@@ -25,7 +25,6 @@ import javax.persistence.metamodel.EntityType;
 
 import junit.framework.Assert;
 
-import org.apache.commons.lang.StringUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

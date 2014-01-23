@@ -30,7 +30,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.kundera.client.Client;
-import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**

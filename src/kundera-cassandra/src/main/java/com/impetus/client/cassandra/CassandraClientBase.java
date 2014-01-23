@@ -19,7 +19,6 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -74,7 +73,6 @@ import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.config.CassandraPropertyReader;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
-import com.impetus.client.cassandra.pelops.PelopsUtils;
 import com.impetus.client.cassandra.schemamanager.CassandraValidationClassMapper;
 import com.impetus.client.cassandra.thrift.CQLTranslator;
 import com.impetus.client.cassandra.thrift.CQLTranslator.TranslationType;
@@ -94,9 +92,9 @@ import com.impetus.kundera.db.SearchResult;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata.Type;
-import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
@@ -2104,8 +2102,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                     while (iter.hasNext())
                     {
                         Object e = null;
-                        // e = PelopsUtils.initialize(entityMetadata, e,
-                        // null);
+
                         CqlRow row = iter.next();
                         Object rowKey = null;
 
@@ -2217,32 +2214,14 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         {
             CQLTranslator translator = new CQLTranslator();
 
-            // List<String> queries = new ArrayList<String>();
-
             String tableName = metadata.getTableName();
-            // for (String tableName : secondaryTables)
-            // {
             String select_Query = translator.SELECTALL_QUERY;
             select_Query = StringUtils.replace(select_Query, CQLTranslator.COLUMN_FAMILY,
                     translator.ensureCase(new StringBuilder(), tableName, false).toString());
             StringBuilder builder = new StringBuilder(select_Query);
             onWhereClause(metadata, rowId, translator, builder, metaModel);
-            // queries.add(builder.toString());
-            // }
-
             return CassandraClientBase.this.executeQuery(metadata.getEntityClazz(), relationNames, false,
                     builder.toString());
-
-            // String select_Query = translator.SELECTALL_QUERY;
-            // select_Query = StringUtils.replace(select_Query,
-            // CQLTranslator.COLUMN_FAMILY,
-            // translator.ensureCase(new StringBuilder(),
-            // metadata.getTableName(), false).toString());
-            // StringBuilder builder = new StringBuilder(select_Query);
-            // onWhereClause(metadata, rowId, translator, builder, metaModel);
-            // return CassandraClientBase.this.executeQuery(builder.toString(),
-            // metadata.getEntityClazz(), relationNames,false);
-
         }
 
         /**

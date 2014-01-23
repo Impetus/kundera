@@ -5,6 +5,13 @@ import java.sql.Time;
 public class SqlTimeDataGenerator implements DataGenerator<Time>
 {
 
+    @Override
+    public Time partialValue()
+    {
+
+        return null;
+    }
+    
     private static final Long LONG_DATA_GENERATOR = new LongDataGenerator().randomValue();
 
     @Override
@@ -26,13 +33,6 @@ public class SqlTimeDataGenerator implements DataGenerator<Time>
     {
 
         return new Time(0L);
-    }
-
-    @Override
-    public Time partialValue()
-    {
-
-        return null;
     }
 
 }

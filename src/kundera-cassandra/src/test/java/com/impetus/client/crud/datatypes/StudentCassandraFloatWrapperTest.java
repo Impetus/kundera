@@ -25,7 +25,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.crud.datatypes.entities.StudentCassandraFloatWrapper;
+import com.impetus.client.crud.datatypes.entities.StudentFloatWrapper;
 import com.impetus.client.persistence.CassandraCli;
 
 public class StudentCassandraFloatWrapperTest extends CassandraBase
@@ -72,21 +72,21 @@ public class StudentCassandraFloatWrapperTest extends CassandraBase
         EntityManager em = emf.createEntityManager();
 
         // Insert max value of Float
-        StudentCassandraFloatWrapper studentMax = new StudentCassandraFloatWrapper();
+        StudentFloatWrapper studentMax = new StudentFloatWrapper();
         studentMax.setAge((Short) getMaxValue(short.class));
         studentMax.setId((Float) getMaxValue(Float.class));
         studentMax.setName((String) getMaxValue(String.class));
         em.persist(studentMax);
 
         // Insert min value of Float
-        StudentCassandraFloatWrapper studentMin = new StudentCassandraFloatWrapper();
+        StudentFloatWrapper studentMin = new StudentFloatWrapper();
         studentMin.setAge((Short) getMinValue(short.class));
         studentMin.setId((Float) getMinValue(Float.class));
         studentMin.setName((String) getMinValue(String.class));
         em.persist(studentMin);
 
         // Insert random value of Float
-        StudentCassandraFloatWrapper student = new StudentCassandraFloatWrapper();
+        StudentFloatWrapper student = new StudentFloatWrapper();
         student.setAge((Short) getRandomValue(short.class));
         student.setId((Float) getRandomValue(Float.class));
         student.setName((String) getRandomValue(String.class));
@@ -98,7 +98,7 @@ public class StudentCassandraFloatWrapperTest extends CassandraBase
     {
         EntityManager em = emf.createEntityManager();
 
-        StudentCassandraFloatWrapper studentMax = em.find(StudentCassandraFloatWrapper.class, getMaxValue(Float.class));
+        StudentFloatWrapper studentMax = em.find(StudentFloatWrapper.class, getMaxValue(Float.class));
         Assert.assertNotNull(studentMax);
         Assert.assertEquals(getMaxValue(short.class), studentMax.getAge());
         Assert.assertEquals(getMaxValue(String.class), studentMax.getName());
@@ -108,7 +108,7 @@ public class StudentCassandraFloatWrapperTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandraFloatWrapper studentMin = em.find(StudentCassandraFloatWrapper.class, getMinValue(Float.class));
+        StudentFloatWrapper studentMin = em.find(StudentFloatWrapper.class, getMinValue(Float.class));
         Assert.assertNotNull(studentMin);
         Assert.assertEquals(getMinValue(short.class), studentMin.getAge());
         Assert.assertEquals(getMinValue(String.class), studentMin.getName());
@@ -118,7 +118,7 @@ public class StudentCassandraFloatWrapperTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandraFloatWrapper student = em.find(StudentCassandraFloatWrapper.class, getRandomValue(Float.class));
+        StudentFloatWrapper student = em.find(StudentFloatWrapper.class, getRandomValue(Float.class));
         Assert.assertNotNull(student);
         Assert.assertEquals(getRandomValue(short.class), student.getAge());
         Assert.assertEquals(getRandomValue(String.class), student.getName());
@@ -128,7 +128,7 @@ public class StudentCassandraFloatWrapperTest extends CassandraBase
     public void testMerge(boolean useSameEm)
     {
         EntityManager em = emf.createEntityManager();
-        StudentCassandraFloatWrapper student = em.find(StudentCassandraFloatWrapper.class, getMaxValue(Float.class));
+        StudentFloatWrapper student = em.find(StudentFloatWrapper.class, getMaxValue(Float.class));
         Assert.assertNotNull(student);
         Assert.assertEquals(getMaxValue(short.class), student.getAge());
         Assert.assertEquals(getMaxValue(String.class), student.getName());
@@ -140,7 +140,7 @@ public class StudentCassandraFloatWrapperTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandraFloatWrapper newStudent = em.find(StudentCassandraFloatWrapper.class, getMaxValue(Float.class));
+        StudentFloatWrapper newStudent = em.find(StudentFloatWrapper.class, getMaxValue(Float.class));
         Assert.assertNotNull(newStudent);
         Assert.assertEquals(getMaxValue(short.class), newStudent.getAge());
         Assert.assertEquals("Kuldeep", newStudent.getName());
@@ -165,17 +165,17 @@ public class StudentCassandraFloatWrapperTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraFloatWrapper> students;
+        List<StudentFloatWrapper> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraFloatWrapper s where s.age = " + getMinValue(short.class)
+        query = "Select s From StudentFloatWrapper s where s.age = " + getMinValue(short.class)
                 + " and s.name > Amresh and s.name <= " + getMaxValue(String.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraFloatWrapper student : students)
+        for (StudentFloatWrapper student : students)
         {
             Assert.assertEquals(getMinValue(Float.class), student.getId());
             Assert.assertEquals(getMinValue(short.class), student.getAge());
@@ -193,9 +193,9 @@ public class StudentCassandraFloatWrapperTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraFloatWrapper> students;
+        List<StudentFloatWrapper> students;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraFloatWrapper s where s.id between ?1 and ?2";
+        query = "Select s From StudentFloatWrapper s where s.id between ?1 and ?2";
         q = em.createQuery(query);
         q.setParameter(1, getMinValue(Float.class));
         q.setParameter(2, getMaxValue(Float.class));
@@ -203,7 +203,7 @@ public class StudentCassandraFloatWrapperTest extends CassandraBase
         Assert.assertNotNull(students);
         Assert.assertEquals(3, students.size());
         int count = 0;
-        for (StudentCassandraFloatWrapper student : students)
+        for (StudentFloatWrapper student : students)
         {
             if (student.getId().equals(getMaxValue(Float.class)))
             {
@@ -234,16 +234,16 @@ public class StudentCassandraFloatWrapperTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraFloatWrapper> students;
+        List<StudentFloatWrapper> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraFloatWrapper s where s.name = Kuldeep and s.age > " + getMinValue(short.class);
+        query = "Select s From StudentFloatWrapper s where s.name = Kuldeep and s.age > " + getMinValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraFloatWrapper student : students)
+        for (StudentFloatWrapper student : students)
         {
             Assert.assertEquals(getMaxValue(Float.class), student.getId());
             Assert.assertEquals(getMaxValue(short.class), student.getAge());
@@ -260,17 +260,17 @@ public class StudentCassandraFloatWrapperTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraFloatWrapper> students;
+        List<StudentFloatWrapper> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraFloatWrapper s where s.name = Kuldeep and s.age > " + getMinValue(short.class)
+        query = "Select s From StudentFloatWrapper s where s.name = Kuldeep and s.age > " + getMinValue(short.class)
                 + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraFloatWrapper student : students)
+        for (StudentFloatWrapper student : students)
         {
             Assert.assertEquals(getMaxValue(Float.class), student.getId());
             Assert.assertEquals(getMaxValue(short.class), student.getAge());
@@ -297,7 +297,7 @@ public class StudentCassandraFloatWrapperTest extends CassandraBase
     {
         EntityManager em = emf.createEntityManager();
 
-        StudentCassandraFloatWrapper studentMax = em.find(StudentCassandraFloatWrapper.class, getMaxValue(Float.class));
+        StudentFloatWrapper studentMax = em.find(StudentFloatWrapper.class, getMaxValue(Float.class));
         Assert.assertNotNull(studentMax);
         Assert.assertEquals(getMaxValue(short.class), studentMax.getAge());
         Assert.assertEquals("Kuldeep", studentMax.getName());
@@ -307,7 +307,7 @@ public class StudentCassandraFloatWrapperTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        studentMax = em.find(StudentCassandraFloatWrapper.class, getMaxValue(Float.class));
+        studentMax = em.find(StudentFloatWrapper.class, getMaxValue(Float.class));
         Assert.assertNull(studentMax);
         em.close();
     }
@@ -318,7 +318,7 @@ public class StudentCassandraFloatWrapperTest extends CassandraBase
     private void deleteNamed(boolean useSameEm)
     {
 
-        String deleteQuery = "Delete From StudentCassandraFloatWrapper s where s.name=Vivek";
+        String deleteQuery = "Delete From StudentFloatWrapper s where s.name=Vivek";
         EntityManager em = emf.createEntityManager();
         Query q = em.createQuery(deleteQuery);
         q.executeUpdate();
@@ -327,7 +327,7 @@ public class StudentCassandraFloatWrapperTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandraFloatWrapper newStudent = em.find(StudentCassandraFloatWrapper.class, getRandomValue(Float.class));
+        StudentFloatWrapper newStudent = em.find(StudentFloatWrapper.class, getRandomValue(Float.class));
         Assert.assertNull(newStudent);
         em.close();
     }
@@ -338,7 +338,7 @@ public class StudentCassandraFloatWrapperTest extends CassandraBase
     private void updateNamed(boolean useSameEm)
     {
         EntityManager em = emf.createEntityManager();
-        String updateQuery = "Update StudentCassandraFloatWrapper s SET s.name=Vivek where s.name=Amresh";
+        String updateQuery = "Update StudentFloatWrapper s SET s.name=Vivek where s.name=Amresh";
         Query q = em.createQuery(updateQuery);
         q.executeUpdate();
         if (!useSameEm)
@@ -346,7 +346,7 @@ public class StudentCassandraFloatWrapperTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandraFloatWrapper newStudent = em.find(StudentCassandraFloatWrapper.class, getRandomValue(Float.class));
+        StudentFloatWrapper newStudent = em.find(StudentFloatWrapper.class, getRandomValue(Float.class));
         Assert.assertNotNull(newStudent);
         Assert.assertEquals(getRandomValue(short.class), newStudent.getAge());
         Assert.assertEquals("Vivek", newStudent.getName());
@@ -358,17 +358,17 @@ public class StudentCassandraFloatWrapperTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraFloatWrapper> students;
+        List<StudentFloatWrapper> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraFloatWrapper s where s.name = Amresh and s.age between "
+        query = "Select s From StudentFloatWrapper s where s.name = Amresh and s.age between "
                 + getMinValue(short.class) + " and " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraFloatWrapper student : students)
+        for (StudentFloatWrapper student : students)
         {
             Assert.assertEquals(getRandomValue(Float.class), student.getId());
             Assert.assertEquals(getRandomValue(short.class), student.getAge());
@@ -385,17 +385,17 @@ public class StudentCassandraFloatWrapperTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraFloatWrapper> students;
+        List<StudentFloatWrapper> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraFloatWrapper s where s.name = Amresh and s.age > " + getMinValue(short.class)
+        query = "Select s From StudentFloatWrapper s where s.name = Amresh and s.age > " + getMinValue(short.class)
                 + " and s.age < " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraFloatWrapper student : students)
+        for (StudentFloatWrapper student : students)
         {
             Assert.assertEquals(getRandomValue(Float.class), student.getId());
             Assert.assertEquals(getRandomValue(short.class), student.getAge());
@@ -413,17 +413,17 @@ public class StudentCassandraFloatWrapperTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraFloatWrapper> students;
+        List<StudentFloatWrapper> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraFloatWrapper s where s.name = Kuldeep and s.age >= " + getMinValue(short.class)
+        query = "Select s From StudentFloatWrapper s where s.name = Kuldeep and s.age >= " + getMinValue(short.class)
                 + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(2, students.size());
         count = 0;
-        for (StudentCassandraFloatWrapper student : students)
+        for (StudentFloatWrapper student : students)
         {
             if (student.getId().equals(getMaxValue(Float.class)))
             {
@@ -450,16 +450,16 @@ public class StudentCassandraFloatWrapperTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraFloatWrapper> students;
+        List<StudentFloatWrapper> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraFloatWrapper s where s.age = " + getRandomValue(short.class);
+        query = "Select s From StudentFloatWrapper s where s.age = " + getRandomValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraFloatWrapper student : students)
+        for (StudentFloatWrapper student : students)
         {
             Assert.assertEquals(getRandomValue(Float.class), student.getId());
             Assert.assertEquals(getRandomValue(short.class), student.getAge());
@@ -478,16 +478,16 @@ public class StudentCassandraFloatWrapperTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraFloatWrapper> students;
+        List<StudentFloatWrapper> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraFloatWrapper s where s.name = Kuldeep";
+        query = "Select s From StudentFloatWrapper s where s.name = Kuldeep";
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(2, students.size());
         count = 0;
-        for (StudentCassandraFloatWrapper student : students)
+        for (StudentFloatWrapper student : students)
         {
             if (student.getId().equals(getMaxValue(Float.class)))
             {
@@ -514,13 +514,13 @@ public class StudentCassandraFloatWrapperTest extends CassandraBase
     {
         EntityManager em = emf.createEntityManager();
         // Selet all query.
-        String query = "Select s From StudentCassandraFloatWrapper s ";
+        String query = "Select s From StudentFloatWrapper s ";
         Query q = em.createQuery(query);
-        List<StudentCassandraFloatWrapper> students = q.getResultList();
+        List<StudentFloatWrapper> students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(3, students.size());
         int count = 0;
-        for (StudentCassandraFloatWrapper student : students)
+        for (StudentFloatWrapper student : students)
         {
             if (student.getId().equals(getMaxValue(Float.class)))
             {
@@ -554,27 +554,27 @@ public class StudentCassandraFloatWrapperTest extends CassandraBase
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            
         }
         catch (TException e)
         {
-            e.printStackTrace();
+            
         }
         catch (InvalidRequestException e)
         {
-            e.printStackTrace();
+            
         }
         catch (UnavailableException e)
         {
-            e.printStackTrace();
+            
         }
         catch (TimedOutException e)
         {
-            e.printStackTrace();
+            
         }
         catch (SchemaDisagreementException e)
         {
-            e.printStackTrace();
+            
         }
     }
 
@@ -591,7 +591,7 @@ public class StudentCassandraFloatWrapperTest extends CassandraBase
             KsDef ksDef = null;
 
             CfDef cfDef = new CfDef();
-            cfDef.name = "StudentCassandraFloatWrapper";
+            cfDef.name = "StudentFloatWrapper";
             cfDef.keyspace = keyspace;
             cfDef.setKey_validation_class("FloatType");
             cfDef.setComparator_type("UTF8Type");
@@ -614,10 +614,10 @@ public class StudentCassandraFloatWrapperTest extends CassandraBase
                 for (CfDef cfDef1 : cfDefn)
                 {
 
-                    if (cfDef1.getName().equalsIgnoreCase("StudentCassandraFloatWrapper"))
+                    if (cfDef1.getName().equalsIgnoreCase("StudentFloatWrapper"))
                     {
 
-                        CassandraCli.client.system_drop_column_family("StudentCassandraFloatWrapper");
+                        CassandraCli.client.system_drop_column_family("StudentFloatWrapper");
 
                     }
                 }
@@ -642,15 +642,15 @@ public class StudentCassandraFloatWrapperTest extends CassandraBase
         }
         catch (TException e)
         {
-            e.printStackTrace();
+            
         }
         catch (InvalidRequestException e)
         {
-            e.printStackTrace();
+            
         }
         catch (SchemaDisagreementException e)
         {
-            e.printStackTrace();
+            
         }
 
     }

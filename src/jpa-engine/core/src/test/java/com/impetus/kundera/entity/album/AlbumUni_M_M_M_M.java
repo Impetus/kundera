@@ -18,6 +18,7 @@ package com.impetus.kundera.entity.album;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -48,7 +49,7 @@ public class AlbumUni_M_M_M_M
     @Column(name = "ALBUM_DESC")
     private String albumDescription;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "ALBUM_PHOTO", joinColumns = { @JoinColumn(name = "ALBUM_ID") }, inverseJoinColumns = { @JoinColumn(name = "PHOTO_ID") })
     private List<PhotoUni_M_M_M_M> photos;
 

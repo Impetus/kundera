@@ -15,6 +15,15 @@
  ******************************************************************************/
 package com.impetus.client.crud;
 
+import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,17 +31,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.BufferedInputStream;
-import java.io.InputStream;
-import java.io.File;
-import java.io.IOException;
 import javax.imageio.ImageIO;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -55,15 +54,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
-import com.impetus.client.cassandra.thrift.CQLTranslator;
-import com.impetus.client.cassandra.thrift.ThriftClient;
-import com.impetus.client.crud.PersonCassandra.Day;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.property.PropertyAccessorFactory;
-import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
  * Test case to perform simple CRUD operation.(insert, delete, merge, and
@@ -216,7 +209,7 @@ public class ByteDataTest extends BaseTest
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            
         }
 
     }

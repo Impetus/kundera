@@ -23,9 +23,6 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 
-import com.impetus.kundera.client.crud.mappedsuperclass.Status;
-import com.impetus.kundera.client.crud.mappedsuperclass.Transaction;
-
 /**
  * @author vivek.mishra
  * Debit transaction extends {@link Transaction}

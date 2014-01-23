@@ -23,7 +23,6 @@ import java.util.Properties;
 
 import javax.net.SocketFactory;
 
-import com.impetus.client.mongodb.utils.MongoDBUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import com.impetus.client.mongodb.config.MongoDBPropertyReader;
 import com.impetus.client.mongodb.config.MongoDBPropertyReader.MongoDBSchemaMetadata;
 import com.impetus.client.mongodb.schemamanager.MongoDBSchemaManager;
+import com.impetus.client.mongodb.utils.MongoDBUtils;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.configure.ClientProperties;
@@ -39,7 +39,6 @@ import com.impetus.kundera.configure.ClientProperties.DataStore.Connection.Serve
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.loader.ClientLoaderException;
 import com.impetus.kundera.loader.GenericClientFactory;
-import com.impetus.kundera.loader.KunderaAuthenticationException;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.mongodb.DB;

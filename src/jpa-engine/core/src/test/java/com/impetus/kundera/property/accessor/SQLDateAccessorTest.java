@@ -96,7 +96,7 @@ public class SQLDateAccessorTest
         long l = System.currentTimeMillis();        
         Date d = new Date(l);        
         
-        Assert.assertEquals("" + l, accessor.toString(d));
+        Assert.assertEquals(d.toString(), accessor.toString(d));
         
     }
 

@@ -73,6 +73,22 @@ public class StudentCouchDBSqlDateTest extends CouchDBBase
         testDelete(false);
     }
 
+    
+    private Object getMinValue()
+    {
+        return new Date(1970, 1, 1);
+    }
+
+    private Object getRandomValue()
+    {
+        return new Date(System.currentTimeMillis());
+    }
+
+    private Object getMaxValue()
+    {
+        return new Date(2100, 1, 1);
+    }
+    
     public void testPersist(boolean useSameEm)
     {
         EntityManager em = emf.createEntityManager();
@@ -80,21 +96,21 @@ public class StudentCouchDBSqlDateTest extends CouchDBBase
         // Insert random value of Date
         StudentCouchDBSqlDate student = new StudentCouchDBSqlDate();
         student.setAge((Short) getRandomValue(short.class));
-        student.setId((Date) getRandomValue(Date.class));
+        student.setId((Date) getRandomValue());
         student.setName((String) getRandomValue(String.class));
         em.persist(student);
 
         // Insert max value of Date
         StudentCouchDBSqlDate studentMax = new StudentCouchDBSqlDate();
         studentMax.setAge((Short) getMaxValue(short.class));
-        studentMax.setId((Date) getMaxValue(Date.class));
+        studentMax.setId((Date) getMaxValue());
         studentMax.setName((String) getMaxValue(String.class));
         em.persist(studentMax);
 
         // Insert min value of Date
         StudentCouchDBSqlDate studentMin = new StudentCouchDBSqlDate();
         studentMin.setAge((Short) getMinValue(short.class));
-        studentMin.setId((Date) getMinValue(Date.class));
+        studentMin.setId((Date) getMinValue());
         studentMin.setName((String) getMinValue(String.class));
         em.persist(studentMin);
 
@@ -105,7 +121,7 @@ public class StudentCouchDBSqlDateTest extends CouchDBBase
     {
         EntityManager em = emf.createEntityManager();
 
-        StudentCouchDBSqlDate studentMax = em.find(StudentCouchDBSqlDate.class, getMaxValue(Date.class));
+        StudentCouchDBSqlDate studentMax = em.find(StudentCouchDBSqlDate.class, getMaxValue());
         Assert.assertNotNull(studentMax);
         Assert.assertEquals(getMaxValue(short.class), studentMax.getAge());
         Assert.assertEquals(getMaxValue(String.class), studentMax.getName());
@@ -115,7 +131,7 @@ public class StudentCouchDBSqlDateTest extends CouchDBBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCouchDBSqlDate studentMin = em.find(StudentCouchDBSqlDate.class, getMinValue(Date.class));
+        StudentCouchDBSqlDate studentMin = em.find(StudentCouchDBSqlDate.class, getMinValue());
         Assert.assertNotNull(studentMin);
         Assert.assertEquals(getMinValue(short.class), studentMin.getAge());
         Assert.assertEquals(getMinValue(String.class), studentMin.getName());
@@ -125,7 +141,7 @@ public class StudentCouchDBSqlDateTest extends CouchDBBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCouchDBSqlDate student = em.find(StudentCouchDBSqlDate.class, getRandomValue(Date.class));
+        StudentCouchDBSqlDate student = em.find(StudentCouchDBSqlDate.class, getRandomValue());
         Assert.assertNotNull(student);
         Assert.assertEquals(getRandomValue(short.class), student.getAge());
         Assert.assertEquals(getRandomValue(String.class), student.getName());
@@ -135,7 +151,7 @@ public class StudentCouchDBSqlDateTest extends CouchDBBase
     public void testMerge(boolean useSameEm)
     {
         EntityManager em = emf.createEntityManager();
-        StudentCouchDBSqlDate student = em.find(StudentCouchDBSqlDate.class, getMaxValue(Date.class));
+        StudentCouchDBSqlDate student = em.find(StudentCouchDBSqlDate.class, getMaxValue());
         Assert.assertNotNull(student);
         Assert.assertEquals(getMaxValue(short.class), student.getAge());
         Assert.assertEquals(getMaxValue(String.class), student.getName());
@@ -147,7 +163,7 @@ public class StudentCouchDBSqlDateTest extends CouchDBBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCouchDBSqlDate newStudent = em.find(StudentCouchDBSqlDate.class, getMaxValue(Date.class));
+        StudentCouchDBSqlDate newStudent = em.find(StudentCouchDBSqlDate.class, getMaxValue());
         Assert.assertNotNull(newStudent);
         Assert.assertEquals(getMaxValue(short.class), newStudent.getAge());
         Assert.assertEquals("Kuldeep", newStudent.getName());
@@ -184,7 +200,7 @@ public class StudentCouchDBSqlDateTest extends CouchDBBase
         count = 0;
         for (StudentCouchDBSqlDate student : students)
         {
-            Assert.assertEquals(getMinValue(Date.class), student.getId());
+            Assert.assertEquals(getMinValue(), student.getId());
             Assert.assertEquals(getMinValue(short.class), student.getAge());
             Assert.assertEquals(getMinValue(String.class), student.getName());
             count++;
@@ -202,8 +218,8 @@ public class StudentCouchDBSqlDateTest extends CouchDBBase
         Query q;
         List<StudentCouchDBSqlDate> students;
         em = emf.createEntityManager();
-        query = "Select s From StudentOracleNoSQLSqlDate s where s.id between " + getMinValue(Date.class) + " and "
-                + getMaxValue(Date.class);
+        query = "Select s From StudentOracleNoSQLSqlDate s where s.id between " + getMinValue() + " and "
+                + getMaxValue();
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -211,13 +227,13 @@ public class StudentCouchDBSqlDateTest extends CouchDBBase
         int count = 0;
         for (StudentCouchDBSqlDate student : students)
         {
-            if (student.getId().equals(getMaxValue(Date.class)))
+            if (student.getId().equals(getMaxValue()))
             {
                 Assert.assertEquals(getMaxValue(short.class), student.getAge());
                 Assert.assertEquals("Kuldeep", student.getName());
                 count++;
             }
-            else if (student.getId().equals(getMinValue(Date.class)))
+            else if (student.getId().equals(getMinValue()))
             {
                 Assert.assertEquals(getMinValue(short.class), student.getAge());
                 Assert.assertEquals(getMinValue(String.class), student.getName());
@@ -225,7 +241,7 @@ public class StudentCouchDBSqlDateTest extends CouchDBBase
             }
             else
             {
-                Assert.assertEquals(getRandomValue(Date.class), student.getId());
+                Assert.assertEquals(getRandomValue(), student.getId());
                 Assert.assertEquals(getRandomValue(short.class), student.getAge());
                 Assert.assertEquals(getRandomValue(String.class), student.getName());
                 count++;
@@ -252,7 +268,7 @@ public class StudentCouchDBSqlDateTest extends CouchDBBase
         count = 0;
         for (StudentCouchDBSqlDate student : students)
         {
-            Assert.assertEquals(getMaxValue(Date.class), student.getId());
+            Assert.assertEquals(getMaxValue(), student.getId());
             Assert.assertEquals(getMaxValue(short.class), student.getAge());
             Assert.assertEquals("Kuldeep", student.getName());
             count++;
@@ -279,7 +295,7 @@ public class StudentCouchDBSqlDateTest extends CouchDBBase
         count = 0;
         for (StudentCouchDBSqlDate student : students)
         {
-            Assert.assertEquals(getMaxValue(Date.class), student.getId());
+            Assert.assertEquals(getMaxValue(), student.getId());
             Assert.assertEquals(getMaxValue(short.class), student.getAge());
             Assert.assertEquals("Kuldeep", student.getName());
             count++;
@@ -304,7 +320,7 @@ public class StudentCouchDBSqlDateTest extends CouchDBBase
     {
         EntityManager em = emf.createEntityManager();
 
-        StudentCouchDBSqlDate studentMax = em.find(StudentCouchDBSqlDate.class, getMaxValue(Date.class));
+        StudentCouchDBSqlDate studentMax = em.find(StudentCouchDBSqlDate.class, getMaxValue());
         Assert.assertNotNull(studentMax);
         Assert.assertEquals(getMaxValue(short.class), studentMax.getAge());
         Assert.assertEquals("Kuldeep", studentMax.getName());
@@ -314,7 +330,7 @@ public class StudentCouchDBSqlDateTest extends CouchDBBase
             em.close();
             em = emf.createEntityManager();
         }
-        studentMax = em.find(StudentCouchDBSqlDate.class, getMaxValue(Date.class));
+        studentMax = em.find(StudentCouchDBSqlDate.class, getMaxValue());
         Assert.assertNull(studentMax);
         em.close();
     }
@@ -334,7 +350,7 @@ public class StudentCouchDBSqlDateTest extends CouchDBBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCouchDBSqlDate newStudent = em.find(StudentCouchDBSqlDate.class, getRandomValue(Date.class));
+        StudentCouchDBSqlDate newStudent = em.find(StudentCouchDBSqlDate.class, getRandomValue());
         Assert.assertNull(newStudent);
         em.close();
     }
@@ -353,7 +369,7 @@ public class StudentCouchDBSqlDateTest extends CouchDBBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCouchDBSqlDate newStudent = em.find(StudentCouchDBSqlDate.class, getRandomValue(Date.class));
+        StudentCouchDBSqlDate newStudent = em.find(StudentCouchDBSqlDate.class, getRandomValue());
         Assert.assertNotNull(newStudent);
         Assert.assertEquals(getRandomValue(short.class), newStudent.getAge());
         Assert.assertEquals("Vivek", newStudent.getName());
@@ -377,7 +393,7 @@ public class StudentCouchDBSqlDateTest extends CouchDBBase
         count = 0;
         for (StudentCouchDBSqlDate student : students)
         {
-            Assert.assertEquals(getRandomValue(Date.class), student.getId());
+            Assert.assertEquals(getRandomValue(), student.getId());
             Assert.assertEquals(getRandomValue(short.class), student.getAge());
             Assert.assertEquals(getRandomValue(String.class), student.getName());
             count++;
@@ -404,7 +420,7 @@ public class StudentCouchDBSqlDateTest extends CouchDBBase
         count = 0;
         for (StudentCouchDBSqlDate student : students)
         {
-            Assert.assertEquals(getRandomValue(Date.class), student.getId());
+            Assert.assertEquals(getRandomValue(), student.getId());
             Assert.assertEquals(getRandomValue(short.class), student.getAge());
             Assert.assertEquals(getRandomValue(String.class), student.getName());
             count++;
@@ -432,7 +448,7 @@ public class StudentCouchDBSqlDateTest extends CouchDBBase
         count = 0;
         for (StudentCouchDBSqlDate student : students)
         {
-            if (student.getId().equals(getMaxValue(Date.class)))
+            if (student.getId().equals(getMaxValue()))
             {
                 Assert.assertEquals(getMaxValue(short.class), student.getAge());
                 Assert.assertEquals("Kuldeep", student.getName());
@@ -440,7 +456,7 @@ public class StudentCouchDBSqlDateTest extends CouchDBBase
             }
             else
             {
-                Assert.assertEquals(getMinValue(Date.class), student.getId());
+                Assert.assertEquals(getMinValue(), student.getId());
                 Assert.assertEquals(getMinValue(short.class), student.getAge());
                 Assert.assertEquals(getMinValue(String.class), student.getName());
                 count++;
@@ -468,7 +484,7 @@ public class StudentCouchDBSqlDateTest extends CouchDBBase
         count = 0;
         for (StudentCouchDBSqlDate student : students)
         {
-            Assert.assertEquals(getRandomValue(Date.class), student.getId());
+            Assert.assertEquals(getRandomValue(), student.getId());
             Assert.assertEquals(getRandomValue(short.class), student.getAge());
             Assert.assertEquals(getRandomValue(String.class), student.getName());
             count++;
@@ -496,7 +512,7 @@ public class StudentCouchDBSqlDateTest extends CouchDBBase
         count = 0;
         for (StudentCouchDBSqlDate student : students)
         {
-            if (student.getId().equals(getMaxValue(Date.class)))
+            if (student.getId().equals(getMaxValue()))
             {
                 Assert.assertEquals(getMaxValue(short.class), student.getAge());
                 Assert.assertEquals("Kuldeep", student.getName());
@@ -504,7 +520,7 @@ public class StudentCouchDBSqlDateTest extends CouchDBBase
             }
             else
             {
-                Assert.assertEquals(getMinValue(Date.class), student.getId());
+                Assert.assertEquals(getMinValue(), student.getId());
                 Assert.assertEquals(getMinValue(short.class), student.getAge());
                 Assert.assertEquals(getMinValue(String.class), student.getName());
                 count++;
@@ -529,13 +545,13 @@ public class StudentCouchDBSqlDateTest extends CouchDBBase
         int count = 0;
         for (StudentCouchDBSqlDate student : students)
         {
-            if (student.getId().equals(getMaxValue(Date.class)))
+            if (student.getId().equals(getMaxValue()))
             {
                 Assert.assertEquals(getMaxValue(short.class), student.getAge());
                 Assert.assertEquals("Kuldeep", student.getName());
                 count++;
             }
-            else if (student.getId().equals(getMinValue(Date.class)))
+            else if (student.getId().equals(getMinValue()))
             {
                 Assert.assertEquals(getMinValue(short.class), student.getAge());
                 Assert.assertEquals(getMinValue(String.class), student.getName());
@@ -543,7 +559,7 @@ public class StudentCouchDBSqlDateTest extends CouchDBBase
             }
             else
             {
-                Assert.assertEquals(((Date) getRandomValue(Date.class)).getTime(), student.getId().getTime());
+                Assert.assertEquals(((Date) getRandomValue()).getTime(), student.getId().getTime());
                 Assert.assertEquals(getRandomValue(short.class), student.getAge());
                 Assert.assertEquals(getRandomValue(String.class), student.getName());
                 count++;

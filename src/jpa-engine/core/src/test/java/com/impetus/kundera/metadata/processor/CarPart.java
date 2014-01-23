@@ -17,7 +17,6 @@ package com.impetus.kundera.metadata.processor;
 
 
 import javax.persistence.Entity;
-
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 

@@ -76,7 +76,7 @@ public class ConfiguratorTest
         // configurator.configure();
         getEntityManagerFactory();
 
-        new PersistenceUnitConfiguration(_persistenceUnit).configure();
+        new PersistenceUnitConfiguration(null, _persistenceUnit).configure();
         // new MetamodelConfiguration(puName).configure();
 
         // Assert entity metadata

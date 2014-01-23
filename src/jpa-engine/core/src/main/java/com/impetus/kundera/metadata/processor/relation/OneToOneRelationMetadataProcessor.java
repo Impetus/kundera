@@ -65,12 +65,6 @@ public class OneToOneRelationMetadataProcessor extends AbstractEntityFieldProces
         boolean isJoinedByFK = relationField.isAnnotationPresent(JoinColumn.class);
         boolean isJoinedByTable = relationField.isAnnotationPresent(JoinTable.class);
 
-        /*
-         * if(!isJoinedByPK && !isJoinedByFK) { throw new PersistenceException(
-         * "A one-to-one relationship must have either JoinColumn or PrimaryKeyJoinColumn annotation"
-         * ); }
-         */
-
         Relation relation = new Relation(relationField, targetEntity, null, oneToOneAnn.fetch(),
                 Arrays.asList(oneToOneAnn.cascade()), oneToOneAnn.optional(), oneToOneAnn.mappedBy(),
                 Relation.ForeignKey.ONE_TO_ONE);
@@ -101,14 +95,10 @@ public class OneToOneRelationMetadataProcessor extends AbstractEntityFieldProces
         else if (isJoinedByTable)
         {
             throw new UnsupportedOperationException("@JoinTable not supported for one to one association");
-/*            JoinTableMetadata jtMetadata = new JoinTableMetadata(relationField);
-            relation.setRelatedViaJoinTable(true);
-            relation.setJoinTableMetadata(jtMetadata);
-*/        }
+        }
 
         relation.setBiDirectionalField(metadata.getEntityClazz());
-        metadata.addRelation(relationField.getName(), relation);
-        
+        metadata.addRelation(relationField.getName(), relation);       
     }
 
 
@@ -133,5 +123,4 @@ public class OneToOneRelationMetadataProcessor extends AbstractEntityFieldProces
     {
         throw new MetamodelLoaderException("Method call not applicable for Relation processors");
     }
-
 }

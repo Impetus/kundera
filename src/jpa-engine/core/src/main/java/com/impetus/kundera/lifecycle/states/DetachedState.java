@@ -64,7 +64,7 @@ public class DetachedState extends NodeState
 
         // Cascade manage operation for all related entities for whom
         // cascade=ALL or MERGE
-        recursivelyPerformOperation(nodeStateContext, OPERATION.MERGE);
+//        recursivelyPerformOperation(nodeStateContext, OPERATION.MERGE);
     }
 
     @Override

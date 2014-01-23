@@ -49,8 +49,6 @@ import com.impetus.kundera.metadata.processor.relation.RelationMetadataProcessor
 import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
 import com.impetus.kundera.metadata.validator.InvalidEntityDefinitionException;
 
-//import com.sun.xml.internal.stream.Entity;
-
 /**
  * Metadata processor class for persistent entities.
  * 
@@ -105,18 +103,6 @@ public class TableProcessor extends AbstractEntityFieldProcessor
     private <X extends Class, T extends Object> void populateMetadata(EntityMetadata metadata, Class<X> clazz,
             Map puProperties)
     {
-        /*
-         * Table table = clazz.getAnnotation(Table.class); if (table != null) {
-         * // Set Name of persistence object
-         * metadata.setTableName(table.name()); // Add named/native query
-         * related application metadata. addNamedNativeQueryMetadata(clazz); //
-         * set schema name and persistence unit name (if provided) String
-         * schemaStr = table.schema();
-         * 
-         * MetadataUtils.setSchemaAndPersistenceUnit(metadata, schemaStr,
-         * puProperties); }
-         */// scan for fields
-
         // process for metamodelImpl
 
         if (metadata.getPersistenceUnit() != null)
@@ -137,16 +123,11 @@ public class TableProcessor extends AbstractEntityFieldProcessor
                     metaModelBuilder.construct(clazz, f);
 
                     // on id attribute.
-
                     onIdAttribute(metaModelBuilder, metadata, clazz, f);
 
                     // determine if it is a column family or super column
                     // family.
-
                     onFamilyType(metadata, clazz, f);
-
-                    // onJPAColumnMapping(metaModelBuilder, metadata, f);
-
                 }
             }
 
@@ -157,9 +138,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
 
             /* Scan for Relationship field */
             populateRelationMetaData(entityType, clazz, metadata);
-
         }
-
     }
 
     /**
@@ -235,14 +214,12 @@ public class TableProcessor extends AbstractEntityFieldProcessor
 
         try
         {
-
             relProcessor = RelationMetadataProcessorFactory.getRelationMetadataProcessor(relationField);
 
             if (relProcessor != null)
             {
                 relProcessor.addRelationIntoMetadata(relationField, metadata);
             }
-
         }
         catch (PersistenceException pe)
         {
@@ -350,42 +327,11 @@ public class TableProcessor extends AbstractEntityFieldProcessor
     }
 
     /**
-     * On jpa column mapping.
      * 
-     * @param builder
-     *            the builder
-     * @param entityMetadata
-     *            the entity metadata
-     * @param f
-     *            the f
+     * @param metadata
+     * @param clazz
+     * @param metaModelBuilder
      */
-    /*
-     * private void onJPAColumnMapping(final MetaModelBuilder builder,
-     * EntityMetadata entityMetadata, Field f) { EntityType entityType =
-     * (EntityType)
-     * builder.getManagedTypes().get(entityMetadata.getEntityClazz());
-     * AbstractAttribute attribute = (AbstractAttribute)
-     * entityType.getAttribute(f.getName());
-     * entityMetadata.addJPAColumnMapping(attribute.getJPAColumnName(),
-     * f.getName()); }
-     */
-    /*
-     * public static void onJPAColumnMapping(final EntityType entityType,
-     * EntityMetadata entityMetadata) { // EntityType entityType = (EntityType)
-     * builder.getManagedTypes().get(entityMetadata.getEntityClazz());
-     * 
-     * Set<Attribute> attributes = entityType.getAttributes();
-     * 
-     * Iterator<Attribute> iter = attributes.iterator();
-     * 
-     * while(iter.hasNext()) { Attribute attribute = iter.next();
-     * entityMetadata.
-     * addJPAColumnMapping(((AbstractAttribute)attribute).getJPAColumnName(),
-     * attribute.getName()); }
-     * 
-     * }
-     */
-
     private <X, T> void validateAndSetId(EntityMetadata metadata, Class<X> clazz,
             MetaModelBuilder<X, T> metaModelBuilder)
     {
@@ -405,6 +351,11 @@ public class TableProcessor extends AbstractEntityFieldProcessor
         validateIdAttribute(metadata.getIdAttribute(), clazz);
     }
 
+    /**
+     * 
+     * @param idAttribute
+     * @param clazz
+     */
     private void validateIdAttribute(SingularAttribute idAttribute, Class clazz)
     {
         // Means if id attribute not found neither on entity or mappedsuper

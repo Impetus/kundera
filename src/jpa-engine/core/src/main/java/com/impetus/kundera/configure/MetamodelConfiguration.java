@@ -54,8 +54,6 @@ import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.processor.GeneratedValueProcessor;
-import com.impetus.kundera.metadata.validator.EntityValidator;
-import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
 import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**
@@ -96,7 +94,10 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
         {
             if (appMetadata.getMetamodelMap().get(persistenceUnit.trim()) != null)
             {
-                log.debug("Metadata already exists for the Persistence Unit " + persistenceUnit + ". Nothing to do");
+                if (log.isDebugEnabled())
+                {
+                    log.debug("Metadata already exists for the Persistence Unit " + persistenceUnit + ". Nothing to do");
+                }
             }
             else
             {
@@ -117,7 +118,8 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
         if (persistenceUnit == null)
         {
             throw new IllegalArgumentException(
-                    "Must have a persistenceUnitName in order to load entity metadata, you provided:" + persistenceUnit);
+                    "Must have a persistenceUnitName in order to load entity metadata, you provided :"
+                            + persistenceUnit);
         }
 
         KunderaMetadata kunderaMetadata = KunderaMetadata.INSTANCE;
@@ -182,7 +184,7 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
             reader = new ClasspathReader(classesToScan);
             // resources = reader.findResourcesByContextLoader();
         }
-       
+
         InputStream[] iStreams = null;
         PersistenceUnitMetadata puMetadata = persistentUnitMetadataMap.get(persistenceUnit);
         if (this.getClass().getClassLoader() instanceof URLClassLoader && !puMetadata.getExcludeUnlistedClasses())
@@ -280,41 +282,6 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
                 .getMetaModelBuilder(persistenceUnit).getManagedTypes());
         ((MetamodelImpl) metamodel).assignMappedSuperClass(KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getMetaModelBuilder(persistenceUnit).getMappedSuperClassTypes());
-
-        // validateEntityForClientSpecificProperty(classes, persistenceUnit);
-
-    }
-
-    /**
-     * @param resources
-     * @param reader
-     * @throws IOException
-     * @throws ClassNotFoundException
-     */
-    private void validateEntityForClientSpecificProperty(List<Class<?>> classes, final String persistenceUnit)
-    {
-        for (Class clazz : classes)
-        {
-            String pu = getPersistenceUnitOfEntity(clazz);
-            EntityValidator validator = new EntityValidatorImpl(KunderaCoreUtils.getExternalProperties(persistenceUnit,
-                    externalPropertyMap, persistenceUnits));
-            if (clazz.isAnnotationPresent(Entity.class) && clazz.isAnnotationPresent(Table.class)
-                    && persistenceUnit.equalsIgnoreCase(pu))
-            {
-                validator.validateEntity(clazz);
-            }
-        }
-    }
-
-    private String getPersistenceUnitOfEntity(Class clazz)
-    {
-        String schema = ((Table) clazz.getAnnotation(Table.class)).schema();
-        String pu = null;
-        if (schema != null && schema.indexOf("@") > 0)
-        {
-            pu = schema.substring(schema.indexOf("@") + 1, schema.length());
-        }
-        return pu;
     }
 
     /**
@@ -364,9 +331,6 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
                 // check if the current class has one?
                 if (annotations.contains(validAnn))
                 {
-                    // Class<?> clazz =
-                    // Thread.currentThread().getContextClassLoader().loadClass(className);
-
                     Class<?> clazz = this.getClass().getClassLoader().loadClass(className);
 
                     // get the name of entity to be used for entity to class map

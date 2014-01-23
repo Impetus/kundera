@@ -15,9 +15,14 @@
  ******************************************************************************/
 package com.impetus.client.rdbms.query;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EmbeddableType;
+import javax.persistence.metamodel.EntityType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,14 +32,16 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.MetadataUtils;
-import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.QueryHandlerException;
 import com.impetus.kundera.query.QueryImpl;
+import com.impetus.kundera.utils.ReflectUtils;
 
 /**
  * The Class RDBMSQuery.
@@ -50,7 +57,7 @@ public class RDBMSQuery extends QueryImpl
     private EntityReader reader;
 
     /**
-     * Instantiates a new rDBMS query.
+     * Instantiates a new RDBMS query.
      * 
      * @param query
      *            the query
@@ -71,10 +78,12 @@ public class RDBMSQuery extends QueryImpl
     {
         // retrieve
         if (log.isDebugEnabled())
+        {
             log.debug("On handleAssociation() retrieve associations ");
-
+        }
         initializeReader();
-        List<EnhanceEntity> ls = getReader().populateRelation(m, client,this.maxResult);
+        
+        List<EnhanceEntity> ls = getReader().populateRelation(m, client, this.maxResult);
 
         return setRelationEntities(ls, client, m);
     }
@@ -89,8 +98,9 @@ public class RDBMSQuery extends QueryImpl
     protected List<Object> populateEntities(EntityMetadata m, Client client)
     {
         if (log.isDebugEnabled())
+        {
             log.debug("on start of fetching non associated entities");
-
+        }
         List<Object> result = new ArrayList<Object>();
 
         initializeReader();
@@ -100,17 +110,12 @@ public class RDBMSQuery extends QueryImpl
             if (MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
             {
                 List<String> relations = new ArrayList<String>();
-                List r = ((HibernateClient) client).find(
-                        ((RDBMSEntityReader) getReader()).getSqlQueryFromJPA(m, relations, null), relations, m);
+                List r = ((HibernateClient) client).find(kunderaQuery.isNative() ? getJPAQuery()
+                        : ((RDBMSEntityReader) getReader()).getSqlQueryFromJPA(m, relations, null), relations, m);
                 result = new ArrayList<Object>(r.size());
 
                 for (Object o : r)
                 {
-                    Class clazz = m.getEntityClazz();
-                    if (!o.getClass().isAssignableFrom(m.getEntityClazz()))
-                    {
-                        o = ((Object[]) o)[0];
-                    }
                     result.add(o);
                 }
             }
@@ -121,7 +126,7 @@ public class RDBMSQuery extends QueryImpl
         }
         catch (Exception e)
         {
-            log.error("Error during query execution ", e);
+            log.error("Error during query execution, Caused by: {}.", e);
             throw new QueryHandlerException(e);
         }
         return result;
@@ -137,7 +142,7 @@ public class RDBMSQuery extends QueryImpl
     {
         if (reader == null)
         {
-            reader = new RDBMSEntityReader(getLuceneQueryFromJPAQuery(), getJPAQuery(),kunderaQuery);
+            reader = new RDBMSEntityReader(getJPAQuery(), kunderaQuery);
         }
         return reader;
     }
@@ -160,11 +165,8 @@ public class RDBMSQuery extends QueryImpl
      */
     private void initializeReader()
     {
-        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+        boolean isNative = kunderaQuery.isNative();
 
-        String query = appMetadata.getQuery(getJPAQuery());
-        boolean isNative = kunderaQuery.isNative()/*query == null ? true : appMetadata.isNative(getJPAQuery())*/;        
-        
         if (!isNative)
         {
             ((RDBMSEntityReader) getReader()).setConditions(getKunderaQuery().getFilterClauseQueue());
@@ -176,14 +178,78 @@ public class RDBMSQuery extends QueryImpl
     @Override
     public void close()
     {
-        // TODO Auto-generated method stub
-        
+        this.reader = null;
     }
 
     @Override
     public Iterator iterate()
     {
-        // TODO Auto-generated method stub
+        if (kunderaQuery.isNative())
+        {
+            throw new UnsupportedOperationException("Iteration not supported over native queries");
+        }
+        
+        initializeReader();     
+        EntityMetadata m = getEntityMetadata();
+        Client client = persistenceDelegeator.getClient(m);
+        return new ResultIterator((HibernateClient) client, m, persistenceDelegeator,
+                getFetchSize() != null ? getFetchSize() : this.maxResult,
+                ((RDBMSEntityReader) getReader()).getSqlQueryFromJPA(m, m.getRelationNames(), null));
+    }
+
+    /**
+     * Gets the column list.
+     * 
+     * @param m
+     *            the m
+     * @param results
+     *            the results
+     * @return the column list
+     */
+    List<String> getColumnList(EntityMetadata m, String[] results, EmbeddableType compoundKey)
+    {
+        List<String> columns = new ArrayList<String>();
+        if (results != null && results.length > 0)
+        {
+            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                    m.getPersistenceUnit());
+            EntityType entity = metaModel.entity(m.getEntityClazz());
+
+            for (int i = 1; i < results.length; i++)
+            {
+                if (results[i] != null)
+                {
+                    Attribute attribute = entity.getAttribute(results[i]);
+
+                    if (attribute == null)
+                    {
+                        throw new QueryHandlerException("column type is null for: " + results);
+                    }
+                    else if (m.getIdAttribute().equals(attribute) && compoundKey != null)
+                    {
+                        Field[] fields = m.getIdAttribute().getBindableJavaType().getDeclaredFields();
+                        for (Field field : fields)
+                        {
+                            if (!ReflectUtils.isTransientOrStatic(field))
+                            {
+                                Attribute compositeColumn = compoundKey.getAttribute(field.getName());
+                                columns.add(((AbstractAttribute) compositeColumn).getJPAColumnName());
+                            }
+                        }
+                    }
+                    else
+                    {
+                        columns.add(((AbstractAttribute) attribute).getJPAColumnName());
+                    }
+                }
+            }
+            return columns;
+        }
+
+        if (log.isInfoEnabled())
+        {
+            log.info("No record found, returning null.");
+        }
         return null;
     }
 

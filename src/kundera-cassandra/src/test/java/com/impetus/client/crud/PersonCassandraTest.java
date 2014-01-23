@@ -21,6 +21,9 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -81,7 +84,7 @@ public class PersonCassandraTest extends BaseTest
     private EntityManagerFactory emf;
 
     /** The em. */
-    private EntityManager em;
+    private EntityManager entityManager;
 
     /** The col. */
     private Map<Object, Object> col;
@@ -116,7 +119,7 @@ public class PersonCassandraTest extends BaseTest
             // loadData();
         }
         emf = Persistence.createEntityManagerFactory(SEC_IDX_CASSANDRA_TEST, propertyMap);
-        em = emf.createEntityManager();
+        entityManager = emf.createEntityManager();
         col = new java.util.HashMap<Object, Object>();
     }
 
@@ -133,73 +136,70 @@ public class PersonCassandraTest extends BaseTest
         Object p2 = prepareData("2", 20);
         Object p3 = prepareData("3", 15);
 
-        Query findQuery = em.createQuery("Select p from PersonCassandra p", PersonCassandra.class);
+        Query findQuery = entityManager.createQuery("Select p from PersonCassandra p", PersonCassandra.class);
         List<PersonCassandra> allPersons = findQuery.getResultList();
         Assert.assertNotNull(allPersons);
         Assert.assertTrue(allPersons.isEmpty());
 
-        findQuery = em.createQuery("Select p from PersonCassandra p where p.personName = vivek");
+        findQuery = entityManager.createQuery("Select p from PersonCassandra p where p.personName = vivek");
         allPersons = findQuery.getResultList();
         Assert.assertNotNull(allPersons);
         Assert.assertTrue(allPersons.isEmpty());
 
-        findQuery = em.createQuery("Select p.age from PersonCassandra p where p.personName = vivek");
+        findQuery = entityManager.createQuery("Select p.age from PersonCassandra p where p.personName = vivek");
         allPersons = findQuery.getResultList();
         Assert.assertNotNull(allPersons);
         Assert.assertTrue(allPersons.isEmpty());
 
-        em.persist(p1);
-        em.persist(p2);
-        em.persist(p3);
+        entityManager.persist(p1);
+        entityManager.persist(p2);
+        entityManager.persist(p3);
 
         PersonCassandra personWithKey = new PersonCassandra();
         personWithKey.setPersonId("111");
-        em.persist(personWithKey);
+        entityManager.persist(personWithKey);
         col.put("1", p1);
         col.put("2", p2);
         col.put("3", p3);
 
-        em.clear();
-        PersonCassandra p = findById(PersonCassandra.class, "1", em);
+        entityManager.clear();
+        PersonCassandra p = findById(PersonCassandra.class, "1", entityManager);
         Assert.assertNotNull(p);
         Assert.assertEquals("vivek", p.getPersonName());
         Assert.assertEquals(Day.THURSDAY, p.getDay());
 
-        em.clear();
+        entityManager.clear();
         Query q;
         List<PersonCassandra> persons = queryOverRowkey();
 
-        assertFindByName(em, "PersonCassandra", PersonCassandra.class, "vivek", "personName");
-        assertFindByNameAndAge(em, "PersonCassandra", PersonCassandra.class, "vivek", "10", "personName");
-        assertFindByNameAndAgeGTAndLT(em, "PersonCassandra", PersonCassandra.class, "vivek", "10", "20", "personName");
-        assertFindByNameAndAgeBetween(em, "PersonCassandra", PersonCassandra.class, "vivek", "10", "15", "personName");
-        assertFindByRange(em, "PersonCassandra", PersonCassandra.class, "1", "2", "personId");
-        assertFindWithoutWhereClause(em, "PersonCassandra", PersonCassandra.class);
+        assertFindByName(entityManager, "PersonCassandra", PersonCassandra.class, "vivek", "personName");
+        assertFindByNameAndAge(entityManager, "PersonCassandra", PersonCassandra.class, "vivek", "10", "personName");
+        assertFindByNameAndAgeGTAndLT(entityManager, "PersonCassandra", PersonCassandra.class, "vivek", "10", "20",
+                "personName");
+        assertFindByNameAndAgeBetween(entityManager, "PersonCassandra", PersonCassandra.class, "vivek", "10", "15",
+                "personName");
+        assertFindByRange(entityManager, "PersonCassandra", PersonCassandra.class, "1", "2", "personId");
+        assertFindWithoutWhereClause(entityManager, "PersonCassandra", PersonCassandra.class);
 
         // perform merge after query.
         for (PersonCassandra person : persons)
         {
             person.setPersonName("'after merge'");
-            em.merge(person);
+            entityManager.merge(person);
         }
 
-        em.clear();
+        entityManager.clear();
 
-        // select rowid test
-        selectIdQuery();
-
-        em.clear();
-
-        p = findById(PersonCassandra.class, "1", em);
+        p = findById(PersonCassandra.class, "1", entityManager);
         Assert.assertNotNull(p);
         Assert.assertEquals("'after merge'", p.getPersonName());
 
         String updateQuery = "update PersonCassandra p set p.personName=''KK MISHRA'' where p.personId=1";
-        q = em.createQuery(updateQuery);
+        q = entityManager.createQuery(updateQuery);
         q.executeUpdate();
 
-        em.clear();
-        p = findById(PersonCassandra.class, "1", em);
+        entityManager.clear();
+        p = findById(PersonCassandra.class, "1", entityManager);
         Assert.assertNotNull(p);
         Assert.assertEquals("'KK MISHRA'", p.getPersonName());
 
@@ -207,7 +207,7 @@ public class PersonCassandraTest extends BaseTest
         // Delete without WHERE clause.
 
         String deleteQuery = "DELETE from PersonCassandra";
-        q = em.createQuery(deleteQuery);
+        q = entityManager.createQuery(deleteQuery);
         Assert.assertEquals(3, q.executeUpdate());
 
     }
@@ -215,49 +215,48 @@ public class PersonCassandraTest extends BaseTest
     private List<PersonCassandra> queryOverRowkey()
     {
         String qry = "Select p.personId,p.personName from PersonCassandra p where p.personId = 1";
-        Query q = em.createQuery(qry);
+        Query q = entityManager.createQuery(qry);
         List<PersonCassandra> persons = q.getResultList();
         Assert.assertNotNull(persons);
         Assert.assertFalse(persons.isEmpty());
         Assert.assertEquals(1, persons.size());
 
         qry = "Select p.personId,p.personName from PersonCassandra p where p.personId > 1";
-        q = em.createQuery(qry);
+        q = entityManager.createQuery(qry);
         persons = q.getResultList();
         Assert.assertNotNull(persons);
 
-
         qry = "Select p.personId,p.personName from PersonCassandra p where p.personId < 2";
-        q = em.createQuery(qry);
+        q = entityManager.createQuery(qry);
         persons = q.getResultList();
         Assert.assertNotNull(persons);
         Assert.assertFalse(persons.isEmpty());
 
         qry = "Select p.personId,p.personName from PersonCassandra p where p.personId <= 2";
-        q = em.createQuery(qry);
+        q = entityManager.createQuery(qry);
         persons = q.getResultList();
         Assert.assertNotNull(persons);
         Assert.assertFalse(persons.isEmpty());
 
         qry = "Select p.personId,p.personName from PersonCassandra p where p.personId >= 1";
-        q = em.createQuery(qry);
+        q = entityManager.createQuery(qry);
         persons = q.getResultList();
         Assert.assertNotNull(persons);
         Assert.assertFalse(persons.isEmpty());
-        
+
         return persons;
     }
 
     private void testCountResult()
     {
-        Map<String, Client> clientMap = (Map<String, Client>) em.getDelegate();
+        Map<String, Client> clientMap = (Map<String, Client>) entityManager.getDelegate();
         ThriftClient tc = (ThriftClient) clientMap.get(SEC_IDX_CASSANDRA_TEST);
         tc.setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
         CQLTranslator translator = new CQLTranslator();
 
         String query = "select count(*) from "
                 + translator.ensureCase(new StringBuilder(), "PERSONCASSANDRA", false).toString();
-        Query q = em.createNativeQuery(query, PersonCassandra.class);
+        Query q = entityManager.createNativeQuery(query, PersonCassandra.class);
         List noOfRows = q.getResultList();
         Assert.assertEquals(new Long(3),
                 PropertyAccessorHelper.getObject(Long.class, ((Column) noOfRows.get(0)).getValue()));
@@ -281,23 +280,23 @@ public class PersonCassandraTest extends BaseTest
         Object p1 = prepareData("1", 10);
         Object p2 = prepareData("2", 20);
         Object p3 = prepareData("3", 15);
-        em.persist(p1);
-        em.persist(p2);
-        em.persist(p3);
+        entityManager.persist(p1);
+        entityManager.persist(p2);
+        entityManager.persist(p3);
 
-        em.clear();
+        entityManager.clear();
         col.put("1", p1);
         col.put("2", p2);
         col.put("3", p3);
-        PersonCassandra p = findById(PersonCassandra.class, "1", em);
+        PersonCassandra p = findById(PersonCassandra.class, "1", entityManager);
         Assert.assertNotNull(p);
         Assert.assertEquals("vivek", p.getPersonName());
         Assert.assertEquals(Month.APRIL, p.getMonth());
         // modify record.
         p.setPersonName("newvivek");
-        em.merge(p);
+        entityManager.merge(p);
 
-        assertOnMerge(em, "PersonCassandra", PersonCassandra.class, "vivek", "newvivek", "personName");
+        assertOnMerge(entityManager, "PersonCassandra", PersonCassandra.class, "vivek", "newvivek", "personName");
     }
 
     @Test
@@ -309,20 +308,21 @@ public class PersonCassandraTest extends BaseTest
         Object p1 = prepareData("1", 10);
         Object p2 = prepareData("2", 20);
         Object p3 = prepareData("3", 15);
-        em.persist(p1);
-        em.persist(p2);
-        em.persist(p3);
+        entityManager.persist(p1);
+        entityManager.persist(p2);
+        entityManager.persist(p3);
 
         col.put("1", p1);
         col.put("2", p2);
         col.put("3", p3);
-        PersonCassandra p = findById(PersonCassandra.class, "1", em);
+        PersonCassandra p = findById(PersonCassandra.class, "1", entityManager);
         Assert.assertNotNull(p);
         Assert.assertEquals("vivek", p.getPersonName());
-        em.remove(p);
-        em.clear();
+        entityManager.remove(p);
+        entityManager.clear();
 
-        TypedQuery<PersonCassandra> query = em.createQuery("Select p from PersonCassandra p", PersonCassandra.class);
+        TypedQuery<PersonCassandra> query = entityManager.createQuery("Select p from PersonCassandra p",
+                PersonCassandra.class);
 
         List<PersonCassandra> results = query.getResultList();
         Assert.assertNotNull(query);
@@ -331,9 +331,9 @@ public class PersonCassandraTest extends BaseTest
         Assert.assertEquals(Month.APRIL, results.get(0).getMonth());
 
         p1 = prepareData("1", 10);
-        em.persist(p1);
+        entityManager.persist(p1);
 
-        query = em.createQuery("Select p from PersonCassandra p", PersonCassandra.class);
+        query = entityManager.createQuery("Select p from PersonCassandra p", PersonCassandra.class);
 
         results = query.getResultList();
         Assert.assertNotNull(query);
@@ -354,9 +354,9 @@ public class PersonCassandraTest extends BaseTest
         Object p1 = prepareData("1", 10);
         Object p2 = prepareData("2", 20);
         Object p3 = prepareData("3", 15);
-        em.persist(p1);
-        em.persist(p2);
-        em.persist(p3);
+        entityManager.persist(p1);
+        entityManager.persist(p2);
+        entityManager.persist(p3);
         col.put("1", p1);
         col.put("2", p2);
         col.put("3", p3);
@@ -365,21 +365,21 @@ public class PersonCassandraTest extends BaseTest
         Object pp1 = prepareData("1", 10);
         Object pp2 = prepareData("2", 20);
         Object pp3 = prepareData("3", 15);
-        Assert.assertTrue(em.contains(pp1));
-        Assert.assertTrue(em.contains(pp2));
-        Assert.assertTrue(em.contains(pp3));
+        Assert.assertTrue(entityManager.contains(pp1));
+        Assert.assertTrue(entityManager.contains(pp2));
+        Assert.assertTrue(entityManager.contains(pp3));
 
         // Check for detach
-        em.detach(pp1);
-        em.detach(pp2);
-        Assert.assertFalse(em.contains(pp1));
-        Assert.assertFalse(em.contains(pp2));
-        Assert.assertTrue(em.contains(pp3));
+        entityManager.detach(pp1);
+        entityManager.detach(pp2);
+        Assert.assertFalse(entityManager.contains(pp1));
+        Assert.assertFalse(entityManager.contains(pp2));
+        Assert.assertTrue(entityManager.contains(pp3));
 
         // Modify value in database directly, refresh and then check PC
-        em.clear();
-        em = emf.createEntityManager();
-        Object o1 = em.find(PersonCassandra.class, "1");
+        entityManager.clear();
+        entityManager = emf.createEntityManager();
+        Object o1 = entityManager.find(PersonCassandra.class, "1");
 
         if (!USE_CQL)
         {
@@ -408,9 +408,9 @@ public class PersonCassandraTest extends BaseTest
             CassandraCli.client.execute_cql3_query(ByteBuffer.wrap(query.getBytes()), Compression.NONE,
                     ConsistencyLevel.ONE);
         }
-        em.refresh(o1);
-        Object oo1 = em.find(PersonCassandra.class, "1");
-        Assert.assertTrue(em.contains(o1));
+        entityManager.refresh(o1);
+        Object oo1 = entityManager.find(PersonCassandra.class, "1");
+        Assert.assertTrue(entityManager.contains(o1));
         Assert.assertEquals("Amry", ((PersonCassandra) oo1).getPersonName());
     }
 
@@ -433,10 +433,11 @@ public class PersonCassandraTest extends BaseTest
         Object p1 = prepareData("1", 10);
         Object p2 = prepareData("2", 20);
         Object p3 = prepareData("3", 15);
-        em.persist(p1);
-        em.persist(p2);
-        em.persist(p3);
-        TypedQuery<PersonCassandra> query = em.createQuery("Select p from PersonCassandra p", PersonCassandra.class);
+        entityManager.persist(p1);
+        entityManager.persist(p2);
+        entityManager.persist(p3);
+        TypedQuery<PersonCassandra> query = entityManager.createQuery("Select p from PersonCassandra p",
+                PersonCassandra.class);
 
         List<PersonCassandra> results = query.getResultList();
         Assert.assertNotNull(query);
@@ -464,10 +465,10 @@ public class PersonCassandraTest extends BaseTest
         Object p1 = prepareData("1", 10);
         Object p2 = prepareData("2", 20);
         Object p3 = prepareData("3", 15);
-        em.persist(p1);
-        em.persist(p2);
-        em.persist(p3);
-        TypedQuery<Object> query = em.createQuery("Select p from PersonCassandra p", Object.class);
+        entityManager.persist(p1);
+        entityManager.persist(p2);
+        entityManager.persist(p3);
+        TypedQuery<Object> query = entityManager.createQuery("Select p from PersonCassandra p", Object.class);
 
         List<Object> results = query.getResultList();
         Assert.assertNotNull(query);
@@ -495,14 +496,14 @@ public class PersonCassandraTest extends BaseTest
         Object p1 = prepareData("1", 10);
         Object p2 = prepareData("2", 20);
         Object p3 = prepareData("3", 15);
-        em.persist(p1);
-        em.persist(p2);
-        em.persist(p3);
+        entityManager.persist(p1);
+        entityManager.persist(p2);
+        entityManager.persist(p3);
 
         TypedQuery<PersonAuth> query = null;
         try
         {
-            query = em.createQuery("Select p from PersonCassandra p", PersonAuth.class);
+            query = entityManager.createQuery("Select p from PersonCassandra p", PersonAuth.class);
             Assert.fail("Should have gone to catch block, as it is an invalid scenario!");
         }
         catch (IllegalArgumentException iaex)
@@ -520,14 +521,16 @@ public class PersonCassandraTest extends BaseTest
         Object p1 = prepareData("1", 10);
         Object p2 = prepareData("2", 20);
         Object p3 = prepareData("3", 15);
-        em.persist(p1);
-        em.persist(p2);
-        em.persist(p3);
-        em.clear();
-        PersonCassandra person = em.find(PersonCassandra.class, "1");
-        em.remove(person);
-        em.clear(); // just to make sure that not to be picked up from cache.
-        TypedQuery<PersonCassandra> query = em.createQuery("Select p from PersonCassandra p", PersonCassandra.class);
+        entityManager.persist(p1);
+        entityManager.persist(p2);
+        entityManager.persist(p3);
+        entityManager.clear();
+        PersonCassandra person = entityManager.find(PersonCassandra.class, "1");
+        entityManager.remove(person);
+        entityManager.clear(); // just to make sure that not to be picked up
+                               // from cache.
+        TypedQuery<PersonCassandra> query = entityManager.createQuery("Select p from PersonCassandra p",
+                PersonCassandra.class);
 
         List<PersonCassandra> results = query.getResultList();
         Assert.assertNotNull(results);
@@ -535,32 +538,44 @@ public class PersonCassandraTest extends BaseTest
 
     }
 
-    private void selectIdQuery()
-    {/*
-      * String query = "select p.personId from PersonCassandra p"; Query q =
-      * em.createQuery(query); List<PersonCassandra> results =
-      * q.getResultList(); Assert.assertNotNull(results); Assert.assertEquals(3,
-      * results.size()); Assert.assertNotNull(results.get(0).getPersonId());
-      * Assert.assertNull(results.get(0).getPersonName());
-      * 
-      * query =
-      * "Select p.personId from PersonCassandra p where p.personName = vivek";
-      * // // find by name. q = em.createQuery(query); results =
-      * q.getResultList(); Assert.assertNotNull(results);
-      * Assert.assertFalse(results.isEmpty()); Assert.assertEquals(3,
-      * results.size()); Assert.assertNotNull(results.get(0).getPersonId());
-      * Assert.assertNull(results.get(0).getPersonName());
-      * Assert.assertNull(results.get(0).getAge());
-      * 
-      * q = em.createQuery(
-      * "Select p.personId from PersonCassandra p where p.personName = vivek and p.age > "
-      * + 10); results = q.getResultList(); Assert.assertNotNull(results);
-      * Assert.assertFalse(results.isEmpty()); Assert.assertEquals(2,
-      * results.size()); Assert.assertNotNull(results.get(0).getPersonId());
-      * Assert.assertNull(results.get(0).getPersonName());
-      * Assert.assertNull(results.get(0).getAge());
-      */
+    @Test
+    public void testWithMultipleThread() throws TException, InvalidRequestException, UnavailableException,
+            TimedOutException, SchemaDisagreementException
+    {
+        // CassandraCli.createKeySpace("KunderaExamples");
+        // loadData();
+
+        // EM
+        ExecutorService executor = Executors.newFixedThreadPool(10);
+
+        List<Future> futureList = new ArrayList<Future>();
+
+        for (int i = 0; i < 10; i++)
+        {
+            HandlePersist persist = new HandlePersist(i);
+            futureList.add(executor.submit(persist));
+        }
+
+        while (!futureList.isEmpty())
+        {
+            for (int i = 0; i < futureList.size(); i++)
+            {
+                if (futureList.get(i).isDone())
+                {
+                    futureList.remove(i);
+                }
+            }
+        }
+
+        String qry = "Select * from \"PERSONCASSANDRA\"";
+        Query q = entityManager.createNativeQuery(qry, PersonCassandra.class);
+        List<PersonCassandra> persons = q.getResultList();
+        Assert.assertNotNull(persons);
+        Assert.assertFalse(persons.isEmpty());
+        Assert.assertEquals(10000, persons.size());
     }
+
+    // }
 
     /**
      * Tear down.
@@ -570,14 +585,8 @@ public class PersonCassandraTest extends BaseTest
      */
     @After
     public void tearDown() throws Exception
-    {/*
-      * Delete is working, but as row keys are not deleted from cassandra, so
-      * resulting in issue while reading back. // Delete
-      * em.remove(em.find(Person.class, "1")); em.remove(em.find(Person.class,
-      * "2")); em.remove(em.find(Person.class, "3")); em.close(); emf.close();
-      * em = null; emf = null;
-      */
-        em.close();
+    {
+        entityManager.close();
         emf.close();
         CassandraCli.dropKeySpace("KunderaExamples");
     }
@@ -659,4 +668,24 @@ public class PersonCassandraTest extends BaseTest
         CassandraCli.client.set_keyspace("KunderaExamples");
 
     }
+
+    private class HandlePersist implements Runnable
+    {
+        private int i;
+
+        public HandlePersist(int i)
+        {
+            this.i = i;
+        }
+
+        @Override
+        public void run()
+        {
+            for (int j = i * 1000; j < (i + 1) * 1000; j++)
+            {
+                entityManager.persist(prepareData("" + j, j + 10));
+            }
+        }
+    }
+
 }

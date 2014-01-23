@@ -16,11 +16,12 @@
 package com.impetus.kundera.client.crud.inheritence;
 
 import java.io.Serializable;
+
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
-import javax.persistence.InheritanceType;
 import javax.persistence.Entity;
 import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.PostPersist;
 import javax.persistence.Table;
 

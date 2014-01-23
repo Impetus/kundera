@@ -138,7 +138,7 @@ public class CassandraCqlSecondaryTableTest
         }
         catch (NotFoundException e)
         {
-            e.printStackTrace();
+            
         }
     }
 }

@@ -66,7 +66,7 @@ public class CassandraHostConfiguration extends HostConfiguration
             onValidation(host, portAsString);
             Properties serverProperties = server.getProperties();
             CassandraHost cassandraHost = new CassandraHost(host, Integer.parseInt(portAsString));
-            setConfig(cassandraHost, null,serverProperties);
+            setConfig(cassandraHost, null, serverProperties);
             cassandraHosts.add(cassandraHost);
             hostsList.add(cassandraHost);
         }
@@ -157,36 +157,6 @@ public class CassandraHostConfiguration extends HostConfiguration
                 userName = props.getProperty(PersistenceProperties.KUNDERA_USERNAME);
                 password = props.getProperty(PersistenceProperties.KUNDERA_PASSWORD);
             }
-            /*if (testOnBorrow == null)
-            {
-                testOnBorrow = props.getProperty(CassandraConstants.TEST_ON_BORROW) != null ? props.getProperty(
-                        CassandraConstants.TEST_ON_BORROW).trim() : null;
-            }
-            if (testOnConnect == null)
-            {
-                testOnConnect = props.getProperty(CassandraConstants.TEST_ON_CONNECT) != null ? props.getProperty(
-                        CassandraConstants.TEST_ON_CONNECT).trim() : null;
-            }
-            if (testOnReturn == null)
-            {
-                testOnReturn = props.getProperty(CassandraConstants.TEST_ON_RETURN) != null ? props.getProperty(
-                        CassandraConstants.TEST_ON_RETURN).trim() : null;
-            }*/
-            /*if (testWhileIdle == null)
-            {
-                testWhileIdle = props.getProperty(CassandraConstants.TEST_WHILE_IDLE) != null ? props.getProperty(
-                        CassandraConstants.TEST_WHILE_IDLE).trim() : null;
-            }
-            
-            if (socketTimeOut == null)
-            {
-                socketTimeOut = props.getProperty(CassandraConstants.SOCKET_TIMEOUT) != null ? props.getProperty(
-                        CassandraConstants.SOCKET_TIMEOUT).trim() : null;
-            }
-            failOverPolicy = props.getProperty(Constants.FAILOVER_POLICY) != null ? props.getProperty(
-                    Constants.FAILOVER_POLICY).trim() : null;
-            hostRetry = Boolean.parseBoolean(props.getProperty(Constants.RETRY) != null ? props.getProperty(
-                    Constants.RETRY).trim() : null);*/
         }
         try
         {

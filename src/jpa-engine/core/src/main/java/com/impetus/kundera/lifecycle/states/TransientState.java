@@ -42,10 +42,9 @@ public class TransientState extends NodeState
 
         // Add this node into persistence cache
         nodeStateContext.getPersistenceCache().getMainCache().addNodeToCache((Node) nodeStateContext);
-
         // Recurse persist operation on all managed entities for whom
         // cascade=ALL or PERSIST
-        recursivelyPerformOperation(nodeStateContext, OPERATION.PERSIST);
+        // recursivelyPerformOperation(nodeStateContext, OPERATION.PERSIST);
     }
 
     @Override
@@ -55,7 +54,7 @@ public class TransientState extends NodeState
 
         // Recurse remove operation for all related entities for whom
         // cascade=ALL or REMOVE
-        recursivelyPerformOperation(nodeStateContext, OPERATION.REMOVE);
+        // recursivelyPerformOperation(nodeStateContext, OPERATION.REMOVE);
     }
 
     @Override

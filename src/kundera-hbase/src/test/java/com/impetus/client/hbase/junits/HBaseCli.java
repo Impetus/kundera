@@ -133,7 +133,7 @@ public class HBaseCli
             }
             catch (Exception e)
             {
-                e.printStackTrace();
+                
                 logger.error(e.getMessage());
                 throw new RuntimeException(e);
             }
@@ -264,12 +264,12 @@ public class HBaseCli
         // catch (NullPointerException e)
         // {
         // // TODO Auto-generated catch block
-        // e.printStackTrace();
+        // 
         // }
         // catch (Exception e)
         // {
         // // TODO Auto-generated catch block
-        // e.printStackTrace();
+        // 
         // }
         //
     }
@@ -308,12 +308,12 @@ public class HBaseCli
         catch (NullPointerException e)
         {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+            
         }
         catch (Exception e)
         {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+            
         }
 
     }

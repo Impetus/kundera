@@ -88,17 +88,17 @@ public class CassanrdaGeneratedIdSchemaTest
         catch (NotFoundException e)
         {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+            
         }
         catch (InvalidRequestException e)
         {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+            
         }
         catch (TException e)
         {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+            
         }
     }
 

@@ -25,16 +25,24 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.persistence.PersistenceException;
+import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.Metamodel;
 
 import org.apache.commons.configuration.EnvironmentConfiguration;
 import org.apache.commons.configuration.SystemConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.ProxyHelper;
+import com.impetus.kundera.query.KunderaQuery;
+import com.impetus.kundera.query.KunderaQuery.FilterClause;
+import com.impetus.kundera.query.LuceneQueryBuilder;
 
 public class KunderaCoreUtils
 {
@@ -168,14 +176,14 @@ public class KunderaCoreUtils
         }
         return stringBuilder.toString();
     }
-    
+
     /**
      * Resolves variable in path given as string
      * 
      * @param input
-     *            String input url
-     * Code inspired by :http://stackoverflow.com/questions/2263929/
-     * regarding-application-properties-file-and-environment-variable
+     *            String input url Code inspired by
+     *            :http://stackoverflow.com/questions/2263929/
+     *            regarding-application-properties-file-and-environment-variable
      */
     public static String resolvePath(String input)
     {
@@ -188,7 +196,8 @@ public class KunderaCoreUtils
 
         // Pattern pattern = Pattern.compile("\\$\\{(\\w+)\\}|\\$(\\w+)");
         Pattern pathPattern = Pattern.compile("\\$\\{(.+?)\\}");
-        Matcher matcherPattern = pathPattern.matcher(input); // get a matcher object
+        Matcher matcherPattern = pathPattern.matcher(input); // get a matcher
+                                                             // object
         StringBuffer sb = new StringBuffer();
         EnvironmentConfiguration config = new EnvironmentConfiguration();
         SystemConfiguration sysConfig = new SystemConfiguration();
@@ -233,5 +242,65 @@ public class KunderaCoreUtils
         }
 
         return count;
+    }
+
+    /**
+     * Gets the lucene query from jpa query.
+     * 
+     * @return the lucene query from jpa query
+     */
+    public static String getLuceneQueryFromJPAQuery(KunderaQuery kunderaQuery)
+    {
+
+        LuceneQueryBuilder queryBuilder = new LuceneQueryBuilder();
+        EntityMetadata metadata = kunderaQuery.getEntityMetadata();
+        Metamodel metaModel = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                metadata.getPersistenceUnit());
+
+        EntityType entity = metaModel.entity(metadata.getEntityClazz());
+
+        for (Object object : kunderaQuery.getFilterClauseQueue())
+        {
+            if (object instanceof FilterClause)
+            {
+                FilterClause filter = (FilterClause) object;
+                String property = filter.getProperty();
+                String condition = filter.getCondition();
+                String valueAsString = filter.getValue().toString();
+                String fieldName = metadata.getFieldName(property);
+                Class valueClazz = getValueType(entity, fieldName);
+
+                queryBuilder.appendIndexName(metadata.getIndexName())
+                        .appendPropertyName(getPropertyName(metadata, property))
+                        .buildQuery(condition, valueAsString, valueClazz);
+            }
+            else
+            {
+                queryBuilder.buildQuery(object.toString(), object.toString(), String.class);
+            }
+        }
+        queryBuilder.appendEntityName(kunderaQuery.getEntityClass().getCanonicalName().toLowerCase());
+        return queryBuilder.getQuery();
+    }
+
+    private static Class getValueType(EntityType entity, String fieldName)
+    {
+        Class valueClazz = null;
+        if (fieldName != null)
+        {
+            valueClazz = ((AbstractAttribute) entity.getAttribute(fieldName)).getBindableJavaType();
+        }
+        return valueClazz;
+    }
+
+    private static String getPropertyName(final EntityMetadata metadata, final String property)
+    {
+        if (MetadataUtils.getEnclosingEmbeddedFieldName(metadata, property, true) != null)
+        {
+            return property.substring(property.indexOf(".") + 1, property.length());
+        }
+
+        return property;
+
     }
 }

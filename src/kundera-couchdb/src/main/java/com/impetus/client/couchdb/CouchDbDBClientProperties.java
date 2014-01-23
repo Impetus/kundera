@@ -50,7 +50,6 @@ public class CouchDbDBClientProperties
                     if (key.equals(BATCH_SIZE))
                     {
                         setBatchSize(value);
-
                     }
                 }
                 // Add more properties as needed
@@ -66,11 +65,9 @@ public class CouchDbDBClientProperties
         if (value instanceof Integer)
         {
             this.couchDBClient.setBatchSize((Integer) value);
-
         }
         else if (value instanceof String)
         {
-
             this.couchDBClient.setBatchSize(Integer.valueOf((String) value));
         }
     }

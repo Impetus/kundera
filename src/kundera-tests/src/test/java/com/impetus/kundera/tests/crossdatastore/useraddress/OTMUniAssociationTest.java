@@ -178,7 +178,7 @@ public class OTMUniAssociationTest extends TwinAssociation
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+
             Assert.fail();
         }
     }
@@ -196,7 +196,7 @@ public class OTMUniAssociationTest extends TwinAssociation
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+
             Assert.fail();
         }
     }
@@ -210,9 +210,9 @@ public class OTMUniAssociationTest extends TwinAssociation
     @After
     public void tearDown() throws Exception
     {
-        //shutDownRdbmsServer();
+        shutDownRdbmsServer();
+        // shutDownRdbmsServer();
         // tearDownInternal(ALL_PUs_UNDER_TEST);
-
     }
 
     /**
@@ -261,7 +261,6 @@ public class OTMUniAssociationTest extends TwinAssociation
         CfDef cfDef = new CfDef();
         cfDef.name = "PERSONNEL";
         cfDef.keyspace = "KunderaTests";
-        // cfDef.column_type = "Super";
         cfDef.setComparator_type("UTF8Type");
         cfDef.setDefault_validation_class("UTF8Type");
         cfDef.setKey_validation_class("UTF8Type");
@@ -276,12 +275,15 @@ public class OTMUniAssociationTest extends TwinAssociation
         {
             ksDef = CassandraCli.client.describe_keyspace("KunderaTests");
             CassandraCli.client.set_keyspace("KunderaTests");
-            if (!CassandraCli.columnFamilyExist("PERSONNEL", "KunderaTests")) {
+
+            if (!CassandraCli.columnFamilyExist("PERSONNEL", "KunderaTests"))
+            {
                 CassandraCli.client.system_add_column_family(cfDef);
-            } else {
+            }
+            else
+            {
                 CassandraCli.truncateColumnFamily("KunderaTests", "PERSONNEL");
             }
-
 
         }
         catch (NotFoundException e)
@@ -319,9 +321,12 @@ public class OTMUniAssociationTest extends TwinAssociation
         {
             ksDef = CassandraCli.client.describe_keyspace("KunderaTests");
             CassandraCli.client.set_keyspace("KunderaTests");
-            if (!CassandraCli.columnFamilyExist("ADDRESS", "KunderaTests")) {
+            if (!CassandraCli.columnFamilyExist("ADDRESS", "KunderaTests"))
+            {
                 CassandraCli.client.system_add_column_family(cfDef2);
-            } else {
+            }
+            else
+            {
                 CassandraCli.truncateColumnFamily("KunderaTests", "ADDRESS");
             }
 
@@ -346,14 +351,14 @@ public class OTMUniAssociationTest extends TwinAssociation
     {
         try
         {
-           // cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL (PERSON_ID VARCHAR(150) PRIMARY KEY, PERSON_NAME VARCHAR(250))");
+            // cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL (PERSON_ID VARCHAR(150) PRIMARY KEY, PERSON_NAME VARCHAR(250))");
             cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL (PERSON_ID VARCHAR(150) PRIMARY KEY, PERSON_NAME VARCHAR(150), ADDRESS_ID VARCHAR(150))");
         }
         catch (Exception e)
         {
             cli.update("DELETE FROM KUNDERATESTS.PERSONNEL");
-//            cli.update("DROP TABLE KUNDERATESTS.PERSONNEL");
-//            cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL (PERSON_ID VARCHAR(150) PRIMARY KEY, PERSON_NAME VARCHAR(250))");
+            // cli.update("DROP TABLE KUNDERATESTS.PERSONNEL");
+            // cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL (PERSON_ID VARCHAR(150) PRIMARY KEY, PERSON_NAME VARCHAR(250))");
         }
     }
 
@@ -374,8 +379,8 @@ public class OTMUniAssociationTest extends TwinAssociation
         catch (Exception e)
         {
             cli.update("DELETE FROM KUNDERATESTS.ADDRESS");
-//            cli.update("DROP TABLE KUNDERATESTS.ADDRESS");
-//            cli.update("CREATE TABLE KUNDERATESTS.ADDRESS (ADDRESS_ID VARCHAR(150) PRIMARY KEY, STREET VARCHAR(250),PERSON_ID VARCHAR(150))");
+            // cli.update("DROP TABLE KUNDERATESTS.ADDRESS");
+            // cli.update("CREATE TABLE KUNDERATESTS.ADDRESS (ADDRESS_ID VARCHAR(150) PRIMARY KEY, STREET VARCHAR(250),PERSON_ID VARCHAR(150))");
         }
     }
 

@@ -40,6 +40,7 @@ import com.impetus.kundera.persistence.context.PersistenceCacheManager;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.ProxyHelper;
+import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**
@@ -53,11 +54,9 @@ public class AbstractEntityReader
     /** The log. */
     private static Logger log = LoggerFactory.getLogger(AbstractEntityReader.class);
 
-    /** The lucene query from jpa query. */
-    protected String luceneQueryFromJPAQuery;
-
     private AssociationBuilder associationBuilder;
 
+    protected KunderaQuery kunderaQuery;
     /**
      * Retrieves an entity from ID
      * 
@@ -489,6 +488,10 @@ public class AbstractEntityReader
         // use lucene to query and get Pk's only.
         // go to client and get relation with values.!
         // populate EnhanceEntity
+
+        /** The lucene query from jpa query. */
+        String luceneQueryFromJPAQuery = KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery);
+        
         Map<String, Object> results = client.getIndexManager().search(clazz, luceneQueryFromJPAQuery);
         Set rSet = new HashSet(results.values());
         return rSet;

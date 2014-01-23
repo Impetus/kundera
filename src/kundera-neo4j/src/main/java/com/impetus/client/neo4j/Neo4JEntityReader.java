@@ -22,6 +22,7 @@ import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.AbstractEntityReader;
 import com.impetus.kundera.persistence.EntityReader;
+import com.impetus.kundera.query.KunderaQuery;
 
 /**
  * Entity Reader for Neo4J
@@ -30,6 +31,16 @@ import com.impetus.kundera.persistence.EntityReader;
  */
 public class Neo4JEntityReader extends AbstractEntityReader implements EntityReader
 {
+
+    public Neo4JEntityReader()
+    {
+        // TODO Auto-generated constructor stub
+    }
+
+    public Neo4JEntityReader(KunderaQuery kunderaQuery)
+    {
+        this.kunderaQuery = kunderaQuery;
+    }
 
     @Override
     public EnhanceEntity findById(Object primaryKey, EntityMetadata m, Client client)

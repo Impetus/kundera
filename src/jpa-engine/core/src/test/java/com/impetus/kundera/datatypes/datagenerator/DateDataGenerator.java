@@ -4,6 +4,7 @@ import java.util.Date;
 
 public class DateDataGenerator implements DataGenerator<Date>
 {
+
     private static final LongDataGenerator LONG_DATA_GENERATOR = new LongDataGenerator();
 
     private static final Date MIN_DATE = new Date(0L);

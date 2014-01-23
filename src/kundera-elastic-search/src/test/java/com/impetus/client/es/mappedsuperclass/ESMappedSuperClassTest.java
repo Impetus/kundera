@@ -3,11 +3,6 @@ package com.impetus.client.es.mappedsuperclass;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.List;
-
-import javax.persistence.Query;
-
-import junit.framework.Assert;
 
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.node.Node;
@@ -16,7 +11,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.kundera.client.crud.mappedsuperclass.CreditTransaction;
 import com.impetus.kundera.client.crud.mappedsuperclass.MappedSuperClassBase;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 

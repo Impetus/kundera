@@ -61,7 +61,7 @@ public class ObjectGraphBuilderTest
     public void setUp() throws Exception
     {
         getEntityManagerFactory();
-        new PersistenceUnitConfiguration("kunderatest").configure();
+        new PersistenceUnitConfiguration(null, "kunderatest").configure();
         PersistenceCache persistenceCache = new PersistenceCache();
 
         graphBuilder = new ObjectGraphBuilder(persistenceCache, new PersistenceDelegator(persistenceCache));

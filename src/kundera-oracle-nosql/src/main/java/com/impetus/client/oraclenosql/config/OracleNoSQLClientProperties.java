@@ -63,20 +63,15 @@ public class OracleNoSQLClientProperties
                     if (key.equals(WRITE_TIMEOUT))
                     {
                         setTimeOut(value);
-
                     }
                     else if (key.equals(DURABILITY) && value instanceof Durability)
                     {
-
                         this.oracleNoSQLClient.setDurability((Durability) value);
                     }
-
                     else if (key.equals(TIME_UNIT))
                     {
                         setTimeUnit(value);
-
                     }
-
                     else if (key.equals(CONSISTENCY) && value instanceof Consistency)
                     {
                         this.oracleNoSQLClient.setConsistency((Consistency) value);
@@ -84,9 +79,7 @@ public class OracleNoSQLClientProperties
                     else if (key.equals(PersistenceProperties.KUNDERA_BATCH_SIZE))
                     {
                         setBatchSize(value);
-
                     }
-
                     // Add more properties as needed
                 }
             }
@@ -101,14 +94,11 @@ public class OracleNoSQLClientProperties
         if (value instanceof Integer)
         {
             this.oracleNoSQLClient.setTimeout((Integer) value);
-
         }
         else if (value instanceof String)
         {
-
             this.oracleNoSQLClient.setTimeout(Integer.valueOf((String) value));
         }
-
     }
 
     /**
@@ -124,7 +114,6 @@ public class OracleNoSQLClientProperties
         {
             this.oracleNoSQLClient.setTimeUnit(TimeUnit.valueOf((String) value));
         }
-
     }
 
     /**
@@ -140,7 +129,6 @@ public class OracleNoSQLClientProperties
         {
             this.oracleNoSQLClient.setBatchSize(Integer.valueOf((String) value));
         }
-
     }
 
     /**

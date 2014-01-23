@@ -168,9 +168,9 @@ public final class PersistenceDelegator
         graph = null;
         if (log.isDebugEnabled())
         {
-            log.debug("Data persisted successfully for entity : " + e.getClass());
+            log.debug("Data persisted successfully for entity {}.", e.getClass());
         }
-    }    
+    }
 
     /**
      * Find object based on primary key either form persistence cache or from
@@ -260,8 +260,8 @@ public final class PersistenceDelegator
         else
         {
             E e = (E) ObjectUtils.deepCopy(nodeData);
-            
-            onSetProxyOwners(entityMetadata,e);
+
+            onSetProxyOwners(entityMetadata, e);
             return e;
         }
 
@@ -285,7 +285,7 @@ public final class PersistenceDelegator
         {
             return entities;
         }
-        Set pKeys = new HashSet(Arrays.asList(primaryKeys));
+        Set<Object> pKeys = new HashSet<Object>(Arrays.asList(primaryKeys));
         for (Object primaryKey : pKeys)
         {
             E e = find(entityClass, primaryKey);
@@ -537,9 +537,9 @@ public final class PersistenceDelegator
      */
     Query createQuery(String jpaQuery)
     {
-        return getQueryInstance(jpaQuery, false,null);
+        return getQueryInstance(jpaQuery, false, null);
     }
-    
+
     /*
      * 
      */
@@ -548,12 +548,12 @@ public final class PersistenceDelegator
         return getQueryInstance(jpaQuery, true, resultClass);
     }
 
-    
     private Query getQueryInstance(String jpaQuery, boolean isNative, Class mappedClass)
     {
-        Query query = new QueryResolver().getQueryImplementation(jpaQuery, this,mappedClass,isNative);
+        Query query = new QueryResolver().getQueryImplementation(jpaQuery, this, mappedClass, isNative);
         return query;
     }
+
     /**
      * Checks if is open.
      * 
@@ -605,7 +605,7 @@ public final class PersistenceDelegator
         }
     }
 
-    private void onSetProxyOwners(final EntityMetadata m,Object e)
+    private void onSetProxyOwners(final EntityMetadata m, Object e)
     {
         if (KunderaMetadata.INSTANCE.getCoreMetadata() != null)
         {
@@ -678,11 +678,10 @@ public final class PersistenceDelegator
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(clazz);
         if (metadata == null)
         {
-            log.error(
-                    "Entity metadata not found for {}, possible reasons may be: "
-                            + "1) not annotated with @Entity. 2) is annotated with @MappedSuperclass."  
-                            + "3) does not properly with mapped persistence unit for persistence unit and keyspace. Please verify with @Table annotation or persistence.xml "
-                            + clazz);
+            log.error("Entity metadata not found for {}, possible reasons may be: "
+                    + "1) not annotated with @Entity. 2) is annotated with @MappedSuperclass."
+                    + "3) does not properly with mapped persistence unit for persistence unit and keyspace. Please verify with @Table annotation or persistence.xml "
+                    + clazz);
             throw new KunderaException("Entity metadata not found for " + clazz.getName());
         }
         return metadata;
@@ -825,7 +824,8 @@ public final class PersistenceDelegator
             {
                 if (client instanceof Batcher)
                 {
-                    // if no batch operation performed{may be running in transaction?}
+                    // if no batch operation performed{may be running in
+                    // transaction?}
                     if (((Batcher) client).getBatchSize() == 0 || ((Batcher) client).executeBatch() > 0)
                     {
                         flushJoinTableData();
@@ -918,11 +918,12 @@ public final class PersistenceDelegator
                     coordinator.addResource(new DefaultTransactionResource(clientMap.get(pu)), pu);
                 }
             }
-        } catch(Exception e)
+        }
+        catch (Exception e)
         {
             log.error("Error while initializing Transaction Resource:", e);
             throw new KunderaTransactionException(e);
-            
+
         }
 
         return coordinator;

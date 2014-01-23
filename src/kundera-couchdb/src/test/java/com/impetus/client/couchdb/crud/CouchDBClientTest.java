@@ -57,7 +57,6 @@ import com.impetus.kundera.lifecycle.states.TransientState;
 import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData.OPERATION;
-
 /**
  * Junit for {@link CouchDBClient}.
  * 

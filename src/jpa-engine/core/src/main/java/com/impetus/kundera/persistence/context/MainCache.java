@@ -15,7 +15,6 @@
  */
 package com.impetus.kundera.persistence.context;
 
-import javax.persistence.Cache;
 
 /**
  * Main cache for the persistence context

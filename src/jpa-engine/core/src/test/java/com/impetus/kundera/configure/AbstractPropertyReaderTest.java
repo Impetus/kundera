@@ -58,7 +58,7 @@ public class AbstractPropertyReaderTest
     {
         PropertyReader   reader = new DummyPropertyReader(null);
         String pu = "PropertyTest";
-        new PersistenceUnitConfiguration(pu).configure();
+        new PersistenceUnitConfiguration(null, pu).configure();
         ClientProperties cp = null;
         reader.read(pu);
         cp = DummyPropertyReader.dsmd.getClientProperties();
@@ -70,7 +70,7 @@ public class AbstractPropertyReaderTest
     {
         PropertyReader   reader = new DummyPropertyReader(null);
         String pu = "PropertyTestwithabsolutepath";
-        new PersistenceUnitConfiguration(pu).configure();
+        new PersistenceUnitConfiguration(null, pu).configure();
         ClientProperties cp = null;
         reader.read(pu);
         cp = DummyPropertyReader.dsmd.getClientProperties();
@@ -82,7 +82,7 @@ public class AbstractPropertyReaderTest
     {
         PropertyReader   reader = new DummyPropertyReader(null);
         String pu = "PropertyTestwithvaraiable";
-        new PersistenceUnitConfiguration(pu).configure();
+        new PersistenceUnitConfiguration(null, pu).configure();
         ClientProperties cp = null;
         reader.read(pu);
         cp = DummyPropertyReader.dsmd.getClientProperties();

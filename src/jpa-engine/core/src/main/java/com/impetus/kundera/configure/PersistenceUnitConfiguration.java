@@ -29,6 +29,7 @@ import javax.persistence.spi.PersistenceUnitTransactionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaPersistence;
 import com.impetus.kundera.loader.PersistenceLoaderException;
 import com.impetus.kundera.loader.PersistenceXMLLoader;
@@ -59,9 +60,9 @@ public class PersistenceUnitConfiguration extends AbstractSchemaConfiguration im
      * @param persistenceUnits
      *            persistence units.
      */
-    public PersistenceUnitConfiguration(String... persistenceUnits)
+    public PersistenceUnitConfiguration(Map properties, String... persistenceUnits)
     {
-        super(persistenceUnits, null);
+        super(persistenceUnits, properties);
     }
 
     /*
@@ -110,16 +111,19 @@ public class PersistenceUnitConfiguration extends AbstractSchemaConfiguration im
      */
     private Map<String, PersistenceUnitMetadata> findPersistenceMetadatas() throws InvalidConfigurationException
     {
-
+        String puLocation = (String) (externalPropertyMap != null && externalPropertyMap.get(Constants.PERSISTENCE_UNIT_LOCATIION) != null ? externalPropertyMap
+                .get(Constants.PERSISTENCE_UNIT_LOCATIION) : Constants.DEFAULT_PERSISTENCE_UNIT_LOCATIION);
+        
         Enumeration<URL> xmls = null;
         try
         {
-            xmls = this.getClass().getClassLoader().getResources("META-INF/persistence.xml");
-            
-//            if (xmls == null || !xmls.hasMoreElements())
-//            {
-//                xmls = Thread.currentThread().getClass().getClassLoader().getResources("META-INF/persistence.xml");
-//            }
+            xmls = this.getClass().getClassLoader().getResources(puLocation);
+
+            // if (xmls == null || !xmls.hasMoreElements())
+            // {
+            // xmls =
+            // Thread.currentThread().getClass().getClassLoader().getResources("META-INF/persistence.xml");
+            // }
         }
         catch (IOException ioex)
         {

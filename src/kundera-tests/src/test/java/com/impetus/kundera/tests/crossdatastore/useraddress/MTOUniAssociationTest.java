@@ -178,6 +178,8 @@ public class MTOUniAssociationTest extends TwinAssociation
         // Find Person 2
         PersonnelUniMTo1 p2 = (PersonnelUniMTo1) dao.findPerson(PersonnelUniMTo1.class, "unimanytoone_2");
         Assert.assertNotNull(p2);
+        Assert.assertNotNull(p2.getAddress());
+        Assert.assertNotNull(p2.getAddress().getAddressId());
         p2.setPersonName("Prateek");
         dao.merge(p2);
         PersonnelUniMTo1 p2AfterMerge = (PersonnelUniMTo1) dao.findPerson(PersonnelUniMTo1.class, "unimanytoone_2");

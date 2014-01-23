@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.persistence.context;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 

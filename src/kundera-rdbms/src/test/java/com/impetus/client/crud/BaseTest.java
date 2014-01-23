@@ -22,6 +22,8 @@ import javax.persistence.Query;
 
 import junit.framework.Assert;
 
+import com.impetus.client.crud.entities.PersonRDBMS;
+
 /**
  * The Class BaseTest.
  * 

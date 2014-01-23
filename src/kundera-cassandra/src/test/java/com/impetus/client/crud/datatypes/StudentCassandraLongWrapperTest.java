@@ -25,7 +25,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.crud.datatypes.entities.StudentCassandraLongWrapper;
+import com.impetus.client.crud.datatypes.entities.StudentLongWrapper;
 import com.impetus.client.persistence.CassandraCli;
 
 public class StudentCassandraLongWrapperTest extends CassandraBase
@@ -71,21 +71,21 @@ public class StudentCassandraLongWrapperTest extends CassandraBase
         EntityManager em = emf.createEntityManager();
 
         // Insert min value of Long
-        StudentCassandraLongWrapper studentMin = new StudentCassandraLongWrapper();
+        StudentLongWrapper studentMin = new StudentLongWrapper();
         studentMin.setAge((Short) getMinValue(short.class));
         studentMin.setId((Long) getMinValue(Long.class));
         studentMin.setName((String) getMinValue(String.class));
         em.persist(studentMin);
 
         // Insert random value of Long
-        StudentCassandraLongWrapper student = new StudentCassandraLongWrapper();
+        StudentLongWrapper student = new StudentLongWrapper();
         student.setAge((Short) getRandomValue(short.class));
         student.setId((Long) getRandomValue(Long.class));
         student.setName((String) getRandomValue(String.class));
         em.persist(student);
 
         // Insert max value of Long
-        StudentCassandraLongWrapper studentMax = new StudentCassandraLongWrapper();
+        StudentLongWrapper studentMax = new StudentLongWrapper();
         studentMax.setAge((Short) getMaxValue(short.class));
         studentMax.setId((Long) getMaxValue(Long.class));
         studentMax.setName((String) getMaxValue(String.class));
@@ -98,7 +98,7 @@ public class StudentCassandraLongWrapperTest extends CassandraBase
     {
         EntityManager em = emf.createEntityManager();
 
-        StudentCassandraLongWrapper studentMax = em.find(StudentCassandraLongWrapper.class, getMaxValue(Long.class));
+        StudentLongWrapper studentMax = em.find(StudentLongWrapper.class, getMaxValue(Long.class));
         Assert.assertNotNull(studentMax);
         Assert.assertEquals(getMaxValue(short.class), studentMax.getAge());
         Assert.assertEquals(getMaxValue(String.class), studentMax.getName());
@@ -108,7 +108,7 @@ public class StudentCassandraLongWrapperTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandraLongWrapper studentMin = em.find(StudentCassandraLongWrapper.class, getMinValue(Long.class));
+        StudentLongWrapper studentMin = em.find(StudentLongWrapper.class, getMinValue(Long.class));
         Assert.assertNotNull(studentMin);
         Assert.assertEquals(getMinValue(short.class), studentMin.getAge());
         Assert.assertEquals(getMinValue(String.class), studentMin.getName());
@@ -118,7 +118,7 @@ public class StudentCassandraLongWrapperTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandraLongWrapper student = em.find(StudentCassandraLongWrapper.class, getRandomValue(Long.class));
+        StudentLongWrapper student = em.find(StudentLongWrapper.class, getRandomValue(Long.class));
         Assert.assertNotNull(student);
         Assert.assertEquals(getRandomValue(short.class), student.getAge());
         Assert.assertEquals(getRandomValue(String.class), student.getName());
@@ -128,7 +128,7 @@ public class StudentCassandraLongWrapperTest extends CassandraBase
     public void testMerge(boolean useSameEm)
     {
         EntityManager em = emf.createEntityManager();
-        StudentCassandraLongWrapper student = em.find(StudentCassandraLongWrapper.class, getMaxValue(Long.class));
+        StudentLongWrapper student = em.find(StudentLongWrapper.class, getMaxValue(Long.class));
         Assert.assertNotNull(student);
         Assert.assertEquals(getMaxValue(short.class), student.getAge());
         Assert.assertEquals(getMaxValue(String.class), student.getName());
@@ -140,7 +140,7 @@ public class StudentCassandraLongWrapperTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandraLongWrapper newStudent = em.find(StudentCassandraLongWrapper.class, getMaxValue(Long.class));
+        StudentLongWrapper newStudent = em.find(StudentLongWrapper.class, getMaxValue(Long.class));
         Assert.assertNotNull(newStudent);
         Assert.assertEquals(getMaxValue(short.class), newStudent.getAge());
         Assert.assertEquals("Kuldeep", newStudent.getName());
@@ -165,17 +165,17 @@ public class StudentCassandraLongWrapperTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraLongWrapper> students;
+        List<StudentLongWrapper> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraLongWrapper s where s.age = " + getMinValue(short.class)
+        query = "Select s From StudentLongWrapper s where s.age = " + getMinValue(short.class)
                 + " and s.name > Amresh and s.name <= " + getMaxValue(String.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraLongWrapper student : students)
+        for (StudentLongWrapper student : students)
         {
             Assert.assertEquals(getMinValue(Long.class), student.getId());
             Assert.assertEquals(getMinValue(short.class), student.getAge());
@@ -193,9 +193,9 @@ public class StudentCassandraLongWrapperTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraLongWrapper> students;
+        List<StudentLongWrapper> students;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraLongWrapper s where s.id between ?1 and ?2";
+        query = "Select s From StudentLongWrapper s where s.id between ?1 and ?2";
         q = em.createQuery(query);
         q.setParameter(1, getMinValue(Long.class));
         q.setParameter(2, getMaxValue(Long.class));
@@ -203,7 +203,7 @@ public class StudentCassandraLongWrapperTest extends CassandraBase
         Assert.assertNotNull(students);
         Assert.assertEquals(3, students.size());
         int count = 0;
-        for (StudentCassandraLongWrapper student : students)
+        for (StudentLongWrapper student : students)
         {
             if (student.getId().equals(getMaxValue(Long.class)))
             {
@@ -234,16 +234,16 @@ public class StudentCassandraLongWrapperTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraLongWrapper> students;
+        List<StudentLongWrapper> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraLongWrapper s where s.name = Kuldeep and s.age > " + getMinValue(short.class);
+        query = "Select s From StudentLongWrapper s where s.name = Kuldeep and s.age > " + getMinValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraLongWrapper student : students)
+        for (StudentLongWrapper student : students)
         {
             Assert.assertEquals(getMaxValue(Long.class), student.getId());
             Assert.assertEquals(getMaxValue(short.class), student.getAge());
@@ -260,17 +260,17 @@ public class StudentCassandraLongWrapperTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraLongWrapper> students;
+        List<StudentLongWrapper> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraLongWrapper s where s.name = Kuldeep and s.age > " + getMinValue(short.class)
+        query = "Select s From StudentLongWrapper s where s.name = Kuldeep and s.age > " + getMinValue(short.class)
                 + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraLongWrapper student : students)
+        for (StudentLongWrapper student : students)
         {
             Assert.assertEquals(getMaxValue(Long.class), student.getId());
             Assert.assertEquals(getMaxValue(short.class), student.getAge());
@@ -297,7 +297,7 @@ public class StudentCassandraLongWrapperTest extends CassandraBase
     {
         EntityManager em = emf.createEntityManager();
 
-        StudentCassandraLongWrapper studentMax = em.find(StudentCassandraLongWrapper.class, getMaxValue(Long.class));
+        StudentLongWrapper studentMax = em.find(StudentLongWrapper.class, getMaxValue(Long.class));
         Assert.assertNotNull(studentMax);
         Assert.assertEquals(getMaxValue(short.class), studentMax.getAge());
         Assert.assertEquals("Kuldeep", studentMax.getName());
@@ -307,7 +307,7 @@ public class StudentCassandraLongWrapperTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        studentMax = em.find(StudentCassandraLongWrapper.class, getMaxValue(Long.class));
+        studentMax = em.find(StudentLongWrapper.class, getMaxValue(Long.class));
         Assert.assertNull(studentMax);
         em.close();
     }
@@ -318,7 +318,7 @@ public class StudentCassandraLongWrapperTest extends CassandraBase
     private void deleteNamed(boolean useSameEm)
     {
 
-        String deleteQuery = "Delete From StudentCassandraLongWrapper s where s.name=Vivek";
+        String deleteQuery = "Delete From StudentLongWrapper s where s.name=Vivek";
         EntityManager em = emf.createEntityManager();
         Query q = em.createQuery(deleteQuery);
         q.executeUpdate();
@@ -327,7 +327,7 @@ public class StudentCassandraLongWrapperTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandraLongWrapper newStudent = em.find(StudentCassandraLongWrapper.class, getRandomValue(Long.class));
+        StudentLongWrapper newStudent = em.find(StudentLongWrapper.class, getRandomValue(Long.class));
         Assert.assertNull(newStudent);
         em.close();
     }
@@ -338,7 +338,7 @@ public class StudentCassandraLongWrapperTest extends CassandraBase
     private void updateNamed(boolean useSameEm)
     {
         EntityManager em = emf.createEntityManager();
-        String updateQuery = "Update StudentCassandraLongWrapper s SET s.name=Vivek where s.name=Amresh";
+        String updateQuery = "Update StudentLongWrapper s SET s.name=Vivek where s.name=Amresh";
         Query q = em.createQuery(updateQuery);
         q.executeUpdate();
         if (!useSameEm)
@@ -346,7 +346,7 @@ public class StudentCassandraLongWrapperTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandraLongWrapper newStudent = em.find(StudentCassandraLongWrapper.class, getRandomValue(Long.class));
+        StudentLongWrapper newStudent = em.find(StudentLongWrapper.class, getRandomValue(Long.class));
         Assert.assertNotNull(newStudent);
         Assert.assertEquals(getRandomValue(short.class), newStudent.getAge());
         Assert.assertEquals("Vivek", newStudent.getName());
@@ -358,17 +358,17 @@ public class StudentCassandraLongWrapperTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraLongWrapper> students;
+        List<StudentLongWrapper> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraLongWrapper s where s.name = Amresh and s.age between "
+        query = "Select s From StudentLongWrapper s where s.name = Amresh and s.age between "
                 + getMinValue(short.class) + " and " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraLongWrapper student : students)
+        for (StudentLongWrapper student : students)
         {
             Assert.assertEquals(getRandomValue(Long.class), student.getId());
             Assert.assertEquals(getRandomValue(short.class), student.getAge());
@@ -385,17 +385,17 @@ public class StudentCassandraLongWrapperTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraLongWrapper> students;
+        List<StudentLongWrapper> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraLongWrapper s where s.name = Amresh and s.age > " + getMinValue(short.class)
+        query = "Select s From StudentLongWrapper s where s.name = Amresh and s.age > " + getMinValue(short.class)
                 + " and s.age < " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraLongWrapper student : students)
+        for (StudentLongWrapper student : students)
         {
             Assert.assertEquals(getRandomValue(Long.class), student.getId());
             Assert.assertEquals(getRandomValue(short.class), student.getAge());
@@ -413,17 +413,17 @@ public class StudentCassandraLongWrapperTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraLongWrapper> students;
+        List<StudentLongWrapper> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraLongWrapper s where s.name = Kuldeep and s.age >= " + getMinValue(short.class)
+        query = "Select s From StudentLongWrapper s where s.name = Kuldeep and s.age >= " + getMinValue(short.class)
                 + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(2, students.size());
         count = 0;
-        for (StudentCassandraLongWrapper student : students)
+        for (StudentLongWrapper student : students)
         {
             if (student.getId().equals(getMaxValue(Long.class)))
             {
@@ -450,16 +450,16 @@ public class StudentCassandraLongWrapperTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraLongWrapper> students;
+        List<StudentLongWrapper> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraLongWrapper s where s.age = " + getRandomValue(short.class);
+        query = "Select s From StudentLongWrapper s where s.age = " + getRandomValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraLongWrapper student : students)
+        for (StudentLongWrapper student : students)
         {
             Assert.assertEquals(getRandomValue(Long.class), student.getId());
             Assert.assertEquals(getRandomValue(short.class), student.getAge());
@@ -478,16 +478,16 @@ public class StudentCassandraLongWrapperTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraLongWrapper> students;
+        List<StudentLongWrapper> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraLongWrapper s where s.name = Kuldeep";
+        query = "Select s From StudentLongWrapper s where s.name = Kuldeep";
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(2, students.size());
         count = 0;
-        for (StudentCassandraLongWrapper student : students)
+        for (StudentLongWrapper student : students)
         {
             if (student.getId().equals(getMaxValue(Long.class)))
             {
@@ -514,13 +514,13 @@ public class StudentCassandraLongWrapperTest extends CassandraBase
     {
         EntityManager em = emf.createEntityManager();
         // Selet all query.
-        String query = "Select s From StudentCassandraLongWrapper s ";
+        String query = "Select s From StudentLongWrapper s ";
         Query q = em.createQuery(query);
-        List<StudentCassandraLongWrapper> students = q.getResultList();
+        List<StudentLongWrapper> students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(3, students.size());
         int count = 0;
-        for (StudentCassandraLongWrapper student : students)
+        for (StudentLongWrapper student : students)
         {
             if (student.getId().equals(getMaxValue(Long.class)))
             {
@@ -554,27 +554,27 @@ public class StudentCassandraLongWrapperTest extends CassandraBase
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            
         }
         catch (TException e)
         {
-            e.printStackTrace();
+            
         }
         catch (InvalidRequestException e)
         {
-            e.printStackTrace();
+            
         }
         catch (UnavailableException e)
         {
-            e.printStackTrace();
+            
         }
         catch (TimedOutException e)
         {
-            e.printStackTrace();
+            
         }
         catch (SchemaDisagreementException e)
         {
-            e.printStackTrace();
+            
         }
     }
 
@@ -591,7 +591,7 @@ public class StudentCassandraLongWrapperTest extends CassandraBase
             KsDef ksDef = null;
 
             CfDef cfDef = new CfDef();
-            cfDef.name = "StudentCassandraLongWrapper";
+            cfDef.name = "StudentLongWrapper";
             cfDef.keyspace = keyspace;
             cfDef.setKey_validation_class("LongType");
             cfDef.setComparator_type("UTF8Type");
@@ -614,10 +614,10 @@ public class StudentCassandraLongWrapperTest extends CassandraBase
                 for (CfDef cfDef1 : cfDefn)
                 {
 
-                    if (cfDef1.getName().equalsIgnoreCase("StudentCassandraLongWrapper"))
+                    if (cfDef1.getName().equalsIgnoreCase("StudentLongWrapper"))
                     {
 
-                        CassandraCli.client.system_drop_column_family("StudentCassandraLongWrapper");
+                        CassandraCli.client.system_drop_column_family("StudentLongWrapper");
 
                     }
                 }
@@ -642,15 +642,15 @@ public class StudentCassandraLongWrapperTest extends CassandraBase
         }
         catch (TException e)
         {
-            e.printStackTrace();
+            
         }
         catch (InvalidRequestException e)
         {
-            e.printStackTrace();
+            
         }
         catch (SchemaDisagreementException e)
         {
-            e.printStackTrace();
+            
         }
 
     }

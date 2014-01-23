@@ -25,7 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
-import com.impetus.client.crud.datatypes.entities.StudentCassandraBigDecimal;
+import com.impetus.client.crud.datatypes.entities.StudentBigDecimal;
 import com.impetus.client.persistence.CassandraCli;
 
 public class StudentCassandraBigDecimalTest extends CassandraBase
@@ -74,23 +74,23 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
         EntityManager em = emf.createEntityManager();
 
         // Insert max value of BigDecimal
-        StudentCassandraBigDecimal studentMax = new StudentCassandraBigDecimal();
+        StudentBigDecimal studentMax = new StudentBigDecimal();
         studentMax.setAge((Short) getMaxValue(short.class));
-        studentMax.setId((BigDecimal) getMaxValue(BigDecimal.class));
+        studentMax.setStudentId((BigDecimal) getMaxValue(BigDecimal.class));
         studentMax.setName((String) getMaxValue(String.class));
         em.persist(studentMax);
 
         // Insert min value of BigDecimal
-        StudentCassandraBigDecimal studentMin = new StudentCassandraBigDecimal();
+        StudentBigDecimal studentMin = new StudentBigDecimal();
         studentMin.setAge((Short) getMinValue(short.class));
-        studentMin.setId((BigDecimal) getMinValue(BigDecimal.class));
+        studentMin.setStudentId((BigDecimal) getMinValue(BigDecimal.class));
         studentMin.setName((String) getMinValue(String.class));
         em.persist(studentMin);
 
         // Insert random value of BigDecimal
-        StudentCassandraBigDecimal student = new StudentCassandraBigDecimal();
+        StudentBigDecimal student = new StudentBigDecimal();
         student.setAge((Short) getRandomValue(short.class));
-        student.setId((BigDecimal) getRandomValue(BigDecimal.class));
+        student.setStudentId((BigDecimal) getRandomValue(BigDecimal.class));
         student.setName((String) getRandomValue(String.class));
         em.persist(student);
         em.close();
@@ -100,8 +100,8 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
     {
         EntityManager em = emf.createEntityManager();
 
-        StudentCassandraBigDecimal studentMax = em
-                .find(StudentCassandraBigDecimal.class, getMaxValue(BigDecimal.class));
+        StudentBigDecimal studentMax = em
+                .find(StudentBigDecimal.class, getMaxValue(BigDecimal.class));
         Assert.assertNotNull(studentMax);
         Assert.assertEquals(getMaxValue(short.class), studentMax.getAge());
         Assert.assertEquals(getMaxValue(String.class), studentMax.getName());
@@ -111,8 +111,8 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandraBigDecimal studentMin = em
-                .find(StudentCassandraBigDecimal.class, getMinValue(BigDecimal.class));
+        StudentBigDecimal studentMin = em
+                .find(StudentBigDecimal.class, getMinValue(BigDecimal.class));
         Assert.assertNotNull(studentMin);
         Assert.assertEquals(getMinValue(short.class), studentMin.getAge());
         Assert.assertEquals(getMinValue(String.class), studentMin.getName());
@@ -122,8 +122,8 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandraBigDecimal student = em
-                .find(StudentCassandraBigDecimal.class, getRandomValue(BigDecimal.class));
+        StudentBigDecimal student = em
+                .find(StudentBigDecimal.class, getRandomValue(BigDecimal.class));
         Assert.assertNotNull(student);
         Assert.assertEquals(getRandomValue(short.class), student.getAge());
         Assert.assertEquals(getRandomValue(String.class), student.getName());
@@ -133,7 +133,7 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
     public void testMerge(boolean useSameEm)
     {
         EntityManager em = emf.createEntityManager();
-        StudentCassandraBigDecimal student = em.find(StudentCassandraBigDecimal.class, getMaxValue(BigDecimal.class));
+        StudentBigDecimal student = em.find(StudentBigDecimal.class, getMaxValue(BigDecimal.class));
         Assert.assertNotNull(student);
         Assert.assertEquals(getMaxValue(short.class), student.getAge());
         Assert.assertEquals(getMaxValue(String.class), student.getName());
@@ -145,8 +145,8 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandraBigDecimal newStudent = em
-                .find(StudentCassandraBigDecimal.class, getMaxValue(BigDecimal.class));
+        StudentBigDecimal newStudent = em
+                .find(StudentBigDecimal.class, getMaxValue(BigDecimal.class));
         Assert.assertNotNull(newStudent);
         Assert.assertEquals(getMaxValue(short.class), newStudent.getAge());
         Assert.assertEquals("Kuldeep", newStudent.getName());
@@ -171,19 +171,19 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraBigDecimal> students;
+        List<StudentBigDecimal> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraBigDecimal s where s.age = " + getMinValue(short.class)
+        query = "Select s From StudentBigDecimal s where s.age = " + getMinValue(short.class)
                 + " and s.name > Amresh and s.name <= " + getMaxValue(String.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraBigDecimal student : students)
+        for (StudentBigDecimal student : students)
         {
-            Assert.assertEquals(getMinValue(BigDecimal.class), student.getId());
+            Assert.assertEquals(getMinValue(BigDecimal.class), student.getStudentId());
             Assert.assertEquals(getMinValue(short.class), student.getAge());
             Assert.assertEquals(getMinValue(String.class), student.getName());
             count++;
@@ -199,9 +199,9 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraBigDecimal> students;
+        List<StudentBigDecimal> students;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraBigDecimal s where s.id between ?1 and ?2";
+        query = "Select s From StudentBigDecimal s where s.id between ?1 and ?2";
         q = em.createQuery(query);
         q.setParameter(1, getMinValue(BigDecimal.class));
         q.setParameter(2, getMaxValue(BigDecimal.class));
@@ -209,15 +209,15 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
         Assert.assertNotNull(students);
         Assert.assertEquals(2, students.size());
         int count = 0;
-        for (StudentCassandraBigDecimal student : students)
+        for (StudentBigDecimal student : students)
         {
-            if (student.getId().equals(getMaxValue(BigDecimal.class)))
+            if (student.getStudentId().equals(getMaxValue(BigDecimal.class)))
             {
                 Assert.assertEquals(getMaxValue(short.class), student.getAge());
                 Assert.assertEquals("Kuldeep", student.getName());
                 count++;
             }
-            else if (student.getId().equals(getMinValue(BigDecimal.class)))
+            else if (student.getStudentId().equals(getMinValue(BigDecimal.class)))
             {
                 Assert.assertEquals(getMinValue(short.class), student.getAge());
                 Assert.assertEquals(getMinValue(String.class), student.getName());
@@ -233,19 +233,19 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraBigDecimal> students;
+        List<StudentBigDecimal> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraBigDecimal s where s.name = Kuldeep and s.age > "
+        query = "Select s From StudentBigDecimal s where s.name = Kuldeep and s.age > "
                 + getMinValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraBigDecimal student : students)
+        for (StudentBigDecimal student : students)
         {
-            Assert.assertEquals(getMaxValue(BigDecimal.class), student.getId());
+            Assert.assertEquals(getMaxValue(BigDecimal.class), student.getStudentId());
             Assert.assertEquals(getMaxValue(short.class), student.getAge());
             Assert.assertEquals("Kuldeep", student.getName());
             count++;
@@ -260,19 +260,19 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraBigDecimal> students;
+        List<StudentBigDecimal> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraBigDecimal s where s.name = Kuldeep and s.age > "
+        query = "Select s From StudentBigDecimal s where s.name = Kuldeep and s.age > "
                 + getMinValue(short.class) + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraBigDecimal student : students)
+        for (StudentBigDecimal student : students)
         {
-            Assert.assertEquals(getMaxValue(BigDecimal.class), student.getId());
+            Assert.assertEquals(getMaxValue(BigDecimal.class), student.getStudentId());
             Assert.assertEquals(getMaxValue(short.class), student.getAge());
             Assert.assertEquals("Kuldeep", student.getName());
             count++;
@@ -297,8 +297,8 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
     {
         EntityManager em = emf.createEntityManager();
 
-        StudentCassandraBigDecimal studentMax = em
-                .find(StudentCassandraBigDecimal.class, getMaxValue(BigDecimal.class));
+        StudentBigDecimal studentMax = em
+                .find(StudentBigDecimal.class, getMaxValue(BigDecimal.class));
         Assert.assertNotNull(studentMax);
         Assert.assertEquals(getMaxValue(short.class), studentMax.getAge());
         Assert.assertEquals("Kuldeep", studentMax.getName());
@@ -308,7 +308,7 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        studentMax = em.find(StudentCassandraBigDecimal.class, getMaxValue(BigDecimal.class));
+        studentMax = em.find(StudentBigDecimal.class, getMaxValue(BigDecimal.class));
         Assert.assertNull(studentMax);
         em.close();
     }
@@ -319,7 +319,7 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
     private void deleteNamed(boolean useSameEm)
     {
 
-        String deleteQuery = "Delete From StudentCassandraBigDecimal s where s.name=Vivek";
+        String deleteQuery = "Delete From StudentBigDecimal s where s.name=Vivek";
         EntityManager em = emf.createEntityManager();
         Query q = em.createQuery(deleteQuery);
         q.executeUpdate();
@@ -328,7 +328,7 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandraBigDecimal newStudent = em.find(StudentCassandraBigDecimal.class,
+        StudentBigDecimal newStudent = em.find(StudentBigDecimal.class,
                 getRandomValue(BigDecimal.class));
         Assert.assertNull(newStudent);
         em.close();
@@ -340,7 +340,7 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
     private void updateNamed(boolean useSameEm)
     {
         EntityManager em = emf.createEntityManager();
-        String updateQuery = "Update StudentCassandraBigDecimal s SET s.name=Vivek where s.name=Amresh";
+        String updateQuery = "Update StudentBigDecimal s SET s.name=Vivek where s.name=Amresh";
         Query q = em.createQuery(updateQuery);
         q.executeUpdate();
         if (!useSameEm)
@@ -348,7 +348,7 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCassandraBigDecimal newStudent = em.find(StudentCassandraBigDecimal.class,
+        StudentBigDecimal newStudent = em.find(StudentBigDecimal.class,
                 getRandomValue(BigDecimal.class));
         Assert.assertNotNull(newStudent);
         Assert.assertEquals(getRandomValue(short.class), newStudent.getAge());
@@ -361,19 +361,19 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraBigDecimal> students;
+        List<StudentBigDecimal> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraBigDecimal s where s.name = Amresh and s.age between "
+        query = "Select s From StudentBigDecimal s where s.name = Amresh and s.age between "
                 + getMinValue(short.class) + " and " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraBigDecimal student : students)
+        for (StudentBigDecimal student : students)
         {
-            Assert.assertEquals(getRandomValue(BigDecimal.class), student.getId());
+            Assert.assertEquals(getRandomValue(BigDecimal.class), student.getStudentId());
             Assert.assertEquals(getRandomValue(short.class), student.getAge());
             Assert.assertEquals(getRandomValue(String.class), student.getName());
             count++;
@@ -388,19 +388,19 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraBigDecimal> students;
+        List<StudentBigDecimal> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraBigDecimal s where s.name = Amresh and s.age > "
+        query = "Select s From StudentBigDecimal s where s.name = Amresh and s.age > "
                 + getMinValue(short.class) + " and s.age < " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraBigDecimal student : students)
+        for (StudentBigDecimal student : students)
         {
-            Assert.assertEquals(getRandomValue(BigDecimal.class), student.getId());
+            Assert.assertEquals(getRandomValue(BigDecimal.class), student.getStudentId());
             Assert.assertEquals(getRandomValue(short.class), student.getAge());
             Assert.assertEquals(getRandomValue(String.class), student.getName());
             count++;
@@ -416,19 +416,19 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraBigDecimal> students;
+        List<StudentBigDecimal> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraBigDecimal s where s.name = Kuldeep and s.age >= "
+        query = "Select s From StudentBigDecimal s where s.name = Kuldeep and s.age >= "
                 + getMinValue(short.class) + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(2, students.size());
         count = 0;
-        for (StudentCassandraBigDecimal student : students)
+        for (StudentBigDecimal student : students)
         {
-            if (student.getId().equals(getMaxValue(BigDecimal.class)))
+            if (student.getStudentId().equals(getMaxValue(BigDecimal.class)))
             {
                 Assert.assertEquals(getMaxValue(short.class), student.getAge());
                 Assert.assertEquals("Kuldeep", student.getName());
@@ -436,7 +436,7 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
             }
             else
             {
-                Assert.assertEquals(getMinValue(BigDecimal.class), student.getId());
+                Assert.assertEquals(getMinValue(BigDecimal.class), student.getStudentId());
                 Assert.assertEquals(getMinValue(short.class), student.getAge());
                 Assert.assertEquals(getMinValue(String.class), student.getName());
                 count++;
@@ -453,18 +453,18 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraBigDecimal> students;
+        List<StudentBigDecimal> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraBigDecimal s where s.age = " + getRandomValue(short.class);
+        query = "Select s From StudentBigDecimal s where s.age = " + getRandomValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(1, students.size());
         count = 0;
-        for (StudentCassandraBigDecimal student : students)
+        for (StudentBigDecimal student : students)
         {
-            Assert.assertEquals(getRandomValue(BigDecimal.class), student.getId());
+            Assert.assertEquals(getRandomValue(BigDecimal.class), student.getStudentId());
             Assert.assertEquals(getRandomValue(short.class), student.getAge());
             Assert.assertEquals(getRandomValue(String.class), student.getName());
             count++;
@@ -481,18 +481,18 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
         EntityManager em;
         String query;
         Query q;
-        List<StudentCassandraBigDecimal> students;
+        List<StudentBigDecimal> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentCassandraBigDecimal s where s.name = Kuldeep";
+        query = "Select s From StudentBigDecimal s where s.name = Kuldeep";
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(2, students.size());
         count = 0;
-        for (StudentCassandraBigDecimal student : students)
+        for (StudentBigDecimal student : students)
         {
-            if (student.getId().equals(getMaxValue(BigDecimal.class)))
+            if (student.getStudentId().equals(getMaxValue(BigDecimal.class)))
             {
                 Assert.assertEquals(getMaxValue(short.class), student.getAge());
                 Assert.assertEquals("Kuldeep", student.getName());
@@ -500,7 +500,7 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
             }
             else
             {
-                Assert.assertEquals(getMinValue(BigDecimal.class), student.getId());
+                Assert.assertEquals(getMinValue(BigDecimal.class), student.getStudentId());
                 Assert.assertEquals(getMinValue(short.class), student.getAge());
                 Assert.assertEquals(getMinValue(String.class), student.getName());
                 count++;
@@ -517,21 +517,21 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
     {
         EntityManager em = emf.createEntityManager();
         // Selet all query.
-        String query = "Select s From StudentCassandraBigDecimal s ";
+        String query = "Select s From StudentBigDecimal s ";
         Query q = em.createQuery(query);
-        List<StudentCassandraBigDecimal> students = q.getResultList();
+        List<StudentBigDecimal> students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(3, students.size());
         int count = 0;
-        for (StudentCassandraBigDecimal student : students)
+        for (StudentBigDecimal student : students)
         {
-            if (student.getId().equals(getMaxValue(BigDecimal.class)))
+            if (student.getStudentId().equals(getMaxValue(BigDecimal.class)))
             {
                 Assert.assertEquals(getMaxValue(short.class), student.getAge());
                 Assert.assertEquals("Kuldeep", student.getName());
                 count++;
             }
-            else if (student.getId().equals(getMinValue(BigDecimal.class)))
+            else if (student.getStudentId().equals(getMinValue(BigDecimal.class)))
             {
                 Assert.assertEquals(getMinValue(short.class), student.getAge());
                 Assert.assertEquals(getMinValue(String.class), student.getName());
@@ -539,7 +539,7 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
             }
             else
             {
-                Assert.assertEquals(getRandomValue(BigDecimal.class), student.getId());
+                Assert.assertEquals(getRandomValue(BigDecimal.class), student.getStudentId());
                 Assert.assertEquals(getRandomValue(short.class), student.getAge());
                 Assert.assertEquals(getRandomValue(String.class), student.getName());
                 count++;
@@ -557,7 +557,7 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
             KsDef ksDef = null;
 
             CfDef cfDef = new CfDef();
-            cfDef.name = "StudentCassandraBigDecimal";
+            cfDef.name = "StudentBigDecimal";
             cfDef.keyspace = keyspace;
             cfDef.setKey_validation_class("DecimalType");
             cfDef.setComparator_type("UTF8Type");
@@ -581,10 +581,10 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
                 for (CfDef cfDef1 : cfDefn)
                 {
 
-                    if (cfDef1.getName().equalsIgnoreCase("StudentCassandraBigDecimal"))
+                    if (cfDef1.getName().equalsIgnoreCase("StudentBigDecimal"))
                     {
 
-                        CassandraCli.client.system_drop_column_family("StudentCassandraBigDecimal");
+                        CassandraCli.client.system_drop_column_family("StudentBigDecimal");
 
                     }
                 }
@@ -609,15 +609,15 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
         }
         catch (TException e)
         {
-            e.printStackTrace();
+            
         }
         catch (InvalidRequestException e)
         {
-            e.printStackTrace();
+            
         }
         catch (SchemaDisagreementException e)
         {
-            e.printStackTrace();
+            
         }
 
     }

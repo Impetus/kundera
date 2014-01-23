@@ -14,7 +14,6 @@ import org.junit.Before;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.persistence.CassandraCli;
-import com.impetus.client.persistence.CassandraEntitySample;
 import com.impetus.kundera.query.JPQLParseException;
 
 public class EntityWithClauseTest

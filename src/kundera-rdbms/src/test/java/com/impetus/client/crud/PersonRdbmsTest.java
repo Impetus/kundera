@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.client.crud;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -30,8 +31,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.client.crud.entities.PersonRDBMS;
+
 public class PersonRdbmsTest extends BaseTest
 {
+
+    private static final String SCHEMA = "testdb";
 
     /** The emf. */
     private static EntityManagerFactory emf;
@@ -60,22 +65,21 @@ public class PersonRdbmsTest extends BaseTest
     @Test
     public void onInsertRdbms() throws Exception
     {
-
         try
         {
-            cli = new RDBMSCli("testdb");
-            cli.createSchema("testdb");
+            cli = new RDBMSCli(SCHEMA);
+            cli.createSchema(SCHEMA);
             cli.update("CREATE TABLE TESTDB.PERSON (PERSON_ID VARCHAR(9) PRIMARY KEY, PERSON_NAME VARCHAR(256), AGE INTEGER)");
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            
             cli.update("DELETE FROM TESTDB.PERSON");
             cli.update("DROP TABLE TESTDB.PERSON");
             cli.update("DROP SCHEMA TESTDB");
-            cli.update("CREATE TABLE TESTDB.PERSON (PERSON_ID VARCHAR(9) PRIMARY KEY, PERSON_NAME VARCHAR(256), AGE INTEGER)"); // nothing
-                                                                                                                                // to
-                                                                                                                                // do
+            cli.update("CREATE TABLE TESTDB.PERSON (PERSON_ID VARCHAR(9) PRIMARY KEY, PERSON_NAME VARCHAR(256), AGE INTEGER)");
+            // nothing
+            // do
         }
 
         Object p1 = prepareRDBMSInstance("1", 10);
@@ -102,8 +106,8 @@ public class PersonRdbmsTest extends BaseTest
         em.persist(p3);
 
         em.close();
-        emf.close();
-        emf = Persistence.createEntityManagerFactory("testHibernate");
+        // emf.close();
+        // emf = Persistence.createEntityManagerFactory("testHibernate");
 
         em = emf.createEntityManager();
 
@@ -120,7 +124,11 @@ public class PersonRdbmsTest extends BaseTest
         assertFindByNameAndAgeBetween(em, "PersonRDBMS", PersonRDBMS.class, "vivek", "10", "15", "personName");
         assertFindByRange(em, "PersonRDBMS", PersonRDBMS.class, "1", "2", "personId");
 
+        // Test IN clause.
         testINClause();
+
+        // Test Native queries.
+        testNativeQuery();
 
     }
 
@@ -185,6 +193,33 @@ public class PersonRdbmsTest extends BaseTest
 
     }
 
+    private void testNativeQuery()
+    {
+
+        Query findQuery;
+        List<PersonRDBMS> allPersons;
+        findQuery = em.createNativeQuery("Select * from testdb.PERSON where PERSON_NAME IN ('vivek' , 'kk')",
+                PersonRDBMS.class);
+
+        allPersons = findQuery.getResultList();
+        Assert.assertNotNull(allPersons);
+        Assert.assertEquals(3, allPersons.size());
+
+        findQuery = em.createNativeQuery("Select * from testdb.PERSON where AGE IN (10, 25)", PersonRDBMS.class);
+        allPersons = findQuery.getResultList();
+        Assert.assertNotNull(allPersons);
+        Assert.assertEquals(1, allPersons.size());
+
+        findQuery = em.createNativeQuery("Select count(*) from testdb.PERSON", PersonRDBMS.class);
+        allPersons = findQuery.getResultList();
+        Assert.assertNotNull(allPersons);
+        Assert.assertEquals(1, allPersons.size());
+        Assert.assertTrue(allPersons.get(0) instanceof Map);
+        Assert.assertTrue(((Map<String, Object>) allPersons.get(0)).get("C1") != null);
+        Assert.assertTrue(((Map<String, Object>) allPersons.get(0)).get("C1") instanceof BigInteger);
+        Assert.assertTrue(((BigInteger) ((Map<String, Object>) allPersons.get(0)).get("C1")).intValue() == 3);
+    }
+
     // @Test
     public void onMergeRdbms()
     {
@@ -215,13 +250,7 @@ public class PersonRdbmsTest extends BaseTest
      */
     @After
     public void tearDown() throws Exception
-    {/*
-      * Delete is working, but as row keys are not deleted from cassandra, so
-      * resulting in issue while reading back. // Delete
-      * em.remove(em.find(Person.class, "1")); em.remove(em.find(Person.class,
-      * "2")); em.remove(em.find(Person.class, "3")); em.close(); emf.close();
-      * em = null; emf = null;
-      */
+    {
         for (Object val : col.values())
         {
             em.remove(val);
@@ -239,6 +268,6 @@ public class PersonRdbmsTest extends BaseTest
         {
             // Nothing to do
         }
-//        cli.dropSchema("testdb");
+        // cli.dropSchema("TESTDB");
     }
 }

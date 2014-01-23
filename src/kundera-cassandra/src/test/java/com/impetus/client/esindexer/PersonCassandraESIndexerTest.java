@@ -560,7 +560,7 @@ public class PersonCassandraESIndexerTest extends BaseTest
         }
         catch (InterruptedException e)
         {
-            e.printStackTrace();
+            
         }
     }
 }

@@ -17,7 +17,6 @@ package com.impetus.client.cassandra.datahandler;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.SuperColumn;

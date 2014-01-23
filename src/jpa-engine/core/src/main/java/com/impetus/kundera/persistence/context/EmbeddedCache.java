@@ -15,7 +15,6 @@
  */
 package com.impetus.kundera.persistence.context;
 
-import javax.persistence.Cache;
 
 /**
  * <Prove description of functionality provided by this Type>

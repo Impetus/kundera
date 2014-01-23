@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>com.impetus</groupId>
@@ -221,42 +222,19 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- Required for running tests for embedded cassandra mode 
-		<dependency>
-			<groupId>org.cliffc</groupId>
-			<artifactId>high-scale-lib</artifactId>
-			<version>UNKNOWN</version>
-		</dependency>
-		<dependency>
-			<groupId>com.reardencommerce</groupId>
-			<artifactId>clhm-production</artifactId>
-			<version>UNKNOWN</version>
-		</dependency>
-		 <dependency> <groupId>javassist</groupId> <artifactId>javassist</artifactId> 
-			<version>3.9.0.GA</version> </dependency>
-		Cassandra Dependencies
-		<dependency>
-			<groupId>org.apache.cassandra</groupId>
-			<artifactId>cassandra-all</artifactId>
-			<version>1.2.4</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.cassandra</groupId>
-			<artifactId>cassandra-thrift</artifactId>
-			<version>1.2.4</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.cassandra</groupId>
-			<artifactId>cassandra-clientutil</artifactId>
-			<version>1.2.4</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.xerial</groupId>
-			<artifactId>snappy</artifactId>
-			<version>1.0.1-rc4</version>
-		</dependency>
--->
+		<!-- Required for running tests for embedded cassandra mode <dependency> 
+			<groupId>org.cliffc</groupId> <artifactId>high-scale-lib</artifactId> <version>UNKNOWN</version> 
+			</dependency> <dependency> <groupId>com.reardencommerce</groupId> <artifactId>clhm-production</artifactId> 
+			<version>UNKNOWN</version> </dependency> <dependency> <groupId>javassist</groupId> 
+			<artifactId>javassist</artifactId> <version>3.9.0.GA</version> </dependency> 
+			Cassandra Dependencies <dependency> <groupId>org.apache.cassandra</groupId> 
+			<artifactId>cassandra-all</artifactId> <version>1.2.4</version> </dependency> 
+			<dependency> <groupId>org.apache.cassandra</groupId> <artifactId>cassandra-thrift</artifactId> 
+			<version>1.2.4</version> </dependency> <dependency> <groupId>org.apache.cassandra</groupId> 
+			<artifactId>cassandra-clientutil</artifactId> <version>1.2.4</version> <scope>test</scope> 
+			</dependency> <dependency> <groupId>org.xerial</groupId> <artifactId>snappy</artifactId> 
+			<version>1.0.1-rc4</version> </dependency> -->
+
 		<!-- contiperf dependency -->
 
 		<dependency>
@@ -280,8 +258,8 @@
 		<!-- kundera dependencies -->
 
 		<dependency>
-	        	<groupId>com.impetus.kundera.core</groupId>
-                	<artifactId>kundera-core</artifactId>
+			<groupId>com.impetus.kundera.core</groupId>
+			<artifactId>kundera-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 
@@ -306,6 +284,16 @@
 			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-hbase</artifactId>
 			<version>2.10-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.thrift</groupId>
+					<artifactId>libthrift</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>commons-httpclient</groupId>
+					<artifactId>commons-httpclient</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.impetus.kundera.client</groupId>
@@ -355,8 +343,8 @@
 		<!-- kundera tests dependencies -->
 
 		<dependency>
-	        	<groupId>com.impetus.kundera.core</groupId>
-                	<artifactId>kundera-core</artifactId>
+			<groupId>com.impetus.kundera.core</groupId>
+			<artifactId>kundera-core</artifactId>
 			<version>${project.version}</version>
 			<type>test-jar</type>
 			<scope>test</scope>
@@ -382,6 +370,16 @@
 			<version>${project.version}</version>
 			<type>test-jar</type>
 			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.thrift</groupId>
+					<artifactId>libthrift</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>commons-httpclient</groupId>
+					<artifactId>commons-httpclient</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.impetus.kundera.client</groupId>

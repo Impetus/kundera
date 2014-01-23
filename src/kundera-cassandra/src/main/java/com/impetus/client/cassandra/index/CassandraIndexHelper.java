@@ -19,7 +19,6 @@ import org.apache.cassandra.thrift.IndexType;
 
 import com.impetus.client.cassandra.config.CassandraPropertyReader;
 import com.impetus.kundera.Constants;
-import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 
 /**

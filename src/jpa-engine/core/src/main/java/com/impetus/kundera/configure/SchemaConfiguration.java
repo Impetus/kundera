@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.OrderBy;
 import javax.persistence.metamodel.Attribute;
@@ -105,11 +104,12 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
     {
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
 
-        EntityValidator validator = new EntityValidatorImpl(externalPropertyMap);
-
         // TODO, FIXME: Refactoring is required.
         for (String persistenceUnit : persistenceUnits)
         {
+            EntityValidator validator = new EntityValidatorImpl(KunderaCoreUtils.getExternalProperties(persistenceUnit,
+                    externalPropertyMap, persistenceUnits));
+            
             log.info("Configuring schema export for : " + persistenceUnit);
             List<TableInfo> tableInfos = getSchemaInfo(persistenceUnit);
 
@@ -123,7 +123,7 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
                 // get entity metadata(table info as well as columns)
                 // if table info exists, get it from map.
                 boolean found = false;
-                
+
                 Type type = entityMetadata.getType();
                 Class idClassName = entityMetadata.getIdAttribute() != null ? entityMetadata.getIdAttribute()
                         .getJavaType() : null;

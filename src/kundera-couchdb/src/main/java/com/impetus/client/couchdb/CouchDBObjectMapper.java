@@ -243,8 +243,6 @@ public class CouchDBObjectMapper
                         PropertyAccessorHelper.fromSourceToTargetClass(idClass, String.class, rowKey.getAsString()));
             }
 
-            // Populate entity columns
-            // List<Column> columns = m.getColumnsAsList();
             EntityType entityType = metaModel.entity(entityClass);
 
             String discriminatorColumn = ((AbstractManagedType) entityType).getDiscriminatorColumn();

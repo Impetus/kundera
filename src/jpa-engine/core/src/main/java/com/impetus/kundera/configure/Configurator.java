@@ -47,10 +47,10 @@ public final class Configurator
      */
     public Configurator(Map properties, String... persistenceUnits)
     {
-        configurer.add(new PersistenceUnitConfiguration(persistenceUnits));
+        configurer.add(new PersistenceUnitConfiguration(properties, persistenceUnits));
         configurer.add(new MetamodelConfiguration(properties, persistenceUnits));
-//        configurer.add(new SchemaConfiguration(properties, persistenceUnits));
-//        configurer.add(new ClientFactoryConfiguraton(properties, persistenceUnits));
+        // configurer.add(new SchemaConfiguration(properties, persistenceUnits));
+        // configurer.add(new ClientFactoryConfiguraton(properties, persistenceUnits));
     }
 
     /**
@@ -61,7 +61,10 @@ public final class Configurator
     {
         for (Configuration conf : configurer)
         {
-            logger.debug("Loading configuration for :" + conf.getClass().getSimpleName());
+            if (logger.isDebugEnabled())
+            {
+                logger.debug("Loading configuration for :" + conf.getClass().getSimpleName());
+            }
             conf.configure();
         }
     }

@@ -17,12 +17,15 @@ package com.impetus.client.oraclenosql;
  */
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
 import junit.framework.Assert;
+import oracle.kv.Consistency;
+import oracle.kv.Durability;
 
 import org.junit.After;
 import org.junit.Before;
@@ -30,15 +33,9 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.impetus.client.oraclenosql.OracleNoSQLClient;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
-
-import java.util.concurrent.TimeUnit;
-
-import oracle.kv.Consistency;
-import oracle.kv.Durability;
 
 /**
  * Test case for {@link OracleNoSQLClient}

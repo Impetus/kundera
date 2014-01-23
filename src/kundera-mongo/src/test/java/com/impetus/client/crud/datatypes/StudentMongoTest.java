@@ -97,12 +97,12 @@ public class StudentMongoTest extends StudentMongoBase<StudentMongo>
         }
         catch (InstantiationException e)
         {
-            e.printStackTrace();
+            
             Assert.fail(e.getMessage());
         }
         catch (IllegalAccessException e)
         {
-            e.printStackTrace();
+            
             Assert.fail(e.getMessage());
         }
 
