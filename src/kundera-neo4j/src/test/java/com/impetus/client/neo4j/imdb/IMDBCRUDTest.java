@@ -107,6 +107,7 @@ public class IMDBCRUDTest extends IMDBTestBase
 
     private void delete()
     {
+        em.clear();
         Actor actor1 = em.find(Actor.class, 1);
         Actor actor2 = em.find(Actor.class, 2);
         assertUpdatedActors(actor1, actor2);

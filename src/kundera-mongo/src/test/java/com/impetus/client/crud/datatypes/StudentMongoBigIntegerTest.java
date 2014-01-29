@@ -348,6 +348,7 @@ public class StudentMongoBigIntegerTest extends MongoBase
         q.executeUpdate();
         if (!useSameEm)
         {
+            em.clear();
             em.close();
             em = emf.createEntityManager();
         }

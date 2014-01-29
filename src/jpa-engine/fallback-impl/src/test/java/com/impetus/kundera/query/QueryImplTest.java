@@ -85,7 +85,6 @@ public class QueryImplTest
         
         em.persist(p1);
         
-        em.clear();
         
         Person p2 = new Person();
         p2.setAge(100);
@@ -110,7 +109,8 @@ public class QueryImplTest
         Assert.assertEquals(1,results.size());
         Assert.assertNotNull(KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery)); //assert on lucene query transformation.
         Assert.assertNotNull(queryObj.populateUsingLucene()); //assert on lucene query transformation.
-        
+
+
         final String deleteQuery = "Delete from Person p where p.personId = ?1";
 
         kunderaQuery = parseQuery(deleteQuery);
@@ -142,6 +142,7 @@ public class QueryImplTest
         
         queryObj.executeUpdate();
         
+        em.clear();
         
         kunderaQuery = parseQuery(query);
         queryObj = new CoreQuery(kunderaQuery, delegator);

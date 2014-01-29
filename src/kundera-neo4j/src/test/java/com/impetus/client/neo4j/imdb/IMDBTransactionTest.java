@@ -111,7 +111,7 @@ public class IMDBTransactionTest extends IMDBTestBase
             assertUpdatedActors(actor1AfterMerge, actor2AfterMerge);
 
             /** Delete records */
-            em.clear();
+//            em.clear();
             em.getTransaction().begin();
             em.remove(actor11);
             em.getTransaction().commit();

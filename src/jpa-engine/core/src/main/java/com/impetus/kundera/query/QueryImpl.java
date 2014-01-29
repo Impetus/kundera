@@ -53,6 +53,7 @@ import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.model.type.DefaultEntityType;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
+import com.impetus.kundera.persistence.context.PersistenceCacheManager;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.KunderaQuery.UpdateClause;
 import com.impetus.kundera.utils.KunderaCoreUtils;
@@ -287,6 +288,9 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
                 // then case of delete
                 for (Object result : results)
                 {
+                    PersistenceCacheManager.addEntityToPersistenceCache(result, persistenceDelegeator,
+                            PropertyAccessorHelper.getId(result, this.getEntityMetadata()));
+                    
                     persistenceDelegeator.remove(result);
                 }
             }
@@ -295,6 +299,9 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
                 EntityMetadata entityMetadata = getEntityMetadata();
                 for (Object result : results)
                 {
+                    PersistenceCacheManager.addEntityToPersistenceCache(result, persistenceDelegeator,
+                            PropertyAccessorHelper.getId(result, this.getEntityMetadata()));
+
                     for (UpdateClause c : kunderaQuery.getUpdateClauseQueue())
                     {
                         String columnName = c.getProperty();

@@ -46,12 +46,22 @@ public class IdGenerator
 
     public Object generateAndSetId(Object e, EntityMetadata m, PersistenceDelegator pd)
     {
+        Client<?> client = pd.getClient(m);
+        return generateId(e, m, client);
+    }
+
+    public Object generateAndSetId(Object e, EntityMetadata m, Client client)
+    {
+        return generateId(e, m, client);
+    }
+
+    private Object generateId(Object e, EntityMetadata m, Client<?> client)
+    {
         Metamodel metamodel = KunderaMetadataManager.getMetamodel(m.getPersistenceUnit());
         IdDiscriptor keyValue = ((MetamodelImpl) metamodel).getKeyValue(e.getClass().getName());
 
         if (keyValue != null)
         {
-            Client<?> client = pd.getClient(m);
 
             String clientFactoryName = KunderaMetadataManager.getPersistenceUnitMetadata(m.getPersistenceUnit())
                     .getClient();

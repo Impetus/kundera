@@ -63,6 +63,7 @@ import com.impetus.kundera.persistence.KunderaTransactionException;
 import com.impetus.kundera.persistence.TransactionBinder;
 import com.impetus.kundera.persistence.TransactionResource;
 import com.impetus.kundera.persistence.api.Batcher;
+import com.impetus.kundera.persistence.context.PersistenceCacheManager;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.utils.ReflectUtils;

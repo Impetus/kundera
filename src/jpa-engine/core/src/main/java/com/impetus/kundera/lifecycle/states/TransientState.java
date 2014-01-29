@@ -69,7 +69,11 @@ public class TransientState extends NodeState
         // create a new managed entity and copy state of original entity into
         // this one.
         Object copiedNodeData = ObjectUtils.deepCopy(nodeStateContext.getData());
+
         nodeStateContext.setData(copiedNodeData);
+        moveNodeToNextState(nodeStateContext, new ManagedState());
+
+        nodeStateContext.getPersistenceCache().getMainCache().addNodeToCache((Node) nodeStateContext);
     }
 
     @Override

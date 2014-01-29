@@ -37,13 +37,12 @@ import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientPropertiesSetter;
 import com.impetus.kundera.client.ClientResolverException;
+import com.impetus.kundera.graph.GraphGenerator;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.ObjectGraph;
-import com.impetus.kundera.graph.ObjectGraphBuilder;
 import com.impetus.kundera.graph.ObjectGraphUtils;
 import com.impetus.kundera.lifecycle.states.ManagedState;
 import com.impetus.kundera.lifecycle.states.RemovedState;
-import com.impetus.kundera.lifecycle.states.TransientState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -85,7 +84,7 @@ public final class PersistenceDelegator
 
     private FlushModeType flushMode = FlushModeType.AUTO;
 
-    private ObjectGraphBuilder graphBuilder;
+//    private ObjectGraphBuilder graphBuilder;
 
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
@@ -112,7 +111,7 @@ public final class PersistenceDelegator
     PersistenceDelegator(final PersistenceCache pc)
     {
         this.eventDispatcher = new EntityEventDispatcher();
-        this.graphBuilder = new ObjectGraphBuilder(pc, this);
+//        this.graphBuilder = new ObjectGraphBuilder(pc, this);
         this.persistenceCache = pc;
     }
 
@@ -133,8 +132,8 @@ public final class PersistenceDelegator
         }
 
         // Create an object graph of the entity object.
-        ObjectGraph graph = graphBuilder.getObjectGraph(e, new TransientState());
-
+//        ObjectGraph graph = graphBuilder.getObjectGraph(e, );
+        ObjectGraph graph = new GraphGenerator().generateGraph(e, this);
         // Call persist on each node in object graph.
         Node node = graph.getHeadNode();
         try
@@ -335,7 +334,7 @@ public final class PersistenceDelegator
         EntityMetadata metadata = getMetadata(e.getClass());
 
         // Create an object graph of the entity object
-        ObjectGraph graph = graphBuilder.getObjectGraph(e, new ManagedState());
+        ObjectGraph graph = new GraphGenerator().generateGraph(e, this);
 
         Node node = graph.getHeadNode();
 
@@ -446,7 +445,7 @@ public final class PersistenceDelegator
         EntityMetadata m = getMetadata(e.getClass());
 
         // Create an object graph of the entity object to be merged
-        ObjectGraph graph = graphBuilder.getObjectGraph(e, new ManagedState());
+        ObjectGraph graph = new GraphGenerator().generateGraph(e, this);
 
         // Call merge on each node in object graph
         Node node = graph.getHeadNode();
@@ -455,13 +454,6 @@ public final class PersistenceDelegator
         {
             lock.writeLock().lock();
             // Change node's state after successful flush.
-
-            // TODO : push into action queue, get original end-point from
-            // persistenceContext first!
-
-            // Action/ExecutionQueue/ActivityQueue :-> id, name, EndPoint,
-            // changed
-            // state
             node.setPersistenceDelegator(this);
             node.merge();
 

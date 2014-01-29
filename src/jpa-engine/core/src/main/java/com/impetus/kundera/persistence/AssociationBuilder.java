@@ -206,6 +206,7 @@ public final class AssociationBuilder
                     List parents = delegator.find(entity.getClass(), pKeys);
                     PropertyAccessorHelper.set(obj, biDirectionalField,
                             ObjectUtils.getFieldInstance(parents, biDirectionalField));
+                    PersistenceCacheManager.addEntityToPersistenceCache(obj, delegator, columnValue);
                 }
 
                 childrenEntities.add(obj);

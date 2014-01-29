@@ -178,8 +178,8 @@ public class EntityManagerImplTest
         em.clear();
         found = em.find(SampleEntity.class, 1);
         
-        em.clear();        
         em.remove(found);
+        em.clear();        
         SampleEntity foundAfterDeletion = em.find(SampleEntity.class, 1);
         Assert.assertNull(foundAfterDeletion);
     }
