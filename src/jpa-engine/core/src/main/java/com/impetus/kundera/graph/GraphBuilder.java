@@ -315,12 +315,14 @@ public class GraphBuilder
             {
                 node = nodeInPersistenceCache;
                 node.setPersistenceCache(pc);
+                node.setTraversed(false);
             }
 
             // Determine whether this node is dirty based on comparison between
             // Node data and entity data
             // If dirty, set the entity data into node and mark it as dirty
             onDirtyCheck(entity, node);
+            node.setData(entity);
 
             return this;
         }
@@ -337,7 +339,6 @@ public class GraphBuilder
             {
                 if (!DeepEquals.deepEquals(node.getData(), entity))
                 {
-                    node.setData(entity);
                     node.setDirty(true);
                 }
                 else if (node.isProcessed())
