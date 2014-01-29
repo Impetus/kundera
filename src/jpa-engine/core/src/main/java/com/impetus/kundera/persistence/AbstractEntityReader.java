@@ -334,7 +334,7 @@ public class AbstractEntityReader
 
                         for (Object immediateRelation : immediateRelations)
                         {
-                            if (!compareTo(getEntity(immediateRelation), originalEntity))
+                            if (immediateRelation != null && !compareTo(getEntity(immediateRelation), originalEntity))
                             {
                                 onParseRelation(relationEntity, pd, targetEntityMetadata, immediateRelation, relation,
                                         lazilyloaded);

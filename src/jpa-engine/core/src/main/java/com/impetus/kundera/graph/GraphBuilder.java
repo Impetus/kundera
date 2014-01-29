@@ -27,6 +27,7 @@ import org.apache.commons.lang.StringUtils;
 
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.lifecycle.states.ManagedState;
+import com.impetus.kundera.lifecycle.states.NodeState;
 import com.impetus.kundera.lifecycle.states.TransientState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -72,7 +73,7 @@ public class GraphBuilder
      * @param entityId    entity id
      * @return            added node.
      */
-    public final Node buildNode(Object entity, PersistenceCache pc, Object entityId)
+    public final Node buildNode(Object entity, PersistenceCache pc, Object entityId, NodeState nodeState)
     {
 
         String nodeId = ObjectGraphUtils.getNodeId(entityId, entity.getClass());
@@ -93,7 +94,7 @@ public class GraphBuilder
             return null;
         }
 
-        node = new NodeBuilder().buildNode(entity, pc, entityId, nodeId).node;
+        node = new NodeBuilder().assignState(nodeState).buildNode(entity, pc, entityId, nodeId).node;
         this.graph.addNode(node.getNodeId(), node);
         return node;
 
@@ -240,7 +241,7 @@ public class GraphBuilder
                         {
                             Object relObject = entry.getKey();
                             Object entityObject = entry.getValue();
-                            Node childNode = this.generator.generate(entityObject, pd, pc);
+                            Node childNode = this.generator.generate(entityObject, pd, pc,null);
                             // in case node is already in cache.
                             if (childNode != null)
                             {
@@ -282,6 +283,14 @@ public class GraphBuilder
     {
         private Node node;
 
+        private NodeState state;
+        
+        private NodeBuilder assignState(NodeState state)
+        {
+            this.state = state;
+            return this;
+        }
+        
         /**
          * Build node.
          * Check for:
@@ -305,11 +314,13 @@ public class GraphBuilder
             // handled better.
             if (nodeInPersistenceCache == null)
             {
+                this.state = state != null ? this.state:new TransientState(); 
+                
                 node = new Node(
                         nodeId,
                         entity,
                         ((Field) entityMetadata.getIdAttribute().getJavaMember()).isAnnotationPresent(EmbeddedId.class) ? new ManagedState()
-                                : new TransientState(), pc, entityId);
+                                : this.state, pc, entityId);
             }
             else
             {

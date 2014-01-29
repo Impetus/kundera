@@ -118,10 +118,11 @@ public class InheritenceDomainTest
         Assert.assertEquals("Test", results.get(0).getDispName());
          Assert.assertEquals(2, results.get(0).getSocialProfiles().size());
 
-         
+         em.remove(results.get(0));
+
         em.clear();
 
-        em.remove(results.get(0));
+
     }
 
     @Test

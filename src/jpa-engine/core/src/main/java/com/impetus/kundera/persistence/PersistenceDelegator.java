@@ -334,7 +334,7 @@ public final class PersistenceDelegator
         EntityMetadata metadata = getMetadata(e.getClass());
 
         // Create an object graph of the entity object
-        ObjectGraph graph = new GraphGenerator().generateGraph(e, this);
+        ObjectGraph graph = new GraphGenerator().generateGraph(e, this, new ManagedState());
 
         Node node = graph.getHeadNode();
 
