@@ -33,21 +33,22 @@ import com.impetus.client.couchdb.datatypes.entities.StudentCouchDBSqlDate;
 
 public class StudentCouchDBSqlDateTest extends CouchDBBase
 {
-
-    private static final String keyspace = "KunderaTests";
+    private static final Date DATE = new Date(System.currentTimeMillis());
 
     private EntityManagerFactory emf;
 
     @Before
     public void setUp() throws Exception
     {
-        emf = Persistence.createEntityManagerFactory(pu);super.setUpBase();     
+        emf = Persistence.createEntityManagerFactory(pu);
+        super.setUpBase();
     }
 
     @After
     public void tearDown() throws Exception
     {
-        emf.close();     super.dropDatabase();
+        emf.close();
+        super.dropDatabase();
 
     }
 
@@ -73,7 +74,6 @@ public class StudentCouchDBSqlDateTest extends CouchDBBase
         testDelete(false);
     }
 
-    
     private Object getMinValue()
     {
         return new Date(1970, 1, 1);
@@ -81,14 +81,14 @@ public class StudentCouchDBSqlDateTest extends CouchDBBase
 
     private Object getRandomValue()
     {
-        return new Date(System.currentTimeMillis());
+        return DATE;
     }
 
     private Object getMaxValue()
     {
         return new Date(2100, 1, 1);
     }
-    
+
     public void testPersist(boolean useSameEm)
     {
         EntityManager em = emf.createEntityManager();

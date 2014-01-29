@@ -31,6 +31,7 @@ import com.impetus.client.persistence.CassandraCli;
 
 public class StudentCassandraSqlDateTest extends CassandraBase
 {
+    private static final Date DATE = new Date(System.currentTimeMillis());
     private static final String keyspace = "KunderaCassandraDataType";
 
     @Before
@@ -102,7 +103,7 @@ public class StudentCassandraSqlDateTest extends CassandraBase
 
     private Object getRandomValue()
     {
-        return new Date(System.currentTimeMillis());
+        return DATE;
     }
 
     private Object getMaxValue()

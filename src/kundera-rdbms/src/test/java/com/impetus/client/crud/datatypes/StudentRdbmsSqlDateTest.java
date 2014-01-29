@@ -17,7 +17,8 @@ import com.impetus.client.crud.datatypes.entities.StudentSqlDate;
 
 public class StudentRdbmsSqlDateTest extends RdbmsBase
 {
-
+    private static final Date DATE = new Date(System.currentTimeMillis());
+    
     @Before
     public void setUp() throws Exception
     {
@@ -87,7 +88,7 @@ public class StudentRdbmsSqlDateTest extends RdbmsBase
 
     private Object getRandomValue()
     {
-        return new Date(System.currentTimeMillis());
+        return DATE;
     }
 
     private Object getMaxValue()

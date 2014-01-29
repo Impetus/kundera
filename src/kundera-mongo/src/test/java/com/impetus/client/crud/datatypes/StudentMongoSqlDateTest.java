@@ -40,15 +40,7 @@ public class StudentMongoSqlDateTest extends MongoBase
     @After
     public void tearDown() throws Exception
     {
-        // EntityManager em = emf.createEntityManager();
-        // // em.remove(em.find(StudentMongoSqlDate.class,
-        // // getMaxValue(Date.class)));
-        // em.remove(em.find(StudentMongoSqlDate.class,
-        // getMinValue(Date.class)));
-        // if (AUTO_MANAGE_SCHEMA)
-        // {
         dropSchema();
-        // }
         if (RUN_IN_EMBEDDED_MODE)
         {
             stopCluster();
