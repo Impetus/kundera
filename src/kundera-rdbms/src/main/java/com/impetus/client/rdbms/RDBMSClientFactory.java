@@ -41,7 +41,7 @@ import com.impetus.kundera.metadata.model.MetamodelImpl;
 /**
  * A factory for creating RDBMSClient objects.
  * 
- * @author impadmin
+ * @author vivek.mishra
  */
 public class RDBMSClientFactory extends GenericClientFactory
 {
