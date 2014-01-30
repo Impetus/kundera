@@ -139,4 +139,16 @@ public class CassandraRunner extends YCSBRunner
         }
 
     }
+    
+    
+    public static void main(String g[])
+    {
+        String s = "abc";
+        String s2=s;
+        s2="cdb";
+        s=s2;
+        System.out.println(s);
+        System.out.println(s2);
+        
+    }
 }

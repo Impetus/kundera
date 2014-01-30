@@ -115,7 +115,7 @@ public class IndexManager
                     {
 
                         ((com.impetus.kundera.index.lucene.Indexer) indexer).update(metadata, entity, id,
-                                parentId != null ? parentId.toString() : null);
+                                parentId != null ? parentId.toString() : null, clazz);
                     }
                     else
                     {

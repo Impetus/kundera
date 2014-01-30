@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.cache.CacheException;
 import com.impetus.kundera.cache.CacheProvider;
+import com.impetus.kundera.utils.InvalidConfigurationException;
 
 /**
  * Cache provider implementation using Ehcache.
@@ -195,9 +196,7 @@ public class EhCacheProvider implements CacheProvider
 
         if (url == null)
         {
-            log.warn("A configurationResourceName was set to " + configurationResourceName
-                    + " but the resource could not be loaded from the classpath."
-                    + "Ehcache will configure itself using defaults.");
+            log.warn("A configurationResourceName was set to {} but the resource could not be loaded from the classpath.Ehcache will configure itself using defaults." ,configurationResourceName);
         }
         return url;
     }

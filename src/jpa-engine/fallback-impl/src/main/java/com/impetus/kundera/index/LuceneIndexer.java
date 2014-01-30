@@ -276,7 +276,7 @@ public class LuceneIndexer extends DocumentIndexer
     }
 
     @Override
-    public final void update(EntityMetadata metadata, Object entity, Object id, String parentId)
+    public final void update(EntityMetadata metadata, Object entity, Object id, String parentId, Class parentClazz)
 
     {
         if (log.isDebugEnabled())
@@ -284,7 +284,7 @@ public class LuceneIndexer extends DocumentIndexer
             log.debug("Updating @Entity[{}] for key:{}", metadata.getEntityClazz().getName(), id);
         }
 
-        updateDocument(metadata, entity, parentId, entity.getClass(), true);
+        updateDocument(metadata, entity, parentId, parentClazz, true);
 
     }
 
@@ -794,9 +794,9 @@ public class LuceneIndexer extends DocumentIndexer
      * @return the document
      */
     private void updateDocument(EntityMetadata metadata, Object entity, String parentId,
-            Class<? extends Object> class1, boolean b)
+            Class<? extends Object> parentClazz, boolean b)
     {
-        updateOrIndexDocument(metadata, entity, parentId, entity.getClass(), true);
+        updateOrIndexDocument(metadata, entity, parentId, parentClazz, true);
         onCommit();
 
     }
