@@ -234,8 +234,8 @@ public class PelopsClient extends DB
      */
     public int insert(String table, String key, HashMap<String, ByteIterator> values)
     {
-        Mutator mutator = pool.createMutator(); 
-//                Pelops.createMutator(_host + ":" + _port + ":" + _keyspace);
+        Mutator mutator = 
+                Pelops.createMutator(_host + ":" + _port + ":" + _keyspace);
         try
         {
             List<Column> columns = new ArrayList<Column>();
