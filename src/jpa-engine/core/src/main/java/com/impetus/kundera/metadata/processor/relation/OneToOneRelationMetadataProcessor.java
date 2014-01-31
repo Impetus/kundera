@@ -48,7 +48,6 @@ public class OneToOneRelationMetadataProcessor extends AbstractEntityFieldProces
     public OneToOneRelationMetadataProcessor(KunderaMetadata kunderaMetadata)
     {
         super(kunderaMetadata);
-        validator = new EntityValidatorImpl();
     }
 
     @Override
@@ -56,7 +55,6 @@ public class OneToOneRelationMetadataProcessor extends AbstractEntityFieldProces
     {
         // taking field's type as foreign entity, ignoring "targetEntity"
         Class<?> targetEntity = relationField.getType();
-        validate(targetEntity);
 
         // TODO: Add code to check whether this entity has already been
         // validated, at all places below
@@ -65,7 +63,6 @@ public class OneToOneRelationMetadataProcessor extends AbstractEntityFieldProces
 
         boolean isJoinedByPK = relationField.isAnnotationPresent(PrimaryKeyJoinColumn.class);
         boolean isJoinedByFK = relationField.isAnnotationPresent(JoinColumn.class);
-        boolean isJoinedByTable = relationField.isAnnotationPresent(JoinTable.class);
 
         Relation relation = new Relation(relationField, targetEntity, null, oneToOneAnn.fetch(),
                 Arrays.asList(oneToOneAnn.cascade()), oneToOneAnn.optional(), oneToOneAnn.mappedBy(),
@@ -75,9 +72,6 @@ public class OneToOneRelationMetadataProcessor extends AbstractEntityFieldProces
         {
             AssociationOverride annotation = relationField.getAnnotation(AssociationOverride.class);
             JoinColumn[] joinColumns = annotation.joinColumns();
-
-            validateJoinColumns(joinColumns);
-
             relation.setJoinColumnName(joinColumns[0].name());
 
             JoinTable joinTable = annotation.joinTable();
@@ -97,10 +91,6 @@ public class OneToOneRelationMetadataProcessor extends AbstractEntityFieldProces
             JoinColumn joinColumnAnn = relationField.getAnnotation(JoinColumn.class);
             relation.setJoinColumnName(joinColumnAnn.name());
         }
-        else if (isJoinedByTable)
-        {
-            throw new UnsupportedOperationException("@JoinTable not supported for one to one association");
-        }
 
         relation.setBiDirectionalField(metadata.getEntityClazz());
         metadata.addRelation(relationField.getName(), relation);
@@ -111,14 +101,6 @@ public class OneToOneRelationMetadataProcessor extends AbstractEntityFieldProces
         if (joinTable != null)
         {
             throw new UnsupportedOperationException("@JoinTable not supported for many to one association");
-        }
-    }
-
-    private void validateJoinColumns(JoinColumn[] joinColumns)
-    {
-        if (joinColumns.length > 1)
-        {
-            throw new UnsupportedOperationException("More than one join columns are not supported.");
         }
     }
 

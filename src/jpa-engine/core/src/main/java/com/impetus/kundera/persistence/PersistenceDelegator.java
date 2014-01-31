@@ -535,7 +535,9 @@ public final class PersistenceDelegator
      */
     Query createQuery(String jpaQuery, final String persistenceUnit)
     {
-        Query query = new QueryResolver().getQueryImplementation(jpaQuery, getClient(persistenceUnit).getQueryImplementor(),this);
+        Client client = getClient(persistenceUnit);
+        EntityMetadata metadata = KunderaMetadataManager.getMetamodel(client.getPersistenceUnit()).getEntityMetadataMap().values().iterator().next();
+        Query query = new QueryResolver().getQueryImplementation(jpaQuery, getClient(persistenceUnit).getQueryImplementor(),this, metadata);
         return query;
     }
 

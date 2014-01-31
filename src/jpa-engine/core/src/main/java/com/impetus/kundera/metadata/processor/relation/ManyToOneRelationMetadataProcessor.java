@@ -20,7 +20,6 @@ import java.util.Arrays;
 
 import javax.persistence.AssociationOverride;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
 
 import com.impetus.kundera.loader.MetamodelLoaderException;
@@ -62,58 +61,39 @@ public class ManyToOneRelationMetadataProcessor extends AbstractEntityFieldProce
         // taking field's type as foreign entity, ignoring "targetEntity"
         Class<?> targetEntity = relationField.getType();
 
-        validate(targetEntity);
-
+     
         ManyToOne ann = relationField.getAnnotation(ManyToOne.class);
         Relation relation = new Relation(relationField, targetEntity, null, ann.fetch(), Arrays.asList(ann.cascade()),
                 ann.optional(), null, // mappedBy is null
                 Relation.ForeignKey.MANY_TO_ONE);
 
         boolean isJoinedByFK = relationField.isAnnotationPresent(JoinColumn.class);
-        boolean isJoinedByTable = relationField.isAnnotationPresent(JoinTable.class);
+
 
         if (relationField.isAnnotationPresent(AssociationOverride.class))
         {
             AssociationOverride annotation = relationField.getAnnotation(AssociationOverride.class);
             JoinColumn[] joinColumns = annotation.joinColumns();
 
-            validateJoinColumns(joinColumns);
+         
 
             relation.setJoinColumnName(joinColumns[0].name());
 
-            JoinTable joinTable = annotation.joinTable();
-            onJoinTable(joinTable);
+       
         }
         else if (isJoinedByFK)
         {
             JoinColumn joinColumnAnn = relationField.getAnnotation(JoinColumn.class);
             relation.setJoinColumnName(joinColumnAnn.name());
         }
-        else if (isJoinedByTable)
-        {
-            throw new UnsupportedOperationException("@JoinTable not supported for many to one association");
-        }
+
 
         relation.setBiDirectionalField(metadata.getEntityClazz());
         metadata.addRelation(relationField.getName(), relation);
 
     }
 
-    private void onJoinTable(JoinTable joinTable)
-    {
-        if (joinTable != null)
-        {
-            throw new UnsupportedOperationException("@JoinTable not supported for many to one association");
-        }
-    }
 
-    private void validateJoinColumns(JoinColumn[] joinColumns)
-    {
-        if (joinColumns.length > 1)
-        {
-            throw new UnsupportedOperationException("More than one join columns are not supported.");
-        }
-    }
 
     @Override
     public void process(Class<?> clazz, EntityMetadata metadata)

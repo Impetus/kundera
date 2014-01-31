@@ -68,6 +68,8 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
     /** The log. */
     private static Logger log = LoggerFactory.getLogger(MetamodelConfiguration.class);
 
+    private ValidationFactory factory;
+
     /**
      * Constructor using persistence units as parameter.
      * 
@@ -77,6 +79,8 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
     public MetamodelConfiguration(Map properties, final KunderaMetadata metadata, String... persistenceUnits)
     {
         super(persistenceUnits, properties, metadata);
+        ValidationFactoryGenerator generator = new ValidationFactoryGenerator();
+        this.factory = generator.getFactory(ValidationFactoryType.BOOT_STRAP_VALIDATION);
     }
 
     /*
@@ -298,6 +302,7 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
      *            unit the persistence unit.
      * @throws IOException
      *             Signals that an I/O exception has occurred.
+     * @throws RuleValidationException
      */
     private List<Class<?>> scanClassAndPutMetadata(InputStream bits, Reader reader,
             Map<String, EntityMetadata> entityMetadataMap, Map<String, Class<?>> entityNameToClassMap,
@@ -322,14 +327,16 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
                     (AnnotationsAttribute) cf.getAttribute(AnnotationsAttribute.visibleTag));
             reader.accumulateAnnotations(annotations,
                     (AnnotationsAttribute) cf.getAttribute(AnnotationsAttribute.invisibleTag));
+            Class<?> clazz = this.getClass().getClassLoader().loadClass(className);
 
             // iterate through all valid annotations
             for (String validAnn : reader.getValidAnnotations())
             {
+
                 // check if the current class has one?
                 if (annotations.contains(validAnn))
                 {
-                    Class<?> clazz = this.getClass().getClassLoader().loadClass(className);
+                    this.factory.validate(clazz);
 
                     // get the name of entity to be used for entity to class map
                     // if or not annotated with name
@@ -381,6 +388,7 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
         {
             log.error("Class " + className + " not found, it won't be loaded as entity");
         }
+
         finally
         {
             if (dstream != null)

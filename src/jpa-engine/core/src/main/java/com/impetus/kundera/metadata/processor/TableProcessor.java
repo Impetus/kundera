@@ -63,6 +63,8 @@ public class TableProcessor extends AbstractEntityFieldProcessor
     /** holds pu prperties */
     private Map puProperties;
 
+    private ValidationFactory factory;
+
     /**
      * Instantiates a new table processor.
      */
@@ -70,6 +72,9 @@ public class TableProcessor extends AbstractEntityFieldProcessor
     {
         super(kunderaMetadata);
         validator = new EntityValidatorImpl(puProperty);
+        // validator = new EntityValidatorImpl(puProperty);
+        ValidationFactoryGenerator generator = new ValidationFactoryGenerator();
+        this.factory = generator.getFactory(ValidationFactoryType.BOOT_STRAP_VALIDATION);
         this.puProperties = puProperty;
     }
 
@@ -151,6 +156,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
      *            the generic type
      * @param metadata
      *            the metadata
+     * @throws RuleValidationException
      */
     private <X> void populateRelationMetaData(EntityType entityType, Class<X> clazz, EntityMetadata metadata)
     {
@@ -160,6 +166,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
         {
             if (attribute.isAssociation())
             {
+
                 addRelationIntoMetadata(clazz, (Field) attribute.getJavaMember(), metadata);
             }
         }
@@ -212,21 +219,27 @@ public class TableProcessor extends AbstractEntityFieldProcessor
     private void addRelationIntoMetadata(Class<?> entityClass, Field relationField, EntityMetadata metadata)
     {
         RelationMetadataProcessor relProcessor = null;
-
         try
         {
-            relProcessor = RelationMetadataProcessorFactory.getRelationMetadataProcessor(relationField, kunderaMetadata);
+            relProcessor = RelationMetadataProcessorFactory
+                    .getRelationMetadataProcessor(relationField, kunderaMetadata);
+
+            this.factory.validate(relationField, new RelationAttributeRule());
+
+            relProcessor = RelationMetadataProcessorFactory.getRelationMetadataProcessor(relationField);
 
             if (relProcessor != null)
             {
                 relProcessor.addRelationIntoMetadata(relationField, metadata);
             }
+
         }
         catch (PersistenceException pe)
         {
             throw new MetamodelLoaderException("Error with relationship in @Entity(" + entityClass + "."
                     + relationField.getName() + "), reason: " + pe);
         }
+
     }
 
     /**

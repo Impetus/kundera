@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @param <E> @Id attribute.
  */
-public class PrimaryKeyNullCheck<E extends Object> implements IRule<E>
+public class PrimaryKeyNullCheck<E extends Object>
 {
     private static final Logger log = LoggerFactory.getLogger(PrimaryKeyNullCheck.class);
 
@@ -35,7 +35,7 @@ public class PrimaryKeyNullCheck<E extends Object> implements IRule<E>
     /* (non-Javadoc)
      * @see com.impetus.kundera.validation.rules.IRule#validate(java.lang.Object)
      */
-    @Override
+    
     public boolean validate(E value)
     {
         if (value == null)
