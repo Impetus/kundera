@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.impetus.kundera.persistence;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,8 +50,11 @@ import com.impetus.kundera.cache.Cache;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientResolverException;
 import com.impetus.kundera.loader.ClientFactory;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.persistence.context.PersistenceCache;
 import com.impetus.kundera.persistence.jta.KunderaJTAUserTransaction;
+import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.KunderaTypedQuery;
 import com.impetus.kundera.query.QueryImpl;
 
@@ -422,7 +427,7 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     public final Query createNativeQuery(String sqlString)
     {
         checkClosed();
-        throw new NotImplementedException("Please use createNativeQuery(String sqlString, Class resultClass) instead.");
+        return getPersistenceDelegator().createQuery(sqlString, getPersistenceUnit());
     }
 
     /*

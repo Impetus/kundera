@@ -502,6 +502,11 @@ public final class PersistenceDelegator
         }
         String persistenceUnit = m.getPersistenceUnit();
 
+        return getClient(persistenceUnit);
+    }
+    
+    private Client getClient(final String persistenceUnit)
+    {
         Client client = clientMap.get(persistenceUnit);
         if (client == null)
         {
@@ -530,6 +535,19 @@ public final class PersistenceDelegator
     Query createQuery(String jpaQuery)
     {
         return getQueryInstance(jpaQuery, false, null);
+    }
+
+    /**
+     * Creates the query.
+     * 
+     * @param jpaQuery
+     *            the jpa query
+     * @return the query
+     */
+    Query createQuery(String jpaQuery, final String persistenceUnit)
+    {
+        Query query = new QueryResolver().getQueryImplementation(jpaQuery, getClient(persistenceUnit).getQueryImplementor(),this);
+        return query;
     }
 
     /*
