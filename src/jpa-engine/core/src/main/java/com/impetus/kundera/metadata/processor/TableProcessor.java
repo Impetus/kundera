@@ -48,6 +48,11 @@ import com.impetus.kundera.metadata.processor.relation.RelationMetadataProcessor
 import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
 import com.impetus.kundera.metadata.validator.InvalidEntityDefinitionException;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
+import com.impetus.kundera.validation.ValidationFactory;
+import com.impetus.kundera.validation.ValidationFactoryGenerator;
+import com.impetus.kundera.validation.ValidationFactoryGenerator.ValidationFactoryType;
+import com.impetus.kundera.validation.rules.RelationAttributeRule;
+import com.impetus.kundera.validation.rules.RuleValidationException;
 
 /**
  * Metadata processor class for persistent entities.
@@ -226,7 +231,8 @@ public class TableProcessor extends AbstractEntityFieldProcessor
 
             this.factory.validate(relationField, new RelationAttributeRule());
 
-            relProcessor = RelationMetadataProcessorFactory.getRelationMetadataProcessor(relationField);
+            relProcessor = RelationMetadataProcessorFactory
+                    .getRelationMetadataProcessor(relationField, kunderaMetadata);
 
             if (relProcessor != null)
             {

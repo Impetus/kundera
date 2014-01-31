@@ -16,7 +16,6 @@
 
 package com.impetus.kundera.validation.rules;
 
-import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 
 /**

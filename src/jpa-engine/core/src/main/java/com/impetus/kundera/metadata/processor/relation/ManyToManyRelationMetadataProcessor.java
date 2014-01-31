@@ -20,19 +20,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.MapKeyClass;
 import javax.persistence.MapKeyJoinColumn;
+
 import com.impetus.kundera.loader.MetamodelLoaderException;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.JoinTableMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.processor.AbstractEntityFieldProcessor;
 import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
-
-import com.impetus.kundera.metadata.validator.InvalidEntityDefinitionException;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 

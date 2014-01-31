@@ -19,11 +19,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import javax.persistence.CascadeType;
-import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.PersistenceContextType;
-import javax.persistence.Query;
 
 import junit.framework.Assert;
 
@@ -35,12 +33,9 @@ import com.impetus.kundera.graph.BillingCounter;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.StoreBuilder;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
-import com.impetus.kundera.persistence.EntityManagerImpl;
-import com.impetus.kundera.persistence.PersistenceDelegator;
-import com.impetus.kundera.persistence.PersistenceDelegatorTest;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
+import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.persistence.context.PersistenceCache;
-import com.impetus.kundera.query.KunderaQuery;
 
 /**
  * @author amresh.singh

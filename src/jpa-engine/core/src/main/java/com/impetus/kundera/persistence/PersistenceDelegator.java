@@ -81,7 +81,7 @@ public final class PersistenceDelegator
 
     private FlushModeType flushMode = FlushModeType.AUTO;
 
-//    private ObjectGraphBuilder graphBuilder;
+    // private ObjectGraphBuilder graphBuilder;
 
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
@@ -130,7 +130,7 @@ public final class PersistenceDelegator
         }
 
         // Create an object graph of the entity object.
-//        ObjectGraph graph = graphBuilder.getObjectGraph(e, );
+        // ObjectGraph graph = graphBuilder.getObjectGraph(e, );
         ObjectGraph graph = new GraphGenerator().generateGraph(e, this);
         // Call persist on each node in object graph.
         Node node = graph.getHeadNode();
@@ -398,7 +398,8 @@ public final class PersistenceDelegator
                         ((Batcher) (node.getClient())).addBatch(node);
                     }
                     else if (isTransactionInProgress
-                            && MetadataUtils.defaultTransactionSupported(metadata.getPersistenceUnit(),kunderaMetadata))
+                            && MetadataUtils
+                                    .defaultTransactionSupported(metadata.getPersistenceUnit(), kunderaMetadata))
                     {
                         onSynchronization(node, metadata);
                     }
@@ -493,7 +494,7 @@ public final class PersistenceDelegator
 
         return getClient(persistenceUnit);
     }
-    
+
     private Client getClient(final String persistenceUnit)
     {
         Client client = clientMap.get(persistenceUnit);
@@ -536,8 +537,10 @@ public final class PersistenceDelegator
     Query createQuery(String jpaQuery, final String persistenceUnit)
     {
         Client client = getClient(persistenceUnit);
-        EntityMetadata metadata = KunderaMetadataManager.getMetamodel(client.getPersistenceUnit()).getEntityMetadataMap().values().iterator().next();
-        Query query = new QueryResolver().getQueryImplementation(jpaQuery, getClient(persistenceUnit).getQueryImplementor(),this, metadata);
+        EntityMetadata metadata = KunderaMetadataManager.getMetamodel(kunderaMetadata, client.getPersistenceUnit())
+                .getEntityMetadataMap().values().iterator().next();
+        Query query = new QueryResolver().getQueryImplementation(jpaQuery, getClient(persistenceUnit)
+                .getQueryImplementor(), this, metadata);
         return query;
     }
 

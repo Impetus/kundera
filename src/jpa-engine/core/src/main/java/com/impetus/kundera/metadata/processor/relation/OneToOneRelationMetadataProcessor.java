@@ -30,7 +30,6 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.processor.AbstractEntityFieldProcessor;
-import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 
 /**

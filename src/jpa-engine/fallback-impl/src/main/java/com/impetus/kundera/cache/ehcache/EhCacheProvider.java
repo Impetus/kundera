@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.cache.CacheException;
 import com.impetus.kundera.cache.CacheProvider;
-import com.impetus.kundera.utils.InvalidConfigurationException;
 
 /**
  * Cache provider implementation using Ehcache.

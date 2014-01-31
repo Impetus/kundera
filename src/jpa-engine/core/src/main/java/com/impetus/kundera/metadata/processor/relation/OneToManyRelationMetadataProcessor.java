@@ -19,7 +19,6 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
 
 import com.impetus.kundera.loader.MetamodelLoaderException;

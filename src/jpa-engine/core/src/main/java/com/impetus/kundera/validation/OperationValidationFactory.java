@@ -19,7 +19,6 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-//import com.impetus.kundera.validation.rules.AttributeConstraintRule;
 import com.impetus.kundera.validation.rules.IRule;
 import com.impetus.kundera.validation.rules.RuleValidationException;
 

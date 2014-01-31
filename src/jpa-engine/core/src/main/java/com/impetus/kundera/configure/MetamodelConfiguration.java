@@ -55,6 +55,10 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.processor.GeneratedValueProcessor;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.utils.KunderaCoreUtils;
+import com.impetus.kundera.validation.ValidationFactory;
+import com.impetus.kundera.validation.ValidationFactoryGenerator;
+import com.impetus.kundera.validation.ValidationFactoryGenerator.ValidationFactoryType;
+import com.impetus.kundera.validation.rules.RuleValidationException;
 
 /**
  * The Metamodel configurer: a) Configure application meta data b) loads entity

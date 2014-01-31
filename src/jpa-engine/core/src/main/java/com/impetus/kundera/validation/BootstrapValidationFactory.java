@@ -19,9 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.impetus.kundera.validation.rules.EntityAnnotationRule;
+import com.impetus.kundera.validation.rules.EntityFieldAnnotationRule;
 import com.impetus.kundera.validation.rules.IRule;
 import com.impetus.kundera.validation.rules.RuleValidationException;
-import com.impetus.kundera.validation.rules.EntityFieldAnnotationRule;
 
 
 /**

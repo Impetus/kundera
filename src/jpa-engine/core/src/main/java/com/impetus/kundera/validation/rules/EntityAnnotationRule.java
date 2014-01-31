@@ -15,9 +15,9 @@
  ******************************************************************************/
 package com.impetus.kundera.validation.rules;
 
+import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.MappedSuperclass;
-import javax.persistence.Embeddable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -16,15 +16,12 @@
 package com.impetus.kundera.graph;
 
 import java.lang.reflect.Field;
-import java.util.regex.Pattern;
 
 import javax.persistence.GeneratedValue;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
 
 import com.impetus.kundera.Constants;
-import com.impetus.kundera.persistence.IdGenerator;
 import com.impetus.kundera.utils.NumericUtils;
 
 /**
