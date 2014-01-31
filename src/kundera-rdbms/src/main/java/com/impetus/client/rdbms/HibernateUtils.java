@@ -213,6 +213,7 @@ public final class HibernateUtils
                 obj = ((AbstractAttribute) column).getBindableJavaType().newInstance();
             }
             embeddedDocumentObject = valueMap.get(((AbstractAttribute) column).getJPAColumnName());
+            if(embeddedDocumentObject != null)
             PropertyAccessorHelper.set(
                     entity,
                     embeddedField,

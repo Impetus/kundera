@@ -126,24 +126,29 @@ public class RDBMSClientFactory extends GenericClientFactory
             }
         }
         sf = conf.buildSessionFactory(serviceRegistry);
-
-        for (String pu : pus)
+        
+        synchronized (sf)
         {
-            StatelessSession session = sf.openStatelessSession();
-            if (!pu.equals(getPersistenceUnit()))
+            for (String pu : pus)
             {
-                Collection<Class<?>> collection = classes.get(pu);
-                for (Class clazz : collection)
+                StatelessSession session = sf.openStatelessSession();
+                if (!pu.equals(getPersistenceUnit()))
                 {
-                    EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(clazz);
-                    try
+                    Collection<Class<?>> collection = classes.get(pu);
+                    for (Class clazz : collection)
                     {
-                        session.createSQLQuery("Drop table " + metadata.getTableName()).executeUpdate();
-                    }catch(Exception e)
-                    {
-                        // ignore such drops.
+                        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(clazz);
+                        try
+                        {
+                            session.createSQLQuery("Drop table " + metadata.getTableName()).executeUpdate();
+                        }
+                        catch (Exception e)
+                        {
+                            // ignore such drops.
+                        }
                     }
                 }
+
             }
         }
 
