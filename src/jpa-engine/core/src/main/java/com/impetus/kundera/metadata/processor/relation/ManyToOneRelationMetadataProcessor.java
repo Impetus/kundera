@@ -28,6 +28,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.processor.AbstractEntityFieldProcessor;
 import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 
 /**
  * The Class ManyToOneRelationMetadataProcessor.
@@ -41,8 +42,9 @@ public class ManyToOneRelationMetadataProcessor extends AbstractEntityFieldProce
     /**
      * Instantiates a new many to one relation metadata processor.
      */
-    public ManyToOneRelationMetadataProcessor()
+    public ManyToOneRelationMetadataProcessor(KunderaMetadata kunderaMetadata)
     {
+        super(kunderaMetadata);
         validator = new EntityValidatorImpl();
     }
 
@@ -63,7 +65,6 @@ public class ManyToOneRelationMetadataProcessor extends AbstractEntityFieldProce
         validate(targetEntity);
 
         ManyToOne ann = relationField.getAnnotation(ManyToOne.class);
-
         Relation relation = new Relation(relationField, targetEntity, null, ann.fetch(), Arrays.asList(ann.cascade()),
                 ann.optional(), null, // mappedBy is null
                 Relation.ForeignKey.MANY_TO_ONE);

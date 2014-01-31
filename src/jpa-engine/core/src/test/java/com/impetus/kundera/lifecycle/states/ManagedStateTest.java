@@ -145,7 +145,7 @@ public class ManagedStateTest
 
         Assert.assertEquals(ManagedState.class, storeNode.getCurrentNodeState().getClass());
         Assert.assertTrue(storeNode.isUpdate());
-        Assert.assertNotNull(storeNode.getPersistenceCache().getMainCache().getNodeFromCache(storeNode.getNodeId()));
+        Assert.assertNotNull(storeNode.getPersistenceCache().getMainCache().getNodeFromCache(storeNode.getNodeId(), null));
 
 //        for (Node childNode : storeNode.getChildren().values())
 //        {

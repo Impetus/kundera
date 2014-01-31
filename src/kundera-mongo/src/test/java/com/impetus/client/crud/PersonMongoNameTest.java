@@ -31,7 +31,6 @@ import org.junit.Test;
 
 import com.impetus.client.crud.PersonMongoNameAnnotation.Day;
 import com.impetus.kundera.client.DummyDatabase;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
  * Test case to perform check entity name annotation support
@@ -50,7 +49,7 @@ public class PersonMongoNameTest
     @Before
     public void setUp() throws Exception
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);        
+                
         emf = Persistence.createEntityManagerFactory(PU, propertyMap);
         em = emf.createEntityManager();
 

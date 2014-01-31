@@ -17,12 +17,17 @@ package com.impetus.kundera.query;
 
 import java.util.List;
 
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+
 import junit.framework.Assert;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.query.KunderaQuery.SortOrder;
 import com.impetus.kundera.query.KunderaQuery.SortOrdering;
 import com.impetus.kundera.query.KunderaQuery.UpdateClause;
@@ -35,6 +40,10 @@ import com.impetus.kundera.query.KunderaQuery.UpdateClause;
 public class KunderaQueryParserTest
 {
 
+    private EntityManagerFactory emf;
+
+    private KunderaMetadata kunderaMetadata;
+
     /**
      * Sets the up.
      * 
@@ -44,6 +53,8 @@ public class KunderaQueryParserTest
     @Before
     public void setUp() throws Exception
     {
+        emf = Persistence.createEntityManagerFactory("kunderatest");
+        kunderaMetadata = ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance();
     }
 
     /**
@@ -55,7 +66,7 @@ public class KunderaQueryParserTest
 
         // Valid Query with clause.
         String validQuery = "SELECT c FROM Country c ORDER BY c.currency, c.population DESC";
-        KunderaQuery kunderQuery = new KunderaQuery(validQuery);
+        KunderaQuery kunderQuery = new KunderaQuery(validQuery, kunderaMetadata);
 
         KunderaQueryParser parser = new KunderaQueryParser(kunderQuery);
         parser.parse();
@@ -71,7 +82,7 @@ public class KunderaQueryParserTest
         // valid query with default ASC clause.
         String validQueryWithDefaultClause = "SELECT c FROM Country c ORDER BY c.currency, c.population";
 
-        kunderQuery = new KunderaQuery(validQueryWithDefaultClause);
+        kunderQuery = new KunderaQuery(validQueryWithDefaultClause, kunderaMetadata);
         parser = new KunderaQueryParser(kunderQuery);
         parser.parse();
 
@@ -85,7 +96,7 @@ public class KunderaQueryParserTest
 
         String invalidQuery = "SELECT c FROM Country c where currency, c.population DESCS";
 
-        kunderQuery = new KunderaQuery(invalidQuery);
+        kunderQuery = new KunderaQuery(invalidQuery, kunderaMetadata);
         parser = new KunderaQueryParser(kunderQuery);
         parser.parse();
 
@@ -98,7 +109,7 @@ public class KunderaQueryParserTest
         // update with single set value in SET clause.
         String updateQuery = "UPDATE Country SET population = 10 where currency = INR";
 
-        KunderaQuery kunderaQuery = new KunderaQuery(updateQuery);
+        KunderaQuery kunderaQuery = new KunderaQuery(updateQuery, kunderaMetadata);
         KunderaQueryParser parser = new KunderaQueryParser(kunderaQuery);
         parser.parse();
 
@@ -115,7 +126,7 @@ public class KunderaQueryParserTest
 
         // Update with multi valued SET clause.
         String multiValueUpdaeQuery = "UPDATE Country SET population = 10,name=vivek where currency = INR";
-        kunderaQuery = new KunderaQuery(multiValueUpdaeQuery);
+        kunderaQuery = new KunderaQuery(multiValueUpdaeQuery, kunderaMetadata);
 
         parser = new KunderaQueryParser(kunderaQuery);
         parser.parse();
@@ -134,12 +145,10 @@ public class KunderaQueryParserTest
         Assert.assertEquals("name", result[1].getProperty());
         Assert.assertEquals("vivek", result[1].getValue());
 
-        
-
         // Delete query.
         String deleteQuery = "Delete from Country where currency = INR";
-        
-        kunderaQuery = new KunderaQuery(deleteQuery);
+
+        kunderaQuery = new KunderaQuery(deleteQuery, kunderaMetadata);
         parser = new KunderaQueryParser(kunderaQuery);
         parser.parse();
 
@@ -153,12 +162,11 @@ public class KunderaQueryParserTest
     @Test
     public void onInvalidQueryParse()
     {
-        
 
         // Valid Query with where clause.
         String validQuery = "SELECT c,c.currency FROM Country c where c.currency = INR";
 
-        KunderaQuery kunderQuery = new KunderaQuery(validQuery);
+        KunderaQuery kunderQuery = new KunderaQuery(validQuery, kunderaMetadata);
         KunderaQueryParser parser = new KunderaQueryParser(kunderQuery);
         try
         {
@@ -169,12 +177,10 @@ public class KunderaQueryParserTest
             Assert.assertTrue(jpqlpe.getMessage().startsWith("Bad query format"));
         }
 
-        
-
         // Valid Query with where clause.
         validQuery = "SELECT c.currency,c FROM Country c where c.currency = INR";
-        
-        kunderQuery = new KunderaQuery(validQuery);
+
+        kunderQuery = new KunderaQuery(validQuery, kunderaMetadata);
         parser = new KunderaQueryParser(kunderQuery);
         try
         {
@@ -185,11 +191,10 @@ public class KunderaQueryParserTest
             Assert.assertTrue(jpqlpe.getMessage().startsWith("Bad query format"));
         }
 
-
         // Valid Query with where clause.
         validQuery = "SELECT c. FROM Country c where c.currency = INR";
 
-        kunderQuery = new KunderaQuery(validQuery);
+        kunderQuery = new KunderaQuery(validQuery, kunderaMetadata);
 
         parser = new KunderaQueryParser(kunderQuery);
         try

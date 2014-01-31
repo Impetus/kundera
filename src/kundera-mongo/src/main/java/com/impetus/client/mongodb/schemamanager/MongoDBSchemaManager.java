@@ -37,6 +37,7 @@ import com.impetus.kundera.configure.schema.api.AbstractSchemaManager;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.loader.ClientLoaderException;
 import com.impetus.kundera.loader.KunderaAuthenticationException;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -65,9 +66,9 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
     /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(MongoDBSchemaManager.class);
 
-    public MongoDBSchemaManager(String clientFactory, Map<String, Object> externalProperties)
+    public MongoDBSchemaManager(String clientFactory, Map<String, Object> externalProperties, final KunderaMetadata kunderaMetadata)
     {
-        super(clientFactory, externalProperties);
+        super(clientFactory, externalProperties, kunderaMetadata);
     }
 
     @Override

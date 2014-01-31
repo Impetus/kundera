@@ -20,7 +20,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
+
+import javax.persistence.Persistence;
 
 import junit.framework.Assert;
 
@@ -38,25 +39,15 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.cassandra.pelops.PelopsClientFactory;
 import com.impetus.client.cassandra.thrift.ThriftClientFactory;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.client.schemamanager.entites.CassandraEntitySimple;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.ClientResolver;
-import com.impetus.kundera.configure.ClientFactoryConfiguraton;
-import com.impetus.kundera.configure.SchemaConfiguration;
 import com.impetus.kundera.configure.schema.SchemaGenerationException;
-import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
-import com.impetus.kundera.metadata.MetadataBuilder;
-import com.impetus.kundera.metadata.model.ApplicationMetadata;
-import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.metadata.model.MetamodelImpl;
-import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
 /**
@@ -65,15 +56,7 @@ import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
  */
 public class CassandraSchemaOperationTest
 {
-    /** The configuration. */
-    private SchemaConfiguration configuration;
-
-    /** Configure schema manager. */
-    private SchemaManager schemaManager;
-
     private Cassandra.Client client;
-
-    private final boolean useLucene = false;
 
     /**
      * @throws java.lang.Exception
@@ -81,7 +64,6 @@ public class CassandraSchemaOperationTest
     @Before
     public void setUp() throws Exception
     {
-        configuration = new SchemaConfiguration(null, "CassandraSchemaOperationTest");
         CassandraCli.cassandraSetUp();
         CassandraCli cli = new CassandraCli();
         client = cli.getClient();
@@ -109,30 +91,33 @@ public class CassandraSchemaOperationTest
         Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntitySimple", "KunderaCoreExmples"));
         org.apache.cassandra.thrift.KsDef ksDef = new KsDef();
         ksDef = client.describe_keyspace("KunderaCoreExmples");
-        Assert.assertEquals(1, ksDef.getCf_defs().size());
+        Assert.assertEquals(2, ksDef.getCf_defs().size());
         for (org.apache.cassandra.thrift.CfDef cfDef : ksDef.getCf_defs())
         {
-            Assert.assertEquals("CassandraEntitySimple", cfDef.getName());
-
-            Assert.assertEquals("Standard", cfDef.column_type);
-            Assert.assertEquals(2, cfDef.getColumn_metadata().size());
-            List<String> columns = new ArrayList<String>();
-            columns.add("AGE");
-            columns.add("PERSON_NAME");
-            for (ColumnDef columnDef : cfDef.getColumn_metadata())
+            if ("CassandraEntitySimple".equals(cfDef.getName()))
             {
-                if (new String(columnDef.getName(), Constants.ENCODING).equals("AGE"))
-                {
-                    Assert.assertTrue(columnDef.isSetIndex_type());
-                    Assert.assertTrue(columns.contains(new String(columnDef.getName(), Constants.ENCODING)));
-                    Assert.assertEquals(IndexType.KEYS, columnDef.index_type);
-                }
-                else
-                {
+                Assert.assertEquals("CassandraEntitySimple", cfDef.getName());
 
-                    Assert.assertTrue(columnDef.isSetIndex_type());
-                    Assert.assertTrue(columns.contains(new String(columnDef.getName(), Constants.ENCODING)));
-                    Assert.assertEquals(IndexType.KEYS, columnDef.index_type);
+                Assert.assertEquals("Standard", cfDef.column_type);
+                Assert.assertEquals(2, cfDef.getColumn_metadata().size());
+                List<String> columns = new ArrayList<String>();
+                columns.add("AGE");
+                columns.add("PERSON_NAME");
+                for (ColumnDef columnDef : cfDef.getColumn_metadata())
+                {
+                    if (new String(columnDef.getName(), Constants.ENCODING).equals("AGE"))
+                    {
+                        Assert.assertTrue(columnDef.isSetIndex_type());
+                        Assert.assertTrue(columns.contains(new String(columnDef.getName(), Constants.ENCODING)));
+                        Assert.assertEquals(IndexType.KEYS, columnDef.index_type);
+                    }
+                    else
+                    {
+
+                        Assert.assertTrue(columnDef.isSetIndex_type());
+                        Assert.assertTrue(columns.contains(new String(columnDef.getName(), Constants.ENCODING)));
+                        Assert.assertEquals(IndexType.KEYS, columnDef.index_type);
+                    }
                 }
             }
         }
@@ -153,33 +138,35 @@ public class CassandraSchemaOperationTest
         ksDef = client.describe_keyspace("KunderaCoreExmples");
         for (org.apache.cassandra.thrift.CfDef cfDef : ksDef.getCf_defs())
         {
-            Assert.assertEquals("CassandraEntitySimple", cfDef.getName());
-
-            Assert.assertEquals("Standard", cfDef.column_type);
-            Assert.assertEquals(2, cfDef.getColumn_metadata().size());
-
-            List<String> columns = new ArrayList<String>();
-            columns.add("AGE");
-            columns.add("PERSON_NAME");
-
-            for (ColumnDef columnDef : cfDef.getColumn_metadata())
+            if ("CassandraEntitySimple".equals(cfDef.getName()))
             {
-                if (new String(columnDef.getName(), Constants.ENCODING).equals("AGE"))
+                Assert.assertEquals("CassandraEntitySimple", cfDef.getName());
+
+                Assert.assertEquals("Standard", cfDef.column_type);
+                Assert.assertEquals(2, cfDef.getColumn_metadata().size());
+
+                List<String> columns = new ArrayList<String>();
+                columns.add("AGE");
+                columns.add("PERSON_NAME");
+
+                for (ColumnDef columnDef : cfDef.getColumn_metadata())
                 {
-                    Assert.assertTrue(columnDef.isSetIndex_type());
-                    Assert.assertTrue(columns.contains(new String(columnDef.getName(), Constants.ENCODING)));
-                    Assert.assertEquals(IndexType.KEYS, columnDef.index_type);
-                }
-                else
-                {
-                    Assert.assertTrue(columnDef.isSetIndex_type());
-                    Assert.assertTrue(columns.contains(new String(columnDef.getName(), Constants.ENCODING)));
-                    Assert.assertEquals(IndexType.KEYS, columnDef.index_type);
+                    if (new String(columnDef.getName(), Constants.ENCODING).equals("AGE"))
+                    {
+                        Assert.assertTrue(columnDef.isSetIndex_type());
+                        Assert.assertTrue(columns.contains(new String(columnDef.getName(), Constants.ENCODING)));
+                        Assert.assertEquals(IndexType.KEYS, columnDef.index_type);
+                    }
+                    else
+                    {
+                        Assert.assertTrue(columnDef.isSetIndex_type());
+                        Assert.assertTrue(columns.contains(new String(columnDef.getName(), Constants.ENCODING)));
+                        Assert.assertEquals(IndexType.KEYS, columnDef.index_type);
+                    }
                 }
             }
         }
-
-        PelopsClientFactory clientFactory = (PelopsClientFactory) ClientResolver
+        ThriftClientFactory clientFactory = (ThriftClientFactory) ClientResolver
                 .getClientFactory("CassandraSchemaOperationTest");
         clientFactory.getSchemaManager(null).dropSchema();
         Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCoreExmples"));
@@ -214,30 +201,33 @@ public class CassandraSchemaOperationTest
         ksDef = client.describe_keyspace("KunderaCoreExmples");
         for (org.apache.cassandra.thrift.CfDef cfDef : ksDef.getCf_defs())
         {
-            Assert.assertEquals("CassandraEntitySimple", cfDef.getName());
-
-            Assert.assertEquals("Standard", cfDef.getColumn_type());
-
-            int counter = 0;
-            for (ColumnDef columnDef : cfDef.getColumn_metadata())
+            if ("CassandraEntitySimple".equals(cfDef.getName()))
             {
-                if (new String(columnDef.getName(), Constants.ENCODING).equals("AGE"))
+                Assert.assertEquals("CassandraEntitySimple", cfDef.getName());
+
+                Assert.assertEquals("Standard", cfDef.getColumn_type());
+
+                int counter = 0;
+                for (ColumnDef columnDef : cfDef.getColumn_metadata())
                 {
-                    Assert.assertTrue(columnDef.isSetIndex_type());
-                    Assert.assertNotNull(columnDef.index_name);
-                    Assert.assertEquals(IntegerType.class.getName(), columnDef.getValidation_class());
-                    counter++;
+                    if (new String(columnDef.getName(), Constants.ENCODING).equals("AGE"))
+                    {
+                        Assert.assertTrue(columnDef.isSetIndex_type());
+                        Assert.assertNotNull(columnDef.index_name);
+                        Assert.assertEquals(IntegerType.class.getName(), columnDef.getValidation_class());
+                        counter++;
+                    }
+                    else
+                    {
+                        Assert.assertTrue(columnDef.isSetIndex_type());
+                        Assert.assertEquals("PERSON_NAME", new String(columnDef.getName(), Constants.ENCODING));
+                        Assert.assertNotNull(columnDef.index_name);
+                        Assert.assertEquals(UTF8Type.class.getName(), columnDef.getValidation_class());
+                        counter++;
+                    }
                 }
-                else
-                {
-                    Assert.assertTrue(columnDef.isSetIndex_type());
-                    Assert.assertEquals("PERSON_NAME", new String(columnDef.getName(), Constants.ENCODING));
-                    Assert.assertNotNull(columnDef.index_name);
-                    Assert.assertEquals(UTF8Type.class.getName(), columnDef.getValidation_class());
-                    counter++;
-                }
+                Assert.assertEquals(2, counter);
             }
-            Assert.assertEquals(2, counter);
         }
     }
 
@@ -283,30 +273,33 @@ public class CassandraSchemaOperationTest
         ksDef = client.describe_keyspace("KunderaCoreExmples");
         for (org.apache.cassandra.thrift.CfDef cfDef : ksDef.getCf_defs())
         {
-            Assert.assertEquals("CassandraEntitySimple", cfDef.getName());
-
-            Assert.assertEquals("Standard", cfDef.getColumn_type());
-
-            int counter = 0;
-            for (ColumnDef columnDef : cfDef.getColumn_metadata())
+            if ("CassandraEntitySimple".equals(cfDef.getName()))
             {
-                if (new String(columnDef.getName(), Constants.ENCODING).equals("AGE"))
+                Assert.assertEquals("CassandraEntitySimple", cfDef.getName());
+
+                Assert.assertEquals("Standard", cfDef.getColumn_type());
+
+                int counter = 0;
+                for (ColumnDef columnDef : cfDef.getColumn_metadata())
                 {
-                    Assert.assertTrue(columnDef.isSetIndex_type());
-                    Assert.assertNotNull(columnDef.index_name);
-                    Assert.assertEquals(IntegerType.class.getName(), columnDef.getValidation_class());
-                    counter++;
+                    if (new String(columnDef.getName(), Constants.ENCODING).equals("AGE"))
+                    {
+                        Assert.assertTrue(columnDef.isSetIndex_type());
+                        Assert.assertNotNull(columnDef.index_name);
+                        Assert.assertEquals(IntegerType.class.getName(), columnDef.getValidation_class());
+                        counter++;
+                    }
+                    else
+                    {
+                        Assert.assertTrue(columnDef.isSetIndex_type());
+                        Assert.assertEquals("PERSON_NAME", new String(columnDef.getName(), Constants.ENCODING));
+                        Assert.assertNotNull(columnDef.index_name);
+                        Assert.assertEquals(UTF8Type.class.getName(), columnDef.getValidation_class());
+                        counter++;
+                    }
                 }
-                else
-                {
-                    Assert.assertTrue(columnDef.isSetIndex_type());
-                    Assert.assertEquals("PERSON_NAME", new String(columnDef.getName(), Constants.ENCODING));
-                    Assert.assertNotNull(columnDef.index_name);
-                    Assert.assertEquals(UTF8Type.class.getName(), columnDef.getValidation_class());
-                    counter++;
-                }
+                Assert.assertEquals(2, counter);
             }
-            Assert.assertEquals(2, counter);
         }
     }
 
@@ -324,6 +317,12 @@ public class CassandraSchemaOperationTest
             cf_def.column_type = "Standard";
             client.system_add_column_family(cf_def);
 
+            org.apache.cassandra.thrift.CfDef actor = new org.apache.cassandra.thrift.CfDef("KunderaCoreExmples",
+                    "Actor");
+            actor.column_type = "Super";
+
+            client.system_add_column_family(actor);
+
             getEntityManagerFactory("validate");
             // schemaManager = new
             // CassandraSchemaManager(PelopsClientFactory.class.getName(),
@@ -335,18 +334,21 @@ public class CassandraSchemaOperationTest
             org.apache.cassandra.thrift.KsDef ksDef = client.describe_keyspace("KunderaCoreExmples");
             for (org.apache.cassandra.thrift.CfDef cfDef : ksDef.getCf_defs())
             {
-                Assert.assertEquals("CassandraEntitySimple", cfDef.getName());
-
-                Assert.assertEquals("Standard", cfDef.column_type);
-                List<String> columns = new ArrayList<String>();
-                columns.add("AGE");
-                columns.add("PERSON_NAME");
-
-                for (ColumnDef columnDef : cfDef.getColumn_metadata())
+                if ("CassandraEntitySimple".equals(cfDef.getName()))
                 {
-                    Assert.assertFalse(columnDef.isSetIndex_type());
-                    Assert.assertTrue(columns.contains(new String(columnDef.getName(), Constants.ENCODING)));
-                    Assert.assertNull(columnDef.index_name);
+                    Assert.assertEquals("CassandraEntitySimple", cfDef.getName());
+
+                    Assert.assertEquals("Standard", cfDef.column_type);
+                    List<String> columns = new ArrayList<String>();
+                    columns.add("AGE");
+                    columns.add("PERSON_NAME");
+
+                    for (ColumnDef columnDef : cfDef.getColumn_metadata())
+                    {
+                        Assert.assertFalse(columnDef.isSetIndex_type());
+                        Assert.assertTrue(columns.contains(new String(columnDef.getName(), Constants.ENCODING)));
+                        Assert.assertNull(columnDef.index_name);
+                    }
                 }
             }
         }
@@ -411,13 +413,22 @@ public class CassandraSchemaOperationTest
             cf_def.setColumn_metadata(column_metadata);
             client.system_add_column_family(cf_def);
 
+            org.apache.cassandra.thrift.CfDef actor = new org.apache.cassandra.thrift.CfDef("KunderaCoreExmples",
+                    "Actor");
+            actor.column_type = "Super";
+
+            client.system_add_column_family(actor);
+
             Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCoreExmples"));
             Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntitySimple", "KunderaCoreExmples"));
             org.apache.cassandra.thrift.KsDef ksDef = client.describe_keyspace("KunderaCoreExmples");
-            Assert.assertEquals(1, ksDef.getCf_defs().size());
-            Assert.assertEquals(2, ksDef.getCf_defs().get(0).getColumn_metadata().size());
+            Assert.assertEquals(2, ksDef.getCf_defs().size());
+            Assert.assertTrue(2 == ksDef.getCf_defs().get(0).getColumn_metadata().size()
+                    || 0 == ksDef.getCf_defs().get(0).getColumn_metadata().size());
+            Assert.assertTrue(2 == ksDef.getCf_defs().get(1).getColumn_metadata().size()
+                    || 0 == ksDef.getCf_defs().get(1).getColumn_metadata().size());
 
-            getEntityManagerFactory("validate");
+            EntityManagerFactoryImpl emf = getEntityManagerFactory("validate");
             // schemaManager = new
             // CassandraSchemaManager(PelopsClientFactory.class.getName(),
             // null);
@@ -428,19 +439,23 @@ public class CassandraSchemaOperationTest
             ksDef = client.describe_keyspace("KunderaCassandraExamples");
             for (org.apache.cassandra.thrift.CfDef cfDef : ksDef.getCf_defs())
             {
-                Assert.assertEquals("CassandraEntitySimple", cfDef.getName());
-
-                Assert.assertEquals("Standard", cfDef.getColumn_type());
-
-                List<String> columns = new ArrayList<String>();
-                columns.add("AGE");
-                columns.add("PERSON_NAME");
-                EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(CassandraEntitySimple.class);
-                for (ColumnDef columnDef : cfDef.getColumn_metadata())
+                if ("CassandraEntitySimple".equals(cfDef.getName()))
                 {
-                    Assert.assertTrue(columnDef.isSetIndex_type());
-                    Assert.assertTrue(columns.contains(new String(columnDef.getName(), Constants.ENCODING)));
-                    Assert.assertNotNull(columnDef.index_name);
+                    Assert.assertEquals("CassandraEntitySimple", cfDef.getName());
+
+                    Assert.assertEquals("Standard", cfDef.getColumn_type());
+
+                    List<String> columns = new ArrayList<String>();
+                    columns.add("AGE");
+                    columns.add("PERSON_NAME");
+                    EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(
+                            emf.getKunderaMetadataInstance(), CassandraEntitySimple.class);
+                    for (ColumnDef columnDef : cfDef.getColumn_metadata())
+                    {
+                        Assert.assertTrue(columnDef.isSetIndex_type());
+                        Assert.assertTrue(columns.contains(new String(columnDef.getName(), Constants.ENCODING)));
+                        Assert.assertNotNull(columnDef.index_name);
+                    }
                 }
             }
         }
@@ -464,66 +479,9 @@ public class CassandraSchemaOperationTest
      */
     private EntityManagerFactoryImpl getEntityManagerFactory(String property)
     {
-        ClientMetadata clientMetadata = new ClientMetadata();
-        Map<String, Object> props = new HashMap<String, Object>();
-        String persistenceUnit = "CassandraSchemaOperationTest";
-        props.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
-        props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY, PelopsClientFactory.class.getName());
-        props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
-        props.put(PersistenceProperties.KUNDERA_PORT, "9160");
-        props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaCoreExmples");
-        props.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, property);
-        if (useLucene)
-        {
-            props.put(PersistenceProperties.KUNDERA_INDEX_HOME_DIR, "lucene");
-
-            clientMetadata.setLuceneIndexDir("lucene");
-        }
-        else
-        {
-
-            clientMetadata.setLuceneIndexDir(null);
-        }
-
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
-        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
-        PersistenceUnitMetadata puMetadata = new PersistenceUnitMetadata();
-        puMetadata.setPersistenceUnitName(persistenceUnit);
-        Properties p = new Properties();
-        p.putAll(props);
-        puMetadata.setProperties(p);
-        Map<String, PersistenceUnitMetadata> metadata = new HashMap<String, PersistenceUnitMetadata>();
-        metadata.put("CassandraSchemaOperationTest", puMetadata);
-        appMetadata.addPersistenceUnitMetadata(metadata);
-
-        Map<String, List<String>> clazzToPu = new HashMap<String, List<String>>();
-
-        List<String> pus = new ArrayList<String>();
-        pus.add(persistenceUnit);
-        clazzToPu.put(CassandraEntitySimple.class.getName(), pus);
-
-        appMetadata.setClazzToPuMap(clazzToPu);
-
-
-        MetadataBuilder metadataBuilder = new MetadataBuilder(persistenceUnit, ThriftClientFactory.class.getSimpleName(), null);
-
-        MetamodelImpl metaModel = new MetamodelImpl();
-        metaModel.addEntityMetadata(CassandraEntitySimple.class, metadataBuilder.buildEntityMetadata(CassandraEntitySimple.class));
-
-        appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
-
-        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(persistenceUnit).getManagedTypes());
-        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(persistenceUnit).getEmbeddables());
-        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(persistenceUnit).getMappedSuperClassTypes());
-
-//        KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit, clientMetadata);
-
-        String[] persistenceUnits = new String[] { persistenceUnit };
-        new ClientFactoryConfiguraton(null, persistenceUnits).configure();
-
-        configuration.configure();
-        // EntityManagerFactoryImpl impl = new
-        // EntityManagerFactoryImpl(puMetadata, props);
-        return null;
+        Map propertyMap = new HashMap();
+        propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, property);
+        return (EntityManagerFactoryImpl) Persistence.createEntityManagerFactory("CassandraSchemaOperationTest",
+                propertyMap);
     }
 }

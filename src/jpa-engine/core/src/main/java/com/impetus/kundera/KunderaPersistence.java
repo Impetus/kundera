@@ -25,9 +25,7 @@ import javax.persistence.spi.ProviderUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.impetus.kundera.configure.Configurator;
 import com.impetus.kundera.configure.PersistenceUnitConfigurationException;
-import com.impetus.kundera.loader.CoreLoader;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
 /**
@@ -51,10 +49,6 @@ public class KunderaPersistence implements PersistenceProvider
      */
     public KunderaPersistence()
     {
-        // Load Core
-        logger.info("Loading Core");
-        new CoreLoader().load();
-
         this.providerUtil = new KunderaPersistenceProviderUtil(this);
         this.cache = new PersistenceUtilHelper.MetadataCache();
     }
@@ -62,25 +56,11 @@ public class KunderaPersistence implements PersistenceProvider
     @Override
     public final EntityManagerFactory createContainerEntityManagerFactory(PersistenceUnitInfo info, Map map)
     {
-        return createEntityManagerFactory(info.getPersistenceUnitName(), map);
-    }
-
-    @Override
-    public synchronized final EntityManagerFactory createEntityManagerFactory(String persistenceUnit, Map map)
-    {
-        // TODO: This may be a comma separated PU list, synchronizing on this
-        // list may not be intended
-        if (persistenceUnit == null)
-        {
-            throw new KunderaException("Persistence unit should not be null");
-        }
         synchronized (this)
         {
             try
             {
-                initializeKundera(persistenceUnit, map);
-
-                EntityManagerFactory emf = new EntityManagerFactoryImpl(persistenceUnit, map);
+                EntityManagerFactory emf = new EntityManagerFactoryImpl(info, map);
 
                 return emf;
             }
@@ -93,24 +73,26 @@ public class KunderaPersistence implements PersistenceProvider
         }
     }
 
-    /**
-     * One time initialization at Application and Client level.
-     * 
-     * @param persistenceUnit
-     *            Persistence Unit/ Comma separated persistence units
-     */
-    private void initializeKundera(String persistenceUnit, Map props)
+    @Override
+    public synchronized final EntityManagerFactory createEntityManagerFactory(String persistenceUnit, Map map)
     {
-        // Invoke Application MetaData
-        if (logger.isInfoEnabled())
+        // TODO: This may be a comma separated PU list, synchronizing on this
+        // list may not be intended
+        synchronized (this)
         {
-            logger.info("Loading Application MetaData and Initializing Client(s) For Persistence Unit(s) {}.",
-                    persistenceUnit);
+            try
+            {
+                EntityManagerFactory emf = new EntityManagerFactoryImpl(persistenceUnit, map);
+
+                return emf;
+            }
+            catch (PersistenceUnitConfigurationException pcex)
+            {
+                // Means it is not for kundera persistence!
+                logger.error("EnrityManagerFactory not created, returning null.");
+                return null;
+            }
         }
-
-        String[] persistenceUnits = persistenceUnit.split(Constants.PERSISTENCE_UNIT_SEPARATOR);
-
-        new Configurator(props, persistenceUnits).configure();
     }
 
     /**

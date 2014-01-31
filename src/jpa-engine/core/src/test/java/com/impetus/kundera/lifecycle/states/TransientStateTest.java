@@ -84,7 +84,7 @@ public class TransientStateTest
 
         Assert.assertEquals(ManagedState.class, storeNode.getCurrentNodeState().getClass());
         Assert.assertTrue(storeNode.isDirty());
-        Assert.assertNotNull(storeNode.getPersistenceCache().getMainCache().getNodeFromCache(storeNode.getNodeId()));
+        Assert.assertNotNull(storeNode.getPersistenceCache().getMainCache().getNodeFromCache(storeNode.getNodeId(), null));
 
 //        for (Node childNode : storeNode.getChildren().values())
 //        {

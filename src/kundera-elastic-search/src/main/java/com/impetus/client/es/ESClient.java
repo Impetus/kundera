@@ -61,11 +61,11 @@ import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
@@ -101,12 +101,13 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
     private static final String KEY_SEPERATOR = "\001";
 
 
-    ESClient(final ESClientFactory factory, final TransportClient client, final Map<String, Object> externalProperties)
+    ESClient(final ESClientFactory factory, final TransportClient client, final Map<String, Object> externalProperties,final KunderaMetadata kunderaMetadata)
     {
+        super(kunderaMetadata);
         this.factory = factory;
         this.clientMetadata = factory.getClientMetadata();
         this.txClient = client;
-        this.reader = new ESEntityReader();
+        this.reader = new ESEntityReader(kunderaMetadata);
         setBatchSize(getPersistenceUnit(), externalProperties);
     }
 
@@ -118,7 +119,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
              
             Map<String, Object> values = new HashMap<String, Object>();
 
-            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                     entityMetadata.getPersistenceUnit());
 
             EntityType entityType = metaModel.entity(entityMetadata.getEntityClazz());
@@ -187,10 +188,10 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
     @Override
     public Object find(Class entityClass, Object key)
     {
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entityClass);
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClass);
         GetResponse get = null;
 
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 metadata.getPersistenceUnit());
 
         EntityType entityType = metaModel.entity(metadata.getEntityClazz());
@@ -252,7 +253,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
         
         Class clazz = entityMetadata.getEntityClazz();
 
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 entityMetadata.getPersistenceUnit());
 
         EntityType entityType = metaModel.entity(clazz);
@@ -339,9 +340,9 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
     {
         if (entity != null)
         {
-            EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
+            EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,  entity.getClass());
 
-            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                     metadata.getPersistenceUnit());
 
             EntityType entityType = metaModel.entity(metadata.getEntityClazz());
@@ -501,7 +502,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
 
         List results = new ArrayList();
 
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entityClazz);
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClazz);
 
         try
         {
@@ -517,7 +518,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
             SearchHits hits = response.getHits();
             for (SearchHit hit : hits)
             {
-                MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata()
+                MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
                         .getMetamodel(metadata.getPersistenceUnit());
 
                 EntityType entityType = metaModel.entity(entityClazz);
@@ -597,9 +598,9 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
                     node.handlePreEvent();
                     Object entity = node.getData();
                     Object id = node.getEntityId();
-                    EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
+                    EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, node.getDataClass());
 
-                    MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata()
+                    MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
                             .getMetamodel(metadata.getPersistenceUnit());
 
                     EntityType entityType = metaModel.entity(metadata.getEntityClazz());
@@ -710,7 +711,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
         }
         else if (batch_Size == null)
         {
-            PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
+            PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata, persistenceUnit);
             batchSize = puMetadata != null ? puMetadata.getBatchSize() : 0;
         }
     }

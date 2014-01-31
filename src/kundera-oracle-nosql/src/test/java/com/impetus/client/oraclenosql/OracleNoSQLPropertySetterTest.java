@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
  * Test case for {@link OracleNoSQLClient}
@@ -75,7 +74,7 @@ public class OracleNoSQLPropertySetterTest
     {
         em.close();
         emf.close();
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
     }
 
     @Test

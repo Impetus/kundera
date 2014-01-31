@@ -28,6 +28,8 @@ import javax.persistence.PersistenceContextType;
 import javax.persistence.PersistenceUnitUtil;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.metamodel.Metamodel;
+import javax.persistence.spi.LoadState;
+import javax.persistence.spi.PersistenceUnitInfo;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 
 import org.apache.commons.lang.NotImplementedException;
@@ -35,7 +37,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.Constants;
-import com.impetus.kundera.KunderaPersistenceUnitUtil;
+import com.impetus.kundera.KunderaException;
+import com.impetus.kundera.KunderaPersistence;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.PersistenceUtilHelper;
 import com.impetus.kundera.cache.CacheException;
@@ -43,10 +46,18 @@ import com.impetus.kundera.cache.CacheProvider;
 import com.impetus.kundera.cache.NonOperationalCacheProvider;
 import com.impetus.kundera.client.ClientResolverException;
 import com.impetus.kundera.configure.ClientMetadataBuilder;
+import com.impetus.kundera.configure.MetamodelConfiguration;
+import com.impetus.kundera.configure.PersistenceUnitConfiguration;
 import com.impetus.kundera.loader.ClientFactory;
 import com.impetus.kundera.loader.ClientLifeCycleManager;
+import com.impetus.kundera.loader.CoreLoader;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.ApplicationMetadata;
+import com.impetus.kundera.metadata.model.CoreMetadata;
+import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
  * Implementation class for {@link EntityManagerFactory}
@@ -88,6 +99,20 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     /** ClientFactory map holds one clientfactory for one persistence unit */
     private Map<String, ClientFactory> clientFactories = new ConcurrentHashMap<String, ClientFactory>();
 
+    /** The Constant INSTANCE holds all application and core metadata. */
+    private final KunderaMetadata kunderaMetadata = new KunderaMetadata();
+
+    public EntityManagerFactoryImpl(PersistenceUnitInfo puInfo, Map<String, Object> properties)
+    {
+        // Load Core
+        logger.info("Loading Core");
+        new CoreLoader().load(kunderaMetadata);
+
+        this.configurePersistenceUnit(puInfo, properties);
+        this.util = new KunderaPersistenceUnitUtil(cache);
+        this.configure(puInfo.getPersistenceUnitName(), properties);
+    }
+
     /**
      * Use this if you want to construct this directly.
      * 
@@ -97,6 +122,22 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
      *            the properties
      */
     public EntityManagerFactoryImpl(String persistenceUnit, Map<String, Object> properties)
+    {
+        // Load Core
+        logger.info("Loading Core");
+        new CoreLoader().load(kunderaMetadata);
+
+        this.configurePersistenceUnit(persistenceUnit, properties);
+        this.util = new KunderaPersistenceUnitUtil(cache);
+        this.configure(persistenceUnit, properties);
+    }
+
+    /**
+     * 
+     * @param persistenceUnit
+     * @param properties
+     */
+    private void configure(String persistenceUnit, Map<String, Object> properties)
     {
         Map<String, Object> propsMap = new HashMap<String, Object>();
 
@@ -110,26 +151,23 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         this.properties = propsMap;
         this.persistenceUnits = persistenceUnit.split(Constants.PERSISTENCE_UNIT_SEPARATOR);
 
+        // Configure metamodel.
+        new MetamodelConfiguration(properties, kunderaMetadata, persistenceUnits).configure();
+
         // configure client factories
         configureClientFactories();
 
         // Initialize L2 cache
-        
-        
-
         // Invoke Client Loaders
-        // logger.info("Loading Client(s) For Persistence Unit(s) " +
-        // persistenceUnit);
 
         Set<PersistenceUnitTransactionType> txTypes = new HashSet<PersistenceUnitTransactionType>();
 
         for (String pu : persistenceUnits)
         {
-            PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(pu);
-            PersistenceUnitTransactionType txType = KunderaMetadataManager.getPersistenceUnitMetadata(pu)
-                    .getTransactionType();
+            PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata,  pu);
+            PersistenceUnitTransactionType txType = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata, pu).getTransactionType();
             txTypes.add(txType);
-            if(cacheProvider == null)
+            if (cacheProvider == null)
             {
                 this.cacheProvider = initSecondLevelCache(puMetadata);
                 this.cacheProvider.createCache(Constants.KUNDERA_SECONDARY_CACHE_NAME);
@@ -146,9 +184,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
             this.transactionType = txTypes.iterator().next();
         }
 
-        this.util = new KunderaPersistenceUnitUtil(cache);
-
-        if (logger.isDebugEnabled())
+        if (logger.isInfoEnabled())
         {
             logger.info("EntityManagerFactory created for persistence unit : " + persistenceUnit);
         }
@@ -181,7 +217,6 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
             for (String pu : persistenceUnits)
             {
                 ((ClientLifeCycleManager) clientFactories.get(pu)).destroy();
-                // KunderaMetadata.INSTANCE.unloadKunderaMetadata(pu);
             }
             this.persistenceUnits = null;
             this.properties = null;
@@ -190,7 +225,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         }
         else
         {
-            throw new IllegalStateException("entity manager factory has been closed");
+            throw new IllegalStateException("Entity manager factory has been closed");
         }
     }
 
@@ -282,7 +317,18 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     {
         if (isOpen())
         {
-            return KunderaMetadataManager.getMetamodel(getPersistenceUnits());
+            MetamodelImpl metamodel = null;
+            for (String pu : persistenceUnits)
+            {
+                metamodel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(pu);
+
+                if (metamodel != null)
+                {
+                    return metamodel;
+                }
+            }
+            // return
+            // KunderaMetadataManager.getMetamodel(getPersistenceUnits());
         }
         throw new IllegalStateException("Entity manager factory has been closed.");
     }
@@ -302,7 +348,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     {
         if (isOpen())
         {
-            return properties ;
+            return properties;
         }
         throw new IllegalStateException("Entity manager factory has been closed.");
     }
@@ -354,8 +400,9 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
      */
     private void configureClientFactories()
     {
-        ClientMetadataBuilder builder = new ClientMetadataBuilder(getProperties(), getPersistenceUnits());
-        builder.buildClientFactoryMetadata(clientFactories);
+        ClientMetadataBuilder builder = new ClientMetadataBuilder(getProperties(), kunderaMetadata,
+                getPersistenceUnits());
+        builder.buildClientFactoryMetadata(clientFactories, kunderaMetadata);
     }
 
     /**
@@ -365,15 +412,15 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
      */
     private CacheProvider initSecondLevelCache(final PersistenceUnitMetadata puMetadata)
     {
-        
+
         String classResourceName = (String) getProperties().get(PersistenceProperties.KUNDERA_CACHE_CONFIG_RESOURCE);
-        
+
         classResourceName = classResourceName != null ? classResourceName : puMetadata
                 .getProperty(PersistenceProperties.KUNDERA_CACHE_CONFIG_RESOURCE);
-        
+
         String cacheProviderClassName = (String) getProperties()
                 .get(PersistenceProperties.KUNDERA_CACHE_PROVIDER_CLASS);
-        
+
         cacheProviderClassName = cacheProviderClassName != null ? cacheProviderClassName : puMetadata
                 .getProperty(PersistenceProperties.KUNDERA_CACHE_PROVIDER_CLASS);
 
@@ -432,4 +479,181 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         logger.error("Client Factory Not Configured For Specified Client Type : ");
         throw new ClientResolverException("Client Factory Not Configured For Specified Client Type.");
     }
+
+    /**
+     * 
+     * @return Kundera metadata instance.
+     */
+    public KunderaMetadata getKunderaMetadataInstance()
+    {
+        return kunderaMetadata;
+    }
+
+    /**
+     * The Class KunderaMetadata.
+     * 
+     * @author amresh.singh
+     */
+    public static class KunderaMetadata
+    {
+        /* Metadata for Kundera core */
+        /** The core metadata. */
+        private CoreMetadata coreMetadata;
+
+        /* User application specific metadata */
+        /** The application metadata. */
+        private ApplicationMetadata applicationMetadata;
+
+        /**
+         * Instantiates a new kundera metadata.
+         */
+        private KunderaMetadata()
+        {
+
+        }
+
+        /**
+         * Gets the application metadata.
+         * 
+         * @return the applicationMetadata
+         */
+        public ApplicationMetadata getApplicationMetadata()
+        {
+            if (applicationMetadata == null)
+            {
+                applicationMetadata = new ApplicationMetadata();
+            }
+            return applicationMetadata;
+        }
+
+        /**
+         * Gets the core metadata.
+         * 
+         * @return the coreMetadata
+         */
+        public CoreMetadata getCoreMetadata()
+        {
+            return coreMetadata;
+        }
+
+        /**
+         * Sets the application metadata.
+         * 
+         * @param applicationMetadata
+         *            the applicationMetadata to set
+         */
+        public void setApplicationMetadata(ApplicationMetadata applicationMetadata)
+        {
+            this.applicationMetadata = applicationMetadata;
+        }
+
+        /**
+         * Sets the core metadata.
+         * 
+         * @param coreMetadata
+         *            the coreMetadata to set
+         */
+        public void setCoreMetadata(CoreMetadata coreMetadata)
+        {
+            this.coreMetadata = coreMetadata;
+        }
+    }
+
+    /**
+     * {@link PersistenceUnitUtil} for {@link KunderaPersistence}
+     * 
+     * @author amresh.singh
+     */
+    private class KunderaPersistenceUnitUtil implements PersistenceUnitUtil
+    {
+        private transient PersistenceUtilHelper.MetadataCache cache;
+
+        public KunderaPersistenceUnitUtil(PersistenceUtilHelper.MetadataCache cache)
+        {
+            this.cache = cache;
+        }
+
+        @Override
+        public boolean isLoaded(Object entity, String attributeName)
+        {
+            LoadState state = PersistenceUtilHelper.isLoadedWithoutReference(entity, attributeName, this.cache);
+            if (state == LoadState.LOADED)
+            {
+                return true;
+            }
+            if (state == LoadState.NOT_LOADED)
+            {
+                return false;
+            }
+            return (PersistenceUtilHelper.isLoadedWithReference(entity, attributeName, this.cache) != LoadState.NOT_LOADED);
+        }
+
+        @Override
+        public boolean isLoaded(Object entity)
+        {
+            return (PersistenceUtilHelper.isLoaded(entity) != LoadState.NOT_LOADED);
+        }
+
+        @Override
+        public Object getIdentifier(Object entity)
+        {
+            Class<?> entityClass = entity.getClass();
+            EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,  entityClass);
+
+            if (entityMetadata == null)
+            {
+                throw new IllegalArgumentException(entityClass + " is not an entity");
+            }
+            return PropertyAccessorHelper.getId(entity, entityMetadata);
+        }
+
+    }
+
+    /**
+     * One time initialization for persistence unit metadata.
+     * 
+     * @param persistenceUnit
+     *            Persistence Unit/ Comma separated persistence units
+     */
+    private void configurePersistenceUnit(String persistenceUnit, Map props)
+    {
+        // Invoke Persistence unit MetaData
+        if (persistenceUnit == null)
+        {
+            throw new KunderaException("Persistence unit name should not be null");
+        }
+        if (logger.isInfoEnabled())
+        {
+            logger.info("Loading Persistence Unit MetaData For Persistence Unit(s) {}.", persistenceUnit);
+        }
+
+        String[] persistenceUnits = persistenceUnit.split(Constants.PERSISTENCE_UNIT_SEPARATOR);
+
+        new PersistenceUnitConfiguration(props, kunderaMetadata, persistenceUnits).configure();
+    }
+
+    /**
+     * One time initialization for persistence unit metadata.
+     * 
+     * @param persistenceUnit
+     *            Persistence Unit/ Comma separated persistence units
+     */
+    private void configurePersistenceUnit(PersistenceUnitInfo puInfo, Map props)
+    {
+        // Invoke Persistence unit MetaData
+        if (puInfo.getPersistenceUnitName() == null)
+        {
+            throw new KunderaException("Persistence unit name should not be null");
+        }
+        if (logger.isInfoEnabled())
+        {
+            logger.info("Loading Persistence Unit MetaData For Persistence Unit(s) {}.",
+                    puInfo.getPersistenceUnitName());
+        }
+
+        String[] persistenceUnits = puInfo.getPersistenceUnitName().split(Constants.PERSISTENCE_UNIT_SEPARATOR);
+
+        new PersistenceUnitConfiguration(props, kunderaMetadata, persistenceUnits).configure(puInfo);
+    }
+
 }

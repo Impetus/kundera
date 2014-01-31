@@ -72,11 +72,11 @@ import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.TableGeneratorDiscriptor;
 import com.impetus.kundera.metadata.model.annotation.DefaultEntityAnnotationProcessor;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.EntityReaderException;
 import com.impetus.kundera.persistence.api.Batcher;
@@ -110,13 +110,14 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     private ConnectionPool pool;
 
     public ThriftClient(ThriftClientFactory clientFactory, IndexManager indexManager, EntityReader reader,
-            String persistenceUnit, ConnectionPool pool, Map<String, Object> externalProperties)
+            String persistenceUnit, ConnectionPool pool, Map<String, Object> externalProperties,
+            final KunderaMetadata kunderaMetadata)
     {
-        super(persistenceUnit, externalProperties);
+        super(persistenceUnit, externalProperties, kunderaMetadata);
         this.clientFactory = clientFactory;
         this.persistenceUnit = persistenceUnit;
         this.indexManager = indexManager;
-        this.dataHandler = new ThriftDataHandler(this);
+        this.dataHandler = new ThriftDataHandler(this, kunderaMetadata);
         this.reader = reader;
         this.clientMetadata = clientFactory.getClientMetadata();
         this.invertedIndexHandler = new ThriftInvertedIndexHandler(this, MetadataUtils.useSecondryIndex(clientMetadata));
@@ -214,7 +215,8 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         String invJoinColumnName = joinTableData.getInverseJoinColumnName();
         Map<Object, Set<Object>> joinTableRecords = joinTableData.getJoinTableRecords();
 
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(joinTableData.getEntityClass());
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
+                joinTableData.getEntityClass());
 
         Connection conn = null;
         try
@@ -485,7 +487,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             Object columnValue, Class entityClazz)
     {
         List<Object> rowKeys = new ArrayList<Object>();
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entityClazz);
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClazz);
 
         SlicePredicate slicePredicate = new SlicePredicate();
 
@@ -559,7 +561,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     @Override
     public List<Object> findByRelation(String colName, Object colValue, Class entityClazz)
     {
-        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClazz);
+        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClazz);
         List<Object> entities = null;
 
         if (isCql3Enabled(m))
@@ -569,7 +571,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
              */
             entities = new ArrayList<Object>();
 
-            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                     m.getPersistenceUnit());
 
             EntityType entityType = metaModel.entity(m.getEntityClazz());
@@ -584,8 +586,8 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             {
                 for (AbstractManagedType subEntity : subManagedType)
                 {
-                    EntityMetadata subEntityMetadata = KunderaMetadataManager
-                            .getEntityMetadata(subEntity.getJavaType());
+                    EntityMetadata subEntityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
+                            subEntity.getJavaType());
 
                     entities.addAll(findByRelationQuery(subEntityMetadata, colName, colValue,
                             subEntityMetadata.getEntityClazz(), dataHandler));
@@ -662,8 +664,8 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             {
                 entities = new ArrayList<Object>(keySlices.size());
 
-                MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata()
-                        .getMetamodel(m.getPersistenceUnit());
+                MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                        m.getPersistenceUnit());
 
                 EntityType entityType = metaModel.entity(m.getEntityClazz());
 
@@ -677,8 +679,8 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                 {
                     for (AbstractManagedType subEntity : subManagedType)
                     {
-                        EntityMetadata subEntityMetadata = KunderaMetadataManager.getEntityMetadata(subEntity
-                                .getJavaType());
+                        EntityMetadata subEntityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
+                                subEntity.getJavaType());
                         entities = populateData(subEntityMetadata, keySlices, entities,
                                 subEntityMetadata.getRelationNames() != null, subEntityMetadata.getRelationNames());
                         // TODOO:: if(entities != null)
@@ -698,12 +700,12 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             throw new PersistenceException("ThriftClient is closed.");
         }
 
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entity.getClass());
         Connection conn = null;
         try
         {
             conn = getConection();
-            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                     metadata.getPersistenceUnit());
 
             AbstractManagedType managedType = (AbstractManagedType) metaModel.entity(metadata.getEntityClazz());
@@ -740,7 +742,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             getIndexManager().remove(metadata, entity, pKey.toString());
 
             // Delete from Inverted Index if applicable
-            invertedIndexHandler.delete(entity, metadata, getConsistencyLevel());
+            invertedIndexHandler.delete(entity, metadata, getConsistencyLevel(), kunderaMetadata);
         }
         catch (InvalidRequestException e)
         {
@@ -898,7 +900,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         }
         catch (Exception e)
         {
-            
+
             log.error("Error while populating data for relations of column family {}, Caused by: .", m.getTableName(),
                     e);
             throw new KunderaException(e);

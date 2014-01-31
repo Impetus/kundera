@@ -18,6 +18,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.hbase.junits.HBaseCli;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 import com.impetus.kundera.utils.LuceneCleanupUtilities;
 
 /**
@@ -60,12 +61,13 @@ public class HBaseIdQueryTest extends BaseTest
             em.remove(val);
         }
         em.close();
-        emf.close();
         if (cli != null)
         {
             cli.dropTable("KunderaExamples");
         }
-        LuceneCleanupUtilities.cleanLuceneDirectory("hbaseTest");
+        LuceneCleanupUtilities.cleanLuceneDirectory(((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance()
+                .getApplicationMetadata().getPersistenceUnitMetadata("hbaseTest"));
+        emf.close();
     }
 
     @Test

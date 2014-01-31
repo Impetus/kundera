@@ -28,27 +28,30 @@ import org.junit.Test;
 
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 import com.impetus.kundera.query.Person;
 import com.impetus.kundera.query.Person.Day;
 import com.impetus.kundera.utils.LuceneCleanupUtilities;
 
 /**
  * Junit for {@link LuceneIndexer}
+ * 
  * @author vivek.mishra
- *
+ * 
  */
 public class LuceneIndexerTest
 {
     private EntityManagerFactory emf;
-    
+
     private static final String LUCENE_DIR_PATH = "./lucene";
-  
+
     @Before
     public void setup()
     {
         emf = Persistence.createEntityManagerFactory("patest");
     }
-    
+
     @Test
     public void testGetInstance()
     {
@@ -62,17 +65,19 @@ public class LuceneIndexerTest
     {
         LuceneIndexer indexer = LuceneIndexer.getInstance(LUCENE_DIR_PATH);
         Assert.assertNotNull(indexer);
-        
+
         String luceneQuery = LuceneQueryUtils.getQuery("addressId", "address", "addressId", "1");
-        
+
         try
         {
-            indexer.search(luceneQuery, 0, 10,false);
-        }catch(LuceneIndexingException liex)
-        {
-            Assert.assertNotNull(liex.getMessage()); // as there is no index directory created.
+            indexer.search(luceneQuery, 0, 10, false);
         }
-        
+        catch (LuceneIndexingException liex)
+        {
+            Assert.assertNotNull(liex.getMessage()); // as there is no index
+                                                     // directory created.
+        }
+
         indexer.close();
     }
 
@@ -80,24 +85,27 @@ public class LuceneIndexerTest
     public void invalidLuceneQueryTest()
     {
         LuceneIndexer indexer = LuceneIndexer.getInstance(LUCENE_DIR_PATH);
-        
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(Person.class);
+
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(
+                ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance(), Person.class);
         Person p = new Person();
         p.setAge(32);
         p.setDay(Day.TUESDAY);
         p.setPersonId("p1");
-        indexer.index(metadata, p);
+        indexer.index(metadata, (MetamodelImpl) ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance()
+                .getApplicationMetadata().getMetamodel("patest"), p);
         Assert.assertNotNull(indexer);
-        
+
         final String luceneQuery = "Invalid lucene query";
         try
         {
-            indexer.search(luceneQuery, 0, 10,false);
-        }catch(LuceneIndexingException liex)
+            indexer.search(luceneQuery, 0, 10, false);
+        }
+        catch (LuceneIndexingException liex)
         {
             Assert.assertEquals("Error while parsing Lucene Query " + luceneQuery, liex.getMessage());
         }
-        
+
         indexer.close();
     }
 
@@ -105,73 +113,78 @@ public class LuceneIndexerTest
     public void invalidValidQueryTest()
     {
         LuceneIndexer indexer = LuceneIndexer.getInstance(LUCENE_DIR_PATH);
-        
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(Person.class);
+
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(
+                ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance(), Person.class);
         Person p = new Person();
         p.setAge(32);
         p.setDay(Day.TUESDAY);
         p.setPersonId("p1");
-        indexer.index(metadata, p);
-        
+        indexer.index(metadata, (MetamodelImpl) ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance()
+                .getApplicationMetadata().getMetamodel("patest"), p);
+
         indexer.flush();
         Assert.assertNotNull(indexer);
-        
+
         String luceneQuery = "+Person.AGE:32 AND +entity.class:com.impetus.kundera.query.Person";
 
         try
         {
-            Map<String, Object> results = indexer.search(luceneQuery, 0, 10,false);
+            Map<String, Object> results = indexer.search(luceneQuery, 0, 10, false);
             Assert.assertTrue(!results.isEmpty());
-        }catch(LuceneIndexingException liex)
+        }
+        catch (LuceneIndexingException liex)
         {
             Assert.fail();
         }
-        
+
         indexer.close();
     }
-    
+
     @Test
     public void testOnUnsupportedMethods()
     {
         String luceneQuery = "+Person.AGE:32 AND +entity.class:com.impetus.kundera.query.Person";
         Indexer indexer = LuceneIndexer.getInstance(LUCENE_DIR_PATH);
+        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(
+                ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance(), Person.class);
         try
         {
-            indexer.index(Person.class, null, null, null);
+            indexer.index(Person.class, m, null, null, null);
             Assert.fail("Should have gone to catch block!");
         }
         catch (UnsupportedOperationException uoex)
         {
             Assert.assertNotNull(uoex);
         }
-        
+
         try
         {
-            EntityMetadata m = KunderaMetadataManager.getEntityMetadata(Person.class);
-            indexer.search(m.getEntityClazz(),luceneQuery, 0, 100);
+            indexer.search(m.getEntityClazz(), m, luceneQuery, 0, 100);
             Assert.fail("Should have gone to catch block!");
-        }catch(UnsupportedOperationException uoex)
+        }
+        catch (UnsupportedOperationException uoex)
         {
             Assert.assertNotNull(uoex);
         }
-        
+
         try
         {
-            indexer.unIndex(Person.class, null);
+            indexer.unIndex(Person.class, null, m, (MetamodelImpl) ((EntityManagerFactoryImpl) emf)
+                    .getKunderaMetadataInstance().getApplicationMetadata().getMetamodel("patest"));
             Assert.fail("Should have gone to catch block!");
-        }catch(UnsupportedOperationException uoex)
+        }
+        catch (UnsupportedOperationException uoex)
         {
             Assert.assertNotNull(uoex);
         }
-        
-        
+
     }
-    
+
     @After
     public void tearDown()
     {
         LuceneCleanupUtilities.cleanDir(LUCENE_DIR_PATH);
     }
 
-    
 }

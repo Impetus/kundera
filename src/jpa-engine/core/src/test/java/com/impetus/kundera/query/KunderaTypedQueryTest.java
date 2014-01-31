@@ -32,7 +32,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.kundera.metadata.entities.SampleEntity;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
  * @author vivek.mishra
@@ -51,7 +50,7 @@ public class KunderaTypedQueryTest
     @Before
     public void setUp()
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         emf = Persistence.createEntityManagerFactory("kunderatest");
 
         em = emf.createEntityManager();

@@ -247,7 +247,7 @@ public class RedisClientTest
         object.setDay(Day.TUESDAY);
         object.setMonth(Month.JAN);
 
-        Node node = new Node(nodeId, PersonRedis.class, new TransientState(), null, ROW_KEY);
+        Node node = new Node(nodeId, PersonRedis.class, new TransientState(), null, ROW_KEY, null);
         node.setData(object);
         client.persist(node);
 

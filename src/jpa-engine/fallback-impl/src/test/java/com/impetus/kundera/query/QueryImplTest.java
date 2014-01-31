@@ -38,7 +38,8 @@ import com.impetus.kundera.CoreTestUtilities;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.DummyDatabase;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.polyglot.entities.AddressB1M;
 import com.impetus.kundera.polyglot.entities.AddressBM1;
@@ -62,14 +63,16 @@ public class QueryImplTest
 
     private EntityManager em;
 
+    private KunderaMetadata kunderaMetadata;
     /**
      * @throws java.lang.Exception
      */
     @Before
     public void setUp() throws Exception
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);        
+                
         emf = Persistence.createEntityManagerFactory(PU);
+        kunderaMetadata = ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance();
         em = emf.createEntityManager();
 
     }
@@ -102,13 +105,13 @@ public class QueryImplTest
         KunderaQueryParser queryParser;
         KunderaQuery kunderaQuery = parseQuery(query);
 
-        CoreQuery queryObj = new CoreQuery(kunderaQuery, delegator);
+        CoreQuery queryObj = new CoreQuery(kunderaQuery, delegator, ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());
         
         queryObj.setParameter("personId", "1");
         List<Person> results = queryObj.getResultList();
         
         Assert.assertEquals(1,results.size());
-        Assert.assertNotNull(KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery)); //assert on lucene query transformation.
+        Assert.assertNotNull(KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery,kunderaMetadata)); //assert on lucene query transformation.
         Assert.assertNotNull(queryObj.populateUsingLucene()); //assert on lucene query transformation.
         
         final String deleteQuery = "Delete from Person p where p.personId = ?1";
@@ -116,7 +119,7 @@ public class QueryImplTest
         kunderaQuery = parseQuery(deleteQuery);
         
         
-        queryObj = new CoreQuery(kunderaQuery, delegator);
+        queryObj = new CoreQuery(kunderaQuery, delegator, ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());
         
         try
         {
@@ -127,7 +130,7 @@ public class QueryImplTest
         }
         Assert.assertNotNull(queryObj.getParameter(1, String.class));
         Assert.assertNotNull(queryObj.getParameterValue(1));
-        Assert.assertNotNull(KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery)); 
+        Assert.assertNotNull(KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery, kunderaMetadata)); 
         Assert.assertNotNull(queryObj.populateUsingLucene()); 
 
         try
@@ -144,7 +147,7 @@ public class QueryImplTest
         
         
         kunderaQuery = parseQuery(query);
-        queryObj = new CoreQuery(kunderaQuery, delegator);
+        queryObj = new CoreQuery(kunderaQuery, delegator, ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());
         
         try
         {
@@ -189,7 +192,7 @@ public class QueryImplTest
         results = queryObj.getResultList();
         
         Assert.assertEquals(0,results.size());
-        Assert.assertNotNull(KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery)); 
+        Assert.assertNotNull(KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery, kunderaMetadata)); 
         Assert.assertNotNull(queryObj.populateUsingLucene()); 
         
 
@@ -225,10 +228,10 @@ public class QueryImplTest
         //assert on native query.
         try
         {
-            ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+            ApplicationMetadata appMetadata = ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance().getApplicationMetadata();
             appMetadata.addQueryToCollection(query, query, true, null);
             kunderaQuery = parseQuery(query);
-            queryObj = new CoreQuery(kunderaQuery, delegator);
+            queryObj = new CoreQuery(kunderaQuery, delegator, ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());
             Assert.assertNull(queryObj.getParameter(1, String.class));
             Assert.fail("Should have gone to catch block!");
         }catch(IllegalStateException iaex)
@@ -241,9 +244,9 @@ public class QueryImplTest
         {
             final String updateQuery = "Update Person p set p.personName=Amresh where p.personId = 1";
             kunderaQuery = parseQuery(updateQuery);       
-            queryObj = new CoreQuery(kunderaQuery, delegator);
+            queryObj = new CoreQuery(kunderaQuery, delegator, ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());
             queryObj.executeUpdate();
-            Assert.assertNotNull(KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery)); 
+            Assert.assertNotNull(KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery, kunderaMetadata)); 
             Assert.assertNotNull(queryObj.populateUsingLucene()); 
         }
         catch (Exception e)
@@ -272,49 +275,49 @@ public class QueryImplTest
         query = "Select p from Person p where p.age >:age";        
         delegator = CoreTestUtilities.getDelegator(em);  
         kunderaQuery = parseQuery(query);
-        queryObj = new CoreQuery(kunderaQuery, delegator);        
+        queryObj = new CoreQuery(kunderaQuery, delegator, ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());        
         queryObj.setParameter("age", new Integer(32));       
-        Assert.assertNotNull(KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery)); 
+        Assert.assertNotNull(KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery, kunderaMetadata)); 
         Assert.assertNotNull(queryObj.populateUsingLucene());
         
         query = "Select p from Person p where p.age >=:age";        
         delegator = CoreTestUtilities.getDelegator(em);  
         kunderaQuery = parseQuery(query);
-        queryObj = new CoreQuery(kunderaQuery, delegator);        
+        queryObj = new CoreQuery(kunderaQuery, delegator, ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());        
         queryObj.setParameter("age", new Integer(32));       
-        Assert.assertNotNull(KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery)); 
+        Assert.assertNotNull(KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery, kunderaMetadata)); 
         Assert.assertNotNull(queryObj.populateUsingLucene());
         
         query = "Select p from Person p where p.age <:age";        
         delegator = CoreTestUtilities.getDelegator(em);  
         kunderaQuery = parseQuery(query);
-        queryObj = new CoreQuery(kunderaQuery, delegator);        
+        queryObj = new CoreQuery(kunderaQuery, delegator, ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());        
         queryObj.setParameter("age", new Integer(32));       
-        Assert.assertNotNull(KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery)); 
+        Assert.assertNotNull(KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery, kunderaMetadata)); 
         Assert.assertNotNull(queryObj.populateUsingLucene());
         
         query = "Select p from Person p where p.age <=:age";        
         delegator = CoreTestUtilities.getDelegator(em);  
         kunderaQuery = parseQuery(query);
-        queryObj = new CoreQuery(kunderaQuery, delegator);        
+        queryObj = new CoreQuery(kunderaQuery, delegator, ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());        
         queryObj.setParameter("age", new Integer(32));       
-        Assert.assertNotNull(KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery)); 
+        Assert.assertNotNull(KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery, kunderaMetadata )); 
         Assert.assertNotNull(queryObj.populateUsingLucene());
         
         query = "Select p from Person p where p.personName like :personName";        
         delegator = CoreTestUtilities.getDelegator(em);  
         kunderaQuery = parseQuery(query);
-        queryObj = new CoreQuery(kunderaQuery, delegator);        
+        queryObj = new CoreQuery(kunderaQuery, delegator, ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());        
         queryObj.setParameter("personName", "Amresh");       
-        Assert.assertNotNull(KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery)); 
+        Assert.assertNotNull(KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery, kunderaMetadata)); 
         Assert.assertNotNull(queryObj.populateUsingLucene()); 
         
         query = "Select p from Person p where p.salary >=:salary";        
         delegator = CoreTestUtilities.getDelegator(em);  
         kunderaQuery = parseQuery(query);
-        queryObj = new CoreQuery(kunderaQuery, delegator);        
+        queryObj = new CoreQuery(kunderaQuery, delegator, ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());        
         queryObj.setParameter("salary", 500.0);       
-        Assert.assertNotNull(KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery)); 
+        Assert.assertNotNull(KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery, kunderaMetadata)); 
         Assert.assertNotNull(queryObj.populateUsingLucene());
         
         onassertBi1MAssociation(delegator);
@@ -353,7 +356,7 @@ public class QueryImplTest
         kunderaQuery = parseQuery(query);
         
         
-        queryObj = new CoreQuery(kunderaQuery, delegator);
+        queryObj = new CoreQuery(kunderaQuery, delegator, ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());
         
         List<PersonB1M> associationResults = queryObj.getResultList();
         
@@ -369,7 +372,7 @@ public class QueryImplTest
         kunderaQuery = parseQuery(query);
         
         
-        queryObj = new CoreQuery(kunderaQuery, delegator);
+        queryObj = new CoreQuery(kunderaQuery, delegator, ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());
         
         associationResults = queryObj.getResultList();
 
@@ -409,7 +412,7 @@ public class QueryImplTest
         kunderaQuery = parseQuery(selectAssociationQuery);
         
         
-        queryObj = new CoreQuery(kunderaQuery, delegator);
+        queryObj = new CoreQuery(kunderaQuery, delegator, ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());
         
         List<PersonBM1> associationResults = queryObj.getResultList();
         
@@ -422,7 +425,7 @@ public class QueryImplTest
 
         kunderaQuery = parseQuery(selectAssociationQuery);        
         
-        queryObj = new CoreQuery(kunderaQuery, delegator);
+        queryObj = new CoreQuery(kunderaQuery, delegator, ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());
         
         associationResults = queryObj.getResultList();
 
@@ -432,7 +435,7 @@ public class QueryImplTest
 
     private KunderaQuery parseQuery(final String query)
     {
-        KunderaQuery kunderaQuery = new KunderaQuery(query);
+        KunderaQuery kunderaQuery = new KunderaQuery(query, kunderaMetadata);
         KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery);
         queryParser.parse();
         kunderaQuery.postParsingInit();
@@ -444,7 +447,8 @@ public class QueryImplTest
     public void tearDown()
     {
         DummyDatabase.INSTANCE.dropDatabase();
-        LuceneCleanupUtilities.cleanLuceneDirectory(PU);
+        LuceneCleanupUtilities.cleanLuceneDirectory(((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance()
+                .getApplicationMetadata().getPersistenceUnitMetadata(PU));
     }
 
     /**
@@ -464,7 +468,7 @@ public class QueryImplTest
         KunderaQueryParser queryParser;
         KunderaQuery kunderaQuery = parseQuery(queryStr);
 
-        CoreQuery query = new CoreQuery(kunderaQuery, delegator);
+        CoreQuery query = new CoreQuery(kunderaQuery, delegator, ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());
 
         try
         {

@@ -47,10 +47,10 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.model.type.DefaultEntityType;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -72,6 +72,8 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
     /** The persistence delegeator. */
     protected PersistenceDelegator persistenceDelegeator;
 
+    protected KunderaMetadata kunderaMetadata;
+
     /** The log. */
     private static Logger log = LoggerFactory.getLogger(QueryImpl.class);
 
@@ -86,7 +88,6 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
 
     private Integer fetchSize;
 
-    
     /**
      * Instantiates a new query impl.
      * 
@@ -97,12 +98,13 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
      * @param persistenceUnits
      *            the persistence units
      */
-    public QueryImpl(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
+    public QueryImpl(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator,
+            final KunderaMetadata kunderaMetadata)
     {
         this.kunderaQuery = kunderaQuery;
         this.persistenceDelegeator = persistenceDelegator;
+        this.kunderaMetadata = kunderaMetadata;
     }
-    
 
     /**
      * Gets the jPA query.
@@ -195,7 +197,7 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
     protected List<Object> populateUsingLucene(EntityMetadata m, Client client, List<Object> result,
             String[] columnsToSelect)
     {
-        String luceneQ = KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery);
+        String luceneQ = KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery, kunderaMetadata);
         Map<String, Object> searchFilter = client.getIndexManager().search(m.getEntityClazz(), luceneQ,
                 Constants.INVALID, Constants.INVALID);
         String[] primaryKeys = searchFilter.values().toArray(new String[] {});
@@ -301,8 +303,8 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
                         try
                         {
 
-                            DefaultEntityType entityType = (DefaultEntityType) KunderaMetadata.INSTANCE
-                                    .getApplicationMetadata().getMetamodel(entityMetadata.getPersistenceUnit())
+                            DefaultEntityType entityType = (DefaultEntityType) kunderaMetadata.getApplicationMetadata()
+                                    .getMetamodel(entityMetadata.getPersistenceUnit())
                                     .entity(entityMetadata.getEntityClazz());
 
                             // That will always be attribute name.
@@ -798,7 +800,7 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
      */
     private void onNativeCondition()
     {
-        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+        ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
         if (appMetadata.isNative(getJPAQuery()))
         {
             throw new IllegalStateException(
@@ -853,7 +855,7 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
         List<String> columnAsList = new ArrayList<String>();
         if (columns != null && columns.length > 0)
         {
-            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                     m.getPersistenceUnit());
             EntityType entity = metaModel.entity(m.getEntityClazz());
             for (int i = 1; i < columns.length; i++)
@@ -915,20 +917,19 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
 
     protected void onValidateSingleResult(List results)
     {
-      if(results == null || results.isEmpty())
-      {
-          log.error("No result found for {} ", kunderaQuery.getJPAQuery());
-          throw new NoResultException("No result found!");
-      }
-      
-      if(results.size() > 1)
-      {
-          log.error("Non unique results found for query {} ", kunderaQuery.getJPAQuery());
-          throw new NonUniqueResultException("Containing more than one result!");
-      }
-      
+        if (results == null || results.isEmpty())
+        {
+            log.error("No result found for {} ", kunderaQuery.getJPAQuery());
+            throw new NoResultException("No result found!");
+        }
+
+        if (results.size() > 1)
+        {
+            log.error("Non unique results found for query {} ", kunderaQuery.getJPAQuery());
+            throw new NonUniqueResultException("Containing more than one result!");
+        }
+
     }
-    
 
     protected Object onReturnResults(List results)
     {
@@ -962,8 +963,7 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
         {
             for (Object obj : results)
             {
-                KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory()
-                        .setProxyOwners(getEntityMetadata(), obj);
+                kunderaMetadata.getCoreMetadata().getLazyInitializerFactory().setProxyOwners(getEntityMetadata(), obj);
             }
         }
     }

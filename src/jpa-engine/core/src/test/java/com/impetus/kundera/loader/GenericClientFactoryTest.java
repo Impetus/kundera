@@ -15,8 +15,13 @@
  */
 package com.impetus.kundera.loader;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 
 import junit.framework.Assert;
 
@@ -25,8 +30,9 @@ import org.junit.Test;
 
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.CoreTestClientFactory;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 
 /**
  * @author vivek.mishra
@@ -37,7 +43,7 @@ public class GenericClientFactoryTest
 {
     private static final String PU = "patest";
 
-//    private EntityManagerFactory emf;
+    private EntityManagerFactory emf;
 
     /**
      * @throws java.lang.Exception
@@ -45,20 +51,30 @@ public class GenericClientFactoryTest
     @Before
     public void setUp() throws Exception
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);        
-//        emf = Persistence.createEntityManagerFactory(PU);
-//        emf.createEntityManager();
+                
+        emf = Persistence.createEntityManagerFactory(PU);
+        emf.createEntityManager();
 
     }
 
     @Test
-    public void test()
+    public void test() throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException
     {
         PersistenceUnitMetadata puMetadata = new PersistenceUnitMetadata();
         Map<String, PersistenceUnitMetadata> puMetadataMap = new HashMap<String, PersistenceUnitMetadata>();
         puMetadataMap.put(PU, puMetadata);
-        KunderaMetadata.INSTANCE.getApplicationMetadata().addPersistenceUnitMetadata(puMetadataMap);
+        ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance().getApplicationMetadata().addPersistenceUnitMetadata(puMetadataMap);
         CoreTestClientFactory clientFactory = new CoreTestClientFactory();
+               
+        
+        Method m = GenericClientFactory.class.getDeclaredMethod("setKunderaMetadata", KunderaMetadata.class);
+        if (!m.isAccessible())
+        {
+            m.setAccessible(true);
+        }
+
+        m.invoke(clientFactory, ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());
+        
         clientFactory.load(PU, null);
         
         clientFactory.setExternalProperties(new HashMap<String, Object>());
@@ -88,7 +104,7 @@ public class GenericClientFactoryTest
     @Test
     public void testIndexerClass()
     {
-//        KunderaMetadata.INSTANCE.addClientMetadata(PU, null);
+//        kunderaMetadata.addClientMetadata(PU, null);
         Map<String, Object> propertyMap = new HashMap<String, Object>();
         propertyMap.put(PersistenceProperties.KUNDERA_INDEXER_CLASS, "com.impetus.kundera.query.CoreIndexer");
         propertyMap.put(PersistenceProperties.KUNDERA_INDEX_HOME_DIR, "");

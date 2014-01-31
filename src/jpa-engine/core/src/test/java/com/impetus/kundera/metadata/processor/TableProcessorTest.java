@@ -35,8 +35,9 @@ import com.impetus.kundera.client.CoreTestClient;
 import com.impetus.kundera.metadata.MetadataBuilder;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 
 /**
  * Junit Test case for @See TableProcessor.
@@ -47,6 +48,10 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 public class TableProcessorTest
 {
 
+    private EntityManagerFactory emf;
+
+    private KunderaMetadata kunderaMetadata;
+
     /**
      * Sets the up.
      * 
@@ -56,7 +61,8 @@ public class TableProcessorTest
     @Before
     public void setUp() throws Exception
     {
-        // Do nothing.
+        emf = Persistence.createEntityManagerFactory("kunderatest");
+        kunderaMetadata = ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance();
     }
 
     /**
@@ -83,7 +89,7 @@ public class TableProcessorTest
 
         PersistenceUnitMetadata puMetadata = new PersistenceUnitMetadata();
         puMetadata.setPersistenceUnitName(persistenceUnit);
-        
+
         Map<String, Object> props = new HashMap<String, Object>();
         props.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
         props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
@@ -95,17 +101,15 @@ public class TableProcessorTest
         p.putAll(props);
         puMetadata.setProperties(p);
 
-
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
-        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+        ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
 
         Map<String, PersistenceUnitMetadata> metadataCol = new HashMap<String, PersistenceUnitMetadata>();
 
         metadataCol.put(persistenceUnit, puMetadata);
         appMetadata.addPersistenceUnitMetadata(metadataCol);
 
-        
-        MetadataBuilder metadataBuilder = new MetadataBuilder(persistenceUnit, CoreTestClient.class.getSimpleName(), null);
+        MetadataBuilder metadataBuilder = new MetadataBuilder(persistenceUnit, CoreTestClient.class.getSimpleName(),
+                null, kunderaMetadata);
         metadataBuilder.buildEntityMetadata(metadata.getEntityClazz());
 
         // Named query asserts.
@@ -125,7 +129,7 @@ public class TableProcessorTest
         Assert.assertNotNull(appMetadata.getQuery("test.native.query2"));
         Assert.assertEquals(appMetadata.getQuery("test.native.query2"), native_query2);
     }
-    
+
     /**
      * Test process query metadata.
      * 
@@ -138,13 +142,12 @@ public class TableProcessorTest
     public void testProcessInheritedClass() throws InstantiationException, IllegalAccessException
     {
         final String persistenceUnit = "rdbms";
-       
 
         EntityMetadata metadata;
 
         PersistenceUnitMetadata puMetadata = new PersistenceUnitMetadata();
         puMetadata.setPersistenceUnitName(persistenceUnit);
-        
+
         Map<String, Object> props = new HashMap<String, Object>();
         props.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
         props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
@@ -155,39 +158,38 @@ public class TableProcessorTest
         Properties p = new Properties();
         p.putAll(props);
         puMetadata.setProperties(p);
-        
-        TableProcessor t1 = new TableProcessor(p);
-               
+
+        TableProcessor t1 = new TableProcessor(p, kunderaMetadata);
+
         metadata = new EntityMetadata(Rectangle.class);
         metadata.setPersistenceUnit(persistenceUnit);
         t1.process(Rectangle.class, metadata);
         Assert.assertNotNull(metadata.getIdAttribute());
-        
-                            
+
         metadata = new EntityMetadata(Circle.class);
         metadata.setPersistenceUnit(persistenceUnit);
         t1.process(Circle.class, metadata);
         Assert.assertNotNull(metadata.getIdAttribute());
-        
+
         metadata = new EntityMetadata(Shape.class);
         metadata.setPersistenceUnit(persistenceUnit);
         t1.process(Shape.class, metadata);
         Assert.assertNotNull(metadata.getIdAttribute());
 
     }
-    
+
     /**
      * Test process query metadata.
      * 
-    */
+     */
     @Test
-    public void testInheritedRelations() 
+    public void testInheritedRelations()
     {
         final String persistenceUnit = "inheritanceTest";
-        
+
         EntityManagerFactory emf = Persistence.createEntityManagerFactory(persistenceUnit);
         EntityManager em = emf.createEntityManager();
-        
+
         Rectangle rect1 = new Rectangle();
         rect1.setId("r1");
         rect1.setName("Rect1");
@@ -197,42 +199,38 @@ public class TableProcessorTest
         geo1.setName("Two D");
 
         rect1.setGeometry(geo1);
-      
+
         Circle circle = new Circle();
         circle.setId("c1");
         circle.setName("Circle1");
         circle.setGeometry(geo1);
-         
+
         em.persist(rect1);
         em.persist(circle);
         em.clear();
-         
+
         Geometry geo2 = new Geometry();
         geo2.setGeoId("g2");
         geo2.setName("Closed");
 
-       
         Rectangle rectangle = em.find(Rectangle.class, "r1");
-     
+
         Assert.assertNotNull(rectangle.getGeometry());
         Assert.assertEquals("Two D", rectangle.getGeometry().getName());
-       
 
         rectangle.setGeometry(geo2);
 
         em.merge(rectangle);
         em.clear();
-        
-        
+
         circle = em.find(Circle.class, "c1");
         Assert.assertNotNull(circle.getGeometry());
         Assert.assertEquals("Two D", circle.getGeometry().getName());
         em.clear();
-       
+
         em.close();
         emf.close();
     }
-
 
     /**
      * Tear down.

@@ -29,6 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.couchdb.datatypes.entities.StudentCouchDBDoublePrimitive;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
 public class StudentCouchDBDoublePrimitiveTest extends CouchDBBase
 {
@@ -42,7 +43,7 @@ public class StudentCouchDBDoublePrimitiveTest extends CouchDBBase
     {
 
         emf = Persistence.createEntityManagerFactory(pu);
-        super.setUpBase();
+        super.setUpBase(((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());
     }
 
     @After

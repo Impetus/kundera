@@ -39,6 +39,7 @@ import org.junit.Test;
 import com.impetus.client.couchdb.datatypes.tests.CouchDBBase;
 import com.impetus.client.couchdb.entities.CouchDBAddressJTAEntity;
 import com.impetus.client.couchdb.entities.CouchDBPersonJTAEntity;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 import com.impetus.kundera.persistence.jta.KunderaJTAUserTransaction;
 
 /**
@@ -75,7 +76,7 @@ public class CouchDBJTATest extends CouchDBBase
 
         emf = Persistence.createEntityManagerFactory("couchdbJTA_pu");
 
-        super.setUpBase();
+        super.setUpBase(((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());
         em = emf.createEntityManager();
     }
 

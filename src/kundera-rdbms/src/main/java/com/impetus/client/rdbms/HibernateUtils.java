@@ -34,11 +34,11 @@ import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.Metamodel;
 
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.model.attributes.AttributeType;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReaderException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.property.accessor.EnumAccessor;
@@ -58,17 +58,17 @@ public final class HibernateUtils
      *            the persistence unit
      * @return the properties
      */
-    static final Properties getProperties(final String persistenceUnit)
+    static final Properties getProperties(final KunderaMetadata kunderaMetadata, final String persistenceUnit)
     {
-        PersistenceUnitMetadata persistenceUnitMetadatata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+        PersistenceUnitMetadata persistenceUnitMetadatata = kunderaMetadata.getApplicationMetadata()
                 .getPersistenceUnitMetadata(persistenceUnit);
         Properties props = persistenceUnitMetadatata.getProperties();
         return props;
     }
 
-    static final URL getPersistenceUnitUrl(final String persistenceUnit)
+    static final URL getPersistenceUnitUrl(final KunderaMetadata kunderaMetadata, final String persistenceUnit)
     {
-        PersistenceUnitMetadata persistenceUnitMetadatata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+        PersistenceUnitMetadata persistenceUnitMetadatata = kunderaMetadata.getApplicationMetadata()
                 .getPersistenceUnitMetadata(persistenceUnit);
         return persistenceUnitMetadatata != null ? persistenceUnitMetadatata.getMappedUrl() : null;
     }
@@ -80,9 +80,9 @@ public final class HibernateUtils
      * @param m
      * @return
      */
-    static Map<String, Object> getTranslatedObject(Object entity, Map<String, Object> valueMap, EntityMetadata m)
+    static Map<String, Object> getTranslatedObject(final KunderaMetadata kunderaMetadata, Object entity, Map<String, Object> valueMap, EntityMetadata m)
     {
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
         EntityType entityType = metaModel.entity(m.getEntityClazz());
 

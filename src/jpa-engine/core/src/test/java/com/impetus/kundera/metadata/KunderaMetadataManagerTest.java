@@ -15,6 +15,7 @@
  */
 package com.impetus.kundera.metadata;
 
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.metamodel.Metamodel;
 
@@ -26,62 +27,69 @@ import org.junit.Test;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.metadata.entities.SingularEntityEmbeddable;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.validator.GeneratedIdStrategyIdentity;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 
 /**
- * @author vivek.mishra
- * junit for {@link KunderaMetadataManager}.
- *
+ * @author vivek.mishra junit for {@link KunderaMetadataManager}.
+ * 
  */
 public class KunderaMetadataManagerTest
 {
 
     private String persistenceUnit = "patest";
 
+    private EntityManagerFactory emf;
+
+    private KunderaMetadata kunderaMetadata;
+
     @Before
     public void setup()
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
-        Persistence.createEntityManagerFactory(persistenceUnit);
+        emf = Persistence.createEntityManagerFactory(persistenceUnit);
+        kunderaMetadata = ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance();
     }
 
     @Test
     public void test()
     {
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(SingularEntityEmbeddable.class);
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
+                SingularEntityEmbeddable.class);
         Assert.assertNotNull(entityMetadata);
-        entityMetadata = KunderaMetadataManager.getEntityMetadata(persistenceUnit, SingularEntityEmbeddable.class);
+        entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, persistenceUnit,
+                SingularEntityEmbeddable.class);
         Assert.assertNotNull(entityMetadata);
-        
+
         try
         {
-            entityMetadata = KunderaMetadataManager.getEntityMetadata(null);
+            entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, null);
             Assert.fail("Should have gone to catch block!");
-        }catch(KunderaException kex)
+        }
+        catch (KunderaException kex)
         {
             Assert.assertNotNull(kex.getMessage());
         }
-        
-        entityMetadata = KunderaMetadataManager.getEntityMetadata(GeneratedIdStrategyIdentity.class);
+
+        entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, GeneratedIdStrategyIdentity.class);
         Assert.assertNull(entityMetadata);
-        
-        Metamodel metaModel = KunderaMetadataManager.getMetamodel(persistenceUnit);
+
+        Metamodel metaModel = KunderaMetadataManager.getMetamodel(kunderaMetadata, persistenceUnit);
         Assert.assertNotNull(metaModel);
 
-        metaModel = KunderaMetadataManager.getMetamodel(persistenceUnit,"KunderaTests");
+        metaModel = KunderaMetadataManager.getMetamodel(kunderaMetadata, persistenceUnit, "KunderaTests");
         Assert.assertNotNull(metaModel);
-        
-        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
-        
+
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata,
+                persistenceUnit);
+
         Assert.assertNotNull(puMetadata);
-        
-        puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(null);
-        
+
+        puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata, null);
+
         Assert.assertNull(puMetadata);
-        
-        
+
     }
 
 }

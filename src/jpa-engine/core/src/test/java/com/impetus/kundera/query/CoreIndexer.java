@@ -17,6 +17,8 @@
 import java.util.Map;
 
 import com.impetus.kundera.index.Indexer;
+import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
 
 /**
  * @author vivek.mishra
@@ -27,55 +29,35 @@ import com.impetus.kundera.index.Indexer;
 public class CoreIndexer implements Indexer
 {
 
-    
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.index.Indexer#index(java.lang.Class, java.util.Map)
-     */
     @Override
-    public void index(Class entityClazz, Map<String, Object> values, Object parentId, Class clazz)
+    public void index(Class entityClazz, EntityMetadata entityMetadata, Map<String, Object> values, Object parentId,
+            final Class parentClazz)
     {
-        // TODO Auto-generated method stub
-
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.index.Indexer#search(java.lang.String, int, int)
-     */
     @Override
-    public Map<String, Object> search(Class<?> clazz, String queryString, int start, int count)
+    public Map<String, Object> search(Class<?> clazz, EntityMetadata m, String luceneQuery, int start, int count)
     {
-        // TODO Auto-generated method stub
+
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.index.Indexer#search(java.lang.Class, java.lang.Class, java.lang.Object, int, int)
-     */
     @Override
-    public Map<String, Object> search(String query, Class<?> parentClass, Class<?> childClass, Object entityId, int start, int count)
+    public Map<String, Object> search(String query, Class<?> parentClass, EntityMetadata parentMetadata,
+            Class<?> childClass, EntityMetadata childMetadata, Object entityId, int start, int count)
     {
-        // TODO Auto-generated method stub
+
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.index.Indexer#unIndex(java.lang.Class, java.lang.Object)
-     */
     @Override
-    public void unIndex(Class entityClazz, Object entity)
+    public void unIndex(Class entityClazz, Object entity, EntityMetadata metadata, MetamodelImpl metamodel)
     {
-        // TODO Auto-generated method stub
-
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.index.Indexer#close()
-     */
     @Override
     public void close()
     {
-        // TODO Auto-generated method stub
-
     }
 
 }

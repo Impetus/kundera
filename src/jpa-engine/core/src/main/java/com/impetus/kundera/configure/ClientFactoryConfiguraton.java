@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.client.ClientResolver;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**
@@ -40,9 +41,10 @@ public class ClientFactoryConfiguraton extends AbstractSchemaConfiguration imple
      * @param persistenceUnits
      *            persistence units.
      */
-    public ClientFactoryConfiguraton(Map externalProperties, String... persistenceUnits)
+    public ClientFactoryConfiguraton(Map externalProperties, final KunderaMetadata kunderaMetadata,
+            String... persistenceUnits)
     {
-        super(persistenceUnits, externalProperties);
+        super(persistenceUnits, externalProperties, kunderaMetadata);
     }
 
     @Override
@@ -57,7 +59,7 @@ public class ClientFactoryConfiguraton extends AbstractSchemaConfiguration imple
             Map<String, Object> puProperty = KunderaCoreUtils.getExternalProperties(pu, externalPropertyMap,
                     persistenceUnits);
 
-            ClientResolver.getClientFactory(pu, puProperty).load(pu, puProperty);
+            ClientResolver.getClientFactory(pu, puProperty, kunderaMetadata).load(pu, puProperty);
         }
     }
 }

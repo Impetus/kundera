@@ -23,8 +23,8 @@ import com.impetus.kundera.configure.ClientProperties.DataStore;
 import com.impetus.kundera.configure.ClientProperties.DataStore.Connection;
 import com.impetus.kundera.configure.ClientProperties.DataStore.Schema;
 import com.impetus.kundera.configure.schema.TableInfo;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 
 /**
  * Abstract Schema Manager has abstract method to handle
@@ -69,6 +69,8 @@ public abstract class AbstractSchemaManager
 
     protected String password = null;
 
+    protected final KunderaMetadata kunderaMetadata;
+
     /**
      * Initialise with configured client factory.
      * 
@@ -76,10 +78,12 @@ public abstract class AbstractSchemaManager
      *            specific client factory.
      * @param externalProperties
      */
-    protected AbstractSchemaManager(String clientFactory, Map<String, Object> externalProperties)
+    protected AbstractSchemaManager(String clientFactory, Map<String, Object> externalProperties,
+            final KunderaMetadata kunderaMetadata)
     {
         this.clientFactory = clientFactory;
         this.externalProperties = externalProperties;
+        this.kunderaMetadata = kunderaMetadata;
     }
 
     /**
@@ -90,7 +94,7 @@ public abstract class AbstractSchemaManager
     protected void exportSchema(final String persistenceUnit, List<TableInfo> tables)
     {
         // Get persistence unit metadata
-        this.puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+        this.puMetadata = kunderaMetadata.getApplicationMetadata()
                 .getPersistenceUnitMetadata(persistenceUnit);
         String paramString = externalProperties != null ? (String) externalProperties
                 .get(PersistenceProperties.KUNDERA_CLIENT_FACTORY) : null;

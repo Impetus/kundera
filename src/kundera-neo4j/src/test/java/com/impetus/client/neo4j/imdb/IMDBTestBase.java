@@ -29,6 +29,8 @@ import org.neo4j.kernel.impl.util.FileUtils;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 
 /**
  * Base class for All IMDB Tests
@@ -46,6 +48,8 @@ public class IMDBTestBase
     protected EntityManager em;
 
     protected static final String IMDB_PU = "imdb";
+
+    protected KunderaMetadata kunderaMetadata;
 
     /**
      * @param actor1
@@ -187,12 +191,14 @@ public class IMDBTestBase
     protected void init()
     {
         emf = Persistence.createEntityManagerFactory(IMDB_PU);
+        kunderaMetadata = ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance();
         em = emf.createEntityManager();
     }
 
     protected void clean() throws IOException
     {
-        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(IMDB_PU);
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager
+                .getPersistenceUnitMetadata(kunderaMetadata, IMDB_PU);
         String datastoreFilePath = puMetadata.getProperty(PersistenceProperties.KUNDERA_DATASTORE_FILE_PATH);
 
         em.close();

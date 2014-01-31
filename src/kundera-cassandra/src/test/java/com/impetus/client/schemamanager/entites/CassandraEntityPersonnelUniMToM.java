@@ -29,7 +29,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "CassandraEntityPersonnelUniMToM", schema = "KunderaCassandraMTMExamples@cassandra")
+@Table(name = "CassandraEntityPersonnelUniMToM", schema = "KunderaExamples@cassandra")
 public class CassandraEntityPersonnelUniMToM
 {
     @Id

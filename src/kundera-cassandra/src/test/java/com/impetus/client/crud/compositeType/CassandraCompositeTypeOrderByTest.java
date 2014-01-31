@@ -38,7 +38,6 @@ import org.slf4j.LoggerFactory;
 import com.impetus.client.cassandra.CassandraClientBase;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.client.Client;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
  * Junit test case for Compound/Composite key.
@@ -69,7 +68,7 @@ public class CassandraCompositeTypeOrderByTest
         CassandraCli.cassandraSetUp();
         Map<String, Object> puProperties = new HashMap<String, Object>();
         puProperties.put("kundera.ddl.auto.prepare", "create-drop");
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
 
         emf = Persistence.createEntityManagerFactory(_PU, puProperties);
     }

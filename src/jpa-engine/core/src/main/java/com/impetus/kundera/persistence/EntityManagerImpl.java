@@ -123,7 +123,7 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
         }
         // session = new EntityManagerSession((Cache) factory.getCache());
         this.persistenceCache = new PersistenceCache((Cache) factory.getCache());
-        
+
         this.persistenceCache.setPersistenceContextType(persistenceContextType);
 
         this.factory = factory;
@@ -131,8 +131,8 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
         this.transactionType = transactionType;
         this.persistenceCache = new PersistenceCache();
         this.persistenceCache.setPersistenceContextType(persistenceContextType);
-        this.persistenceDelegator = new PersistenceDelegator(this.persistenceCache);
-        
+        this.persistenceDelegator = new PersistenceDelegator(
+                ((EntityManagerFactoryImpl) this.factory).getKunderaMetadataInstance(), this.persistenceCache);
 
         for (String pu : ((EntityManagerFactoryImpl) this.factory).getPersistenceUnits())
         {
@@ -576,7 +576,7 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     public void refresh(Object entity, Map<String, Object> properties)
     {
         checkClosed();
-        
+
         // Store current properties in a variable for post-find reset
         Map<String, Object> currentProperties = getProperties();
 

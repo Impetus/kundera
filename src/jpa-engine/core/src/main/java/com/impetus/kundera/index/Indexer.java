@@ -17,6 +17,9 @@ package com.impetus.kundera.index;
 
 import java.util.Map;
 
+import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
+
 /**
  * Indexer interface. Any custom implementation for this interface can be
  * plugged-in by configuring kundera.indexer.class property in persistence.xml.
@@ -40,7 +43,8 @@ public interface Indexer
      * @param values
      *            map of values containing field name as key and it's value.
      */
-    void index(final Class entityClazz, Map<String, Object> values, final Object parentId, final Class parentClazz);
+    void index(final Class entityClazz, EntityMetadata entityMetadata, Map<String, Object> values,
+            final Object parentId, final Class parentClazz);
 
     /**
      * Executes lucene query and returns inverted indices as output. TODO:
@@ -56,15 +60,15 @@ public interface Indexer
      * @return collection containing stored index value.
      */
     @Deprecated
-    Map<String, Object> search(final Class<?> clazz, final String queryString, int start, int count);
+    Map<String, Object> search(Class<?> clazz, EntityMetadata m, String luceneQuery, int start, int count);
 
     /**
      * Searches into a secondary index
      * 
      * @return
      */
-    Map<String, Object> search(String query, Class<?> parentClass, Class<?> childClass, Object entityId, int start,
-            int count);
+    Map<String, Object> search(String query, Class<?> parentClass,  EntityMetadata parentMetadata, Class<?> childClass, EntityMetadata childMetadata, Object entityId,
+            int start, int count);
 
     /**
      * Deletes index for given entity class.
@@ -75,7 +79,7 @@ public interface Indexer
      * @param entity
      *            Entity object
      */
-    void unIndex(final Class entityClazz, final Object entity);
+    void unIndex(final Class entityClazz, final Object entity, EntityMetadata entityMetadata, MetamodelImpl metamodel);
 
     /**
      * Close indexer instance.

@@ -53,10 +53,10 @@ import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -97,9 +97,10 @@ public class CassQuery extends QueryImpl
      * @param persistenceDelegator
      *            the persistence delegator
      */
-    public CassQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
+    public CassQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator,
+            final KunderaMetadata kunderaMetadata)
     {
-        super(kunderaQuery, persistenceDelegator);
+        super(kunderaQuery, persistenceDelegator, kunderaMetadata);
     }
 
     /*
@@ -117,14 +118,14 @@ public class CassQuery extends QueryImpl
             log.debug("Populating entities for Cassandra query {}.", getJPAQuery());
         }
         List<Object> result = new ArrayList<Object>();
-        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+        ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
         externalProperties = ((CassandraClientBase) client).getExternalProperties();
 
         // if id attribute is embeddable, it is meant for CQL translation.
         // make it independent of embedded stuff and allow even to add non
         // composite into where clause and let cassandra complain for it.
 
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
 
         String query = appMetadata.getQuery(getJPAQuery());
@@ -195,9 +196,9 @@ public class CassQuery extends QueryImpl
     protected List<Object> recursivelyPopulateEntities(EntityMetadata m, Client client)
     {
         List<EnhanceEntity> ls = null;
-        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+        ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
 
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
 
         String query = appMetadata.getQuery(getJPAQuery());
@@ -244,7 +245,7 @@ public class CassQuery extends QueryImpl
     {
         EntityMetadata m = getEntityMetadata();
 
-        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+        ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
 
         String query = appMetadata.getQuery(getJPAQuery());
 
@@ -331,11 +332,11 @@ public class CassQuery extends QueryImpl
         List<String> columns = new ArrayList<String>();
         if (results != null && results.length > 0)
         {
-            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                     m.getPersistenceUnit());
             EntityType entity = metaModel.entity(m.getEntityClazz());
 
-            String keyFieldName = CassandraUtilities.getIdColumnName(m, externalProperties);
+            String keyFieldName = CassandraUtilities.getIdColumnName(kunderaMetadata, m, externalProperties);
             for (int i = 1; i < results.length; i++)
             {
                 if (results[i] != null)
@@ -506,7 +507,7 @@ public class CassQuery extends QueryImpl
     {
         if (reader == null)
         {
-            reader = new CassandraEntityReader(kunderaQuery);
+            reader = new CassandraEntityReader(kunderaQuery, kunderaMetadata);
         }
 
         return reader;
@@ -527,7 +528,7 @@ public class CassQuery extends QueryImpl
     {
         // Column idCol = m.getIdColumn();
         Attribute idCol = m.getIdAttribute();
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
 
         EntityType entity = metaModel.entity(m.getEntityClazz());
@@ -767,11 +768,11 @@ public class CassQuery extends QueryImpl
                 {
                     translator.buildWhereClause(builder,
                             ((AbstractAttribute) m.getIdAttribute()).getBindableJavaType(),
-                            CassandraUtilities.getIdColumnName(m, externalProperties), value, condition, true);
+                            CassandraUtilities.getIdColumnName(kunderaMetadata, m, externalProperties), value, condition, true);
                 }
                 else
                 {
-                    Metamodel metamodel = KunderaMetadataManager.getMetamodel(m.getPersistenceUnit());
+                    Metamodel metamodel = KunderaMetadataManager.getMetamodel(kunderaMetadata, m.getPersistenceUnit());
                     Attribute attribute = ((MetamodelImpl) metamodel).getEntityAttribute(m.getEntityClazz(),
                             m.getFieldName(fieldName));
                     translator.buildWhereClause(builder, ((AbstractAttribute) attribute).getBindableJavaType(),
@@ -836,10 +837,10 @@ public class CassQuery extends QueryImpl
     @Override
     public Iterator iterate()
     {
-    	if(kunderaQuery.isNative())
-    	{
-    		throw new UnsupportedOperationException("Iteration not supported over native queries");
-    	}
+        if (kunderaQuery.isNative())
+        {
+            throw new UnsupportedOperationException("Iteration not supported over native queries");
+        }
         EntityMetadata m = getEntityMetadata();
         Client client = persistenceDelegeator.getClient(m);
         externalProperties = ((CassandraClientBase) client).getExternalProperties();
@@ -850,7 +851,7 @@ public class CassQuery extends QueryImpl
         }
 
         return new ResultIterator(this, m, persistenceDelegeator.getClient(m), this.getReader(),
-                getFetchSize() != null ? getFetchSize() : this.maxResult);
+                getFetchSize() != null ? getFetchSize() : this.maxResult, kunderaMetadata);
     }
 
     void setRelationalEntities(List enhanceEntities, Client client, EntityMetadata m)
@@ -877,7 +878,7 @@ public class CassQuery extends QueryImpl
     public String createUpdateQuery(KunderaQuery kunderaQuery)
     {
         EntityMetadata metadata = kunderaQuery.getEntityMetadata();
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 metadata.getPersistenceUnit());
 
         CQLTranslator translator = new CQLTranslator();
@@ -930,7 +931,7 @@ public class CassQuery extends QueryImpl
     public String createDeleteQuery(KunderaQuery kunderaQuery)
     {
         EntityMetadata metadata = kunderaQuery.getEntityMetadata();
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 metadata.getPersistenceUnit());
         CQLTranslator translator = new CQLTranslator();
         String delete_query = translator.DELETE_QUERY;
@@ -1004,13 +1005,13 @@ public class CassQuery extends QueryImpl
      */
     private String getColumnName(EntityMetadata metadata, String property)
     {
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 metadata.getPersistenceUnit());
         String jpaColumnName = null;
 
         if (property.equals(((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName()))
         {
-            jpaColumnName = CassandraUtilities.getIdColumnName(metadata,
+            jpaColumnName = CassandraUtilities.getIdColumnName(kunderaMetadata, metadata,
                     ((CassandraClientBase) persistenceDelegeator.getClient(metadata)).getExternalProperties());
         }
         else

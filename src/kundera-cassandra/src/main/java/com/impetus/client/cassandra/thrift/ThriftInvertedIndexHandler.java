@@ -39,7 +39,6 @@ import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.client.cassandra.index.CassandraIndexHelper;
 import com.impetus.client.cassandra.index.InvertedIndexHandler;
@@ -50,6 +49,7 @@ import com.impetus.kundera.db.SearchResult;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexingException;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
@@ -88,8 +88,6 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
             Connection conn = thriftClient.getConection();
             try
             {
-                String keyspace = CassandraUtilities.getKeyspace(persistenceUnit);
-
                 for (ThriftRow thriftRow : indexThriftyRows)
                 {
                     byte[] rowKey = PropertyAccessorHelper.toBytes(thriftRow.getId(), thriftRow.getId().getClass());
@@ -273,10 +271,10 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
     }
 
     @Override
-    public void delete(Object entity, EntityMetadata metadata, ConsistencyLevel consistencyLevel)
+    public void delete(Object entity, EntityMetadata metadata, ConsistencyLevel consistencyLevel, final KunderaMetadata kunderaMetadata)
     {
 
-        super.delete(entity, metadata, consistencyLevel);
+        super.delete(entity, metadata, consistencyLevel, kunderaMetadata);
 
     }
 

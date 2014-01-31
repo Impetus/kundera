@@ -56,12 +56,12 @@ import com.impetus.kundera.index.Indexer;
 import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.SequenceGeneratorDiscriptor;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.KunderaTransactionException;
 import com.impetus.kundera.persistence.TransactionBinder;
@@ -105,10 +105,11 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
     private Jedis connection;
 
-    RedisClient(final RedisClientFactory factory, final String persistenceUnit)
+    RedisClient(final RedisClientFactory factory, final String persistenceUnit, final KunderaMetadata kunderaMetadata)
     {
+        super(kunderaMetadata);
         this.factory = factory;
-        reader = new RedisEntityReader();
+        this.reader = new RedisEntityReader(kunderaMetadata);
         this.indexManager = factory.getIndexManager();
         initializeIndexer();
         this.persistenceUnit = persistenceUnit;
@@ -216,9 +217,9 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     {
         Object result = null;
 
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(clazz);
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, clazz);
 
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 entityMetadata.getPersistenceUnit());
 
         String rowKey = null;
@@ -756,7 +757,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     public List<Object> findByRelation(String colName, Object colValue, Class entityClazz)
     {
 
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClazz);
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClazz);
         Object[] ids = findIdsByColumn(entityMetadata.getTableName(), colName, colValue);
         List<Object> resultSet = new ArrayList<Object>();
         if (ids != null)
@@ -842,7 +843,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                     {
 
                         List<RelationHolder> relationHolders = getRelationHolders(node);
-                        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
+                        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, node.getDataClass());
 
                         onPersist(metadata, node.getData(), node.getEntityId(), relationHolders,
                                 pipeLine != null ? pipeLine : connection);
@@ -1065,7 +1066,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                     metadata.getTableName(),
                     getHashKey(((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName(), rowKey)), getDouble(rowKey));
 
-            indexer.index(metadata.getEntityClazz(), wrapper.getIndexes(), rowKey, null);
+            indexer.index(metadata.getEntityClazz(), metadata, wrapper.getIndexes(), rowKey, null);
         }
     }
 
@@ -1164,7 +1165,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     private AttributeWrapper wrap(EntityMetadata entityMetadata, Object entity)
     {
 
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 entityMetadata.getPersistenceUnit());
 
         EntityType entityType = metaModel.entity(entityMetadata.getEntityClazz());
@@ -1290,7 +1291,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             throws InstantiationException, IllegalAccessException
     {
 
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 entityMetadata.getPersistenceUnit());
 
         List<String> relationNames = entityMetadata.getRelationNames();
@@ -1326,7 +1327,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                     {
                         Field field = (Field) attribute.getJavaMember();
                         EntityMetadata associationMetadata = KunderaMetadataManager
-                                .getEntityMetadata(((AbstractAttribute) attribute).getBindableJavaType());
+                                .getEntityMetadata(kunderaMetadata, ((AbstractAttribute) attribute).getBindableJavaType());
                         relations.put(columnName, PropertyAccessorHelper.getObject(associationMetadata.getIdAttribute()
                                 .getBindableJavaType(), value));
                     }
@@ -1409,7 +1410,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         {
             connection = getConnection();
             Set<String> rowKeys = new HashSet<String>();
-            EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClazz);
+            EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClazz);
             if (queryParameter.getClause() != null && !queryParameter.isByRange())
             {
                 String destStore = entityClazz.getSimpleName() + System.currentTimeMillis();
@@ -1714,7 +1715,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         }
         else if (batch_Size == null)
         {
-            PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
+            PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata, persistenceUnit);
             setBatchSize(puMetadata.getBatchSize());
         }
     }
@@ -1754,7 +1755,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
         // prepareCompositeKey
 
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 entityMetadata.getPersistenceUnit());
 
         EntityType entityType = metaModel.entity(entityMetadata.getEntityClazz());
@@ -1817,14 +1818,14 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
     private void onDelete(Object entity, Object pKey, Object connection)
     {
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,  entity.getClass());
         AttributeWrapper wrapper = wrap(entityMetadata, entity);
 
         Set<byte[]> columnNames = wrapper.columns.keySet();
 
         String rowKey = null;
 
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 entityMetadata.getPersistenceUnit());
 
         if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))

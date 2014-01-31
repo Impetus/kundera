@@ -21,7 +21,6 @@ public class PersistenceUnitConfigurationException extends KunderaException
     public PersistenceUnitConfigurationException()
     {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     /**
@@ -31,7 +30,6 @@ public class PersistenceUnitConfigurationException extends KunderaException
     public PersistenceUnitConfigurationException(String paramString, Throwable paramThrowable)
     {
         super(paramString, paramThrowable);
-        // TODO Auto-generated constructor stub
     }
 
     /**
@@ -40,7 +38,6 @@ public class PersistenceUnitConfigurationException extends KunderaException
     public PersistenceUnitConfigurationException(String paramString)
     {
         super(paramString);
-        // TODO Auto-generated constructor stub
     }
 
     /**
@@ -49,6 +46,5 @@ public class PersistenceUnitConfigurationException extends KunderaException
     public PersistenceUnitConfigurationException(Throwable paramThrowable)
     {
         super(paramThrowable);
-        // TODO Auto-generated constructor stub
     }
 }

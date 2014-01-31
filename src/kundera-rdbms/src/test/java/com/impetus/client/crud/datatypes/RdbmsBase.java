@@ -8,7 +8,6 @@ import javax.persistence.Persistence;
 import com.impetus.client.crud.RDBMSCli;
 import com.impetus.kundera.datatypes.datagenerator.DataGenerator;
 import com.impetus.kundera.datatypes.datagenerator.DataGeneratorFactory;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 public abstract class RdbmsBase
 {
@@ -23,7 +22,7 @@ public abstract class RdbmsBase
         cli = new RDBMSCli("TESTDB");
         cli.createSchema("TESTDB");
 
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         if (AUTO_MANAGE_SCHEMA)
         {
             createSchema();

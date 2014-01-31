@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.couchdb.utils.CouchDBTestUtils;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
 public class CouchDBMappedSuperClassTest extends MappedSuperClassBase
 {
@@ -22,12 +23,13 @@ public class CouchDBMappedSuperClassTest extends MappedSuperClassBase
     {
         _PU = "couchdb_pu";
         setUpInternal();
-        httpClient = CouchDBTestUtils.initiateHttpClient(_PU);
+        httpClient = CouchDBTestUtils.initiateHttpClient(((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance(),
+                _PU);
         httpHost = new HttpHost("localhost", 5984);
         CouchDBTestUtils.createViews(new String[] { "CREDIT_BANK_IDENT" }, "TRNX_CREDIT", httpHost, "couchdatabase",
                 httpClient);
-        CouchDBTestUtils.createViews(new String[] { "DEBIT_BANK_IDENT" }, "DebitTransaction", httpHost, "couchdatabase",
-                httpClient);
+        CouchDBTestUtils.createViews(new String[] { "DEBIT_BANK_IDENT" }, "DebitTransaction", httpHost,
+                "couchdatabase", httpClient);
     }
 
     @Test

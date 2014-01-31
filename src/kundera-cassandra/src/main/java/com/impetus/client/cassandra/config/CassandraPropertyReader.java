@@ -33,6 +33,7 @@ import com.impetus.kundera.configure.ClientProperties.DataStore.Connection.Serve
 import com.impetus.kundera.configure.ClientProperties.DataStore.Schema;
 import com.impetus.kundera.configure.ClientProperties.DataStore.Schema.Table;
 import com.impetus.kundera.configure.PropertyReader;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
  * Cassandra Property Reader reads cassandra properties from property file
@@ -52,9 +53,9 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
 
     private static final String dataStoreName = "cassandra";
 
-    public CassandraPropertyReader(Map externalProperties)
+    public CassandraPropertyReader(Map externalProperties, final PersistenceUnitMetadata puMetadata)
     {
-        super(externalProperties);
+        super(externalProperties, puMetadata);
         csmd = new CassandraSchemaMetadata();
     }
 

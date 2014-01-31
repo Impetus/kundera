@@ -36,9 +36,9 @@ import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.JoinTableMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.context.PersistenceCacheManager;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -59,6 +59,7 @@ public final class AssociationBuilder
 {
 
     private static Logger log = LoggerFactory.getLogger(AssociationBuilder.class);
+
     /**
      * Retrieves associated entities from secondary index. There are two
      * alternatives here:
@@ -93,7 +94,6 @@ public final class AssociationBuilder
         return associatedEntities;
     }
 
-    
     /**
      * Populates entities related via join table for <code>entity</code>
      * 
@@ -143,7 +143,8 @@ public final class AssociationBuilder
 
         String schema = entityMetadata.getSchema();
 
-        EntityMetadata owningEntityMetadata = KunderaMetadataManager.getEntityMetadata(relation.getTargetEntity());
+        EntityMetadata owningEntityMetadata = KunderaMetadataManager.getEntityMetadata(delegator.getKunderaMetadata(),
+                relation.getTargetEntity());
         Class columnJavaType = owningEntityMetadata.getIdAttribute().getJavaType();
         if (jtMetadata == null)
         {
@@ -169,12 +170,13 @@ public final class AssociationBuilder
                 entityId, columnJavaType);
 
         List childrenEntities = new ArrayList();
-        
+
         if (foreignKeys != null)
         {
             for (Object foreignKey : foreignKeys)
             {
-                EntityMetadata childMetadata = KunderaMetadataManager.getEntityMetadata(relation.getTargetEntity());
+                EntityMetadata childMetadata = KunderaMetadataManager.getEntityMetadata(delegator.getKunderaMetadata(),
+                        relation.getTargetEntity());
 
                 Object child = delegator.find(relation.getTargetEntity(), foreignKey);
                 Object obj = child instanceof EnhanceEntity && child != null ? ((EnhanceEntity) child).getEntity()
@@ -182,20 +184,7 @@ public final class AssociationBuilder
 
                 // If child has any bidirectional relationship, process them
                 // here
-                Field biDirectionalField = relation.getBiDirectionalField()/*
-                                                                            * getBiDirectionalField
-                                                                            * (
-                                                                            * entity
-                                                                            * .
-                                                                            * getClass
-                                                                            * (
-                                                                            * ),
-                                                                            * relation
-                                                                            * .
-                                                                            * getTargetEntity
-                                                                            * (
-                                                                            * ))
-                                                                            */;
+                Field biDirectionalField = relation.getBiDirectionalField();
                 boolean isBidirectionalRelation = (biDirectionalField != null);
 
                 if (isBidirectionalRelation && obj != null)
@@ -241,7 +230,8 @@ public final class AssociationBuilder
     private void populateCollectionFromMap(Object entity, PersistenceDelegator delegator, Relation relation,
             Object relObject, Map<String, Object> relationsMap)
     {
-        EntityMetadata childMetadata = KunderaMetadataManager.getEntityMetadata(relation.getTargetEntity());
+        EntityMetadata childMetadata = KunderaMetadataManager.getEntityMetadata(delegator.getKunderaMetadata(),
+                relation.getTargetEntity());
         Map<Object, Object> relationshipEntityMap = new HashMap<Object, Object>(); // Map
                                                                                    // collection
                                                                                    // to
@@ -250,7 +240,8 @@ public final class AssociationBuilder
                                                                                    // into
                                                                                    // entity
 
-        if ((relObject == null || ProxyHelper.isProxyCollection(relObject) ) && relationsMap != null && !relationsMap.isEmpty())
+        if ((relObject == null || ProxyHelper.isProxyCollection(relObject)) && relationsMap != null
+                && !relationsMap.isEmpty())
         {
             for (String relationName : relationsMap.keySet())
             {
@@ -299,7 +290,7 @@ public final class AssociationBuilder
         PropertyAccessorHelper.set(entity, relation.getProperty(), relObject);
 
         // Add target entities into persistence cache
-        if (relObject != null && ! ProxyHelper.isProxyCollection(relObject))
+        if (relObject != null && !ProxyHelper.isProxyCollection(relObject))
         {
             for (Object child : ((Map) relObject).values())
             {
@@ -323,7 +314,8 @@ public final class AssociationBuilder
     public void setProxyRelationObject(Object entity, Map<String, Object> relationsMap, EntityMetadata m,
             PersistenceDelegator pd, Object entityId, Relation relation)
     {
-        String relationName = MetadataUtils.getMappedName(m, relation);
+        KunderaMetadata kunderaMetadata = pd.getKunderaMetadata();
+        String relationName = MetadataUtils.getMappedName(m, relation, kunderaMetadata);
         Object relationValue = relationsMap != null ? relationsMap.get(relationName) : null;
 
         if ((relation.getType().equals(ForeignKey.ONE_TO_ONE) || relation.getType().equals(ForeignKey.MANY_TO_ONE)))
@@ -331,19 +323,30 @@ public final class AssociationBuilder
           // Many-To-One
           // relationship
 
-            Field biDirectionalField = relation.getBiDirectionalField()/*getBiDirectionalField(entity.getClass(), relation.getTargetEntity())*/;
+            Field biDirectionalField = relation.getBiDirectionalField()/*
+                                                                        * getBiDirectionalField
+                                                                        * (
+                                                                        * entity
+                                                                        * .
+                                                                        * getClass
+                                                                        * (),
+                                                                        * relation
+                                                                        * .
+                                                                        * getTargetEntity
+                                                                        * ())
+                                                                        */;
             boolean isBidirectionalRelation = (biDirectionalField != null);
             if (isBidirectionalRelation && (relationValue == null && !relation.isJoinedByPrimaryKey()))
             {
-                EntityMetadata parentEntityMetadata = KunderaMetadataManager.getEntityMetadata(relation
-                        .getTargetEntity());
+                EntityMetadata parentEntityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
+                        relation.getTargetEntity());
                 Object owner = null;
-                
+
                 String entityName = m.getEntityClazz().getName() + "_" + entityId + "#"
-                + relation.getProperty().getName();
-                
-                KunderaProxy kp = KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory().getProxy(entityName);
-                
+                        + relation.getProperty().getName();
+
+                KunderaProxy kp = kunderaMetadata.getCoreMetadata().getLazyInitializerFactory().getProxy(entityName);
+
                 if (kp != null)
                 {
                     owner = kp.getKunderaLazyInitializer().getOwner();
@@ -360,7 +363,6 @@ public final class AssociationBuilder
                             log.debug("Creating proxy for >> " + parentEntityMetadata.getEntityClazz().getName() + "#"
                                     + relation.getProperty().getName() + "_" + relationValue);
                         }
-                        
 
                         Object proxy = getLazyEntity(entityName, relation.getTargetEntity(),
                                 parentEntityMetadata.getReadIdentifierMethod(),
@@ -387,7 +389,7 @@ public final class AssociationBuilder
                 PropertyAccessorHelper.set(entity, relation.getProperty(), proxy);
 
             }
-            else if(relation.isJoinedByPrimaryKey())
+            else if (relation.isJoinedByPrimaryKey())
             {
                 if (log.isDebugEnabled())
                 {
@@ -434,7 +436,7 @@ public final class AssociationBuilder
     private KunderaProxy getLazyEntity(String entityName, Class<?> persistentClass, Method getIdentifierMethod,
             Method setIdentifierMethod, Object id, PersistenceDelegator pd)
     {
-        return KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory()
+        return pd.getKunderaMetadata().getCoreMetadata().getLazyInitializerFactory()
                 .getProxy(entityName, persistentClass, getIdentifierMethod, setIdentifierMethod, id, pd);
     }
 

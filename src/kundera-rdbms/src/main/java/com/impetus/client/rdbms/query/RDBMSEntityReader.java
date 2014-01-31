@@ -47,12 +47,12 @@ import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.persistence.AbstractEntityReader;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.KunderaQuery;
@@ -87,8 +87,9 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
      * @param query
      *            the query
      */
-    public RDBMSEntityReader(String query, KunderaQuery kunderaQuery)
+    public RDBMSEntityReader(String query, KunderaQuery kunderaQuery, final KunderaMetadata kunderaMetadata)
     {
+        super(kunderaMetadata);
         this.jpaQuery = query;
         this.kunderaQuery = kunderaQuery;
     }
@@ -96,9 +97,9 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
     /**
      * Instantiates a new rDBMS entity reader.
      */
-    public RDBMSEntityReader()
+    public RDBMSEntityReader(final KunderaMetadata kunderaMetadata)
     {
-
+        super(kunderaMetadata);
     }
 
     /*
@@ -217,7 +218,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
      */
     public String getSqlQueryFromJPA(EntityMetadata entityMetadata, List<String> relations, Set<String> primaryKeys)
     {
-        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+        ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
         Metamodel metaModel = appMetadata.getMetamodel(entityMetadata.getPersistenceUnit());
 
         String query = appMetadata.getQuery(jpaQuery);
@@ -228,7 +229,8 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
             return query != null ? query : jpaQuery;
         }
 
-        // Suffixing the UNDERSCORE instead of prefix as Oracle 11g complains about invalid characters error while executing the request.
+        // Suffixing the UNDERSCORE instead of prefix as Oracle 11g complains
+        // about invalid characters error while executing the request.
         String aliasName = entityMetadata.getTableName() + "_";
 
         StringBuilder queryBuilder = new StringBuilder("Select ");
@@ -268,7 +270,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
             for (String relation : relations)
             {
                 Relation rel = entityMetadata.getRelation(entityMetadata.getFieldName(relation));
-                String r = MetadataUtils.getMappedName(entityMetadata, rel);
+                String r = MetadataUtils.getMappedName(entityMetadata, rel, kunderaMetadata);
                 if (!((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName().equalsIgnoreCase(
                         r != null ? r : relation)
                         && rel != null
@@ -365,7 +367,8 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
 
                             queryBuilder.delete(queryBuilder.lastIndexOf("and"), queryBuilder.lastIndexOf("and") + 3);
                         }
-                        else if (((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName().equals(propertyName))
+                        else if (((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName().equals(
+                                propertyName))
                         {
                             addClause(entityMetadata, aliasName, queryBuilder, entityType, value, condition,
                                     propertyName, entityMetadata.getIdAttribute());

@@ -15,6 +15,7 @@
  */
 package com.impetus.kundera.metadata;
 
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
 import junit.framework.Assert;
@@ -22,33 +23,40 @@ import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.query.Person;
 
 /**
- * @author vivek.mishra
- * junit for {@link MetadataUtils}.
- *
+ * @author vivek.mishra junit for {@link MetadataUtils}.
+ * 
  */
 public class MetadataBuilderTest
 {
 
     private String persistenceUnit = "patest";
 
+    private EntityManagerFactory emf;
+
+    private KunderaMetadata kunderaMetadata;
+
     @Before
     public void setup()
     {
-        Persistence.createEntityManagerFactory(persistenceUnit);
+        emf = Persistence.createEntityManagerFactory(persistenceUnit);
+        kunderaMetadata = ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance();
     }
 
     @Test
     public void test()
     {
-        MetadataBuilder metadataBuilder = new MetadataBuilder(persistenceUnit, "com.impetus.kundera.client.CoreTestClientFactory", null);
-        
+        MetadataBuilder metadataBuilder = new MetadataBuilder(persistenceUnit,
+                "com.impetus.kundera.client.CoreTestClientFactory", null, kunderaMetadata);
+
         metadataBuilder.buildEntityMetadata(Person.class);
         metadataBuilder.validate(Person.class);
-        
-        Assert.assertNotNull(KunderaMetadataManager.getEntityMetadata(Person.class));
+
+        Assert.assertNotNull(KunderaMetadataManager.getEntityMetadata(kunderaMetadata, Person.class));
     }
 
 }

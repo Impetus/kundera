@@ -26,8 +26,8 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.configure.ClientProperties.DataStore.Connection.Server;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 
 /**
  * Configure host name and port and build Hosts array.
@@ -58,9 +58,9 @@ public abstract class HostConfiguration
      */
     protected List<Host> hostsList = new CopyOnWriteArrayList<Host>();
 
-    public HostConfiguration(Map externalProperties, List<Server> servers, String persistenceUnit)
+    public HostConfiguration(Map externalProperties, List<Server> servers, String persistenceUnit, final KunderaMetadata kunderaMetadata)
     {
-        buildHosts(externalProperties, servers, persistenceUnit);
+        buildHosts(externalProperties, servers, persistenceUnit, kunderaMetadata);
     }
 
     /**
@@ -70,9 +70,9 @@ public abstract class HostConfiguration
      * @param servers
      * @param persistenceUnit
      */
-    private void buildHosts(Map externalProperties, List<Server> servers, String persistenceUnit)
+    private void buildHosts(Map externalProperties, List<Server> servers, String persistenceUnit, final KunderaMetadata kunderaMetadata)
     {
-        persistenceUnitMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadata(
+        persistenceUnitMetadata = kunderaMetadata.getApplicationMetadata().getPersistenceUnitMetadata(
                 persistenceUnit);
         this.externalProperties = externalProperties;
         String hosts = externalProperties != null ? (String) externalProperties

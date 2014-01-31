@@ -37,10 +37,10 @@ import com.impetus.client.mongodb.utils.MongoDBUtils;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.mongodb.BasicDBList;
@@ -74,7 +74,7 @@ public final class MongoDBDataHandler
      * @return the entity from document
      */
     public Map<String, Object> getEntityFromDocument(Class<?> entityClass, Object entity, EntityMetadata m,
-            DBObject document, List<String> relations, Map<String, Object> relationValue)
+            DBObject document, List<String> relations, Map<String, Object> relationValue, final KunderaMetadata kunderaMetadata)
     {
         // Map to hold property-name=>foreign-entity relations
         try
@@ -83,7 +83,7 @@ public final class MongoDBDataHandler
             Object rowKey = document.get("_id");
             Class<?> rowKeyValueClass = rowKey.getClass();
             Class<?> idClass = null;
-            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                     m.getPersistenceUnit());
             idClass = m.getIdAttribute().getJavaType();
             rowKey = MongoDBUtils.populateValue(rowKey, idClass);
@@ -143,7 +143,7 @@ public final class MongoDBDataHandler
                                 String colFieldName = m.getFieldName(jpaColumnName);
                                 Attribute attribute = colFieldName != null ? entityType.getAttribute(colFieldName)
                                         : null;
-                                EntityMetadata relationMetadata = KunderaMetadataManager.getEntityMetadata(attribute
+                                EntityMetadata relationMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, attribute
                                         .getJavaType());
                                 colValue = MongoDBUtils.getTranslatedObject(colValue, colValue.getClass(),
                                         relationMetadata.getIdAttribute().getJavaType());
@@ -185,12 +185,12 @@ public final class MongoDBDataHandler
      * @throws PropertyAccessException
      *             the property access exception
      */
-    Map<String, DBObject> getDocumentFromEntity(EntityMetadata m, Object entity, List<RelationHolder> relations)
+    Map<String, DBObject> getDocumentFromEntity(EntityMetadata m, Object entity, List<RelationHolder> relations, final KunderaMetadata kunderaMetadata)
             throws PropertyAccessException
     {
         Map<String, DBObject> dbObjects = new HashMap<String, DBObject>();
 
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
         EntityType entityType = metaModel.entity(m.getEntityClazz());
 
@@ -298,7 +298,7 @@ public final class MongoDBDataHandler
      * @throws InstantiationException
      */
     List getEmbeddedObjectList(DBCollection dbCollection, EntityMetadata m, String documentName,
-            BasicDBObject mongoQuery, String result, BasicDBObject orderBy, int maxResult, BasicDBObject keys)
+            BasicDBObject mongoQuery, String result, BasicDBObject orderBy, int maxResult, BasicDBObject keys, final KunderaMetadata kunderaMetadata)
             throws PropertyAccessException, InstantiationException, IllegalAccessException
     {
         List list = new ArrayList();// List of embedded object to be returned
@@ -312,7 +312,7 @@ public final class MongoDBDataHandler
 
         String enclosingDocumentName = null;
 
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
         EntityType entityType = metaModel.entity(m.getEntityClazz());
         EmbeddableType superColumn = null;

@@ -657,7 +657,7 @@ public class StudentCassandraCharTest extends CassandraBase
 
     public void dropSchema()
     {
-        CassandraCli.executeCqlQuery("TRUNCATE \"StudentChar\"");
+        CassandraCli.executeCqlQuery("TRUNCATE \"StudentChar\"", keyspace);
     }
 
 }

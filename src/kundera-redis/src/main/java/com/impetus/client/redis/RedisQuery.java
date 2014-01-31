@@ -27,6 +27,7 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.query.KunderaQuery;
@@ -43,9 +44,9 @@ import com.impetus.kundera.query.QueryImpl;
 public class RedisQuery extends QueryImpl
 {
 
-    public RedisQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
+    public RedisQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator, final KunderaMetadata kunderaMetadata)
     {
-        super(kunderaQuery, persistenceDelegator);
+        super(kunderaQuery, persistenceDelegator, kunderaMetadata);
     }
 
     /*
@@ -101,7 +102,7 @@ public class RedisQuery extends QueryImpl
     {
         // TODO Auto-generated method stub
         // WHY is it required!!!
-        return new RedisEntityReader(kunderaQuery);
+        return new RedisEntityReader(kunderaQuery, kunderaMetadata);
     }
 
     /*

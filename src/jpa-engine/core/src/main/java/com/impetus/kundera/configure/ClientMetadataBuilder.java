@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.loader.ClientFactory;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.utils.KunderaCoreUtils;
 
 public class ClientMetadataBuilder
@@ -20,14 +21,16 @@ public class ClientMetadataBuilder
 
     private SchemaConfiguration schemaConfiguration;
 
-    public ClientMetadataBuilder(Map mapOfPuProperties, String... persistenceUnits)
+    public ClientMetadataBuilder(Map mapOfPuProperties, final KunderaMetadata kunderaMetadata,
+            String... persistenceUnits)
     {
         this.persistenceUnits = persistenceUnits;
         this.mapExternalProperties = mapOfPuProperties;
-        this.schemaConfiguration = new SchemaConfiguration(mapOfPuProperties, persistenceUnits);
+        this.schemaConfiguration = new SchemaConfiguration(mapOfPuProperties, kunderaMetadata, persistenceUnits);
     }
 
-    public void buildClientFactoryMetadata(Map<String, ClientFactory> clientFactories)
+    public void buildClientFactoryMetadata(Map<String, ClientFactory> clientFactories,
+            final KunderaMetadata kunderaMetadata)
     {
         for (String pu : persistenceUnits)
         {
@@ -36,7 +39,7 @@ public class ClientMetadataBuilder
             Map<String, Object> puProperty = KunderaCoreUtils.getExternalProperties(pu, mapExternalProperties,
                     persistenceUnits);
 
-            ClientFactory clientFactory = ClientResolver.getClientFactory(pu, puProperty);
+            ClientFactory clientFactory = ClientResolver.getClientFactory(pu, puProperty, kunderaMetadata);
             clientFactories.put(pu, clientFactory);
         }
 

@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import com.impetus.kundera.configure.AbstractPropertyReader;
 import com.impetus.kundera.configure.ClientProperties;
 import com.impetus.kundera.configure.PropertyReader;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
  * CouchDB Property Reader.
@@ -38,9 +39,9 @@ public class CouchDBPropertyReader extends AbstractPropertyReader implements Pro
     /** MongoDB schema metadata instance */
     public static CouchDBSchemaMetadata csmd;
 
-    public CouchDBPropertyReader(Map externalProperties)
+    public CouchDBPropertyReader(Map externalProperties, final PersistenceUnitMetadata puMetadata)
     {
-        super(externalProperties);
+        super(externalProperties, puMetadata);
         csmd = new CouchDBSchemaMetadata();
     }
 

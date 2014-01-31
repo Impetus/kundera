@@ -465,7 +465,7 @@ public class FlushManager
                     EventLog event = iter.next();
                     Node node = event.getNode();
                     Class clazz = node.getDataClass();
-                    EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(clazz);
+                    EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(delegator.getKunderaMetadata(), clazz);
                     Client client = delegator.getClient(metadata);
 
                     // do manual rollback, if data is processed, and running
@@ -473,7 +473,7 @@ public class FlushManager
                     // support!
                     if (node.isProcessed()
                             && (!delegator.isTransactionInProgress() || MetadataUtils
-                                    .defaultTransactionSupported(metadata.getPersistenceUnit())))
+                                    .defaultTransactionSupported(metadata.getPersistenceUnit(), delegator.getKunderaMetadata())))
                     {
                         if (node.getOriginalNode() == null)
                         {
@@ -548,7 +548,7 @@ public class FlushManager
         {
             if (jtData.isProcessed())
             {
-                EntityMetadata m = KunderaMetadataManager.getEntityMetadata(jtData.getEntityClass());
+                EntityMetadata m = KunderaMetadataManager.getEntityMetadata(delegator.getKunderaMetadata(), jtData.getEntityClass());
                 Client client = delegator.getClient(m);
 
                 if (OPERATION.INSERT.equals(jtData.getOperation()))

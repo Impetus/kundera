@@ -27,6 +27,7 @@ import javax.persistence.JoinColumn;
 
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.utils.ReflectUtils;
 
@@ -72,6 +73,8 @@ public final class Relation
     /** Metadata for JoinTable, applicable only if isRelatedViaJoinTable==true. */
     private JoinTableMetadata joinTableMetadata;
 
+    /** Target entity metadata. */
+    private EntityMetadata targetEntityMetadata;
     /**
      * Whether this relationship is joined by primary key, only applicable for
      * OneToOne.
@@ -236,12 +239,12 @@ public final class Relation
      * 
      * @return the joinColumnName
      */
-    public String getJoinColumnName()
+    public String getJoinColumnName(final KunderaMetadata kunderaMetadata)
     {
-
+                
         if(joinColumnName == null && isJoinedByPrimaryKey)
         {
-            EntityMetadata joinClassMetadata = KunderaMetadataManager.getEntityMetadata(targetEntity);
+            EntityMetadata joinClassMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, targetEntity);
             joinColumnName  = ((AbstractAttribute)joinClassMetadata.getIdAttribute()).getJPAColumnName();
         }
         

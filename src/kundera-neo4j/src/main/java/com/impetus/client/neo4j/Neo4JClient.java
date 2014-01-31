@@ -54,10 +54,11 @@ import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.KunderaTransactionException;
 import com.impetus.kundera.persistence.TransactionBinder;
@@ -91,13 +92,15 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
 
     private Neo4JIndexManager indexer;
 
-    Neo4JClient(final Neo4JClientFactory factory, Map<String, Object> puProperties, String persistenceUnit)
+    Neo4JClient(final Neo4JClientFactory factory, Map<String, Object> puProperties, String persistenceUnit,
+            final KunderaMetadata kunderaMetadata)
     {
+        super(kunderaMetadata);
         this.persistenceUnit = persistenceUnit;
         this.factory = factory;
-        reader = new Neo4JEntityReader();
+        reader = new Neo4JEntityReader(kunderaMetadata);
         indexer = new Neo4JIndexManager();
-        mapper = new GraphEntityMapper(indexer);
+        mapper = new GraphEntityMapper(indexer, kunderaMetadata);
         populateBatchSize(persistenceUnit, puProperties);
         this.clientMetadata = factory.getClientMetadata();
 
@@ -138,7 +141,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
         if (graphDb == null)
             graphDb = factory.getConnection();
 
-        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClass);
+        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,  entityClass);
 
         Object entity = null;
         Node node = mapper.searchNode(key, m, graphDb, true);
@@ -187,7 +190,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
         GraphDatabaseService graphDb = getConnection();
 
         // Find Node for this particular entity
-        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entity.getClass());
+        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,  entity.getClass());
         Node node = mapper.searchNode(key, m, graphDb, true);
         if (node != null)
         {
@@ -287,6 +290,8 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
 
             if (node != null)
             {
+                MetamodelImpl metamodel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(getPersistenceUnit());
+                
                 ((Neo4JTransaction) resource).addProcessedNode(id, node);
 
                 if (!rlHolders.isEmpty())
@@ -294,8 +299,8 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
                     for (RelationHolder rh : rlHolders)
                     {
                         // Search Node (to be connected to ) in Neo4J graph
-                        EntityMetadata targetNodeMetadata = KunderaMetadataManager.getEntityMetadata(rh
-                                .getRelationValue().getClass());
+                        EntityMetadata targetNodeMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, 
+                                rh.getRelationValue().getClass());
                         Object targetNodeKey = PropertyAccessorHelper.getId(rh.getRelationValue(), targetNodeMetadata);
                         // Node targetNode = mapper.searchNode(targetNodeKey,
                         // targetNodeMetadata, graphDb);
@@ -344,14 +349,14 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
                                 // After relationship creation, manually index
                                 // it if desired
                                 EntityMetadata relationMetadata = KunderaMetadataManager
-                                        .getEntityMetadata(relationshipObj.getClass());
+                                        .getEntityMetadata(kunderaMetadata, relationshipObj.getClass());
                                 if (!isUpdate)
                                 {
-                                    indexer.indexRelationship(relationMetadata, graphDb, relationship);
+                                    indexer.indexRelationship(relationMetadata, graphDb, relationship, metamodel);
                                 }
                                 else
                                 {
-                                    indexer.updateRelationshipIndex(relationMetadata, graphDb, relationship);
+                                    indexer.updateRelationshipIndex(relationMetadata, graphDb, relationship, metamodel);
                                 }
 
                             }
@@ -363,11 +368,11 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
                 // After node creation, manually index this node, if desired
                 if (!isUpdate)
                 {
-                    indexer.indexNode(entityMetadata, graphDb, node);
+                    indexer.indexNode(entityMetadata, graphDb, node, metamodel);
                 }
                 else
                 {
-                    indexer.updateNodeIndex(entityMetadata, graphDb, node);
+                    indexer.updateNodeIndex(entityMetadata, graphDb, node, metamodel);
                 }
             }
 
@@ -438,7 +443,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
                     {
                         // Insert node
                         Object entity = graphNode.getData();
-                        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entity.getClass());
+                        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,  entity.getClass());
                         Object pk = PropertyAccessorHelper.getId(entity, m);
                         Map<String, Object> nodeProperties = mapper.createNodeProperties(entity, m);
                         long nodeId = inserter.createNode(nodeProperties);
@@ -455,7 +460,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
                             {
                                 // Search Node (to be connected to ) in Neo4J
                                 // graph
-                                EntityMetadata targetNodeMetadata = KunderaMetadataManager.getEntityMetadata(rh
+                                EntityMetadata targetNodeMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,  rh
                                         .getRelationValue().getClass());
                                 Object targetNodeKey = PropertyAccessorHelper.getId(rh.getRelationValue(),
                                         targetNodeMetadata);
@@ -477,7 +482,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
                                     if (relationshipObj != null)
                                     {
                                         EntityMetadata relationMetadata = KunderaMetadataManager
-                                                .getEntityMetadata(relationshipObj.getClass());
+                                                .getEntityMetadata(kunderaMetadata, relationshipObj.getClass());
 
                                         relationshipProperties = mapper.createRelationshipProperties(m,
                                                 targetNodeMetadata, relationshipObj);
@@ -530,7 +535,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
         for (Relation relation : m.getRelations())
         {
             Class<?> targetEntityClass = relation.getTargetEntity();
-            EntityMetadata targetEntityMetadata = KunderaMetadataManager.getEntityMetadata(targetEntityClass);
+            EntityMetadata targetEntityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,  targetEntityClass);
             Field property = relation.getProperty();
             if (relation.getPropertyType().isAssignableFrom(Map.class))
             {
@@ -542,7 +547,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
                 {
 
                     for (Relationship relationship : node.getRelationships(Direction.OUTGOING,
-                            DynamicRelationshipType.withName(relation.getJoinColumnName())))
+                            DynamicRelationshipType.withName(relation.getJoinColumnName(kunderaMetadata))))
                     {
                         if (relationship == null)
                         {
@@ -571,7 +576,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
                         if (bidirectionalField != null)
                         {
                             for (Relationship incomingRelationship : endNode.getRelationships(Direction.INCOMING,
-                                    DynamicRelationshipType.withName(relation.getJoinColumnName())))
+                                    DynamicRelationshipType.withName(relation.getJoinColumnName(kunderaMetadata))))
                             {
                                 Node startNode = incomingRelationship.getStartNode();
                                 Object sourceEntity = nodeIdToEntityMap.get(startNode.getId());
@@ -618,7 +623,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
                 {
 
                     for (Relationship relationship : node.getRelationships(Direction.OUTGOING,
-                            DynamicRelationshipType.withName(relation.getJoinColumnName())))
+                            DynamicRelationshipType.withName(relation.getJoinColumnName(kunderaMetadata))))
                     {
                         Node proxyNode = relationship.getEndNode();
 
@@ -630,7 +635,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
                         targetEntitiesMap.put(targetObjectId, relationshipEntity);
                     }
 
-                    relationMap.put(relation.getJoinColumnName(), targetEntitiesMap);
+                    relationMap.put(relation.getJoinColumnName(kunderaMetadata), targetEntitiesMap);
                 }
             }
         }
@@ -641,8 +646,8 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
      */
     protected BatchInserter getBatchInserter()
     {
-        PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                .getPersistenceUnitMetadata(getPersistenceUnit());
+        PersistenceUnitMetadata puMetadata = kunderaMetadata.getApplicationMetadata().getPersistenceUnitMetadata(
+                getPersistenceUnit());
         Properties props = puMetadata.getProperties();
 
         // Datastore file path

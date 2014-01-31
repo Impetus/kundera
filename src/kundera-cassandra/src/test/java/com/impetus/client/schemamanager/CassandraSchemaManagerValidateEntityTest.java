@@ -15,11 +15,7 @@
  ******************************************************************************/
 package com.impetus.client.schemamanager;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import javax.persistence.Persistence;
 
 import junit.framework.Assert;
 
@@ -30,19 +26,9 @@ import org.junit.Test;
 import com.impetus.client.cassandra.config.CassandraPropertyReader;
 import com.impetus.client.cassandra.pelops.PelopsClientFactory;
 import com.impetus.client.cassandra.schemamanager.CassandraSchemaManager;
-import com.impetus.client.cassandra.thrift.ThriftClientFactory;
 import com.impetus.client.schemamanager.entites.InvalidCounterColumnEntity;
 import com.impetus.client.schemamanager.entites.ValidCounterColumnFamily;
-import com.impetus.kundera.Constants;
-import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.metadata.MetadataBuilder;
-import com.impetus.kundera.metadata.model.ApplicationMetadata;
-import com.impetus.kundera.metadata.model.CoreMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.metadata.model.MetamodelImpl;
-import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
-import com.impetus.kundera.proxy.cglib.CglibLazyInitializerFactory;
 
 /**
  * @author impadmin
@@ -79,10 +65,12 @@ public class CassandraSchemaManagerValidateEntityTest
     @Test
     public void testValidateEntity()
     {
-        getEntityManagerFactory();
-        CassandraPropertyReader reader = new CassandraPropertyReader(null);
+        EntityManagerFactoryImpl emf = getEntityManagerFactory();
+        CassandraPropertyReader reader = new CassandraPropertyReader(null, emf.getKunderaMetadataInstance()
+                .getApplicationMetadata().getPersistenceUnitMetadata("cassandraProperties"));
         reader.read(persistenceUnit);
-        CassandraSchemaManager manager = new CassandraSchemaManager(PelopsClientFactory.class.getName(), null);
+        CassandraSchemaManager manager = new CassandraSchemaManager(PelopsClientFactory.class.getName(), null,
+                emf.getKunderaMetadataInstance());
         boolean valid = manager.validateEntity(ValidCounterColumnFamily.class);
         Assert.assertTrue(valid);
         valid = manager.validateEntity(InvalidCounterColumnEntity.class);
@@ -96,54 +84,6 @@ public class CassandraSchemaManagerValidateEntityTest
      */
     private EntityManagerFactoryImpl getEntityManagerFactory()
     {
-        Map<String, Object> props = new HashMap<String, Object>();
-        // String persistenceUnit = "cassandraProperties";
-        props.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
-        props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY,
-                "com.impetus.client.cassandra.thrift.ThriftClientFactory");
-        props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
-        props.put(PersistenceProperties.KUNDERA_PORT, "9160");
-        props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaCounterColumn");
-        props.put(PersistenceProperties.KUNDERA_CLIENT_PROPERTY, "kunderaTest.xml");
-
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
-
-        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
-        PersistenceUnitMetadata puMetadata = new PersistenceUnitMetadata();
-        puMetadata.setPersistenceUnitName(persistenceUnit);
-        Properties p = new Properties();
-        p.putAll(props);
-        puMetadata.setProperties(p);
-        Map<String, PersistenceUnitMetadata> metadata = new HashMap<String, PersistenceUnitMetadata>();
-        metadata.put(persistenceUnit, puMetadata);
-        appMetadata.addPersistenceUnitMetadata(metadata);
-
-        Map<String, List<String>> clazzToPu = new HashMap<String, List<String>>();
-
-        List<String> pus = new ArrayList<String>();
-        pus.add(persistenceUnit);
-        clazzToPu.put(ValidCounterColumnFamily.class.getName(), pus);
-        clazzToPu.put(InvalidCounterColumnEntity.class.getName(), pus);
-        appMetadata.setClazzToPuMap(clazzToPu);
-
-        MetadataBuilder metadataBuilder = new MetadataBuilder(persistenceUnit, ThriftClientFactory.class.getSimpleName(), null);
-
-        MetamodelImpl metaModel = new MetamodelImpl();
-        metaModel.addEntityMetadata(ValidCounterColumnFamily.class, metadataBuilder.buildEntityMetadata(ValidCounterColumnFamily.class));
-        metaModel.addEntityMetadata(InvalidCounterColumnEntity.class,metadataBuilder.buildEntityMetadata(InvalidCounterColumnEntity.class));
-        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(persistenceUnit).getManagedTypes());
-        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(persistenceUnit).getEmbeddables());
-        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(persistenceUnit).getMappedSuperClassTypes());
-
-        appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
-        
-        CoreMetadata coreMetadata = new CoreMetadata();
-        coreMetadata.setLazyInitializerFactory(new CglibLazyInitializerFactory());
-        KunderaMetadata.INSTANCE.setCoreMetadata(coreMetadata);
-        
-        // EntityManagerFactoryImpl emf = new
-        // EntityManagerFactoryImpl(persistenceUnit, props);
-        // return emf;
-        return null;
+        return (EntityManagerFactoryImpl) Persistence.createEntityManagerFactory("cassandraProperties");
     }
 }

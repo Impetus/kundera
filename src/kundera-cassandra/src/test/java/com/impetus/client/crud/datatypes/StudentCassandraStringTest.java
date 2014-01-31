@@ -649,7 +649,7 @@ public class StudentCassandraStringTest extends CassandraBase
 
     public void dropSchema()
     {
-        CassandraCli.executeCqlQuery("TRUNCATE \"StudentString\"");
+        CassandraCli.executeCqlQuery("TRUNCATE \"StudentString\"", keyspace);
     }
 
 }

@@ -30,7 +30,6 @@ import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.tests.crossdatastore.imdb.entities.Actor;
 import com.impetus.kundera.tests.crossdatastore.imdb.entities.Movie;
@@ -61,7 +60,7 @@ public abstract class TwinAssociation extends AssociationBase
      */
     public static void init(List<Class> classes, String... persistenceUnits) throws Exception
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         combinations = null;
         combinations = new ArrayList<Map<Class, String>>();
 
@@ -96,7 +95,7 @@ public abstract class TwinAssociation extends AssociationBase
             Metamodel metaModel = null;
             for (int i = 0; i < ALL_PUs_UNDER_TEST.length; i++)
             {
-                metaModel = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(ALL_PUs_UNDER_TEST[i]);
+                metaModel = kunderaMetadata.getApplicationMetadata().getMetamodel(ALL_PUs_UNDER_TEST[i]);
 
 //                if (traversedPus.isEmpty() || !traversedPus.contains(ALL_PUs_UNDER_TEST[i]))
 //                {
@@ -107,7 +106,7 @@ public abstract class TwinAssociation extends AssociationBase
                             traversedPus.add(ALL_PUs_UNDER_TEST[i1]);
                             Map<Class<?>, EntityType<?>> original = getManagedTypes((MetamodelImpl) metaModel);
 
-                            Metamodel m = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                            Metamodel m = kunderaMetadata.getApplicationMetadata().getMetamodel(
                                     ALL_PUs_UNDER_TEST[i1]);
                             Map<Class<?>, EntityType<?>> copy = getManagedTypes((MetamodelImpl) m);
                             if (original != null && copy != null)

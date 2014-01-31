@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
 import com.impetus.client.crud.compositeType.CassandraCompoundKey;
 import com.impetus.client.crud.compositeType.CassandraPrimeUser;
 import com.impetus.client.persistence.CassandraCli;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
  * @author chhavi.gangwal
@@ -69,7 +68,7 @@ public class ResultIteratorEmbeddableTest
         CassandraCli.cassandraSetUp();
         CassandraCli.initClient();
         
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         
         emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT);
         em = emf.createEntityManager();

@@ -31,9 +31,9 @@ import org.slf4j.LoggerFactory;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -52,9 +52,9 @@ public class CouchDBQuery extends QueryImpl
 {
     private static final Logger log = LoggerFactory.getLogger(CouchDBQuery.class);
 
-    public CouchDBQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
+    public CouchDBQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator, final KunderaMetadata kunderaMetadata)
     {
-        super(kunderaQuery, persistenceDelegator);
+        super(kunderaQuery, persistenceDelegator, kunderaMetadata);
     }
 
     /**
@@ -87,7 +87,7 @@ public class CouchDBQuery extends QueryImpl
     @Override
     protected EntityReader getReader()
     {
-        return new CouchDBEntityReader(kunderaQuery);
+        return new CouchDBEntityReader(kunderaQuery, kunderaMetadata);
     }
 
     @Override
@@ -128,7 +128,7 @@ public class CouchDBQuery extends QueryImpl
 
         CouchDBQueryInterpreter interpreter = new CouchDBQueryInterpreter(getColumns(getKunderaQuery().getResult(), m),
                 getMaxResults(), m);
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
 
         EntityType entity = metaModel.entity(m.getEntityClazz());

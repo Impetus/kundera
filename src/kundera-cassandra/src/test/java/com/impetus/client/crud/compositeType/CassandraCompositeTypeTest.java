@@ -30,8 +30,6 @@ import junit.framework.Assert;
 
 import org.apache.cassandra.thrift.Compression;
 import org.apache.cassandra.thrift.ConsistencyLevel;
-import org.apache.cassandra.thrift.InvalidRequestException;
-import org.apache.thrift.TException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,7 +41,6 @@ import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.crud.compositeType.CassandraPrimeUser.NickName;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.client.Client;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
  * Junit test case for Compound/Composite key.
@@ -80,8 +77,7 @@ public class CassandraCompositeTypeTest
     {
         CassandraCli.cassandraSetUp();
         CassandraCli.initClient();
-        
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+
     }
 
     @Test
@@ -114,7 +110,7 @@ public class CassandraCompositeTypeTest
 
         em.flush();
         em.close();
-        em =emf.createEntityManager();
+        em = emf.createEntityManager();
         clients = (Map<String, Client>) em.getDelegate();
         client = clients.get(PERSISTENCE_UNIT);
         ((CassandraClientBase) client).setCqlVersion("3.0.0");
@@ -124,7 +120,7 @@ public class CassandraCompositeTypeTest
         em.close();
     }
 
-//    @Test
+    // @Test
     public void onAlterColumnType() throws Exception
     {
         // Here tweetDate is of type "int". On update will be changed to
@@ -148,10 +144,10 @@ public class CassandraCompositeTypeTest
                                                                                      // of
                                                                                      // changed
                                                                                      // tweetDate.
-        em.remove(result);        
+        em.remove(result);
         em.flush();
         em.close();
-        em =emf.createEntityManager();
+        em = emf.createEntityManager();
         clients = (Map<String, Client>) em.getDelegate();
         client = clients.get(PERSISTENCE_UNIT);
         ((CassandraClientBase) client).setCqlVersion("3.0.0");
@@ -348,7 +344,7 @@ public class CassandraCompositeTypeTest
         Assert.assertNotNull(results);
         Assert.assertEquals(2, results.size());
     }
-    
+
     @Test
     public void onOrderBYClause()
     {
@@ -394,7 +390,7 @@ public class CassandraCompositeTypeTest
         Assert.assertEquals("my second tweet", results.get(1).getTweetBody());
         Assert.assertEquals("my third tweet", results.get(2).getTweetBody());
         Assert.assertEquals(3, results.size());
-        
+
         orderClause = "Select u from CassandraPrimeUser u where u.key.userId = :userId ORDER BY tweetId DESC";
         q = em.createQuery(orderClause);
         q.setParameter("userId", "mevivs");
@@ -410,29 +406,29 @@ public class CassandraCompositeTypeTest
         q.setParameter("userId", "mevivs");
         q.setMaxResults(2);
         results = q.getResultList();
-       
+
         Assert.assertNotNull(results);
         Assert.assertEquals(2, results.size());
-        
+
         try
         {
             orderClause = "Select u from CassandraPrimeUser u where u.key.userId = :userId ORDER BY userId DESC";
             q = em.createQuery(orderClause);
             q.setParameter("userId", "mevivs");
             results = q.getResultList();
-                    
+
             Assert.fail();
         }
         catch (Exception e)
         {
-            
+
             Assert.assertEquals(
                     "javax.persistence.PersistenceException: InvalidRequestException(why:Order by is currently only supported on the clustered columns of the PRIMARY KEY, got userId)",
                     e.getMessage());
         }
 
     }
-    
+
     @Test
     public void onInClause()
     {
@@ -464,46 +460,43 @@ public class CassandraCompositeTypeTest
 
         em.flush();
 
-        
         em.clear();
 
         String inClause = "Select u from CassandraPrimeUser u where u.key.userId IN (mevivs,cgangwal's,kmishra) ORDER BY tweetId ASC";
         Query q = em.createQuery(inClause);
-       
+
         List<CassandraPrimeUser> results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals("my first tweet", results.get(0).getTweetBody());
         Assert.assertEquals("my second tweet", results.get(1).getTweetBody());
         Assert.assertEquals("my third tweet", results.get(2).getTweetBody());
         Assert.assertEquals(3, results.size());
-        
+
         inClause = "Select u from CassandraPrimeUser u where u.key.userId IN (\"mevivs\",\"cgangwal's\",\"kmishra\") ORDER BY tweetId ASC";
         q = em.createQuery(inClause);
-       
+
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals("my first tweet", results.get(0).getTweetBody());
         Assert.assertEquals("my second tweet", results.get(1).getTweetBody());
         Assert.assertEquals("my third tweet", results.get(2).getTweetBody());
         Assert.assertEquals(3, results.size());
-        
+
         inClause = "Select u from CassandraPrimeUser u where u.key.userId IN ('mevivs','cgangwal's') ORDER BY tweetId ASC";
         q = em.createQuery(inClause);
-       
+
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals("my first tweet", results.get(0).getTweetBody());
         Assert.assertEquals("my second tweet", results.get(1).getTweetBody());
         Assert.assertEquals(2, results.size());
-        
-        
-        
+
         try
         {
             inClause = "Select u from CassandraPrimeUser u where u.key.tweetId IN (1,2,3) ORDER BY tweetId DESC";
             q = em.createQuery(inClause);
             results = q.getResultList();
-                    
+
             Assert.fail();
         }
         catch (Exception e)
@@ -514,7 +507,6 @@ public class CassandraCompositeTypeTest
         }
 
     }
-    
 
     @Test
     public void onBatchInsert()
@@ -567,19 +559,7 @@ public class CassandraCompositeTypeTest
     private void executeScript(final String cql)
     {
         CassandraCli.createKeySpace("CompositeCassandra");
-        try
-        {
-            CassandraCli.getClient().set_keyspace("CompositeCassandra");
-            CassandraCli.executeCqlQuery(cql);
-        }
-        catch (InvalidRequestException e)
-        {
-            logger.error(e.getMessage());
-        }
-        catch (TException e)
-        {
-            logger.error(e.getMessage());
-        }
+        CassandraCli.executeCqlQuery(cql, "CompositeCassandra");
     }
 
     /**

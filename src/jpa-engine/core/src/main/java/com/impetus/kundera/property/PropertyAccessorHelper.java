@@ -18,11 +18,14 @@ package com.impetus.kundera.property;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.impetus.kundera.client.EnhanceEntity;
@@ -412,6 +415,16 @@ public class PropertyAccessorHelper
                 }
             }
         }
+        if(collectionField.getType().isAssignableFrom(Map.class))
+        {
+            java.lang.reflect.Type[] arguments = ((ParameterizedType) collectionField.getGenericType())
+                    .getActualTypeArguments();
+            if(arguments != null && arguments.length > 1)
+            {
+                genericClass = getTypedClass(arguments[1]);
+            }
+
+        }
         return genericClass != null ? genericClass : collectionField.getType();
     }
 
@@ -567,5 +580,33 @@ public class PropertyAccessorHelper
             return clazz;
         }
         return (Class<?>) o;
+    }
+    
+    
+    /**
+     * Gets the typed class.
+     * 
+     * @param type
+     *            the type
+     * @return the typed class
+     */
+    private static Class<?> getTypedClass(java.lang.reflect.Type type)
+    {
+        if (type instanceof Class)
+        {
+            return ((Class) type);
+        }
+        else if (type instanceof ParameterizedType)
+        {
+            java.lang.reflect.Type rawParamterizedType = ((ParameterizedType) type).getRawType();
+            return getTypedClass(rawParamterizedType);
+        }
+        else if (type instanceof TypeVariable)
+        {
+            java.lang.reflect.Type upperBound = ((TypeVariable) type).getBounds()[0];
+            return getTypedClass(upperBound);
+        }
+
+        throw new IllegalArgumentException("Error while finding generic class for :" + type);
     }
 }

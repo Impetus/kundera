@@ -32,7 +32,7 @@ public class RedisAssociationTest
     @Before
     public void setUp()
     {
-        // KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        // 
         emf = Persistence.createEntityManagerFactory(REDIS_PU);
     }
 

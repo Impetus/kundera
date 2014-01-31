@@ -672,6 +672,6 @@ public class StudentCassandraSqlDateTest extends CassandraBase
 
     public void dropSchema()
     {
-        CassandraCli.executeCqlQuery("TRUNCATE \"StudentSqlDate\"");
+        CassandraCli.executeCqlQuery("TRUNCATE \"StudentSqlDate\"", keyspace);
     }
 }

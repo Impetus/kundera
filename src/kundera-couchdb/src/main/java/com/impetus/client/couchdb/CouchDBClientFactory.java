@@ -46,7 +46,6 @@ import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.loader.GenericClientFactory;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
@@ -71,7 +70,7 @@ public class CouchDBClientFactory extends GenericClientFactory
         if (schemaManager == null)
         {
             initializePropertyReader();
-            schemaManager = new CouchDBSchemaManager(this.getClass().getName(), puProperties);
+            schemaManager = new CouchDBSchemaManager(this.getClass().getName(), puProperties, this.kunderaMetadata);
         }
         return schemaManager;
     }
@@ -96,7 +95,7 @@ public class CouchDBClientFactory extends GenericClientFactory
     @Override
     public void initialize(Map<String, Object> externalProperty)
     {
-        reader = new CouchDBEntityReader();
+        reader = new CouchDBEntityReader(kunderaMetadata);
         initializePropertyReader();
         setExternalProperties(externalProperty);
     }
@@ -104,8 +103,8 @@ public class CouchDBClientFactory extends GenericClientFactory
     @Override
     protected Object createPoolOrConnection()
     {
-        PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                .getPersistenceUnitMetadata(getPersistenceUnit());
+        PersistenceUnitMetadata puMetadata = kunderaMetadata.getApplicationMetadata().getPersistenceUnitMetadata(
+                getPersistenceUnit());
 
         Properties props = puMetadata.getProperties();
         String contactNode = null;
@@ -208,7 +207,7 @@ public class CouchDBClientFactory extends GenericClientFactory
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
-        return new CouchDBClient(httpClient, httpHost, reader, persistenceUnit, externalProperties, clientMetadata);
+        return new CouchDBClient(httpClient, httpHost, reader, persistenceUnit, externalProperties, clientMetadata, kunderaMetadata);
     }
 
     @Override
@@ -228,7 +227,8 @@ public class CouchDBClientFactory extends GenericClientFactory
     {
         if (propertyReader == null)
         {
-            propertyReader = new CouchDBPropertyReader(externalProperties);
+            propertyReader = new CouchDBPropertyReader(externalProperties, kunderaMetadata.getApplicationMetadata()
+                    .getPersistenceUnitMetadata(getPersistenceUnit()));
             propertyReader.read(getPersistenceUnit());
         }
     }

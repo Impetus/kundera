@@ -27,7 +27,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.query.IResultIterator;
 import com.impetus.kundera.query.Query;
 
@@ -51,7 +50,7 @@ public class ResultIteratorTest extends BaseTest
     @Before
     public void setUp() throws Exception
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         emf = Persistence.createEntityManagerFactory("mongoTest");
         em = emf.createEntityManager();
     }

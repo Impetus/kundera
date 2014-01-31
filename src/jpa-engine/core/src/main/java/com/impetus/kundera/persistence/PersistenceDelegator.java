@@ -47,9 +47,9 @@ import com.impetus.kundera.lifecycle.states.TransientState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.EventLog.EventType;
 import com.impetus.kundera.persistence.context.FlushManager;
@@ -80,9 +80,6 @@ public final class PersistenceDelegator
     /** The event dispatcher. */
     private EntityEventDispatcher eventDispatcher;
 
-    // /** The is relation via join table. */
-    // private boolean isRelationViaJoinTable;
-
     private FlushModeType flushMode = FlushModeType.AUTO;
 
     private ObjectGraphBuilder graphBuilder;
@@ -100,6 +97,7 @@ public final class PersistenceDelegator
 
     private Coordinator coordinator;
 
+    private KunderaMetadata kunderaMetadata;
 
     /**
      * Instantiates a new persistence delegator.
@@ -109,11 +107,12 @@ public final class PersistenceDelegator
      * @param persistenceUnits
      *            the persistence units
      */
-    PersistenceDelegator(final PersistenceCache pc)
+    PersistenceDelegator(final KunderaMetadata kunderaMetadata, final PersistenceCache pc)
     {
         this.eventDispatcher = new EntityEventDispatcher();
         this.graphBuilder = new ObjectGraphBuilder(pc, this);
         this.persistenceCache = pc;
+        this.kunderaMetadata = kunderaMetadata;
     }
 
     /***********************************************************************/
@@ -186,16 +185,6 @@ public final class PersistenceDelegator
         if (e == null)
             return null;
 
-        // I don't it's needed as already done via find () method!
-        /*
-         * // Set this returned entity as head node if applicable String nodeId
-         * = ObjectGraphUtils.getNodeId(primaryKey, entityClass); CacheBase
-         * mainCache = getPersistenceCache().getMainCache(); Node node =
-         * mainCache.getNodeFromCache(nodeId); if (node != null &&
-         * node.getParents() == null &&
-         * !mainCache.getHeadNodes().contains(node)) {
-         * mainCache.addHeadNode(node); }
-         */
         // Return a copy of this entity
         return (E) (e);
     }
@@ -228,12 +217,12 @@ public final class PersistenceDelegator
 
         // TODO all the scrap should go from here.
         MainCache mainCache = (MainCache) getPersistenceCache().getMainCache();
-        Node node = mainCache.getNodeFromCache(nodeId);
+        Node node = mainCache.getNodeFromCache(nodeId, this);
 
         // if node is not in persistence cache or is dirty, fetch from database
         if (node == null || node.isDirty())
         {
-            node = new Node(nodeId, entityClass, new ManagedState(), getPersistenceCache(), primaryKey);
+            node = new Node(nodeId, entityClass, new ManagedState(), getPersistenceCache(), primaryKey, this);
             node.setClient(getClient(entityMetadata));
             // TODO ManagedState.java require serious attention.
             node.setPersistenceDelegator(this);
@@ -247,10 +236,11 @@ public final class PersistenceDelegator
             {
                 lock.readLock().unlock();
             }
-        } else
+        }
+        else
         {
             node.setPersistenceDelegator(this);
-            
+
         }
         Object nodeData = node.getData();
         if (nodeData == null)
@@ -259,7 +249,7 @@ public final class PersistenceDelegator
         }
         else
         {
-            E e = (E) ObjectUtils.deepCopy(nodeData);
+            E e = (E) ObjectUtils.deepCopy(nodeData, getKunderaMetadata());
 
             onSetProxyOwners(entityMetadata, e);
             return e;
@@ -410,7 +400,7 @@ public final class PersistenceDelegator
                         ((Batcher) (node.getClient())).addBatch(node);
                     }
                     else if (isTransactionInProgress
-                            && MetadataUtils.defaultTransactionSupported(metadata.getPersistenceUnit()))
+                            && MetadataUtils.defaultTransactionSupported(metadata.getPersistenceUnit(),kunderaMetadata))
                     {
                         onSynchronization(node, metadata);
                     }
@@ -487,7 +477,7 @@ public final class PersistenceDelegator
      */
     public void detach(Object entity)
     {
-        Node node = getPersistenceCache().getMainCache().getNodeFromCache(entity);
+        Node node = getPersistenceCache().getMainCache().getNodeFromCache(entity, getMetadata(entity.getClass()), this);
         if (node != null)
         {
             node.detach();
@@ -550,7 +540,8 @@ public final class PersistenceDelegator
 
     private Query getQueryInstance(String jpaQuery, boolean isNative, Class mappedClass)
     {
-        Query query = new QueryResolver().getQueryImplementation(jpaQuery, this, mappedClass, isNative);
+        Query query = new QueryResolver()
+                .getQueryImplementation(jpaQuery, this, mappedClass, isNative, kunderaMetadata);
         return query;
     }
 
@@ -593,9 +584,9 @@ public final class PersistenceDelegator
 
     private void onClearProxy()
     {
-        if (KunderaMetadata.INSTANCE.getCoreMetadata() != null)
+        if (kunderaMetadata.getCoreMetadata() != null)
         {
-            LazyInitializerFactory lazyInitializerrFactory = KunderaMetadata.INSTANCE.getCoreMetadata()
+            LazyInitializerFactory lazyInitializerrFactory = kunderaMetadata.getCoreMetadata()
                     .getLazyInitializerFactory();
 
             if (lazyInitializerrFactory != null)
@@ -607,9 +598,9 @@ public final class PersistenceDelegator
 
     private void onSetProxyOwners(final EntityMetadata m, Object e)
     {
-        if (KunderaMetadata.INSTANCE.getCoreMetadata() != null)
+        if (kunderaMetadata.getCoreMetadata() != null)
         {
-            LazyInitializerFactory lazyInitializerrFactory = KunderaMetadata.INSTANCE.getCoreMetadata()
+            LazyInitializerFactory lazyInitializerrFactory = kunderaMetadata.getCoreMetadata()
                     .getLazyInitializerFactory();
 
             if (lazyInitializerrFactory != null)
@@ -633,7 +624,7 @@ public final class PersistenceDelegator
      */
     boolean contains(Object entity)
     {
-        Node node = getPersistenceCache().getMainCache().getNodeFromCache(entity);
+        Node node = getPersistenceCache().getMainCache().getNodeFromCache(entity, getMetadata(entity.getClass()), this);
         return node != null && node.isInState(ManagedState.class);
     }
 
@@ -646,7 +637,7 @@ public final class PersistenceDelegator
         if (contains(entity))
         {
             MainCache mainCache = (MainCache) getPersistenceCache().getMainCache();
-            Node node = mainCache.getNodeFromCache(entity);
+            Node node = mainCache.getNodeFromCache(entity, getMetadata(entity.getClass()), this);
             // Locking as it might read from persistence context.
 
             try
@@ -675,7 +666,7 @@ public final class PersistenceDelegator
      */
     private EntityMetadata getMetadata(Class<?> clazz)
     {
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(clazz);
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, clazz);
         if (metadata == null)
         {
             log.error("Entity metadata not found for {}, possible reasons may be: "
@@ -811,8 +802,6 @@ public final class PersistenceDelegator
         return clientMap;
     }
 
-    
-    
     /**
      * Executes batch.
      */
@@ -846,7 +835,8 @@ public final class PersistenceDelegator
             {
                 if (!jtData.isProcessed())
                 {
-                    EntityMetadata m = KunderaMetadataManager.getEntityMetadata(jtData.getEntityClass());
+                    EntityMetadata m = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
+                            jtData.getEntityClass());
                     Client client = getClient(m);
                     if (OPERATION.INSERT.equals(jtData.getOperation()))
                     {
@@ -891,7 +881,8 @@ public final class PersistenceDelegator
         {
             for (String pu : clientMap.keySet())
             {
-                PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(pu);
+                PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata,
+                        pu);
 
                 String txResource = puMetadata.getProperty(PersistenceProperties.KUNDERA_TRANSACTION_RESOURCE);
 
@@ -949,5 +940,10 @@ public final class PersistenceDelegator
         {
             resource.syncNode(node);
         }
+    }
+
+    public KunderaMetadata getKunderaMetadata()
+    {
+        return this.kunderaMetadata;
     }
 }

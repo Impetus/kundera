@@ -30,7 +30,6 @@ import org.junit.Test;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.persistence.CassandraCli;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
  * Test case for Storing and retrieving Blog posts. 1. Validates correct
@@ -48,6 +47,7 @@ public class BlogPostTest
     String persistenceUnit = "secIdxCassandraTest";
 
     private boolean RUN_IN_EMBEDDED_MOODE = true;
+
     private boolean AUTO_MANAGE_SCHEMA = true;
 
     /**
@@ -56,8 +56,7 @@ public class BlogPostTest
     @Before
     public void setUp() throws Exception
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
-        
+
         if (RUN_IN_EMBEDDED_MOODE)
         {
             CassandraCli.cassandraSetUp();
@@ -66,7 +65,7 @@ public class BlogPostTest
         if (AUTO_MANAGE_SCHEMA)
         {
 
-            createKeyspace();            
+            createKeyspace();
             createColumnFamily();
         }
 
@@ -74,7 +73,6 @@ public class BlogPostTest
         em = emf.createEntityManager();
         em.setProperty(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
     }
-
 
     @Test
     public void testCRUD()
@@ -174,10 +172,10 @@ public class BlogPostTest
         Assert.assertFalse(allPosts.isEmpty());
         Assert.assertEquals(1, allPosts.size());
         assertUpdatedPost1(allPosts.get(0));
-        
-        //Named Query
+
+        // Named Query
         em.clear();
-        q = em.createNamedQuery("select.post.2");        
+        q = em.createNamedQuery("select.post.2");
         allPosts = q.getResultList();
         Assert.assertNotNull(allPosts);
         Assert.assertFalse(allPosts.isEmpty());
@@ -252,15 +250,15 @@ public class BlogPostTest
                 BlogPost.class);
         q.executeUpdate();
 
-        //Native select query
+        // Native select query
         q = em.createNativeQuery("select * from blog_posts where post_id = 2", BlogPost.class);
         allPosts = q.getResultList();
         Assert.assertNotNull(allPosts);
         Assert.assertFalse(allPosts.isEmpty());
         Assert.assertEquals(1, allPosts.size());
         assertUpdatedPost2(allPosts.get(0));
-        
-        //Named native query
+
+        // Named native query
         q = em.createNativeQuery("select.post.1", BlogPost.class);
         allPosts = q.getResultList();
         Assert.assertNotNull(allPosts);
@@ -494,25 +492,26 @@ public class BlogPostTest
 
         if (AUTO_MANAGE_SCHEMA)
         {
-            CassandraCli.executeCqlQuery("USE \"KunderaExamples\"");
-            CassandraCli.executeCqlQuery("TRUNCATE blog_posts");
-            CassandraCli.executeCqlQuery("DROP TABLE blog_posts");
-            CassandraCli.executeCqlQuery("DROP KEYSPACE \"KunderaExamples\"");
+            CassandraCli.executeCqlQuery("TRUNCATE blog_posts", "KunderaExamples");
+            CassandraCli.executeCqlQuery("DROP TABLE blog_posts", "KunderaExamples");
+            CassandraCli.executeCqlQuery("DROP KEYSPACE \"KunderaExamples\"", "KunderaExamples");
         }
 
     }
-    
+
     private void createColumnFamily()
     {
         try
         {
-            CassandraCli.executeCqlQuery("USE \"KunderaExamples\"");
+            CassandraCli.executeCqlQuery("USE \"KunderaExamples\"", "KunderaExamples");
             CassandraCli
-                    .executeCqlQuery("CREATE TABLE blog_posts (post_id int PRIMARY KEY, body text, tags set<text>, liked_by list<int>, comments map<int, text>)");
-            CassandraCli.executeCqlQuery("CREATE INDEX ON blog_posts(body)");
+                    .executeCqlQuery(
+                            "CREATE TABLE blog_posts (post_id int PRIMARY KEY, body text, tags set<text>, liked_by list<int>, comments map<int, text>)",
+                            "KunderaExamples");
+            CassandraCli.executeCqlQuery("CREATE INDEX ON blog_posts(body)", "KunderaExamples");
         }
         catch (Exception e)
-        {                
+        {
         }
     }
 
@@ -521,7 +520,9 @@ public class BlogPostTest
         try
         {
             CassandraCli
-                    .executeCqlQuery("CREATE KEYSPACE \"KunderaExamples\" WITH replication = {'class':'SimpleStrategy','replication_factor':3}");
+                    .executeCqlQuery(
+                            "CREATE KEYSPACE \"KunderaExamples\" WITH replication = {'class':'SimpleStrategy','replication_factor':3}",
+                            "KunderaExamples");
         }
         catch (Exception e)
         {

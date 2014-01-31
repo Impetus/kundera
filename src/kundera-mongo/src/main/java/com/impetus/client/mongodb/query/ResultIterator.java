@@ -55,8 +55,8 @@ class ResultIterator<E> implements IResultIterator<E>
 
     private PersistenceDelegator persistenceDelegator;
 
-    ResultIterator(MongoDBClient client, EntityMetadata m, BasicDBObject basicDBObject,
-            BasicDBObject orderByClause, BasicDBObject keys, PersistenceDelegator pd, int fetchSize)
+    ResultIterator(MongoDBClient client, EntityMetadata m, BasicDBObject basicDBObject, BasicDBObject orderByClause,
+            BasicDBObject keys, PersistenceDelegator pd, int fetchSize)
     {
         this.m = m;
         this.client = client;
@@ -90,7 +90,7 @@ class ResultIterator<E> implements IResultIterator<E>
             E entityFromDocument = instantiateEntity(m.getEntityClazz(), null);
             Map<String, Object> relationValue = null;
             relationValue = handler.getEntityFromDocument(m.getEntityClazz(), entityFromDocument, m, document,
-                    m.getRelationNames(), relationValue);
+                    m.getRelationNames(), relationValue, persistenceDelegator.getKunderaMetadata());
 
             if (relationValue != null && !relationValue.isEmpty())
             {

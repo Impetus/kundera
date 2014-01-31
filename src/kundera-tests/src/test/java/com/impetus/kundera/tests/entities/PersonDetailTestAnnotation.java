@@ -29,7 +29,6 @@ import org.junit.Test;
 
 import com.impetus.client.hbase.junits.HBaseCli;
 import com.impetus.client.persistence.CassandraCli;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 
 public class PersonDetailTestAnnotation
@@ -62,7 +61,7 @@ public class PersonDetailTestAnnotation
     {
         CassandraCli.cassandraSetUp();
       
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
 
         mongoProperties.put("kundera.ddl.auto.prepare", "create-drop");
 

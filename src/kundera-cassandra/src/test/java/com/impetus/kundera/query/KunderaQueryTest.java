@@ -31,6 +31,7 @@ import org.junit.Test;
 import com.impetus.client.entity.CassandraUUIDEntity;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
 /**
  * @author kuldeep.mishra
@@ -69,14 +70,14 @@ public class KunderaQueryTest
     public void test()
     {
         String query = "Select p from CassandraUUIDEntity p";
-        KunderaQuery kunderaQuery = new KunderaQuery(query);
+        KunderaQuery kunderaQuery = new KunderaQuery(query, ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());
         KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery);
         queryParser.parse();
         kunderaQuery.postParsingInit();
         Assert.assertNotNull(kunderaQuery.getEntityClass());
         Assert.assertEquals(CassandraUUIDEntity.class, kunderaQuery.getEntityClass());
         Assert.assertNotNull(kunderaQuery.getEntityMetadata());
-        Assert.assertTrue(KunderaMetadataManager.getEntityMetadata(CassandraUUIDEntity.class).equals(
+        Assert.assertTrue(KunderaMetadataManager.getEntityMetadata(((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance(), CassandraUUIDEntity.class).equals(
                 kunderaQuery.getEntityMetadata()));
         Assert.assertNull(kunderaQuery.getFilter());
         Assert.assertTrue(kunderaQuery.getFilterClauseQueue().isEmpty());
@@ -88,7 +89,7 @@ public class KunderaQueryTest
         try
         {
             query = "Select p from p";
-            kunderaQuery = new KunderaQuery(query);
+            kunderaQuery = new KunderaQuery(query, ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());
             queryParser = new KunderaQueryParser(kunderaQuery);
             queryParser.parse();
             kunderaQuery.postParsingInit();
@@ -103,7 +104,7 @@ public class KunderaQueryTest
         try
         {
             query = "Select p form CassandraUUIDEntity p";
-            kunderaQuery = new KunderaQuery(query);
+            kunderaQuery = new KunderaQuery(query, ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());
             queryParser = new KunderaQueryParser(kunderaQuery);
             queryParser.parse();
             kunderaQuery.postParsingInit();
@@ -118,14 +119,14 @@ public class KunderaQueryTest
         try
         {
             query = "Selct p from CassandraUUIDEntity p";
-            kunderaQuery = new KunderaQuery(query);
+            kunderaQuery = new KunderaQuery(query, ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());
             queryParser = new KunderaQueryParser(kunderaQuery);
             queryParser.parse();
             kunderaQuery.postParsingInit();
             Assert.assertNotNull(kunderaQuery.getEntityClass());
             Assert.assertEquals(CassandraUUIDEntity.class, kunderaQuery.getEntityClass());
             Assert.assertNotNull(kunderaQuery.getEntityMetadata());
-            Assert.assertTrue(KunderaMetadataManager.getEntityMetadata(CassandraUUIDEntity.class).equals(
+            Assert.assertTrue(KunderaMetadataManager.getEntityMetadata(((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance(), CassandraUUIDEntity.class).equals(
                     kunderaQuery.getEntityMetadata()));
             Assert.assertNull(kunderaQuery.getFilter());
             Assert.assertTrue(kunderaQuery.getFilterClauseQueue().isEmpty());
@@ -142,7 +143,7 @@ public class KunderaQueryTest
         try
         {
             query = "Select p from CassandraUUIDEntity p where";
-            kunderaQuery = new KunderaQuery(query);
+            kunderaQuery = new KunderaQuery(query, ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());
             queryParser = new KunderaQueryParser(kunderaQuery);
             queryParser.parse();
             kunderaQuery.postParsingInit();
@@ -157,7 +158,7 @@ public class KunderaQueryTest
         try
         {
             query = "Select p from CassandraUUIDEntity p where p";
-            kunderaQuery = new KunderaQuery(query);
+            kunderaQuery = new KunderaQuery(query, ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());
             queryParser = new KunderaQueryParser(kunderaQuery);
             queryParser.parse();
             kunderaQuery.postParsingInit();
@@ -173,7 +174,7 @@ public class KunderaQueryTest
     public void testOnIndexParameter()
     {
         String query = "Select p from CassandraUUIDEntity p where p.uuidKey = ?1 and p.name= ?2";
-        KunderaQuery kunderaQuery = new KunderaQuery(query);
+        KunderaQuery kunderaQuery = new KunderaQuery(query, ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());
         KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery);
         queryParser.parse();
         kunderaQuery.postParsingInit();
@@ -200,7 +201,7 @@ public class KunderaQueryTest
     public void testOnNameParameter()
     {
         String query = "Select p from CassandraUUIDEntity p where p.uuidKey = :uuid and p.name= :name";
-        KunderaQuery kunderaQuery = new KunderaQuery(query);
+        KunderaQuery kunderaQuery = new KunderaQuery(query, ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());
         KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery);
         queryParser.parse();
         kunderaQuery.postParsingInit();
@@ -230,7 +231,7 @@ public class KunderaQueryTest
     public void testInvalidIndexParameter()
     {
         String query = "Select p from CassandraUUIDEntity p where p.uuidKey = ?1 and p.name= ?2";
-        KunderaQuery kunderaQuery = new KunderaQuery(query);
+        KunderaQuery kunderaQuery = new KunderaQuery(query, ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());
         KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery);
         queryParser.parse();
         kunderaQuery.postParsingInit();
@@ -251,7 +252,7 @@ public class KunderaQueryTest
     public void testInvalidNameParameter()
     {
         String query = "Select p from CassandraUUIDEntity p where p.uuidKey = :uuid and p.name= :name";
-        KunderaQuery kunderaQuery = new KunderaQuery(query);
+        KunderaQuery kunderaQuery = new KunderaQuery(query, ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());
         KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery);
         queryParser.parse();
         kunderaQuery.postParsingInit();

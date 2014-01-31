@@ -43,10 +43,10 @@ import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 
 /**
  * The Class KunderaQuery.
@@ -113,8 +113,10 @@ public class KunderaQuery
     private TypedParameter typedParameter;
 
     boolean isNativeQuery;
-    
+
     private String jpaQuery;
+
+    private final KunderaMetadata kunderaMetadata;
 
     /**
      * Instantiates a new kundera query.
@@ -122,9 +124,10 @@ public class KunderaQuery
      * @param persistenceUnits
      *            the persistence units
      */
-    public KunderaQuery(final String jpaQuery)
+    public KunderaQuery(final String jpaQuery, final KunderaMetadata kunderaMetadata)
     {
         this.jpaQuery = jpaQuery;
+        this.kunderaMetadata = kunderaMetadata;
     }
 
     /**
@@ -396,7 +399,7 @@ public class KunderaQuery
         if (fromArray.length == 2)
             this.entityAlias = fromArray[1];
 
-        persistenceUnit = KunderaMetadata.INSTANCE.getApplicationMetadata().getMappedPersistenceUnit(entityName);
+        persistenceUnit = kunderaMetadata.getApplicationMetadata().getMappedPersistenceUnit(entityName);
 
         // Get specific metamodel.
         MetamodelImpl model = getMetamodel(persistenceUnit);
@@ -428,12 +431,12 @@ public class KunderaQuery
      */
     private void initFilter()
     {
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entityClass);
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClass);
         // String indexName = metadata.getIndexName();
 
         // String filter = getFilter();
 
-        Metamodel metaModel = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(getPersistenceUnit());
+        Metamodel metaModel = kunderaMetadata.getApplicationMetadata().getMetamodel(getPersistenceUnit());
         EntityType entityType = metaModel.entity(entityClass);
 
         if (null == filter)
@@ -483,7 +486,7 @@ public class KunderaQuery
                 if (columnName == null && property.indexOf(".") > 0)
                 {
                     String enclosingEmbeddedField = MetadataUtils.getEnclosingEmbeddedFieldName(metadata, property,
-                            true);
+                            true, kunderaMetadata);
                     if (enclosingEmbeddedField != null)
                     {
                         columnName = property;
@@ -655,7 +658,7 @@ public class KunderaQuery
     {
         String attributeName = getAttributeName(fieldName);
 
-        Attribute entityAttribute = ((MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        Attribute entityAttribute = ((MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 persistenceUnit)).getEntityAttribute(entityClass, attributeName);
         Class fieldType = entityAttribute.getJavaType();
 
@@ -758,7 +761,7 @@ public class KunderaQuery
      */
     public final EntityMetadata getEntityMetadata()
     {
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entityClass);
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClass);
         if (metadata == null)
         {
             throw new KunderaException("Unable to load entity metadata for :" + entityClass);
@@ -981,7 +984,7 @@ public class KunderaQuery
      */
     private MetamodelImpl getMetamodel(String pu)
     {
-        return KunderaMetadataManager.getMetamodel(pu);
+        return KunderaMetadataManager.getMetamodel(kunderaMetadata, pu);
     }
 
     /**
@@ -1133,7 +1136,7 @@ public class KunderaQuery
     {
         return this.jpaQuery;
     }
-    
+
     /**
      * Return parsed token string.
      * 

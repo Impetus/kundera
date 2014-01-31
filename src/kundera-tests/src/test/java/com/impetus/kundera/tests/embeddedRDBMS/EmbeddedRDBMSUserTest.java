@@ -46,7 +46,6 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.client.crud.RDBMSCli;
 import com.impetus.client.persistence.CassandraCli;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.property.accessor.DateAccessor;
 
 /**
@@ -68,7 +67,7 @@ public class EmbeddedRDBMSUserTest
     @Before
     public void setUp() throws Exception
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         try
         {
             CassandraCli.cassandraSetUp();

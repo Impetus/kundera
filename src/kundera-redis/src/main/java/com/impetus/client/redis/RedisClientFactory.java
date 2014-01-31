@@ -32,7 +32,6 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.loader.GenericClientFactory;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
@@ -74,8 +73,8 @@ public class RedisClientFactory extends GenericClientFactory
 
         final byte WHEN_EXHAUSTED_FAIL = 0;
 
-        PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                .getPersistenceUnitMetadata(getPersistenceUnit());
+        PersistenceUnitMetadata puMetadata = kunderaMetadata.getApplicationMetadata().getPersistenceUnitMetadata(
+                getPersistenceUnit());
 
         Properties props = puMetadata.getProperties();
         String contactNode = RedisPropertyReader.rsmd.getHost() != null ? RedisPropertyReader.rsmd.getHost()
@@ -185,7 +184,7 @@ public class RedisClientFactory extends GenericClientFactory
     protected Client<RedisQuery> instantiateClient(String persistenceUnit)
     {
         logger.info("instantiating client instance");
-        return new RedisClient(this, persistenceUnit);
+        return new RedisClient(this, persistenceUnit, kunderaMetadata);
     }
 
     Map<String, Object> getOverridenProperties()
@@ -256,8 +255,8 @@ public class RedisClientFactory extends GenericClientFactory
         }
         else
         {
-            PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                    .getPersistenceUnitMetadata(getPersistenceUnit());
+            PersistenceUnitMetadata puMetadata = kunderaMetadata.getApplicationMetadata().getPersistenceUnitMetadata(
+                    getPersistenceUnit());
 
             Properties props = puMetadata.getProperties();
 
@@ -359,7 +358,8 @@ public class RedisClientFactory extends GenericClientFactory
     {
         if (propertyReader == null)
         {
-            propertyReader = new RedisPropertyReader(externalProperties);
+            propertyReader = new RedisPropertyReader(externalProperties, kunderaMetadata.getApplicationMetadata()
+                    .getPersistenceUnitMetadata(getPersistenceUnit()));
             propertyReader.read(getPersistenceUnit());
         }
     }

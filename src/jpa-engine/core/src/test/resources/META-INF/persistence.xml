@@ -133,6 +133,11 @@
 
 	<persistence-unit name="metaDataTest">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.kundera.persistence.event.PersonEventDispatch</class>
+		<class>com.impetus.kundera.metadata.model.Employe</class>
+		<class>com.impetus.kundera.metadata.model.KunderaUser</class>
+		<class>com.impetus.kundera.metadata.model.TweetKundera</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="9160" />

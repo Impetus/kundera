@@ -127,7 +127,7 @@
 	</persistence-unit>
 
 	<persistence-unit name="CassandraDataTypeTest">
-		<provider>com.impetus.kundera.KunderaPersistence</provider>		
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>
 			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="9160" />
@@ -309,4 +309,69 @@
 				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
 		</properties>
 	</persistence-unit>
+
+	<persistence-unit name="cassandra">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.client.schemamanager.entites.CassandraEntityPersonnelUniMToM</class>
+		<class>com.impetus.client.schemamanager.entites.CassandraEntityHabitatUniMToM</class>
+		<class>com.impetus.client.persistence.CassandraEntity</class>
+		<class>com.impetus.client.persistence.CassandraEntitySample</class>
+		<class>com.impetus.client.persistence.CassandraBatchEntity</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="9160" />
+			<property name="kundera.keyspace" value="KunderaExamples" />
+			<property name="kundera.dialect" value="cassandra" />
+			<property name="kundera.client" value="pelops" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.cassandra.pelops.PelopsClientFactory" />
+		</properties>
+	</persistence-unit>
+
+	<persistence-unit name="CassandraSchemaManager">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.client.schemamanager.entites.Actor</class>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="9160" />
+			<property name="kundera.keyspace" value="CassandraSchemaManagerTest" />
+			<property name="kundera.dialect" value="cassandra" />
+			<property name="kundera.client" value="thrift" />
+			<property name="kundera.ddl.auto.prepare" value="create" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
+		</properties>
+	</persistence-unit>
+
+	<persistence-unit name="cassandraProperties">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="9160" />
+			<property name="kundera.keyspace" value="KunderaCounterColumn" />
+			<property name="kundera.dialect" value="cassandra" />
+			<property name="kundera.client" value="thrift" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
+			<property name="kundera.client.property" value="kunderaTest.xml" />
+		</properties>
+	</persistence-unit>
+
+	<persistence-unit name="CassandraSchemaOperationTest">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.client.schemamanager.entites.CassandraEntitySimple</class>
+		<class>com.impetus.client.schemamanager.entites.Actor</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="9160" />
+			<property name="kundera.keyspace" value="KunderaCoreExmples" />
+			<property name="kundera.dialect" value="cassandra" />
+			<property name="kundera.client" value="thrift" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
+		</properties>
+	</persistence-unit>
+
 </persistence>

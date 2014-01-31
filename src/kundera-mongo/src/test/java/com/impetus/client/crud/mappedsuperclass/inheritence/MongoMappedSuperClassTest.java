@@ -34,7 +34,6 @@ import com.impetus.kundera.client.crud.mappedsuperclass.CreditTransaction;
 import com.impetus.kundera.client.crud.mappedsuperclass.MappedSuperClassBase;
 import com.impetus.kundera.client.crud.mappedsuperclass.Status;
 import com.impetus.kundera.client.mongo.mappedsuperclass.Ledger;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 
 
@@ -48,7 +47,7 @@ public class MongoMappedSuperClassTest extends MappedSuperClassBase
     @Before
     public void setUp() throws Exception
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         _PU = "mongoTest";
         setUpInternal();
     }

@@ -32,8 +32,8 @@ import org.neo4j.kernel.impl.util.FileUtils;
 
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
 /**
  * Test case demonstrating batch insertion in Neo4J
@@ -68,11 +68,11 @@ public class IMDBBatchInsertionTest
     @After
     public void tearDown() throws Exception
     {
-        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(IMDB_BATCH_PU);
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance(), IMDB_BATCH_PU);
         String datastoreFilePath = puMetadata.getProperty(PersistenceProperties.KUNDERA_DATASTORE_FILE_PATH);
 
         em.close();
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         emf.close();
 
         if (datastoreFilePath != null)

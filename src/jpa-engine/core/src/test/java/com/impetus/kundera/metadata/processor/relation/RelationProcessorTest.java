@@ -11,7 +11,7 @@ import org.junit.Test;
 import com.impetus.kundera.loader.MetamodelLoaderException;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 import com.impetus.kundera.polyglot.entities.PersonU11FK;
 import com.impetus.kundera.polyglot.entities.PersonU1M;
 import com.impetus.kundera.polyglot.entities.PersonUM1;
@@ -26,15 +26,17 @@ public class RelationProcessorTest
     @BeforeClass
     public static void setUpBeforeClass() throws Exception
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+
         emf = Persistence.createEntityManagerFactory("patest");
     }
 
     @Test
     public void testManyToMany() throws NoSuchFieldException, SecurityException
     {
-        ManyToManyRelationMetadataProcessor processor = new ManyToManyRelationMetadataProcessor();
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(PersonUMMByMap.class);
+        ManyToManyRelationMetadataProcessor processor = new ManyToManyRelationMetadataProcessor(
+                ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance());
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(
+                ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance(), PersonUMMByMap.class);
         Assert.assertNotNull(metadata.getRelation("addresses"));
         // processor.addRelationIntoMetadata(PersonB11FK.class.getDeclaredField("address"),metadata);
 
@@ -52,8 +54,10 @@ public class RelationProcessorTest
     @Test
     public void testOneToMany() throws NoSuchFieldException, SecurityException
     {
-        OneToManyRelationMetadataProcessor processor = new OneToManyRelationMetadataProcessor();
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(PersonU1M.class);
+        OneToManyRelationMetadataProcessor processor = new OneToManyRelationMetadataProcessor(
+                ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance());
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(
+                ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance(), PersonU1M.class);
         Assert.assertNotNull(metadata.getRelation("addresses"));
 
         try
@@ -65,24 +69,24 @@ public class RelationProcessorTest
         {
             Assert.assertNotNull(mlex.getMessage());
         }
-        
-/*        try
-        {
-            processor.addRelationIntoMetadata(PersonUMMByMap.class.getDeclaredField("addresses"), metadata);
-            Assert.fail("Should have gone to catch block!");
-        }
-        catch (UnsupportedOperationException uoex)
-        {
-            Assert.assertNotNull(uoex.getMessage());
-        }
-*/
+
+        /*
+         * try {
+         * processor.addRelationIntoMetadata(PersonUMMByMap.class.getDeclaredField
+         * ("addresses"), metadata);
+         * Assert.fail("Should have gone to catch block!"); } catch
+         * (UnsupportedOperationException uoex) {
+         * Assert.assertNotNull(uoex.getMessage()); }
+         */
     }
 
     @Test
     public void testManyToOne() throws NoSuchFieldException, SecurityException
     {
-        ManyToOneRelationMetadataProcessor processor = new ManyToOneRelationMetadataProcessor();
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(PersonUM1.class);
+        ManyToOneRelationMetadataProcessor processor = new ManyToOneRelationMetadataProcessor(
+                ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance());
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(
+                ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance(), PersonUM1.class);
         Assert.assertNotNull(metadata.getRelation("address"));
 
         try
@@ -95,22 +99,22 @@ public class RelationProcessorTest
             Assert.assertNotNull(mlex.getMessage());
         }
 
-/*        try
-        {
-            processor.addRelationIntoMetadata(PersonUMMByMap.class.getDeclaredField("addresses"), metadata);
-            Assert.fail("Should have gone to catch block!");
-        }
-        catch (UnsupportedOperationException uoex)
-        {
-            Assert.assertNotNull(uoex.getMessage());
-        }
-*/    }
+        /*
+         * try {
+         * processor.addRelationIntoMetadata(PersonUMMByMap.class.getDeclaredField
+         * ("addresses"), metadata);
+         * Assert.fail("Should have gone to catch block!"); } catch
+         * (UnsupportedOperationException uoex) {
+         * Assert.assertNotNull(uoex.getMessage()); }
+         */}
 
     @Test
     public void testOneToOne() throws NoSuchFieldException, SecurityException
     {
-        OneToOneRelationMetadataProcessor processor = new OneToOneRelationMetadataProcessor();
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(PersonU11FK.class);
+        OneToOneRelationMetadataProcessor processor = new OneToOneRelationMetadataProcessor(
+                ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance());
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(
+                ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance(), PersonU11FK.class);
         Assert.assertNotNull(metadata.getRelation("address"));
 
         try
@@ -123,16 +127,14 @@ public class RelationProcessorTest
             Assert.assertNotNull(mlex.getMessage());
         }
 
-/*        try
-        {
-            processor.addRelationIntoMetadata(PersonUMMByMap.class.getDeclaredField("addresses"), metadata);
-            Assert.fail("Should have gone to catch block!");
-        }
-        catch (UnsupportedOperationException uoex)
-        {
-            Assert.assertNotNull(uoex.getMessage());
-        }
-*/
+        /*
+         * try {
+         * processor.addRelationIntoMetadata(PersonUMMByMap.class.getDeclaredField
+         * ("addresses"), metadata);
+         * Assert.fail("Should have gone to catch block!"); } catch
+         * (UnsupportedOperationException uoex) {
+         * Assert.assertNotNull(uoex.getMessage()); }
+         */
     }
 
     @AfterClass

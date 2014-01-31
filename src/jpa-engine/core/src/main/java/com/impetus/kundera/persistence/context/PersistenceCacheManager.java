@@ -82,7 +82,7 @@ public class PersistenceCacheManager
     {
         MainCache mainCache = (MainCache) pd.getPersistenceCache().getMainCache();
         String nodeId = ObjectGraphUtils.getNodeId(entityId, entity.getClass());
-        Node node = new Node(nodeId, entity.getClass(), new ManagedState(), pd.getPersistenceCache(), entityId);
+        Node node = new Node(nodeId, entity.getClass(), new ManagedState(), pd.getPersistenceCache(), entityId, pd);
         node.setData(entity);
         node.setPersistenceDelegator(pd);
         mainCache.addNodeToCache(node);

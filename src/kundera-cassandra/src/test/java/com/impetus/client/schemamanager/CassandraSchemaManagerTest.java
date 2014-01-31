@@ -17,11 +17,9 @@
 package com.impetus.client.schemamanager;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 
 import junit.framework.Assert;
 
@@ -34,38 +32,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.cassandra.thrift.ThriftClientFactory;
 import com.impetus.client.persistence.CassandraCli;
-import com.impetus.client.schemamanager.entites.CassandraEmbeddedPersonUniMto1;
-import com.impetus.client.schemamanager.entites.CassandraEntityAddressBi1To1FK;
-import com.impetus.client.schemamanager.entites.CassandraEntityAddressBi1To1PK;
-import com.impetus.client.schemamanager.entites.CassandraEntityAddressBi1ToM;
-import com.impetus.client.schemamanager.entites.CassandraEntityAddressBiMTo1;
-import com.impetus.client.schemamanager.entites.CassandraEntityAddressUni1To1;
-import com.impetus.client.schemamanager.entites.CassandraEntityAddressUni1To1PK;
-import com.impetus.client.schemamanager.entites.CassandraEntityAddressUni1ToM;
-import com.impetus.client.schemamanager.entites.CassandraEntityAddressUniMTo1;
-import com.impetus.client.schemamanager.entites.CassandraEntityPersonBi1To1FK;
-import com.impetus.client.schemamanager.entites.CassandraEntityPersonBi1To1PK;
-import com.impetus.client.schemamanager.entites.CassandraEntityPersonBi1ToM;
-import com.impetus.client.schemamanager.entites.CassandraEntityPersonBiMTo1;
-import com.impetus.client.schemamanager.entites.CassandraEntityPersonUni1To1;
-import com.impetus.client.schemamanager.entites.CassandraEntityPersonUni1To1PK;
-import com.impetus.client.schemamanager.entites.CassandraEntityPersonUni1ToM;
-import com.impetus.client.schemamanager.entites.CassandraEntityPersonUniMto1;
-import com.impetus.client.schemamanager.entites.CassandraEntitySuper;
-import com.impetus.kundera.Constants;
-import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.configure.ClientFactoryConfiguraton;
-import com.impetus.kundera.configure.SchemaConfiguration;
-import com.impetus.kundera.metadata.MetadataBuilder;
-import com.impetus.kundera.metadata.model.ApplicationMetadata;
-import com.impetus.kundera.metadata.model.CoreMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.metadata.model.MetamodelImpl;
-import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
-import com.impetus.kundera.proxy.cglib.CglibLazyInitializerFactory;
 
 /**
  * CassandraSchemaManagerTest class test the auto creation schema property in
@@ -151,148 +119,7 @@ public class CassandraSchemaManagerTest
      */
     private EntityManagerFactoryImpl getEntityManagerFactory()
     {
-        Map<String, Object> props = new HashMap<String, Object>();
-        props.put(Constants.PERSISTENCE_UNIT_NAME, _PU);
-        props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY,
-                "com.impetus.client.cassandra.thrift.ThriftClientFactory");
-        props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
-        props.put(PersistenceProperties.KUNDERA_PORT, "9160");
-        props.put(PersistenceProperties.KUNDERA_KEYSPACE, _KEYSPACE);
-        props.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create");
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
-        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
-        PersistenceUnitMetadata puMetadata = new PersistenceUnitMetadata();
-        puMetadata.setPersistenceUnitName(_PU);
-        Properties p = new Properties();
-        p.putAll(props);
-        puMetadata.setProperties(p);
-        Map<String, PersistenceUnitMetadata> metadata = new HashMap<String, PersistenceUnitMetadata>();
-        metadata.put(_PU, puMetadata);
-        appMetadata.addPersistenceUnitMetadata(metadata);
-
-        Map<String, List<String>> clazzToPu = new HashMap<String, List<String>>();
-
-        List<String> pus = new ArrayList<String>();
-        pus.add(_PU);
-        clazzToPu.put(CassandraEntitySuper.class.getName(), pus);
-        clazzToPu.put(CassandraEntityAddressUni1To1.class.getName(), pus);
-        clazzToPu.put(CassandraEntityAddressUni1ToM.class.getName(), pus);
-        clazzToPu.put(CassandraEntityAddressUniMTo1.class.getName(), pus);
-        clazzToPu.put(CassandraEntityPersonUniMto1.class.getName(), pus);
-        clazzToPu.put(CassandraEntityPersonUni1To1.class.getName(), pus);
-        clazzToPu.put(CassandraEntityPersonUni1ToM.class.getName(), pus);
-        clazzToPu.put(CassandraEntityAddressUni1To1PK.class.getName(), pus);
-        clazzToPu.put(CassandraEntityPersonUni1To1PK.class.getName(), pus);
-        clazzToPu.put(CassandraEntityPersonBi1To1FK.class.getName(), pus);
-        clazzToPu.put(CassandraEntityPersonBi1To1PK.class.getName(), pus);
-        clazzToPu.put(CassandraEntityPersonBi1ToM.class.getName(), pus);
-        clazzToPu.put(CassandraEntityPersonBiMTo1.class.getName(), pus);
-        clazzToPu.put(CassandraEntityAddressBi1To1FK.class.getName(), pus);
-        clazzToPu.put(CassandraEntityAddressBi1To1PK.class.getName(), pus);
-        clazzToPu.put(CassandraEntityAddressBi1ToM.class.getName(), pus);
-        clazzToPu.put(CassandraEntityAddressBiMTo1.class.getName(), pus);
-        clazzToPu.put(CassandraEmbeddedPersonUniMto1.class.getName(), pus);
-
-        appMetadata.setClazzToPuMap(clazzToPu);
-
-//        EntityMetadata m1 = new EntityMetadata(CassandraEntitySuper.class);
-//        EntityMetadata m2 = new EntityMetadata(CassandraEntityAddressUni1To1.class);
-//        EntityMetadata m3 = new EntityMetadata(CassandraEntityAddressUni1ToM.class);
-//        EntityMetadata m4 = new EntityMetadata(CassandraEntityAddressUniMTo1.class);
-//        EntityMetadata m5 = new EntityMetadata(CassandraEntityPersonUniMto1.class);
-//        EntityMetadata m6 = new EntityMetadata(CassandraEntityPersonUni1To1.class);
-//        EntityMetadata m7 = new EntityMetadata(CassandraEntityPersonUni1ToM.class);
-//        EntityMetadata m8 = new EntityMetadata(CassandraEntityPersonUni1To1PK.class);
-//        EntityMetadata m9 = new EntityMetadata(CassandraEntityAddressUni1To1PK.class);
-//        EntityMetadata m10 = new EntityMetadata(CassandraEntityAddressBi1To1FK.class);
-//        EntityMetadata m11 = new EntityMetadata(CassandraEntityAddressBi1To1PK.class);
-//        EntityMetadata m12 = new EntityMetadata(CassandraEntityAddressBi1ToM.class);
-//        EntityMetadata m13 = new EntityMetadata(CassandraEntityAddressBiMTo1.class);
-//        EntityMetadata m14 = new EntityMetadata(CassandraEntityPersonBi1To1FK.class);
-//        EntityMetadata m15 = new EntityMetadata(CassandraEntityPersonBi1To1PK.class);
-//        EntityMetadata m16 = new EntityMetadata(CassandraEntityPersonBi1ToM.class);
-//        EntityMetadata m17 = new EntityMetadata(CassandraEntityPersonBiMTo1.class);
-//        EntityMetadata m18 = new EntityMetadata(CassandraEmbeddedPersonUniMto1.class);
-//
-//        TableProcessor processor = new TableProcessor(null);
-//        processor.process(CassandraEntitySuper.class, m1);
-//        processor.process(CassandraEntityAddressUni1To1.class, m2);
-//        processor.process(CassandraEntityAddressUni1ToM.class, m3);
-//        processor.process(CassandraEntityAddressUniMTo1.class, m4);
-//        processor.process(CassandraEntityPersonUniMto1.class, m5);
-//        processor.process(CassandraEntityPersonUni1To1.class, m6);
-//        processor.process(CassandraEntityPersonUni1ToM.class, m7);
-//        processor.process(CassandraEntityPersonUni1To1PK.class, m8);
-//        processor.process(CassandraEntityAddressUni1To1PK.class, m9);
-//        processor.process(CassandraEntityAddressBi1To1FK.class, m10);
-//        processor.process(CassandraEntityAddressBi1To1PK.class, m11);
-//        processor.process(CassandraEntityAddressBi1ToM.class, m12);
-//        processor.process(CassandraEntityAddressBiMTo1.class, m13);
-//        processor.process(CassandraEntityPersonBi1To1FK.class, m14);
-//        processor.process(CassandraEntityPersonBi1To1PK.class, m15);
-//        processor.process(CassandraEntityPersonBi1ToM.class, m16);
-//        processor.process(CassandraEntityPersonBiMTo1.class, m17);
-//        processor.process(CassandraEmbeddedPersonUniMto1.class, m18);
-//
-//        IndexProcessor indexProcessor = new IndexProcessor();
-//        indexProcessor.process(CassandraEntityPersonUniMto1.class, m5);
-//
-//        m1.setPersistenceUnit(_PU);
-//        m2.setPersistenceUnit(_PU);
-//        m3.setPersistenceUnit(_PU);
-//        m4.setPersistenceUnit(_PU);
-//        m5.setPersistenceUnit(_PU);
-//        m6.setPersistenceUnit(_PU);
-//        m7.setPersistenceUnit(_PU);
-//        m8.setPersistenceUnit(_PU);
-//        m9.setPersistenceUnit(_PU);
-//        m10.setPersistenceUnit(_PU);
-//        m11.setPersistenceUnit(_PU);
-//        m12.setPersistenceUnit(_PU);
-//        m13.setPersistenceUnit(_PU);
-//        m14.setPersistenceUnit(_PU);
-//        m15.setPersistenceUnit(_PU);
-//        m16.setPersistenceUnit(_PU);
-//        m17.setPersistenceUnit(_PU);
-
-        MetadataBuilder metadataBuilder = new MetadataBuilder(_PU, ThriftClientFactory.class.getSimpleName(), null);
-
-        MetamodelImpl metaModel = new MetamodelImpl();
-        metaModel.addEntityMetadata(CassandraEntitySuper.class, metadataBuilder.buildEntityMetadata(CassandraEntitySuper.class));
-        metaModel.addEntityMetadata(CassandraEntityAddressUni1To1.class, metadataBuilder.buildEntityMetadata(CassandraEntityAddressUni1To1.class));
-        metaModel.addEntityMetadata(CassandraEntityAddressUni1ToM.class, metadataBuilder.buildEntityMetadata(CassandraEntityAddressUni1ToM.class));
-        metaModel.addEntityMetadata(CassandraEntityAddressUniMTo1.class, metadataBuilder.buildEntityMetadata(CassandraEntityAddressUniMTo1.class));
-        metaModel.addEntityMetadata(CassandraEntityPersonUniMto1.class, metadataBuilder.buildEntityMetadata(CassandraEntityPersonUniMto1.class));
-        metaModel.addEntityMetadata(CassandraEntityPersonUni1To1.class, metadataBuilder.buildEntityMetadata(CassandraEntityPersonUni1To1.class));
-        metaModel.addEntityMetadata(CassandraEntityPersonUni1ToM.class, metadataBuilder.buildEntityMetadata(CassandraEntityPersonUni1ToM.class));
-        metaModel.addEntityMetadata(CassandraEntityPersonUni1To1PK.class, metadataBuilder.buildEntityMetadata(CassandraEntityPersonUni1To1PK.class));
-        metaModel.addEntityMetadata(CassandraEntityAddressUni1To1PK.class, metadataBuilder.buildEntityMetadata(CassandraEntityAddressUni1To1PK.class));
-        metaModel.addEntityMetadata(CassandraEntityAddressBi1To1FK.class, metadataBuilder.buildEntityMetadata(CassandraEntityAddressBi1To1FK.class));
-        metaModel.addEntityMetadata(CassandraEntityAddressBi1To1PK.class, metadataBuilder.buildEntityMetadata(CassandraEntityAddressBi1To1PK.class));
-        metaModel.addEntityMetadata(CassandraEntityAddressBi1ToM.class, metadataBuilder.buildEntityMetadata(CassandraEntityAddressBi1ToM.class));
-        metaModel.addEntityMetadata(CassandraEntityAddressBiMTo1.class, metadataBuilder.buildEntityMetadata(CassandraEntityAddressBiMTo1.class));
-        metaModel.addEntityMetadata(CassandraEntityPersonBi1To1FK.class, metadataBuilder.buildEntityMetadata(CassandraEntityPersonBi1To1FK.class));
-        metaModel.addEntityMetadata(CassandraEntityPersonBi1To1PK.class, metadataBuilder.buildEntityMetadata(CassandraEntityPersonBi1To1PK.class));
-        metaModel.addEntityMetadata(CassandraEntityPersonBi1ToM.class, metadataBuilder.buildEntityMetadata(CassandraEntityPersonBi1ToM.class));
-        metaModel.addEntityMetadata(CassandraEntityPersonBiMTo1.class, metadataBuilder.buildEntityMetadata(CassandraEntityPersonBiMTo1.class));
-        metaModel.addEntityMetadata(CassandraEmbeddedPersonUniMto1.class, metadataBuilder.buildEntityMetadata(CassandraEmbeddedPersonUniMto1.class));
-        
-        
-        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(_PU).getManagedTypes());
-        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(_PU).getEmbeddables());
-        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(_PU).getMappedSuperClassTypes());
-
-        appMetadata.getMetamodelMap().put(_PU, metaModel);
-
-        new ClientFactoryConfiguraton(null, _PU).configure();
-        new SchemaConfiguration(null, _PU).configure();
-        
-        CoreMetadata coreMetadata = new CoreMetadata();
-        coreMetadata.setLazyInitializerFactory(new CglibLazyInitializerFactory());
-        KunderaMetadata.INSTANCE.setCoreMetadata(coreMetadata);
-        
-        // EntityManagerFactoryImpl impl = new
-        // EntityManagerFactoryImpl(puMetadata, props);
-        return null;
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory(_PU);
+        return (EntityManagerFactoryImpl) emf;
     }
 }

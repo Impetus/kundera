@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.client.couchdb.entities.CouchDBCompoundKey;
 import com.impetus.client.couchdb.entities.CouchDBPrimeUser;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 public class CouchDBCompositeKeyTest
 {
@@ -34,8 +33,7 @@ public class CouchDBCompositeKeyTest
 
     @Before
     public void setUp() throws Exception
-    {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+    {        
         emf = Persistence.createEntityManagerFactory(COUCHDB_PU);
     }
 

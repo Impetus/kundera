@@ -34,9 +34,6 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.client.crud.RDBMSCli;
 import com.impetus.client.persistence.CassandraCli;
-import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.tests.crossdatastore.pickr.dao.Pickr;
 import com.impetus.kundera.tests.crossdatastore.pickr.dao.PickrImpl;
 import com.mongodb.Mongo;
@@ -168,17 +165,15 @@ public abstract class PickrBaseTest
      */
     private void truncateMongo()
     {
-        PersistenceUnitMetadata pUnitMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                .getPersistenceUnitMetadata("picongo");
-        String host = pUnitMetadata != null ? pUnitMetadata.getProperty(PersistenceProperties.KUNDERA_NODES) : null;
-        String port = pUnitMetadata != null ? pUnitMetadata.getProperty(PersistenceProperties.KUNDERA_PORT) : null;
+        String host = "localhost";
+        String port = "27017";
         try
         {
             Mongo m = null;
             if (host != null && port != null)
             {
                 m = new Mongo(host, Integer.parseInt(port));
-                m.getDB(pUnitMetadata.getProperty(PersistenceProperties.KUNDERA_KEYSPACE)).dropDatabase();
+                m.getDB("Pickr").dropDatabase();
             }
         }
         catch (NumberFormatException e)

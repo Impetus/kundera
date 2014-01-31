@@ -15,6 +15,7 @@
  */
 package com.impetus.kundera.client;
 
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
 import junit.framework.Assert;
@@ -22,11 +23,12 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 import com.impetus.kundera.loader.ClientFactory;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
 /**
- * @author vivek.mishra 
+ * @author vivek.mishra
  * 
- * junit for {@link ClientResolver}
+ *         junit for {@link ClientResolver}
  * 
  */
 public class ClientResolverTest
@@ -36,8 +38,9 @@ public class ClientResolverTest
     @Test
     public void test()
     {
-        Persistence.createEntityManagerFactory(persistenceUnit);
-        ClientResolver.getClientFactory(persistenceUnit, null);
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory(persistenceUnit);
+        ClientResolver.getClientFactory(persistenceUnit, null,
+                ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance());
         ClientFactory clientFactory = ClientResolver.getClientFactory(persistenceUnit);
         Assert.assertNotNull(clientFactory);
         Assert.assertTrue(clientFactory.getClass().isAssignableFrom(CoreTestClientFactory.class));
@@ -46,8 +49,9 @@ public class ClientResolverTest
     @Test
     public void testInvalidPU()
     {
-        Persistence.createEntityManagerFactory(persistenceUnit);
-        ClientResolver.getClientFactory(persistenceUnit, null);
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory(persistenceUnit);
+        ClientResolver.getClientFactory(persistenceUnit, null,
+                ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance());
         try
         {
             ClientResolver.getClientFactory("metadatatest");

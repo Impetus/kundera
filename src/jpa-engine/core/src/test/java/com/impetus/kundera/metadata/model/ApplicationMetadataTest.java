@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.model;
 
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
 import junit.framework.Assert;
@@ -25,23 +26,26 @@ import org.junit.Test;
 
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.entities.Article;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
 /**
  * @author amresh.singh
- *
+ * 
  */
 public class ApplicationMetadataTest
 {
 
     private String persistenceUnit = "patest";
-    
+
+    private EntityManagerFactory emf;
+
     /**
      * @throws java.lang.Exception
      */
     @Before
     public void setUp() throws Exception
     {
-        Persistence.createEntityManagerFactory(persistenceUnit);
+        emf = Persistence.createEntityManagerFactory(persistenceUnit);
     }
 
     /**
@@ -50,18 +54,23 @@ public class ApplicationMetadataTest
     @After
     public void tearDown() throws Exception
     {
-        KunderaMetadata.INSTANCE.getApplicationMetadata().unloadApplicationMatadata(persistenceUnit);
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance().getApplicationMetadata()
+                .unloadApplicationMatadata(persistenceUnit);
+
     }
 
     /**
-     * Test method for {@link com.impetus.kundera.metadata.model.ApplicationMetadata#addEntityMetadata(java.lang.String, java.lang.Class, com.impetus.kundera.metadata.model.EntityMetadata)}.
+     * Test method for
+     * {@link com.impetus.kundera.metadata.model.ApplicationMetadata#addEntityMetadata(java.lang.String, java.lang.Class, com.impetus.kundera.metadata.model.EntityMetadata)}
+     * .
      */
     @Test
     public void testAddEntityMetadata()
     {
-        KunderaMetadata.INSTANCE.getApplicationMetadata().addEntityMetadata(persistenceUnit, Article.class, new EntityMetadata(Article.class));
-        Assert.assertNotNull(KunderaMetadataManager.getEntityMetadata(Article.class));
-    } 
+        ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance().getApplicationMetadata()
+                .addEntityMetadata(persistenceUnit, Article.class, new EntityMetadata(Article.class));
+        Assert.assertNotNull(KunderaMetadataManager.getEntityMetadata(
+                ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance(), Article.class));
+    }
 
 }

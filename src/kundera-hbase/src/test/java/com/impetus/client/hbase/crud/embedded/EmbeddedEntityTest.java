@@ -19,7 +19,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.impetus.client.hbase.junits.HBaseCli;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 public class EmbeddedEntityTest
 {
@@ -48,7 +47,7 @@ public class EmbeddedEntityTest
     {
         cli = new HBaseCli();
         cli.startCluster();
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         emf = Persistence.createEntityManagerFactory("hbaseTest");
     }
 

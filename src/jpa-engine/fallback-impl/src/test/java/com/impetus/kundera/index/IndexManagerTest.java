@@ -21,6 +21,7 @@ import com.impetus.kundera.metadata.entities.SingularEntityEmbeddable;
 import com.impetus.kundera.metadata.model.Employe;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.PropertyIndex;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 import com.impetus.kundera.query.Person;
 import com.impetus.kundera.query.Person.Day;
 import com.impetus.kundera.utils.LuceneCleanupUtilities;
@@ -44,9 +45,9 @@ public class IndexManagerTest
     public void testCRUD()
     {
         LuceneIndexer indexer = LuceneIndexer.getInstance(LUCENE_DIR_PATH);
-        IndexManager ixManager = new IndexManager(indexer);
+        IndexManager ixManager = new IndexManager(indexer, ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());
 
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(Person.class);
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance(), Person.class);
         Person p = new Person();
         p.setAge(32);
         p.setDay(Day.TUESDAY);
@@ -106,9 +107,9 @@ public class IndexManagerTest
     public void testEmbeddable()
     {
         LuceneIndexer indexer = LuceneIndexer.getInstance(LUCENE_DIR_PATH);
-        IndexManager ixManager = new IndexManager(indexer);
+        IndexManager ixManager = new IndexManager(indexer, ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());
 
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(SingularEntityEmbeddable.class);
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance(), SingularEntityEmbeddable.class);
         SingularEntityEmbeddable entity = new SingularEntityEmbeddable();
         entity.setKey(1);
         entity.setName("entity");
@@ -140,13 +141,13 @@ public class IndexManagerTest
         try
         {
             CoreTestIndexer indexer = new CoreTestIndexer();
-            IndexManager ixManager = new IndexManager(indexer);
+            IndexManager ixManager = new IndexManager(indexer, ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());
             
             Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
             CoreTestClient client = (CoreTestClient)clients.get("patest");
             client.setIndexManager(ixManager);
 
-            EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(SingularEntityEmbeddable.class);
+            EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance(), SingularEntityEmbeddable.class);
             SingularEntityEmbeddable entity = new SingularEntityEmbeddable();
             entity.setKey(1);
             entity.setName("entity");

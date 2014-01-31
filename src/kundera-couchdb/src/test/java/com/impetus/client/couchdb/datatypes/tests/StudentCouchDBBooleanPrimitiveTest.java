@@ -29,6 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.couchdb.datatypes.entities.StudentCouchDBBooleanPrimitive;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 import com.impetus.kundera.query.QueryHandlerException;
 
 public class StudentCouchDBBooleanPrimitiveTest extends CouchDBBase
@@ -42,7 +43,7 @@ public class StudentCouchDBBooleanPrimitiveTest extends CouchDBBase
     public void setUp() throws Exception
     {
 
-        emf = Persistence.createEntityManagerFactory(pu);super.setUpBase();     
+        emf = Persistence.createEntityManagerFactory(pu);super.setUpBase(((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());     
     }
 
     @After

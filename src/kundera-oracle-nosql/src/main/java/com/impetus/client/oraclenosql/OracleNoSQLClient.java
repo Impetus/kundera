@@ -72,6 +72,7 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
@@ -124,8 +125,10 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
      *            the reader
      */
     OracleNoSQLClient(final OracleNoSQLClientFactory factory, EntityReader reader, IndexManager indexManager,
-            final KVStore kvStore, Map<String, Object> puProperties, String persistenceUnit)
+            final KVStore kvStore, Map<String, Object> puProperties, String persistenceUnit,
+            final KunderaMetadata kunderaMetadata)
     {
+        super(kunderaMetadata);
         this.persistenceUnit = persistenceUnit;
         this.factory = factory;
         this.kvStore = kvStore;
@@ -144,9 +147,9 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
 
     private Object find(Class entityClass, Object key, List<String> columnsToSelect)
     {
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
-        MetamodelImpl metamodel = (MetamodelImpl) KunderaMetadataManager.getMetamodel(entityMetadata
-                .getPersistenceUnit());
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClass);
+        MetamodelImpl metamodel = (MetamodelImpl) KunderaMetadataManager.getMetamodel(kunderaMetadata,
+                entityMetadata.getPersistenceUnit());
 
         EntityType entityType = metamodel.entity(entityMetadata.getEntityClazz());
 
@@ -245,8 +248,8 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
                                     && entityMetadata.getRelationNames().contains(minorKeyFirstPart))
                             {
                                 Relation relation = entityMetadata.getRelation(f.getName());
-                                EntityMetadata associationMetadata = KunderaMetadataManager.getEntityMetadata(relation
-                                        .getTargetEntity());
+                                EntityMetadata associationMetadata = KunderaMetadataManager.getEntityMetadata(
+                                        kunderaMetadata, relation.getTargetEntity());
                                 relationMap.put(minorKeyFirstPart, PropertyAccessorHelper.getObject(associationMetadata
                                         .getIdAttribute().getBindableJavaType(), v.getValue()));
                             }
@@ -327,7 +330,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     @Override
     public void delete(Object entity, Object pKey)
     {
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entity.getClass());
         String idString = PropertyAccessorHelper.getString(pKey);
 
         Key key = Key.createKey(entityMetadata.getTableName());
@@ -387,8 +390,8 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
                                                     // datastore
         String table = entityMetadata.getTableName();
 
-        MetamodelImpl metamodel = (MetamodelImpl) KunderaMetadataManager.getMetamodel(entityMetadata
-                .getPersistenceUnit());
+        MetamodelImpl metamodel = (MetamodelImpl) KunderaMetadataManager.getMetamodel(kunderaMetadata,
+                entityMetadata.getPersistenceUnit());
 
         if (log.isDebugEnabled())
         {
@@ -683,12 +686,12 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
             // Select Query with where clause (requires search within inverted
             // index)
             primaryKeys.addAll(((OracleNoSQLInvertedIndexer) getIndexManager().getIndexer()).executeQuery(interpreter,
-                    entityClass));
+                    entityClass, KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClass)));
 
         }
         else
         {
-            EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClass);
+            EntityMetadata m = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClass);
 
             ArrayList<String> majorComponents = new ArrayList<String>();
             majorComponents.add(m.getTableName());
@@ -772,7 +775,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         String valueAsStr = PropertyAccessorHelper.getString(columnValue);
         Set<Object> results = new HashSet<Object>();
 
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entityClazz);
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClazz);
         // Major Key components
         List<String> majorComponents = new ArrayList<String>();
         majorComponents.add(tableName);
@@ -924,7 +927,8 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
                 }
                 else
                 {
-                    EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
+                    EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
+                            node.getDataClass());
                     List<RelationHolder> relationHolders = getRelationHolders(node);
                     onPersist(metadata, node.getData(), node.getEntityId(), relationHolders);
                 }
@@ -980,7 +984,8 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         }
         else if (batch_Size == null)
         {
-            PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
+            PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata,
+                    persistenceUnit);
             setBatchSize(puMetadata.getBatchSize());
         }
     }

@@ -338,11 +338,12 @@ public final class CassandraCli
         return client;
     }
 
-    public static void executeCqlQuery(String cqlQuery)
+    public static void executeCqlQuery(String cqlQuery, String keyspaceName)
     {
         try
         {
             getClient().set_cql_version("3.0.0");
+            getClient().set_keyspace(keyspaceName);
             getClient().execute_cql3_query(ByteBuffer.wrap(cqlQuery.getBytes("UTF-8")), Compression.NONE,
                     ConsistencyLevel.ONE);
         }

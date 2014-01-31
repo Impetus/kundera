@@ -34,7 +34,6 @@ import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.index.Indexer;
 import com.impetus.kundera.loader.ClientFactory;
 import com.impetus.kundera.loader.GenericClientFactory;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
@@ -62,18 +61,17 @@ public class OracleNoSQLClientFactory extends GenericClientFactory
     {
         initializePropertyReader();
         setExternalProperties(puProperties);
-        reader = new OracleNoSQLEntityReader();
+        reader = new OracleNoSQLEntityReader(kunderaMetadata);
     }
 
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
-        String indexerClass = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                .getPersistenceUnitMetadata(getPersistenceUnit()).getProperties()
-                .getProperty(PersistenceProperties.KUNDERA_INDEXER_CLASS);
+        String indexerClass = kunderaMetadata.getApplicationMetadata().getPersistenceUnitMetadata(getPersistenceUnit())
+                .getProperties().getProperty(PersistenceProperties.KUNDERA_INDEXER_CLASS);
 
         Client client = new OracleNoSQLClient(this, reader, indexManager, kvStore, externalProperties,
-                getPersistenceUnit());
+                getPersistenceUnit(), kunderaMetadata);
         populateIndexer(indexerClass, client);
 
         return client;
@@ -136,7 +134,8 @@ public class OracleNoSQLClientFactory extends GenericClientFactory
     {
         if (propertyReader == null)
         {
-            propertyReader = new OracleNoSQLPropertyReader(externalProperties);
+            propertyReader = new OracleNoSQLPropertyReader(externalProperties, kunderaMetadata.getApplicationMetadata()
+                    .getPersistenceUnitMetadata(getPersistenceUnit()));
             propertyReader.read(getPersistenceUnit());
         }
     }
@@ -149,7 +148,7 @@ public class OracleNoSQLClientFactory extends GenericClientFactory
     private KVStore getConnection()
     {
 
-        PersistenceUnitMetadata persistenceUnitMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+        PersistenceUnitMetadata persistenceUnitMetadata = kunderaMetadata.getApplicationMetadata()
                 .getPersistenceUnitMetadata(getPersistenceUnit());
 
         Properties props = persistenceUnitMetadata.getProperties();

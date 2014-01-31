@@ -16,7 +16,6 @@
 package com.impetus.kundera.polyglot.tests;
 
 import com.impetus.kundera.client.DummyDatabase;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.polyglot.dao.PersonAddressDaoImpl;
 
 /**
@@ -37,7 +36,7 @@ public abstract class PersonAddressTestBase
     {
         dao.closeEntityManagerFactory();
         dao = null;
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         DummyDatabase.INSTANCE.dropDatabase();
     }
     

@@ -12,7 +12,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.kundera.client.crud.mappedsuperclass.MappedSuperClassBase;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 public class ESMappedSuperClassTest extends MappedSuperClassBase
 {
@@ -47,7 +46,7 @@ public class ESMappedSuperClassTest extends MappedSuperClassBase
           node.close();
         }
         tearDownInternal();
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
 
     }
     

@@ -36,6 +36,7 @@ import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.context.PersistenceCacheManager;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -57,6 +58,13 @@ public class AbstractEntityReader
     private AssociationBuilder associationBuilder;
 
     protected KunderaQuery kunderaQuery;
+    
+    protected KunderaMetadata kunderaMetadata;
+    
+    public AbstractEntityReader(final KunderaMetadata kunderaMetadata)
+    {
+       this.kunderaMetadata = kunderaMetadata;
+    }
     /**
      * Retrieves an entity from ID
      * 
@@ -177,8 +185,8 @@ public class AbstractEntityReader
         // else invoke target entity for find by relation, pass it's entityId as
         // a column value and relation.getJoinColumnName as column name.
 
-        Object relationValue = relationsMap != null ? relationsMap.get(relation.getJoinColumnName()) : null;
-        EntityMetadata targetEntityMetadata = KunderaMetadataManager.getEntityMetadata(relation.getTargetEntity());
+        Object relationValue = relationsMap != null ? relationsMap.get(relation.getJoinColumnName(kunderaMetadata)) : null;
+        EntityMetadata targetEntityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, relation.getTargetEntity());
 
         List relationalEntities = fetchRelations(relation, metadata, pd, entityId, relationValue, targetEntityMetadata);
 
@@ -290,7 +298,7 @@ public class AbstractEntityReader
                             PropertyAccessorHelper.set(relationEntity, relation.getProperty(), originalEntity);
                         }
                     }
-                    else if (relationsMap != null && relationsMap.containsKey(relation.getJoinColumnName()))
+                    else if (relationsMap != null && relationsMap.containsKey(relation.getJoinColumnName(kunderaMetadata)))
                     {
                         PropertyAccessorHelper.set(relationEntity, relation.getProperty(), originalEntity);
                     }
@@ -301,8 +309,8 @@ public class AbstractEntityReader
                     // onRelation(relationEntity, relationsMap, metadata, pd,
                     // relation, relationType);
                     final Object entityId = PropertyAccessorHelper.getId(relationEntity, metadata);
-                    Object relationValue = relationsMap != null ? relationsMap.get(relation.getJoinColumnName()) : null;
-                    final EntityMetadata targetEntityMetadata = KunderaMetadataManager.getEntityMetadata(relation
+                    Object relationValue = relationsMap != null ? relationsMap.get(relation.getJoinColumnName(kunderaMetadata)) : null;
+                    final EntityMetadata targetEntityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, relation
                             .getTargetEntity());
                     List immediateRelations = fetchRelations(relation, metadata, pd, entityId, relationValue,
                             targetEntityMetadata);
@@ -375,7 +383,7 @@ public class AbstractEntityReader
             Client associatedClient = pd.getClient(targetEntityMetadata);
 
             if (!MetadataUtils.useSecondryIndex(((ClientBase) associatedClient).getClientMetadata())
-                    && MetadataUtils.indexSearchEnabled(targetEntityMetadata.getPersistenceUnit()))
+                    && MetadataUtils.indexSearchEnabled(targetEntityMetadata.getPersistenceUnit(), kunderaMetadata))
             {
 
                 relationalEntities = getAssociationBuilder().getAssociatedEntitiesFromIndex(
@@ -384,7 +392,7 @@ public class AbstractEntityReader
             }
             else
             {
-                relationalEntities = associatedClient.findByRelation(relation.getJoinColumnName(), entityId,
+                relationalEntities = associatedClient.findByRelation(relation.getJoinColumnName(kunderaMetadata), entityId,
                         relation.getTargetEntity());
             }
         }
@@ -490,7 +498,7 @@ public class AbstractEntityReader
         // populate EnhanceEntity
 
         /** The lucene query from jpa query. */
-        String luceneQueryFromJPAQuery = KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery);
+        String luceneQueryFromJPAQuery = KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery, kunderaMetadata);
         
         Map<String, Object> results = client.getIndexManager().search(clazz, luceneQueryFromJPAQuery);
         Set rSet = new HashSet(results.values());
@@ -532,7 +540,7 @@ public class AbstractEntityReader
         if (relationalEntity != null && originalEntity != null
                 && relationalEntity.getClass().isAssignableFrom(originalEntity.getClass()))
         {
-            EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(originalEntity.getClass());
+            EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, originalEntity.getClass());
 
             Object relationalEntityId = PropertyAccessorHelper.getId(relationalEntity, metadata);
             Object originalEntityId = PropertyAccessorHelper.getId(originalEntity, metadata);

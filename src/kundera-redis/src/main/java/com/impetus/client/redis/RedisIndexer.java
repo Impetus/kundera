@@ -25,6 +25,8 @@ import redis.clients.jedis.Transaction;
 
 import com.impetus.client.redis.RedisClient.AttributeWrapper;
 import com.impetus.kundera.index.Indexer;
+import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
 
 /**
  * @author vivek.mishra
@@ -42,7 +44,7 @@ public class RedisIndexer implements Indexer
      * java.util.Map, java.lang.Object, java.lang.Class)
      */
     @Override
-    public void index(Class entityClazz, Map<String, Object> values, Object parentId, Class parentClazz)
+    public void index(Class entityClazz, EntityMetadata m, Map<String, Object> values, Object parentId, Class parentClazz)
     {
         Set<String> indexNames = values.keySet();
         for (String idx_Name : indexNames)
@@ -79,7 +81,7 @@ public class RedisIndexer implements Indexer
      * java.lang.String, int, int)
      */
     @Override
-    public Map<String, Object> search(Class<?> clazz, String queryString, int start, int count)
+    public Map<String, Object> search(Class<?> clazz, EntityMetadata m, String queryString, int start, int count)
     {
         // TODO Auto-generated method stub
         return null;
@@ -92,8 +94,8 @@ public class RedisIndexer implements Indexer
      * java.lang.Class, java.lang.Class, java.lang.Object, int, int)
      */
     @Override
-    public Map<String, Object> search(String query, Class<?> parentClass, Class<?> childClass, Object entityId,
-            int start, int count)
+    public Map<String, Object> search(String query, Class<?> parentClass, EntityMetadata parentMetadata,
+            Class<?> childClass, EntityMetadata childMetadata, Object entityId, int start, int count)
     {
         // TODO Auto-generated method stub
         return null;
@@ -106,7 +108,7 @@ public class RedisIndexer implements Indexer
      * java.lang.Object)
      */
     @Override
-    public void unIndex(Class entityClazz, Object entity)
+    public void unIndex(Class entityClazz, Object entity, EntityMetadata metadata, MetamodelImpl metamodel)
     {
         throw new UnsupportedOperationException("Removing index is implicitly managed by RedisClient's unindex method");
     }

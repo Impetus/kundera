@@ -31,7 +31,6 @@ import org.junit.Test;
 import com.impetus.client.crud.entities.PersonRDBMS;
 import com.impetus.client.crud.entities.RDBMSToken;
 import com.impetus.client.crud.entities.RDBMSTokenClient;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.query.IResultIterator;
 import com.impetus.kundera.query.Query;
 
@@ -60,7 +59,7 @@ public class ResultIteratorTest extends BaseTest
     public void setUp() throws Exception
     {
         createSchema();
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         emf = Persistence.createEntityManagerFactory("testHibernate");
         em = emf.createEntityManager();
     }

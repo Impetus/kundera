@@ -16,7 +16,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.crud.RDBMSCli;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
  * @author impadmin
@@ -55,7 +54,7 @@ public class GeneratedIdTest
         cli.dropSchema("TESTDB");
         em.close();
         emf.close();
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         try
         {
             cli.update("DELETE FROM TESTDB.USERGENERATEDID");

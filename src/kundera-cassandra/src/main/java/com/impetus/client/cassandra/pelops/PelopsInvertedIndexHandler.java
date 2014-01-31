@@ -42,6 +42,7 @@ import com.impetus.client.cassandra.thrift.ThriftRow;
 import com.impetus.kundera.db.SearchResult;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 
 /**
  * Pelops implementation of {@link InvertedIndexHandler}
@@ -167,9 +168,9 @@ public class PelopsInvertedIndexHandler extends InvertedIndexHandlerBase impleme
      */
 
     @Override
-    public void delete(Object entity, EntityMetadata metadata, ConsistencyLevel consistencyLevel)
+    public void delete(Object entity, EntityMetadata metadata, ConsistencyLevel consistencyLevel, final KunderaMetadata kunderaMetadata)
     {
-        super.delete(entity, metadata, consistencyLevel);
+        super.delete(entity, metadata, consistencyLevel, kunderaMetadata);
     }
 
     @Override

@@ -35,6 +35,7 @@ import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 
 /**
  * Validates entity for JPA rules.
@@ -237,9 +238,9 @@ public class EntityValidatorImpl implements EntityValidator
     }
 
     @Override
-    public void validateEntity(Class<?> clazz)
+    public void validateEntity(Class<?> clazz, final KunderaMetadata kunderaMetadata)
     {
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(clazz);
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, clazz);
         if (metadata != null)
         {
             SchemaManager schemaManager = ClientResolver.getClientFactory(metadata.getPersistenceUnit())

@@ -40,7 +40,6 @@ import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.entities.AssociationEntity;
 import com.impetus.kundera.metadata.entities.OToOOwnerEntity;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.query.QueryHandlerException;
 
 public class PersistenceDelegatorTest
@@ -52,7 +51,7 @@ public class PersistenceDelegatorTest
     @BeforeClass
     public static void setUpBeforeClass() throws Exception
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         emf = Persistence.createEntityManagerFactory("kunderatest");
     }
 
@@ -289,7 +288,7 @@ public class PersistenceDelegatorTest
     public void testGetClient()
     {
         PersonnelDTO dto = new PersonnelDTO();
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(dto.getClass());
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance(), dto.getClass());
         PersistenceDelegator pd = ((EntityManagerImpl) em).getPersistenceDelegator();
         Client c = pd.getClient(entityMetadata);
         Assert.assertNotNull(c);

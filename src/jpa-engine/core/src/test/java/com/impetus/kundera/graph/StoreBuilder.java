@@ -43,11 +43,11 @@ public class StoreBuilder {
         String b2Id = ObjectGraphUtils.getNodeId("A2", b2.getClass());
         String b3Id = ObjectGraphUtils.getNodeId("A3", b3.getClass());
 
-        Node headNode = new Node(storeId, store, initialState, pc, "1");
+        Node headNode = new Node(storeId, store, initialState, pc, "1", null);
 
-        Node child1 = new Node(b1Id, b1, initialState, pc, "A1");
-        Node child2 = new Node(b2Id, b2, initialState, pc, "A2");
-        Node child3 = new Node(b3Id, b3, initialState, pc, "A3");
+        Node child1 = new Node(b1Id, b1, initialState, pc, "A1", null);
+        Node child2 = new Node(b2Id, b2, initialState, pc, "A2", null);
+        Node child3 = new Node(b3Id, b3, initialState, pc, "A3", null);
 
         NodeLink linkB1 = new NodeLink(storeId, b1Id);
         NodeLink linkB2 = new NodeLink(storeId, b2Id);

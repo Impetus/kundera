@@ -47,7 +47,6 @@ import com.impetus.client.crud.BaseTest;
 import com.impetus.client.crud.PersonCassandra;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 
 /**
@@ -91,7 +90,7 @@ public class ByteDataTest extends BaseTest
     @Before
     public void setUp() throws Exception
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         CassandraCli.cassandraSetUp();
         CassandraCli.createKeySpace("KunderaExamples");
 

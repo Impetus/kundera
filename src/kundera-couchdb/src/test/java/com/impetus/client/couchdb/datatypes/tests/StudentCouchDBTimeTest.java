@@ -30,6 +30,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.couchdb.datatypes.entities.StudentCouchDBTime;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
 public class StudentCouchDBTimeTest extends CouchDBBase
 {
@@ -41,7 +42,7 @@ public class StudentCouchDBTimeTest extends CouchDBBase
     @Before
     public void setUp() throws Exception
     {
-        emf = Persistence.createEntityManagerFactory(pu);super.setUpBase();     
+        emf = Persistence.createEntityManagerFactory(pu);super.setUpBase(((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());     
     }
 
     @After

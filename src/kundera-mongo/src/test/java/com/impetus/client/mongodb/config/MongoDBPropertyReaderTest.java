@@ -24,6 +24,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,6 +40,7 @@ import com.impetus.kundera.configure.PersistenceUnitConfiguration;
 import com.impetus.kundera.configure.PropertyReader;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 import com.mongodb.ReadPreference;
 
 /**
@@ -58,13 +62,17 @@ public class MongoDBPropertyReaderTest
 
     private ReadPreference readPreference;
 
+    private EntityManagerFactory emf;
+
     /**
      * @throws java.lang.Exception
      */
     @Before
     public void setUp() throws Exception
     {
-        new PersistenceUnitConfiguration(null, pu).configure();
+        emf = Persistence.createEntityManagerFactory(pu);
+        new PersistenceUnitConfiguration(null, ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance(), pu)
+                .configure();
     }
 
     /**
@@ -83,12 +91,14 @@ public class MongoDBPropertyReaderTest
     @Test
     public void testRead()
     {
-        PropertyReader reader = new MongoDBPropertyReader(null);
+        PropertyReader reader = new MongoDBPropertyReader(null, ((EntityManagerFactoryImpl) emf)
+                .getKunderaMetadataInstance().getApplicationMetadata().getPersistenceUnitMetadata(pu));
         reader.read(pu);
         dbSchemaMetadata = MongoDBPropertyReader.msmd;
 
         Properties properties = new Properties();
-        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(pu);
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(
+                ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance(), pu);
         String propertyName = puMetadata != null ? puMetadata
                 .getProperty(PersistenceProperties.KUNDERA_CLIENT_PROPERTY) : null;
 

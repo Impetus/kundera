@@ -95,13 +95,13 @@ import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata.Type;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.TableGeneratorDiscriptor;
 import com.impetus.kundera.metadata.model.annotation.DefaultEntityAnnotationProcessor;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -150,8 +150,10 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      *            the persistence unit
      * @param externalProperties
      */
-    protected CassandraClientBase(String persistenceUnit, Map<String, Object> externalProperties)
+    protected CassandraClientBase(String persistenceUnit, Map<String, Object> externalProperties,
+            final KunderaMetadata kunderaMetadata)
     {
+        super(kunderaMetadata);
         this.externalProperties = externalProperties;
         this.cqlClient = new CQLClient();
         setBatchSize(persistenceUnit, this.externalProperties);
@@ -276,7 +278,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             List<Object> entities, Map<Bytes, List<Column>> qResults)
     {
 
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
 
         EntityType entityType = metaModel.entity(m.getEntityClazz());
@@ -297,8 +299,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 {
                     for (AbstractManagedType subEntity : subManagedType)
                     {
-                        EntityMetadata subEntityMetadata = KunderaMetadataManager.getEntityMetadata(subEntity
-                                .getJavaType());
+                        EntityMetadata subEntityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
+                                subEntity.getJavaType());
 
                         o = getDataHandler().populateEntity(tr, subEntityMetadata, CassandraUtilities.getEntity(o),
                                 subEntityMetadata.getRelationNames(), isRelation);
@@ -389,7 +391,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         if (relations != null)
         {
             long timestamp = System.currentTimeMillis();
-            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                     metadata.getPersistenceUnit());
             for (RelationHolder rh : relations)
             {
@@ -607,7 +609,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      */
     public Object find(Class entityClass, Object rowId)
     {
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClass);
         List<String> relationNames = entityMetadata.getRelationNames();
         return find(entityClass, entityMetadata, rowId, relationNames);
     }
@@ -627,7 +629,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      */
     public <E> List<E> findAll(Class<E> entityClass, String[] columnsToSelect, Object... rowIds)
     {
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClass);
         List<E> results = new ArrayList<E>();
         results = find(entityClass, entityMetadata.getRelationNames(), entityMetadata.getRelationNames() != null
                 && !entityMetadata.getRelationNames().isEmpty(), entityMetadata, rowIds);
@@ -653,7 +655,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         List<Object> result = null;
         try
         {
-            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                     metadata.getPersistenceUnit());
 
             EntityType entityType = metaModel.entity(clazz);
@@ -664,8 +666,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             {
                 for (ManagedType subEntity : subTypes)
                 {
-                    EntityMetadata subEntityMetadata = KunderaMetadataManager
-                            .getEntityMetadata(subEntity.getJavaType());
+                    EntityMetadata subEntityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
+                            subEntity.getJavaType());
                     result = populate(clazz, subEntityMetadata, rowId, subEntityMetadata.getRelationNames(), metaModel);
                     if (result != null && !result.isEmpty())
                     {
@@ -719,7 +721,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         if (metadata != null)
         {
 
-            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                     metadata.getPersistenceUnit());
 
             if (metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
@@ -769,7 +771,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         String entityId = null;
         try
         {
-            EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
+            EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
+                    getPersistenceUnit(), entityClass);
             entities = new ArrayList<E>();
             for (String superColumnName : superColumnMap.keySet())
             {
@@ -817,9 +820,9 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
         List entities = new ArrayList<Object>();
 
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(clazz);
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, clazz);
 
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 entityMetadata.getPersistenceUnit());
 
         EntityType entityType = metaModel.entity(entityMetadata.getEntityClazz());
@@ -834,7 +837,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         {
             for (AbstractManagedType subEntity : subManagedType)
             {
-                EntityMetadata subEntityMetadata = KunderaMetadataManager.getEntityMetadata(subEntity.getJavaType());
+                EntityMetadata subEntityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
+                        subEntity.getJavaType());
 
                 entities.addAll(cqlClient.executeQuery(subEntityMetadata.getEntityClazz(), relationalField,
                         dataHandler, true, isNative, cqlQuery));
@@ -973,7 +977,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             List<KeySlice> keys, CassandraDataHandler dataHandler) throws Exception
     {
         List results;
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
 
         // List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
@@ -1029,7 +1033,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         List<String> insert_Queries = new ArrayList<String>();
         CQLTranslator translator = new CQLTranslator();
         HashMap<TranslationType, Map<String, StringBuilder>> translation = translator.prepareColumnOrColumnValues(
-                entity, entityMetadata, TranslationType.ALL, externalProperties);
+                entity, entityMetadata, TranslationType.ALL, externalProperties, kunderaMetadata);
 
         Map<String, StringBuilder> columnNamesMap = translation.get(TranslationType.COLUMN);
         Map<String, StringBuilder> columnValuesMap = translation.get(TranslationType.VALUE);
@@ -1095,7 +1099,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         CQLTranslator translator = new CQLTranslator();
 
         Object rowId = PropertyAccessorHelper.getId(entity, entityMetadata);
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 entityMetadata.getPersistenceUnit());
 
         EntityType entityType = metaModel.entity(entityMetadata.getEntityClazz());
@@ -1300,8 +1304,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             Attribute attribute = metadata.getIdAttribute();
             translator.buildWhereClause(queryBuilder,
                     ((AbstractAttribute) metadata.getIdAttribute()).getBindableJavaType(),
-                    CassandraUtilities.getIdColumnName(metadata, getExternalProperties()), key, translator.EQ_CLAUSE,
-                    false);
+                    CassandraUtilities.getIdColumnName(kunderaMetadata, metadata, getExternalProperties()), key,
+                    translator.EQ_CLAUSE, false);
         }
 
         // strip last "AND" clause.
@@ -1542,12 +1546,13 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                     node.handlePreEvent();
                     Object entity = node.getData();
                     Object id = node.getEntityId();
-                    EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
+                    EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
+                            node.getDataClass());
                     persistenceUnit = metadata.getPersistenceUnit();
                     isUpdate = node.isUpdate();
 
-                    MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata()
-                            .getMetamodel(metadata.getPersistenceUnit());
+                    MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                            metadata.getPersistenceUnit());
 
                     // delete can not be executed in batch
 
@@ -1915,7 +1920,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
         catch (Exception ex)
         {
-            if(log.isErrorEnabled())
+            if (log.isErrorEnabled())
             {
                 log.error("Error during executing query {}, Caused by: {} .", cqlQuery, ex);
             }
@@ -1948,7 +1953,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     {
         String batch_Size = null;
 
-        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata,
+                persistenceUnit);
 
         String externalBatchSize = puProperties != null ? (String) puProperties
                 .get(PersistenceProperties.KUNDERA_BATCH_SIZE) : null;
@@ -2083,8 +2089,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         public List executeQuery(Class clazz, List<String> relationalField, CassandraDataHandler dataHandler,
                 boolean isCql3Enabled, boolean isNative, String cqlQuery)
         {
-            EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(clazz);
-            ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+            EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, clazz);
+            ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
 
             CqlResult result = null;
             List returnedEntities = new ArrayList();
@@ -2151,7 +2157,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         {
             CqlResult result;
             // For secondary tables.
-            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                     entityMetadata.getPersistenceUnit());
             if (!metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
             {
@@ -2167,10 +2173,10 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                     // Building query.
                     StringBuilder queryBuilder = new StringBuilder("select * from \"" + tableName + "\" where ");
                     Attribute attribute = entityMetadata.getIdAttribute();
-                    translator.buildWhereClause(queryBuilder,
-                            ((AbstractAttribute) entityMetadata.getIdAttribute()).getBindableJavaType(),
-                            CassandraUtilities.getIdColumnName(entityMetadata, getExternalProperties()),
-                            PropertyAccessorHelper.getId(e, entityMetadata), translator.EQ_CLAUSE, false);
+                    translator.buildWhereClause(queryBuilder, ((AbstractAttribute) entityMetadata.getIdAttribute())
+                            .getBindableJavaType(), CassandraUtilities.getIdColumnName(kunderaMetadata, entityMetadata,
+                            getExternalProperties()), PropertyAccessorHelper.getId(e, entityMetadata),
+                            translator.EQ_CLAUSE, false);
                     // strip last "AND" clause.
                     queryBuilder.delete(queryBuilder.lastIndexOf(CQLTranslator.AND_CLAUSE), queryBuilder.length());
 
@@ -2313,7 +2319,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     {
         List entities = null;
 
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 metadata.getPersistenceUnit());
 
         EntityType entityType = metaModel.entity(metadata.getEntityClazz());
@@ -2327,8 +2333,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             {
                 for (AbstractManagedType subEntity : subManagedType)
                 {
-                    EntityMetadata subEntityMetadata = KunderaMetadataManager
-                            .getEntityMetadata(subEntity.getJavaType());
+                    EntityMetadata subEntityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
+                            subEntity.getJavaType());
                     entities = getDataHandler().fromThriftRow(entityClass, subEntityMetadata,
                             subEntityMetadata.getRelationNames(), isWrapReq, getConsistencyLevel(), rowIds);
 

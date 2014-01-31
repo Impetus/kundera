@@ -21,6 +21,7 @@ import org.apache.http.client.HttpClient;
 import com.impetus.client.couchdb.utils.CouchDBTestUtils;
 import com.impetus.kundera.datatypes.datagenerator.DataGenerator;
 import com.impetus.kundera.datatypes.datagenerator.DataGeneratorFactory;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 
 public abstract class CouchDBBase
 {
@@ -63,9 +64,9 @@ public abstract class CouchDBBase
         return dataGenerator.partialValue();
     }
 
-    protected void setUpBase()
+    protected void setUpBase(final KunderaMetadata kunderaMetadata)
     {
-        httpClient = CouchDBTestUtils.initiateHttpClient(pu);
+        httpClient = CouchDBTestUtils.initiateHttpClient(kunderaMetadata, pu);
         httpHost = new HttpHost("localhost", 5984);
     }
 

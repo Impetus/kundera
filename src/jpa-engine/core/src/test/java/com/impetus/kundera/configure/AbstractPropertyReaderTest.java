@@ -15,6 +15,9 @@
  ******************************************************************************/
 package com.impetus.kundera.configure;
 
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+
 import junit.framework.Assert;
 
 import org.junit.After;
@@ -22,6 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.kundera.configure.ClientProperties.DataStore;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
 /**
  * Abstract property reader test
@@ -45,7 +49,7 @@ public class AbstractPropertyReaderTest
     @After
     public void tearDown() throws Exception
     {
-        
+
     }
 
     /**
@@ -56,39 +60,42 @@ public class AbstractPropertyReaderTest
     @Test
     public void testParseXML()
     {
-        PropertyReader   reader = new DummyPropertyReader(null);
         String pu = "PropertyTest";
-        new PersistenceUnitConfiguration(null, pu).configure();
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory(pu);
+        PropertyReader reader = new DummyPropertyReader(null, ((EntityManagerFactoryImpl) emf)
+                .getKunderaMetadataInstance().getApplicationMetadata().getPersistenceUnitMetadata(pu));
         ClientProperties cp = null;
         reader.read(pu);
         cp = DummyPropertyReader.dsmd.getClientProperties();
         assertValues(cp);
     }
 
-//    @Test
+    // @Test
     public void testParseXMLWithAsolutePath()
     {
-        PropertyReader   reader = new DummyPropertyReader(null);
-        String pu = "PropertyTestwithabsolutepath";
-        new PersistenceUnitConfiguration(null, pu).configure();
+        String pu = "PropertyTest";
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory(pu);
+        PropertyReader reader = new DummyPropertyReader(null, ((EntityManagerFactoryImpl) emf)
+                .getKunderaMetadataInstance().getApplicationMetadata().getPersistenceUnitMetadata(pu));
         ClientProperties cp = null;
         reader.read(pu);
         cp = DummyPropertyReader.dsmd.getClientProperties();
         assertValues(cp);
     }
-    
-//    @Test
+
+    // @Test
     public void testParseXMLWithVariable()
     {
-        PropertyReader   reader = new DummyPropertyReader(null);
-        String pu = "PropertyTestwithvaraiable";
-        new PersistenceUnitConfiguration(null, pu).configure();
+        String pu = "PropertyTest";
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory(pu);
+        PropertyReader reader = new DummyPropertyReader(null, ((EntityManagerFactoryImpl) emf)
+                .getKunderaMetadataInstance().getApplicationMetadata().getPersistenceUnitMetadata(pu));
         ClientProperties cp = null;
         reader.read(pu);
         cp = DummyPropertyReader.dsmd.getClientProperties();
         assertValues(cp);
     }
-    
+
     private void assertValues(ClientProperties cp)
     {
         Assert.assertNotNull(cp);

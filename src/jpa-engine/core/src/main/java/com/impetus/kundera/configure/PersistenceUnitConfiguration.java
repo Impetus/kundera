@@ -24,23 +24,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.spi.PersistenceUnitInfo;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaPersistence;
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.loader.PersistenceLoaderException;
 import com.impetus.kundera.loader.PersistenceXMLLoader;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.utils.InvalidConfigurationException;
 
 /**
  * The Class PersistenceUnitConfiguration: 1) Find and load/configure
- * persistence unit meta data. Earlier it was PersistenceUnitLoader.
+ * persistence unit metadata. Earlier it was PersistenceUnitLoader.
  * 
  * @author vivek.mishra
  */
@@ -60,9 +63,9 @@ public class PersistenceUnitConfiguration extends AbstractSchemaConfiguration im
      * @param persistenceUnits
      *            persistence units.
      */
-    public PersistenceUnitConfiguration(Map properties, String... persistenceUnits)
+    public PersistenceUnitConfiguration(Map properties, final KunderaMetadata metadata, String... persistenceUnits)
     {
-        super(persistenceUnits, properties);
+        super(persistenceUnits, properties, metadata);
     }
 
     /*
@@ -74,20 +77,94 @@ public class PersistenceUnitConfiguration extends AbstractSchemaConfiguration im
     public void configure()
     {
         log.info("Loading Metadata from persistence.xml ...");
-        KunderaMetadata kunderaMetadata = KunderaMetadata.INSTANCE;
 
         ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
 
-        Map<String, PersistenceUnitMetadata> metadatas;
         try
         {
-            metadatas = findPersistenceMetadatas();
+            Map<String, PersistenceUnitMetadata> metadatas = findPersistenceMetadatas();
             for (String persistenceUnit : persistenceUnits)
             {
                 if (!metadatas.containsKey(persistenceUnit))
                 {
                     log.error("Unconfigured persistence unit: " + persistenceUnit
                             + " please validate with persistence.xml");
+                    throw new PersistenceUnitConfigurationException("Invalid persistence unit: " + persistenceUnit
+                            + " provided");
+                }
+            }
+            log.info("Finishing persistence unit metadata configuration ...");
+            appMetadata.addPersistenceUnitMetadata(metadatas);
+        }
+        catch (InvalidConfigurationException icex)
+        {
+            log.error("Error occurred during persistence unit configuration, Caused by: .", icex);
+            throw new PersistenceLoaderException(icex);
+        }
+    }
+
+    public void configure(PersistenceUnitInfo puInfo)
+    {
+        log.info("Loading Metadata from persistence.xml ...");
+
+        ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
+
+        try
+        {
+            PersistenceUnitMetadata metadata = new PersistenceUnitMetadata(puInfo.getPersistenceXMLSchemaVersion(),
+                    puInfo.getPersistenceUnitRootUrl(), null);
+
+            metadata.setTransactionType(puInfo.getTransactionType());
+
+            metadata.setClasses(puInfo.getManagedClassNames());
+
+            metadata.setExcludeUnlistedClasses(puInfo.excludeUnlistedClasses());
+
+            if (StringUtils.isBlank(puInfo.getPersistenceUnitName()))
+            {
+                throw new PersistenceUnitConfigurationException(
+                        "Invalid persistence unit name, persistence unit name should not be null or blank.");
+            }
+            else
+            {
+                metadata.setPersistenceUnitName(puInfo.getPersistenceUnitName());
+            }
+
+            if (puInfo.getProperties().getProperty(PersistenceProperties.KUNDERA_CLIENT_FACTORY) != null)
+            {
+                log.error("kundera.client property is missing for persistence unit:" + puInfo.getPersistenceUnitName());
+                throw new IllegalArgumentException("kundera.client property is missing for persistence unit:"
+                        + puInfo.getPersistenceUnitName());
+            }
+            metadata.setProperties(puInfo.getProperties());
+
+            if (puInfo.getPersistenceProviderClassName() == null
+                    || PROVIDER_IMPLEMENTATION_NAME.equalsIgnoreCase(puInfo.getPersistenceProviderClassName()))
+            {
+                metadata.setProvider(puInfo.getPersistenceProviderClassName());
+            }
+            else
+            {
+                throw new PersistenceUnitConfigurationException("Invalid persistence provider : "
+                        + puInfo.getPersistenceProviderClassName() + ", persistence provider must be "
+                        + PROVIDER_IMPLEMENTATION_NAME + ".");
+            }
+
+            metadata.setPackages(puInfo.getMappingFileNames());
+
+            for (URL url : puInfo.getJarFileUrls())
+            {
+                metadata.addJarFile(url.getPath());
+            }
+
+            Map<String, PersistenceUnitMetadata> metadatas = new HashMap<String, PersistenceUnitMetadata>();
+            metadatas.put(puInfo.getPersistenceUnitName(), metadata);
+
+            for (String persistenceUnit : persistenceUnits)
+            {
+                if (!metadatas.containsKey(persistenceUnit))
+                {
+                    log.error("Unconfigured persistence unit: " + persistenceUnit);
                     throw new PersistenceUnitConfigurationException("Invalid persistence unit: " + persistenceUnit
                             + " provided");
                 }
@@ -111,23 +188,18 @@ public class PersistenceUnitConfiguration extends AbstractSchemaConfiguration im
      */
     private Map<String, PersistenceUnitMetadata> findPersistenceMetadatas() throws InvalidConfigurationException
     {
-        String puLocation = (String) (externalPropertyMap != null && externalPropertyMap.get(Constants.PERSISTENCE_UNIT_LOCATIION) != null ? externalPropertyMap
+        String puLocation = (String) (externalPropertyMap != null
+                && externalPropertyMap.get(Constants.PERSISTENCE_UNIT_LOCATIION) != null ? externalPropertyMap
                 .get(Constants.PERSISTENCE_UNIT_LOCATIION) : Constants.DEFAULT_PERSISTENCE_UNIT_LOCATIION);
-        
+
         Enumeration<URL> xmls = null;
         try
         {
             xmls = this.getClass().getClassLoader().getResources(puLocation);
-
-            // if (xmls == null || !xmls.hasMoreElements())
-            // {
-            // xmls =
-            // Thread.currentThread().getClass().getClassLoader().getResources("META-INF/persistence.xml");
-            // }
         }
         catch (IOException ioex)
         {
-            log.warn("Error while loading persistence.xml Caused by:" + ioex.getMessage());
+            log.warn("Error while loading persistence.xml, Caused by: {}.", ioex);
         }
 
         if (xmls == null || !xmls.hasMoreElements())

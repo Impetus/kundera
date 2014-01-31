@@ -23,6 +23,7 @@ import com.impetus.kundera.configure.ClientProperties;
 import com.impetus.kundera.configure.ClientProperties.DataStore;
 import com.impetus.kundera.configure.ClientProperties.DataStore.Connection;
 import com.impetus.kundera.configure.PropertyReader;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
  * @author vivek.mishra
@@ -33,9 +34,9 @@ public class ESClientPropertyReader extends AbstractPropertyReader implements Pr
 
     private ESSchemaMetadata esmd;
     
-    public ESClientPropertyReader(Map externalProperties)
+    public ESClientPropertyReader(Map externalProperties, final PersistenceUnitMetadata puMetadata)
     {
-        super(externalProperties);
+        super(externalProperties, puMetadata);
         esmd = new ESSchemaMetadata();
     }
 

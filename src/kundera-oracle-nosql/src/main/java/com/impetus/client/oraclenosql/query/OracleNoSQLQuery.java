@@ -37,6 +37,7 @@ import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -53,9 +54,9 @@ public class OracleNoSQLQuery extends QueryImpl
 {
     private static Logger log = LoggerFactory.getLogger(OracleNoSQLQuery.class);
 
-    public OracleNoSQLQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
+    public OracleNoSQLQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator, final KunderaMetadata kunderaMetadata)
     {
-        super(kunderaQuery, persistenceDelegator);
+        super(kunderaQuery, persistenceDelegator, kunderaMetadata);
     }
 
     @Override
@@ -119,7 +120,7 @@ public class OracleNoSQLQuery extends QueryImpl
     @Override
     protected EntityReader getReader()
     {
-        return new OracleNoSQLEntityReader(kunderaQuery);
+        return new OracleNoSQLEntityReader(kunderaQuery, kunderaMetadata);
     }
 
     @Override

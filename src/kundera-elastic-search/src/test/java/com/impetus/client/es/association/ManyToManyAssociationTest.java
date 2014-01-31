@@ -35,8 +35,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.impetus.kundera.metadata.model.KunderaMetadata;
-
 public class ManyToManyAssociationTest
 {
 
@@ -212,7 +210,7 @@ public class ManyToManyAssociationTest
         {
             emf.close();
         }
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
 
     }
 

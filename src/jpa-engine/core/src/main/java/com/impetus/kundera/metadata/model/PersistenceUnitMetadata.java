@@ -124,16 +124,6 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
         this.transactionType = transactionType;
     }
 
-    // /**
-    // * Gets the provider.
-    // *
-    // * @return the provider
-    // */
-    // public String getProvider()
-    // {
-    // return provider;
-    // }
-
     /**
      * Sets the provider.
      * 

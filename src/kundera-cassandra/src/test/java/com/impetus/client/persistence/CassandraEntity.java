@@ -26,7 +26,7 @@ import javax.persistence.Table;
  * @author amresh.singh
  */
 @Entity
-@Table(name = "users", schema = "kunderaexamples@cassandra")
+@Table(name = "users", schema = "KunderaExamples@cassandra")
 public class CassandraEntity
 {
     @Id

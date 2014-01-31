@@ -17,14 +17,12 @@ package com.impetus.client.persistence;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 import javax.persistence.Query;
 
 import junit.framework.Assert;
@@ -40,19 +38,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.cassandra.config.CassandraPropertyReader;
-import com.impetus.client.cassandra.thrift.ThriftClientFactory;
-import com.impetus.kundera.Constants;
-import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.configure.ClientFactoryConfiguraton;
-import com.impetus.kundera.metadata.MetadataBuilder;
-import com.impetus.kundera.metadata.model.ApplicationMetadata;
-import com.impetus.kundera.metadata.model.CoreMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.metadata.model.MetamodelImpl;
-import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
-import com.impetus.kundera.proxy.cglib.CglibLazyInitializerFactory;
 
 /**
  * Test case for update/delete via JPQL.
@@ -70,7 +56,6 @@ public class UpdateDeleteNamedQueryTest
     public void setUp() throws Exception
     {
         CassandraCli.cassandraSetUp();
-        // CassandraCli.createKeySpace("KunderaExamples");
 
         loadData();
     }
@@ -121,21 +106,7 @@ public class UpdateDeleteNamedQueryTest
         EntityManagerFactory emf = getEntityManagerFactory();
         EntityManager em = emf.createEntityManager();
 
-        // String colFamilySql =
-        // "CREATE COLUMNFAMILY users (key varchar PRIMARY KEY,full_name varchar, birth_date int,state varchar)";
-        // Query q1 = em.createNativeQuery(colFamilySql,
-        // CassandraEntitySample.class);
-        // q1.executeUpdate();
-        //
-        // String idxSql = "CREATE INDEX ON users (birthDate)";
-        // q1 = em.createNativeQuery(idxSql, CassandraEntitySample.class);
-        // q1.executeUpdate();
-        //
-        // idxSql = "CREATE INDEX ON users (state)";
-        // q1 = em.createNativeQuery(idxSql, CassandraEntitySample.class);
-        // q1.executeUpdate();
-
-        CassandraEntitySample entity = new CassandraEntitySample();
+       CassandraEntitySample entity = new CassandraEntitySample();
         entity.setBirth_date(new Integer(100112));
         entity.setFull_name("impetus_emp");
         entity.setKey("k");
@@ -147,14 +118,13 @@ public class UpdateDeleteNamedQueryTest
         q.executeUpdate();
         CassandraEntitySample result = em.find(CassandraEntitySample.class, "k");
         Assert.assertNotNull(result);
-        
+
         updateQuery = "Update CassandraEntitySample c SET c.state = Bengalore where c.key = k";
         q = em.createQuery(updateQuery);
         q.executeUpdate();
         result = em.find(CassandraEntitySample.class, "k");
         Assert.assertNotNull(result);
 
-        
         // Assert.assertEquals("DELHI", result.getState()); // This should be
         // uncommented later. as merge got some issue.
         String deleteQuery = "Delete From CassandraEntitySample c where c.state=UP";
@@ -173,21 +143,20 @@ public class UpdateDeleteNamedQueryTest
     {
         EntityManagerFactory emf = getEntityManagerFactory();
         EntityManager em = emf.createEntityManager();
- 
+
         CassandraEntitySample entity = new CassandraEntitySample();
         entity.setBirth_date(new Integer(100112));
         entity.setFull_name("impetus_emp");
         entity.setKey("k");
         entity.setState("UP");
         em.persist(entity);
-        
+
         String updateQuery = "Update CassandraEntitySample c SET c.state = DELHI where c.key = k";
         Query q = em.createQuery(updateQuery);
         q.executeUpdate();
         CassandraEntitySample result = em.find(CassandraEntitySample.class, "k");
         Assert.assertNotNull(result);
 
-        
         // Assert.assertEquals("DELHI", result.getState()); // This should be
         // uncommented later. as merge got some issue.
         String deleteQuery = "Delete From CassandraEntitySample c where c.key=k";
@@ -200,7 +169,7 @@ public class UpdateDeleteNamedQueryTest
         // merge got some issue.
         emf.close();
     }
-    
+
     /**
      * @throws java.lang.Exception
      */
@@ -217,54 +186,7 @@ public class UpdateDeleteNamedQueryTest
      */
     private EntityManagerFactoryImpl getEntityManagerFactory()
     {
-        Map<String, Object> props = new HashMap<String, Object>();
-        String persistenceUnit = "cassandra";
-        props.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
-        props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY,
-                "com.impetus.client.cassandra.thrift.ThriftClientFactory");
-        props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
-        props.put(PersistenceProperties.KUNDERA_PORT, "9160");
-        props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaExamples");
-        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
-        PersistenceUnitMetadata puMetadata = new PersistenceUnitMetadata();
-        puMetadata.setPersistenceUnitName(persistenceUnit);
-        Properties p = new Properties();
-        p.putAll(props);
-        puMetadata.setProperties(p);
-        Map<String, PersistenceUnitMetadata> metadata = new HashMap<String, PersistenceUnitMetadata>();
-        metadata.put("cassandra", puMetadata);
-        appMetadata.addPersistenceUnitMetadata(metadata);
-
-        Map<String, List<String>> clazzToPu = new HashMap<String, List<String>>();
-
-        List<String> pus = new ArrayList<String>();
-        pus.add(persistenceUnit);
-        clazzToPu.put(CassandraEntitySample.class.getName(), pus);
-
-        appMetadata.setClazzToPuMap(clazzToPu);
-
-        MetadataBuilder metadataBuilder = new MetadataBuilder(persistenceUnit, ThriftClientFactory.class.getSimpleName(), null);
-
-        MetamodelImpl metaModel = new MetamodelImpl();
-        metaModel.addEntityMetadata(CassandraEntitySample.class, metadataBuilder.buildEntityMetadata(CassandraEntitySample.class));
-        metaModel.addEntityNameToClassMapping("CassandraEntitySample", CassandraEntitySample.class);
-        appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
-
-        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(persistenceUnit).getManagedTypes());
-        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(persistenceUnit).getEmbeddables());
-        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(persistenceUnit).getMappedSuperClassTypes());
-
-        CassandraPropertyReader reader = new CassandraPropertyReader(null);
-        reader.read(persistenceUnit);
-        String[] persistenceUnits = new String[] { persistenceUnit };
-        new ClientFactoryConfiguraton(null, persistenceUnits).configure();
-        
-        CoreMetadata coreMetadata = new CoreMetadata();
-        coreMetadata.setLazyInitializerFactory(new CglibLazyInitializerFactory());
-        KunderaMetadata.INSTANCE.setCoreMetadata(coreMetadata);
-        
-        EntityManagerFactoryImpl emf = new EntityManagerFactoryImpl(persistenceUnit, props);
-        return emf;
+        return (EntityManagerFactoryImpl) Persistence.createEntityManagerFactory("cassandra");
     }
 
 }

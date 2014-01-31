@@ -44,9 +44,9 @@ import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.IResultIterator;
@@ -95,6 +95,8 @@ class ResultIterator<E> implements IResultIterator<E>
 
     private E current;
 
+    private KunderaMetadata kunderaMetadata;
+
     /**
      * Constructor with parameters
      * 
@@ -105,7 +107,7 @@ class ResultIterator<E> implements IResultIterator<E>
      * @param fetchSize
      */
     ResultIterator(final Query query, final EntityMetadata m, final Client client, final EntityReader reader,
-            final int fetchSize)
+            final int fetchSize, final KunderaMetadata kunderaMetadata)
     {
         this.client = client;
         this.query = (CassQuery) query;
@@ -113,7 +115,7 @@ class ResultIterator<E> implements IResultIterator<E>
         this.reader = reader;
         this.scrollComplete = false;
         this.fetchSize = fetchSize;
-
+        this.kunderaMetadata = kunderaMetadata;
     }
 
     @Override
@@ -229,14 +231,14 @@ class ResultIterator<E> implements IResultIterator<E>
             log.debug("Populating entities for Cassandra query {}.", ((QueryImpl) query).getJPAQuery());
         }
         List<E> result = new ArrayList<E>();
-        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+        ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
         externalProperties = ((CassandraClientBase) client).getExternalProperties();
 
         // if id attribute is embeddable, it is meant for CQL translation.
         // make it independent of embedded stuff and allow even to add non
         // composite into where clause and let cassandra complain for it.
 
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
 
         String queryString = appMetadata.getQuery(((QueryImpl) query).getJPAQuery());
@@ -410,7 +412,7 @@ class ResultIterator<E> implements IResultIterator<E>
             Class idClazz = ((AbstractAttribute) entityMetadata.getIdAttribute()).getBindableJavaType();
             Object id = PropertyAccessorHelper.getId(entity, entityMetadata);
             StringBuilder builder = new StringBuilder(CQLTranslator.TOKEN);
-            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                     entityMetadata.getPersistenceUnit());
 
             EmbeddableType keyObj = null;
@@ -429,7 +431,7 @@ class ResultIterator<E> implements IResultIterator<E>
             }
             else
             {
-                columnName = CassandraUtilities.getIdColumnName(entityMetadata, externalProperties);
+                columnName = CassandraUtilities.getIdColumnName(kunderaMetadata, entityMetadata, externalProperties);
             }
 
             translator.appendColumnName(builder, columnName);
@@ -449,7 +451,7 @@ class ResultIterator<E> implements IResultIterator<E>
 
         Map<Boolean, String> filterIdResult = new HashMap<Boolean, String>();
 
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 entityMetadata.getPersistenceUnit());
 
         EmbeddableType keyObj = null;
@@ -486,7 +488,7 @@ class ResultIterator<E> implements IResultIterator<E>
         Object id = PropertyAccessorHelper.getId(entity, entityMetadata);
         String idName = ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName();
         Class idClazz = ((AbstractAttribute) entityMetadata.getIdAttribute()).getBindableJavaType();
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 entityMetadata.getPersistenceUnit());
 
         EmbeddableType keyObj = null;

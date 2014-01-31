@@ -22,6 +22,7 @@ import com.impetus.kundera.metadata.validator.GeneratedIdWithOutSequenceGenerato
 import com.impetus.kundera.metadata.validator.GeneratedIdWithOutTableGenerator;
 import com.impetus.kundera.metadata.validator.GeneratedIdWithSequenceGenerator;
 import com.impetus.kundera.metadata.validator.GeneratedIdWithTableGenerator;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
 public class ProcessAnnotationsTest
 {
@@ -53,7 +54,8 @@ public class ProcessAnnotationsTest
     @Test
     public void testProcess()
     {
-        Metamodel metamodel = KunderaMetadataManager.getMetamodel("GeneratedValue");
+        Metamodel metamodel = KunderaMetadataManager.getMetamodel(
+                ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance(), "GeneratedValue");
 
         // for entity GeneratedIdDefault.
         IdDiscriptor keyValue = ((MetamodelImpl) metamodel).getKeyValue(GeneratedIdDefault.class.getName());

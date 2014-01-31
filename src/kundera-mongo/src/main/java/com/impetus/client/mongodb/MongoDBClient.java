@@ -44,11 +44,11 @@ import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.annotation.DefaultEntityAnnotationProcessor;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
@@ -104,10 +104,11 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      * @param puProperties
      */
     public MongoDBClient(Object mongo, IndexManager mgr, EntityReader reader, String persistenceUnit,
-            Map<String, Object> puProperties, ClientMetadata clientMetadata)
+            Map<String, Object> puProperties, ClientMetadata clientMetadata, final KunderaMetadata kunderaMetadata)
     {
         // TODO: This could be a constly call, see how connection pooling is
         // relevant here
+        super(kunderaMetadata);
         this.mongoDb = (DB) mongo;
         this.indexManager = mgr;
         this.reader = reader;
@@ -182,7 +183,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     public Object[] findIdsByColumn(String schemaName, String tableName, String pKeyName, String columnName,
             Object columnValue, Class entityClazz)
     {
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entityClazz);
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClazz);
 
         List<Object> primaryKeys = new ArrayList<Object>();
 
@@ -221,13 +222,13 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     @Override
     public Object find(Class entityClass, Object key)
     {
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClass);
 
         List<String> relationNames = entityMetadata.getRelationNames();
 
         BasicDBObject query = new BasicDBObject();
 
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 entityMetadata.getPersistenceUnit());
 
         AbstractManagedType managedType = (AbstractManagedType) metaModel.entity(entityMetadata.getEntityClazz());
@@ -272,20 +273,20 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
                         Object value = fetchedDocument.get(discColumn);
                         if (value != null && value.toString().equals(disColValue))
                         {
-                            subEntityMetadata = KunderaMetadataManager.getEntityMetadata(subEntity.getJavaType());
+                            subEntityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, subEntity.getJavaType());
                             break;
                         }
                     }
 
                     enhancedEntity = instantiateEntity(subEntityMetadata.getEntityClazz(), enhancedEntity);
                     relationValue = handler.getEntityFromDocument(subEntityMetadata.getEntityClazz(), enhancedEntity,
-                            subEntityMetadata, fetchedDocument, subEntityMetadata.getRelationNames(), relationValue);
+                            subEntityMetadata, fetchedDocument, subEntityMetadata.getRelationNames(), relationValue, kunderaMetadata);
                 }
                 else
                 {
                     enhancedEntity = instantiateEntity(entityClass, enhancedEntity);
                     relationValue = handler.getEntityFromDocument(entityMetadata.getEntityClazz(), enhancedEntity,
-                            entityMetadata, fetchedDocument, relationNames, relationValue);
+                            entityMetadata, fetchedDocument, relationNames, relationValue, kunderaMetadata);
                 }
 
             }
@@ -333,7 +334,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     @Override
     public <E> List<E> findAll(Class<E> entityClass, String[] columnsToSelect, Object... keys)
     {
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClass);
 
         log.debug("Fetching data from " + entityMetadata.getTableName() + " for Keys " + keys);
 
@@ -416,7 +417,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
                 {
                     // TODO i need to discuss with Amresh before modifying it.
                     entities.addAll(handler.getEmbeddedObjectList(dbCollection, entityMetadata, documentName,
-                            mongoQuery, result, orderBy, maxResult, keys));
+                            mongoQuery, result, orderBy, maxResult, keys, kunderaMetadata));
                     return entities;
                 }
             }
@@ -466,12 +467,12 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     @Override
     public void delete(Object entity, Object pKey)
     {
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,  entity.getClass());
 
         // Find the DBObject to remove first
         BasicDBObject query = new BasicDBObject();
 
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 entityMetadata.getPersistenceUnit());
 
         if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
@@ -574,7 +575,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      */
     public List<Object> findByRelation(String colName, Object colValue, Class entityClazz)
     {
-        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClazz);
+        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClazz);
         // you got column name and column value.
         DBCollection dbCollection = mongoDb.getCollection(m.getTableName());
 
@@ -702,7 +703,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
                 else
                 {
                     List<RelationHolder> relationHolders = getRelationHolders(node);
-                    EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
+                    EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, node.getDataClass());
                     collections = onPersist(collections, node.getData(), node.getEntityId(), metadata, relationHolders,
                             node.isUpdate());
                     indexNode(node, metadata);
@@ -754,14 +755,14 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     {
         persistenceUnit = metadata.getPersistenceUnit();
         // String documentName = metadata.getTableName();
-        Map<String, DBObject> documents = handler.getDocumentFromEntity(metadata, entity, relationHolders);
+        Map<String, DBObject> documents = handler.getDocumentFromEntity(metadata, entity, relationHolders, kunderaMetadata);
         if (isUpdate)
         {
             for (String documentName : documents.keySet())
             {
                 BasicDBObject query = new BasicDBObject();
 
-                MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata()
+                MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
                         .getMetamodel(metadata.getPersistenceUnit());
 
                 if (metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
@@ -920,7 +921,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         }
         else
         {
-            PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
+            PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata, persistenceUnit);
             batchSize = puMetadata.getBatchSize();
         }
     }
@@ -951,7 +952,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         Map<String, Object> relationValue = null;
         if (fetchedDocument != null)
         {
-            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                     entityMetadata.getPersistenceUnit());
 
             EntityType entityType = metaModel.entity(entityMetadata.getEntityClazz());
@@ -969,20 +970,20 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
                     Object value = fetchedDocument.get(discColumn);
                     if (value != null && value.toString().equals(disColValue))
                     {
-                        subEntityMetadata = KunderaMetadataManager.getEntityMetadata(subEntity.getJavaType());
+                        subEntityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, subEntity.getJavaType());
                         break;
                     }
                 }
                 enhancedEntity = instantiateEntity(subEntityMetadata.getEntityClazz(), enhancedEntity);
                 relationValue = handler.getEntityFromDocument(subEntityMetadata.getEntityClazz(), enhancedEntity,
-                        subEntityMetadata, fetchedDocument, subEntityMetadata.getRelationNames(), relationValue);
+                        subEntityMetadata, fetchedDocument, subEntityMetadata.getRelationNames(), relationValue, kunderaMetadata);
 
             }
             else
             {
                 enhancedEntity = instantiateEntity(entityMetadata.getEntityClazz(), enhancedEntity);
                 relationValue = handler.getEntityFromDocument(entityMetadata.getEntityClazz(), enhancedEntity,
-                        entityMetadata, fetchedDocument, entityMetadata.getRelationNames(), relationValue);
+                        entityMetadata, fetchedDocument, entityMetadata.getRelationNames(), relationValue, kunderaMetadata);
             }
 
             if (relationValue != null && !relationValue.isEmpty())

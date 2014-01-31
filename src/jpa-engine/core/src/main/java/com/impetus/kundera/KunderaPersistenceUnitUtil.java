@@ -18,8 +18,6 @@ package com.impetus.kundera;
 import javax.persistence.PersistenceUnitUtil;
 import javax.persistence.spi.LoadState;
 
-import com.impetus.kundera.metadata.KunderaMetadataManager;
-import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
@@ -61,13 +59,13 @@ public class KunderaPersistenceUnitUtil implements PersistenceUnitUtil
     public Object getIdentifier(Object entity)
     {
         Class<?> entityClass = entity.getClass();
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
-
-        if (entityMetadata == null)
-        {
-            throw new IllegalArgumentException(entityClass + " is not an entity");
-        }
-        return PropertyAccessorHelper.getId(entity, entityMetadata);
+//        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClass);
+//
+//        if (entityMetadata == null)
+//        {
+//            throw new IllegalArgumentException(entityClass + " is not an entity");
+//        }
+        return PropertyAccessorHelper.getId(entity, /*entityMetadata*/null);
     }
 
 }

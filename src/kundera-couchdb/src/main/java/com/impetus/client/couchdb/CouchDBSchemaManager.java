@@ -61,6 +61,7 @@ import com.impetus.kundera.configure.schema.SchemaGenerationException;
 import com.impetus.kundera.configure.schema.TableInfo;
 import com.impetus.kundera.configure.schema.api.AbstractSchemaManager;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 
 /**
  * Schema Manager for couchdb.
@@ -79,9 +80,9 @@ public class CouchDBSchemaManager extends AbstractSchemaManager implements Schem
 
     private Gson gson = new Gson();
 
-    public CouchDBSchemaManager(String clientFactory, Map<String, Object> externalProperties)
+    public CouchDBSchemaManager(String clientFactory, Map<String, Object> externalProperties, final KunderaMetadata kunderaMetadata)
     {
-        super(clientFactory, externalProperties);
+        super(clientFactory, externalProperties, kunderaMetadata);
     }
 
     @Override

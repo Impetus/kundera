@@ -75,11 +75,11 @@ import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.TableGeneratorDiscriptor;
 import com.impetus.kundera.metadata.model.annotation.DefaultEntityAnnotationProcessor;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
@@ -122,12 +122,13 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
      *            the persistence unit
      */
     public PelopsClient(IndexManager indexManager, EntityReader reader, PelopsClientFactory clientFactory,
-            String persistenceUnit, Map<String, Object> externalProperties, IThriftPool pool)
+            String persistenceUnit, Map<String, Object> externalProperties, IThriftPool pool,
+            final KunderaMetadata kunderaMetadata)
     {
-        super(persistenceUnit, externalProperties);
+        super(persistenceUnit, externalProperties, kunderaMetadata);
         this.persistenceUnit = persistenceUnit;
         this.indexManager = indexManager;
-        this.dataHandler = new PelopsDataHandler(this);
+        this.dataHandler = new PelopsDataHandler(this, kunderaMetadata);
         this.reader = reader;
         this.clientFactory = clientFactory;
         this.clientMetadata = clientFactory.getClientMetadata();
@@ -193,9 +194,9 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         {
             throw new PersistenceException("PelopsClient is closed.");
         }
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entity.getClass());
 
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 metadata.getPersistenceUnit());
         AbstractManagedType managedType = (AbstractManagedType) metaModel.entity(metadata.getEntityClazz());
         // For secondary tables.
@@ -233,7 +234,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         Object conn = getConection();
         try
         {
-            invertedIndexHandler.delete(entity, metadata, getConsistencyLevel());
+            invertedIndexHandler.delete(entity, metadata, getConsistencyLevel(), kunderaMetadata);
         }
         finally
         {
@@ -262,7 +263,8 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         String joinTableName = joinTableData.getJoinTableName();
         String invJoinColumnName = joinTableData.getInverseJoinColumnName();
         Map<Object, Set<Object>> joinTableRecords = joinTableData.getJoinTableRecords();
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(joinTableData.getEntityClass());
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
+                joinTableData.getEntityClass());
 
         for (Object key : joinTableRecords.keySet())
         {
@@ -325,7 +327,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     {
         Selector selector = clientFactory.getSelector(pool);
         SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, 10000);
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entityClazz);
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClazz);
         // String childIdStr = (String) columnValue;
 
         IndexClause ix = Selector.newIndexClause(Bytes.EMPTY, 10000, Selector.newIndexExpression(columnName
@@ -394,7 +396,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     @Override
     public List<Object> findByRelation(String colName, Object colValue, Class clazz)
     {
-        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(clazz);
+        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, clazz);
         List<Object> entities = null;
         if (isCql3Enabled(m))
         {
@@ -424,7 +426,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             // populateData(m, qResults, entities, false, m.getRelationNames(),
             // dataHandler);
 
-            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                     m.getPersistenceUnit());
 
             EntityType entityType = metaModel.entity(m.getEntityClazz());
@@ -433,17 +435,20 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
 
             if (subManagedType.isEmpty())
             {
-//                entities = populateData(m, keySlices, entities, m.getRelationNames() != null, m.getRelationNames());
+                // entities = populateData(m, keySlices, entities,
+                // m.getRelationNames() != null, m.getRelationNames());
                 entities = populateData(m, qResults, entities, false, m.getRelationNames(), dataHandler);
             }
             else
             {
                 for (AbstractManagedType subEntity : subManagedType)
                 {
-                    EntityMetadata subEntityMetadata = KunderaMetadataManager
-                            .getEntityMetadata(subEntity.getJavaType());
-//                    entities = populateData(subEntityMetadata, keySlices, entities,
-//                            subEntityMetadata.getRelationNames() != null, subEntityMetadata.getRelationNames());
+                    EntityMetadata subEntityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
+                            subEntity.getJavaType());
+                    // entities = populateData(subEntityMetadata, keySlices,
+                    // entities,
+                    // subEntityMetadata.getRelationNames() != null,
+                    // subEntityMetadata.getRelationNames());
                     entities = populateData(subEntityMetadata, qResults, entities, false,
                             subEntityMetadata.getRelationNames(), dataHandler);
 
@@ -585,8 +590,8 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
 
                         // Bytes.from
                         mutator.writeColumns(tf.getColumnFamilyName(),
-                                CassandraUtilities.toBytes(tf.getId(), tf.getId().getClass()),tf.getColumns()
-                                /*Arrays.asList(tf.getColumns().toArray(new Column[0]))*/);
+                                CassandraUtilities.toBytes(tf.getId(), tf.getId().getClass()), tf.getColumns()
+                        /* Arrays.asList(tf.getColumns().toArray(new Column[0])) */);
                     }
 
                     if (thriftSuperColumns != null && !thriftSuperColumns.isEmpty())
@@ -687,7 +692,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     @Override
     public List executeQuery(Class clazz, List<String> relationalField, boolean isNative, String cqlQuery)
     {
-        return super.executeSelectQuery(clazz, relationalField, dataHandler,isNative, cqlQuery);
+        return super.executeSelectQuery(clazz, relationalField, dataHandler, isNative, cqlQuery);
     }
 
     /**

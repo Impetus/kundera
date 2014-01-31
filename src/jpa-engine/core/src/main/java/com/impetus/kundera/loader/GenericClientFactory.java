@@ -34,7 +34,7 @@ import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.index.Indexer;
 import com.impetus.kundera.index.IndexingConstants;
 import com.impetus.kundera.metadata.model.ClientMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.service.Host;
 import com.impetus.kundera.service.policy.LoadBalancingPolicy;
@@ -63,9 +63,6 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
     /** The connection pool or connection. */
     private Object connectionPoolOrConnection;
 
-    /** The index manager. */
-    protected IndexManager indexManager = new IndexManager(null);
-
     /** The reader. */
     protected EntityReader reader;
 
@@ -91,6 +88,12 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
      * Holds reference to client metadata.
      */
     protected ClientMetadata clientMetadata;
+
+    /** kundera metadata */
+    protected KunderaMetadata kunderaMetadata;
+
+    /** The index manager. */
+    protected IndexManager indexManager = new IndexManager(null, kunderaMetadata);
 
     /**
      * Load.
@@ -132,15 +135,13 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
 
         if (indexerClass == null)
         {
-            indexerClass = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                    .getPersistenceUnitMetadata(persistenceUnit).getProperties()
-                    .getProperty(PersistenceProperties.KUNDERA_INDEXER_CLASS);
+            indexerClass = kunderaMetadata.getApplicationMetadata().getPersistenceUnitMetadata(persistenceUnit)
+                    .getProperties().getProperty(PersistenceProperties.KUNDERA_INDEXER_CLASS);
         }
 
         if (luceneDirectoryPath == null)
         {
-            luceneDirectoryPath = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                    .getPersistenceUnitMetadata(persistenceUnit)
+            luceneDirectoryPath = kunderaMetadata.getApplicationMetadata().getPersistenceUnitMetadata(persistenceUnit)
                     .getProperty(PersistenceProperties.KUNDERA_INDEX_HOME_DIR);
         }
 
@@ -159,7 +160,7 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
                         String.class);
 
                 Indexer indexer = (Indexer) method.invoke(null, luceneDirectoryPath);
-                indexManager = new IndexManager(indexer);
+                indexManager = new IndexManager(indexer, kunderaMetadata);
             }
             catch (Exception e)
             {
@@ -179,7 +180,7 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
             {
                 Class<?> indexerClazz = Class.forName(indexerClass);
                 Indexer indexer = (Indexer) indexerClazz.newInstance();
-                indexManager = new IndexManager(indexer);
+                indexManager = new IndexManager(indexer, kunderaMetadata);
                 clientMetadata.setIndexImplementor(indexerClass);
             }
             catch (Exception cnfex)
@@ -190,12 +191,14 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
         }
         else
         {
-            indexManager = new IndexManager(null);
+            indexManager = new IndexManager(null, kunderaMetadata);
         }
-        // if (KunderaMetadata.INSTANCE.getClientMetadata(persistenceUnit) ==
+        // if
+        // (kunderaMetadata.getClientMetadata(persistenceUnit)
+        // ==
         // null)
         // {
-        // KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit,
+        // kunderaMetadata.addClientMetadata(persistenceUnit,
         // clientMetadata);
         // }
     }
@@ -296,6 +299,17 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
     private void setPersistenceUnit(String persistenceUnit)
     {
         this.persistenceUnit = persistenceUnit;
+    }
+
+    /**
+     * Sets the persistence unit.
+     * 
+     * @param persistenceUnit
+     *            the new persistence unit
+     */
+    protected void setKunderaMetadata(KunderaMetadata kunderaMetadata)
+    {
+        this.kunderaMetadata = kunderaMetadata;
     }
 
     /**

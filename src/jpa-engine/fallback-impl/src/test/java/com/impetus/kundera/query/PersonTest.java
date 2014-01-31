@@ -32,7 +32,6 @@ import org.junit.Test;
 
 import com.impetus.kundera.client.DummyDatabase;
 import com.impetus.kundera.entity.PersonnelDTO;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.query.Person.Day;
 
 /**
@@ -52,7 +51,7 @@ public class PersonTest
     @Before
     public void setUp() throws Exception
     {
-            KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+            
             emf = Persistence.createEntityManagerFactory(PU, propertyMap);
             em = emf.createEntityManager();
 

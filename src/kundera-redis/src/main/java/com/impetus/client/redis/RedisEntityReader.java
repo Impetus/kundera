@@ -22,6 +22,7 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.AbstractEntityReader;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.query.KunderaQuery;
 
@@ -33,13 +34,14 @@ import com.impetus.kundera.query.KunderaQuery;
 public class RedisEntityReader extends AbstractEntityReader implements EntityReader
 {
 
-    public RedisEntityReader()
+    public RedisEntityReader(final KunderaMetadata kunderaMetadata)
     {
-
+        super(kunderaMetadata);
     }
 
-    public RedisEntityReader(KunderaQuery kunderaQuery)
+    public RedisEntityReader(KunderaQuery kunderaQuery, final KunderaMetadata kunderaMetadata)
     {
+        super(kunderaMetadata);
         this.kunderaQuery = kunderaQuery;
     }
 

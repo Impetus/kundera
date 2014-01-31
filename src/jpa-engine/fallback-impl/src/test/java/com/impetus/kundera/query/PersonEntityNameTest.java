@@ -30,7 +30,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.kundera.client.DummyDatabase;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.query.PersonEntityNameAnnotation.Day;
 
 /**
@@ -50,7 +49,7 @@ public class PersonEntityNameTest
     @Before
     public void setUp() throws Exception
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);        
+                
         emf = Persistence.createEntityManagerFactory(PU, propertyMap);
         em = emf.createEntityManager();
 

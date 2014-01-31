@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.configure.AbstractPropertyReader;
 import com.impetus.kundera.configure.ClientProperties;
-import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**
@@ -46,9 +46,9 @@ public class RDBMSPropertyReader extends AbstractPropertyReader
     /** The log instance. */
     private static final Logger log = LoggerFactory.getLogger(RDBMSPropertyReader.class);
 
-    public RDBMSPropertyReader(Map externalProperties)
+    public RDBMSPropertyReader(Map externalProperties, final PersistenceUnitMetadata puMetadata)
     {
-        super(externalProperties);
+        super(externalProperties, puMetadata);
     }
 
     /**
@@ -59,10 +59,9 @@ public class RDBMSPropertyReader extends AbstractPropertyReader
 
     public Configuration load(String pu)
     {
-        Configuration conf = new Configuration().addProperties(HibernateUtils.getProperties(pu));
+        Configuration conf = new Configuration().addProperties(puMetadata.getProperties());
         String propertyFileName = externalProperties != null ? (String) externalProperties
                 .get(PersistenceProperties.KUNDERA_CLIENT_PROPERTY) : null;
-        puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(pu);
         if (propertyFileName == null)
         {
             propertyFileName = puMetadata != null ? puMetadata

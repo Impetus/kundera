@@ -35,6 +35,7 @@ import org.neo4j.kernel.impl.util.FileUtils;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
 /**
  * Test case
@@ -109,7 +110,7 @@ public class IMDBAllDataTypeTest
             em.getTransaction().commit();
         }
 
-        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(IMDB_PU);
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance(), IMDB_PU);
         String datastoreFilePath = puMetadata.getProperty(PersistenceProperties.KUNDERA_DATASTORE_FILE_PATH);
 
         em.close();

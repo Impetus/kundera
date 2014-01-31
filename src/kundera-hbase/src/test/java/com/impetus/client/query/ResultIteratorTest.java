@@ -30,7 +30,6 @@ import org.junit.Test;
 import com.impetus.client.hbase.crud.BaseTest;
 import com.impetus.client.hbase.crud.PersonHBase;
 import com.impetus.client.hbase.junits.HBaseCli;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.query.IResultIterator;
 import com.impetus.kundera.query.Query;
 
@@ -56,7 +55,7 @@ public class ResultIteratorTest extends BaseTest
     @Before
     public void setUp() throws Exception
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         cli.startCluster();
         emf = Persistence.createEntityManagerFactory("hbaseTest");
         em = emf.createEntityManager();

@@ -39,7 +39,6 @@ import com.impetus.kundera.configure.ClientProperties.DataStore.Connection.Serve
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.loader.ClientLoaderException;
 import com.impetus.kundera.loader.GenericClientFactory;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.mongodb.DB;
 import com.mongodb.DBDecoderFactory;
@@ -63,7 +62,7 @@ public class MongoDBClientFactory extends GenericClientFactory
     @Override
     public void initialize(Map<String, Object> externalProperty)
     {
-        reader = new MongoEntityReader();
+        reader = new MongoEntityReader(kunderaMetadata);
         initializePropertyReader();
         setExternalProperties(externalProperty);
     }
@@ -78,7 +77,7 @@ public class MongoDBClientFactory extends GenericClientFactory
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
-        return new MongoDBClient(mongoDB, indexManager, reader, persistenceUnit, externalProperties, clientMetadata);
+        return new MongoDBClient(mongoDB, indexManager, reader, persistenceUnit, externalProperties, clientMetadata, kunderaMetadata);
     }
 
     /**
@@ -89,7 +88,7 @@ public class MongoDBClientFactory extends GenericClientFactory
     private DB getConnection()
     {
 
-        PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+        PersistenceUnitMetadata puMetadata = kunderaMetadata.getApplicationMetadata()
                 .getPersistenceUnitMetadata(getPersistenceUnit());
 
         Properties props = puMetadata.getProperties();
@@ -253,7 +252,7 @@ public class MongoDBClientFactory extends GenericClientFactory
         {
             initializePropertyReader();
             setExternalProperties(externalProperty);
-            schemaManager = new MongoDBSchemaManager(MongoDBClientFactory.class.getName(), externalProperty);
+            schemaManager = new MongoDBSchemaManager(MongoDBClientFactory.class.getName(), externalProperty, kunderaMetadata);
         }
         return schemaManager;
     }
@@ -265,7 +264,8 @@ public class MongoDBClientFactory extends GenericClientFactory
     {
         if (propertyReader == null)
         {
-            propertyReader = new MongoDBPropertyReader(externalProperties);
+            propertyReader = new MongoDBPropertyReader(externalProperties, kunderaMetadata.getApplicationMetadata()
+                    .getPersistenceUnitMetadata(getPersistenceUnit()));
             propertyReader.read(getPersistenceUnit());
         }
     }

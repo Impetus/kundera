@@ -31,8 +31,6 @@ import junit.framework.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.impetus.kundera.metadata.model.KunderaMetadata;
-
 /**
  * @author vivek.mishra junit for {@link MappedSuperclass},
  *         {@link AttributeOverride}, {@link AttributeOverrides}.
@@ -121,7 +119,7 @@ public abstract class MappedSuperClassBase
             em.close();
         }
 
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
     }
 
     private void waitThread(boolean toWait)

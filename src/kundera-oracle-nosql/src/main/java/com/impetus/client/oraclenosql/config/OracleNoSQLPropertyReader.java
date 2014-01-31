@@ -24,6 +24,7 @@ import com.impetus.kundera.configure.AbstractPropertyReader;
 import com.impetus.kundera.configure.ClientProperties;
 import com.impetus.kundera.configure.ClientProperties.DataStore;
 import com.impetus.kundera.configure.PropertyReader;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
  * XML Property reader for OracleNoSQL specific configuration
@@ -38,9 +39,9 @@ public class OracleNoSQLPropertyReader extends AbstractPropertyReader implements
     /** OracleNoSQL schema metadata instance */
     public static OracleNoSQLSchemaMetadata osmd;
 
-    public OracleNoSQLPropertyReader(Map externalProperties)
+    public OracleNoSQLPropertyReader(Map externalProperties, final PersistenceUnitMetadata puMetadata)
     {
-        super(externalProperties);
+        super(externalProperties, puMetadata);
         osmd = new OracleNoSQLSchemaMetadata();
     }
 

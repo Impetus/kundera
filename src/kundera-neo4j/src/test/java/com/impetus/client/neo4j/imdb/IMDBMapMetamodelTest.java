@@ -54,26 +54,26 @@ public class IMDBMapMetamodelTest extends IMDBTestBase
     @Test
     public void testMetamodel()
     {
-        EntityMetadata m1 = KunderaMetadataManager.getEntityMetadata(Actor.class);
+        EntityMetadata m1 = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, Actor.class);
         Assert.assertNotNull(m1);
         Assert.assertEquals(Actor.class, m1.getEntityClazz());
         Assert.assertEquals(Role.class, m1.getRelation("movies").getMapKeyJoinClass());
         Assert.assertEquals(Movie.class, m1.getRelation("movies").getTargetEntity());
-        Assert.assertEquals("ACTS_IN", m1.getRelation("movies").getJoinColumnName());
+        Assert.assertEquals("ACTS_IN", m1.getRelation("movies").getJoinColumnName(kunderaMetadata));
 
-        EntityMetadata m2 = KunderaMetadataManager.getEntityMetadata(Movie.class);
+        EntityMetadata m2 = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, Movie.class);
         Assert.assertNotNull(m2);
         Assert.assertEquals(Movie.class, m2.getEntityClazz());
         Assert.assertEquals(Role.class, m2.getRelation("actors").getMapKeyJoinClass());
         Assert.assertEquals(Actor.class, m2.getRelation("actors").getTargetEntity());
-        Assert.assertNotNull(m2.getRelation("actors").getJoinColumnName());
-        Assert.assertEquals(m2.getRelation("actors").getJoinColumnName(),"actors");
+        Assert.assertNotNull(m2.getRelation("actors").getJoinColumnName(kunderaMetadata));
+        Assert.assertEquals(m2.getRelation("actors").getJoinColumnName(kunderaMetadata),"actors");
 
-        EntityMetadata m3 = KunderaMetadataManager.getEntityMetadata(Role.class);
+        EntityMetadata m3 = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, Role.class);
         Assert.assertNotNull(m3);
         Assert.assertEquals(Role.class, m3.getEntityClazz());
 
-        Metamodel mm = KunderaMetadataManager.getMetamodel("imdb");
+        Metamodel mm = KunderaMetadataManager.getMetamodel(kunderaMetadata, "imdb");
         Assert.assertNotNull(mm);
 
     }

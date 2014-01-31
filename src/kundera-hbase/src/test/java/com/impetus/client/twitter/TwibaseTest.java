@@ -18,7 +18,6 @@ package com.impetus.client.twitter;
 import org.junit.Test;
 
 import com.impetus.client.hbase.junits.HBaseCli;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
  * Test case for Twitter like application on HBase
@@ -33,7 +32,7 @@ public class TwibaseTest extends TwitterTestBaseHbase
     @Override
     protected void setUp() throws Exception
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         setUpInternal("twibaseTest");
     }
 

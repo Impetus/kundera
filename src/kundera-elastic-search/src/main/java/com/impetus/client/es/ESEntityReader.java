@@ -21,6 +21,7 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.AbstractEntityReader;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.query.KunderaQuery;
 
@@ -28,35 +29,38 @@ import com.impetus.kundera.query.KunderaQuery;
  * @author vivek.mishra {@link EntityReader} implementation for elastic search.
  * 
  */
-public class ESEntityReader extends AbstractEntityReader implements
-		EntityReader {
+public class ESEntityReader extends AbstractEntityReader implements EntityReader
+{
 
-	public ESEntityReader() {
+    public ESEntityReader(final KunderaMetadata kunderaMetadata)
+    {
+        super(kunderaMetadata);
+    }
 
-	}
+    public ESEntityReader(KunderaQuery kunderaQuery, final KunderaMetadata kunderaMetadata)
+    {
+        super(kunderaMetadata);
+        this.kunderaQuery = kunderaQuery;
+    }
 
-	public ESEntityReader(KunderaQuery kunderaQuery) {
-		this.kunderaQuery = kunderaQuery;
-	}
+    @Override
+    public List<EnhanceEntity> populateRelation(EntityMetadata m, Client client, int maxResults)
+    {
+        throw new UnsupportedOperationException("Method not supported");
+    }
 
-	@Override
-	public List<EnhanceEntity> populateRelation(EntityMetadata m,
-			Client client, int maxResults) {
-		throw new UnsupportedOperationException("Method not supported");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.impetus.kundera.persistence.EntityReader#findById(java.lang.String,
-	 * com.impetus.kundera.metadata.model.EntityMetadata, java.util.List,
-	 * com.impetus.kundera.client.Client)
-	 */
-	@Override
-	public EnhanceEntity findById(Object primaryKey, EntityMetadata m,
-			Client client) {
-		return super.findById(primaryKey, m, client);
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.persistence.EntityReader#findById(java.lang.String,
+     * com.impetus.kundera.metadata.model.EntityMetadata, java.util.List,
+     * com.impetus.kundera.client.Client)
+     */
+    @Override
+    public EnhanceEntity findById(Object primaryKey, EntityMetadata m, Client client)
+    {
+        return super.findById(primaryKey, m, client);
+    }
 
 }

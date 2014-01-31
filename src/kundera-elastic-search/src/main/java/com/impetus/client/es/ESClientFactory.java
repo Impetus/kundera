@@ -27,7 +27,6 @@ import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.loader.GenericClientFactory;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
@@ -80,7 +79,8 @@ public class ESClientFactory extends GenericClientFactory
     {
         this.externalProperties = puProperties;
         
-        this.propertyReader = new ESClientPropertyReader(externalProperties);
+        this.propertyReader = new ESClientPropertyReader(externalProperties, kunderaMetadata.getApplicationMetadata()
+                .getPersistenceUnitMetadata(getPersistenceUnit()));
         propertyReader.read(getPersistenceUnit());
         
     }
@@ -95,7 +95,7 @@ public class ESClientFactory extends GenericClientFactory
     protected Object createPoolOrConnection()
     {
 
-        PersistenceUnitMetadata persistenceUnitMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+        PersistenceUnitMetadata persistenceUnitMetadata = kunderaMetadata.getApplicationMetadata()
                 .getPersistenceUnitMetadata(getPersistenceUnit());
 
         Properties props = persistenceUnitMetadata.getProperties();
@@ -149,7 +149,7 @@ public class ESClientFactory extends GenericClientFactory
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
-        return new ESClient(this,((TransportClient) getConnectionPoolOrConnection()),this.externalProperties);
+        return new ESClient(this,((TransportClient) getConnectionPoolOrConnection()),this.externalProperties, kunderaMetadata);
     }
 
     /*

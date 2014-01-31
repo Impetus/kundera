@@ -50,10 +50,10 @@ import com.impetus.kundera.metadata.MetadataBuilder;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.IdDiscriptor;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.processor.GeneratedValueProcessor;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**
@@ -74,9 +74,9 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
      * @param persistenceUnits
      *            persistence units.
      */
-    public MetamodelConfiguration(Map properties, String... persistenceUnits)
+    public MetamodelConfiguration(Map properties, final KunderaMetadata metadata, String... persistenceUnits)
     {
-        super(persistenceUnits, properties);
+        super(persistenceUnits, properties, metadata);
     }
 
     /*
@@ -88,7 +88,7 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
     public void configure()
     {
         log.debug("Loading Entity Metadata...");
-        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+        ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
 
         for (String persistenceUnit : persistenceUnits)
         {
@@ -104,7 +104,6 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
                 loadEntityMetadata(persistenceUnit);
             }
         }
-
     }
 
     /**
@@ -122,7 +121,6 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
                             + persistenceUnit);
         }
 
-        KunderaMetadata kunderaMetadata = KunderaMetadata.INSTANCE;
         Map<String, PersistenceUnitMetadata> persistentUnitMetadataMap = kunderaMetadata.getApplicationMetadata()
                 .getPersistenceUnitMetadataMap();
 
@@ -276,11 +274,11 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
         appMetadata.setClazzToPuMap(puToClazzMap);
         ((MetamodelImpl) metamodel).addKeyValues(entityNameToKeyDiscriptorMap);
         // assign JPA metamodel.
-        ((MetamodelImpl) metamodel).assignEmbeddables(KunderaMetadata.INSTANCE.getApplicationMetadata()
+        ((MetamodelImpl) metamodel).assignEmbeddables(kunderaMetadata.getApplicationMetadata()
                 .getMetaModelBuilder(persistenceUnit).getEmbeddables());
-        ((MetamodelImpl) metamodel).assignManagedTypes(KunderaMetadata.INSTANCE.getApplicationMetadata()
+        ((MetamodelImpl) metamodel).assignManagedTypes(kunderaMetadata.getApplicationMetadata()
                 .getMetaModelBuilder(persistenceUnit).getManagedTypes());
-        ((MetamodelImpl) metamodel).assignMappedSuperClass(KunderaMetadata.INSTANCE.getApplicationMetadata()
+        ((MetamodelImpl) metamodel).assignMappedSuperClass(kunderaMetadata.getApplicationMetadata()
                 .getMetaModelBuilder(persistenceUnit).getMappedSuperClassTypes());
     }
 
@@ -358,7 +356,7 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
                             {
                                 MetadataBuilder metadataBuilder = new MetadataBuilder(persistenceUnit, client,
                                         KunderaCoreUtils.getExternalProperties(persistenceUnit, externalPropertyMap,
-                                                persistenceUnits));
+                                                persistenceUnits), kunderaMetadata);
                                 metadata = metadataBuilder.buildEntityMetadata(clazz);
 
                                 // in case entity's pu does not belong to parse
@@ -467,8 +465,8 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
     {
         GeneratedValueProcessor processer = new GeneratedValueProcessor();
         String pu = m.getPersistenceUnit()/* getPersistenceUnitOfEntity(clazz) */;
-        String clientFactoryName = KunderaMetadataManager.getPersistenceUnitMetadata(m.getPersistenceUnit())
-                .getClient();
+        String clientFactoryName = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata,
+                m.getPersistenceUnit()).getClient();
         if (pu != null && pu.equals(persistenceUnit)
                 || clientFactoryName.equalsIgnoreCase("com.impetus.client.rdbms.RDBMSClientFactory"))
         {

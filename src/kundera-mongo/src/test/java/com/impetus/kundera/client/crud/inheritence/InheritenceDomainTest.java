@@ -31,7 +31,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.impetus.client.utils.MongoUtils;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
  * Junit test case.
@@ -53,7 +52,7 @@ public class InheritenceDomainTest
     @BeforeClass
     public static void setUpBeforeClass() throws Exception
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         
         emf = Persistence.createEntityManagerFactory(_PU);
         em = emf.createEntityManager();

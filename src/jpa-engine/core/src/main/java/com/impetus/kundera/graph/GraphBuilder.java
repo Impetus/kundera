@@ -15,8 +15,6 @@
  */
 package com.impetus.kundera.graph;
 
-import com.impetus.kundera.metadata.KunderaMetadataManager;
-import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.context.PersistenceCache;
 
 /**
@@ -45,9 +43,9 @@ public class GraphBuilder
 
     public final GraphBuilder buildRelationalNode(Node relationalNode, PersistenceCache persistenceCache)
     {
-        Node headNode = this.graph.getHeadNode();
+       /* Node headNode = this.graph.getHeadNode();
         
-        EntityMetadata relationalMetadata = KunderaMetadataManager.getEntityMetadata(relationalNode.getDataClass());
+        EntityMetadata relationalMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, relationalNode.getDataClass());*/
         return this;
     }
     
@@ -81,7 +79,7 @@ public class GraphBuilder
     private Node getNode(Object entity, ObjectGraph graph, NodeState initialNodeState)
     {
 
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,  entity.getClass());
 
         // entity metadata could be null.
         if (entityMetadata == null)
@@ -165,7 +163,7 @@ public class GraphBuilder
 
             if (childObject != null && !ProxyHelper.isProxy(childObject))
             {
-                EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(PropertyAccessorHelper
+                EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, PropertyAccessorHelper
                         .getGenericClass(relation.getProperty()));
 
                 if (metadata != null && relation.isJoinedByPrimaryKey())
@@ -262,7 +260,7 @@ public class GraphBuilder
                 NodeLink nodeLink = new NodeLink(node.getNodeId(), childNode.getNodeId());
                 nodeLink.setMultiplicity(relation.getType());
 
-                EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
+                EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, node.getDataClass());
                 nodeLink.setLinkProperties(getLinkProperties(metadata, relation));
 
                 nodeLink.addLinkProperty(LinkProperty.LINK_VALUE, relObject);
@@ -285,7 +283,7 @@ public class GraphBuilder
                 NodeLink nodeLink = new NodeLink(node.getNodeId(), childNode.getNodeId());
                 nodeLink.setMultiplicity(relation.getType());
 
-                EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
+                EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, node.getDataClass());
                 nodeLink.setLinkProperties(getLinkProperties(metadata, relation));
 
                 // Add Parent node to this child

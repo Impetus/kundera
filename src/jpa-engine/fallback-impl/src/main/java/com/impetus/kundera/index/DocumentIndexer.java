@@ -365,8 +365,8 @@ public abstract class DocumentIndexer implements com.impetus.kundera.index.lucen
     }
 
     @Override
-    public Map<String, Object> search(String query, Class<?> parentClass, Class<?> childClass, Object entityId,
-            int start, int count)
+    public Map<String, Object> search(String query, Class<?> parentClass, EntityMetadata parentMetadata,
+            Class<?> childClass, EntityMetadata childMetadata, Object entityId, int start, int count)
     {
         return null;
     }

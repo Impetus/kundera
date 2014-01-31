@@ -35,8 +35,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.impetus.kundera.metadata.model.KunderaMetadata;
-
 /**
  * @author vivek.mishra junit for Elastic search association.
  */
@@ -179,7 +177,7 @@ public class ESAssociationTest
         {
             emf.close();
         }
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
 
     }
 

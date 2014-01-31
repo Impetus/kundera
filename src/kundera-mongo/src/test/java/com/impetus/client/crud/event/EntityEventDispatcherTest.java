@@ -30,7 +30,7 @@ import org.junit.Test;
 
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 import com.impetus.kundera.persistence.event.EntityEventDispatcher;
 
 
@@ -56,7 +56,7 @@ public class EntityEventDispatcherTest
     public void setUp() throws Exception
     {
         eventDispatcher = new EntityEventDispatcher();
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         emf = Persistence.createEntityManagerFactory("mongoTest");
         em = emf.createEntityManager();
     }
@@ -83,7 +83,7 @@ public class EntityEventDispatcherTest
     public void testExternalFireEventListeners() throws NoSuchMethodException, SecurityException
     {
         PersonEventDispatch person = new PersonEventDispatch("1", "John", "Smith");
-        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(person.getClass());
+        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance(), person.getClass());
         eventDispatcher.fireEventListeners(m, person, PrePersist.class);
         Assert.assertEquals("Amresh", person.getFirstName());
         Assert.assertEquals("Smith", person.getLastName());

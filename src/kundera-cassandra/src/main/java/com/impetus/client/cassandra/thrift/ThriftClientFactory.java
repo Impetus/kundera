@@ -48,7 +48,6 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.service.Host;
 import com.impetus.kundera.service.HostConfiguration;
@@ -75,7 +74,8 @@ public class ThriftClientFactory extends GenericClientFactory
         if (schemaManager == null)
         {
             initializePropertyReader();
-            schemaManager = new CassandraSchemaManager(ThriftClientFactory.class.getName(), externalProperties);
+            schemaManager = new CassandraSchemaManager(ThriftClientFactory.class.getName(), externalProperties,
+                    kunderaMetadata);
         }
         return schemaManager;
     }
@@ -87,7 +87,8 @@ public class ThriftClientFactory extends GenericClientFactory
     {
         if (propertyReader == null)
         {
-            propertyReader = new CassandraPropertyReader(externalProperties);
+            propertyReader = new CassandraPropertyReader(externalProperties, kunderaMetadata.getApplicationMetadata()
+                    .getPersistenceUnitMetadata(getPersistenceUnit()));
             propertyReader.read(getPersistenceUnit());
         }
     }
@@ -119,21 +120,21 @@ public class ThriftClientFactory extends GenericClientFactory
     @Override
     public void initialize(Map<String, Object> externalProperty)
     {
-        reader = new CassandraEntityReader();
+        reader = new CassandraEntityReader(kunderaMetadata);
         initializePropertyReader();
         setExternalProperties(externalProperty);
         String loadBalancingPolicyName = CassandraPropertyReader.csmd != null ? CassandraPropertyReader.csmd
                 .getConnectionProperties().getProperty(Constants.LOADBALANCING_POLICY) : null;
         initializeLoadBalancer(loadBalancingPolicyName);
         configuration = new CassandraHostConfiguration(externalProperties, CassandraPropertyReader.csmd,
-                getPersistenceUnit());
+                getPersistenceUnit(), kunderaMetadata);
         hostRetryService = new CassandraRetryService(configuration, this);
     }
 
     @Override
     protected Object createPoolOrConnection()
     {
-        PersistenceUnitMetadata persistenceUnitMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+        PersistenceUnitMetadata persistenceUnitMetadata = kunderaMetadata.getApplicationMetadata()
                 .getPersistenceUnitMetadata(getPersistenceUnit());
 
         Properties props = persistenceUnitMetadata.getProperties();
@@ -179,7 +180,7 @@ public class ThriftClientFactory extends GenericClientFactory
     protected Client instantiateClient(String persistenceUnit)
     {
         ConnectionPool pool = getPoolUsingPolicy();
-        return new ThriftClient(this, indexManager, reader, persistenceUnit, pool, externalProperties);
+        return new ThriftClient(this, indexManager, reader, persistenceUnit, pool, externalProperties, kunderaMetadata);
     }
 
     /**
@@ -289,8 +290,8 @@ public class ThriftClientFactory extends GenericClientFactory
      */
     public boolean addCassandraHost(CassandraHost cassandraHost)
     {
-        String keysapce = KunderaMetadataManager.getPersistenceUnitMetadata(getPersistenceUnit()).getProperties()
-                .getProperty(PersistenceProperties.KUNDERA_KEYSPACE);
+        String keysapce = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata, getPersistenceUnit())
+                .getProperties().getProperty(PersistenceProperties.KUNDERA_KEYSPACE);
         PoolConfiguration prop = new PoolProperties();
         prop.setHost(cassandraHost.getHost());
         prop.setPort(cassandraHost.getPort());

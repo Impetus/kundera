@@ -72,7 +72,7 @@ public class ManagedState extends NodeState
         // Fetch Node data from Client
         Client client = nodeStateContext.getClient();
         Class<?> nodeDataClass = nodeStateContext.getDataClass();
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(nodeDataClass);
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(nodeStateContext.getPersistenceDelegator().getKunderaMetadata(), nodeDataClass);
         Object entityId = nodeStateContext.getEntityId();
 
         EntityReader reader = client.getReader();
@@ -119,7 +119,7 @@ public class ManagedState extends NodeState
         // Fetch Node data from Client
         Client client = nodeStateContext.getClient();
         Class<?> nodeDataClass = nodeStateContext.getDataClass();
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(nodeDataClass);
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(nodeStateContext.getPersistenceDelegator().getKunderaMetadata(), nodeDataClass);
         Object entityId = nodeStateContext.getEntityId();
 
         Object nodeData = null; // Node data

@@ -54,9 +54,10 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.CoreMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.proxy.cglib.CglibLazyInitializerFactory;
 import com.impetus.kundera.tests.cli.CleanupUtilities;
 import com.impetus.kundera.tests.crossdatastore.useraddress.dao.UserAddressDaoImpl;
@@ -88,6 +89,7 @@ public abstract class AssociationBase
     /** The dao. */
     protected UserAddressDaoImpl dao;
 
+    protected KunderaMetadata kunderaMetadata;
     /** the log used by this class. */
     private static Logger log = LoggerFactory.getLogger(AssociationBase.class);
 
@@ -129,16 +131,17 @@ public abstract class AssociationBase
             CassandraCli.createKeySpace("Pickr");
 
             dao = new UserAddressDaoImpl(persistenceUnits);
-            KunderaMetadata.INSTANCE.setApplicationMetadata(null);
-            KunderaMetadata.INSTANCE.setCoreMetadata(null);
+            
+            kunderaMetadata.setCoreMetadata(null);
             em = null;
             dao.closeEntityManager();
             dao.closeEntityManagerFactory();
 
             em = dao.getEntityManager(persistenceUnits, propertyMap);
+            kunderaMetadata = ((EntityManagerFactoryImpl) em.getEntityManagerFactory()).getKunderaMetadataInstance();
             this.colFamilies = colFamilies;
 
-            httpClient = CouchDBTestUtils.initiateHttpClient("addCouchdb");
+            httpClient = CouchDBTestUtils.initiateHttpClient(kunderaMetadata, "addCouchdb");
             httpHost = new HttpHost("localhost", 5984);
         }
         catch (Exception e)
@@ -159,7 +162,7 @@ public abstract class AssociationBase
      * entityPuCol.keySet().iterator(); log.warn("Invocation for:"); while
      * (iter.hasNext()) { Class clazz = iter.next(); String pu =
      * entityPuCol.get(clazz); Map<String, Metamodel> metaModels =
-     * KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodelMap();
+     * kunderaMetadata.getApplicationMetadata().getMetamodelMap();
      * EntityMetadata mAdd = null; for (Metamodel m : metaModels.values()) {
      * mAdd = ((MetamodelImpl) m).getEntityMetadataMap().get(clazz); if (mAdd !=
      * null) { break; } } // EntityMetadata mAdd = //
@@ -196,9 +199,9 @@ public abstract class AssociationBase
                 // EntityMetadata mAdd = KunderaMetadataManager
                 // .getEntityMetadata(clazz);
 
-                Map<String, Metamodel> metaModels = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodelMap();
+                Map<String, Metamodel> metaModels = kunderaMetadata.getApplicationMetadata().getMetamodelMap();
 
-                EntityMetadata mAdd = KunderaMetadataManager.getEntityMetadata(clazz);
+                EntityMetadata mAdd = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, clazz);
                 for (Metamodel m : metaModels.values())
                 {
                     mAdd = ((MetamodelImpl) m).getEntityMetadataMap().get(clazz.getName());
@@ -215,19 +218,19 @@ public abstract class AssociationBase
                 List<String> pus = new ArrayList<String>(1);
                 pus.add(pu);
                 clazzToPu.put(clazz.getName(), pus);
-                KunderaMetadata.INSTANCE.getApplicationMetadata().setClazzToPuMap(clazzToPu);
+                kunderaMetadata.getApplicationMetadata().setClazzToPuMap(clazzToPu);
 
-                Metamodel metaModel = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(pu);
+                Metamodel metaModel = kunderaMetadata.getApplicationMetadata().getMetamodel(pu);
                 ((MetamodelImpl) metaModel).addEntityMetadata(clazz, mAdd);
-                KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodelMap().put(pu, metaModel);
-                // KunderaMetadata.INSTANCE.getApplicationMetadata().addEntityMetadata(pu,
+                kunderaMetadata.getApplicationMetadata().getMetamodelMap().put(pu, metaModel);
+                // kunderaMetadata.getApplicationMetadata().addEntityMetadata(pu,
                 // clazz, mAdd);
-                PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+                PersistenceUnitMetadata puMetadata = kunderaMetadata.getApplicationMetadata()
                         .getPersistenceUnitMetadata(pu);
 
                 CoreMetadata coreMetadata = new CoreMetadata();
                 coreMetadata.setLazyInitializerFactory(new CglibLazyInitializerFactory());
-                KunderaMetadata.INSTANCE.setCoreMetadata(coreMetadata);
+                kunderaMetadata.setCoreMetadata(coreMetadata);
 
                 String client = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_CLIENT_FACTORY);
                 if (client.equalsIgnoreCase("com.impetus.client.cassandra.pelops.PelopsClientFactory")
@@ -353,7 +356,7 @@ public abstract class AssociationBase
 
         for (String pu : ALL_PUs_UNDER_TEST)
         {
-            CleanupUtilities.cleanLuceneDirectory(pu);
+            CleanupUtilities.cleanLuceneDirectory(kunderaMetadata.getApplicationMetadata().getPersistenceUnitMetadata(pu));
         }
 
         CouchDBTestUtils.dropDatabase("KunderaTests".toLowerCase(), httpClient, httpHost);
@@ -419,7 +422,7 @@ public abstract class AssociationBase
     {
         if (RedisPropertyReader.rsmd != null)
         {
-            PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+            PersistenceUnitMetadata puMetadata = kunderaMetadata.getApplicationMetadata()
                     .getPersistenceUnitMetadata("redis");
             Properties props = puMetadata.getProperties();
             String contactNode = RedisPropertyReader.rsmd.getHost() != null ? RedisPropertyReader.rsmd.getHost()

@@ -31,7 +31,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.crud.RDBMSCli;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
  * @author vivek.mishra
@@ -264,7 +263,7 @@ public class RdbmsCompositeTypeTest
     public void tearDown() throws Exception
     {
         emf.close();
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         dropSchema();
     }
     

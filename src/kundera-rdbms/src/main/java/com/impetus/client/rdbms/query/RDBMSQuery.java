@@ -33,9 +33,9 @@ import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.query.KunderaQuery;
@@ -68,9 +68,9 @@ public class RDBMSQuery extends QueryImpl
      * @param persistenceUnits
      *            the persistence units
      */
-    public RDBMSQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
+    public RDBMSQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator, final KunderaMetadata kunderaMetadata)
     {
-        super(kunderaQuery, persistenceDelegator);
+        super(kunderaQuery, persistenceDelegator, kunderaMetadata);
     }
 
     @Override
@@ -142,7 +142,7 @@ public class RDBMSQuery extends QueryImpl
     {
         if (reader == null)
         {
-            reader = new RDBMSEntityReader(getJPAQuery(), kunderaQuery);
+            reader = new RDBMSEntityReader(getJPAQuery(), kunderaQuery, kunderaMetadata);
         }
         return reader;
     }
@@ -211,7 +211,7 @@ public class RDBMSQuery extends QueryImpl
         List<String> columns = new ArrayList<String>();
         if (results != null && results.length > 0)
         {
-            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                     m.getPersistenceUnit());
             EntityType entity = metaModel.entity(m.getEntityClazz());
 

@@ -63,7 +63,7 @@ public class HBaseClientFactory extends GenericClientFactory
         setExternalProperties(externalProperty);
         initializePropertyReader();
         // Initialize HBase configuration
-        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(getPersistenceUnit());
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata, getPersistenceUnit());
 
         String node = null;
         String port = null;
@@ -119,7 +119,7 @@ public class HBaseClientFactory extends GenericClientFactory
             hadoopConf.set("hbase.zookeeper.property.clientPort", DEFAULT_ZOOKEEPER_PORT);
         }
         conf = new HBaseConfiguration(hadoopConf);
-        reader = new HBaseEntityReader();
+        reader = new HBaseEntityReader(kunderaMetadata);
     }
 
     @Override
@@ -132,7 +132,7 @@ public class HBaseClientFactory extends GenericClientFactory
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
-        return new HBaseClient(indexManager, conf, hTablePool, reader, persistenceUnit, externalProperties, clientMetadata);
+        return new HBaseClient(indexManager, conf, hTablePool, reader, persistenceUnit, externalProperties, clientMetadata, kunderaMetadata);
     }
 
     @Override
@@ -163,7 +163,7 @@ public class HBaseClientFactory extends GenericClientFactory
         if (schemaManager == null)
         {
             initializePropertyReader();
-            schemaManager = new HBaseSchemaManager(HBaseClientFactory.class.getName(), externalProperty);
+            schemaManager = new HBaseSchemaManager(HBaseClientFactory.class.getName(), externalProperty, kunderaMetadata);
         }
         return schemaManager;
     }
@@ -175,7 +175,8 @@ public class HBaseClientFactory extends GenericClientFactory
     {
         if (propertyReader == null)
         {
-            propertyReader = new HBasePropertyReader(externalProperties);
+            propertyReader = new HBasePropertyReader(externalProperties, kunderaMetadata.getApplicationMetadata()
+                    .getPersistenceUnitMetadata(getPersistenceUnit()));
             propertyReader.read(getPersistenceUnit());
         }
     }

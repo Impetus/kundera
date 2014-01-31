@@ -30,9 +30,7 @@ import org.neo4j.unsafe.batchinsert.BatchInserterIndex;
 import org.neo4j.unsafe.batchinsert.BatchInserterIndexProvider;
 
 import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
@@ -65,10 +63,8 @@ public class Neo4JIndexManager
         return graphDb.index().getRelationshipAutoIndexer().getAutoIndexedProperties();
     }
 
-    protected boolean isEntityForNeo4J(EntityMetadata entityMetadata)
+    protected boolean isEntityForNeo4J(EntityMetadata entityMetadata, PersistenceUnitMetadata puMetadata)
     {
-        String persistenceUnit = entityMetadata.getPersistenceUnit();
-        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
         String clientFactory = puMetadata.getProperty(PersistenceProperties.KUNDERA_CLIENT_FACTORY);
         if (clientFactory.indexOf("com.impetus.client.neo4j") >= 0)
         {
@@ -87,12 +83,12 @@ public class Neo4JIndexManager
      * @param autoIndexing
      * @param node
      */
-    public void indexNode(EntityMetadata entityMetadata, GraphDatabaseService graphDb, Node node)
+    public void indexNode(EntityMetadata entityMetadata, GraphDatabaseService graphDb, Node node, MetamodelImpl metaModel)
     {
         if (!isNodeAutoIndexingEnabled(graphDb) && entityMetadata.isIndexable())
         {
             Index<Node> nodeIndex = graphDb.index().forNodes(entityMetadata.getIndexName());
-            addNodeIndex(entityMetadata, node, nodeIndex);
+            addNodeIndex(entityMetadata, node, nodeIndex, metaModel);
         }
     }
 
@@ -105,12 +101,12 @@ public class Neo4JIndexManager
      * @param autoIndexing
      * @param node
      */
-    public void indexRelationship(EntityMetadata entityMetadata, GraphDatabaseService graphDb, Relationship relationship)
+    public void indexRelationship(EntityMetadata entityMetadata, GraphDatabaseService graphDb, Relationship relationship, MetamodelImpl metaModel)
     {
         if (!isRelationshipAutoIndexingEnabled(graphDb) && entityMetadata.isIndexable())
         {
             Index<Relationship> relationshipIndex = graphDb.index().forRelationships(entityMetadata.getIndexName());
-            addRelationshipIndex(entityMetadata, relationship, relationshipIndex);
+            addRelationshipIndex(entityMetadata, relationship, relationshipIndex, metaModel);
         }
     }
 
@@ -162,7 +158,7 @@ public class Neo4JIndexManager
      * @param autoIndexing
      * @param node
      */
-    public void updateNodeIndex(EntityMetadata entityMetadata, GraphDatabaseService graphDb, Node node)
+    public void updateNodeIndex(EntityMetadata entityMetadata, GraphDatabaseService graphDb, Node node, MetamodelImpl metaModel)
     {
         if (!isNodeAutoIndexingEnabled(graphDb) && entityMetadata.isIndexable())
         {
@@ -172,7 +168,7 @@ public class Neo4JIndexManager
             nodeIndex.remove(node);
 
             // Recreate fresh index on this node
-            addNodeIndex(entityMetadata, node, nodeIndex);
+            addNodeIndex(entityMetadata, node, nodeIndex, metaModel);
         }
 
     }
@@ -187,7 +183,7 @@ public class Neo4JIndexManager
      * @param node
      */
     public void updateRelationshipIndex(EntityMetadata entityMetadata, GraphDatabaseService graphDb,
-            Relationship relationship)
+            Relationship relationship, MetamodelImpl metaModel)
     {
         if (!isRelationshipAutoIndexingEnabled(graphDb) && entityMetadata.isIndexable())
         {
@@ -197,7 +193,7 @@ public class Neo4JIndexManager
             relationshipIndex.remove(relationship);
 
             // Recreate fresh index on this relationship
-            addRelationshipIndex(entityMetadata, relationship, relationshipIndex);
+            addRelationshipIndex(entityMetadata, relationship, relationshipIndex, metaModel);
         }
     }
 
@@ -245,10 +241,10 @@ public class Neo4JIndexManager
      * @param metaModel
      * @param nodeIndex
      */
-    private void addNodeIndex(EntityMetadata entityMetadata, Node node, Index<Node> nodeIndex)
+    private void addNodeIndex(EntityMetadata entityMetadata, Node node, Index<Node> nodeIndex, MetamodelImpl metaModel)
     {
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                entityMetadata.getPersistenceUnit());
+//        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+//                entityMetadata.getPersistenceUnit());
 
         // ID attribute has to be indexed necessarily
         String idColumnName = ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName();
@@ -276,10 +272,10 @@ public class Neo4JIndexManager
      * @param relationship
      */
     private void addRelationshipIndex(EntityMetadata entityMetadata, Relationship relationship,
-            Index<Relationship> relationshipIndex)
+            Index<Relationship> relationshipIndex, MetamodelImpl metaModel)
     {
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                entityMetadata.getPersistenceUnit());
+//        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+//                entityMetadata.getPersistenceUnit());
 
         // ID attribute has to be indexed first
         String idColumnName = ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName();

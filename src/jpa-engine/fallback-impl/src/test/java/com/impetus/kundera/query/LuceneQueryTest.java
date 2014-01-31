@@ -31,7 +31,7 @@ import org.junit.Test;
 import com.impetus.kundera.metadata.entities.EmbeddableEntity;
 import com.impetus.kundera.metadata.entities.EmbeddableEntityTwo;
 import com.impetus.kundera.metadata.entities.SingularEntityEmbeddable;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 import com.impetus.kundera.query.Person.Day;
 import com.impetus.kundera.utils.LuceneCleanupUtilities;
 
@@ -55,7 +55,7 @@ public class LuceneQueryTest
     @Before
     public void setUp() throws Exception
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);        
+                
         emf = Persistence.createEntityManagerFactory(PU);
         em = emf.createEntityManager();
 
@@ -65,12 +65,12 @@ public class LuceneQueryTest
     public void test()
     {
         String query = "Select p from Person p";
-        KunderaQuery kunderaQuery = new KunderaQuery(query);
+        KunderaQuery kunderaQuery = new KunderaQuery(query, ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());
         KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery);
         queryParser.parse();
         kunderaQuery.postParsingInit();
 
-        LuceneQuery luceneQuery = new LuceneQuery(kunderaQuery,null);
+        LuceneQuery luceneQuery = new LuceneQuery(kunderaQuery,null, ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());
         
         try
         {

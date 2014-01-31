@@ -26,8 +26,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.kundera.metadata.model.KunderaMetadata;
-
 /**
  * EmbeddableUserTest tests @{@link Entity} and {@link Embeddable} having
  * {@link Set, List, Map} as its attribute.
@@ -102,6 +100,6 @@ public class EmbeddableUserTest
     {
         em.close();
         emf.close();
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
     }
 }

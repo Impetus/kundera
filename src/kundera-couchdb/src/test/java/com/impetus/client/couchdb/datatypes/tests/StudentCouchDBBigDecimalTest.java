@@ -30,6 +30,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.couchdb.datatypes.entities.StudentCouchDBBigDecimal;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
 public class StudentCouchDBBigDecimalTest extends CouchDBBase
 {
@@ -40,7 +41,7 @@ public class StudentCouchDBBigDecimalTest extends CouchDBBase
     public void setUp() throws Exception
     {
         emf = Persistence.createEntityManagerFactory(pu);
-        super.setUpBase();
+        super.setUpBase(((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());
     }
 
     @After

@@ -42,7 +42,6 @@ import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
  * Test case for verifying Time to Live feature of Cassandra on single entity
@@ -77,7 +76,7 @@ public class PersonCassandraTTLTest extends BaseTest
     @Before
     public void setUp() throws Exception
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         CassandraCli.cassandraSetUp();
         CassandraCli.createKeySpace("KunderaExamples");
     }

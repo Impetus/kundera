@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.loader.ClientFactory;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
  * Test case for {@link OracleNoSQLClientFactory}
@@ -64,7 +63,7 @@ public class OracleNoSQLClientFactoryTest
     public void tearDown() throws Exception
     {
         emf.close();
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
     }
 
     /**

@@ -26,8 +26,8 @@ import com.impetus.client.neo4j.Neo4JEntityReader;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.query.KunderaQuery;
@@ -52,9 +52,9 @@ public class Neo4JQuery extends QueryImpl
      * @param query
      * @param persistenceDelegator
      */
-    public Neo4JQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
+    public Neo4JQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator, final KunderaMetadata kunderaMetadata)
     {
-        super(kunderaQuery, persistenceDelegator);
+        super(kunderaQuery, persistenceDelegator, kunderaMetadata);
         if (getHints().containsKey(NATIVE_QUERY_TYPE))
         {
             queryType = (Neo4JQueryType) getHints().get(NATIVE_QUERY_TYPE);
@@ -77,7 +77,7 @@ public class Neo4JQuery extends QueryImpl
     protected List<Object> recursivelyPopulateEntities(EntityMetadata m, Client client)
     {
         List<Object> entities = new ArrayList<Object>();
-        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+        ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
 
         String query = appMetadata.getQuery(getJPAQuery());
         boolean isNative = kunderaQuery.isNative()/*query == null ? true : appMetadata.isNative(getJPAQuery())*/;        
@@ -101,7 +101,7 @@ public class Neo4JQuery extends QueryImpl
     {
         if (reader == null)
         {
-            reader = new Neo4JEntityReader(kunderaQuery);
+            reader = new Neo4JEntityReader(kunderaQuery, kunderaMetadata);
         }
         return reader;
     }

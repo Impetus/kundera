@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.configure;
 
-
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,7 +51,6 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata.Type;
 import com.impetus.kundera.metadata.model.IdDiscriptor;
 import com.impetus.kundera.metadata.model.JoinTableMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.PropertyIndex;
@@ -63,6 +61,7 @@ import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.metadata.processor.IndexProcessor;
 import com.impetus.kundera.metadata.validator.EntityValidator;
 import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.utils.KunderaCoreUtils;
 
@@ -90,9 +89,9 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
      * @param persistenceUnits
      *            persistence units.
      */
-    public SchemaConfiguration(Map externalProperties, String... persistenceUnits)
+    public SchemaConfiguration(Map externalProperties, final KunderaMetadata metadata, String... persistenceUnits)
     {
-        super(persistenceUnits, externalProperties);
+        super(persistenceUnits, externalProperties, metadata);
     }
 
     @Override
@@ -102,14 +101,14 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
      */
     public void configure()
     {
-        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+        ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
 
         // TODO, FIXME: Refactoring is required.
         for (String persistenceUnit : persistenceUnits)
         {
             EntityValidator validator = new EntityValidatorImpl(KunderaCoreUtils.getExternalProperties(persistenceUnit,
                     externalPropertyMap, persistenceUnits));
-            
+
             log.info("Configuring schema export for : " + persistenceUnit);
             List<TableInfo> tableInfos = getSchemaInfo(persistenceUnit);
 
@@ -159,7 +158,7 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
                 addTableGenerator(appMetadata, persistenceUnit, tableInfos, entityMetadata, idClassName, idName);
 
                 // Validating entity against counter column family.
-                validator.validateEntity(entityMetadata.getEntityClazz());
+                validator.validateEntity(entityMetadata.getEntityClazz(), kunderaMetadata);
             }
 
             puToSchemaMetadata.put(persistenceUnit, tableInfos);
@@ -255,7 +254,8 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
         for (Relation relation : relations)
         {
             Class entityClass = relation.getTargetEntity();
-            EntityMetadata targetEntityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
+            EntityMetadata targetEntityMetadata = KunderaMetadataManager
+                    .getEntityMetadata(kunderaMetadata, entityClass);
             if (targetEntityMetadata == null)
             {
                 log.error("Persistence unit for class : " + entityClass + " is not loaded");
@@ -265,13 +265,13 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
 
             // if relation type is one to many or join by primary key
             if (targetEntityMetadata != null && relationType.equals(ForeignKey.ONE_TO_MANY)
-                    && relation.getJoinColumnName() != null)
+                    && relation.getJoinColumnName(kunderaMetadata) != null)
             {
                 // if self association
                 if (targetEntityMetadata.equals(entityMetadata))
                 {
-                    tableInfo.addColumnInfo(getJoinColumn(tableInfo, relation.getJoinColumnName(), entityMetadata
-                            .getIdAttribute().getJavaType()));
+                    tableInfo.addColumnInfo(getJoinColumn(tableInfo, relation.getJoinColumnName(kunderaMetadata),
+                            entityMetadata.getIdAttribute().getJavaType()));
                 }
                 else
                 {
@@ -288,23 +288,24 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
                     {
                         List<TableInfo> targetTableInfos = getSchemaInfo(pu);
 
-                        addJoinColumnToInfo(relation.getJoinColumnName(), targetTableInfo, targetTableInfos,
-                                entityMetadata);
+                        addJoinColumnToInfo(relation.getJoinColumnName(kunderaMetadata), targetTableInfo,
+                                targetTableInfos, entityMetadata);
 
                         // add for newly discovered persistence unit.
                         puToSchemaMetadata.put(pu, targetTableInfos);
                     }
                     else
                     {
-                        addJoinColumnToInfo(relation.getJoinColumnName(), targetTableInfo, tableInfos, entityMetadata);
+                        addJoinColumnToInfo(relation.getJoinColumnName(kunderaMetadata), targetTableInfo, tableInfos,
+                                entityMetadata);
                     }
                 }
             }
             // if relation type is one to one or many to one.
-            else if (relation.isUnary() && relation.getJoinColumnName() != null)
+            else if (relation.isUnary() && relation.getJoinColumnName(kunderaMetadata) != null)
             {
-                tableInfo.addColumnInfo(getJoinColumn(tableInfo, relation.getJoinColumnName(), targetEntityMetadata
-                        .getIdAttribute().getJavaType()));
+                tableInfo.addColumnInfo(getJoinColumn(tableInfo, relation.getJoinColumnName(kunderaMetadata),
+                        targetEntityMetadata.getIdAttribute().getJavaType()));
             }
             // if relation type is many to many and relation via join table.
             else if ((relationType.equals(ForeignKey.MANY_TO_MANY)) && (entityMetadata.isRelationViaJoinTable()))
@@ -383,8 +384,8 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
     {
         // Add columns to table info.
 
-        Metamodel metaModel = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                entityMetadata.getPersistenceUnit());
+        Metamodel metaModel = kunderaMetadata.getApplicationMetadata()
+                .getMetamodel(entityMetadata.getPersistenceUnit());
         EntityType entityType = metaModel.entity(entityMetadata.getEntityClazz());
         Map<String, PropertyIndex> columns = entityMetadata.getIndexProperties();
 
@@ -394,17 +395,16 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
         while (iter.hasNext())
         {
             Attribute attr = iter.next();
-            
+
             if (!attr.isAssociation())
             {
                 if (((MetamodelImpl) metaModel).isEmbeddable(attr.getJavaType()))
                 {
-                  
-                    
+
                     EmbeddableType embeddable = metaModel.embeddable(attr.getJavaType());
 
                     EmbeddedColumnInfo embeddedColumnInfo = getEmbeddedColumn(tableInfo, embeddable, attr.getName(),
-                            attr.getJavaType(), ((Field)((Field)attr.getJavaMember())));
+                            attr.getJavaType(), ((Field) ((Field) attr.getJavaMember())));
 
                     if (!tableInfo.getEmbeddedColumnMetadatas().contains(embeddedColumnInfo))
                     {
@@ -413,7 +413,7 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
                 }
                 else if (!attr.isCollection() && !((SingularAttribute) attr).isId())
                 {
-                   
+
                     ColumnInfo columnInfo = getColumn(tableInfo, attr,
                             columns != null ? columns.get(((AbstractAttribute) attr).getJPAColumnName()) : null, null);
                     if (!tableInfo.getColumnMetadatas().contains(columnInfo))
@@ -503,15 +503,15 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
      * @param embeddableType
      * @param embeddableColName
      * @param embeddedEntityClass
-     * @param field 
+     * @param field
      * @return
      */
     private EmbeddedColumnInfo getEmbeddedColumn(TableInfo tableInfo, EmbeddableType embeddableType,
             String embeddableColName, Class embeddedEntityClass, Field field)
     {
-       
+
         String[] orderByColumns = null;
-        if(field.isAnnotationPresent(OrderBy.class))
+        if (field.isAnnotationPresent(OrderBy.class))
         {
             OrderBy order = (OrderBy) field.getAnnotation(OrderBy.class);
             orderByColumns = order.value().split("\\s*,\\s*");
@@ -540,15 +540,16 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
      *            of Column.
      * @return Object of ColumnInfo.
      */
-    private ColumnInfo getColumn(TableInfo tableInfo, Attribute column, PropertyIndex indexedColumn, String[] orderByColumns)
+    private ColumnInfo getColumn(TableInfo tableInfo, Attribute column, PropertyIndex indexedColumn,
+            String[] orderByColumns)
     {
         ColumnInfo columnInfo = new ColumnInfo();
-       
-        if(column.getJavaType().isAnnotationPresent(OrderBy.class))
+
+        if (column.getJavaType().isAnnotationPresent(OrderBy.class))
         {
             OrderBy order = (OrderBy) column.getJavaType().getAnnotation(OrderBy.class);
             orderByColumns = order.value().split("\\s*,\\s*");
-            
+
         }
         columnInfo.setOrderBy(getOrderByColumn(orderByColumns, column));
 
@@ -569,16 +570,18 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
             tableInfo.addToIndexedColumnList(indexInfo);
             // Add more if required
         }
-        
+
         return columnInfo;
     }
-    
+
     /**
-     * getOrderByColumn  method return order by value of the column
+     * getOrderByColumn method return order by value of the column
      * 
-     * @param String[] orderByColumns
+     * @param String
+     *            [] orderByColumns
      * 
-     * @param Attribute column
+     * @param Attribute
+     *            column
      * 
      * @return orderColumnValue.
      */
@@ -590,9 +593,9 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
             for (String orderColumn : orderByColumns)
             {
                 String[] orderValue = orderColumn.split("\\s");
-                String orderColumnName =  orderValue[0].substring(orderValue[0].lastIndexOf('.')+1);
+                String orderColumnName = orderValue[0].substring(orderValue[0].lastIndexOf('.') + 1);
                 String orderColumnValue = orderValue[1];
-               
+
                 if (orderColumnName.equals(((AbstractAttribute) column).getName())
                         || orderColumnName.equals(((AbstractAttribute) column).getJPAColumnName()))
                 {
@@ -638,7 +641,7 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
      */
     private String getSchemaProperty(String persistenceUnit, Map<String, Object> externalProperties)
     {
-        PersistenceUnitMetadata persistenceUnitMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+        PersistenceUnitMetadata persistenceUnitMetadata = kunderaMetadata.getApplicationMetadata()
                 .getPersistenceUnitMetadata(persistenceUnit);
         String autoDdlOption = externalProperties != null ? (String) externalProperties
                 .get(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE) : null;

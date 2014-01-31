@@ -96,7 +96,7 @@ public class ObjectGraphBuilder
         {
             return null;
         }
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(pd.getKunderaMetadata(),  entity.getClass());
 
         // entity metadata could be null.
         if (entityMetadata == null)
@@ -111,11 +111,11 @@ public class ObjectGraphBuilder
         {
             if (!isIdSet(id))
             {
-                id = idGenerator.generateAndSetId(entity, entityMetadata, pd);
+                id = idGenerator.generateAndSetId(entity, entityMetadata, pd, pd.getKunderaMetadata());
             }
         }
 
-        if (!validator.isValidEntityObject(entity))
+        if (!validator.isValidEntityObject(entity, entityMetadata))
         {
             throw new IllegalArgumentException(
                     "Entity object is invalid, operation failed. Please check previous log message for details");
@@ -139,13 +139,13 @@ public class ObjectGraphBuilder
 
         // Construct this Node first, if one not already there in Persistence
         // Cache
-        Node nodeInPersistenceCache = persistenceCache.getMainCache().getNodeFromCache(nodeId);
+        Node nodeInPersistenceCache = persistenceCache.getMainCache().getNodeFromCache(nodeId, pd);
 
         // Make a deep copy of entity data
 
         if (nodeInPersistenceCache == null)
         {
-            node = new Node(nodeId, entity, initialNodeState, persistenceCache, id);
+            node = new Node(nodeId, entity, initialNodeState, persistenceCache, id, pd);
         }
         else
         {
@@ -183,7 +183,7 @@ public class ObjectGraphBuilder
 
             if (childObject != null && !ProxyHelper.isProxy(childObject))
             {
-                EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(PropertyAccessorHelper
+                EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(pd.getKunderaMetadata(), PropertyAccessorHelper
                         .getGenericClass(relation.getProperty()));
 
                 if (metadata != null && relation.isJoinedByPrimaryKey())
@@ -242,7 +242,7 @@ public class ObjectGraphBuilder
         Object childId = PropertyAccessorHelper.getId(childObj, metadata);
         String childNodeId = ObjectGraphUtils.getNodeId(childId, childObj.getClass());
 
-        Node childNodeInCache = persistenceCache.getMainCache().getNodeFromCache(childNodeId);
+        Node childNodeInCache = persistenceCache.getMainCache().getNodeFromCache(childNodeId, pd);
 
         return childNodeInCache != null ? childNodeInCache.getCurrentNodeState() : new TransientState();
     }
@@ -280,7 +280,7 @@ public class ObjectGraphBuilder
                 NodeLink nodeLink = new NodeLink(node.getNodeId(), childNode.getNodeId());
                 nodeLink.setMultiplicity(relation.getType());
 
-                EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
+                EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(pd.getKunderaMetadata(), node.getDataClass());
                 nodeLink.setLinkProperties(getLinkProperties(metadata, relation));
 
                 nodeLink.addLinkProperty(LinkProperty.LINK_VALUE, relObject);
@@ -303,7 +303,7 @@ public class ObjectGraphBuilder
                 NodeLink nodeLink = new NodeLink(node.getNodeId(), childNode.getNodeId());
                 nodeLink.setMultiplicity(relation.getType());
 
-                EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
+                EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(pd.getKunderaMetadata(), node.getDataClass());
                 nodeLink.setLinkProperties(getLinkProperties(metadata, relation));
 
                 // Add Parent node to this child
@@ -326,7 +326,7 @@ public class ObjectGraphBuilder
     {
         Map<LinkProperty, Object> linkProperties = new HashMap<NodeLink.LinkProperty, Object>();
 
-        linkProperties.put(LinkProperty.LINK_NAME, MetadataUtils.getMappedName(metadata, relation));
+        linkProperties.put(LinkProperty.LINK_NAME, MetadataUtils.getMappedName(metadata, relation, pd.getKunderaMetadata()));
         linkProperties.put(LinkProperty.IS_SHARED_BY_PRIMARY_KEY, relation.isJoinedByPrimaryKey());
         linkProperties.put(LinkProperty.IS_BIDIRECTIONAL, !relation.isUnary());
         linkProperties.put(LinkProperty.IS_RELATED_VIA_JOIN_TABLE, relation.isRelatedViaJoinTable());

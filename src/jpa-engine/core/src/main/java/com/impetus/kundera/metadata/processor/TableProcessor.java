@@ -42,12 +42,12 @@ import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata.Type;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.type.AbstractIdentifiableType;
 import com.impetus.kundera.metadata.processor.relation.RelationMetadataProcessor;
 import com.impetus.kundera.metadata.processor.relation.RelationMetadataProcessorFactory;
 import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
 import com.impetus.kundera.metadata.validator.InvalidEntityDefinitionException;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 
 /**
  * Metadata processor class for persistent entities.
@@ -66,8 +66,9 @@ public class TableProcessor extends AbstractEntityFieldProcessor
     /**
      * Instantiates a new table processor.
      */
-    public TableProcessor(Map puProperty)
+    public TableProcessor(Map puProperty, KunderaMetadata kunderaMetadata)
     {
+        super(kunderaMetadata);
         validator = new EntityValidatorImpl(puProperty);
         this.puProperties = puProperty;
     }
@@ -107,8 +108,8 @@ public class TableProcessor extends AbstractEntityFieldProcessor
 
         if (metadata.getPersistenceUnit() != null)
         {
-            MetaModelBuilder<X, T> metaModelBuilder = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                    .getMetaModelBuilder(metadata.getPersistenceUnit());
+            MetaModelBuilder<X, T> metaModelBuilder = kunderaMetadata.getApplicationMetadata().getMetaModelBuilder(
+                    metadata.getPersistenceUnit());
 
             onBuildMetaModelSuperClass(clazz.getSuperclass(), metaModelBuilder);
 
@@ -214,7 +215,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
 
         try
         {
-            relProcessor = RelationMetadataProcessorFactory.getRelationMetadataProcessor(relationField);
+            relProcessor = RelationMetadataProcessorFactory.getRelationMetadataProcessor(relationField, kunderaMetadata);
 
             if (relProcessor != null)
             {
@@ -236,7 +237,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
      */
     private void addNamedNativeQueryMetadata(Class clazz)
     {
-        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+        ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
         String name, query = null;
         if (clazz.isAnnotationPresent(NamedQuery.class))
         {

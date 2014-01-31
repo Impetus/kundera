@@ -43,6 +43,7 @@ import com.impetus.client.hbase.HBaseClient;
 import com.impetus.client.hbase.crud.PersonHBase.Day;
 import com.impetus.client.hbase.junits.HBaseCli;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 import com.impetus.kundera.utils.LuceneCleanupUtilities;
 
 public class PersonHBaseTest extends BaseTest
@@ -287,13 +288,14 @@ public class PersonHBaseTest extends BaseTest
             em.remove(val);
         }
         em.close();
-        emf.close();
         if (cli != null )
         {
             cli.dropTable("KunderaExamples");
             cli.stopCluster("KunderaExamples");
         }
-        LuceneCleanupUtilities.cleanLuceneDirectory("hbaseTest");
+        LuceneCleanupUtilities.cleanLuceneDirectory(((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance()
+                .getApplicationMetadata().getPersistenceUnitMetadata("hbaseTest"));
+        emf.close();
         // if (cli.isStarted)
 
     }

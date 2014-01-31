@@ -30,6 +30,7 @@ import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.IdDiscriptor;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
@@ -44,16 +45,16 @@ public class IdGenerator
     /** The Constant log. */
     private static final Logger log = LoggerFactory.getLogger(IdGenerator.class);
 
-    public Object generateAndSetId(Object e, EntityMetadata m, PersistenceDelegator pd)
+    public Object generateAndSetId(Object e, EntityMetadata m, PersistenceDelegator pd, final KunderaMetadata kunderaMetadata)
     {
-        Metamodel metamodel = KunderaMetadataManager.getMetamodel(m.getPersistenceUnit());
+        Metamodel metamodel = KunderaMetadataManager.getMetamodel(kunderaMetadata, m.getPersistenceUnit());
         IdDiscriptor keyValue = ((MetamodelImpl) metamodel).getKeyValue(e.getClass().getName());
 
         if (keyValue != null)
         {
             Client<?> client = pd.getClient(m);
 
-            String clientFactoryName = KunderaMetadataManager.getPersistenceUnitMetadata(m.getPersistenceUnit())
+            String clientFactoryName = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata, m.getPersistenceUnit())
                     .getClient();
             if (clientFactoryName != null
                     && !clientFactoryName.equalsIgnoreCase("com.impetus.client.rdbms.RDBMSClientFactory"))

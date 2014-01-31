@@ -44,6 +44,8 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 
 /**
  * Test case for {@link GraphEntityMapper}
@@ -64,6 +66,7 @@ public class GraphEntityMapperTest
 
     final static String PU = "imdb";
 
+    private static KunderaMetadata kunderaMetadata;
     /**
      * @throws java.lang.Exception
      */
@@ -71,7 +74,11 @@ public class GraphEntityMapperTest
     public static void setUpBeforeClass() throws Exception
     {
         emf = Persistence.createEntityManagerFactory(PU);
+        
+        kunderaMetadata = ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance();
+        
         em = emf.createEntityManager();
+        
         Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
         client = (Neo4JClient) clients.get(PU);
     }
@@ -82,7 +89,7 @@ public class GraphEntityMapperTest
     @AfterClass
     public static void tearDownAfterClass() throws Exception
     {
-        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(PU);
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata, PU);
         String datastoreFilePath = puMetadata.getProperty(PersistenceProperties.KUNDERA_DATASTORE_FILE_PATH);
 
         em.close();
@@ -98,7 +105,7 @@ public class GraphEntityMapperTest
     @Before
     public void setUp() throws Exception
     {
-        mapper = new GraphEntityMapper(new Neo4JIndexManager());
+        mapper = new GraphEntityMapper(new Neo4JIndexManager(), kunderaMetadata);
         graphDb = client.getConnection();
     }
 
@@ -125,7 +132,7 @@ public class GraphEntityMapperTest
         actor.setName("Keenu Reeves");
 
         Transaction tx = graphDb.beginTx();
-        Node node = mapper.getNodeFromEntity(actor, 1, graphDb, KunderaMetadataManager.getEntityMetadata(Actor.class),
+        Node node = mapper.getNodeFromEntity(actor, 1, graphDb, KunderaMetadataManager.getEntityMetadata(kunderaMetadata, Actor.class),
                 false);
         Assert.assertNotNull(node);
         Assert.assertEquals(1, node.getProperty("ACTOR_ID"));
@@ -145,8 +152,8 @@ public class GraphEntityMapperTest
     @Test
     public void testCreateProxyNode()
     {
-        EntityMetadata sourceM = KunderaMetadataManager.getEntityMetadata(Actor.class);
-        EntityMetadata targetM = KunderaMetadataManager.getEntityMetadata(Movie.class);
+        EntityMetadata sourceM = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, Actor.class);
+        EntityMetadata targetM = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, Movie.class);
 
         Transaction tx = graphDb.beginTx();
         Node proxyNode = mapper.createProxyNode(1, "A", graphDb, sourceM, targetM);
@@ -174,7 +181,7 @@ public class GraphEntityMapperTest
         node.setProperty("ACTOR_ID", 1);
         node.setProperty("ACTOR_NAME", "Amresh Singh");
 
-        Actor actor = (Actor) mapper.getEntityFromNode(node, KunderaMetadataManager.getEntityMetadata(Actor.class));
+        Actor actor = (Actor) mapper.getEntityFromNode(node, KunderaMetadataManager.getEntityMetadata(kunderaMetadata, Actor.class));
 
         Assert.assertNotNull(actor);
         Assert.assertEquals(1, actor.getId());
@@ -208,8 +215,8 @@ public class GraphEntityMapperTest
         rel.setProperty("ROLE_NAME", "Neo");
         rel.setProperty("ROLE_TYPE", "Lead Actor");
 
-        Role role = (Role) mapper.getEntityFromRelationship(rel, KunderaMetadataManager.getEntityMetadata(Actor.class),
-                KunderaMetadataManager.getEntityMetadata(Actor.class).getRelation("movies"));
+        Role role = (Role) mapper.getEntityFromRelationship(rel, KunderaMetadataManager.getEntityMetadata(kunderaMetadata, Actor.class),
+                KunderaMetadataManager.getEntityMetadata(kunderaMetadata, Actor.class).getRelation("movies"));
 
         Assert.assertNotNull(role);
         Assert.assertEquals("Neo", role.getRoleName());
@@ -235,7 +242,7 @@ public class GraphEntityMapperTest
         actor.setId(1);
         actor.setName("Keenu Reeves");
 
-        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(Actor.class);
+        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, Actor.class);
 
         Map<String, Object> props = mapper.createNodeProperties(actor, m);
         Assert.assertNotNull(props);

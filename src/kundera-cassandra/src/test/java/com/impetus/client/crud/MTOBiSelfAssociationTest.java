@@ -16,7 +16,6 @@ import org.junit.Test;
 
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 public class MTOBiSelfAssociationTest
 {
@@ -44,7 +43,7 @@ public class MTOBiSelfAssociationTest
     @Before
     public void setUp() throws Exception
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         CassandraCli.cassandraSetUp();
         CassandraCli.createKeySpace("KunderaExamples");
 

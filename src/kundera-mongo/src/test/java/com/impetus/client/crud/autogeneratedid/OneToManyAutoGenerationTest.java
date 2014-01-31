@@ -15,7 +15,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.utils.MongoUtils;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 public class OneToManyAutoGenerationTest
 {
@@ -128,6 +127,6 @@ public class OneToManyAutoGenerationTest
         em.close();
         MongoUtils.dropDatabase(emf, _PU);
         emf.close();
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
     }
 }

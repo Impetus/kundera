@@ -34,7 +34,7 @@ import org.junit.Test;
 import com.impetus.kundera.CoreTestUtilities;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.polyglot.entities.AddressB11FK;
 import com.impetus.kundera.polyglot.entities.AddressB1M;
 import com.impetus.kundera.polyglot.entities.AddressBM1;
@@ -57,7 +57,8 @@ import com.impetus.kundera.utils.LuceneCleanupUtilities;
 /**
  * @author vivek.mishra junit for {@link AbstractEntityReader}.
  * 
- * TODO: do not delete commented out code. some cases failing for lucene.
+ *         TODO: do not delete commented out code. some cases failing for
+ *         lucene.
  */
 public class EntityReaderTest
 {
@@ -68,14 +69,17 @@ public class EntityReaderTest
 
     private EntityManager em;
 
+    private KunderaMetadata kunderaMetadata;
+
     /**
      * @throws java.lang.Exception
      */
     @Before
     public void setUp() throws Exception
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+
         emf = Persistence.createEntityManagerFactory(PU);
+        kunderaMetadata = ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance();
         em = emf.createEntityManager();
 
     }
@@ -100,11 +104,12 @@ public class EntityReaderTest
         Map<String, Object> relationMap = new HashMap<String, Object>();
         relationMap.put("ADDRESS_ID", "addr1");
 
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(PersonU11FK.class);
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(
+                ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance(), PersonU11FK.class);
 
         p1.setAddress(null);
 
-        CoreTestEntityReader reader = new CoreTestEntityReader();
+        CoreTestEntityReader reader = new CoreTestEntityReader(kunderaMetadata);
 
         reader.recursivelyFindEntities(p1, relationMap, metadata, delegator, false);
 
@@ -142,11 +147,12 @@ public class EntityReaderTest
         Map<String, Object> relationMap = new HashMap<String, Object>();
         relationMap.put("ADDRESS_ID", "addr1");
 
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(PersonB11FK.class);
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(
+                ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance(), PersonB11FK.class);
 
         p1.setAddress(null);
 
-        CoreTestEntityReader reader = new CoreTestEntityReader();
+        CoreTestEntityReader reader = new CoreTestEntityReader(kunderaMetadata);
 
         reader.recursivelyFindEntities(p1, relationMap, metadata, delegator, false);
 
@@ -161,7 +167,7 @@ public class EntityReaderTest
         Assert.assertNotNull(p1.getAddress());
 
         Assert.assertFalse(ProxyHelper.isKunderaProxy(p1.getAddress()));
-        
+
         Assert.assertEquals(p1, p1.getAddress().getPerson());
 
     }
@@ -193,9 +199,10 @@ public class EntityReaderTest
         Map<String, Object> relationMap = new HashMap<String, Object>();
         relationMap.put("ADDRESS_ID", "addr1");
 
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(PersonUM1.class);
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(
+                ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance(), PersonUM1.class);
 
-        CoreTestEntityReader reader = new CoreTestEntityReader();
+        CoreTestEntityReader reader = new CoreTestEntityReader(kunderaMetadata);
 
         person1.setAddress(null);
 
@@ -214,7 +221,6 @@ public class EntityReaderTest
         Assert.assertFalse(ProxyHelper.isKunderaProxy(person1.getAddress()));
 
     }
-
 
     @Test
     public void testBiManyToOne() throws NoSuchFieldException, SecurityException, IllegalArgumentException,
@@ -243,9 +249,10 @@ public class EntityReaderTest
         Map<String, Object> relationMap = new HashMap<String, Object>();
         relationMap.put("ADDRESS_ID", "addr1");
 
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(PersonBM1.class);
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(
+                ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance(), PersonBM1.class);
 
-        CoreTestEntityReader reader = new CoreTestEntityReader();
+        CoreTestEntityReader reader = new CoreTestEntityReader(kunderaMetadata);
 
         person1.setAddress(null);
 
@@ -254,9 +261,8 @@ public class EntityReaderTest
         Assert.assertNotNull(person1.getAddress());
 
         Assert.assertTrue(ProxyHelper.isKunderaProxy(person1.getAddress()));
-        
-        
-//        Assert.assertEquals(2, person1.getAddress().getPeople().size());
+
+        // Assert.assertEquals(2, person1.getAddress().getPeople().size());
 
         person1.setAddress(null);
 
@@ -265,36 +271,37 @@ public class EntityReaderTest
         Assert.assertNotNull(person1.getAddress());
 
         Assert.assertFalse(ProxyHelper.isKunderaProxy(person1.getAddress()));
-//        Assert.assertEquals(2, person1.getAddress().getPeople().size());
+        // Assert.assertEquals(2, person1.getAddress().getPeople().size());
 
     }
-    
+
     @Test
-    public void testManyToMany() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
+    public void testManyToMany() throws NoSuchFieldException, SecurityException, IllegalArgumentException,
+            IllegalAccessException
     {
         PersonUMM person = new PersonUMM();
         person.setPersonId("person1");
         person.setPersonName("personName");
-        
+
         AddressUMM address = new AddressUMM();
         address.setAddressId("addr1");
         address.setStreet("mtmstreet");
-        
+
         Set<AddressUMM> addresses = new HashSet<AddressUMM>();
         addresses.add(address);
         person.setAddresses(addresses);
-        
+
         em.persist(person);
-        
-        
+
         PersistenceDelegator delegator = CoreTestUtilities.getDelegator(em);
 
         Map<String, Object> relationMap = new HashMap<String, Object>();
         relationMap.put("ADDRESS_ID", "addr1");
 
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(PersonUMM.class);
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(
+                ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance(), PersonUMM.class);
 
-        CoreTestEntityReader reader = new CoreTestEntityReader();
+        CoreTestEntityReader reader = new CoreTestEntityReader(kunderaMetadata);
 
         person.setAddresses(null);
 
@@ -306,40 +313,44 @@ public class EntityReaderTest
 
         reader.recursivelyFindEntities(person, relationMap, metadata, delegator, true);
 
-        Assert.assertTrue(person.getAddresses().isEmpty());  // code to fetch from join table data in dummy client is missing.
+        Assert.assertTrue(person.getAddresses().isEmpty()); // code to fetch
+                                                            // from join table
+                                                            // data in dummy
+                                                            // client is
+                                                            // missing.
 
-//        Assert.assertFalse(ProxyHelper.isKunderaProxyCollection(person.getAddresses()));
+        // Assert.assertFalse(ProxyHelper.isKunderaProxyCollection(person.getAddresses()));
 
     }
 
-    
     @Test
-    public void testManyToManyByMap() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
+    public void testManyToManyByMap() throws NoSuchFieldException, SecurityException, IllegalArgumentException,
+            IllegalAccessException
     {
         PersonUMMByMap person = new PersonUMMByMap();
         person.setPersonId("person1");
         person.setPersonName("personName");
-        
+
         AddressUMM address = new AddressUMM();
         address.setAddressId("addr1");
         address.setStreet("mtmstreet");
-        
-        Map<String, AddressUMM> addresses = new HashMap<String,AddressUMM>();
-        addresses.put("addr1",address);
-        
+
+        Map<String, AddressUMM> addresses = new HashMap<String, AddressUMM>();
+        addresses.put("addr1", address);
+
         person.setAddresses(addresses);
-        
+
         em.persist(person);
-        
-        
+
         PersistenceDelegator delegator = CoreTestUtilities.getDelegator(em);
 
         Map<String, Object> relationMap = new HashMap<String, Object>();
         relationMap.put("ADDRESS_ID", "addr1");
 
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(PersonUMMByMap.class);
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(
+                ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance(), PersonUMMByMap.class);
 
-        CoreTestEntityReader reader = new CoreTestEntityReader();
+        CoreTestEntityReader reader = new CoreTestEntityReader(kunderaMetadata);
 
         person.setAddresses(null);
 
@@ -351,9 +362,13 @@ public class EntityReaderTest
 
         reader.recursivelyFindEntities(person, relationMap, metadata, delegator, true);
 
-        Assert.assertTrue(person.getAddresses().isEmpty());  // code to fetch from join table data in dummy client is missing.
+        Assert.assertTrue(person.getAddresses().isEmpty()); // code to fetch
+                                                            // from join table
+                                                            // data in dummy
+                                                            // client is
+                                                            // missing.
 
-//        Assert.assertFalse(ProxyHelper.isKunderaProxyCollection(person.getAddresses()));
+        // Assert.assertFalse(ProxyHelper.isKunderaProxyCollection(person.getAddresses()));
 
     }
 
@@ -384,9 +399,10 @@ public class EntityReaderTest
 
         Map<String, Object> relationMap = null;
 
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(PersonU1M.class);
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(
+                ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance(), PersonU1M.class);
 
-        CoreTestEntityReader reader = new CoreTestEntityReader();
+        CoreTestEntityReader reader = new CoreTestEntityReader(kunderaMetadata);
 
         p1.setAddresses(null);
 
@@ -396,7 +412,7 @@ public class EntityReaderTest
 
         Assert.assertTrue(ProxyHelper.isKunderaProxyCollection(p1.getAddresses()));
 
-//        p1.setAddresses(null);
+        // p1.setAddresses(null);
 
         reader.recursivelyFindEntities(p1, relationMap, metadata, delegator, true);
 
@@ -433,9 +449,10 @@ public class EntityReaderTest
 
         Map<String, Object> relationMap = null;
 
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(PersonB1M.class);
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(
+                ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance(), PersonB1M.class);
 
-        CoreTestEntityReader reader = new CoreTestEntityReader();
+        CoreTestEntityReader reader = new CoreTestEntityReader(kunderaMetadata);
 
         p1.setAddresses(null);
 
@@ -444,8 +461,10 @@ public class EntityReaderTest
         Assert.assertNotNull(p1.getAddresses());
 
         Assert.assertTrue(ProxyHelper.isKunderaProxyCollection(p1.getAddresses()));
-//        Assert.assertEquals(p1, p1.getAddresses().iterator().next().getPerson());
-//        Assert.assertEquals(p1, p1.getAddresses().iterator().next().getPerson());
+        // Assert.assertEquals(p1,
+        // p1.getAddresses().iterator().next().getPerson());
+        // Assert.assertEquals(p1,
+        // p1.getAddresses().iterator().next().getPerson());
 
         p1.setAddresses(null);
 
@@ -454,11 +473,12 @@ public class EntityReaderTest
         Assert.assertNotNull(p1.getAddresses());
 
         Assert.assertFalse(ProxyHelper.isKunderaProxyCollection(p1.getAddresses()));
-        
-//        Assert.assertEquals(p1, p1.getAddresses().iterator().next().getPerson());
-//        Assert.assertEquals(p1, p1.getAddresses().iterator().next().getPerson());
-    }
 
+        // Assert.assertEquals(p1,
+        // p1.getAddresses().iterator().next().getPerson());
+        // Assert.assertEquals(p1,
+        // p1.getAddresses().iterator().next().getPerson());
+    }
 
     @After
     public void tearDown()
@@ -473,7 +493,8 @@ public class EntityReaderTest
             em.close();
         }
 
-        LuceneCleanupUtilities.cleanLuceneDirectory(PU);
+        LuceneCleanupUtilities.cleanLuceneDirectory(((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance()
+                .getApplicationMetadata().getPersistenceUnitMetadata(PU));
     }
 
 }

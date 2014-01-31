@@ -40,10 +40,10 @@ import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -68,12 +68,12 @@ public class CouchDBObjectMapper
      * @return
      * @throws OperationNotSupportedException
      */
-    static JsonObject getJsonOfEntity(EntityMetadata m, Object entity, Object id, List<RelationHolder> relations)
-            throws OperationNotSupportedException
+    static JsonObject getJsonOfEntity(EntityMetadata m, Object entity, Object id, List<RelationHolder> relations,
+            final KunderaMetadata kunderaMetadata) throws OperationNotSupportedException
     {
         JsonObject jsonObject = new JsonObject();
 
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
         EntityType entityType = metaModel.entity(m.getEntityClazz());
 
@@ -188,7 +188,7 @@ public class CouchDBObjectMapper
         JsonObject jsonObject = new JsonObject();
         for (Field field : declaredFields)
         {
-            
+
             if (!ReflectUtils.isTransientOrStatic(field)
                     && !embeddableType.getAttribute(field.getName()).isAssociation())
             {
@@ -208,7 +208,8 @@ public class CouchDBObjectMapper
      * @param relations
      * @return
      */
-    static Object getEntityFromJson(Class<?> entityClass, EntityMetadata m, JsonObject jsonObj, List<String> relations)
+    static Object getEntityFromJson(Class<?> entityClass, EntityMetadata m, JsonObject jsonObj, List<String> relations,
+            final KunderaMetadata kunderaMetadata)
     {// Entity object
         Object entity = null;
 
@@ -219,12 +220,12 @@ public class CouchDBObjectMapper
 
             // Populate primary key column
             JsonElement rowKey = jsonObj.get(((AbstractAttribute) m.getIdAttribute()).getJPAColumnName());
-            if(rowKey == null)
+            if (rowKey == null)
             {
                 return null;
             }
             Class<?> idClass = null;
-            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                     m.getPersistenceUnit());
             Map<String, Object> relationValue = null;
             idClass = m.getIdAttribute().getJavaType();
@@ -282,8 +283,8 @@ public class CouchDBObjectMapper
                             {
                                 String colFieldName = m.getFieldName(fieldName);
                                 Attribute attribute = entityType.getAttribute(colFieldName);
-                                EntityMetadata relationMetadata = KunderaMetadataManager.getEntityMetadata(attribute
-                                        .getJavaType());
+                                EntityMetadata relationMetadata = KunderaMetadataManager.getEntityMetadata(
+                                        kunderaMetadata, attribute.getJavaType());
                                 Object colVal = PropertyAccessorHelper.fromSourceToTargetClass(relationMetadata
                                         .getIdAttribute().getJavaType(), String.class, colValue.getAsString());
                                 relationValue.put(fieldName, colVal);

@@ -15,25 +15,17 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.model;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Properties;
+
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.kundera.Constants;
-import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.client.CoreTestClient;
-import com.impetus.kundera.client.CoreTestClientFactory;
-import com.impetus.kundera.configure.ClientFactoryConfiguraton;
-import com.impetus.kundera.configure.SchemaConfiguration;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
-import com.impetus.kundera.metadata.MetadataBuilder;
 import com.impetus.kundera.metadata.processor.IndexProcessor;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
@@ -45,13 +37,15 @@ public class EntityMetadataTest
 {
     private String persistenceUnit = "metaDataTest";
 
+    private EntityManagerFactory emf;
+
     /**
      * @throws java.lang.Exception
      */
     @Before
     public void setUp() throws Exception
     {
-        getEntityManagerFactory(null);
+        emf = getEntityManagerFactory(null);
     }
 
     /**
@@ -60,13 +54,14 @@ public class EntityMetadataTest
     @After
     public void tearDown() throws Exception
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+
     }
 
     @Test
     public void test()
     {
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(Employe.class);
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(
+                ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance(), Employe.class);
         Assert.assertNotNull(entityMetadata);
         Assert.assertNotNull(entityMetadata.getIndexProperties());
         Assert.assertFalse(entityMetadata.getIndexProperties().isEmpty());
@@ -89,21 +84,22 @@ public class EntityMetadataTest
         Assert.assertNotNull(indexes.get("location"));
         Assert.assertEquals("GEO2D", indexes.get("location").getIndexType());
         Assert.assertEquals(new Integer(200), indexes.get("location").getMax());
-        Assert.assertEquals(new Integer(-200), indexes.get("location").getMin());     
-        
+        Assert.assertEquals(new Integer(-200), indexes.get("location").getMin());
+
     }
 
     @Test
     public void testEmbeddedCollection()
     {
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(KunderaUser.class);
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(
+                ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance(), KunderaUser.class);
         Assert.assertNotNull(entityMetadata);
         Assert.assertTrue(entityMetadata.getIndexProperties().isEmpty());
         Assert.assertEquals(EntityMetadata.Type.SUPER_COLUMN_FAMILY, entityMetadata.getType());
         Assert.assertNotNull(entityMetadata.toString());
-        
+
         entityMetadata.setCounterColumnType(false);
-        Assert.assertFalse(entityMetadata.isCounterColumnType());       
+        Assert.assertFalse(entityMetadata.isCounterColumnType());
     }
 
     /**
@@ -116,61 +112,9 @@ public class EntityMetadataTest
      */
     private EntityManagerFactoryImpl getEntityManagerFactory(String property)
     {
-        ClientMetadata clientMetadata = new ClientMetadata();
-        Map<String, Object> props = new HashMap<String, Object>();
-
-        props.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
-        props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY, CoreTestClientFactory.class.getName());
-        props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
-        props.put(PersistenceProperties.KUNDERA_PORT, "9160");
-        props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaMetaDataTest");
-//        props.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, schemaProperty);
-        clientMetadata.setLuceneIndexDir(null);
-
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
-        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
-        PersistenceUnitMetadata puMetadata = new PersistenceUnitMetadata();
-        puMetadata.setPersistenceUnitName(persistenceUnit);
-        Properties p = new Properties();
-        p.putAll(props);
-        puMetadata.setProperties(p);
-        Map<String, PersistenceUnitMetadata> metadata = new HashMap<String, PersistenceUnitMetadata>();
-        metadata.put(persistenceUnit, puMetadata);
-        appMetadata.addPersistenceUnitMetadata(metadata);
-
-        Map<String, List<String>> clazzToPu = new HashMap<String, List<String>>();
-
-        List<String> pus = new ArrayList<String>();
-        pus.add(persistenceUnit);
-        clazzToPu.put(Employe.class.getName(), pus);
-        clazzToPu.put(KunderaUser.class.getName(), pus);
-
-        appMetadata.setClazzToPuMap(clazzToPu);
-
-
-        MetadataBuilder metadataBuilder = new MetadataBuilder(persistenceUnit, CoreTestClient.class.getSimpleName(), null);
-
-
-        MetamodelImpl metaModel = new MetamodelImpl();
-        metaModel.addEntityMetadata(Employe.class, metadataBuilder.buildEntityMetadata(Employe.class));
-        metaModel.addEntityMetadata(KunderaUser.class, metadataBuilder.buildEntityMetadata(KunderaUser.class));
-
-        appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
-
-        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(persistenceUnit).getManagedTypes());
-        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(persistenceUnit).getEmbeddables());
-        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(persistenceUnit).getMappedSuperClassTypes());
-
-//        KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit, clientMetadata);
-
-        String[] persistenceUnits = new String[] { persistenceUnit };
-        new ClientFactoryConfiguraton(null, persistenceUnits).configure();
-
-        new SchemaConfiguration(null, persistenceUnits).configure();
-        return null;
+        return (EntityManagerFactoryImpl) Persistence.createEntityManagerFactory(persistenceUnit);
     }
-    
-    
+
     @Test
     public void testColumn()
     {
@@ -181,18 +125,18 @@ public class EntityMetadataTest
             Assert.assertTrue(column.isIndexable());
             Assert.assertEquals("empName", column.getField().getName());
             Assert.assertEquals("EMP_NAME", column.getName());
-            
-            column = new Column("AGE", Employe.class.getDeclaredField("age"), true);            
+
+            column = new Column("AGE", Employe.class.getDeclaredField("age"), true);
             Assert.assertTrue(column.isIndexable());
             Assert.assertEquals("age", column.getField().getName());
             Assert.assertEquals("AGE", column.getName());
         }
         catch (SecurityException e)
-        {            
+        {
             Assert.fail(e.getMessage());
         }
         catch (NoSuchFieldException e)
-        {            
+        {
             Assert.fail(e.getMessage());
         }
     }

@@ -22,9 +22,9 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 
 /**
  * The Class KunderaMetadataManager.
@@ -44,11 +44,12 @@ public class KunderaMetadataManager
      *            the persistence unit
      * @return the persistence unit metadata
      */
-    public static PersistenceUnitMetadata getPersistenceUnitMetadata(String persistenceUnit)
+    public static PersistenceUnitMetadata getPersistenceUnitMetadata(final KunderaMetadata kunderaMetadata,
+            String persistenceUnit)
     {
-        if (persistenceUnit != null)
+        if (persistenceUnit != null && kunderaMetadata != null)
         {
-            return KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadata(persistenceUnit);
+            return kunderaMetadata.getApplicationMetadata().getPersistenceUnitMetadata(persistenceUnit);
         }
         return null;
     }
@@ -60,10 +61,8 @@ public class KunderaMetadataManager
      *            the persistence unit
      * @return the metamodel
      */
-    public static MetamodelImpl getMetamodel(String persistenceUnit)
+    public static MetamodelImpl getMetamodel(final KunderaMetadata kunderaMetadata, String persistenceUnit)
     {
-        KunderaMetadata kunderaMetadata = KunderaMetadata.INSTANCE;
-
         MetamodelImpl metamodel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
                 .getMetamodel(persistenceUnit);
 
@@ -77,10 +76,8 @@ public class KunderaMetadataManager
      *            the persistence units
      * @return the metamodel
      */
-    public static MetamodelImpl getMetamodel(String... persistenceUnits)
+    public static MetamodelImpl getMetamodel(final KunderaMetadata kunderaMetadata, String... persistenceUnits)
     {
-        KunderaMetadata kunderaMetadata = KunderaMetadata.INSTANCE;
-
         MetamodelImpl metamodel = null;
         for (String pu : persistenceUnits)
         {
@@ -111,9 +108,10 @@ public class KunderaMetadataManager
      *            the entity class
      * @return the entity metadata
      */
-    public static EntityMetadata getEntityMetadata(String persistenceUnit, Class entityClass)
+    public static EntityMetadata getEntityMetadata(final KunderaMetadata kunderaMetadata, String persistenceUnit,
+            Class entityClass)
     {
-        return getMetamodel(persistenceUnit).getEntityMetadata(entityClass);
+        return getMetamodel(kunderaMetadata, persistenceUnit).getEntityMetadata(entityClass);
     }
 
     /**
@@ -125,14 +123,13 @@ public class KunderaMetadataManager
      *            the persistence units
      * @return the entity metadata
      */
-    public static EntityMetadata getEntityMetadata(Class entityClass)
+    public static EntityMetadata getEntityMetadata(final KunderaMetadata kunderaMetadata, Class entityClass)
     {
         if (entityClass == null)
         {
             throw new KunderaException("Invalid class provided " + entityClass);
         }
-        List<String> persistenceUnits = KunderaMetadata.INSTANCE.getApplicationMetadata().getMappedPersistenceUnit(
-                entityClass);
+        List<String> persistenceUnits = kunderaMetadata.getApplicationMetadata().getMappedPersistenceUnit(entityClass);
 
         // persistence units will only have more than 1 persistence unit in case
         // of RDBMS.
@@ -140,7 +137,7 @@ public class KunderaMetadataManager
         {
             for (String pu : persistenceUnits)
             {
-                MetamodelImpl metamodel = getMetamodel(pu);
+                MetamodelImpl metamodel = getMetamodel(kunderaMetadata, pu);
                 EntityMetadata metadata = metamodel.getEntityMetadata(entityClass);
                 if (metadata != null && metadata.getPersistenceUnit().equals(pu))
                 {

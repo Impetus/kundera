@@ -28,8 +28,8 @@ import com.impetus.kundera.index.Indexer;
 import com.impetus.kundera.index.IndexerProperties;
 import com.impetus.kundera.index.IndexerProperties.Node;
 import com.impetus.kundera.index.IndexingException;
-import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.thoughtworks.xstream.XStream;
@@ -69,12 +69,12 @@ public class ESIndexer implements Indexer
     }
 
     @Override
-    public void index(Class entityClazz, Map<String, Object> values, Object parentId, Class parentClazz)
+    public void index(Class entityClazz, EntityMetadata metadata, Map<String, Object> values, Object parentId,
+            Class parentClazz)
     {
         ObjectMapper mapper = new ObjectMapper();
         try
         {
-            EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entityClazz);
             values.put("entity.class", metadata.getEntityClazz().getCanonicalName().toLowerCase());
             if (parentId != null)
             {
@@ -117,14 +117,12 @@ public class ESIndexer implements Indexer
     }
 
     @Override
-    public Map<String, Object> search(Class<?> clazz, String luceneQuery, int start, int count)
+    public Map<String, Object> search(Class<?> clazz, EntityMetadata m, String luceneQuery, int start, int count)
     {
         if (log.isInfoEnabled())
         {
             log.info("Executing lucene query " + luceneQuery);
         }
-
-        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(clazz);
 
         ListenableActionFuture<SearchResponse> listenableActionFuture = client
                 .prepareSearch(m.getSchema().toLowerCase()).setQuery(QueryBuilders.queryString(luceneQuery))
@@ -142,9 +140,8 @@ public class ESIndexer implements Indexer
     }
 
     @Override
-    public void unIndex(Class entityClazz, Object entity)
+    public void unIndex(Class entityClazz, Object entity, EntityMetadata metadata, MetamodelImpl metamodelImpl)
     {
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entityClazz);
         Object id = PropertyAccessorHelper.getId(entity, metadata);
         DeleteResponse response = client
                 .prepareDelete(metadata.getSchema().toLowerCase(), entityClazz.getSimpleName(), id.toString())
@@ -161,10 +158,10 @@ public class ESIndexer implements Indexer
     }
 
     @Override
-    public Map<String, Object> search(String query, Class<?> parentClass, Class<?> childClass, Object entityId,
+    public Map<String, Object> search(String query, Class<?> parentClass,  EntityMetadata parentMetadata, Class<?> childClass, EntityMetadata childMetadata, Object entityId,
             int start, int count)
     {
-        return search(parentClass, query, start, count);
+        return search(parentClass, parentMetadata, query, start, count);
     }
 
     public void init()
@@ -172,7 +169,7 @@ public class ESIndexer implements Indexer
 
         InputStream inStream = this.getClass().getClassLoader().getResourceAsStream("esindexer.xml");
         XStream xStream = getXStreamObject();
-        
+
         if (inStream != null)
         {
             Object o = xStream.fromXML(inStream);

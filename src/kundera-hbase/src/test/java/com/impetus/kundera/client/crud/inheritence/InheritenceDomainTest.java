@@ -31,7 +31,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.impetus.client.hbase.junits.HBaseCli;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
  * Junit for abstract entity class's operation.
@@ -57,7 +56,7 @@ public class InheritenceDomainTest
     @BeforeClass
     public static void setUpBeforeClass() throws Exception
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         cli = new HBaseCli();
         cli.startCluster();
        

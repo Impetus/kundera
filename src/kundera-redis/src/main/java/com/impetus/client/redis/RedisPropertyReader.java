@@ -27,6 +27,7 @@ import com.impetus.kundera.configure.AbstractPropertyReader;
 import com.impetus.kundera.configure.ClientProperties;
 import com.impetus.kundera.configure.ClientProperties.DataStore;
 import com.impetus.kundera.configure.PropertyReader;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
  * Property reader responsible for: a) Reads property file (xml or .properties)
@@ -43,9 +44,9 @@ public class RedisPropertyReader extends AbstractPropertyReader implements Prope
     /** MongoDB schema metadata instance */
     public static RedisSchemaMetadata rsmd;
 
-    public RedisPropertyReader(Map externalProperties)
+    public RedisPropertyReader(Map externalProperties, final PersistenceUnitMetadata puMetadata)
     {
-        super(externalProperties);
+        super(externalProperties, puMetadata);
         rsmd = new RedisSchemaMetadata();
     }
 

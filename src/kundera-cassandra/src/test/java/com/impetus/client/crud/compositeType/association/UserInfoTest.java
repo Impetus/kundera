@@ -221,10 +221,12 @@ public class UserInfoTest
 
         CassandraCli.getClient().system_add_keyspace(ksDef);
 
-        CassandraCli.executeCqlQuery("USE \"CompositeCassandra\"");
+        CassandraCli.executeCqlQuery("USE \"CompositeCassandra\"", ksDef.getName());
 
         CassandraCli
-                .executeCqlQuery("CREATE TABLE \"CompositeUserAssociation\" (\"userId\" varchar,\"tweetId\" int,\"timeLineId\" uuid, \"tweetBody\" varchar, \"tweetDate\" timestamp, \"userInfo_id\" varchar,\"first_name\" varchar,\"last_name\" varchar, \"age\" int, PRIMARY KEY (\"userId\", \"tweetId\",\"timeLineId\"))");
+                .executeCqlQuery(
+                        "CREATE TABLE \"CompositeUserAssociation\" (\"userId\" varchar,\"tweetId\" int,\"timeLineId\" uuid, \"tweetBody\" varchar, \"tweetDate\" timestamp, \"userInfo_id\" varchar,\"first_name\" varchar,\"last_name\" varchar, \"age\" int, PRIMARY KEY (\"userId\", \"tweetId\",\"timeLineId\"))",
+                        ksDef.getName());
 
     }
 }

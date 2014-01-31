@@ -15,31 +15,14 @@
  ******************************************************************************/
 package com.impetus.kundera.service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import javax.persistence.Persistence;
 
 import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.kundera.Constants;
-import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.client.CoreTestClient;
-import com.impetus.kundera.client.CoreTestClientFactory;
-import com.impetus.kundera.configure.ClientFactoryConfiguraton;
-import com.impetus.kundera.configure.SchemaConfiguration;
-import com.impetus.kundera.metadata.MetadataBuilder;
-import com.impetus.kundera.metadata.model.ApplicationMetadata;
-import com.impetus.kundera.metadata.model.ClientMetadata;
-import com.impetus.kundera.metadata.model.Employe;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.metadata.model.KunderaUser;
-import com.impetus.kundera.metadata.model.MetamodelImpl;
-import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
 /**
  * @author vivek.mishra
@@ -52,13 +35,15 @@ public class HostconfigurationTest
     /* persistence unit. */
     private String persistenceUnit = "metaDataTest";
 
+    private EntityManagerFactoryImpl emf;
+
     /**
      * on setup
      */
     @Before
     public void setUp()
     {
-        getEntityManagerFactory("create");
+        emf = getEntityManagerFactory("create");
     }
 
     /**
@@ -67,7 +52,7 @@ public class HostconfigurationTest
     @Test
     public void test()
     {
-        CoreHostConfiguration hostConfiguration = new CoreHostConfiguration(null, null, persistenceUnit);
+        CoreHostConfiguration hostConfiguration = new CoreHostConfiguration(null, null, persistenceUnit, emf.getKunderaMetadataInstance());
         Assert.assertNotNull(hostConfiguration.hosts);
         Assert.assertNotNull(hostConfiguration.port);
         Assert.assertTrue(hostConfiguration.getHosts().isEmpty());
@@ -93,59 +78,9 @@ public class HostconfigurationTest
      * 
      * @return the entity manager factory
      */
-    private void getEntityManagerFactory(final String schemaProperty)
+    private EntityManagerFactoryImpl getEntityManagerFactory(final String schemaProperty)
     {
-        ClientMetadata clientMetadata = new ClientMetadata();
-        Map<String, Object> props = new HashMap<String, Object>();
-
-        props.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
-        props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY, CoreTestClientFactory.class.getName());
-        props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
-        props.put(PersistenceProperties.KUNDERA_PORT, "9160");
-        props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaMetaDataTest");
-        props.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, schemaProperty);
-        clientMetadata.setLuceneIndexDir(null);
-
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
-        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
-        PersistenceUnitMetadata puMetadata = new PersistenceUnitMetadata();
-        puMetadata.setPersistenceUnitName(persistenceUnit);
-        Properties p = new Properties();
-        p.putAll(props);
-        puMetadata.setProperties(p);
-        Map<String, PersistenceUnitMetadata> metadata = new HashMap<String, PersistenceUnitMetadata>();
-        metadata.put(persistenceUnit, puMetadata);
-        appMetadata.addPersistenceUnitMetadata(metadata);
-
-        Map<String, List<String>> clazzToPu = new HashMap<String, List<String>>();
-
-        List<String> pus = new ArrayList<String>();
-        pus.add(persistenceUnit);
-        clazzToPu.put(Employe.class.getName(), pus);
-        clazzToPu.put(KunderaUser.class.getName(), pus);
-
-        appMetadata.setClazzToPuMap(clazzToPu);
-
-
-        MetadataBuilder metadataBuilder = new MetadataBuilder(persistenceUnit, CoreTestClient.class.getSimpleName(), null);
-
-
-        MetamodelImpl metaModel = new MetamodelImpl();
-        metaModel.addEntityMetadata(Employe.class, metadataBuilder.buildEntityMetadata(Employe.class));
-        metaModel.addEntityMetadata(KunderaUser.class, metadataBuilder.buildEntityMetadata(KunderaUser.class));
-
-        appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
-
-        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(persistenceUnit).getManagedTypes());
-        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(persistenceUnit).getEmbeddables());
-        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(persistenceUnit).getMappedSuperClassTypes());
-
-//        KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit, clientMetadata);
-
-        String[] persistenceUnits = new String[] { persistenceUnit };
-        new ClientFactoryConfiguraton(null, persistenceUnits).configure();
-
-        new SchemaConfiguration(null, persistenceUnits).configure();
+        return (EntityManagerFactoryImpl) Persistence.createEntityManagerFactory(persistenceUnit);
     }
 
 }

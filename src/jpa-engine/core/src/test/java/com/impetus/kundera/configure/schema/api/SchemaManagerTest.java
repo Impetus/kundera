@@ -15,11 +15,8 @@
  */
 package com.impetus.kundera.configure.schema.api;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -30,20 +27,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.client.CoreTestClient;
-import com.impetus.kundera.client.CoreTestClientFactory;
-import com.impetus.kundera.configure.ClientFactoryConfiguraton;
-import com.impetus.kundera.configure.SchemaConfiguration;
-import com.impetus.kundera.metadata.MetadataBuilder;
-import com.impetus.kundera.metadata.model.ApplicationMetadata;
-import com.impetus.kundera.metadata.model.ClientMetadata;
-import com.impetus.kundera.metadata.model.Employe;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.metadata.model.KunderaUser;
-import com.impetus.kundera.metadata.model.MetamodelImpl;
-import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 public class SchemaManagerTest
 {
@@ -53,15 +37,15 @@ public class SchemaManagerTest
     @Before
     public void setUp()
     {
-        getEntityManagerFactory("create");
+
     }
-    
+
     @Test
     public void testCreate()
     {
         Map<String, Object> props = new HashMap<String, Object>();
         props.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create");
-        EntityManagerFactory  emf = Persistence.createEntityManagerFactory("metaDataTest", props);
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("metaDataTest", props);
         Assert.assertTrue(CoreSchemaManager.validateAction("create"));
         emf.close();
         Assert.assertTrue(CoreSchemaManager.validateAction("create"));
@@ -73,7 +57,7 @@ public class SchemaManagerTest
     {
         Map<String, Object> props = new HashMap<String, Object>();
         props.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create-drop");
-        EntityManagerFactory  emf = Persistence.createEntityManagerFactory("metaDataTest", props);
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("metaDataTest", props);
         Assert.assertTrue(CoreSchemaManager.validateAction("create-drop"));
         Assert.assertFalse(CoreSchemaManager.validateAction("create"));
 
@@ -87,7 +71,7 @@ public class SchemaManagerTest
     {
         Map<String, Object> props = new HashMap<String, Object>();
         props.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "update");
-        EntityManagerFactory  emf = Persistence.createEntityManagerFactory("metaDataTest", props);
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("metaDataTest", props);
         Assert.assertFalse(CoreSchemaManager.validateAction("create-drop"));
         Assert.assertFalse(CoreSchemaManager.validateAction("create"));
         Assert.assertTrue(CoreSchemaManager.validateAction("update"));
@@ -99,69 +83,7 @@ public class SchemaManagerTest
     @After
     public void tearDown()
     {
-        
-    }
-    /**
-     * Gets the entity manager factory.
-     * 
-     * @param useLucene
-     * @param property
-     * 
-     * @return the entity manager factory
-     */
-    private void getEntityManagerFactory(final String schemaProperty)
-    {
-        ClientMetadata clientMetadata = new ClientMetadata();
-        Map<String, Object> props = new HashMap<String, Object>();
 
-        props.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
-        props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY, CoreTestClientFactory.class.getName());
-        props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
-        props.put(PersistenceProperties.KUNDERA_PORT, "9160");
-        props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaMetaDataTest");
-        props.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, schemaProperty);
-        clientMetadata.setLuceneIndexDir(null);
-
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
-        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
-        PersistenceUnitMetadata puMetadata = new PersistenceUnitMetadata();
-        puMetadata.setPersistenceUnitName(persistenceUnit);
-        Properties p = new Properties();
-        p.putAll(props);
-        puMetadata.setProperties(p);
-        Map<String, PersistenceUnitMetadata> metadata = new HashMap<String, PersistenceUnitMetadata>();
-        metadata.put(persistenceUnit, puMetadata);
-        appMetadata.addPersistenceUnitMetadata(metadata);
-
-        Map<String, List<String>> clazzToPu = new HashMap<String, List<String>>();
-
-        List<String> pus = new ArrayList<String>();
-        pus.add(persistenceUnit);
-        clazzToPu.put(Employe.class.getName(), pus);
-        clazzToPu.put(KunderaUser.class.getName(), pus);
-
-        appMetadata.setClazzToPuMap(clazzToPu);
-
-
-        MetadataBuilder metadataBuilder = new MetadataBuilder(persistenceUnit, CoreTestClient.class.getSimpleName(), null);
-
-
-        MetamodelImpl metaModel = new MetamodelImpl();
-        metaModel.addEntityMetadata(Employe.class, metadataBuilder.buildEntityMetadata(Employe.class));
-        metaModel.addEntityMetadata(KunderaUser.class, metadataBuilder.buildEntityMetadata(KunderaUser.class));
-
-        appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
-
-        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(persistenceUnit).getManagedTypes());
-        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(persistenceUnit).getEmbeddables());
-        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(persistenceUnit).getMappedSuperClassTypes());
-
-//        KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit, clientMetadata);
-
-        String[] persistenceUnits = new String[] { persistenceUnit };
-        new ClientFactoryConfiguraton(null, persistenceUnits).configure();
-
-        new SchemaConfiguration(null, persistenceUnits).configure();
     }
 
 }

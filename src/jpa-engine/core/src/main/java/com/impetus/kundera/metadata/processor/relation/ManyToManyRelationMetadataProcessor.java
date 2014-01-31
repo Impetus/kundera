@@ -35,6 +35,7 @@ import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.processor.AbstractEntityFieldProcessor;
 import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
 import com.impetus.kundera.metadata.validator.InvalidEntityDefinitionException;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
@@ -49,8 +50,9 @@ public class ManyToManyRelationMetadataProcessor extends AbstractEntityFieldProc
     /**
      * Instantiates a new many to many relation metadata processor.
      */
-    public ManyToManyRelationMetadataProcessor()
+    public ManyToManyRelationMetadataProcessor(KunderaMetadata kunderaMetadata)
     {
+        super(kunderaMetadata);
         validator = new EntityValidatorImpl();
     }
 
@@ -117,6 +119,7 @@ public class ManyToManyRelationMetadataProcessor extends AbstractEntityFieldProc
         }
 
         validate(targetEntity);
+       
         Relation relation = new Relation(relationField, targetEntity, relationField.getType(), m2mAnnotation.fetch(),
                 Arrays.asList(m2mAnnotation.cascade()), Boolean.TRUE, m2mAnnotation.mappedBy(),
                 Relation.ForeignKey.MANY_TO_MANY);
@@ -174,7 +177,6 @@ public class ManyToManyRelationMetadataProcessor extends AbstractEntityFieldProc
             metadata.setRelationViaJoinTable(relation.isRelatedViaJoinTable());
         }
 
-        
     }
 
     @Override

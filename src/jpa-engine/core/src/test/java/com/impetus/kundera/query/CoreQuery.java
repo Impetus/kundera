@@ -21,6 +21,7 @@ import java.util.List;
 
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
@@ -34,9 +35,9 @@ import com.impetus.kundera.utils.KunderaCoreUtils;
 public class CoreQuery<E> extends QueryImpl<E>
 {
 
-    public CoreQuery(final KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
+    public CoreQuery(final KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator, final KunderaMetadata kunderaMetadata)
     {
-        super(kunderaQuery, persistenceDelegator);
+        super(kunderaQuery, persistenceDelegator, kunderaMetadata);
     }
 
 
@@ -76,7 +77,7 @@ public class CoreQuery<E> extends QueryImpl<E>
 
     public String getLuceneQuery()
     {
-        return KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery);
+        return KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery, kunderaMetadata);
     }
     
     /*public Set<String> fetchByLuceneQuery()
@@ -101,7 +102,7 @@ public class CoreQuery<E> extends QueryImpl<E>
     @Override
     protected EntityReader getReader()
     {
-        return new CoreTestEntityReader();
+        return new CoreTestEntityReader(kunderaMetadata);
     }
 
     @Override

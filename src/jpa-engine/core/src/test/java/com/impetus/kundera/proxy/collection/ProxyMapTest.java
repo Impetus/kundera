@@ -31,7 +31,6 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 import com.impetus.kundera.CoreTestUtilities;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.persistence.PersistenceDelegator;
@@ -52,7 +51,7 @@ public class ProxyMapTest
     public void setup(final String persistenceUnit)
     {
 
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         emf = Persistence.createEntityManagerFactory(persistenceUnit);
         em = emf.createEntityManager();
     }

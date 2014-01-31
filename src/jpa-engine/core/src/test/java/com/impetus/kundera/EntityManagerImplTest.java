@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.client.DummyDatabase;
 import com.impetus.kundera.metadata.entities.SampleEntity;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityManagerImpl;
 import com.impetus.kundera.polyglot.entities.PersonBMM;
 import com.impetus.kundera.query.Person;
@@ -56,7 +55,7 @@ public class EntityManagerImplTest
     @Before
     public void setUp()
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         
         
         emf = Persistence.createEntityManagerFactory("kunderatest");
@@ -192,7 +191,7 @@ public class EntityManagerImplTest
         Query query = em.createNativeQuery(nativeQuery, SampleEntity.class);
         
         Assert.assertNotNull(query);
-//        Assert.assertTrue(KunderaMetadata.INSTANCE.getApplicationMetadata().isNative(nativeQuery));
+//        Assert.assertTrue(kunderaMetadata.getApplicationMetadata().isNative(nativeQuery));
     }
     
 

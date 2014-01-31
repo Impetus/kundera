@@ -82,11 +82,11 @@ import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata.Type;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.utils.ReflectUtils;
 
@@ -126,9 +126,9 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      *            the configured client clientFactory
      * @param puProperties
      */
-    public CassandraSchemaManager(String clientFactory, Map<String, Object> puProperties)
+    public CassandraSchemaManager(String clientFactory, Map<String, Object> puProperties, final KunderaMetadata kunderaMetadata)
     {
-        super(clientFactory, puProperties);
+        super(clientFactory, puProperties, kunderaMetadata);
     }
 
     @Override
@@ -1878,8 +1878,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         private boolean validateEntity(Class clazz)
         {
             boolean isvalid = false;
-            EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(clazz);
-            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+            EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, clazz);
+            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                     metadata.getPersistenceUnit());
             String tableName = metadata.getTableName();
             if (csmd.isCounterColumn(metadata.getSchema(), tableName))
@@ -1916,7 +1916,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             boolean isValid = true;
             for (Relation relation : metadata.getRelations())
             {
-                EntityMetadata targetEntityMetadata = KunderaMetadataManager.getEntityMetadata(relation
+                EntityMetadata targetEntityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, relation
                         .getTargetEntity());
                 if (((relation.getType().equals(ForeignKey.ONE_TO_ONE) && !relation.isJoinedByPrimaryKey()) || relation
                         .getType().equals(ForeignKey.MANY_TO_MANY)) && relation.getMappedBy() == null)

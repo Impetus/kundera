@@ -31,22 +31,26 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.annotations.Index;
 import com.impetus.kundera.index.IndexCollection;
-import com.impetus.kundera.metadata.MetadataProcessor;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PropertyIndex;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 
 /**
  * The Class BaseMetadataProcessor.
  * 
  * @author animesh.kumar
  */
-public class IndexProcessor implements MetadataProcessor
+public class IndexProcessor extends AbstractEntityFieldProcessor
 {
 
     /** the log used by this class. */
     private static Logger log = LoggerFactory.getLogger(IndexProcessor.class);
+
+    public IndexProcessor(KunderaMetadata kunderaMetadata)
+    {
+        super(kunderaMetadata);
+    }
 
     public final void process(final Class<?> clazz, EntityMetadata metadata)
     {
@@ -107,7 +111,7 @@ public class IndexProcessor implements MetadataProcessor
 
         // scan for fields
 
-        EntityType entityType = (EntityType) KunderaMetadata.INSTANCE.getApplicationMetadata()
+        EntityType entityType = (EntityType) kunderaMetadata.getApplicationMetadata()
                 .getMetaModelBuilder(metadata.getPersistenceUnit()).getManagedTypes().get(clazz);
 
         Set<Attribute> attributes = entityType.getAttributes();

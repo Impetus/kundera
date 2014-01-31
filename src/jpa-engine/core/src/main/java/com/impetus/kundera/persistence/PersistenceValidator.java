@@ -18,7 +18,6 @@ package com.impetus.kundera.persistence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
@@ -38,7 +37,7 @@ public class PersistenceValidator
      *            Instance of entity object
      * @return True if entity object is valid, false otherwise
      */
-    public boolean isValidEntityObject(Object entity)
+    public boolean isValidEntityObject(Object entity, EntityMetadata metadata)
     {
         if (entity == null)
         {
@@ -46,15 +45,12 @@ public class PersistenceValidator
             return false;
         }
 
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
-
         Object id = PropertyAccessorHelper.getId(entity, metadata);
         if (id == null)
         {
             log.error("Entity to be persisted can't have Primary key set to null.");
-            throw new IllegalArgumentException(
-            "Entity to be persisted can't have Primary key set to null.");
-           // return false;
+            throw new IllegalArgumentException("Entity to be persisted can't have Primary key set to null.");
+            // return false;
         }
         return true;
     }

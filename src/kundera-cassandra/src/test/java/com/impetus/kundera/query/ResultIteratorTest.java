@@ -35,7 +35,6 @@ import com.impetus.client.crud.Token;
 import com.impetus.client.crud.TokenClient;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
  * @author vivek.mishra
@@ -60,7 +59,7 @@ public class ResultIteratorTest extends BaseTest
      */
     public void setUp(final String persistenceUnit,final String keyspace, final String cqlVersion) throws Exception
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         CassandraCli.cassandraSetUp();
         CassandraCli.createKeySpace(keyspace);
         Map propertyMap = new HashMap();

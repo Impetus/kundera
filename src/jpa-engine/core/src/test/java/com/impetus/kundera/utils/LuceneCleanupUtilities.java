@@ -21,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
@@ -34,10 +33,8 @@ public class LuceneCleanupUtilities
     /** The log. */
     private static Logger log = LoggerFactory.getLogger(LuceneCleanupUtilities.class);
 
-    public static void cleanLuceneDirectory(String persistenceUnit)
+    public static void cleanLuceneDirectory(PersistenceUnitMetadata puMetadata)
     {
-        PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                .getPersistenceUnitMetadata(persistenceUnit);
         if (puMetadata != null)
         {
             String luceneDir = puMetadata.getProperty(PersistenceProperties.KUNDERA_INDEX_HOME_DIR);

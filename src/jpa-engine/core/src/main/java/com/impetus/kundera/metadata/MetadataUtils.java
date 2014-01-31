@@ -42,13 +42,13 @@ import com.impetus.kundera.annotations.Index;
 import com.impetus.kundera.index.IndexCollection;
 import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.validator.InvalidEntityDefinitionException;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
@@ -70,10 +70,10 @@ public class MetadataUtils
      *            the super column name to field map
      */
     public static void populateColumnAndSuperColumnMaps(EntityMetadata m, Map<String, Field> columnNameToFieldMap,
-            Map<String, Field> superColumnNameToFieldMap)
+            Map<String, Field> superColumnNameToFieldMap, final KunderaMetadata kunderaMetadata)
     {
 
-        getEmbeddableType(m, columnNameToFieldMap, superColumnNameToFieldMap);
+        getEmbeddableType(m, columnNameToFieldMap, superColumnNameToFieldMap, kunderaMetadata);
     }
 
     /**
@@ -104,10 +104,10 @@ public class MetadataUtils
      *            the m
      * @return the map
      */
-    public static Map<String, Field> createSuperColumnsFieldMap(EntityMetadata m)
+    public static Map<String, Field> createSuperColumnsFieldMap(final EntityMetadata m, final KunderaMetadata kunderaMetadata)
     {
         Map<String, Field> superColumnNameToFieldMap = new HashMap<String, Field>();
-        getEmbeddableType(m, null, superColumnNameToFieldMap);
+        getEmbeddableType(m, null, superColumnNameToFieldMap, kunderaMetadata);
         return superColumnNameToFieldMap;
     }
 
@@ -315,7 +315,7 @@ public class MetadataUtils
     {
         if (!useSecondryIndex(persistenceUnit))
         {
-            ClientMetadata clientMetadata = KunderaMetadata.INSTANCE.getClientMetadata(persistenceUnit);
+            ClientMetadata clientMetadata = kunderaMetadata.getClientMetadata(persistenceUnit);
             return clientMetadata.getLuceneIndexDir();
         }
 
@@ -330,15 +330,15 @@ public class MetadataUtils
      *            holding relation.
      * @return mapped/join column name.
      */
-    public static String getMappedName(EntityMetadata parentMetadata, Relation relation)
+    public static String getMappedName(EntityMetadata parentMetadata, Relation relation, final KunderaMetadata kunderaMetadata)
     {
         if (relation != null)
         {
-            String joinColumn = relation.getJoinColumnName();
+            String joinColumn = relation.getJoinColumnName(kunderaMetadata);
             if (joinColumn == null)
             {
                 Class clazz = relation.getTargetEntity();
-                EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(clazz);
+                EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, clazz);
 
                 joinColumn = relation.getType().equals(ForeignKey.ONE_TO_MANY) ? ((AbstractAttribute) parentMetadata
                         .getIdAttribute()).getJPAColumnName() : ((AbstractAttribute) metadata.getIdAttribute())
@@ -361,7 +361,7 @@ public class MetadataUtils
      *            <code>criteria</code> is column field name
      * @return the enclosing document name
      */
-    public static String getEnclosingEmbeddedFieldName(EntityMetadata m, String criteria, boolean viaColumnName)
+    public static String getEnclosingEmbeddedFieldName(EntityMetadata m, String criteria, boolean viaColumnName, final KunderaMetadata kunderaMetadata)
     {
         String enclosingEmbeddedFieldName = null;
 
@@ -379,7 +379,7 @@ public class MetadataUtils
             }
         }
 
-        Metamodel metaModel = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(m.getPersistenceUnit());
+        Metamodel metaModel = kunderaMetadata.getApplicationMetadata().getMetamodel(m.getPersistenceUnit());
         EntityType entity = metaModel.entity(m.getEntityClazz());
 
         try
@@ -417,9 +417,9 @@ public class MetadataUtils
     }
 
     private static void getEmbeddableType(EntityMetadata m, Map<String, Field> columnNameToFieldMap,
-            Map<String, Field> superColumnNameToFieldMap)
+            Map<String, Field> superColumnNameToFieldMap, final KunderaMetadata kunderaMetadata)
     {
-        Metamodel metaModel = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(m.getPersistenceUnit());
+        Metamodel metaModel = kunderaMetadata.getApplicationMetadata().getMetamodel(m.getPersistenceUnit());
 
         EntityType entityType = metaModel.entity(m.getEntityClazz());
 
@@ -526,9 +526,9 @@ public class MetadataUtils
      * @param persistenceUnit
      * @return
      */
-    public static boolean defaultTransactionSupported(final String persistenceUnit)
+    public static boolean defaultTransactionSupported(final String persistenceUnit, final KunderaMetadata kunderaMetadata)
     {
-        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata, persistenceUnit);
 
         String txResource = puMetadata.getProperty(PersistenceProperties.KUNDERA_TRANSACTION_RESOURCE);
 
@@ -547,9 +547,9 @@ public class MetadataUtils
         }
     }
 
-    public static boolean isSchemaAttributeRequired(final String persistenceUnit)
+    public static boolean isSchemaAttributeRequired(final String persistenceUnit, final KunderaMetadata kunderaMetadata)
     {
-        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata, persistenceUnit);
         String clientFactoryName = puMetadata != null ? puMetadata
                 .getProperty(PersistenceProperties.KUNDERA_CLIENT_FACTORY) : null;
         return !(Constants.NEO4J_CLIENT_FACTORY.equalsIgnoreCase(clientFactoryName) || Constants.RDBMS_CLIENT_FACTORY
@@ -563,9 +563,9 @@ public class MetadataUtils
      * 
      * @return true, if index based search is enabled.
      */
-    public static boolean indexSearchEnabled(final String persistenceUnit)
+    public static boolean indexSearchEnabled(final String persistenceUnit, final KunderaMetadata kunderaMetadata)
     {
-        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata, persistenceUnit);
         String clientFactoryName = puMetadata != null ? puMetadata
                 .getProperty(PersistenceProperties.KUNDERA_CLIENT_FACTORY) : null;
         return !(Constants.REDIS_CLIENT_FACTORY.equalsIgnoreCase(clientFactoryName));
@@ -600,9 +600,9 @@ public class MetadataUtils
      * @param m
      * @return
      */
-    public static boolean containsBasicElementCollectionField(EntityMetadata m)
+    public static boolean containsBasicElementCollectionField(final EntityMetadata m, final KunderaMetadata kunderaMetadata)
     {
-        Metamodel metaModel = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        Metamodel metaModel = kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
         EntityType entityType = metaModel.entity(m.getEntityClazz());        
         Iterator<Attribute> iter = entityType.getAttributes().iterator();        
@@ -620,9 +620,7 @@ public class MetadataUtils
 
 
     public static void onJPAColumnMapping(final EntityType entityType, EntityMetadata entityMetadata)
-    {
-//        EntityType entityType = (EntityType) builder.getManagedTypes().get(entityMetadata.getEntityClazz());
-        
+    {       
         Set<Attribute> attributes = entityType.getAttributes();
         
         Iterator<Attribute> iter = attributes.iterator();
@@ -636,8 +634,9 @@ public class MetadataUtils
             {
                 entityMetadata.addJPAColumnMapping(((AbstractAttribute)attribute).getJPAColumnName(), attribute.getName());
             }
-        }
-    
+        }    
+        
+        entityMetadata.setEntityType(entityType);
     }
 
 }

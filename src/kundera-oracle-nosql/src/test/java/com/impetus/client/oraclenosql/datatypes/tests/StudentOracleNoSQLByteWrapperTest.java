@@ -14,7 +14,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.oraclenosql.datatypes.entities.StudentOracleNoSQLByteWrapper;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 public class StudentOracleNoSQLByteWrapperTest extends OracleNoSQLBase
 {
@@ -34,7 +33,7 @@ public class StudentOracleNoSQLByteWrapperTest extends OracleNoSQLBase
     public void tearDown() throws Exception
     {
         emf.close();
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
     }
 
     @Test

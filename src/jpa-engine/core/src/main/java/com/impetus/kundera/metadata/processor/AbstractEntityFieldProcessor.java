@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import com.impetus.kundera.metadata.MetadataProcessor;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.validator.EntityValidator;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 
 /**
  * The Class AbstractEntityFieldProcessor.
@@ -47,6 +48,13 @@ public abstract class AbstractEntityFieldProcessor implements MetadataProcessor
 
     /** The Validator. */
     protected EntityValidator validator;
+
+    protected KunderaMetadata kunderaMetadata;
+
+    public AbstractEntityFieldProcessor(KunderaMetadata kunderaMetadata)
+    {
+        this.kunderaMetadata = kunderaMetadata;
+    }
 
     /**
      * Gets the valid jpa column.
@@ -118,7 +126,7 @@ public abstract class AbstractEntityFieldProcessor implements MetadataProcessor
         }
         return name;
     }
-    
+
     /**
      * Populates @Id accesser methods like, getId and setId of clazz to
      * metadata.

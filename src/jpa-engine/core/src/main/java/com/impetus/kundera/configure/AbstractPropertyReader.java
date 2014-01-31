@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.configure.ClientProperties.DataStore;
-import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.utils.KunderaCoreUtils;
 import com.thoughtworks.xstream.XStream;
@@ -50,9 +49,10 @@ public abstract class AbstractPropertyReader
 
     protected Map externalProperties;
 
-    public AbstractPropertyReader(Map externalProperties)
+    public AbstractPropertyReader(Map externalProperties, final PersistenceUnitMetadata puMetadata)
     {
         this.externalProperties = externalProperties;
+        this.puMetadata = puMetadata;
     }
 
     /**
@@ -64,7 +64,6 @@ public abstract class AbstractPropertyReader
     {
         String propertyFileName = externalProperties != null ? (String) externalProperties
                 .get(PersistenceProperties.KUNDERA_CLIENT_PROPERTY) : null;
-        puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(pu);
         if (propertyFileName == null)
         {
             propertyFileName = puMetadata != null ? puMetadata

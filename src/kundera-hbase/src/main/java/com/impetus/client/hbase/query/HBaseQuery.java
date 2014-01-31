@@ -44,10 +44,10 @@ import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.query.KunderaQuery;
@@ -76,9 +76,9 @@ public class HBaseQuery extends QueryImpl
      * @param persistenceDelegator
      *            persistence delegator interface.
      */
-    public HBaseQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
+    public HBaseQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator, final KunderaMetadata kunderaMetadata)
     {
-        super(kunderaQuery, persistenceDelegator);
+        super(kunderaQuery, persistenceDelegator, kunderaMetadata);
     }
 
     /*
@@ -119,7 +119,7 @@ public class HBaseQuery extends QueryImpl
     @Override
     protected EntityReader getReader()
     {
-        return new HBaseEntityReader(kunderaQuery);
+        return new HBaseEntityReader(kunderaQuery, kunderaMetadata);
     }
 
     /*
@@ -229,7 +229,7 @@ public class HBaseQuery extends QueryImpl
         List<String> translatedColumns = new ArrayList<String>();
         if (columns != null)
         {
-            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                     m.getPersistenceUnit());
 
             EntityType entity = metaModel.entity(m.getEntityClazz());
@@ -498,7 +498,7 @@ public class HBaseQuery extends QueryImpl
     private byte[] getBytes(String jpaFieldName, EntityMetadata m, Object value)
     {
         Attribute idCol = m.getIdAttribute();
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
 
         EntityType entity = metaModel.entity(m.getEntityClazz());

@@ -30,8 +30,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.impetus.kundera.metadata.model.KunderaMetadata;
-
 /**
  * @author vivek.mishra
  * 
@@ -110,7 +108,7 @@ public class WebTrafficTest
         {
             emf.close();
         }
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
 
     }
 

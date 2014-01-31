@@ -5,7 +5,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.kundera.client.crud.mappedsuperclass.MappedSuperClassBase;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 public class OracleMappedSuperClassTest extends MappedSuperClassBase
 {
@@ -28,7 +27,7 @@ public class OracleMappedSuperClassTest extends MappedSuperClassBase
     public void tearDown() throws Exception
     {
         tearDownInternal();
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
 
     }
 }

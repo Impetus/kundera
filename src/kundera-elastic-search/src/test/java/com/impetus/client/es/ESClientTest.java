@@ -17,14 +17,15 @@ package com.impetus.client.es;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Properties;
+
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 
 import junit.framework.Assert;
 
@@ -36,25 +37,20 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.es.PersonES.Day;
-import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.configure.ClientFactoryConfiguraton;
+import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
-import com.impetus.kundera.metadata.MetadataBuilder;
-import com.impetus.kundera.metadata.model.ApplicationMetadata;
-import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.metadata.model.MetamodelImpl;
-import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
-import com.impetus.kundera.metadata.processor.IndexProcessor;
-import com.impetus.kundera.metadata.processor.TableProcessor;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 
 public class ESClientTest
 {
     private final static String persistenceUnit = "es-pu";
 
     private Node node = null;
+
+    private EntityManagerFactory emf;
 
     @Before
     public void setup() throws Exception
@@ -65,11 +61,12 @@ public class ESClientTest
             builder.put("path.data", "target/data");
             node = new NodeBuilder().settings(builder).node();
         }
-        getEntityManagerFactory();
+        emf = getEntityManagerFactory();
     }
 
     @Test
-    public void test() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, InterruptedException
+    public void test() throws NoSuchFieldException, SecurityException, IllegalArgumentException,
+            IllegalAccessException, InterruptedException, InvocationTargetException, NoSuchMethodException
     {
         ESClientFactory esFactory = new ESClientFactory();
         Map<String, Object> props = new HashMap<String, Object>();
@@ -83,11 +80,20 @@ public class ESClientTest
             f.setAccessible(true);
         }
         f.set(esFactory, persistenceUnit);
+
+        Method m = GenericClientFactory.class.getDeclaredMethod("setKunderaMetadata", KunderaMetadata.class);
+        if (!m.isAccessible())
+        {
+            m.setAccessible(true);
+        }
+
+        m.invoke(esFactory, ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance());
         esFactory.load(persistenceUnit, props);
 
         ESClient client = (ESClient) esFactory.getClientInstance();
 
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(PersonES.class);
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(
+                ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance(), PersonES.class);
 
         PersonES entity = new PersonES();
         entity.setAge(21);
@@ -108,65 +114,9 @@ public class ESClientTest
         Assert.assertNull(result);
     }
 
-    private void getEntityManagerFactory()
+    private EntityManagerFactory getEntityManagerFactory()
     {
-        ClientMetadata clientMetadata = new ClientMetadata();
-        Map<String, Object> props = new HashMap<String, Object>();
-
-        props.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
-        props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY, ESClientFactory.class.getName());
-        props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
-        props.put(PersistenceProperties.KUNDERA_PORT, "9300");
-        props.put(PersistenceProperties.KUNDERA_KEYSPACE, "esSchema");
-        clientMetadata.setLuceneIndexDir(null);
-
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
-        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
-        PersistenceUnitMetadata puMetadata = new PersistenceUnitMetadata();
-        puMetadata.setPersistenceUnitName(persistenceUnit);
-        Properties p = new Properties();
-        p.putAll(props);
-        puMetadata.setProperties(p);
-        Map<String, PersistenceUnitMetadata> metadata = new HashMap<String, PersistenceUnitMetadata>();
-        metadata.put(persistenceUnit, puMetadata);
-        appMetadata.addPersistenceUnitMetadata(metadata);
-
-        Map<String, List<String>> clazzToPu = new HashMap<String, List<String>>();
-
-        List<String> pus = new ArrayList<String>();
-        pus.add(persistenceUnit);
-
-        MetadataBuilder metadataBuilder = new MetadataBuilder(persistenceUnit, ESClient.class.getSimpleName(), null);
-
-        EntityMetadata entityMetadata = new EntityMetadata(PersonES.class);
-
-        //
-        TableProcessor processor = new TableProcessor(null);
-        processor.process(PersonES.class, entityMetadata);
-
-        IndexProcessor indexProcessor = new IndexProcessor();
-        indexProcessor.process(PersonES.class, entityMetadata);
-        //
-        entityMetadata.setPersistenceUnit(persistenceUnit);
-
-        //
-        MetamodelImpl metaModel = new MetamodelImpl();
-        metaModel.addEntityMetadata(PersonES.class, metadataBuilder.buildEntityMetadata(PersonES.class));
-
-        appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
-        //
-        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(persistenceUnit).getManagedTypes());
-        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(persistenceUnit).getEmbeddables());
-        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(persistenceUnit).getMappedSuperClassTypes());
-
-        // cla
-
-        String[] persistenceUnits = new String[] { persistenceUnit };
-        clazzToPu.put(PersonES.class.getName(), Arrays.asList(persistenceUnits));
-
-        appMetadata.setClazzToPuMap(clazzToPu);
-
-        new ClientFactoryConfiguraton(null, persistenceUnits).configure();
+        return Persistence.createEntityManagerFactory("es-pu");
     }
 
     @After
@@ -176,7 +126,7 @@ public class ESClientTest
         {
             node.close();
         }
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+
     }
 
     /**

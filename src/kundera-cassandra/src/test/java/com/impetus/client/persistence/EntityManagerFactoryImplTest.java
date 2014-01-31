@@ -12,7 +12,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 
 /**
  * @author Kuldeep Mishra
@@ -37,7 +38,7 @@ public class EntityManagerFactoryImplTest
     @Before
     public void setUp() throws Exception
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         CassandraCli.cassandraSetUp();
         CassandraCli.createKeySpace(_KEYSPACE1);
         CassandraCli.createKeySpace(_KEYSPACE2);
@@ -126,13 +127,14 @@ public class EntityManagerFactoryImplTest
     private void checkEMFPropertyAfterClosing(String _PU1, EntityManagerFactory emf)
     {
         Assert.assertFalse(emf.isOpen());
-        Assert.assertNotNull(KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadata(_PU1));
-        Assert.assertNotNull(KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadataMap().get(_PU1));
-//        Assert.assertNull(KunderaMetadata.INSTANCE.getClientMetadata(_PU1));
-        Assert.assertNotNull(KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodelMap().get(_PU1));
-        Assert.assertNotNull(KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(_PU1));
-        Assert.assertNotNull(KunderaMetadata.INSTANCE.getApplicationMetadata().getMetaModelBuilder(_PU1));
-//        Assert.assertNotNull(KunderaMetadata.INSTANCE.getApplicationMetadata().getSchemaMetadata().getPuToSchemaMetadata()
+        KunderaMetadata kunderaMetadata = ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance();
+        Assert.assertNotNull(kunderaMetadata.getApplicationMetadata().getPersistenceUnitMetadata(_PU1));
+        Assert.assertNotNull(kunderaMetadata.getApplicationMetadata().getPersistenceUnitMetadataMap().get(_PU1));
+//        Assert.assertNull(kunderaMetadata.getClientMetadata(_PU1));
+        Assert.assertNotNull(kunderaMetadata.getApplicationMetadata().getMetamodelMap().get(_PU1));
+        Assert.assertNotNull(kunderaMetadata.getApplicationMetadata().getMetamodel(_PU1));
+        Assert.assertNotNull(kunderaMetadata.getApplicationMetadata().getMetaModelBuilder(_PU1));
+//        Assert.assertNotNull(kunderaMetadata.getApplicationMetadata().getSchemaMetadata().getPuToSchemaMetadata()
 //                .get(_PU1));
     }
 
@@ -144,18 +146,19 @@ public class EntityManagerFactoryImplTest
         Assert.assertTrue(emf.isOpen());
         EntityManager em = emf.createEntityManager();
         Assert.assertNotNull(em);
-        Assert.assertNotNull(KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadata(pu));
-        Assert.assertFalse(KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadataMap().isEmpty());
-        Assert.assertNotNull(KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadataMap().get(pu));
-//        Assert.assertNotNull(KunderaMetadata.INSTANCE.getClientMetadata(pu));
-        Assert.assertFalse(KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodelMap().isEmpty());
-        Assert.assertNotNull(KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodelMap().get(pu));
-        Assert.assertNotNull(KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(pu));
-        Assert.assertNotNull(KunderaMetadata.INSTANCE.getApplicationMetadata().getMetaModelBuilder(pu));
+        KunderaMetadata kunderaMetadata = ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance();
+        Assert.assertNotNull(kunderaMetadata.getApplicationMetadata().getPersistenceUnitMetadata(pu));
+        Assert.assertFalse(kunderaMetadata.getApplicationMetadata().getPersistenceUnitMetadataMap().isEmpty());
+        Assert.assertNotNull(kunderaMetadata.getApplicationMetadata().getPersistenceUnitMetadataMap().get(pu));
+//        Assert.assertNotNull(kunderaMetadata.getClientMetadata(pu));
+        Assert.assertFalse(kunderaMetadata.getApplicationMetadata().getMetamodelMap().isEmpty());
+        Assert.assertNotNull(kunderaMetadata.getApplicationMetadata().getMetamodelMap().get(pu));
+        Assert.assertNotNull(kunderaMetadata.getApplicationMetadata().getMetamodel(pu));
+        Assert.assertNotNull(kunderaMetadata.getApplicationMetadata().getMetaModelBuilder(pu));
         // TODO: Devise better way.
-//        Assert.assertNotNull(KunderaMetadata.INSTANCE.getApplicationMetadata().getSchemaMetadata()
+//        Assert.assertNotNull(kunderaMetadata.getApplicationMetadata().getSchemaMetadata()
 //                .getPuToSchemaMetadata().get(pu));
-//        Assert.assertNull(KunderaMetadata.INSTANCE.getClientMetadata(pu).getLuceneIndexDir());
+//        Assert.assertNull(kunderaMetadata.getClientMetadata(pu).getLuceneIndexDir());
     }
 
     private class OnConcurrentEMF implements Runnable

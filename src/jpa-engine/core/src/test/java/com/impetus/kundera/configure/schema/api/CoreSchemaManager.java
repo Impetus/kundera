@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.impetus.kundera.configure.schema.TableInfo;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 
 /**
  * @author vivek.mishra
@@ -30,9 +31,9 @@ public class CoreSchemaManager extends AbstractSchemaManager implements SchemaMa
 
     private static String currentAction;
 
-    public CoreSchemaManager(String clientFactory, Map<String, Object> externalProperties)
+    public CoreSchemaManager(String clientFactory, Map<String, Object> externalProperties, final KunderaMetadata kunderaMetadata)
     {
-        super(clientFactory, externalProperties);
+        super(clientFactory, externalProperties, kunderaMetadata);
     }
 
     public void exportSchema(final String persistenceUnit, List<TableInfo> schemas)

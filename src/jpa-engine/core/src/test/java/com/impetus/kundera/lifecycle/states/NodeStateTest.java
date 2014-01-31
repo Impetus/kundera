@@ -65,7 +65,7 @@ public class NodeStateTest
     public void testMoveNodeToNextState()
     {
         NodeState nodeState = new TransientState();
-        NodeStateContext node = new Node("1", PersonnelDTO.class, nodeState, pc, "1");
+        NodeStateContext node = new Node("1", PersonnelDTO.class, nodeState, pc, "1", null);
         nodeState.moveNodeToNextState(node, new ManagedState());
         Assert.assertEquals(ManagedState.class, node.getCurrentNodeState().getClass());
     }

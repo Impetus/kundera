@@ -18,7 +18,6 @@ import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.datatypes.datagenerator.DataGenerator;
 import com.impetus.kundera.datatypes.datagenerator.DataGeneratorFactory;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 public abstract class CassandraBase
 {
@@ -34,7 +33,7 @@ public abstract class CassandraBase
 
     protected void setUp() throws Exception
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+
         if (RUN_IN_EMBEDDED_MODE)
         {
             startCluster();
@@ -48,24 +47,21 @@ public abstract class CassandraBase
 
         propertyMap = new HashMap();
         propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
-        
+
         if (propertyMap == null && !CassandraCli.isArchived(_PU))
         {
             propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create");
         }
-        
+
         emf = Persistence.createEntityManagerFactory(_PU, propertyMap);
-        
+
         CassandraCli.archivePu(_PU);
     }
 
     protected void tearDown() throws Exception
     {
         emf.close();
-        if (AUTO_MANAGE_SCHEMA)
-        {
-            dropSchema();
-        }
+        dropSchema();
         if (RUN_IN_EMBEDDED_MODE)
         {
             stopCluster();
@@ -108,27 +104,27 @@ public abstract class CassandraBase
         }
         catch (IOException e)
         {
-            
+
         }
         catch (TException e)
         {
-            
+
         }
         catch (InvalidRequestException e)
         {
-            
+
         }
         catch (UnavailableException e)
         {
-            
+
         }
         catch (TimedOutException e)
         {
-            
+
         }
         catch (SchemaDisagreementException e)
         {
-            
+
         }
     }
 
@@ -138,11 +134,9 @@ public abstract class CassandraBase
 
     }
 
-    
-    
-//    protected abstract void startCluster();
-//
-//    protected abstract void stopCluster();
+    // protected abstract void startCluster();
+    //
+    // protected abstract void stopCluster();
 
     protected abstract void createSchema();
 

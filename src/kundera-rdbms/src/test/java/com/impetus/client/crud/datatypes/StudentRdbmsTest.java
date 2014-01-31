@@ -24,7 +24,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.crud.RDBMSCli;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
  * The Class StudentDaoTest.
@@ -78,7 +77,7 @@ public class StudentRdbmsTest extends StudentBase<StudentRdbms>
             // do nothing..weird!!
         }
         // cli.dropSchema("TESTDB");
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
     }
 
     @SuppressWarnings("deprecation")

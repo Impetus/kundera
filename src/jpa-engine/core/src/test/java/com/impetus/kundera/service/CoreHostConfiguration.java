@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import com.impetus.kundera.configure.ClientProperties.DataStore.Connection.Server;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 
 /**
  * @author vivek.mishra
@@ -32,9 +33,9 @@ public class CoreHostConfiguration extends HostConfiguration
     String hosts;
     String port;
 
-    public CoreHostConfiguration(Map externalProperties, List<Server> servers, String persistenceUnit)
+    public CoreHostConfiguration(Map externalProperties, List<Server> servers, String persistenceUnit, KunderaMetadata kunderaMetadata)
     {
-        super(externalProperties, servers, persistenceUnit);
+        super(externalProperties, servers, persistenceUnit, kunderaMetadata);
     }
 
     /* (non-Javadoc)

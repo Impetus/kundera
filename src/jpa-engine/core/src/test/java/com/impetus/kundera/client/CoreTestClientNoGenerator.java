@@ -23,6 +23,7 @@ import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.query.CoreTestEntityReader;
@@ -36,8 +37,9 @@ import com.impetus.kundera.query.LuceneQuery;
 public class CoreTestClientNoGenerator extends ClientBase implements Client<LuceneQuery>
 {
 
-    public CoreTestClientNoGenerator(IndexManager indexManager, String persistenceUnit)
+    public CoreTestClientNoGenerator(IndexManager indexManager, String persistenceUnit, final KunderaMetadata kunderaMetadata)
     {
+        super(kunderaMetadata);
         this.indexManager = indexManager;
         this.persistenceUnit = persistenceUnit;       
     }
@@ -72,7 +74,7 @@ public class CoreTestClientNoGenerator extends ClientBase implements Client<Luce
     @Override
     public Object find(Class entityClass, Object key)
     {
-        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClass);
+        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClass);
         DummySchema schema = DummyDatabase.INSTANCE.getSchema(m.getSchema());
         if(schema == null) return null;
         
@@ -87,7 +89,7 @@ public class CoreTestClientNoGenerator extends ClientBase implements Client<Luce
     public void delete(Object entity, Object pKey)
     {
         if(entity == null) return;
-        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entity.getClass());
+        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,  entity.getClass());
         DummySchema schema = DummyDatabase.INSTANCE.getSchema(m.getSchema());
         if(schema == null) return;
         DummyTable table = schema.getTable(m.getTableName());
@@ -148,7 +150,7 @@ public class CoreTestClientNoGenerator extends ClientBase implements Client<Luce
     @Override
     public EntityReader getReader()
     {
-        return new CoreTestEntityReader();
+        return new CoreTestEntityReader(kunderaMetadata);
     }
 
     @Override

@@ -4,11 +4,10 @@
 package com.impetus.client.schemamanager.entites;
 
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Properties;
+
+import javax.persistence.Persistence;
 
 import junit.framework.Assert;
 
@@ -21,19 +20,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.cassandra.thrift.ThriftClientFactory;
 import com.impetus.client.persistence.CassandraCli;
-import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.configure.ClientFactoryConfiguraton;
-import com.impetus.kundera.configure.SchemaConfiguration;
-import com.impetus.kundera.configure.schema.api.SchemaManager;
-import com.impetus.kundera.metadata.MetadataBuilder;
-import com.impetus.kundera.metadata.model.ApplicationMetadata;
-import com.impetus.kundera.metadata.model.ClientMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.metadata.model.MetamodelImpl;
-import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
 /**
@@ -42,12 +30,6 @@ import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
  */
 public class ActorTest
 {
-    /** The configuration. */
-    private SchemaConfiguration configuration;
-
-    /** Configure schema manager. */
-    private SchemaManager schemaManager;
-
     private Cassandra.Client client;
 
     private final boolean useLucene = false;
@@ -58,7 +40,6 @@ public class ActorTest
     @Before
     public void setUp() throws Exception
     {
-        configuration = new SchemaConfiguration(null, "CassandraSchemaOperationTest");
         CassandraCli.cassandraSetUp();
         CassandraCli cli = new CassandraCli();
         client = cli.getClient();
@@ -78,19 +59,18 @@ public class ActorTest
     public void test() throws NotFoundException, InvalidRequestException, TException, UnsupportedEncodingException
     {
         getEntityManagerFactory("create");
-//        schemaManager = new CassandraSchemaManager(PelopsClientFactory.class.getName(), null);
-//        schemaManager.exportSchema();
 
         Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCoreExmples"));
         Assert.assertTrue(CassandraCli.columnFamilyExist("Actor", "KunderaCoreExmples"));
         org.apache.cassandra.thrift.KsDef ksDef = new KsDef();
         ksDef = client.describe_keyspace("KunderaCoreExmples");
-        Assert.assertEquals(1, ksDef.getCf_defs().size());
+        Assert.assertEquals(2, ksDef.getCf_defs().size());
         for (org.apache.cassandra.thrift.CfDef cfDef : ksDef.getCf_defs())
         {
-            Assert.assertEquals("Actor", cfDef.getName());
-
-            Assert.assertEquals("Super", cfDef.column_type);
+            if ("Actor".equals(cfDef.getName()))
+            {
+                Assert.assertEquals("Super", cfDef.column_type);
+            }
         }
     }
 
@@ -104,65 +84,9 @@ public class ActorTest
      */
     private EntityManagerFactoryImpl getEntityManagerFactory(String property)
     {
-        ClientMetadata clientMetadata = new ClientMetadata();
-        Map<String, Object> props = new HashMap<String, Object>();
-        String persistenceUnit = "CassandraSchemaOperationTest";
-        props.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
-        props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY, ThriftClientFactory.class.getName());
-        props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
-        props.put(PersistenceProperties.KUNDERA_PORT, "9160");
-        props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaCoreExmples");
-        props.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, property);
-        if (useLucene)
-        {
-            props.put(PersistenceProperties.KUNDERA_INDEX_HOME_DIR, "/home/impadmin/lucene");
-
-            clientMetadata.setLuceneIndexDir("/home/impadmin/lucene");
-        }
-        else
-        {
-
-            clientMetadata.setLuceneIndexDir(null);
-        }
-
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
-        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
-        PersistenceUnitMetadata puMetadata = new PersistenceUnitMetadata();
-        puMetadata.setPersistenceUnitName(persistenceUnit);
-        Properties p = new Properties();
-        p.putAll(props);
-        puMetadata.setProperties(p);
-        Map<String, PersistenceUnitMetadata> metadata = new HashMap<String, PersistenceUnitMetadata>();
-        metadata.put("CassandraSchemaOperationTest", puMetadata);
-        appMetadata.addPersistenceUnitMetadata(metadata);
-
-        Map<String, List<String>> clazzToPu = new HashMap<String, List<String>>();
-
-        List<String> pus = new ArrayList<String>();
-        pus.add(persistenceUnit);
-        clazzToPu.put(Actor.class.getName(), pus);
-
-        appMetadata.setClazzToPuMap(clazzToPu);
-
-        MetadataBuilder metadataBuilder = new MetadataBuilder(persistenceUnit, ThriftClientFactory.class.getSimpleName(), null);
-
-        MetamodelImpl metaModel = new MetamodelImpl();
-        metaModel.addEntityMetadata(Actor.class, metadataBuilder.buildEntityMetadata(Actor.class));
-
-        appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
-
-        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(persistenceUnit).getManagedTypes());
-        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(persistenceUnit).getEmbeddables());
-        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(persistenceUnit).getMappedSuperClassTypes());
-
-//        KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit, clientMetadata);
-
-        String[] persistenceUnits = new String[] { persistenceUnit };
-        new ClientFactoryConfiguraton(null, persistenceUnits).configure();
-
-        configuration.configure();
-        // EntityManagerFactoryImpl impl = new
-        // EntityManagerFactoryImpl(puMetadata, props);
-        return null;
+        Map propertyMap = new HashMap();
+        propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, property);
+        return (EntityManagerFactoryImpl) Persistence.createEntityManagerFactory("CassandraSchemaOperationTest",
+                propertyMap);
     }
 }

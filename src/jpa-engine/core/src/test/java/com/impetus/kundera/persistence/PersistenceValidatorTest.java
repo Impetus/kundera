@@ -50,7 +50,7 @@ public class PersistenceValidatorTest
     @Test
     public void testIsValidEntityObject()
     {
-        Assert.assertFalse(new PersistenceValidator().isValidEntityObject(null));
+        Assert.assertFalse(new PersistenceValidator().isValidEntityObject(null, null));
     }
 
 }

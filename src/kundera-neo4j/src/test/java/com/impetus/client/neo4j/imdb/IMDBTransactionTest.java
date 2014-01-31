@@ -15,8 +15,6 @@
  */
 package com.impetus.client.neo4j.imdb;
 
-import javax.persistence.Persistence;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -44,7 +42,7 @@ public class IMDBTransactionTest extends IMDBTestBase
     public static void tearDownAfterClass() throws Exception
     {
 
-        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(IMDB_PU);
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata, IMDB_PU);
         String datastoreFilePath = puMetadata.getProperty(PersistenceProperties.KUNDERA_DATASTORE_FILE_PATH);
         FileUtils.deleteRecursively(new File(datastoreFilePath));
 //        emf.close();
@@ -57,8 +55,7 @@ public class IMDBTransactionTest extends IMDBTestBase
     @Before
     public void setUp() throws Exception
     {
-        emf = Persistence.createEntityManagerFactory(IMDB_PU);
-        em = emf.createEntityManager();
+        init();
     }
 
     /**

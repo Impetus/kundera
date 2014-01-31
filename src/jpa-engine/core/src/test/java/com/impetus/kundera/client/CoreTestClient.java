@@ -14,6 +14,7 @@ import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.SequenceGeneratorDiscriptor;
 import com.impetus.kundera.metadata.model.TableGeneratorDiscriptor;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.query.CoreTestEntityReader;
@@ -25,8 +26,9 @@ public class CoreTestClient extends ClientBase implements Client<LuceneQuery>, A
 
     private static int idCount;
 
-    public CoreTestClient(IndexManager indexManager, String persistenceUnit)
+    public CoreTestClient(IndexManager indexManager, String persistenceUnit, final KunderaMetadata kunderaMetadata)
     {
+        super(kunderaMetadata);
         this.indexManager = indexManager;
         this.persistenceUnit = persistenceUnit;
     }
@@ -61,7 +63,7 @@ public class CoreTestClient extends ClientBase implements Client<LuceneQuery>, A
     @Override
     public Object find(Class entityClass, Object key)
     {
-        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClass);
+        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClass);
         DummySchema schema = DummyDatabase.INSTANCE.getSchema(m.getSchema());
         if (schema == null)
             return null;
@@ -79,7 +81,7 @@ public class CoreTestClient extends ClientBase implements Client<LuceneQuery>, A
     {
         if (entity == null)
             return;
-        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entity.getClass());
+        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,  entity.getClass());
         DummySchema schema = DummyDatabase.INSTANCE.getSchema(m.getSchema());
         if (schema == null)
             return;
@@ -156,7 +158,7 @@ public class CoreTestClient extends ClientBase implements Client<LuceneQuery>, A
     @Override
     public EntityReader getReader()
     {
-        return new CoreTestEntityReader();
+        return new CoreTestEntityReader(kunderaMetadata);
     }
 
     @Override

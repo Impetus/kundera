@@ -265,7 +265,7 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
 
             if (owner != null)
             {
-                EntityMetadata m = KunderaMetadataManager.getEntityMetadata(owner.getClass());
+                EntityMetadata m = KunderaMetadataManager.getEntityMetadata(persistenceDelegator.getKunderaMetadata(), owner.getClass());
                 Relation r = m.getRelation(fieldName);
                 PropertyAccessorHelper.set(owner, r.getProperty(), target);
 

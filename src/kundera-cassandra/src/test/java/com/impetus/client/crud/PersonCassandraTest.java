@@ -59,7 +59,6 @@ import com.impetus.client.crud.PersonCassandra.Day;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
@@ -104,7 +103,7 @@ public class PersonCassandraTest extends BaseTest
     @Before
     public void setUp() throws Exception
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         CassandraCli.cassandraSetUp();
         CassandraCli.createKeySpace("KunderaExamples");
 

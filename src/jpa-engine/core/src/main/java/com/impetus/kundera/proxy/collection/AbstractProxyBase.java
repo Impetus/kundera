@@ -91,7 +91,7 @@ public abstract class AbstractProxyBase implements ProxyCollection
     public Relation getRelation()
     {
         return relation;
-    }    
+    }
 
     /**
 	 * 
@@ -100,18 +100,20 @@ public abstract class AbstractProxyBase implements ProxyCollection
     {
         if (getDataCollection() == null || getDataCollection() instanceof ProxyCollection)
         {
-            EntityMetadata m = KunderaMetadataManager.getEntityMetadata(getOwner().getClass());
+            EntityMetadata m = KunderaMetadataManager.getEntityMetadata(getPersistenceDelegator().getKunderaMetadata(),
+                    getOwner().getClass());
 
-            if(! getPersistenceDelegator().isOpen())
+            if (!getPersistenceDelegator().isOpen())
             {
-                throw new LazyInitializationException("Unable to load Proxy Collection." +
-                		" This happens when you access a lazily loaded proxy collection in an entity after entity manager has been closed.");
+                throw new LazyInitializationException(
+                        "Unable to load Proxy Collection."
+                                + " This happens when you access a lazily loaded proxy collection in an entity after entity manager has been closed.");
             }
-            
+
             getPersistenceDelegator().getClient(m).getReader()
                     .recursivelyFindEntities(getOwner(), relationsMap, m, getPersistenceDelegator(), true);
-            
-            if(getRelation().getProperty().getType().isAssignableFrom(Map.class))
+
+            if (getRelation().getProperty().getType().isAssignableFrom(Map.class))
             {
                 dataCollection = (Map) PropertyAccessorHelper.getObject(getOwner(), getRelation().getProperty());
             }
@@ -119,7 +121,7 @@ public abstract class AbstractProxyBase implements ProxyCollection
             {
                 dataCollection = (Collection) PropertyAccessorHelper.getObject(getOwner(), getRelation().getProperty());
             }
-            
+
             if (dataCollection instanceof ProxyCollection)
             {
                 dataCollection = null;
@@ -129,7 +131,6 @@ public abstract class AbstractProxyBase implements ProxyCollection
     }
 
     // ///////////////////Common collection
-    // implementation////////////////////////////   
+    // implementation////////////////////////////
 
-       
 }

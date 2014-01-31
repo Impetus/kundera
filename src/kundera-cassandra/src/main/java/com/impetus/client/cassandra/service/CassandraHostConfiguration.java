@@ -32,6 +32,7 @@ import com.impetus.client.cassandra.config.CassandraPropertyReader.CassandraSche
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.configure.ClientProperties.DataStore.Connection.Server;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.service.Host;
 import com.impetus.kundera.service.HostConfiguration;
 
@@ -46,9 +47,11 @@ public class CassandraHostConfiguration extends HostConfiguration
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(CassandraHostConfiguration.class);
 
-    public CassandraHostConfiguration(Map externalProperties, CassandraSchemaMetadata csmd, String persistenceUnit)
+    public CassandraHostConfiguration(Map externalProperties, CassandraSchemaMetadata csmd, String persistenceUnit,
+            final KunderaMetadata kunderaMetadata)
     {
-        super(externalProperties, csmd != null ? csmd.getConnectionServers() : new ArrayList<Server>(), persistenceUnit);
+        super(externalProperties, csmd != null ? csmd.getConnectionServers() : new ArrayList<Server>(),
+                persistenceUnit, kunderaMetadata);
         String property = csmd.getConnectionProperties().getProperty(Constants.RETRY_DELAY);
         if (StringUtils.isNumeric(property))
         {

@@ -39,10 +39,10 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -60,11 +60,11 @@ public class ObjectUtils
     /** The log. */
     private static Logger log = LoggerFactory.getLogger(ObjectUtils.class);
 
-    public static final Object deepCopy(Object source)
+    public static final Object deepCopy(Object source, final KunderaMetadata kunderaMetadata)
     {
         Map<Object, Object> copiedObjectMap = new HashMap<Object, Object>();
 
-        Object target = deepCopyUsingMetadata(source, copiedObjectMap);
+        Object target = deepCopyUsingMetadata(source, copiedObjectMap, kunderaMetadata);
 
         copiedObjectMap.clear();
         copiedObjectMap = null;
@@ -78,7 +78,7 @@ public class ObjectUtils
      *            TODO
      * @return
      */
-    private static Object deepCopyUsingMetadata(Object source, Map<Object, Object> copiedObjectMap)
+    private static Object deepCopyUsingMetadata(Object source, Map<Object, Object> copiedObjectMap, final KunderaMetadata kunderaMetadata)
     {
         Object target = null;
         try
@@ -88,13 +88,13 @@ public class ObjectUtils
                 return null;
             }
             Class<?> sourceObjectClass = source.getClass();
-            EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(sourceObjectClass);
+            EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, sourceObjectClass);
             if (metadata == null)
             {
                 return source;
             }
 
-            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                     metadata.getPersistenceUnit());
 
             EntityType entityType = metaModel.entity(sourceObjectClass);
@@ -304,7 +304,7 @@ public class ObjectUtils
 
                         for (Object obj : (Collection) sourceRelationObject)
                         {
-                            Object copyTargetRelObj = searchInCacheThenCopy(copiedObjectMap, obj);
+                            Object copyTargetRelObj = searchInCacheThenCopy(copiedObjectMap, obj, kunderaMetadata);
                             m.invoke(targetRelationObject, copyTargetRelObj);
                         }
                     }
@@ -318,16 +318,16 @@ public class ObjectUtils
                         {
                             Object valObj = ((Map) sourceRelationObject).get(keyObj);
 
-                            Object copyTargetKeyObj = searchInCacheThenCopy(copiedObjectMap, keyObj);
+                            Object copyTargetKeyObj = searchInCacheThenCopy(copiedObjectMap, keyObj, kunderaMetadata);
 
-                            Object copyTargetValueObj = searchInCacheThenCopy(copiedObjectMap, valObj);
+                            Object copyTargetValueObj = searchInCacheThenCopy(copiedObjectMap, valObj, kunderaMetadata);
 
                             m.invoke(targetRelationObject, new Object[] { copyTargetKeyObj, copyTargetValueObj });
                         }
                     }
                     else
                     {
-                        targetRelationObject = searchInCacheThenCopy(copiedObjectMap, sourceRelationObject);
+                        targetRelationObject = searchInCacheThenCopy(copiedObjectMap, sourceRelationObject, kunderaMetadata);
                     }
                     PropertyAccessorHelper.set(target, relationField, targetRelationObject);
                 }
@@ -349,10 +349,10 @@ public class ObjectUtils
         return target;
     }
 
-    private static Object searchInCacheThenCopy(Map<Object, Object> copiedObjectMap, Object sourceObject)
+    private static Object searchInCacheThenCopy(Map<Object, Object> copiedObjectMap, Object sourceObject, final KunderaMetadata kunderaMetadata)
     {
         Object copyTargetRelObj = null;
-        copyTargetRelObj = deepCopyUsingMetadata(sourceObject, copiedObjectMap);
+        copyTargetRelObj = deepCopyUsingMetadata(sourceObject, copiedObjectMap, kunderaMetadata);
         return copyTargetRelObj;
     }
 

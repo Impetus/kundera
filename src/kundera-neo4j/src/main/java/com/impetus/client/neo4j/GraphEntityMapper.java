@@ -47,10 +47,10 @@ import org.slf4j.LoggerFactory;
 import com.impetus.client.neo4j.index.Neo4JIndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReaderException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.utils.ReflectUtils;
@@ -75,9 +75,12 @@ public final class GraphEntityMapper
 
     private Neo4JIndexManager indexer;
 
-    public GraphEntityMapper(Neo4JIndexManager indexer)
+    private KunderaMetadata kunderaMetadata;
+
+    public GraphEntityMapper(Neo4JIndexManager indexer, final KunderaMetadata kunderaMetadata)
     {
         this.indexer = indexer;
+        this.kunderaMetadata = kunderaMetadata;
     }
 
     /**
@@ -138,7 +141,7 @@ public final class GraphEntityMapper
      */
     public Object getEntityFromNode(Node node, EntityMetadata m)
     {
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
         EntityType entityType = metaModel.entity(m.getEntityClazz());
 
@@ -197,10 +200,10 @@ public final class GraphEntityMapper
     public Object getEntityFromRelationship(Relationship relationship, EntityMetadata topLevelEntityMetadata,
             Relation relation)
     {
-        EntityMetadata relationshipEntityMetadata = KunderaMetadataManager.getEntityMetadata(relation
-                .getMapKeyJoinClass());
+        EntityMetadata relationshipEntityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
+                relation.getMapKeyJoinClass());
 
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 relationshipEntityMetadata.getPersistenceUnit());
         EntityType entityType = metaModel.entity(relationshipEntityMetadata.getEntityClazz());
 
@@ -262,7 +265,7 @@ public final class GraphEntityMapper
     {
         Map<String, Object> props = new HashMap<String, Object>();
 
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
 
         EntityType entityType = metaModel.entity(m.getEntityClazz());
@@ -297,7 +300,7 @@ public final class GraphEntityMapper
      */
     private void populateNodeProperties(Object entity, EntityMetadata m, Node node)
     {
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
         EntityType entityType = metaModel.entity(m.getEntityClazz());
 
@@ -332,7 +335,7 @@ public final class GraphEntityMapper
     public void populateRelationshipProperties(EntityMetadata entityMetadata, EntityMetadata targetNodeMetadata,
             Relationship relationship, Object relationshipObj)
     {
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 entityMetadata.getPersistenceUnit());
         EntityType entityType = metaModel.entity(relationshipObj.getClass());
 
@@ -343,7 +346,8 @@ public final class GraphEntityMapper
             if (!f.getType().equals(entityMetadata.getEntityClazz())
                     && !f.getType().equals(targetNodeMetadata.getEntityClazz()))
             {
-                EntityMetadata relMetadata = KunderaMetadataManager.getEntityMetadata(relationshipObj.getClass());
+                EntityMetadata relMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
+                        relationshipObj.getClass());
                 String columnName = ((AbstractAttribute) attribute).getJPAColumnName();
                 if (metaModel.isEmbeddable(relMetadata.getIdAttribute().getBindableJavaType())
                         && ((SingularAttribute) attribute).isId())
@@ -391,7 +395,7 @@ public final class GraphEntityMapper
     public Map<String, Object> createRelationshipProperties(EntityMetadata entityMetadata,
             EntityMetadata targetEntityMetadata, Object relationshipEntity)
     {
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 entityMetadata.getPersistenceUnit());
         EntityType entityType = metaModel.entity(relationshipEntity.getClass());
         Map<String, Object> relationshipProperties = new HashMap<String, Object>();
@@ -419,7 +423,7 @@ public final class GraphEntityMapper
             GraphDatabaseService graphDb)
     {
         final String idColumnName = ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName();
-        final MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        final MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
         final String idUniqueValue = serializeIdAttributeValue(m, metaModel, id);
 
@@ -490,12 +494,12 @@ public final class GraphEntityMapper
 
         for (Field embeddedField : embeddableClass.getDeclaredFields())
         {
-            if(!ReflectUtils.isTransientOrStatic(embeddedField))
+            if (!ReflectUtils.isTransientOrStatic(embeddedField))
             {
 
-            Object value = PropertyAccessorHelper.getObject(id, embeddedField);
-            if (value != null && !StringUtils.isEmpty(value.toString()))
-                idUniqueValue = idUniqueValue + value + COMPOSITE_KEY_SEPARATOR;
+                Object value = PropertyAccessorHelper.getObject(id, embeddedField);
+                if (value != null && !StringUtils.isEmpty(value.toString()))
+                    idUniqueValue = idUniqueValue + value + COMPOSITE_KEY_SEPARATOR;
             }
         }
 
@@ -646,7 +650,7 @@ public final class GraphEntityMapper
         Node node = null;
         String idColumnName = ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName();
 
-        final MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        final MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
         if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
         {

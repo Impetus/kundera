@@ -19,7 +19,6 @@ import org.junit.Test;
 
 import com.impetus.client.hbase.junits.HBaseCli;
 import com.impetus.client.persistence.CassandraCli;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
  * @author Kuldeep Mishra
@@ -53,7 +52,7 @@ public class BankTest
     public void setUp() throws Exception
     {
         CassandraCli.cassandraSetUp();
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
 
         mongoProperties.put("kundera.ddl.auto.prepare", "create-drop");
 

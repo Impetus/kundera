@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.processor.CacheableAnnotationProcessor;
 import com.impetus.kundera.metadata.processor.EntityListenersProcessor;
@@ -42,6 +41,7 @@ import com.impetus.kundera.metadata.processor.TableProcessor;
 import com.impetus.kundera.metadata.validator.EntityValidator;
 import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
 import com.impetus.kundera.metadata.validator.InvalidEntityDefinitionException;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 
 /**
  * Concrete implementation of IMetadataManager.
@@ -68,23 +68,29 @@ public class MetadataBuilder
 
     private Map puProperties;
 
+    private KunderaMetadata kunderaMetadata;
     /**
      * Instantiates a new metadata manager.
      * 
      */
 
-    public MetadataBuilder(String puName, String client, Map puProperties)
+    public MetadataBuilder(String puName, String client, Map puProperties, KunderaMetadata kunderaMetadata)
     {
+        if(kunderaMetadata == null)
+        {
+            System.out.println();
+        }
         this.persistenceUnit = puName;
         this.client = client;
         this.puProperties = puProperties;
         this.validator = new EntityValidatorImpl(puProperties);
         this.metadataProcessors = new ArrayList<MetadataProcessor>();
+        this.kunderaMetadata = kunderaMetadata;
 
         // add processors to chain.
-        this.metadataProcessors.add(new TableProcessor(puProperties));
+        this.metadataProcessors.add(new TableProcessor(puProperties,kunderaMetadata));
         this.metadataProcessors.add(new CacheableAnnotationProcessor());
-        this.metadataProcessors.add(new IndexProcessor());
+        this.metadataProcessors.add(new IndexProcessor(kunderaMetadata));
         this.metadataProcessors.add(new EntityListenersProcessor());
         
     }
@@ -136,7 +142,7 @@ public class MetadataBuilder
             }
 
             // Check for schema attribute of Table annotation.
-            if (MetadataUtils.isSchemaAttributeRequired(metadata.getPersistenceUnit())
+            if (MetadataUtils.isSchemaAttributeRequired(metadata.getPersistenceUnit(), kunderaMetadata)
                     && StringUtils.isBlank(metadata.getSchema()))
             {
                 if (log.isErrorEnabled())
@@ -166,7 +172,7 @@ public class MetadataBuilder
         // if pu is null and client is not rdbms OR metadata pu does not match
         // with configured one. don't process for anything.
 
-        PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+        PersistenceUnitMetadata puMetadata = kunderaMetadata.getApplicationMetadata()
                 .getPersistenceUnitMetadata(persistenceUnit);
         String keyspace = puProperties != null ? (String) puProperties.get(PersistenceProperties.KUNDERA_KEYSPACE):null;
         
@@ -199,7 +205,7 @@ public class MetadataBuilder
 //        log.debug("In apply changes class is " + metadata.getEntityClazz().getName());
 //        log.debug("In apply changes pu is " + persistenceUnit);
         metadata.setPersistenceUnit(persistenceUnit);
-        PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+        PersistenceUnitMetadata puMetadata = kunderaMetadata.getApplicationMetadata()
                 .getPersistenceUnitMetadata(persistenceUnit);
         
         String keyspace = puProperties != null ? (String) puProperties.get(PersistenceProperties.KUNDERA_KEYSPACE):null;
@@ -248,7 +254,11 @@ public class MetadataBuilder
      */
     private void addNamedNativeQueryMetadata(Class clazz)
     {
-        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+        if(kunderaMetadata == null)
+        {
+            System.out.println();
+        }
+        ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
         String name, query = null;
         if (clazz.isAnnotationPresent(NamedQuery.class))
         {

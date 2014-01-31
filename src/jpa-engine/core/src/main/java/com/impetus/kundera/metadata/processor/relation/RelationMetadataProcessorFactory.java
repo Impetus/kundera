@@ -22,6 +22,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
+
 /**
  * A factory for creating RelationMetadataProcessor objects.
  * 
@@ -37,34 +39,34 @@ public class RelationMetadataProcessorFactory
      *            the relation field
      * @return the relation metadata processor
      */
-    public static RelationMetadataProcessor getRelationMetadataProcessor(Field relationField)
+    public static RelationMetadataProcessor getRelationMetadataProcessor(Field relationField, KunderaMetadata kunderaMetadata)
     {
         RelationMetadataProcessor relProcessor = null;
 
         // OneToOne
         if (relationField.isAnnotationPresent(OneToOne.class))
         {
-            relProcessor = new OneToOneRelationMetadataProcessor();
+            relProcessor = new OneToOneRelationMetadataProcessor(kunderaMetadata);
         }
 
         // OneToMany
         else if (relationField.isAnnotationPresent(OneToMany.class))
         {
-            relProcessor = new OneToManyRelationMetadataProcessor();
+            relProcessor = new OneToManyRelationMetadataProcessor(kunderaMetadata);
 
         }
 
         // ManyToOne
         else if (relationField.isAnnotationPresent(ManyToOne.class))
         {
-            relProcessor = new ManyToOneRelationMetadataProcessor();
+            relProcessor = new ManyToOneRelationMetadataProcessor(kunderaMetadata);
 
         }
 
         // ManyToMany
         else if (relationField.isAnnotationPresent(ManyToMany.class))
         {
-            relProcessor = new ManyToManyRelationMetadataProcessor();
+            relProcessor = new ManyToManyRelationMetadataProcessor(kunderaMetadata);
 
         }
 

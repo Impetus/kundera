@@ -31,6 +31,7 @@ import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.processor.AbstractEntityFieldProcessor;
 import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 
 /**
  * The Class OneToOneRelationMetadataProcessor.
@@ -44,8 +45,9 @@ public class OneToOneRelationMetadataProcessor extends AbstractEntityFieldProces
     /**
      * Instantiates a new one to one relation metadata processor.
      */
-    public OneToOneRelationMetadataProcessor()
+    public OneToOneRelationMetadataProcessor(KunderaMetadata kunderaMetadata)
     {
+        super(kunderaMetadata);
         validator = new EntityValidatorImpl();
     }
 
@@ -80,12 +82,15 @@ public class OneToOneRelationMetadataProcessor extends AbstractEntityFieldProces
 
             JoinTable joinTable = annotation.joinTable();
             onJoinTable(joinTable);
-        } else if (isJoinedByPK)
+        }
+        else if (isJoinedByPK)
         {
-            
+
             relation.setJoinedByPrimaryKey(true);
-            EntityMetadata joinClassMetadata = KunderaMetadataManager.getEntityMetadata(targetEntity.getClass());
-            relation.setJoinColumnName(joinClassMetadata != null? ((AbstractAttribute)joinClassMetadata.getIdAttribute()).getJPAColumnName(): null);
+            EntityMetadata joinClassMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
+                    targetEntity.getClass());
+            relation.setJoinColumnName(joinClassMetadata != null ? ((AbstractAttribute) joinClassMetadata
+                    .getIdAttribute()).getJPAColumnName() : null);
         }
         else if (isJoinedByFK)
         {
@@ -98,9 +103,8 @@ public class OneToOneRelationMetadataProcessor extends AbstractEntityFieldProces
         }
 
         relation.setBiDirectionalField(metadata.getEntityClazz());
-        metadata.addRelation(relationField.getName(), relation);       
+        metadata.addRelation(relationField.getName(), relation);
     }
-
 
     private void onJoinTable(JoinTable joinTable)
     {

@@ -7,7 +7,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.kundera.client.crud.mappedsuperclass.MappedSuperClassBase;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 public class RedisMappedSuperClassTest extends MappedSuperClassBase
 {
@@ -41,7 +40,7 @@ public class RedisMappedSuperClassTest extends MappedSuperClassBase
         query.executeUpdate();
 
         tearDownInternal();
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
 
     }
 }

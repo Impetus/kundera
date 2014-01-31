@@ -35,7 +35,6 @@ import com.impetus.client.crud.PersonMongo.Month;
 import com.impetus.client.mongodb.MongoDBClient;
 import com.impetus.client.utils.MongoUtils;
 import com.impetus.kundera.client.Client;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 public class PersonMongoTest extends BaseTest
 {
@@ -309,7 +308,7 @@ public class PersonMongoTest extends BaseTest
         }
         MongoUtils.dropDatabase(emf, _PU);
         emf.close();
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
     }
 
     private void onExecuteScript()

@@ -54,9 +54,11 @@ import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.lifecycle.states.TransientState;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData.OPERATION;
+
 /**
  * Junit for {@link CouchDBClient}.
  * 
@@ -84,6 +86,7 @@ public class CouchDBClientTest
     @Rule
     public ContiPerfRule i = new ContiPerfRule(new ReportModule[] { new CSVSummaryReportModule(),
             new HtmlReportModule() });
+
     /**
      * @throws java.lang.Exception
      */
@@ -91,7 +94,8 @@ public class CouchDBClientTest
     public void setUp() throws Exception
     {
         emf = Persistence.createEntityManagerFactory(_PU);
-        httpClient = CouchDBTestUtils.initiateHttpClient(_PU);
+        httpClient = CouchDBTestUtils.initiateHttpClient(((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance(),
+                _PU);
         httpHost = new HttpHost("localhost", 5984);
     }
 
@@ -247,7 +251,7 @@ public class CouchDBClientTest
         object.setDay(Day.TUESDAY);
         object.setMonth(Month.JAN);
 
-        Node node = new Node(nodeId, PersonCouchDB.class, new TransientState(), null, ROW_KEY);
+        Node node = new Node(nodeId, PersonCouchDB.class, new TransientState(), null, ROW_KEY, null);
         node.setData(object);
         client.persist(node);
 

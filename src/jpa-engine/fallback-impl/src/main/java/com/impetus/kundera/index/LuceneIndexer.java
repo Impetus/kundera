@@ -50,7 +50,6 @@ import org.slf4j.LoggerFactory;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.cache.ElementCollectionCacheManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessException;
@@ -217,9 +216,9 @@ public class LuceneIndexer extends DocumentIndexer
     }
 
     @Override
-    public final void index(EntityMetadata metadata, Object object)
+    public final void index(EntityMetadata metadata, final MetamodelImpl metaModel, Object object)
     {
-        indexDocument(metadata, object, null, null);
+        indexDocument(metadata, metaModel, object, null, null);
         onCommit();
     }
 
@@ -276,7 +275,7 @@ public class LuceneIndexer extends DocumentIndexer
     }
 
     @Override
-    public final void update(EntityMetadata metadata, Object entity, Object id, String parentId)
+    public final void update(EntityMetadata metadata, final MetamodelImpl metaModel, Object entity, Object id, String parentId)
 
     {
         if (log.isDebugEnabled())
@@ -284,7 +283,7 @@ public class LuceneIndexer extends DocumentIndexer
             log.debug("Updating @Entity[{}] for key:{}", metadata.getEntityClazz().getName(), id);
         }
 
-        updateDocument(metadata, entity, parentId, entity.getClass(), true);
+        updateDocument(metadata, metaModel, entity, parentId, entity.getClass(), true);
 
     }
 
@@ -481,10 +480,10 @@ public class LuceneIndexer extends DocumentIndexer
     }
 
     @Override
-    public void index(EntityMetadata metadata, Object object, String parentId, Class<?> clazz)
+    public void index(EntityMetadata metadata, final MetamodelImpl metaModel, Object object, String parentId, Class<?> clazz)
     {
 
-        indexDocument(metadata, object, parentId, clazz);
+        indexDocument(metadata, metaModel, object, parentId, clazz);
         onCommit();
     }
 
@@ -551,7 +550,7 @@ public class LuceneIndexer extends DocumentIndexer
      *            the clazz
      * @return the document
      */
-    private Document indexDocument(EntityMetadata metadata, Object object, String parentId, Class<?> clazz)
+    private Document indexDocument(EntityMetadata metadata, final MetamodelImpl metaModel, Object object, String parentId, Class<?> clazz)
     {
 
         if (log.isDebugEnabled())
@@ -561,7 +560,7 @@ public class LuceneIndexer extends DocumentIndexer
 
         // In case defined entity is Super column family.
         // we need to create seperate lucene document for indexing.
-        Document currentDoc = updateOrIndexDocument(metadata, object, parentId, clazz, false);
+        Document currentDoc = updateOrIndexDocument(metadata, metaModel, object, parentId, clazz, false);
 
         return currentDoc;
 
@@ -580,7 +579,7 @@ public class LuceneIndexer extends DocumentIndexer
      *            the clazz
      * @return the document
      */
-    private Document updateOrIndexDocument(EntityMetadata metadata, Object entity, String parentId, Class<?> clazz,
+    private Document updateOrIndexDocument(EntityMetadata metadata, final MetamodelImpl metaModel, Object entity, String parentId, Class<?> clazz,
             boolean isUpdate)
     {
         if (!metadata.isIndexable())
@@ -603,9 +602,9 @@ public class LuceneIndexer extends DocumentIndexer
 
         if (metadata.getType().equals(EntityMetadata.Type.SUPER_COLUMN_FAMILY))
         {
-
-            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                    metadata.getPersistenceUnit());
+//
+//            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+//                    metadata.getPersistenceUnit());
 
             Map<String, EmbeddableType> embeddables = metaModel.getEmbeddables(metadata.getEntityClazz());
 
@@ -755,19 +754,20 @@ public class LuceneIndexer extends DocumentIndexer
     }
 
     @Override
-    public void index(Class entityClazz, Map<String, Object> values, Object parentId, final Class parentClazz)
+    public void index(Class entityClazz, EntityMetadata entityMetadata, Map<String, Object> values, Object parentId,
+            final Class parentClazz)
     {
         throw new UnsupportedOperationException("Method not supported");
     }
 
     @Override
-    public void unIndex(Class entityClazz, Object entity)
+    public void unIndex(Class entityClazz, Object entity, EntityMetadata metadata, MetamodelImpl metamodel)
     {
         throw new UnsupportedOperationException("Method not supported");
     }
 
     @Override
-    public Map<String, Object> search(Class<?> clazz, String luceneQuery, int start, int end)
+    public Map<String, Object> search(Class<?> clazz, EntityMetadata m , String luceneQuery, int start, int end)
     {
         throw new UnsupportedOperationException("Method not supported");
     }
@@ -793,10 +793,10 @@ public class LuceneIndexer extends DocumentIndexer
      *            the clazz
      * @return the document
      */
-    private void updateDocument(EntityMetadata metadata, Object entity, String parentId,
+    private void updateDocument(EntityMetadata metadata, final MetamodelImpl metaModel, Object entity, String parentId,
             Class<? extends Object> class1, boolean b)
     {
-        updateOrIndexDocument(metadata, entity, parentId, entity.getClass(), true);
+        updateOrIndexDocument(metadata, metaModel, entity, parentId, entity.getClass(), true);
         onCommit();
 
     }

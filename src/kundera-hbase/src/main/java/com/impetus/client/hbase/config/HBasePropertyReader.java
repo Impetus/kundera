@@ -27,6 +27,7 @@ import com.impetus.kundera.configure.ClientProperties;
 import com.impetus.kundera.configure.ClientProperties.DataStore;
 import com.impetus.kundera.configure.ClientProperties.DataStore.Connection;
 import com.impetus.kundera.configure.PropertyReader;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
  * HBase Property Reader reads hbase properties from property file
@@ -48,9 +49,9 @@ public class HBasePropertyReader extends AbstractPropertyReader implements Prope
      */
     public static HBaseSchemaMetadata hsmd;
 
-    public HBasePropertyReader(Map externalProperties)
+    public HBasePropertyReader(Map externalProperties, final PersistenceUnitMetadata puMetadata)
     {
-        super(externalProperties);
+        super(externalProperties, puMetadata);
         hsmd = new HBaseSchemaMetadata();
     }
 

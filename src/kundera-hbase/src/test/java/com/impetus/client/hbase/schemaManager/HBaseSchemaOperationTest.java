@@ -20,7 +20,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
+
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
@@ -32,23 +34,11 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.impetus.client.hbase.HBaseClient;
 import com.impetus.client.hbase.HBaseClientFactory;
 import com.impetus.client.hbase.junits.HBaseCli;
-import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.ClientResolver;
-import com.impetus.kundera.configure.ClientFactoryConfiguraton;
-import com.impetus.kundera.configure.SchemaConfiguration;
 import com.impetus.kundera.configure.schema.SchemaGenerationException;
-import com.impetus.kundera.configure.schema.api.SchemaManager;
-import com.impetus.kundera.metadata.MetadataBuilder;
-import com.impetus.kundera.metadata.model.ApplicationMetadata;
-import com.impetus.kundera.metadata.model.ClientMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.metadata.model.MetamodelImpl;
-import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
-import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
 /**
  * @author Kuldeep.Kumar
@@ -60,19 +50,13 @@ public class HBaseSchemaOperationTest
 
     private static final String TABLE = "KunderaHbaseTests";
 
-    /** The configuration. */
-    private static SchemaConfiguration configuration;
-
-    /** Configure schema manager. */
-    private SchemaManager schemaManager;
-
-    private final boolean useLucene = false;
-
     private static HBaseAdmin admin;
 
     private static HBaseCli cli;
 
     private String persistenceUnit = "HBaseSchemaOperationTest";
+
+    private Map propertyMap = new HashMap();
 
     /**
      * @throws java.lang.Exception
@@ -94,7 +78,6 @@ public class HBaseSchemaOperationTest
     @Before
     public void setUp() throws Exception
     {
-        configuration = new SchemaConfiguration(null, "HBaseSchemaOperationTest");
 
     }
 
@@ -106,8 +89,6 @@ public class HBaseSchemaOperationTest
     {
         cli.dropTable(TABLE);
         HBaseCli.stopCluster();
-
-        // admin = null;
     }
 
     /**
@@ -116,15 +97,13 @@ public class HBaseSchemaOperationTest
     @After
     public void tearDown() throws Exception
     {
-        // schemaManager.dropSchema();
-        // HBaseCli.stopCluster();
-        // admin = null;
     }
 
     @Test
     public void testCreate() throws IOException
     {
-        getEntityManagerFactory("create");
+        propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create");
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory(persistenceUnit, propertyMap);
         Assert.assertTrue(admin.isTableAvailable(TABLE));
 
         HTableDescriptor descriptor = admin.getTableDescriptor(TABLE.getBytes());
@@ -145,7 +124,8 @@ public class HBaseSchemaOperationTest
     @Test
     public void testCreatedrop() throws IOException
     {
-        getEntityManagerFactory("create-drop");
+        propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create-drop");
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory(persistenceUnit, propertyMap);
         // schemaManager = new
         // HBaseSchemaManager(HBaseClientFactory.class.getName(), null);
         // schemaManager.exportSchema();
@@ -190,7 +170,8 @@ public class HBaseSchemaOperationTest
             Assert.assertEquals("PERSON_NAME", columnDescriptor.getNameAsString());
         }
 
-        getEntityManagerFactory("update");
+        propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "update");
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory(persistenceUnit, propertyMap);
         // schemaManager = new
         // HBaseSchemaManager(HBaseClientFactory.class.getName(), null);
         // schemaManager.exportSchema();
@@ -245,7 +226,8 @@ public class HBaseSchemaOperationTest
             Assert.assertTrue(columns.contains(columnDescriptor.getNameAsString()));
         }
 
-        getEntityManagerFactory("validate");
+        propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "validate");
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory(persistenceUnit, propertyMap);
         // schemaManager = new
         // HBaseSchemaManager(HBaseClientFactory.class.getName(), null);
         // schemaManager.exportSchema();
@@ -282,7 +264,8 @@ public class HBaseSchemaOperationTest
                 Assert.assertEquals(HBASE_ENTITY_SIMPLE, columnDescriptor.getNameAsString());
             }
 
-            getEntityManagerFactory("validate");
+            propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "validate");
+            EntityManagerFactory emf = Persistence.createEntityManagerFactory(persistenceUnit, propertyMap);
             // schemaManager = new
             // HBaseSchemaManager(HBaseClientFactory.class.getName(), null);
             // schemaManager.exportSchema();
@@ -295,78 +278,5 @@ public class HBaseSchemaOperationTest
             Assert.assertTrue(errors.contains(sgex.getMessage()));
 
         }
-    }
-
-    /**
-     * Gets the entity manager factory.
-     * 
-     * @param useLucene
-     * @param property
-     * 
-     * @return the entity manager factory
-     */
-    private EntityManagerFactoryImpl getEntityManagerFactory(String property)
-    {
-        ClientMetadata clientMetadata = new ClientMetadata();
-        Map<String, Object> props = new HashMap<String, Object>();
-
-        props.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
-        props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY, HBaseClientFactory.class.getName());
-        props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
-        props.put(PersistenceProperties.KUNDERA_PORT, "2181");
-        props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaHbaseTests");
-        props.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, property);
-        if (useLucene)
-        {
-            props.put(PersistenceProperties.KUNDERA_INDEX_HOME_DIR, "/home/impadmin/lucene");
-
-            clientMetadata.setLuceneIndexDir("/home/impadmin/lucene");
-        }
-        else
-        {
-
-            clientMetadata.setLuceneIndexDir(null);
-        }
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
-
-        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
-        // appMetadata = null;
-        PersistenceUnitMetadata puMetadata = new PersistenceUnitMetadata();
-        puMetadata.setPersistenceUnitName(persistenceUnit);
-        Properties p = new Properties();
-        p.putAll(props);
-        puMetadata.setProperties(p);
-        Map<String, PersistenceUnitMetadata> metadata = new HashMap<String, PersistenceUnitMetadata>();
-        metadata.put(persistenceUnit, null);
-        metadata.put(persistenceUnit, puMetadata);
-        appMetadata.addPersistenceUnitMetadata(metadata);
-
-        Map<String, List<String>> clazzToPu = new HashMap<String, List<String>>();
-
-        List<String> pus = new ArrayList<String>();
-        pus.add(persistenceUnit);
-        clazzToPu.put(HBaseEntitySimple.class.getName(), pus);
-
-        appMetadata.setClazzToPuMap(clazzToPu);
-
-        MetadataBuilder metadataBuilder = new MetadataBuilder(persistenceUnit, HBaseClient.class.getSimpleName(), null);
-
-        MetamodelImpl metaModel = new MetamodelImpl();
-        metaModel.addEntityMetadata(HBaseEntitySimple.class, metadataBuilder.buildEntityMetadata(HBaseEntitySimple.class));
-
-        appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
-
-        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(persistenceUnit).getManagedTypes());
-        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(persistenceUnit).getEmbeddables());
-        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(persistenceUnit).getMappedSuperClassTypes());
-
-//        KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit, clientMetadata);
-
-        // String[] persistenceUnits = { persistenceUnit };
-        new ClientFactoryConfiguraton(null, persistenceUnit).configure();
-        configuration.configure();
-        // new ClientFactoryConfiguraton(null, persistenceUnits).configure();
-
-        return null;
     }
 }

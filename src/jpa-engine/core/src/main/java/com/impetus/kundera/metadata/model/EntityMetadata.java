@@ -228,18 +228,18 @@ public final class EntityMetadata
                 .getTableName() : tableName;
     }
 
-    private void getEntityType()
+    private EntityType getEntityType()
     {
-
-        if (this.entityType == null)
+        /*if (this.entityType == null)
         {
-            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                     getPersistenceUnit());
             if (metaModel != null)
             {
                 this.entityType = metaModel.entity(this.entityClazz);
             }
-        }
+        }*/
+        return this.entityType;
     }
 
     /**
@@ -702,28 +702,41 @@ public final class EntityMetadata
 
     public String getFieldName(String jpaColumnName)
     {
-//        if(jpaColumnName.equals(((AbstractAttribute)this.getIdAttribute()).getJPAColumnName()))
-//        {
-//            return this.getIdAttribute().getName();
-//        }
-        
+        // if(jpaColumnName.equals(((AbstractAttribute)this.getIdAttribute()).getJPAColumnName()))
+        // {
+        // return this.getIdAttribute().getName();
+        // }
+
         String fieldName = jpaColumnMapping.get(jpaColumnName);
-        
-        if(fieldName == null)
+
+        if (fieldName == null)
         {
             getEntityType();
-            MetadataUtils.onJPAColumnMapping(this.entityType, this); // rebase. require in case of concrete super entity class.
+            MetadataUtils.onJPAColumnMapping(this.entityType, this); // rebase.
+                                                                     // require
+                                                                     // in case
+                                                                     // of
+                                                                     // concrete
+                                                                     // super
+                                                                     // entity
+                                                                     // class.
             fieldName = jpaColumnMapping.get(jpaColumnName);
         }
-        
-        
-        if(fieldName == null && jpaColumnName.equals(((AbstractAttribute)this.getIdAttribute()).getJPAColumnName()))
+
+        if (fieldName == null && jpaColumnName.equals(((AbstractAttribute) this.getIdAttribute()).getJPAColumnName()))
         {
             return this.getIdAttribute().getName();
         }
-        
-        
+
         return fieldName;
+    }
+
+    public void setEntityType(EntityType entityType)
+    {
+        if (entityType != null)
+        {
+            this.entityType = entityType;
+        }
     }
 
 }

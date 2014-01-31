@@ -15,13 +15,9 @@
  ******************************************************************************/
 package com.impetus.kundera.configure;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 
 import junit.framework.Assert;
 
@@ -31,12 +27,8 @@ import org.junit.Test;
 
 import com.impetus.kundera.entity.PersonnelDTO;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
-import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
-import com.impetus.kundera.metadata.processor.TableProcessor;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
 /**
@@ -70,25 +62,20 @@ public class ConfiguratorTest
     @Test
     public void testValidConfigure()
     {
-
         // invoke configure.
-        // Configurator configurator = new Configurator(puName);
-        // configurator.configure();
-        getEntityManagerFactory();
+       EntityManagerFactoryImpl emfImpl = getEntityManagerFactory();
 
-        new PersistenceUnitConfiguration(null, _persistenceUnit).configure();
-        // new MetamodelConfiguration(puName).configure();
 
         // Assert entity metadata
-        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(PersonnelDTO.class);
+        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(emfImpl.getKunderaMetadataInstance(), PersonnelDTO.class);
         Assert.assertNotNull(m);
         Assert.assertNotNull(m.getPersistenceUnit());
         Assert.assertEquals(_persistenceUnit, m.getPersistenceUnit());
         Assert.assertEquals(PersonnelDTO.class.getName(), m.getEntityClazz().getName());
 
         // Assert on persistence unit meta data.
-        PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                .getPersistenceUnitMetadata(_persistenceUnit);
+        PersistenceUnitMetadata puMetadata = emfImpl.getKunderaMetadataInstance().getApplicationMetadata().getPersistenceUnitMetadata(
+                _persistenceUnit);
         Assert.assertEquals(kundera_client, puMetadata.getClient());
         Assert.assertEquals(true, puMetadata.getExcludeUnlistedClasses());
         Assert.assertNotNull(puMetadata.getPersistenceUnitRootUrl());
@@ -122,10 +109,8 @@ public class ConfiguratorTest
         PersistenceUnitMetadata puMetadata = null;
         try
         {
-            // invoke configure.
-            Configurator configurator = new Configurator(null, invalidPuName);
-            configurator.configure();
-            puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadata(invalidPuName);
+            EntityManagerFactoryImpl emf = getEntityManagerFactory();
+            puMetadata = emf.getKunderaMetadataInstance().getApplicationMetadata().getPersistenceUnitMetadata(invalidPuName);
         }
         catch (PersistenceUnitConfigurationException iex)
         {
@@ -155,32 +140,7 @@ public class ConfiguratorTest
      */
     private EntityManagerFactoryImpl getEntityManagerFactory()
     {
-        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
-
-        Map<String, List<String>> clazzToPu = new HashMap<String, List<String>>();
-
-        List<String> pus = new ArrayList<String>();
-        pus.add(_persistenceUnit);
-        clazzToPu.put(PersonnelDTO.class.getName(), pus);
-
-        appMetadata.setClazzToPuMap(clazzToPu);
-
-        EntityMetadata m = new EntityMetadata(PersonnelDTO.class);
-
-        TableProcessor processor = new TableProcessor(null);
-        processor.process(PersonnelDTO.class, m);
-
-        m.setPersistenceUnit(_persistenceUnit);
-
-        MetamodelImpl metaModel = new MetamodelImpl();
-        metaModel.addEntityMetadata(PersonnelDTO.class, m);
-
-        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(_persistenceUnit).getManagedTypes());
-        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(_persistenceUnit).getEmbeddables());
-        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(_persistenceUnit).getMappedSuperClassTypes());
-
-        appMetadata.getMetamodelMap().put(_persistenceUnit, metaModel);
-        return null;
+        return (EntityManagerFactoryImpl) Persistence.createEntityManagerFactory("kunderatest");
     }
     /* *//**
      * Gets the entity manager factory.

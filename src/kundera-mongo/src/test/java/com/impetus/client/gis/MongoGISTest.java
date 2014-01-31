@@ -33,7 +33,6 @@ import com.impetus.kundera.gis.SurfaceType;
 import com.impetus.kundera.gis.geometry.Coordinate;
 import com.impetus.kundera.gis.geometry.Point;
 import com.impetus.kundera.gis.geometry.Polygon;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.vividsolutions.jts.geom.CoordinateSequence;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
@@ -76,7 +75,7 @@ public class MongoGISTest
     @Before
     public void setUp() throws Exception
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         dao = new PersonGISDao(persistenceUnit);
     }
 

@@ -27,7 +27,6 @@ import com.impetus.client.hbase.generatedId.entites.HBaseGeneratedIdWithSequence
 import com.impetus.client.hbase.generatedId.entites.HBaseGeneratedIdWithTableGenerator;
 import com.impetus.client.hbase.junits.HBaseCli;
 import com.impetus.kundera.KunderaException;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 public class HBaseGeneratedIdTest
 {
@@ -59,7 +58,7 @@ public class HBaseGeneratedIdTest
     {
         emf.close();
         cli.dropTable("kundera");
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
     }
 
     @Test

@@ -375,8 +375,8 @@ public class StudentCassandraUUIDTest extends CassandraBase
         List<StudentUUID> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentUUID s where s.name = Amresh and s.age between "
-                + getMinValue(short.class) + " and " + getMaxValue(short.class);
+        query = "Select s From StudentUUID s where s.name = Amresh and s.age between " + getMinValue(short.class)
+                + " and " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -568,27 +568,27 @@ public class StudentCassandraUUIDTest extends CassandraBase
         }
         catch (IOException e)
         {
-            
+
         }
         catch (TException e)
         {
-            
+
         }
         catch (InvalidRequestException e)
         {
-            
+
         }
         catch (UnavailableException e)
         {
-            
+
         }
         catch (TimedOutException e)
         {
-            
+
         }
         catch (SchemaDisagreementException e)
         {
-            
+
         }
     }
 
@@ -656,22 +656,22 @@ public class StudentCassandraUUIDTest extends CassandraBase
         }
         catch (TException e)
         {
-            
+
         }
         catch (InvalidRequestException e)
         {
-            
+
         }
         catch (SchemaDisagreementException e)
         {
-            
+
         }
 
     }
 
     public void dropSchema()
     {
-        CassandraCli.executeCqlQuery("TRUNCATE \"StudentUUID\"");
+        CassandraCli.executeCqlQuery("TRUNCATE \"StudentUUID\"", keyspace);
     }
 
 }

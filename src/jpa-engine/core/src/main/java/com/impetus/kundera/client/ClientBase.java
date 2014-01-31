@@ -31,6 +31,7 @@ import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
@@ -50,8 +51,15 @@ public abstract class ClientBase
     protected String persistenceUnit;
 
     protected boolean isUpdate;
-    
+
     protected ClientMetadata clientMetadata;
+
+    protected final KunderaMetadata kunderaMetadata;
+
+    protected ClientBase(final KunderaMetadata kunderaMetadata)
+    {
+        this.kunderaMetadata = kunderaMetadata;
+    }
 
     /*
      * (non-Javadoc)
@@ -82,7 +90,7 @@ public abstract class ClientBase
     {
         Object entity = node.getData();
         Object id = node.getEntityId();
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,  node.getDataClass());
         isUpdate = node.isUpdate();
         List<RelationHolder> relationHolders = getRelationHolders(node);
         onPersist(metadata, entity, id, relationHolders);
@@ -221,11 +229,11 @@ public abstract class ClientBase
     protected abstract void onPersist(EntityMetadata entityMetadata, Object entity, Object id,
             List<RelationHolder> rlHolders);
 
-    
-//    protected abstract Map<String, Object> preparePersistentObject(EntityMetadata entityMetadata, Object entity, Object id,
-//            List<RelationHolder> rlHolders);
-    
-    
+    // protected abstract Map<String, Object>
+    // preparePersistentObject(EntityMetadata entityMetadata, Object entity,
+    // Object id,
+    // List<RelationHolder> rlHolders);
+
     public ClientMetadata getClientMetadata()
     {
         return this.clientMetadata;

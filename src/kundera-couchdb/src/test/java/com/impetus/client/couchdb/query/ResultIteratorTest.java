@@ -32,7 +32,7 @@ import com.impetus.client.couchdb.entities.CouchDBTokenClient;
 import com.impetus.client.couchdb.entities.Month;
 import com.impetus.client.couchdb.entities.PersonCouchDB;
 import com.impetus.client.couchdb.entities.PersonCouchDB.Day;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 import com.impetus.kundera.query.IResultIterator;
 import com.impetus.kundera.query.Query;
 
@@ -56,9 +56,9 @@ public class ResultIteratorTest extends CouchDBBase
     @Before
     public void setUp() throws Exception
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         emf = Persistence.createEntityManagerFactory("couchdb_pu");
-        super.setUpBase();
+        super.setUpBase(((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());
         em = emf.createEntityManager();
     }
 

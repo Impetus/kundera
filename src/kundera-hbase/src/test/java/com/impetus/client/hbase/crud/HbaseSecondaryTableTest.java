@@ -13,7 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.hbase.junits.HBaseCli;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 import com.impetus.kundera.utils.LuceneCleanupUtilities;
 
 public class HbaseSecondaryTableTest
@@ -29,7 +29,7 @@ public class HbaseSecondaryTableTest
     @Before
     public void setUp() throws Exception
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         cli = new HBaseCli();
         cli.startCluster();
       
@@ -42,11 +42,12 @@ public class HbaseSecondaryTableTest
     public void tearDown() throws Exception
     {
         em.close();
-        emf.close();
         cli.dropTable("KunderaExamples");
         cli.stopCluster("KunderaExamples");
        
-        LuceneCleanupUtilities.cleanLuceneDirectory("hbaseTest");
+        LuceneCleanupUtilities.cleanLuceneDirectory(((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance()
+                .getApplicationMetadata().getPersistenceUnitMetadata("hbaseTest"));
+        emf.close();
     }
 
     @Test

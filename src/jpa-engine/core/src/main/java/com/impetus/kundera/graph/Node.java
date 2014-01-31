@@ -103,18 +103,18 @@ public class Node implements NodeStateContext
 
     private EntityEventDispatcher eventDispatcher = new EntityEventDispatcher();
 
-    private Node(String nodeId, Object data, PersistenceCache pc, Object primaryKey)
+    private Node(String nodeId, Object data, PersistenceCache pc, Object primaryKey, PersistenceDelegator pd)
     {
-        initializeNode(nodeId, data, primaryKey);
+        initializeNode(nodeId, data, primaryKey, pd);
         setPersistenceCache(pc);
 
         // Initialize current node state to transient state
         this.currentNodeState = new TransientState();
     }
 
-    Node(String nodeId, Object data, NodeState initialNodeState, PersistenceCache pc, Object primaryKey)
+    Node(String nodeId, Object data, NodeState initialNodeState, PersistenceCache pc, Object primaryKey, PersistenceDelegator pd)
     {
-        initializeNode(nodeId, data, primaryKey);
+        initializeNode(nodeId, data, primaryKey, pd);
         setPersistenceCache(pc);
 
         // Initialize current node state
@@ -129,11 +129,12 @@ public class Node implements NodeStateContext
     }
 
     public Node(String nodeId, Class<?> nodeDataClass, NodeState initialNodeState, PersistenceCache pc,
-            Object primaryKey)
+            Object primaryKey, PersistenceDelegator pd)
     {
         this.nodeId = nodeId;
         this.dataClass = nodeDataClass;
         this.entityId = primaryKey;
+        this.pd = pd;
         setPersistenceCache(pc);
 
         // Initialize current node state
@@ -147,8 +148,9 @@ public class Node implements NodeStateContext
         }
     }
 
-    private void initializeNode(String nodeId, Object data, Object primaryKey)
+    private void initializeNode(String nodeId, Object data, Object primaryKey, PersistenceDelegator pd)
     {
+        this.pd = pd;
         this.nodeId = nodeId;
         this.data = data;
         this.dataClass = data != null ? data.getClass() : null;
@@ -456,7 +458,7 @@ public class Node implements NodeStateContext
         getCurrentNodeState().handleRefresh(this);
 
         // Fix for handling PostLoad event on refresh.
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(this.getDataClass());
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(pd.getKunderaMetadata(), this.getDataClass());
         onPostEvent(metadata, EntityEvent.FIND);
 
     }
@@ -503,7 +505,7 @@ public class Node implements NodeStateContext
         getCurrentNodeState().handleFind(this);
 
         // Fix for handling PostLoad event on find.
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(this.getDataClass());
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(pd.getKunderaMetadata(), this.getDataClass());
         onPostEvent(metadata, EntityEvent.FIND);
     }
 
@@ -642,8 +644,8 @@ public class Node implements NodeStateContext
     @Override
     public Node clone()
     {
-        Node cloneCopy = new Node(this.nodeId, ObjectUtils.deepCopy(this.getData()), this.persistenceCache,
-                this.entityId);
+        Node cloneCopy = new Node(this.nodeId, ObjectUtils.deepCopy(this.getData(), pd.getKunderaMetadata()), this.persistenceCache,
+                this.entityId, this.pd);
         cloneCopy.setChildren(this.children);
         cloneCopy.setParents(this.parents);
         cloneCopy.setDataClass(this.dataClass);
@@ -665,7 +667,7 @@ public class Node implements NodeStateContext
 
     public void handlePreEvent()
     {
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(this.getDataClass());
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(pd.getKunderaMetadata(), this.getDataClass());
 
         if (isUpdate)
         {
@@ -683,7 +685,7 @@ public class Node implements NodeStateContext
 
     public void handlePostEvent()
     {
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(this.getDataClass());
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(pd.getKunderaMetadata(), this.getDataClass());
 
         if (isUpdate)
         {

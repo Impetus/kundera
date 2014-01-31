@@ -87,7 +87,7 @@ public class PersistenceXMLLoader
             {
                 URLConnection conn = configURL.openConnection();
                 conn.setUseCaches(false); // avoid JAR locking on Windows and
-                                          // Tomcat
+                                          // Tomcat.
                 is = conn.getInputStream();
             }
             if (is == null)
@@ -114,7 +114,7 @@ public class PersistenceXMLLoader
             }
             catch (ParserConfigurationException e)
             {
-                log.error("Error during parsing, Caused by: " + e.getMessage());
+                log.error("Error during parsing, Caused by: {}.", e);
                 throw new PersistenceLoaderException(e);
             }
 
@@ -146,7 +146,7 @@ public class PersistenceXMLLoader
             }
             else
             {
-                throw new InvalidConfigurationException("invalid persistence.xml", (Throwable) errors.get(0));
+                throw new InvalidConfigurationException("Invalid persistence.xml", (Throwable) errors.get(0));
             }
         }
         catch (IOException e)
@@ -219,7 +219,6 @@ public class PersistenceXMLLoader
     public static List<PersistenceUnitMetadata> findPersistenceUnits(final URL url,
             PersistenceUnitTransactionType defaultTransactionType) throws InvalidConfigurationException
     {
-
         Document doc;
         try
         {
@@ -248,7 +247,6 @@ public class PersistenceXMLLoader
                 if (tag.equals("persistence-unit"))
                 {
                     PersistenceUnitMetadata metadata = parsePersistenceUnit(url, element, versionName);
-                    // metadata.setPersistenceUnitRootUrl(getPersistenceRootUrl(url));
                     units.add(metadata);
                 }
             }
@@ -278,9 +276,7 @@ public class PersistenceXMLLoader
             if (StringUtils.isEmpty(transactionType)
                     || PersistenceUnitTransactionType.RESOURCE_LOCAL.name().equals(transactionType))
             {
-
                 metadata.setTransactionType(PersistenceUnitTransactionType.RESOURCE_LOCAL);
-
             }
             else if (PersistenceUnitTransactionType.JTA.name().equals(transactionType))
             {
@@ -300,26 +296,7 @@ public class PersistenceXMLLoader
                 {
                     metadata.setProvider(getElementContent(element));
                 }
-
-                /*
-                 * else if (tag.equals("transaction-type")) { String
-                 * transactionType = getElementContent(element);
-                 * 
-                 * if (StringUtils.isEmpty(transactionType) ||
-                 * PersistenceUnitTransactionType
-                 * .RESOURCE_LOCAL.name().equals(transactionType)) {
-                 * 
-                 * metadata.setTransactionType(PersistenceUnitTransactionType.
-                 * RESOURCE_LOCAL);
-                 * 
-                 * } else if
-                 * (PersistenceUnitTransactionType.JTA.name().equals(transactionType
-                 * )) {
-                 * metadata.setTransactionType(PersistenceUnitTransactionType
-                 * .JTA); }
-                 * 
-                 * }
-                 */else if (tag.equals("properties"))
+                else if (tag.equals("properties"))
                 {
                     NodeList props = element.getChildNodes();
                     for (int j = 0; j < props.getLength(); j++)
@@ -343,9 +320,6 @@ public class PersistenceXMLLoader
                         }
                     }
                 }
-                // Kundera doesn't support "class", "jar-file" and
-                // "excluded-unlisted-classes" for now.. but will someday.
-                // let's parse it for now.
                 else if (tag.equals("class"))
                 {
                     metadata.getClasses().add(getElementContent(element));
@@ -529,13 +503,9 @@ public class PersistenceXMLLoader
      */
     private static URL getPersistenceRootUrl(URL url)
     {
-
         String f = url.getFile();
         f = parseFilePath(f);
-        
-        
-       String protocol =  url.getProtocol();
-        
+
         URL jarUrl = url;
         try
         {
@@ -563,8 +533,8 @@ public class PersistenceXMLLoader
         }
         catch (MalformedURLException mex)
         {
-            log.error("Error during getPersistenceRootUrl(), Caused by: " + mex.getMessage());
-            throw new IllegalArgumentException("invalid jar URL[] provided!" + url);
+            log.error("Error during getPersistenceRootUrl(), Caused by: {}.", mex);
+            throw new IllegalArgumentException("Invalid jar URL[] provided!" + url);
         }
 
         return jarUrl;
@@ -593,7 +563,7 @@ public class PersistenceXMLLoader
      */
     public enum AllowedProtocol
     {
-        WSJAR, JAR, ZIP, FILE, VFSZIP,VFS;
+        WSJAR, JAR, ZIP, FILE, VFSZIP, VFS;
 
         /**
          * In case it is jar protocol

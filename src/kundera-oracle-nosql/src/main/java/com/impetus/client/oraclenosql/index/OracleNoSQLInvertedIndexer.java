@@ -38,7 +38,6 @@ import com.impetus.client.oraclenosql.OracleNOSQLConstants;
 import com.impetus.client.oraclenosql.OracleNoSQLDataHandler;
 import com.impetus.client.oraclenosql.query.OracleNoSQLQueryInterpreter;
 import com.impetus.kundera.index.Indexer;
-import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
@@ -60,9 +59,8 @@ public class OracleNoSQLInvertedIndexer implements Indexer
     private OracleNoSQLDataHandler handler;
 
     @Override
-    public void index(Class entityClazz, Map<String, Object> values, Object entityId, final Class parentClazz)
+    public void index(Class entityClazz, EntityMetadata m, Map<String, Object> values, Object entityId, final Class parentClazz)
     {
-        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClazz);
         String idColumnName = ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName();
         Object id = values.get(idColumnName);
 
@@ -85,17 +83,15 @@ public class OracleNoSQLInvertedIndexer implements Indexer
     }
 
     @Override
-    public Map<String, Object> search(Class<?> clazz, String queryString, int start, int count)
+    public Map<String, Object> search(Class<?> clazz, EntityMetadata m, String luceneQuery, int start, int count)
     {
         throw new UnsupportedOperationException("This method is not supported for OracleNoSQL.");
     }
 
     @Override
-    public Map<String, Object> search(String query, Class<?> parentClass, Class<?> childClass, Object entityId,
+    public Map<String, Object> search(String query, Class<?> parentClass,  EntityMetadata parentMetadata, Class<?> childClass, EntityMetadata childMetadata, Object entityId,
             int start, int count)
     {
-        EntityMetadata parentMetadata = KunderaMetadataManager.getEntityMetadata(parentClass);
-        EntityMetadata childMetadata = KunderaMetadataManager.getEntityMetadata(childClass);
         String secIndexName = getIndexTableName(childMetadata);
         String parentIdColumnName = ((AbstractAttribute) parentMetadata.getIdAttribute()).getJPAColumnName();
         String childIdColumnName = ((AbstractAttribute) childMetadata.getIdAttribute()).getJPAColumnName();
@@ -129,9 +125,8 @@ public class OracleNoSQLInvertedIndexer implements Indexer
         return results;
     }
 
-    public <E> Set<E> executeQuery(OracleNoSQLQueryInterpreter interpreter, Class<?> entityClass)
+    public <E> Set<E> executeQuery(OracleNoSQLQueryInterpreter interpreter, Class<?> entityClass, EntityMetadata entityMetadata)
     {
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
         String idColumnName = ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName();
         String secIndexName = getIndexTableName(entityMetadata);
 
@@ -228,18 +223,13 @@ public class OracleNoSQLInvertedIndexer implements Indexer
     }
 
     @Override
-    public void unIndex(Class entityClazz, Object entity)
+    public void unIndex(Class entityClazz, Object entity, EntityMetadata entityMetadata, MetamodelImpl metamodel)
     {
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClazz);
-
         String indexTableName = getIndexTableName(entityMetadata);
 
         // byte[] id = PropertyAccessorHelper.get(entity,
         // (Field)entityMetadata.getIdAttribute().getJavaMember());
         Object id = PropertyAccessorHelper.getId(entity, entityMetadata);
-
-        MetamodelImpl metamodel = (MetamodelImpl) KunderaMetadataManager.getMetamodel(entityMetadata
-                .getPersistenceUnit());
         EntityType entityType = metamodel.entity(entityMetadata.getEntityClazz());
         Set<Attribute> attributes = entityType.getSingularAttributes();
 

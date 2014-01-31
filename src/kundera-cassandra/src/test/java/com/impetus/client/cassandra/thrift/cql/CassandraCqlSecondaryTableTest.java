@@ -25,7 +25,6 @@ import org.junit.Test;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.persistence.CassandraCli;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 public class CassandraCqlSecondaryTableTest
 {
@@ -35,7 +34,7 @@ public class CassandraCqlSecondaryTableTest
     @Before
     public void setUp() throws Exception
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         CassandraCli.cassandraSetUp();
         CassandraCli.createKeySpace("KunderaExamples");
         loadData();

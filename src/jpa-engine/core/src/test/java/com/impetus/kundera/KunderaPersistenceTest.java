@@ -42,7 +42,7 @@ public class KunderaPersistenceTest
         }
         catch (KunderaException kex)
         {
-            Assert.assertEquals("Persistence unit should not be null", kex.getMessage());
+            Assert.assertEquals("Persistence unit name should not be null", kex.getMessage());
         }
 
     }

@@ -32,7 +32,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.oraclenosql.entities.PersonKVStore;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
  * Test case for CRUD and Queries on a single entity
@@ -59,7 +58,7 @@ public class OracleNoSQLSingleEntityTest extends OracleNoSQLTestBase
     public void tearDown()
     {
         super.tearDown();
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
     }
 
     @Test

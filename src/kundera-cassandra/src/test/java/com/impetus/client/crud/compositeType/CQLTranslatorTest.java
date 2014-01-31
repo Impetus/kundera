@@ -37,6 +37,7 @@ import com.impetus.client.cassandra.thrift.CQLTranslator.TranslationType;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
 /**
  * JUnit for CQL translator test
@@ -74,9 +75,9 @@ public class CQLTranslatorTest
         CassandraPrimeUser user = new CassandraPrimeUser(key);
         user.setTweetBody("my first tweet");
         user.setTweetDate(currentDate);
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(CassandraPrimeUser.class);
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance(), CassandraPrimeUser.class);
         Map<String, StringBuilder> translatedSql = translator
-                .prepareColumnOrColumnValues(user, entityMetadata, TranslationType.VALUE, null).get(
+                .prepareColumnOrColumnValues(user, entityMetadata, TranslationType.VALUE, null, ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance()).get(
                         TranslationType.VALUE);
         String columnAsCsv = "'mevivs',1," + timeLineId /*+ ",'my first tweet','" + currentDate.getTime() + */ /*+ "'"*/;
         

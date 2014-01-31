@@ -25,7 +25,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.kundera.client.crud.mappedsuperclass.MappedSuperClassBase;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
  * @author vivek.mishra Junit for {@link MappedSuperclass} in RDBMS
@@ -70,7 +69,7 @@ public class RDBMSMappedSuperClassTest extends MappedSuperClassBase
         query.executeUpdate();
 
         tearDownInternal();
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         dropSchema();
 
     }

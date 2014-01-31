@@ -35,7 +35,6 @@ import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.thrift.ThriftClient;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.client.Client;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
  * Junit for abstract entity class's operation.
@@ -57,7 +56,7 @@ public class InheritenceDomainTest
     @BeforeClass
     public static void setUpBeforeClass() throws Exception
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
 
         CassandraCli.cassandraSetUp();
         CassandraCli.createKeySpace("KunderaExamples");

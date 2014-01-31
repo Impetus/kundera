@@ -33,7 +33,6 @@ import com.impetus.client.mongodb.MongoDBClientFactory;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientResolver;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -95,7 +94,7 @@ public class MongoDBSchemaManagerTest
 
         Map props = new HashMap();
         props.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "update");
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         emf = Persistence.createEntityManagerFactory(persistenceUnit, props);
         em = emf.createEntityManager();
 

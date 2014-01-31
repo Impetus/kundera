@@ -63,11 +63,11 @@ import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata.Type;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
@@ -90,9 +90,12 @@ public abstract class CassandraDataHandlerBase
 
     private CassandraClientBase clientBase;
 
-    public CassandraDataHandlerBase(CassandraClientBase clientBase)
+    protected KunderaMetadata kunderaMetadata;
+
+    public CassandraDataHandlerBase(final CassandraClientBase clientBase, final KunderaMetadata kunderaMetadata)
     {
         this.clientBase = clientBase;
+        this.kunderaMetadata = kunderaMetadata;
     }
 
     /**
@@ -122,7 +125,8 @@ public abstract class CassandraDataHandlerBase
         // Get a name->field map for super-columns
         Map<String, Field> columnNameToFieldMap = new HashMap<String, Field>();
         Map<String, Field> superColumnNameToFieldMap = new HashMap<String, Field>();
-        MetadataUtils.populateColumnAndSuperColumnMaps(m, columnNameToFieldMap, superColumnNameToFieldMap);
+        MetadataUtils.populateColumnAndSuperColumnMaps(m, columnNameToFieldMap, superColumnNameToFieldMap,
+                kunderaMetadata);
 
         Collection embeddedCollection = null;
         Field embeddedCollectionField = null;
@@ -278,7 +282,8 @@ public abstract class CassandraDataHandlerBase
         // Get a name->field map for super-columns
         Map<String, Field> columnNameToFieldMap = new HashMap<String, Field>();
         Map<String, Field> superColumnNameToFieldMap = new HashMap<String, Field>();
-        MetadataUtils.populateColumnAndSuperColumnMaps(m, columnNameToFieldMap, superColumnNameToFieldMap);
+        MetadataUtils.populateColumnAndSuperColumnMaps(m, columnNameToFieldMap, superColumnNameToFieldMap,
+                kunderaMetadata);
 
         // If this super column is variable in number (name#sequence format)
         if (scName.indexOf(Constants.EMBEDDED_COLUMN_NAME_DELIMITER) != -1)
@@ -365,7 +370,6 @@ public abstract class CassandraDataHandlerBase
         long timestamp = System.currentTimeMillis();
         // Add super columns to thrift row
         return onColumnOrSuperColumnThriftRow(/* tr, */m, e, id, timestamp, columnTTLs);
-        // return tr;
     }
 
     private ThriftRow getThriftRow(Object id, String columnFamily, Map<String, ThriftRow> thriftRows)
@@ -396,12 +400,9 @@ public abstract class CassandraDataHandlerBase
     {
         List<ThriftRow> indexThriftRows = new ArrayList<ThriftRow>();
 
-        // byte[] rowKey = PropertyAccessorHelper.get(e, (Field)
-        // m.getIdAttribute().getJavaMember());
-
         byte[] rowKey = getThriftColumnValue(e, m.getIdAttribute());
 
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
 
         // Add thrift rows for embeddables
@@ -603,7 +604,7 @@ public abstract class CassandraDataHandlerBase
         try
         {
             boolean isCql3Enabled = clientBase.isCql3Enabled(m);
-            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                     m.getPersistenceUnit());
             EntityType entityType = metaModel.entity(m.getEntityClazz());
 
@@ -663,7 +664,7 @@ public abstract class CassandraDataHandlerBase
                     if (!mappingProcessed)
                     {
                         MetadataUtils.populateColumnAndSuperColumnMaps(m, columnNameToFieldMap,
-                                superColumnNameToFieldMap);
+                                superColumnNameToFieldMap, kunderaMetadata);
                         mappingProcessed = true;
                     }
 
@@ -692,7 +693,6 @@ public abstract class CassandraDataHandlerBase
                         // Add this embedded object to cache
                         ElementCollectionCacheManager.getInstance().addElementCollectionCacheMapping(tr.getId(),
                                 embeddedObject, scName);
-
                     }
                     else
                     {
@@ -749,7 +749,7 @@ public abstract class CassandraDataHandlerBase
                     if (!mappingProcessed)
                     {
                         MetadataUtils.populateColumnAndSuperColumnMaps(m, columnNameToFieldMap,
-                                superColumnNameToFieldMap);
+                                superColumnNameToFieldMap, kunderaMetadata);
                         mappingProcessed = true;
                     }
 
@@ -822,31 +822,8 @@ public abstract class CassandraDataHandlerBase
         else
         {
             setFieldValue(entity, columnValue, m.getIdAttribute());
-            // columnValue =
-            // PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(),
-            // (byte[]) columnValue);
-            // PropertyAccessorHelper.setId(entity, m, columnValue);
         }
     }
-
-    // protected void setId(EntityMetadata m, Object entity, Object columnValue,
-    // boolean isCql3Enabled)
-    // {
-    // if (PropertyAccessorHelper.getId(entity, m) == null)
-    // {
-    // if (isCql3Enabled && !m.getType().equals(Type.SUPER_COLUMN_FAMILY))
-    // {
-    // setFieldValueViaCQL(entity, columnValue, m.getIdAttribute());
-    // }
-    // else
-    // {
-    // columnValue =
-    // PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(),
-    // (byte[]) columnValue);
-    // PropertyAccessorHelper.setId(entity, m, columnValue);
-    // }
-    // }
-    // }
 
     /**
      * Scroll over super column.
@@ -1081,8 +1058,8 @@ public abstract class CassandraDataHandlerBase
         {
             if (thriftColumnValue != null)
             {
-                MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata()
-                        .getMetamodel(m.getPersistenceUnit());
+                MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                        m.getPersistenceUnit());
                 String fieldName = m.getFieldName(thriftColumnName);
                 Attribute attribute = fieldName != null ? entityType.getAttribute(fieldName) : null;
 
@@ -1123,8 +1100,8 @@ public abstract class CassandraDataHandlerBase
                 String fieldName = m.getFieldName(thriftColumnName);
                 Attribute attribute = fieldName != null ? entityType.getAttribute(fieldName) : null;
 
-                EntityMetadata relationMetadata = KunderaMetadataManager
-                        .getEntityMetadata(((AbstractAttribute) attribute).getBindableJavaType());
+                EntityMetadata relationMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
+                        ((AbstractAttribute) attribute).getBindableJavaType());
                 Object value;
                 if (isCql3Enabled && !m.getType().equals(Type.SUPER_COLUMN_FAMILY))
                 {
@@ -1190,7 +1167,7 @@ public abstract class CassandraDataHandlerBase
                     setCollectionValue(entity, thriftColumnValue, attribute);
                 }
                 else if (CassandraDataTranslator.isCassandraDataTypeClass(((AbstractAttribute) attribute)
-                        .getBindableJavaType()) )
+                        .getBindableJavaType()))
                 {
                     PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), CassandraDataTranslator
                             .decompose(((AbstractAttribute) attribute).getBindableJavaType(), thriftColumnValue, true));
@@ -1216,8 +1193,7 @@ public abstract class CassandraDataHandlerBase
         try
         {
 
-            if (CassandraDataTranslator.isCassandraDataTypeClass(((AbstractAttribute) attribute)
-                    .getBindableJavaType()))
+            if (CassandraDataTranslator.isCassandraDataTypeClass(((AbstractAttribute) attribute).getBindableJavaType()))
             {
 
                 objValue = CassandraDataTranslator.decompose(((AbstractAttribute) attribute).getBindableJavaType(),
@@ -1262,7 +1238,7 @@ public abstract class CassandraDataHandlerBase
 
         Map<String, ThriftRow> thriftRows = new HashMap<String, ThriftRow>();
 
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
 
         EntityType entityType = metaModel.entity(m.getEntityClazz());
@@ -1277,10 +1253,10 @@ public abstract class CassandraDataHandlerBase
             if (!attribute.getName().equals(m.getIdAttribute().getName()) && !attribute.isAssociation())
             {
                 Field field = (Field) ((Attribute) attribute).getJavaMember();
-                byte[] name = ByteBufferUtil.bytes(((AbstractAttribute) attribute).getJPAColumnName()).array(); 
-                        
-//                        PropertyAccessorFactory.STRING
-//                        .toBytes(((AbstractAttribute) attribute).getJPAColumnName());
+                byte[] name = ByteBufferUtil.bytes(((AbstractAttribute) attribute).getJPAColumnName()).array();
+
+                // PropertyAccessorFactory.STRING
+                // .toBytes(((AbstractAttribute) attribute).getJPAColumnName());
 
                 // if attribute is embeddable.
                 if (metaModel.isEmbeddable(attribute.isCollection() ? ((PluralAttribute) attribute)
@@ -1556,7 +1532,7 @@ public abstract class CassandraDataHandlerBase
             Attribute embeddableAttrib)
     {
 
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
 
         EmbeddableType superColumn = metaModel.embeddable(((AbstractAttribute) embeddableAttrib).getBindableJavaType());
@@ -1802,7 +1778,7 @@ public abstract class CassandraDataHandlerBase
                 thriftColumn.setValue(value);
                 thriftColumn.setTimestamp(timestamp);
                 thriftColumns.add(thriftColumn);
-               String columnFamilyName = ((AbstractAttribute) column).getTableName() != null ? ((AbstractAttribute) column)
+                String columnFamilyName = ((AbstractAttribute) column).getTableName() != null ? ((AbstractAttribute) column)
                         .getTableName() : tableName;
                 SuperColumn thriftSuperColumn = (SuperColumn) tableToSuperColumns.get(tableName);
                 if (thriftSuperColumn == null)

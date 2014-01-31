@@ -24,6 +24,7 @@ import com.impetus.kundera.configure.AbstractPropertyReader;
 import com.impetus.kundera.configure.ClientProperties;
 import com.impetus.kundera.configure.ClientProperties.DataStore;
 import com.impetus.kundera.configure.PropertyReader;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
  * XML Property reader for Neo4J specific configuration
@@ -39,9 +40,9 @@ public class Neo4JPropertyReader extends AbstractPropertyReader implements Prope
     /** Neo4J schema metadata instance */
     public static Neo4JSchemaMetadata nsmd;
 
-    public Neo4JPropertyReader(Map externalProperties)
+    public Neo4JPropertyReader(Map externalProperties, final PersistenceUnitMetadata puMetadata)
     {
-        super(externalProperties);
+        super(externalProperties, puMetadata);
         nsmd = new Neo4JSchemaMetadata();
     }
 

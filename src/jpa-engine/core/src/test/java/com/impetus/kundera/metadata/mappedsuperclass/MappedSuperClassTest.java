@@ -32,8 +32,8 @@ import org.junit.Test;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 import com.impetus.kundera.query.QueryHandlerException;
 
 /**
@@ -61,9 +61,10 @@ public class MappedSuperClassTest
     @Test
     public void testMappedMetamodel()
     {
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(Employee.class);
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                persistenceUnit);
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(
+                ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance(), Employee.class);
+        MetamodelImpl metaModel = (MetamodelImpl) ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance()
+                .getApplicationMetadata().getMetamodel(persistenceUnit);
 
         EntityType entityType = metaModel.entity(Employee.class);
 
@@ -121,31 +122,32 @@ public class MappedSuperClassTest
         emp.setDepartmentId(1);
         emp.setFirstName("vivek");
         em.persist(emp);
-       
+
         em.clear();
         Employee result = em.find(Employee.class, "emp_1");
         Assert.assertNotNull(result);
         Assert.assertEquals(emp.getFirstName(), result.getFirstName());
         Assert.assertEquals(emp.getDepartmentId(), result.getDepartmentId());
-        
+
         em.remove(result);
-        
+
         result = em.find(Employee.class, "emp_1");
         Assert.assertNull(result);
     }
+
     @After
     public void tearDown()
     {
-        if(em != null)
+        if (em != null)
         {
             em.close();
-            em=null;
+            em = null;
         }
-        
-        if(emf != null)
+
+        if (emf != null)
         {
             emf.close();
-            emf=null;
+            emf = null;
         }
     }
 }

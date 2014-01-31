@@ -35,7 +35,6 @@ import com.impetus.client.rdbms.query.RDBMSEntityReader;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.loader.GenericClientFactory;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 
 /**
@@ -74,7 +73,7 @@ public class RDBMSClientFactory extends GenericClientFactory
     @Override
     public void initialize(Map<String, Object> externalProperty)
     {
-        reader = new RDBMSEntityReader();
+        reader = new RDBMSEntityReader(kunderaMetadata);
         ((RDBMSEntityReader) reader).setFilter("where");
         setExternalProperties(externalProperty);
     }
@@ -84,17 +83,15 @@ public class RDBMSClientFactory extends GenericClientFactory
     {
 
         getConfigurationObject();
-        
-        
-        Set<String> pus =  KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodelMap().keySet();
-        
+
+        Set<String> pus = kunderaMetadata.getApplicationMetadata().getMetamodelMap().keySet();
+
         Collection<Class<?>> classes = new ArrayList<Class<?>>();
-        
-        for(String pu : pus)
+
+        for (String pu : pus)
         {
-            classes.addAll(
-            /* Collection<Class<?>> classes = */((MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata()
-                    .getMetamodel(pu)).getEntityNameToClassMap().values());
+            classes.addAll(((MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(pu))
+                    .getEntityNameToClassMap().values());
         }
         // to keep hibernate happy! As in our case all scanned classes are not
         // meant for rdbms, so initally i have set depth to zero!
@@ -125,7 +122,7 @@ public class RDBMSClientFactory extends GenericClientFactory
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
-        return new HibernateClient(getPersistenceUnit(), indexManager, reader, this, externalProperties, clientMetadata);
+        return new HibernateClient(getPersistenceUnit(), indexManager, reader, this, externalProperties, clientMetadata, kunderaMetadata);
     }
 
     @Override
@@ -152,7 +149,8 @@ public class RDBMSClientFactory extends GenericClientFactory
      */
     private void getConfigurationObject()
     {
-        RDBMSPropertyReader reader = new RDBMSPropertyReader(externalProperties);
+        RDBMSPropertyReader reader = new RDBMSPropertyReader(externalProperties, kunderaMetadata.getApplicationMetadata()
+                .getPersistenceUnitMetadata(getPersistenceUnit()));
         this.conf = reader.load(getPersistenceUnit());
     }
 

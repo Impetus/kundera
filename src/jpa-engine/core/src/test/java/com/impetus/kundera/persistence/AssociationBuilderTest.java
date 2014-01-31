@@ -32,16 +32,14 @@ import com.impetus.kundera.CoreTestUtilities;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.polyglot.entities.AddressU11FK;
 import com.impetus.kundera.polyglot.entities.PersonU11FK;
 import com.impetus.kundera.proxy.ProxyHelper;
 import com.impetus.kundera.utils.LuceneCleanupUtilities;
 
 /**
- * @author vivek.mishra
- * junit for {@link AssociationBuilder}
- *
+ * @author vivek.mishra junit for {@link AssociationBuilder}
+ * 
  */
 public class AssociationBuilderTest
 {
@@ -58,67 +56,72 @@ public class AssociationBuilderTest
     @Before
     public void setUp() throws Exception
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);        
+
         emf = Persistence.createEntityManagerFactory(PU);
         em = emf.createEntityManager();
 
     }
 
     @Test
-    public void testAssociatedEntitiesFromIndex() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
+    public void testAssociatedEntitiesFromIndex() throws NoSuchFieldException, SecurityException,
+            IllegalArgumentException, IllegalAccessException
     {
         AddressU11FK address = new AddressU11FK();
         address.setAddressId("addr1");
         address.setStreet("street");
-        
+
         PersonU11FK p1 = new PersonU11FK();
         p1.setPersonName("vivek");
         p1.setPersonId("1");
         p1.setAddress(address);
-        
+
         em.persist(p1);
-        
+
         em.clear();
 
         AssociationBuilder builder = new AssociationBuilder();
-        
+
         PersistenceDelegator delegator = CoreTestUtilities.getDelegator(em);
-        Client associationEntityClient = delegator.getClient(KunderaMetadataManager.getEntityMetadata(AddressU11FK.class));
-        java.util.List results = builder.getAssociatedEntitiesFromIndex(PersonU11FK.class, "1", AddressU11FK.class, associationEntityClient);
+        Client associationEntityClient = delegator.getClient(KunderaMetadataManager.getEntityMetadata(
+                ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance(), AddressU11FK.class));
+        java.util.List results = builder.getAssociatedEntitiesFromIndex(PersonU11FK.class, "1", AddressU11FK.class,
+                associationEntityClient);
         Assert.assertNotNull(results);
-        
+
         // TODO: This is failing . Vivek to look into this.
-//        Assert.assertFalse(results.isEmpty());
-        
-//       builder.setProxyRelationObject(entity, relationsMap, m, pd, entityId, relation);
-         
-         Map<String, Object> relationMap = new HashMap<String, Object>();
-         relationMap.put("ADDRESS_ID", "addr1");
-         
-         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(PersonU11FK.class);
-         builder.setProxyRelationObject(p1, relationMap, metadata, delegator, "1", metadata.getRelation("address"));
-         
-         Assert.assertTrue(ProxyHelper.isKunderaProxy(p1.getAddress()));
-//       
-//       builder.populateRelationForM2M(entity, entityMetadata, delegator, relation, relObject, relationsMap);
-       
-       
+        // Assert.assertFalse(results.isEmpty());
+
+        // builder.setProxyRelationObject(entity, relationsMap, m, pd, entityId,
+        // relation);
+
+        Map<String, Object> relationMap = new HashMap<String, Object>();
+        relationMap.put("ADDRESS_ID", "addr1");
+
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(
+                ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance(), PersonU11FK.class);
+        builder.setProxyRelationObject(p1, relationMap, metadata, delegator, "1", metadata.getRelation("address"));
+
+        Assert.assertTrue(ProxyHelper.isKunderaProxy(p1.getAddress()));
+        //
+        // builder.populateRelationForM2M(entity, entityMetadata, delegator,
+        // relation, relObject, relationsMap);
+
     }
 
     @After
     public void tearDown()
     {
-        if(emf != null)
+        if (emf != null)
         {
             emf.close();
         }
-        
-        if(em != null)
+
+        if (em != null)
         {
             em.close();
         }
-        
-        LuceneCleanupUtilities.cleanLuceneDirectory(PU);
+
+        LuceneCleanupUtilities.cleanLuceneDirectory(((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance().getApplicationMetadata().getPersistenceUnitMetadata(PU));
     }
-    
+
 }

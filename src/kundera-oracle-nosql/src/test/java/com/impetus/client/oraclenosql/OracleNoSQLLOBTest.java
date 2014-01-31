@@ -27,7 +27,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.oraclenosql.entities.UserProfile;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
  * Test case for read and write on Large Objects (LOBs)
@@ -51,7 +50,7 @@ public class OracleNoSQLLOBTest extends OracleNoSQLTestBase
     public void tearDown()
     {
         super.tearDown();
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
     }
 
     @Test

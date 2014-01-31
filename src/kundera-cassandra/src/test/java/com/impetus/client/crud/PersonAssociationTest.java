@@ -43,7 +43,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.persistence.CassandraCli;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
  * Test case to perform simple SelfAssociation.
@@ -81,7 +80,7 @@ public class PersonAssociationTest extends BaseTest
         cassandraCli = new CassandraCli();
         cassandraCli.cassandraSetUp();
         loadData();
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         emf = Persistence.createEntityManagerFactory("secIdxCassandraTest");
         em = emf.createEntityManager();
     }

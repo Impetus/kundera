@@ -35,14 +35,14 @@ import com.impetus.kundera.CoreTestUtilities;
 import com.impetus.kundera.client.DummyDatabase;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.utils.LuceneCleanupUtilities;
 
 /**
- * @author vivek.mishra
- * junit for {@link QueryImpl}
- *
+ * @author vivek.mishra junit for {@link QueryImpl}
+ * 
  */
 public class QueryImplTest
 {
@@ -53,147 +53,162 @@ public class QueryImplTest
 
     private EntityManager em;
 
+    private KunderaMetadata kunderaMetadata;
+
     /**
      * @throws java.lang.Exception
      */
     @Before
     public void setUp() throws Exception
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);        
+
         emf = Persistence.createEntityManagerFactory(PU);
+        kunderaMetadata = ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance();
         em = emf.createEntityManager();
 
     }
 
-
     private KunderaQuery parseQuery(final String query)
     {
-        KunderaQuery kunderaQuery = new KunderaQuery(query);
+        KunderaQuery kunderaQuery = new KunderaQuery(query, kunderaMetadata);
         KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery);
         queryParser.parse();
         kunderaQuery.postParsingInit();
         return kunderaQuery;
     }
 
-
     @After
     public void tearDown()
     {
         DummyDatabase.INSTANCE.dropDatabase();
-        LuceneCleanupUtilities.cleanLuceneDirectory(PU);
+        LuceneCleanupUtilities.cleanLuceneDirectory(kunderaMetadata.getApplicationMetadata()
+                .getPersistenceUnitMetadata(PU));
     }
 
     /**
      * @param query
-     * @throws IllegalAccessException 
-     * @throws IllegalArgumentException 
-     * @throws SecurityException 
-     * @throws NoSuchFieldException 
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     * @throws SecurityException
+     * @throws NoSuchFieldException
      */
     @Test
-    public void assertOnUnsupportedMethod() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException
+    public void assertOnUnsupportedMethod() throws NoSuchFieldException, SecurityException, IllegalArgumentException,
+            IllegalAccessException
     {
         String queryStr = "Select p from Person p where p.personId = :personId";
-        
+
         PersistenceDelegator delegator = CoreTestUtilities.getDelegator(em);
-        
+
         KunderaQueryParser queryParser;
         KunderaQuery kunderaQuery = parseQuery(queryStr);
 
-        CoreQuery query = new CoreQuery(kunderaQuery, delegator);
+        CoreQuery query = new CoreQuery(kunderaQuery, delegator, kunderaMetadata);
 
         try
         {
             query.setFlushMode(FlushModeType.AUTO);
-        } catch(UnsupportedOperationException usex)
+        }
+        catch (UnsupportedOperationException usex)
         {
             Assert.assertEquals("setFlushMode is unsupported by Kundera", usex.getMessage());
         }
-        
+
         try
         {
             query.setFirstResult(1);
-        } catch(UnsupportedOperationException usex)
+        }
+        catch (UnsupportedOperationException usex)
         {
             Assert.assertEquals("setFirstResult is unsupported by Kundera", usex.getMessage());
         }
-        
+
         try
         {
             query.getSingleResult();
-        } catch(UnsupportedOperationException usex)
+        }
+        catch (UnsupportedOperationException usex)
         {
             Assert.assertEquals("getSingleResult is unsupported by Kundera", usex.getMessage());
         }
-        
+
         try
         {
             query.getFirstResult();
-        } catch(UnsupportedOperationException usex)
+        }
+        catch (UnsupportedOperationException usex)
         {
             Assert.assertEquals("getFirstResult is unsupported by Kundera", usex.getMessage());
         }
-        
+
         try
         {
             query.setLockMode(LockModeType.NONE);
-        } catch(UnsupportedOperationException usex)
+        }
+        catch (UnsupportedOperationException usex)
         {
             Assert.assertEquals("setLockMode is unsupported by Kundera", usex.getMessage());
         }
-        
+
         try
         {
             query.getLockMode();
-        } catch(UnsupportedOperationException usex)
+        }
+        catch (UnsupportedOperationException usex)
         {
             Assert.assertEquals("getLockMode is unsupported by Kundera", usex.getMessage());
         }
-        
+
         try
         {
-            query.setParameter(0,new Date(),TemporalType.DATE);
-        } catch(UnsupportedOperationException usex)
+            query.setParameter(0, new Date(), TemporalType.DATE);
+        }
+        catch (UnsupportedOperationException usex)
         {
             Assert.assertEquals("setParameter is unsupported by Kundera", usex.getMessage());
         }
 
         try
         {
-            query.setParameter("param",new Date(),TemporalType.DATE);
-        } catch(UnsupportedOperationException usex)
-        {
-            Assert.assertEquals("setParameter is unsupported by Kundera", usex.getMessage());
+            query.setParameter("param", new Date(), TemporalType.DATE);
         }
-        
-        try
-        {
-            query.setParameter(0,Calendar.getInstance(),TemporalType.DATE);
-        } catch(UnsupportedOperationException usex)
-        {
-            Assert.assertEquals("setParameter is unsupported by Kundera", usex.getMessage());
-        }
-        
-        try
-        {
-            query.setParameter("param",Calendar.getInstance(),TemporalType.DATE);
-        } catch(UnsupportedOperationException usex)
+        catch (UnsupportedOperationException usex)
         {
             Assert.assertEquals("setParameter is unsupported by Kundera", usex.getMessage());
         }
 
         try
         {
-            query.setParameter(CoreTestUtilities.getParameter(),Calendar.getInstance(),TemporalType.DATE);
-        } catch(UnsupportedOperationException usex)
+            query.setParameter(0, Calendar.getInstance(), TemporalType.DATE);
+        }
+        catch (UnsupportedOperationException usex)
         {
             Assert.assertEquals("setParameter is unsupported by Kundera", usex.getMessage());
         }
 
         try
         {
-            query.setParameter(CoreTestUtilities.getParameter(),new Date(),TemporalType.DATE);
-        } catch(UnsupportedOperationException usex)
+            query.setParameter("param", Calendar.getInstance(), TemporalType.DATE);
+        }
+        catch (UnsupportedOperationException usex)
+        {
+            Assert.assertEquals("setParameter is unsupported by Kundera", usex.getMessage());
+        }
+
+        try
+        {
+            query.setParameter(CoreTestUtilities.getParameter(), Calendar.getInstance(), TemporalType.DATE);
+        }
+        catch (UnsupportedOperationException usex)
+        {
+            Assert.assertEquals("setParameter is unsupported by Kundera", usex.getMessage());
+        }
+
+        try
+        {
+            query.setParameter(CoreTestUtilities.getParameter(), new Date(), TemporalType.DATE);
+        }
+        catch (UnsupportedOperationException usex)
         {
             Assert.assertEquals("setParameter is unsupported by Kundera", usex.getMessage());
         }
@@ -201,29 +216,30 @@ public class QueryImplTest
         try
         {
             query.getFlushMode();
-        } catch(UnsupportedOperationException usex)
+        }
+        catch (UnsupportedOperationException usex)
         {
             Assert.assertEquals("getFlushMode is unsupported by Kundera", usex.getMessage());
         }
 
     }
-    
+
     @Test
     public void testGetColumns()
     {
         try
         {
             String queryStr = "Select p from Person p where p.personId = :personId";
-            
+
             PersistenceDelegator delegator = CoreTestUtilities.getDelegator(em);
-            
+
             KunderaQueryParser queryParser;
             KunderaQuery kunderaQuery = parseQuery(queryStr);
 
-            CoreQuery query = new CoreQuery(kunderaQuery, delegator);
-            
-            EntityMetadata m = KunderaMetadataManager.getEntityMetadata(Person.class);            
-            String[] columns = query.getColumns(new String[]{"personName", "age"}, m);
+            CoreQuery query = new CoreQuery(kunderaQuery, delegator, kunderaMetadata);
+
+            EntityMetadata m = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, Person.class);
+            String[] columns = query.getColumns(new String[] { "personName", "age" }, m);
             Assert.assertNotNull(columns);
             Assert.assertTrue(columns.length > 0);
         }
@@ -244,26 +260,26 @@ public class QueryImplTest
             Assert.fail(e.getMessage());
         }
     }
-    
+
     @Test
     public void testGroupByAndOrderBy()
     {
         try
         {
             String queryStr = "Select p from Person p where p.personId = :personId GROUP BY personId";
-            KunderaQuery kunderaQuery = new KunderaQuery(queryStr);
+            KunderaQuery kunderaQuery = new KunderaQuery(queryStr, kunderaMetadata);
             KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery);
-            queryParser.parse();        
+            queryParser.parse();
             kunderaQuery.postParsingInit();
-            
+
             queryStr = "Select p from Person p where p.personId = :personId GROUP BY personId HAVING 1";
-            kunderaQuery = new KunderaQuery(queryStr);
+            kunderaQuery = new KunderaQuery(queryStr, kunderaMetadata);
             queryParser = new KunderaQueryParser(kunderaQuery);
             queryParser.parse();
             kunderaQuery.postParsingInit();
-            
+
             queryStr = "Select p from Person p where p.personId = :personId GROUP BY personId ORDER BY personName";
-            kunderaQuery = new KunderaQuery(queryStr);
+            kunderaQuery = new KunderaQuery(queryStr, kunderaMetadata);
             queryParser = new KunderaQueryParser(kunderaQuery);
             queryParser.parse();
             kunderaQuery.postParsingInit();
@@ -271,7 +287,7 @@ public class QueryImplTest
         catch (Exception e)
         {
             Assert.fail(e.getMessage());
-        }       
-        
+        }
+
     }
 }

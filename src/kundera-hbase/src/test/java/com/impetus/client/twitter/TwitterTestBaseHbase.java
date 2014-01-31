@@ -28,7 +28,6 @@ import com.impetus.client.twitter.entities.PersonalDetailHbase;
 import com.impetus.client.twitter.entities.PreferenceHBase;
 import com.impetus.client.twitter.entities.TweetHbase;
 import com.impetus.client.twitter.entities.UserHBase;
-import com.impetus.kundera.utils.LuceneCleanupUtilities;
 
 /**
  * Test case for MongoDB.
@@ -109,8 +108,6 @@ public abstract class TwitterTestBaseHbase extends TestCase
         {
             stopServer();
         }
-
-        LuceneCleanupUtilities.cleanLuceneDirectory(persistenceUnitName);
     }
 
     /**

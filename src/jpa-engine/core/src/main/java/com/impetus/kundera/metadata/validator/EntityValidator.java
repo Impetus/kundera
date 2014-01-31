@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.validator;
 
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
+
 /**
  * Interface to validate an entity.
  * 
@@ -38,5 +40,5 @@ public interface EntityValidator
      *            the clazz
      * @param puProperties
      */
-    void validateEntity(Class<?> clazz);
+    void validateEntity(Class<?> clazz, final KunderaMetadata kunderaMetadata);
 }

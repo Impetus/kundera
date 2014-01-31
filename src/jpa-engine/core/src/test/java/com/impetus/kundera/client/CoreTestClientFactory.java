@@ -42,7 +42,7 @@ public class CoreTestClientFactory extends GenericClientFactory
     public SchemaManager getSchemaManager(Map<String, Object> puProperties)
     {
         if(schemaManager == null)
-        schemaManager =  new CoreSchemaManager("com.impetus.kundera.client.CoreTestClientFactory", puProperties);
+        schemaManager =  new CoreSchemaManager("com.impetus.kundera.client.CoreTestClientFactory", puProperties, kunderaMetadata);
         return schemaManager;
     }
 
@@ -57,7 +57,7 @@ public class CoreTestClientFactory extends GenericClientFactory
     {
         setConnectionPoolOrConnection(null);
         
-        return new CoreTestClient(indexManager, persistenceUnit);
+        return new CoreTestClient(indexManager, persistenceUnit, kunderaMetadata);
     }
 
     @Override

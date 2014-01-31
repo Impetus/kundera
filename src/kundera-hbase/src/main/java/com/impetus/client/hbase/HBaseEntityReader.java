@@ -21,6 +21,7 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.AbstractEntityReader;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.query.KunderaQuery;
 
@@ -32,15 +33,17 @@ import com.impetus.kundera.query.KunderaQuery;
 public class HBaseEntityReader extends AbstractEntityReader implements EntityReader
 {
 
-	
-	public HBaseEntityReader() {
-		// TODO Auto-generated constructor stub
-	}
-	
-	public HBaseEntityReader(KunderaQuery kunderaQuery) {
-		this.kunderaQuery = kunderaQuery;
-	}
-	
+    public HBaseEntityReader(final KunderaMetadata kunderaMetadata)
+    {
+        super(kunderaMetadata);
+    }
+
+    public HBaseEntityReader(KunderaQuery kunderaQuery, final KunderaMetadata kunderaMetadata)
+    {
+        super(kunderaMetadata);
+        this.kunderaQuery = kunderaQuery;
+    }
+
     /*
      * (non-Javadoc)
      * 

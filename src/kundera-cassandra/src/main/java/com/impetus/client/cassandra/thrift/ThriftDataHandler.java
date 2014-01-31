@@ -35,10 +35,10 @@ import com.impetus.client.cassandra.datahandler.CassandraDataHandlerBase;
 import com.impetus.client.cassandra.thrift.ThriftClientFactory.Connection;
 import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.annotation.DefaultEntityAnnotationProcessor;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
@@ -54,9 +54,9 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
 {
     private final ThriftClient thriftClient;
 
-    public ThriftDataHandler(final ThriftClient thriftClient)
+    public ThriftDataHandler(final ThriftClient thriftClient, final KunderaMetadata kunderaMetadata)
     {
-        super(thriftClient);
+        super(thriftClient, kunderaMetadata);
         this.thriftClient = thriftClient;
     }
 
@@ -82,7 +82,7 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
         Connection conn = thriftClient.getConection();
         try
         {
-            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                     m.getPersistenceUnit());
 
             AbstractManagedType managedType = (AbstractManagedType) metaModel.entity(m.getEntityClazz());

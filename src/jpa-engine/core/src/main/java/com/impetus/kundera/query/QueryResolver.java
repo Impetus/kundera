@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 
 /**
@@ -54,7 +54,7 @@ public class QueryResolver
      * @return the query implementation
      */
     public Query getQueryImplementation(String jpaQuery, PersistenceDelegator persistenceDelegator, Class mappedClass,
-            boolean isNative)
+            boolean isNative, final KunderaMetadata kunderaMetadata)
     {
         if (jpaQuery == null)
         {
@@ -62,7 +62,7 @@ public class QueryResolver
         }
         
         KunderaQuery kunderaQuery = null;
-        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+        ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
         String mappedQuery = appMetadata.getQuery(jpaQuery);
 
         isNative = mappedQuery != null ? appMetadata.isNative(jpaQuery) : isNative;
@@ -72,7 +72,7 @@ public class QueryResolver
         // In case of named native query
         if (!isNative)
         {
-            kunderaQuery = new KunderaQuery(mappedQuery != null ? mappedQuery : jpaQuery);
+            kunderaQuery = new KunderaQuery(mappedQuery != null ? mappedQuery : jpaQuery, kunderaMetadata);
             KunderaQueryParser parser = new KunderaQueryParser(kunderaQuery);
 
             parser.parse();
@@ -88,11 +88,11 @@ public class QueryResolver
                 mappedClass = appMetadata.getMappedClass(jpaQuery);
             }
            
-            kunderaQuery = new KunderaQuery(jpaQuery);
+            kunderaQuery = new KunderaQuery(jpaQuery, kunderaMetadata);
             
             kunderaQuery.isNativeQuery = true;
             
-            m = KunderaMetadataManager.getEntityMetadata(mappedClass);
+            m = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, mappedClass);
 
             Field entityClazzField = null;
             try
@@ -116,7 +116,7 @@ public class QueryResolver
 
         try
         {
-            query = getQuery(jpaQuery, persistenceDelegator, m, kunderaQuery);
+            query = getQuery(jpaQuery, persistenceDelegator, m, kunderaQuery, kunderaMetadata);
         }
         catch (Exception e)
         {
@@ -152,15 +152,15 @@ public class QueryResolver
      *             the invocation target exception
      */
     private Query getQuery(String jpaQuery, PersistenceDelegator persistenceDelegator, EntityMetadata m,
-            KunderaQuery kunderaQuery) throws ClassNotFoundException, SecurityException, NoSuchMethodException,
+            KunderaQuery kunderaQuery, final KunderaMetadata kunderaMetadata) throws ClassNotFoundException, SecurityException, NoSuchMethodException,
             IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException
     {
         Query query;
         Class clazz = persistenceDelegator.getClient(m).getQueryImplementor();
 
         @SuppressWarnings("rawtypes")
-        Constructor constructor = clazz.getConstructor(KunderaQuery.class, PersistenceDelegator.class);
-        query = (Query) constructor.newInstance(kunderaQuery, persistenceDelegator);
+        Constructor constructor = clazz.getConstructor(KunderaQuery.class, PersistenceDelegator.class, KunderaMetadata.class);
+        query = (Query) constructor.newInstance(kunderaQuery, persistenceDelegator, kunderaMetadata);
 
         return query;
     }

@@ -30,8 +30,8 @@ import org.neo4j.kernel.impl.util.FileUtils;
 
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
 /**
  * Test case for entities that hold composite keys
@@ -57,7 +57,7 @@ public class IMDBCompositeKeyTest
     @Before
     public void setUp() throws Exception
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         emf = Persistence.createEntityManagerFactory(IMDB_PU);
         em = emf.createEntityManager();
     }
@@ -68,7 +68,7 @@ public class IMDBCompositeKeyTest
     @After
     public void tearDown() throws Exception
     {
-        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(IMDB_PU);
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance(), IMDB_PU);
         String datastoreFilePath = puMetadata.getProperty(PersistenceProperties.KUNDERA_DATASTORE_FILE_PATH);
 
         em.close();

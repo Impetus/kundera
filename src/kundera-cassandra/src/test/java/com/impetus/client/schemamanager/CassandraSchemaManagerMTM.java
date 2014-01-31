@@ -15,11 +15,11 @@
  ******************************************************************************/
 package com.impetus.client.schemamanager;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Properties;
+
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 
 import junit.framework.Assert;
 
@@ -27,21 +27,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.cassandra.thrift.ThriftClientFactory;
 import com.impetus.client.persistence.CassandraCli;
-import com.impetus.client.schemamanager.entites.CassandraEntityHabitatUniMToM;
-import com.impetus.client.schemamanager.entites.CassandraEntityPersonnelUniMToM;
-import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.configure.ClientFactoryConfiguraton;
-import com.impetus.kundera.configure.SchemaConfiguration;
-import com.impetus.kundera.metadata.MetadataBuilder;
-import com.impetus.kundera.metadata.model.ApplicationMetadata;
-import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.metadata.model.MetamodelImpl;
-import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
-import com.impetus.kundera.metadata.processor.TableProcessor;
 import com.impetus.kundera.metadata.validator.InvalidEntityDefinitionException;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
@@ -104,64 +91,9 @@ public class CassandraSchemaManagerMTM
      */
     private EntityManagerFactoryImpl getEntityManagerFactory(String property)
     {
-        Map<String, Object> props = new HashMap<String, Object>();
-        props.put(Constants.PERSISTENCE_UNIT_NAME, pu);
-        props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY,
-                "com.impetus.client.cassandra.pelops.PelopsClientFactory");
-        props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
-        props.put(PersistenceProperties.KUNDERA_PORT, "9160");
-        props.put(PersistenceProperties.KUNDERA_KEYSPACE, keyspace);
-        props.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, property);
-        if (useLucene)
-        {
-            props.put(PersistenceProperties.KUNDERA_INDEX_HOME_DIR, "/home/impadmin/lucene");
-        }
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
-        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
-        PersistenceUnitMetadata puMetadata = new PersistenceUnitMetadata();
-        puMetadata.setPersistenceUnitName(pu);
-        Properties p = new Properties();
-        p.putAll(props);
-        puMetadata.setProperties(p);
-        Map<String, PersistenceUnitMetadata> metadata = new HashMap<String, PersistenceUnitMetadata>();
-        metadata.put(pu, puMetadata);
-        appMetadata.addPersistenceUnitMetadata(metadata);
-
-        Map<String, List<String>> clazzToPu = new HashMap<String, List<String>>();
-
-        List<String> pus = new ArrayList<String>();
-        pus.add(pu);
-        clazzToPu.put(CassandraEntityPersonnelUniMToM.class.getName(), pus);
-        clazzToPu.put(CassandraEntityHabitatUniMToM.class.getName(), pus);
-
-        appMetadata.setClazzToPuMap(clazzToPu);
-
-        EntityMetadata m = new EntityMetadata(CassandraEntityPersonnelUniMToM.class);
-        EntityMetadata m1 = new EntityMetadata(CassandraEntityHabitatUniMToM.class);
-
-        TableProcessor processor = new TableProcessor(null);
-        processor.process(CassandraEntityPersonnelUniMToM.class, m);
-        processor.process(CassandraEntityHabitatUniMToM.class, m1);
-
-        m.setPersistenceUnit(pu);
-
-        MetadataBuilder metadataBuilder = new MetadataBuilder(pu, ThriftClientFactory.class.getSimpleName(), null);
-
-        MetamodelImpl metaModel = new MetamodelImpl();
-
-        metaModel.addEntityMetadata(CassandraEntityPersonnelUniMToM.class, metadataBuilder.buildEntityMetadata(CassandraEntityPersonnelUniMToM.class));
-        metaModel.addEntityMetadata(CassandraEntityHabitatUniMToM.class, metadataBuilder.buildEntityMetadata(CassandraEntityHabitatUniMToM.class));
-
-        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(pu).getManagedTypes());
-        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(pu).getEmbeddables());
-        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(pu).getMappedSuperClassTypes());
-
-        appMetadata.getMetamodelMap().put(pu, metaModel);
-
-        new ClientFactoryConfiguraton(null, pu).configure();
-        new SchemaConfiguration(null, pu).configure();
-        // EntityManagerFactoryImpl impl = new
-        // EntityManagerFactoryImpl(puMetadata, props);
-        return null;
+        Map propertyMap = new HashMap();
+        propertyMap.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaCassandraMTMExamples");
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("cassandra", propertyMap);
+        return (EntityManagerFactoryImpl) emf;
     }
 }

@@ -17,6 +17,8 @@ package com.impetus.kundera.configure;
 
 import java.util.Map;
 
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+
 /**
  * Class Dummy Property Reader for test
  * 
@@ -36,9 +38,9 @@ public class DummyPropertyReader extends AbstractPropertyReader implements Prope
      * .kundera.configure.ClientProperties)
      */
 
-    public DummyPropertyReader(Map externalProperties)
+    public DummyPropertyReader(Map externalProperties, final PersistenceUnitMetadata puMetadata)
     {
-        super(externalProperties);
+        super(externalProperties, puMetadata);
         dsmd = new DummySchemaMetadata();
     }
 

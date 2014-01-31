@@ -15,13 +15,10 @@
  ******************************************************************************/
 package com.impetus.client.persistence;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Persistence;
 import javax.persistence.Query;
 
 import junit.framework.Assert;
@@ -31,18 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 
-import com.impetus.client.cassandra.thrift.ThriftClientFactory;
-import com.impetus.kundera.Constants;
-import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.configure.ClientFactoryConfiguraton;
-import com.impetus.kundera.metadata.MetadataBuilder;
-import com.impetus.kundera.metadata.model.ApplicationMetadata;
-import com.impetus.kundera.metadata.model.CoreMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.metadata.model.MetamodelImpl;
-import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
-import com.impetus.kundera.proxy.cglib.CglibLazyInitializerFactory;
 import com.impetus.kundera.query.QueryImpl;
 
 /**
@@ -56,6 +42,8 @@ public class NativeQueryTest
     // /** The schema. */
     private final String schema = "KunderaExamples";
 
+    private EntityManagerFactoryImpl emf;
+
     /**
      * Sets the up.
      * 
@@ -67,6 +55,7 @@ public class NativeQueryTest
     {
         CassandraCli.cassandraSetUp();
         CassandraCli.createKeySpace(schema);
+        emf = getEntityManagerFactory();
     }
 
     /**
@@ -75,20 +64,11 @@ public class NativeQueryTest
     @Test
     public void testCreateNativeQuery()
     {
-        EntityManagerFactoryImpl emf = getEntityManagerFactory();
-        EntityManager em = emf.createEntityManager()/*
-                                                     * new
-                                                     * EntityManagerImpl(emf,
-                                                     * PersistenceUnitTransactionType
-                                                     * .RESOURCE_LOCAL,
-                                                     * PersistenceContextType
-                                                     * .EXTENDED)
-                                                     */;
+        EntityManager em = emf.createEntityManager();
         String nativeSql = "Select * from Cassandra c";
 
         QueryImpl q = (QueryImpl) em.createNativeQuery(nativeSql, CassandraEntitySample.class);
         Assert.assertEquals(nativeSql, q.getJPAQuery());
-//        Assert.assertEquals(true, KunderaMetadata.INSTANCE.getApplicationMetadata().isNative(nativeSql));
     }
 
     /**
@@ -97,29 +77,10 @@ public class NativeQueryTest
     @Test
     public void testExecutNativeQuery()
     {
-        EntityManagerFactoryImpl emf = getEntityManagerFactory();
-        // String nativeSql = "CREATE KEYSPACE " + schema
-        // +
-        // " with strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1";
         String useNativeSql = "USE " + "\"KunderaExamples\"";
 
-        EntityManager em = emf.createEntityManager()/*
-                                                     * new
-                                                     * EntityManagerImpl(emf,
-                                                     * PersistenceUnitTransactionType
-                                                     * .RESOURCE_LOCAL,
-                                                     * PersistenceContextType
-                                                     * .EXTENDED)
-                                                     */;
-//        Map<String, Client> clientMap = (Map<String, Client>) em.getDelegate();
-//        PelopsClient pc = (PelopsClient) clientMap.get("cassandra");
-//        pc.setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
-        // Query q = em.createNativeQuery(nativeSql,
-        // CassandraEntitySample.class);
-        // // q.getResultList();
-        // q.executeUpdate();
+        EntityManager em = emf.createEntityManager();
         Query q = em.createNativeQuery(useNativeSql, CassandraEntitySample.class);
-        // q.getResultList();
         q.executeUpdate();
         Assert.assertTrue(CassandraCli.keyspaceExist(schema));
         Assert.assertFalse(CassandraCli.keyspaceExist("invalidSchema"));
@@ -132,35 +93,14 @@ public class NativeQueryTest
     @Test
     public void testReleasesNativeQueryConnection()
     {
-        EntityManagerFactoryImpl emf = getEntityManagerFactory();
-        // String nativeSql = "CREATE KEYSPACE "
-        // + schema
-        // +
-        // " with strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1";
-        // String useNativeSql = "USE test";
         String useNativeSql = "USE " + "\"KunderaExamples\"";
 
-        EntityManager em = emf.createEntityManager()/*
-                                                     * new
-                                                     * EntityManagerImpl(emf,
-                                                     * PersistenceUnitTransactionType
-                                                     * .RESOURCE_LOCAL,
-                                                     * PersistenceContextType
-                                                     * .EXTENDED)
-                                                     */;
-//        Map<String, Client> clientMap = (Map<String, Client>) em.getDelegate();
-//        PelopsClient pc = (PelopsClient) clientMap.get("cassandra");
-//        pc.setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
-        // Query q = em.createNativeQuery(nativeSql,
-        // CassandraEntitySample.class);
-        // // q.getResultList();
-        // q.executeUpdate();
+        EntityManager em = emf.createEntityManager();
 
         // won't be able to loop if connections are leaked
         for (int i = 0; i < 30; i++)
         {
             Query q = em.createNativeQuery(useNativeSql, CassandraEntitySample.class);
-            // q.getResultList();
             q.executeUpdate();
         }
     }
@@ -171,27 +111,8 @@ public class NativeQueryTest
     @Test
     public void testCreateInsertColumnFamilyQuery()
     {
-        // String nativeSql = "CREATE KEYSPACE " + schema
-        // +
-        // " with strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1";
-        // String useNativeSql = "USE test";
         String useNativeSql = "USE " + "\"KunderaExamples\"";
-        EntityManagerFactoryImpl emf = getEntityManagerFactory();
-        EntityManager em = emf.createEntityManager()/*
-                                                     * new
-                                                     * EntityManagerImpl(emf,
-                                                     * PersistenceUnitTransactionType
-                                                     * .RESOURCE_LOCAL,
-                                                     * PersistenceContextType
-                                                     * .EXTENDED)
-                                                     */;
-//        Map<String, Client> clientMap = (Map<String, Client>) em.getDelegate();
-//        PelopsClient pc = (PelopsClient) clientMap.get("cassandra");
-//        pc.setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
-        // Query q = em.createNativeQuery(nativeSql,
-        // CassandraEntitySample.class);
-        // // q.getResultList();
-        // q.executeUpdate();
+        EntityManager em = emf.createEntityManager();
         Query q = em.createNativeQuery(useNativeSql, CassandraEntitySample.class);
         // q.getResultList();
         q.executeUpdate();
@@ -256,51 +177,7 @@ public class NativeQueryTest
      */
     private EntityManagerFactoryImpl getEntityManagerFactory()
     {
-        Map<String, Object> props = new HashMap<String, Object>();
-        String persistenceUnit = "cassandra";
-        props.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
-        props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY,
-                "com.impetus.client.cassandra.pelops.PelopsClientFactory");
-        props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
-        props.put(PersistenceProperties.KUNDERA_PORT, "9160");
-        props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaExamples");
-        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
-        PersistenceUnitMetadata puMetadata = new PersistenceUnitMetadata();
-        puMetadata.setPersistenceUnitName(persistenceUnit);
-        Properties p = new Properties();
-        p.putAll(props);
-        puMetadata.setProperties(p);
-        Map<String, PersistenceUnitMetadata> metadata = new HashMap<String, PersistenceUnitMetadata>();
-        metadata.put("cassandra", puMetadata);
-        appMetadata.addPersistenceUnitMetadata(metadata);
-
-        Map<String, List<String>> clazzToPu = new HashMap<String, List<String>>();
-
-        List<String> pus = new ArrayList<String>();
-        pus.add(persistenceUnit);
-        clazzToPu.put(CassandraEntitySample.class.getName(), pus);
-
-        appMetadata.setClazzToPuMap(clazzToPu);
-
-        
-        MetadataBuilder metadataBuilder = new MetadataBuilder(persistenceUnit, ThriftClientFactory.class.getSimpleName(), null);
-
-        MetamodelImpl metaModel = new MetamodelImpl();
-        metaModel.addEntityMetadata(CassandraEntitySample.class, metadataBuilder.buildEntityMetadata(CassandraEntitySample.class));
-        
-        appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
-        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(persistenceUnit).getManagedTypes());
-        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(persistenceUnit).getEmbeddables());
-        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(persistenceUnit).getMappedSuperClassTypes());
-        EntityManagerFactoryImpl emf = new EntityManagerFactoryImpl(persistenceUnit, props);
-        String[] persistenceUnits = new String[] { persistenceUnit };
-        new ClientFactoryConfiguraton(null, persistenceUnits).configure();
-        
-        CoreMetadata coreMetadata = new CoreMetadata();
-        coreMetadata.setLazyInitializerFactory(new CglibLazyInitializerFactory());
-        KunderaMetadata.INSTANCE.setCoreMetadata(coreMetadata);
-        
-        return emf;
+        return (EntityManagerFactoryImpl) Persistence.createEntityManagerFactory("cassandra");
     }
 
     /**
@@ -312,7 +189,6 @@ public class NativeQueryTest
     @After
     public void tearDown() throws Exception
     {
-        // CassandraCli.dropKeySpace("KunderaExamples");
         CassandraCli.dropKeySpace(schema);
     }
 

@@ -42,7 +42,6 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.client.mongodb.MongoDBClient;
 import com.impetus.kundera.client.Client;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.mongodb.DB;
 
 /**
@@ -321,7 +320,7 @@ public class MongoCompositeTypeTest
     {
         truncateMongo();
         emf.close();
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
     }
 
     /**

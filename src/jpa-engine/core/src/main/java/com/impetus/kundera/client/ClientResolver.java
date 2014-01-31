@@ -26,8 +26,8 @@ import org.slf4j.LoggerFactory;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.loader.ClientFactory;
 import com.impetus.kundera.loader.GenericClientFactory;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 
 /**
  * Resolver class for client. It instantiates client factory and discover
@@ -51,9 +51,9 @@ public final class ClientResolver
      *            the persistence unit
      * @return the client factory
      */
-    public static ClientFactory getClientFactory(String persistenceUnit, Map<String, Object> puProperties)
+    public static ClientFactory getClientFactory(String persistenceUnit, Map<String, Object> puProperties,final KunderaMetadata kunderaMetadata)
     {
-        ClientFactory clientFactory = instantiateClientFactory(persistenceUnit, puProperties);
+        ClientFactory clientFactory = instantiateClientFactory(persistenceUnit, puProperties, kunderaMetadata);
         clientFactories.put(persistenceUnit, clientFactory);
         return clientFactory;
     }
@@ -66,11 +66,12 @@ public final class ClientResolver
      * @param clientFactory
      * @return new instance of clientFactory
      */
-    private static ClientFactory instantiateClientFactory(String persistenceUnit, Map<String, Object> puProperties)
+    private static ClientFactory instantiateClientFactory(String persistenceUnit, Map<String, Object> puProperties,
+            final KunderaMetadata kunderaMetadata)
     {
         ClientFactory clientFactory = null;
         logger.info("Initializing client factory for: " + persistenceUnit);
-        PersistenceUnitMetadata persistenceUnitMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+        PersistenceUnitMetadata persistenceUnitMetadata = kunderaMetadata.getApplicationMetadata()
                 .getPersistenceUnitMetadata(persistenceUnit);
         String kunderaClientFactory = puProperties != null ? (String) puProperties
                 .get(PersistenceProperties.KUNDERA_CLIENT_FACTORY) : null;
@@ -104,6 +105,15 @@ public final class ClientResolver
             }
 
             m.invoke(clientFactory, puProperties);
+            
+            m = GenericClientFactory.class.getDeclaredMethod("setKunderaMetadata", KunderaMetadata.class);
+            if (!m.isAccessible())
+            {
+                m.setAccessible(true);
+            }
+
+            m.invoke(clientFactory, kunderaMetadata);
+            
         }
         catch (InstantiationException e)
         {

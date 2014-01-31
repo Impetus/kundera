@@ -48,6 +48,7 @@ import com.impetus.client.couchdb.CouchDBUtils;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 
 /**
  * 
@@ -56,9 +57,10 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
  */
 public class CouchDBTestUtils
 {
-    public static HttpClient initiateHttpClient(String persistenceUnit)
+    public static HttpClient initiateHttpClient(final KunderaMetadata kunderaMetadata, String persistenceUnit)
     {
-        PersistenceUnitMetadata pumMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
+        PersistenceUnitMetadata pumMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata,
+                persistenceUnit);
 
         SchemeSocketFactory ssf = null;
         ssf = PlainSocketFactory.getSocketFactory();
@@ -119,15 +121,15 @@ public class CouchDBTestUtils
         }
         catch (URISyntaxException e)
         {
-            
+
         }
         catch (ClientProtocolException e)
         {
-            
+
         }
         catch (IOException e)
         {
-            
+
         }
         finally
         {
@@ -148,15 +150,15 @@ public class CouchDBTestUtils
         }
         catch (URISyntaxException e)
         {
-            
+
         }
         catch (ClientProtocolException e)
         {
-            
+
         }
         catch (IOException e)
         {
-            
+
         }
         finally
         {

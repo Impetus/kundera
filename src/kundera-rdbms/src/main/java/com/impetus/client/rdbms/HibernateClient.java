@@ -55,11 +55,11 @@ import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.EntityReaderException;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
@@ -101,9 +101,10 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      * @param puProperties
      */
     public HibernateClient(final String persistenceUnit, IndexManager indexManager, EntityReader reader,
-            RDBMSClientFactory clientFactory, Map<String, Object> puProperties, final ClientMetadata clientMetadata)
+            RDBMSClientFactory clientFactory, Map<String, Object> puProperties, final ClientMetadata clientMetadata, final KunderaMetadata kunderaMetadata)
     {
 
+        super(kunderaMetadata);
         this.clientFactory = clientFactory;
         // TODO . once we clear this persistenceUnit stuff we need to simply
         // modify this to have a properties or even pass an EMF!
@@ -145,7 +146,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         s.delete(entity);
         tx.commit();
 
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,  entity.getClass());
         if (!MetadataUtils.useSecondryIndex(getClientMetadata()))
         {
             getIndexManager().remove(metadata, entity, pKey.toString());
@@ -195,7 +196,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         // for each finder to avoid lazy loading.
         Session s = getSession();
 
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), arg0);
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, getPersistenceUnit(), arg0);
 
         Object[] pKeys = getDataType(entityMetadata, arg1);
         String id = ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName();
@@ -265,7 +266,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     @Override
     public void persistJoinTable(JoinTableData joinTableData)
     {
-        String schemaName = KunderaMetadataManager.getEntityMetadata(joinTableData.getEntityClass()).getSchema();
+        String schemaName = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, joinTableData.getEntityClass()).getSchema();
         String joinTableName = joinTableData.getJoinTableName();
         String joinColumnName = joinTableData.getJoinColumnName();
         String invJoinColumnName = joinTableData.getInverseJoinColumnName();
@@ -447,7 +448,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
 
         try
         {
-            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                     m.getPersistenceUnit());
 
             EntityType entityType = metaModel.entity(m.getEntityClazz());
@@ -467,18 +468,18 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
                         Object value = ((Map<String, Object>) o).get(discColumn);
                         if (value != null && value.toString().equals(disColValue))
                         {
-                            subEntityMetadata = KunderaMetadataManager.getEntityMetadata(subEntity.getJavaType());
+                            subEntityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, subEntity.getJavaType());
                             break;
                         }
                     }
                     entity = instantiateEntity(subEntityMetadata.getEntityClazz(), entity);
-                    relationValue = HibernateUtils.getTranslatedObject(entity, (Map<String, Object>) o, m);
+                    relationValue = HibernateUtils.getTranslatedObject(kunderaMetadata, entity, (Map<String, Object>) o, m);
 
                 }
                 else
                 {
                     entity = instantiateEntity(m.getEntityClazz(), entity);
-                    relationValue = HibernateUtils.getTranslatedObject(entity, (Map<String, Object>) o, m);
+                    relationValue = HibernateUtils.getTranslatedObject(kunderaMetadata, entity, (Map<String, Object>) o, m);
                 }
 
                 if (relationValue != null && !relationValue.isEmpty())
@@ -511,7 +512,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
             for (String r : relations)
             {
                 Relation rel = m.getRelation(m.getFieldName(r));
-                String name = MetadataUtils.getMappedName(m, m.getRelation(r));
+                String name = MetadataUtils.getMappedName(m, m.getRelation(r), kunderaMetadata);
                 if (!((AbstractAttribute) m.getIdAttribute()).getJPAColumnName().equalsIgnoreCase(
                         name != null ? name : r)
                         && rel != null
@@ -536,7 +537,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      */
     public List findByRelation(String colName, Object colValue, Class entityClazz)
     {
-        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClazz);
+        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClazz);
         String tableName = m.getTableName();
 
         // Suffixing the UNDERSCORE instead of prefix as Oracle 11g complains about invalid characters error while executing the request.
@@ -660,7 +661,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
                 Object relationObject = PropertyAccessorHelper.getObject(entity, relation.getProperty());
                 if (relationObject != null && ProxyHelper.isKunderaProxy(relationObject))
                 {
-                    EntityMetadata relMetadata = KunderaMetadataManager.getEntityMetadata(relation.getTargetEntity());
+                    EntityMetadata relMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, relation.getTargetEntity());
                     Method idAccessorMethod = relMetadata.getReadIdentifierMethod();
                     Object foreignKey = null;
                     try
@@ -687,7 +688,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
                     {
                         relationObject = null;
                         PropertyAccessorHelper.set(entity, relation.getProperty(), relationObject);
-                        relationHolders.add(new RelationHolder(relation.getJoinColumnName(), foreignKey));
+                        relationHolders.add(new RelationHolder(relation.getJoinColumnName(kunderaMetadata), foreignKey));
                         proxyRemoved = true;
                     }
                 }

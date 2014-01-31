@@ -59,10 +59,10 @@ public class FlushStackTest
     public void testFlushStackPush()
     {
         PersistenceCache pc = new PersistenceCache();
-        fs.push(new Node("A", new Object().getClass(), null, pc, "A"));
-        fs.push(new Node("B", new Object().getClass(), null, pc, "B"));
-        fs.push(new Node("C", new Object().getClass(), null, pc, "C"));
-        fs.push(new Node("D", new Object().getClass(), null, pc, "D"));
+        fs.push(new Node("A", new Object().getClass(), null, pc, "A", null));
+        fs.push(new Node("B", new Object().getClass(), null, pc, "B", null));
+        fs.push(new Node("C", new Object().getClass(), null, pc, "C", null));
+        fs.push(new Node("D", new Object().getClass(), null, pc, "D", null));
 
         Assert.assertEquals(4, fs.size());
     }

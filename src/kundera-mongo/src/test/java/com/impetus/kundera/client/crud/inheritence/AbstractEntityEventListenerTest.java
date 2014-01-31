@@ -25,7 +25,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.persistence.event.EntityEventDispatcher;
 
 /**
@@ -52,7 +51,7 @@ public class AbstractEntityEventListenerTest
     public void setUp() throws Exception
     {
         eventDispatcher = new EntityEventDispatcher();
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         emf = Persistence.createEntityManagerFactory(_PU);
         em = emf.createEntityManager();
     }

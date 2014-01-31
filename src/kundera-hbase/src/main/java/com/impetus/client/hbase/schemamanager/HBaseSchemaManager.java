@@ -40,6 +40,7 @@ import com.impetus.kundera.configure.schema.SchemaGenerationException;
 import com.impetus.kundera.configure.schema.TableInfo;
 import com.impetus.kundera.configure.schema.api.AbstractSchemaManager;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 
 /**
  * Manages auto schema operation {@code ScheamOperationType} for HBase data
@@ -72,9 +73,9 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
      * @param clientFactory
      *            client factory.
      */
-    public HBaseSchemaManager(String clientFactory, Map<String, Object> puProperties)
+    public HBaseSchemaManager(String clientFactory, Map<String, Object> puProperties, final KunderaMetadata kunderaMetadata)
     {
-        super(clientFactory, puProperties);
+        super(clientFactory, puProperties, kunderaMetadata);
     }
 
     @Override

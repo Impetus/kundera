@@ -22,7 +22,7 @@ public class InvalidPersonEntity
     private String lastName;
 
     // try with @Id attribute on Employee as well.
-//    @Column
+    // @Column
     private transient int version;
 
     public String getFirstName()
@@ -65,5 +65,4 @@ public class InvalidPersonEntity
         this.id = id;
     }
 
-    
 }

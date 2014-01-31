@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.client.couchdb.datatypes.tests.CouchDBBase;
 import com.impetus.client.couchdb.entities.PersonCouchDB;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 import com.impetus.kundera.query.QueryHandlerException;
 
 /**
@@ -57,7 +58,7 @@ public class CouchDBQueryTest extends CouchDBBase
     public void setUp() throws Exception
     {
         emf = Persistence.createEntityManagerFactory(pu);
-        super.setUpBase();
+        super.setUpBase(((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());
     }
 
     @Test

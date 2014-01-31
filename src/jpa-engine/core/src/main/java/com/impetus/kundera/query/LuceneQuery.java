@@ -28,6 +28,7 @@ import com.impetus.kundera.Constants;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.MetadataBuilder;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.utils.KunderaCoreUtils;
@@ -61,9 +62,9 @@ public class LuceneQuery extends QueryImpl
      * @param persistenceUnits
      *            the persistence units
      */
-    public LuceneQuery(KunderaQuery kunderaQuery, PersistenceDelegator pd)
+    public LuceneQuery(KunderaQuery kunderaQuery, PersistenceDelegator pd, final KunderaMetadata kunderaMetadata)
     {
-        super(kunderaQuery,pd);
+        super(kunderaQuery,pd, kunderaMetadata);
     }
 
     // @see com.impetus.kundera.query.QueryImpl#getResultList()
@@ -82,7 +83,7 @@ public class LuceneQuery extends QueryImpl
         String q = luceneQuery;
         if (null == q)
         {
-            q = KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery);
+            q = KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery, kunderaMetadata);
         }
 
         if (log.isDebugEnabled())

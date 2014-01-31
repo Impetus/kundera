@@ -58,7 +58,6 @@ import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.thrift.CQLTranslator;
 import com.impetus.client.crud.BaseTest;
 import com.impetus.client.persistence.CassandraCli;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 
 /**
@@ -114,7 +113,7 @@ public class PersonCassandraESIndexerTest extends BaseTest
     @Before
     public void setUp() throws Exception
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         CassandraCli.cassandraSetUp();
         CassandraCli.createKeySpace("KunderaExamples");
         loadData();

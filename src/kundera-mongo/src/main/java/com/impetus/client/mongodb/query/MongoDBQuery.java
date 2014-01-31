@@ -41,10 +41,10 @@ import com.impetus.kundera.gis.geometry.Point;
 import com.impetus.kundera.gis.query.GeospatialQuery;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.property.PropertyAccessorFactory;
@@ -80,9 +80,9 @@ public class MongoDBQuery extends QueryImpl
      * @param persistenceUnits
      *            the persistence units
      */
-    public MongoDBQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
+    public MongoDBQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator, final KunderaMetadata kunderaMetadata)
     {
-        super(kunderaQuery, persistenceDelegator);
+        super(kunderaQuery, persistenceDelegator, kunderaMetadata);
     }
 
     /*
@@ -118,7 +118,7 @@ public class MongoDBQuery extends QueryImpl
     @Override
     protected List<Object> populateEntities(EntityMetadata m, Client client)
     {
-        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+        ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
         try
         {
             String query = appMetadata.getQuery(getJPAQuery());
@@ -158,7 +158,7 @@ public class MongoDBQuery extends QueryImpl
         // if it is a parent..then find data related to it only
         // else u need to load for associated fields too.
         List<EnhanceEntity> ls = new ArrayList<EnhanceEntity>();
-        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+        ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
         try
         {
             String query = appMetadata.getQuery(getJPAQuery());
@@ -191,7 +191,7 @@ public class MongoDBQuery extends QueryImpl
     @Override
     protected EntityReader getReader()
     {
-        return new MongoEntityReader(kunderaQuery);
+        return new MongoEntityReader(kunderaQuery, kunderaMetadata);
     }
 
     /**
@@ -209,7 +209,7 @@ public class MongoDBQuery extends QueryImpl
         BasicDBObject query = new BasicDBObject();
         BasicDBObject compositeColumns = new BasicDBObject();
 
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
 
         for (Object object : filterClauseQueue)
@@ -422,7 +422,7 @@ public class MongoDBQuery extends QueryImpl
         BasicDBObject keys = new BasicDBObject();
         if (columns != null && columns.length > 0)
         {
-            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                     m.getPersistenceUnit());
             EntityType entity = metaModel.entity(m.getEntityClazz());
             for (int i = 1; i < columns.length; i++)

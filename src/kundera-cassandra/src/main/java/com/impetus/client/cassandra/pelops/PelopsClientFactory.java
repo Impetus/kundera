@@ -52,7 +52,6 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.service.Host;
 import com.impetus.kundera.service.HostConfiguration;
@@ -72,14 +71,14 @@ public class PelopsClientFactory extends GenericClientFactory
     @Override
     public void initialize(Map<String, Object> externalProperty)
     {
-        reader = new CassandraEntityReader();
+        reader = new CassandraEntityReader(kunderaMetadata);
         initializePropertyReader();
-//        setExternalProperties(externalProperty);
+        // setExternalProperties(externalProperty);
         String loadBalancingPolicyName = CassandraPropertyReader.csmd != null ? CassandraPropertyReader.csmd
                 .getConnectionProperties().getProperty(Constants.LOADBALANCING_POLICY) : null;
         initializeLoadBalancer(loadBalancingPolicyName);
         configuration = new CassandraHostConfiguration(externalProperties, CassandraPropertyReader.csmd,
-                getPersistenceUnit());
+                getPersistenceUnit(), kunderaMetadata);
         hostRetryService = new CassandraRetryService(configuration, this);
     }
 
@@ -87,7 +86,7 @@ public class PelopsClientFactory extends GenericClientFactory
     protected Object createPoolOrConnection()
     {
         logger.info("Creating pool");
-        PersistenceUnitMetadata persistenceUnitMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+        PersistenceUnitMetadata persistenceUnitMetadata = kunderaMetadata.getApplicationMetadata()
                 .getPersistenceUnitMetadata(getPersistenceUnit());
 
         Properties props = persistenceUnitMetadata.getProperties();
@@ -143,10 +142,11 @@ public class PelopsClientFactory extends GenericClientFactory
     {
         if (logger.isInfoEnabled())
         {
-//            logger.info("Initializing pelops client for persistence unit {}", persistenceUnit);
+            // logger.info("Initializing pelops client for persistence unit {}",
+            // persistenceUnit);
         }
         IThriftPool pool = getPoolUsingPolicy();
-        return new PelopsClient(indexManager, reader, this, persistenceUnit, externalProperties, pool);
+        return new PelopsClient(indexManager, reader, this, persistenceUnit, externalProperties, pool, kunderaMetadata);
     }
 
     @Override
@@ -180,7 +180,8 @@ public class PelopsClientFactory extends GenericClientFactory
         {
             initializePropertyReader();
             setExternalProperties(externalProperty);
-            schemaManager = new CassandraSchemaManager(PelopsClientFactory.class.getName(), externalProperty);
+            schemaManager = new CassandraSchemaManager(PelopsClientFactory.class.getName(), externalProperty,
+                    kunderaMetadata);
         }
 
         return schemaManager;
@@ -193,7 +194,8 @@ public class PelopsClientFactory extends GenericClientFactory
     {
         if (propertyReader == null)
         {
-            propertyReader = new CassandraPropertyReader(externalProperties);
+            propertyReader = new CassandraPropertyReader(externalProperties, kunderaMetadata.getApplicationMetadata()
+                    .getPersistenceUnitMetadata(getPersistenceUnit()));
             propertyReader.read(getPersistenceUnit());
         }
     }
@@ -248,14 +250,16 @@ public class PelopsClientFactory extends GenericClientFactory
                 {
                     if (cassandraHost.isTestOnBorrow() && PelopsUtils.verifyConnection(host, thriftPort))
                     {
-//                        logger.info("Returning connection of {} :{} .", nodes[0].getAddress(), thriftPort);
+                        // logger.info("Returning connection of {} :{} .",
+                        // nodes[0].getAddress(), thriftPort);
                         return iThriftPool.getConnection();
                     }
                     removePool(iThriftPool);
                 }
                 else
                 {
-//                    logger.info("Returning connection of {} :{} .", nodes[0].getAddress(), thriftPort);
+                    // logger.info("Returning connection of {} :{} .",
+                    // nodes[0].getAddress(), thriftPort);
                     return iThriftPool.getConnection();
                 }
                 removePool(iThriftPool);
@@ -285,14 +289,16 @@ public class PelopsClientFactory extends GenericClientFactory
                 {
                     if (cassandraHost.isTestOnBorrow() && PelopsUtils.verifyConnection(host, thriftPort))
                     {
-//                        logger.info("Returning mutator of {} :{} .", nodes[0].getAddress(), thriftPort);
+                        // logger.info("Returning mutator of {} :{} .",
+                        // nodes[0].getAddress(), thriftPort);
                         return Pelops.createMutator(PelopsUtils.getPoolName(iThriftPool));
                     }
                     removePool(iThriftPool);
                 }
                 else
                 {
-//                    logger.info("Returning mutator of {} :{} .", nodes[0].getAddress(), thriftPort);
+                    // logger.info("Returning mutator of {} :{} .",
+                    // nodes[0].getAddress(), thriftPort);
                     return Pelops.createMutator(PelopsUtils.getPoolName(iThriftPool));
                 }
             }
@@ -320,14 +326,16 @@ public class PelopsClientFactory extends GenericClientFactory
                 {
                     if (cassandraHost.isTestOnBorrow() && PelopsUtils.verifyConnection(host, thriftPort))
                     {
-//                        logger.info("Returning selector of {} :{} .", nodes[0].getAddress(), thriftPort);
+                        // logger.info("Returning selector of {} :{} .",
+                        // nodes[0].getAddress(), thriftPort);
                         return Pelops.createSelector(PelopsUtils.getPoolName(iThriftPool));
                     }
                     removePool(iThriftPool);
                 }
                 else
                 {
-//                    logger.info("Returning selector of {} :{} .", nodes[0].getAddress(), thriftPort);
+                    // logger.info("Returning selector of {} :{} .",
+                    // nodes[0].getAddress(), thriftPort);
                     return Pelops.createSelector(PelopsUtils.getPoolName(iThriftPool));
                 }
             }
@@ -389,7 +397,8 @@ public class PelopsClientFactory extends GenericClientFactory
      */
     public boolean addCassandraHost(CassandraHost cassandraHost)
     {
-        Properties props = KunderaMetadataManager.getPersistenceUnitMetadata(getPersistenceUnit()).getProperties();
+        Properties props = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata, getPersistenceUnit())
+                .getProperties();
         String keyspace = null;
         if (externalProperties != null)
         {

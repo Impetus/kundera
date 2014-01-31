@@ -25,6 +25,7 @@ import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.kundera.db.SearchResult;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 
 /**
  * This interface defines methods for operation on inverted indexes
@@ -65,6 +66,6 @@ public interface InvertedIndexHandler
      * @param metadata
      * @param consistencyLevel
      */
-    void delete(Object entity, EntityMetadata metadata, ConsistencyLevel consistencyLevel);
+    void delete(Object entity, EntityMetadata metadata, ConsistencyLevel consistencyLevel, final KunderaMetadata kunderaMetadata);
 
 }

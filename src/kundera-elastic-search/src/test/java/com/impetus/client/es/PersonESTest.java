@@ -37,7 +37,6 @@ import org.junit.Test;
 
 import com.impetus.client.es.PersonES.Day;
 import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
  * @author vivek.mishra junit to demonstrate ESQuery implementation.
@@ -64,7 +63,7 @@ public class PersonESTest
     @Before
     public void setup()
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         emf = Persistence.createEntityManagerFactory("es-pu");
         em = emf.createEntityManager();
     }
@@ -257,7 +256,7 @@ public class PersonESTest
     {
         em.close();
         emf.close();
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
 
 //        node.close();
     }

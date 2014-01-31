@@ -37,6 +37,7 @@ import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.loader.ClientFactory;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
 /**
  * Test case for {@link Neo4JClientFactory}
@@ -123,7 +124,7 @@ public class Neo4JClientFactoryTest
     @After
     public void tearDown() throws IOException
     {
-        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance(), persistenceUnit);
         String datastoreFilePath = puMetadata.getProperty(PersistenceProperties.KUNDERA_DATASTORE_FILE_PATH);
 
         emf.close();

@@ -29,8 +29,8 @@ import org.elasticsearch.index.query.TermFilterBuilder;
 
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.query.KunderaQuery;
@@ -45,9 +45,9 @@ public class ESQuery<E> extends QueryImpl
 {
 
 
-    public ESQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
+    public ESQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator, final KunderaMetadata kunderaMetadata)
     {
-        super(kunderaQuery, persistenceDelegator);
+        super(kunderaQuery, persistenceDelegator, kunderaMetadata);
     }
 
     /*
@@ -61,7 +61,7 @@ public class ESQuery<E> extends QueryImpl
     protected List<Object> populateEntities(EntityMetadata m, Client client)
     {
 
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
         EntityType entity = metaModel.entity(m.getEntityClazz());
 
@@ -127,7 +127,7 @@ public class ESQuery<E> extends QueryImpl
     @Override
     protected EntityReader getReader()
     {
-        return new ESEntityReader(kunderaQuery);
+        return new ESEntityReader(kunderaQuery, kunderaMetadata);
     }
 
     /*

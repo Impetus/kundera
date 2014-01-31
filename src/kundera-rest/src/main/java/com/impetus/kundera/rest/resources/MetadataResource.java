@@ -15,27 +15,9 @@
  */
 package com.impetus.kundera.rest.resources;
 
-import java.util.Map;
-import java.util.StringTokenizer;
-
-import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.impetus.kundera.metadata.KunderaMetadataManager;
-import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.MetamodelImpl;
-import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.rest.common.Constants;
-import com.impetus.kundera.rest.dto.Schema;
-import com.impetus.kundera.rest.dto.SchemaMetadata;
-import com.impetus.kundera.rest.dto.Table;
 
 /**
  * REST Resource for Meta data related operations
@@ -45,16 +27,16 @@ import com.impetus.kundera.rest.dto.Table;
 
 @Path("/" + Constants.KUNDERA_API_PATH + Constants.META_DATA_RESOURCE_PATH)
 public class MetadataResource
-{
+{/*
     private static Logger log = LoggerFactory.getLogger(MetadataResource.class);
 
-    /**
+    *//**
      * Handler for GET requests. Returns schema List and related metadata for
      * the given list of persistence units.
      * 
      * @param persistenceUnits
      * @return
-     */
+     *//*
     @GET
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     @Path("/schemaList/{persistenceUnits}")
@@ -71,7 +53,7 @@ public class MetadataResource
         {
 
             String persistenceUnit = st.nextToken();
-            PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
+            PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata, persistenceUnit);
             String schemaStr = puMetadata.getProperty("kundera.keyspace");
 
             if (schemaStr != null)
@@ -108,4 +90,4 @@ public class MetadataResource
 
     }
 
-}
+*/}

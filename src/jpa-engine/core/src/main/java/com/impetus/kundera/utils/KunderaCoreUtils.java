@@ -35,9 +35,9 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.ProxyHelper;
 import com.impetus.kundera.query.KunderaQuery;
@@ -249,13 +249,12 @@ public class KunderaCoreUtils
      * 
      * @return the lucene query from jpa query
      */
-    public static String getLuceneQueryFromJPAQuery(KunderaQuery kunderaQuery)
+    public static String getLuceneQueryFromJPAQuery(KunderaQuery kunderaQuery, final KunderaMetadata kunderaMetadata)
     {
 
         LuceneQueryBuilder queryBuilder = new LuceneQueryBuilder();
         EntityMetadata metadata = kunderaQuery.getEntityMetadata();
-        Metamodel metaModel = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                metadata.getPersistenceUnit());
+        Metamodel metaModel = kunderaMetadata.getApplicationMetadata().getMetamodel(metadata.getPersistenceUnit());
 
         EntityType entity = metaModel.entity(metadata.getEntityClazz());
 
@@ -271,7 +270,7 @@ public class KunderaCoreUtils
                 Class valueClazz = getValueType(entity, fieldName);
 
                 queryBuilder.appendIndexName(metadata.getIndexName())
-                        .appendPropertyName(getPropertyName(metadata, property))
+                        .appendPropertyName(getPropertyName(metadata, property, kunderaMetadata))
                         .buildQuery(condition, valueAsString, valueClazz);
             }
             else
@@ -293,9 +292,10 @@ public class KunderaCoreUtils
         return valueClazz;
     }
 
-    private static String getPropertyName(final EntityMetadata metadata, final String property)
+    private static String getPropertyName(final EntityMetadata metadata, final String property,
+            final KunderaMetadata kunderaMetadata)
     {
-        if (MetadataUtils.getEnclosingEmbeddedFieldName(metadata, property, true) != null)
+        if (MetadataUtils.getEnclosingEmbeddedFieldName(metadata, property, true, kunderaMetadata) != null)
         {
             return property.substring(property.indexOf(".") + 1, property.length());
         }

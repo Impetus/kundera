@@ -30,6 +30,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.couchdb.datatypes.entities.StudentCouchDBUUID;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
 public class StudentCouchDBUUIDTest extends CouchDBBase
 {
@@ -42,7 +43,7 @@ public class StudentCouchDBUUIDTest extends CouchDBBase
     public void setUp() throws Exception
     {
 
-        emf = Persistence.createEntityManagerFactory(pu);super.setUpBase();     
+        emf = Persistence.createEntityManagerFactory(pu);super.setUpBase(((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());     
     }
 
     @After

@@ -18,6 +18,7 @@ package com.impetus.kundera.index.lucene;
 import java.util.Map;
 
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
 
 /**
  * Interface to define the behavior of an Indexer.
@@ -46,7 +47,7 @@ public interface Indexer extends com.impetus.kundera.index.Indexer
      * @param object
      *            the object
      */
-    void index(EntityMetadata metadata, Object object);
+    void index(EntityMetadata metadata, final MetamodelImpl metaModel, Object object);
 
     /**
      * Indexes and object.
@@ -60,7 +61,7 @@ public interface Indexer extends com.impetus.kundera.index.Indexer
      * @param clazz
      *            parent class.
      */
-    void index(EntityMetadata metadata, Object object, String parentId, Class<?> clazz);
+    void index(EntityMetadata metadata, final MetamodelImpl metaModel, Object object, String parentId, Class<?> clazz);
 
     /**
      * Searches for an object. Note that the "query" must be in Indexer
@@ -107,5 +108,5 @@ public interface Indexer extends com.impetus.kundera.index.Indexer
      * @param id       primary key
      * @param parentId owner id
      */
-    void update(EntityMetadata metadata, Object entity, Object id, String parentId);
+    void update(EntityMetadata metadata, final MetamodelImpl metaModel, Object entity, Object id, String parentId);
 }

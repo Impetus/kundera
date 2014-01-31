@@ -28,10 +28,10 @@ import com.impetus.kundera.Constants;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PropertyIndex;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
@@ -47,6 +47,8 @@ public class IndexManager
     /** The indexer. */
     private Indexer indexer;
 
+    private KunderaMetadata kunderaMetadata;
+
     /**
      * The Constructor.
      * 
@@ -54,9 +56,10 @@ public class IndexManager
      *            the indexer
      */
     @SuppressWarnings("deprecation")
-    public IndexManager(Indexer indexer)
+    public IndexManager(Indexer indexer, final KunderaMetadata kunderaMetadata)
     {
         this.indexer = indexer;
+        this.kunderaMetadata = kunderaMetadata;
     }
 
     /**
@@ -87,7 +90,8 @@ public class IndexManager
             }
             else
             {
-                indexer.unIndex(metadata.getEntityClazz(), entity);
+                indexer.unIndex(metadata.getEntityClazz(), entity, metadata, (MetamodelImpl) kunderaMetadata
+                        .getApplicationMetadata().getMetamodel(metadata.getPersistenceUnit()));
             }
         }
     }
@@ -108,13 +112,16 @@ public class IndexManager
             {
                 if (indexer.getClass().getName().equals(IndexingConstants.LUCENE_INDEXER))
                 {
+                    MetamodelImpl metamodel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                            metadata.getPersistenceUnit());
                     Object id = PropertyAccessorHelper.getId(entity, metadata);
-                    boolean documentExistsInIndex = ((com.impetus.kundera.index.lucene.Indexer) indexer).documentExistsInIndex(metadata, id);
+                    boolean documentExistsInIndex = ((com.impetus.kundera.index.lucene.Indexer) indexer)
+                            .documentExistsInIndex(metadata, id);
 
                     if (documentExistsInIndex)
                     {
 
-                        ((com.impetus.kundera.index.lucene.Indexer) indexer).update(metadata, entity, id,
+                        ((com.impetus.kundera.index.lucene.Indexer) indexer).update(metadata, metamodel, entity, id,
                                 parentId != null ? parentId.toString() : null);
                     }
                     else
@@ -127,14 +134,14 @@ public class IndexManager
                             ((com.impetus.kundera.index.lucene.Indexer) indexer).unindex(metadata, id);
                             ((com.impetus.kundera.index.lucene.Indexer) indexer).flush();
                         }
-                        ((com.impetus.kundera.index.lucene.Indexer) indexer).index(metadata, entity,
+                        ((com.impetus.kundera.index.lucene.Indexer) indexer).index(metadata, metamodel, entity,
                                 parentId != null ? parentId.toString() : null, clazz);
                     }
                 }
                 else
                 {
-                    MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata()
-                            .getMetamodel(metadata.getPersistenceUnit());
+                    MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                            metadata.getPersistenceUnit());
 
                     Map<String, PropertyIndex> indexProperties = metadata.getIndexProperties();
                     Map<String, Object> indexCollection = new HashMap<String, Object>();
@@ -150,13 +157,13 @@ public class IndexManager
 
                     indexCollection.put(((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName(), id);
 
-                    EntityMetadata parentMetadata = KunderaMetadataManager.getEntityMetadata(clazz);
+                    EntityMetadata parentMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, clazz);
                     if (parentId != null)
                         indexCollection.put(((AbstractAttribute) parentMetadata.getIdAttribute()).getJPAColumnName(),
                                 parentId);
 
                     onEmbeddable(entity, metadata.getEntityClazz(), metaModel, indexCollection);
-                    indexer.index(metadata.getEntityClazz(), indexCollection, parentId, clazz);
+                    indexer.index(metadata.getEntityClazz(), metadata, indexCollection, parentId, clazz);
                 }
             }
         }
@@ -223,7 +230,9 @@ public class IndexManager
     {
         if (indexer != null)
         {
-            ((com.impetus.kundera.index.lucene.Indexer) indexer).index(metadata, entity);
+            MetamodelImpl metamodel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                    metadata.getPersistenceUnit());
+            ((com.impetus.kundera.index.lucene.Indexer) indexer).index(metadata, metamodel, entity);
         }
     }
 
@@ -243,8 +252,9 @@ public class IndexManager
     {
         if (indexer != null)
         {
-
-            ((com.impetus.kundera.index.lucene.Indexer) indexer).index(metadata, entity, parentId, clazz);
+            MetamodelImpl metamodel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                    metadata.getPersistenceUnit());
+            ((com.impetus.kundera.index.lucene.Indexer) indexer).index(metadata, metamodel, entity, parentId, clazz);
         }
     }
 
@@ -293,7 +303,10 @@ public class IndexManager
                     .toLowerCase());
             // If an alternate indexer implementation class is provided by user,
             // search into that
-            return indexer.search(query, parentClass, childClass, entityId, Constants.INVALID, Constants.INVALID);
+            return indexer.search(query, parentClass,
+                    KunderaMetadataManager.getEntityMetadata(kunderaMetadata, parentClass), childClass,
+                    KunderaMetadataManager.getEntityMetadata(kunderaMetadata, childClass), entityId, Constants.INVALID,
+                    Constants.INVALID);
         }
 
     }
@@ -348,7 +361,8 @@ public class IndexManager
             }
             else
             {
-                return indexer.search(clazz, query, start, count);
+                return indexer.search(clazz, KunderaMetadataManager.getEntityMetadata(kunderaMetadata, clazz), query,
+                        start, count);
             }
         }
         return new HashMap<String, Object>();
@@ -378,7 +392,8 @@ public class IndexManager
             }
             else
             {
-                return indexer.search(clazz, query, start, count);
+                return indexer.search(clazz, KunderaMetadataManager.getEntityMetadata(kunderaMetadata, clazz), query,
+                        start, count);
             }
         }
         return new HashMap<String, Object>();

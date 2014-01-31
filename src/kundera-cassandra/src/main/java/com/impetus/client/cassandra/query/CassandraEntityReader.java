@@ -37,6 +37,7 @@ import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.AbstractEntityReader;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.QueryHandlerException;
@@ -71,17 +72,18 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
      * @param luceneQuery
      *            the lucene query
      */
-    public CassandraEntityReader(KunderaQuery kunderaQuery)
+    public CassandraEntityReader(KunderaQuery kunderaQuery, final KunderaMetadata kunderaMetadata)
     {
+        super(kunderaMetadata);
         this.kunderaQuery = kunderaQuery;
     }
 
     /**
      * Instantiates a new cassandra entity reader.
      */
-    public CassandraEntityReader()
+    public CassandraEntityReader(final KunderaMetadata kunderaMetadata)
     {
-
+        super(kunderaMetadata);
     }
 
     @Override
@@ -108,7 +110,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
     @Override
     public List<EnhanceEntity> populateRelation(EntityMetadata m, Client client, int maxResults)
     {
-        if(log.isInfoEnabled())
+        if (log.isInfoEnabled())
         {
             log.info("On populate relation via JPQL");
         }
@@ -128,8 +130,8 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
                 if (MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
                 {
 
-                    ls = ((CassandraClientBase) client).find(m, relationNames, this.conditions.get(isRowKeyQuery), maxResults,
-                            null);
+                    ls = ((CassandraClientBase) client).find(m, relationNames, this.conditions.get(isRowKeyQuery),
+                            maxResults, null);
                 }
                 else
                 {
@@ -167,7 +169,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
         else
         {
             // List<Object> results = new ArrayList<Object>();
-            ls = handleFindByRange(m, client, ls, conditions, isRowKeyQuery, null,maxResults);
+            ls = handleFindByRange(m, client, ls, conditions, isRowKeyQuery, null, maxResults);
             // ls = (List<EnhanceEntity>) results;
         }
         return ls;

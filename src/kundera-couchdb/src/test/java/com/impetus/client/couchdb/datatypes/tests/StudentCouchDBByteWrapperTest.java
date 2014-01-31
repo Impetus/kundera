@@ -29,6 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.couchdb.datatypes.entities.StudentCouchDBByteWrapper;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
 public class StudentCouchDBByteWrapperTest extends CouchDBBase
 {
@@ -41,7 +42,7 @@ public class StudentCouchDBByteWrapperTest extends CouchDBBase
     public void setUp() throws Exception
     {
 
-        emf = Persistence.createEntityManagerFactory(pu);super.setUpBase();     
+        emf = Persistence.createEntityManagerFactory(pu);super.setUpBase(((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());     
     }
 
     @After

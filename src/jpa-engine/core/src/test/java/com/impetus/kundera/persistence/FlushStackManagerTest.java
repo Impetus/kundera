@@ -15,14 +15,11 @@
  */
 package com.impetus.kundera.persistence;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
+
+import javax.persistence.Persistence;
 
 import junit.framework.Assert;
 
@@ -30,10 +27,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.kundera.Constants;
-import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.client.CoreTestClient;
-import com.impetus.kundera.client.CoreTestClientFactory;
 import com.impetus.kundera.configure.PersistenceUnitConfiguration;
 import com.impetus.kundera.entity.album.AlbumBi_1_1_1_1;
 import com.impetus.kundera.entity.album.AlbumUni_1_1_1_1;
@@ -68,11 +61,6 @@ import com.impetus.kundera.graph.ObjectGraph;
 import com.impetus.kundera.graph.ObjectGraphBuilder;
 import com.impetus.kundera.graph.ObjectGraphUtils;
 import com.impetus.kundera.graph.Store;
-import com.impetus.kundera.metadata.MetadataBuilder;
-import com.impetus.kundera.metadata.model.ApplicationMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.metadata.model.MetamodelImpl;
-import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.persistence.context.EventLog.EventType;
 import com.impetus.kundera.persistence.context.FlushManager;
 import com.impetus.kundera.persistence.context.PersistenceCache;
@@ -90,16 +78,18 @@ public class FlushStackManagerTest
 
     private String _persistenceUnit = "kunderatest";
 
+    private EntityManagerFactoryImpl emfImpl;
+
     /**
      * @throws java.lang.Exception
      */
     @Before
     public void setUp() throws Exception
     {
-        getEntityManagerFactory();
-        new PersistenceUnitConfiguration(null, "kunderatest").configure();
+        emfImpl = getEntityManagerFactory();
+        new PersistenceUnitConfiguration(null, emfImpl.getKunderaMetadataInstance(), "kunderatest").configure();
         pc = new PersistenceCache();
-        graphBuilder = new ObjectGraphBuilder(pc, new PersistenceDelegator(pc));
+        graphBuilder = new ObjectGraphBuilder(pc, new PersistenceDelegator(emfImpl.getKunderaMetadataInstance(), pc));
     }
 
     /**
@@ -108,7 +98,7 @@ public class FlushStackManagerTest
     @After
     public void tearDown() throws Exception
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+
     }
 
     @Test
@@ -129,7 +119,9 @@ public class FlushStackManagerTest
         Assert.assertNotNull(pc.getMainCache());
         Assert.assertEquals(1, pc.getMainCache().getHeadNodes().size());
 
-        Node headNode = pc.getMainCache().getNodeFromCache(ObjectGraphUtils.getNodeId("1", Store.class));
+        PersistenceDelegator pd = new PersistenceDelegator(emfImpl.getKunderaMetadataInstance(), pc);
+        
+        Node headNode = pc.getMainCache().getNodeFromCache(ObjectGraphUtils.getNodeId("1", Store.class), pd);
 
         Assert.assertNotNull(headNode);
         Assert.assertNull(headNode.getParents());
@@ -159,8 +151,10 @@ public class FlushStackManagerTest
 
         ObjectGraph graph = graphBuilder.getObjectGraph(a, null);
         pc.getMainCache().addGraphToCache(graph, pc);
-
-        Node headNode = pc.getMainCache().getNodeFromCache(ObjectGraphUtils.getNodeId("c1", PhotoUni_1_1_1_1.class));
+        
+        PersistenceDelegator pd = new PersistenceDelegator(emfImpl.getKunderaMetadataInstance(), pc);
+        
+        Node headNode = pc.getMainCache().getNodeFromCache(ObjectGraphUtils.getNodeId("c1", PhotoUni_1_1_1_1.class), pd);
 
         markAllNodeAsDirty();
         flushManager.buildFlushStack(graph.getHeadNode(), EventType.INSERT);
@@ -176,13 +170,13 @@ public class FlushStackManagerTest
 
         PhotographerBi_1_1_1_1 a = new PhotographerBi_1_1_1_1();
         a.setPhotographerId(1);
-        
+
         AlbumBi_1_1_1_1 b = new AlbumBi_1_1_1_1();
         b.setAlbumId("b1");
-        
+
         PhotoBi_1_1_1_1 c = new PhotoBi_1_1_1_1();
         c.setPhotoId("c1");
-        
+
         b.setPhotographer(a);
         b.setPhoto(c);
 
@@ -546,107 +540,6 @@ public class FlushStackManagerTest
      */
     private EntityManagerFactoryImpl getEntityManagerFactory()
     {
-        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
-
-        Map<String, List<String>> clazzToPu = new HashMap<String, List<String>>();
-
-        List<String> pus = new ArrayList<String>();
-        pus.add(_persistenceUnit);
-        
-        Map<String, Object> props = new HashMap<String, Object>();
-
-        props.put(Constants.PERSISTENCE_UNIT_NAME, _persistenceUnit);
-        props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY, CoreTestClientFactory.class.getName());
-        props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
-        props.put(PersistenceProperties.KUNDERA_PORT, "9160");
-        props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaTest");
-
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
-//        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
-        PersistenceUnitMetadata puMetadata = new PersistenceUnitMetadata();
-        puMetadata.setPersistenceUnitName(_persistenceUnit);
-        Properties p = new Properties();
-        p.putAll(props);
-        puMetadata.setProperties(p);
-        Map<String, PersistenceUnitMetadata> metadata = new HashMap<String, PersistenceUnitMetadata>();
-        metadata.put(_persistenceUnit, puMetadata);
-        appMetadata.addPersistenceUnitMetadata(metadata);
-
-
-        clazzToPu.put(Store.class.getName(), pus);
-        clazzToPu.put(BillingCounter.class.getName(), pus);
-        clazzToPu.put(PhotographerUni_1_1_1_1.class.getName(), pus);
-        clazzToPu.put(AlbumUni_1_1_1_1.class.getName(), pus);
-        clazzToPu.put(PhotoUni_1_1_1_1.class.getName(), pus);
-        clazzToPu.put(PhotographerUni_1_1_1_M.class.getName(), pus);
-        clazzToPu.put(AlbumUni_1_1_1_M.class.getName(), pus);
-        clazzToPu.put(PhotoUni_1_1_1_M.class.getName(), pus);
-        clazzToPu.put(PhotographerUni_1_1_M_1.class.getName(), pus);
-        clazzToPu.put(AlbumUni_1_1_M_1.class.getName(), pus);
-        clazzToPu.put(PhotoUni_1_1_M_1.class.getName(), pus);
-        clazzToPu.put(PhotographerUni_1_M_1_M.class.getName(), pus);
-        clazzToPu.put(AlbumUni_1_M_1_M.class.getName(), pus);
-        clazzToPu.put(PhotoUni_1_M_1_M.class.getName(), pus);
-        clazzToPu.put(PhotographerUni_1_M_M_M.class.getName(), pus);
-        clazzToPu.put(AlbumUni_1_M_M_M.class.getName(), pus);
-        clazzToPu.put(PhotoUni_1_M_M_M.class.getName(), pus);
-        clazzToPu.put(PhotographerUni_M_1_1_M.class.getName(), pus);
-        clazzToPu.put(AlbumUni_M_1_1_M.class.getName(), pus);
-        clazzToPu.put(PhotoUni_M_1_1_M.class.getName(), pus);
-        clazzToPu.put(PhotographerUni_M_M_1_1.class.getName(), pus);
-        clazzToPu.put(AlbumUni_M_M_1_1.class.getName(), pus);
-        clazzToPu.put(PhotoUni_M_M_1_1.class.getName(), pus);
-        clazzToPu.put(PhotographerUni_M_M_M_M.class.getName(), pus);
-        clazzToPu.put(AlbumUni_M_M_M_M.class.getName(), pus);
-        clazzToPu.put(PhotoUni_M_M_M_M.class.getName(), pus);
-        clazzToPu.put(PhotographerBi_1_1_1_1.class.getName(), pus);
-        clazzToPu.put(AlbumBi_1_1_1_1.class.getName(), pus);
-        clazzToPu.put(PhotoBi_1_1_1_1.class.getName(), pus);
-
-        appMetadata.setClazzToPuMap(clazzToPu);
-        
-        KunderaMetadata.INSTANCE.setApplicationMetadata(appMetadata);
-
-        MetamodelImpl metaModel = new MetamodelImpl();
-        
-        MetadataBuilder metadataBuilder = new MetadataBuilder(_persistenceUnit, CoreTestClient.class.getSimpleName(), null);
-
-        metaModel.addEntityMetadata(Store.class, metadataBuilder.buildEntityMetadata(Store.class));
-        metaModel.addEntityMetadata(BillingCounter.class, metadataBuilder.buildEntityMetadata(BillingCounter.class));
-        metaModel.addEntityMetadata(PhotographerUni_1_1_1_1.class, metadataBuilder.buildEntityMetadata(PhotographerUni_1_1_1_1.class));
-        metaModel.addEntityMetadata(AlbumUni_1_1_1_1.class, metadataBuilder.buildEntityMetadata(AlbumUni_1_1_1_1.class));
-        metaModel.addEntityMetadata(PhotoUni_1_1_1_1.class, metadataBuilder.buildEntityMetadata(PhotoUni_1_1_1_1.class));
-        metaModel.addEntityMetadata(PhotographerUni_1_1_1_M.class, metadataBuilder.buildEntityMetadata(PhotographerUni_1_1_1_M.class));
-        metaModel.addEntityMetadata(AlbumUni_1_1_1_M.class, metadataBuilder.buildEntityMetadata(AlbumUni_1_1_1_M.class));
-        metaModel.addEntityMetadata(PhotoUni_1_1_1_M.class, metadataBuilder.buildEntityMetadata(PhotoUni_1_1_1_M.class));
-        metaModel.addEntityMetadata(PhotographerUni_1_1_M_1.class, metadataBuilder.buildEntityMetadata(PhotographerUni_1_1_M_1.class));
-        metaModel.addEntityMetadata(AlbumUni_1_1_M_1.class, metadataBuilder.buildEntityMetadata(AlbumUni_1_1_M_1.class));
-        metaModel.addEntityMetadata(PhotoUni_1_1_M_1.class, metadataBuilder.buildEntityMetadata(PhotoUni_1_1_M_1.class));
-        metaModel.addEntityMetadata(PhotographerUni_1_M_1_M.class, metadataBuilder.buildEntityMetadata(PhotographerUni_1_M_1_M.class));
-        metaModel.addEntityMetadata(AlbumUni_1_M_1_M.class, metadataBuilder.buildEntityMetadata(AlbumUni_1_M_1_M.class));
-        metaModel.addEntityMetadata(PhotoUni_1_M_1_M.class, metadataBuilder.buildEntityMetadata(PhotoUni_1_M_1_M.class));
-        metaModel.addEntityMetadata(PhotographerUni_1_M_M_M.class, metadataBuilder.buildEntityMetadata(PhotographerUni_1_M_M_M.class));
-        metaModel.addEntityMetadata(AlbumUni_1_M_M_M.class, metadataBuilder.buildEntityMetadata(AlbumUni_1_M_M_M.class));
-        metaModel.addEntityMetadata(PhotoUni_1_M_M_M.class, metadataBuilder.buildEntityMetadata(PhotoUni_1_M_M_M.class));
-        metaModel.addEntityMetadata(PhotographerUni_M_1_1_M.class, metadataBuilder.buildEntityMetadata(PhotographerUni_M_1_1_M.class));
-        metaModel.addEntityMetadata(AlbumUni_M_1_1_M.class, metadataBuilder.buildEntityMetadata(AlbumUni_M_1_1_M.class));
-        metaModel.addEntityMetadata(PhotoUni_M_1_1_M.class, metadataBuilder.buildEntityMetadata(PhotoUni_M_1_1_M.class));
-        metaModel.addEntityMetadata(PhotographerUni_M_M_1_1.class, metadataBuilder.buildEntityMetadata(PhotographerUni_M_M_1_1.class));
-        metaModel.addEntityMetadata(AlbumUni_M_M_1_1.class, metadataBuilder.buildEntityMetadata(AlbumUni_M_M_1_1.class));
-        metaModel.addEntityMetadata(PhotoUni_M_M_1_1.class, metadataBuilder.buildEntityMetadata(PhotoUni_M_M_1_1.class));
-        metaModel.addEntityMetadata(PhotographerUni_M_M_M_M.class, metadataBuilder.buildEntityMetadata(PhotographerUni_M_M_M_M.class));
-        metaModel.addEntityMetadata(AlbumUni_M_M_M_M.class, metadataBuilder.buildEntityMetadata(AlbumUni_M_M_M_M.class));
-        metaModel.addEntityMetadata(PhotoUni_M_M_M_M.class, metadataBuilder.buildEntityMetadata(PhotoUni_M_M_M_M.class));
-
-        metaModel.addEntityMetadata(PhotographerBi_1_1_1_1.class, metadataBuilder.buildEntityMetadata(PhotographerBi_1_1_1_1.class));
-        metaModel.addEntityMetadata(AlbumBi_1_1_1_1.class, metadataBuilder.buildEntityMetadata(AlbumBi_1_1_1_1.class));
-        metaModel.addEntityMetadata(PhotoBi_1_1_1_1.class, metadataBuilder.buildEntityMetadata(PhotoBi_1_1_1_1.class));
-
-        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(_persistenceUnit).getManagedTypes());
-        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(_persistenceUnit).getEmbeddables());
-        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(_persistenceUnit).getMappedSuperClassTypes());
-
-        appMetadata.getMetamodelMap().put(_persistenceUnit, metaModel);
-        return null;
+        return (EntityManagerFactoryImpl) Persistence.createEntityManagerFactory(_persistenceUnit);
     }
 }

@@ -32,7 +32,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.kundera.CoreTestUtilities;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.persistence.PersistenceDelegator;
@@ -52,7 +51,7 @@ public class ProxySetTest
     public void setup()
     {
 
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         emf = Persistence.createEntityManagerFactory("kunderatest");
         em = emf.createEntityManager();
 
@@ -138,7 +137,7 @@ public class ProxySetTest
     public void tearDown()
     {
         
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
     }
 
 }

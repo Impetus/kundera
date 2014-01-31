@@ -37,9 +37,6 @@ import javax.ws.rs.core.UriInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.impetus.kundera.metadata.KunderaMetadataManager;
-import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.rest.common.Constants;
 import com.impetus.kundera.rest.common.EntityUtils;
 import com.impetus.kundera.rest.common.JAXBUtils;
@@ -97,8 +94,8 @@ public class CRUDResource
             Object entity = JAXBUtils.toObject(in, entityClass, mediaType);
             em.persist(entity);
 
-            EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClass);
-            id = PropertyAccessorHelper.getId(entity, m);
+//            EntityMetadata m = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClass);
+//            id = PropertyAccessorHelper.getId(entity, m);
         }
         catch (Exception e)
         {
@@ -106,7 +103,7 @@ public class CRUDResource
             return Response.serverError().build();
         }
 
-        return Response.created(URI.create("/" + entityClassName + "/" + id)).build();
+        return Response.created(URI.create("/" + entityClassName /*+ "/" + id*/)).build();
     }
 
     /**

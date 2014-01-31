@@ -17,34 +17,39 @@ package com.impetus.kundera.index;
 
 import java.util.Map;
 
+import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
+
 /**
  * @author amresh.singh
- *
+ * 
  */
 public class CoreTestIndexer implements Indexer
 {
 
     @Override
-    public void index(Class entityClazz, Map<String, Object> values, Object parentId, final Class parentClazz)
+    public void index(Class entityClazz, EntityMetadata entityMetadata, Map<String, Object> values, Object parentId,
+            final Class parentClazz)
     {
     }
 
     @Override
-    public Map<String, Object> search(Class<?> clazz, String queryString, int start, int count)
+    public Map<String, Object> search(Class<?> clazz, EntityMetadata m, String luceneQuery, int start, int count)
     {
 
         return null;
     }
 
     @Override
-    public Map<String, Object> search(String query, Class<?> parentClass, Class<?> childClass, Object entityId, int start, int count)
+    public Map<String, Object> search(String query, Class<?> parentClass, EntityMetadata parentMetadata,
+            Class<?> childClass, EntityMetadata childMetadata, Object entityId, int start, int count)
     {
-        
+
         return null;
     }
 
     @Override
-    public void unIndex(Class entityClazz, Object entity)
+    public void unIndex(Class entityClazz, Object entity, EntityMetadata metadata, MetamodelImpl metamodel)
     {
     }
 

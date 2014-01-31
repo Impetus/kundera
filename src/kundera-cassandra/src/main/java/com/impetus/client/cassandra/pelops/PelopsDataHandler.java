@@ -32,10 +32,10 @@ import com.impetus.client.cassandra.datahandler.CassandraDataHandlerBase;
 import com.impetus.client.cassandra.thrift.ThriftRow;
 import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.annotation.DefaultEntityAnnotationProcessor;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
@@ -51,9 +51,9 @@ final class PelopsDataHandler extends CassandraDataHandlerBase implements Cassan
     /**
      * @param externalProperties
      */
-    public PelopsDataHandler(final PelopsClient pelopsClient)
+    public PelopsDataHandler(final PelopsClient pelopsClient, final KunderaMetadata kunderaMetadata)
     {
-        super(pelopsClient);
+        super(pelopsClient, kunderaMetadata);
         this.pelopsClient = pelopsClient;
     }
 
@@ -66,7 +66,7 @@ final class PelopsDataHandler extends CassandraDataHandlerBase implements Cassan
         List<ByteBuffer> rowKeys = new ArrayList<ByteBuffer>(1);
         rowKeys.add(ByteBuffer.wrap(PropertyAccessorHelper.toBytes(rowKey, m.getIdAttribute().getJavaType())));
 
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
 
         AbstractManagedType managedType = (AbstractManagedType) metaModel.entity(m.getEntityClazz());
@@ -76,7 +76,7 @@ final class PelopsDataHandler extends CassandraDataHandlerBase implements Cassan
                 .getSecondaryTablesName();
         secondaryTables.add(m.getTableName());
         Object e = null;
-//        e = PelopsUtils.initialize(m, e, null);
+        // e = PelopsUtils.initialize(m, e, null);
 
         for (String tableName : secondaryTables)
         {
@@ -99,17 +99,18 @@ final class PelopsDataHandler extends CassandraDataHandlerBase implements Cassan
                 }
             }
         }
-        
+
         return e;
-//        if (e != null  && PropertyAccessorHelper.getId(e, m) != null )
-//        {
-//            return isWrapReq && !relations.isEmpty() ? new EnhanceEntity(e, PropertyAccessorHelper.getId(e, m),
-//                    relations) : e;
-//        }
-//        else
-//        {
-//            return null;
-//        }
+        // if (e != null && PropertyAccessorHelper.getId(e, m) != null )
+        // {
+        // return isWrapReq && !relations.isEmpty() ? new EnhanceEntity(e,
+        // PropertyAccessorHelper.getId(e, m),
+        // relations) : e;
+        // }
+        // else
+        // {
+        // return null;
+        // }
     }
 
     /** Translation Methods */

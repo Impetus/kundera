@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.client.entities.RedisCompoundKey;
 import com.impetus.client.entities.RedisPrimeUser;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 public class RedisCompositeKeyTest
 {
@@ -34,7 +33,7 @@ public class RedisCompositeKeyTest
     @Before
     public void setUp() throws Exception
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         emf = Persistence.createEntityManagerFactory(REDIS_PU);
     }
 

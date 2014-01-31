@@ -19,7 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.metadata.model.CoreMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.proxy.cglib.CglibLazyInitializerFactory;
 
 /**
@@ -36,12 +36,12 @@ public class CoreLoader
     /**
      * Load.
      */
-    public void load()
+    public void load(final KunderaMetadata kunderaMetadata)
     {
         log.info("Loading Kundera Core Metdata ... ");
 
         CoreMetadata coreMetadata = new CoreMetadata();
         coreMetadata.setLazyInitializerFactory(new CglibLazyInitializerFactory());
-        KunderaMetadata.INSTANCE.setCoreMetadata(coreMetadata);
+        kunderaMetadata.setCoreMetadata(coreMetadata);
     }
 }

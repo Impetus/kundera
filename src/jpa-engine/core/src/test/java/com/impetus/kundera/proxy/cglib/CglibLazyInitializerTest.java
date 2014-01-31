@@ -28,7 +28,8 @@ import org.junit.Test;
 
 import com.impetus.kundera.CoreTestUtilities;
 import com.impetus.kundera.entity.PersonnelDTO;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.proxy.KunderaProxy;
 import com.impetus.kundera.proxy.LazyInitializationException;
@@ -44,12 +45,15 @@ public class CglibLazyInitializerTest
     private static EntityManagerFactory emf;
 
     private static EntityManager em;
+    
+    private static KunderaMetadata kunderaMetadata;
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        
         emf = Persistence.createEntityManagerFactory("kunderatest");
+        kunderaMetadata = ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance();
         em = emf.createEntityManager();
     }
 
@@ -78,7 +82,7 @@ public class CglibLazyInitializerTest
     public void testWithNullPD()
     {
 
-        LazyInitializerFactory factory = KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory();
+        LazyInitializerFactory factory = kunderaMetadata.getCoreMetadata().getLazyInitializerFactory();
         KunderaProxy proxy = factory.getProxy("personnel", PersonnelDTO.class, null, null, "1", null);
         LazyInitializer li = proxy.getKunderaLazyInitializer();
         Assert.assertEquals(CglibLazyInitializer.class, li.getClass());
@@ -100,7 +104,7 @@ public class CglibLazyInitializerTest
         PersistenceDelegator delegator = CoreTestUtilities.getDelegator(em);
         PersonnelDTO dto = new PersonnelDTO("1", "vivek", "mishra");
         em.persist(dto);
-        LazyInitializerFactory factory = KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory();
+        LazyInitializerFactory factory = kunderaMetadata.getCoreMetadata().getLazyInitializerFactory();
         KunderaProxy proxy = factory.getProxy("personnel#1", PersonnelDTO.class, null, null, "1", delegator);
         LazyInitializer li = proxy.getKunderaLazyInitializer();
         ((CglibLazyInitializer)li).setPersistenceDelegator(delegator);
@@ -140,7 +144,7 @@ public class CglibLazyInitializerTest
         em.persist(dto);
         em.close();
 
-        LazyInitializerFactory factory = KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory();
+        LazyInitializerFactory factory = kunderaMetadata.getCoreMetadata().getLazyInitializerFactory();
         KunderaProxy proxy = factory.getProxy("personnel", PersonnelDTO.class, null, null, "1", delegator);
         LazyInitializer li = proxy.getKunderaLazyInitializer();
         

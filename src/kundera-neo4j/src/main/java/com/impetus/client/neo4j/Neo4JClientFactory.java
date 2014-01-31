@@ -35,7 +35,6 @@ import com.impetus.kundera.configure.ClientProperties.DataStore;
 import com.impetus.kundera.configure.PersistenceUnitConfigurationException;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.loader.GenericClientFactory;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
@@ -68,8 +67,8 @@ public class Neo4JClientFactory extends GenericClientFactory
         if (log.isInfoEnabled())
             log.info("Initializing Neo4J database connection...");
 
-        PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                .getPersistenceUnitMetadata(getPersistenceUnit());
+        PersistenceUnitMetadata puMetadata = kunderaMetadata.getApplicationMetadata().getPersistenceUnitMetadata(
+                getPersistenceUnit());
 
         Properties props = puMetadata.getProperties();
         String datastoreFilePath = (String) props.get(PersistenceProperties.KUNDERA_DATASTORE_FILE_PATH);
@@ -115,7 +114,7 @@ public class Neo4JClientFactory extends GenericClientFactory
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
-        return new Neo4JClient(this, externalProperties, persistenceUnit);
+        return new Neo4JClient(this, externalProperties, persistenceUnit, kunderaMetadata);
     }
 
     @Override
@@ -134,7 +133,7 @@ public class Neo4JClientFactory extends GenericClientFactory
     @Override
     public void destroy()
     {
-        this.externalProperties = null;        
+        this.externalProperties = null;
         ((GraphDatabaseService) getConnectionPoolOrConnection()).shutdown();
         // Not required for multithreaded clients
     }
@@ -161,7 +160,8 @@ public class Neo4JClientFactory extends GenericClientFactory
     {
         if (propertyReader == null)
         {
-            propertyReader = new Neo4JPropertyReader(externalProperties);
+            propertyReader = new Neo4JPropertyReader(externalProperties, kunderaMetadata.getApplicationMetadata()
+                    .getPersistenceUnitMetadata(getPersistenceUnit()));
             propertyReader.read(getPersistenceUnit());
         }
     }

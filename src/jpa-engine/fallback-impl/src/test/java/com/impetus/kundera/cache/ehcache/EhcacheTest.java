@@ -31,12 +31,13 @@ import org.junit.Test;
 import com.impetus.kundera.cache.Cache;
 import com.impetus.kundera.entity.EhCacheEntity;
 import com.impetus.kundera.graph.Node;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.query.Person.Day;
 
 /**
  * Junit for ehcache.
+ * 
  * @author vivek.mishra
  * 
  */
@@ -54,7 +55,7 @@ public class EhcacheTest
     @Before
     public void setUp() throws Exception
     {
-        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+
         emf = Persistence.createEntityManagerFactory(PU, propertyMap);
         em = emf.createEntityManager();
     }
@@ -62,10 +63,11 @@ public class EhcacheTest
     @Test
     public void testDummy()
     {
-        //do nothing.
+        // do nothing.
     }
+
     // TODO:: enable it with #494.
-//    @Test
+    // @Test
     public void testEhCache()
     {
         EhCacheEntity entity1 = prepareData("1", 32);
@@ -80,46 +82,66 @@ public class EhcacheTest
         persistenceDelegator = getPersistenceDelegator(persistenceDelegator);
 
         // get node from first level cache.
-        Node node1 = persistenceDelegator.getPersistenceCache().getMainCache().getNodeFromCache(entity1);
+        Node node1 = persistenceDelegator
+                .getPersistenceCache()
+                .getMainCache()
+                .getNodeFromCache(
+                        entity1,
+                        KunderaMetadataManager.getEntityMetadata(persistenceDelegator.getKunderaMetadata(),
+                                entity1.getClass()), persistenceDelegator);
 
         // check if it is present in second level cache.
         EhCacheEntity foundNode1 = (EhCacheEntity) l2Cache.get(node1.getNodeId());
-        
+
         Assert.assertNotNull(foundNode1);
-        Assert.assertEquals(foundNode1,node1.getData()); // should be same object.
+        Assert.assertEquals(foundNode1, node1.getData()); // should be same
+                                                          // object.
 
         // remove entity 1.
         em.remove(entity1);
 
-        Node node2 = persistenceDelegator.getPersistenceCache().getMainCache().getNodeFromCache(entity2);
+        Node node2 = persistenceDelegator
+                .getPersistenceCache()
+                .getMainCache()
+                .getNodeFromCache(
+                        entity2,
+                        KunderaMetadataManager.getEntityMetadata(persistenceDelegator.getKunderaMetadata(),
+                                entity1.getClass()), persistenceDelegator);
 
         Assert.assertNotNull(l2Cache.get(node2.getNodeId()));
-        
+
         EhCacheEntity foundNode2 = (EhCacheEntity) l2Cache.get(node2.getNodeId());
-        Assert.assertEquals(foundNode2,node2.getData()); // should be same object.
+        Assert.assertEquals(foundNode2, node2.getData()); // should be same
+                                                          // object.
         Assert.assertNull(l2Cache.get(node1.getNodeId()));
-        
+
         entity1.setAge(99);
         em.persist(entity1);
         em.flush();
-        
+
         // get node from first level cache.
-        node1 = persistenceDelegator.getPersistenceCache().getMainCache().getNodeFromCache(entity1);
+        node1 = persistenceDelegator
+                .getPersistenceCache()
+                .getMainCache()
+                .getNodeFromCache(
+                        entity1,
+                        KunderaMetadataManager.getEntityMetadata(persistenceDelegator.getKunderaMetadata(),
+                                entity1.getClass()), persistenceDelegator);
 
         // check if it is present in second level cache.
         foundNode1 = (EhCacheEntity) l2Cache.get(node1.getNodeId());
-        
+
         Assert.assertNotNull(foundNode1);
-        Assert.assertEquals(foundNode1,node1.getData()); // should be same object.
-        
+        Assert.assertEquals(foundNode1, node1.getData()); // should be same
+                                                          // object.
+
         Assert.assertEquals(foundNode1.getAge(), new Integer(99));
         Assert.assertEquals(foundNode1.getAge(), entity1.getAge());
 
-        
         em.clear(); // evict all.
-        
+
         Assert.assertNull(l2Cache.get(node2.getNodeId()));
-        
+
     }
 
     private PersistenceDelegator getPersistenceDelegator(PersistenceDelegator persistenceDelegator)
@@ -134,7 +156,7 @@ public class EhcacheTest
             }
 
             persistenceDelegator = (PersistenceDelegator) pd.get(em);
-            
+
         }
         catch (NoSuchFieldException e)
         {

@@ -21,6 +21,7 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.AbstractEntityReader;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.query.KunderaQuery;
 
@@ -33,13 +34,14 @@ import com.impetus.kundera.query.KunderaQuery;
 public class CouchDBEntityReader extends AbstractEntityReader implements EntityReader
 {
 
-    public CouchDBEntityReader()
+    public CouchDBEntityReader(final KunderaMetadata kunderaMetadata)
     {
-        // TODO Auto-generated constructor stub
+        super(kunderaMetadata);
     }
 
-    public CouchDBEntityReader(KunderaQuery kunderaQuery)
+    public CouchDBEntityReader(KunderaQuery kunderaQuery, final KunderaMetadata kunderaMetadata)
     {
+        super(kunderaMetadata);
         this.kunderaQuery = kunderaQuery;
     }
 

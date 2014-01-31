@@ -57,10 +57,10 @@ import org.apache.commons.codec.binary.Hex;
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.utils.ReflectUtils;
@@ -135,11 +135,11 @@ public final class CQLTranslator
     public static final String CLOSE_BRACKET = ")";
 
     public static final String SPACE_STRING = " ";
-    
+
     public static final String IN_CLAUSE = "IN";
-    
+
     public static final String OPEN_BRACKET = "(";
-    
+
     public static final String CREATE_COLUMNFAMILY_CLUSTER_ORDER = " WITH CLUSTERING ORDER BY ($COLUMNS";
 
     public CQLTranslator()
@@ -166,14 +166,15 @@ public final class CQLTranslator
      *         CQL string.
      */
     public HashMap<TranslationType, Map<String, StringBuilder>> prepareColumnOrColumnValues(final Object record,
-            final EntityMetadata entityMetadata, TranslationType type, Map<String, Object> externalProperties)
+            final EntityMetadata entityMetadata, TranslationType type, Map<String, Object> externalProperties,
+            final KunderaMetadata kunderaMetadata)
     {
         HashMap<TranslationType, Map<String, StringBuilder>> parsedColumnOrColumnValue = new HashMap<CQLTranslator.TranslationType, Map<String, StringBuilder>>();
         if (type == null)
         {
             throw new TranslationException("Please specify TranslationType: either COLUMN or VALUE");
         }
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 entityMetadata.getPersistenceUnit());
         Class entityClazz = entityMetadata.getEntityClazz();
         EntityType entityType = metaModel.entity(entityClazz);
@@ -182,7 +183,7 @@ public final class CQLTranslator
         Map<String, StringBuilder> columnBuilders = new HashMap<String, StringBuilder>();
 
         onTranslation(record, entityMetadata, type, metaModel, entityClazz, entityType, builders, columnBuilders,
-                externalProperties);
+                externalProperties, kunderaMetadata);
 
         for (String tableName : columnBuilders.keySet())
         {
@@ -218,7 +219,8 @@ public final class CQLTranslator
 
     private void onTranslation(final Object record, final EntityMetadata m, TranslationType type,
             MetamodelImpl metaModel, Class entityClazz, EntityType entityType, Map<String, StringBuilder> builders,
-            Map<String, StringBuilder> columnBuilders, Map<String, Object> externalProperties)
+            Map<String, StringBuilder> columnBuilders, Map<String, Object> externalProperties,
+            final KunderaMetadata kunderaMetadata)
     {
         Set<Attribute> attributes = entityType.getAttributes();
         Iterator<Attribute> iterator = attributes.iterator();
@@ -244,14 +246,36 @@ public final class CQLTranslator
                 builders.put(tableName, builder);
             }
             Field field = (Field) attribute.getJavaMember();
-            if (!attribute.equals(m.getIdAttribute()) && !((AbstractAttribute)attribute).getJPAColumnName().equals(((AbstractAttribute)m.getIdAttribute()).getJPAColumnName()))
+            if (!attribute.equals(m.getIdAttribute())
+                    && !((AbstractAttribute) attribute).getJPAColumnName().equals(
+                            ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName()))
             {
                 if (metaModel.isEmbeddable(((AbstractAttribute) attribute).getBindableJavaType()))
                 {
                     throw new PersistenceException(
                             "Super columns are not supported via cql for compound/composite keys!");
                 }
-                else if (!ReflectUtils.isTransientOrStatic(field) && !attribute.isAssociation()/* && m.getIdAttribute().getName().equals(attribute.getName())*/)
+                else if (!ReflectUtils.isTransientOrStatic(field) && !attribute.isAssociation()/*
+                                                                                                * &&
+                                                                                                * m
+                                                                                                * .
+                                                                                                * getIdAttribute
+                                                                                                * (
+                                                                                                * )
+                                                                                                * .
+                                                                                                * getName
+                                                                                                * (
+                                                                                                * )
+                                                                                                * .
+                                                                                                * equals
+                                                                                                * (
+                                                                                                * attribute
+                                                                                                * .
+                                                                                                * getName
+                                                                                                * (
+                                                                                                * )
+                                                                                                * )
+                                                                                                */)
                 {
                     onTranslation(type, builder, columnBuilder, ((AbstractAttribute) attribute).getJPAColumnName(),
                             record, field);
@@ -285,8 +309,8 @@ public final class CQLTranslator
             }
             else if (!ReflectUtils.isTransientOrStatic(field))
             {
-                onTranslation(type, builder, columnBuilder, CassandraUtilities.getIdColumnName(m, externalProperties),
-                        record, field);
+                onTranslation(type, builder, columnBuilder,
+                        CassandraUtilities.getIdColumnName(kunderaMetadata, m, externalProperties), record, field);
             }
         }
 
@@ -338,7 +362,7 @@ public final class CQLTranslator
     public void buildWhereClause(StringBuilder builder, Class fieldClazz, String field, Object value, String clause,
             boolean useToken)
     {
-        
+
         builder = ensureCase(builder, field, useToken);
         builder.append(SPACE_STRING);
         builder.append(clause);
@@ -346,7 +370,7 @@ public final class CQLTranslator
         builder = onWhereClause(builder, fieldClazz, field, value, clause, useToken);
         builder.append(AND_CLAUSE);
     }
-    
+
     /**
      * Build where clause with given clause.
      * 
@@ -354,32 +378,36 @@ public final class CQLTranslator
      * @param field
      * @param value
      * @param clause
-     * @return 
+     * @return
      */
-    public StringBuilder onWhereClause(StringBuilder builder, Class fieldClazz, String field, Object value, String clause,
-            boolean useToken)
+    public StringBuilder onWhereClause(StringBuilder builder, Class fieldClazz, String field, Object value,
+            String clause, boolean useToken)
     {
-        
-        if(clause.trim().equals(IN_CLAUSE)) {
+
+        if (clause.trim().equals(IN_CLAUSE))
+        {
             builder.append(OPEN_BRACKET);
             String itemValues = String.valueOf(value);
-            itemValues = itemValues.startsWith(OPEN_BRACKET) && itemValues.endsWith(CLOSE_BRACKET) 
-                            ? itemValues.substring(1, itemValues.length()-1) : itemValues;
+            itemValues = itemValues.startsWith(OPEN_BRACKET) && itemValues.endsWith(CLOSE_BRACKET) ? itemValues
+                    .substring(1, itemValues.length() - 1) : itemValues;
             List<String> items = Arrays.asList(((String) itemValues).split("\\s*,\\s*"));
             int counter = 0;
-            for(String str : items) {
-              str = (str.startsWith("\"") && str.endsWith("\"")) || (str.startsWith("'") && str.endsWith("'"))
-                ? str.substring(1, str.length()-1) : str;
-              appendValue(builder, fieldClazz, str, false, false);
-              counter ++;
-              if(counter < items.size())
-              {
-                builder.append(COMMA_STR);
-              }
-                           
+            for (String str : items)
+            {
+                str = (str.startsWith("\"") && str.endsWith("\"")) || (str.startsWith("'") && str.endsWith("'")) ? str
+                        .substring(1, str.length() - 1) : str;
+                appendValue(builder, fieldClazz, str, false, false);
+                counter++;
+                if (counter < items.size())
+                {
+                    builder.append(COMMA_STR);
+                }
+
             }
             builder.append(CLOSE_BRACKET);
-        } else {
+        }
+        else
+        {
             appendValue(builder, fieldClazz, value, false, useToken);
         }
         return builder;
@@ -862,6 +890,5 @@ public final class CQLTranslator
         builder.append(SPACE_STRING);
         builder.append(orderType);
     }
-    
-    
+
 }

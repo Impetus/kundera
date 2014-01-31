@@ -32,9 +32,9 @@ import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.accessor.DateAccessor;
 
@@ -51,9 +51,9 @@ public class CassandraUtilities
         return value == null ? null : new String(value, Charset.forName(Constants.CHARSET_UTF8));
     }
 
-    public static String getKeyspace(String persistenceUnit)
+    public static String getKeyspace(final KunderaMetadata kunderaMetadata, String persistenceUnit)
     {
-        PersistenceUnitMetadata persistenceUnitMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+        PersistenceUnitMetadata persistenceUnitMetadata = kunderaMetadata.getApplicationMetadata()
                 .getPersistenceUnitMetadata(persistenceUnit);
         Properties props = persistenceUnitMetadata.getProperties();
         String keyspace = (String) props.get(PersistenceProperties.KUNDERA_KEYSPACE);
@@ -169,8 +169,10 @@ public class CassandraUtilities
      * 
      * 
      * 
+     * 
      * } if user opted for
      * {@PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE
+     * 
      * 
      * 
      * 
@@ -184,11 +186,11 @@ public class CassandraUtilities
      * @param externalProperties
      * @return
      */
-    public static String getIdColumnName(final EntityMetadata m, final Map<String, Object> externalProperties)
+    public static String getIdColumnName(final KunderaMetadata kunderaMetadata, final EntityMetadata m, final Map<String, Object> externalProperties)
     {
         // key for auto schema generation.
         String persistenceUnit = m.getPersistenceUnit();
-        PersistenceUnitMetadata persistenceUnitMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+        PersistenceUnitMetadata persistenceUnitMetadata = kunderaMetadata.getApplicationMetadata()
                 .getPersistenceUnitMetadata(persistenceUnit);
         String autoDdlOption = externalProperties != null ? (String) externalProperties
                 .get(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE) : null;
@@ -199,7 +201,7 @@ public class CassandraUtilities
         }
 
         // check if id attribute is embeddable
-        boolean containsBasicCollectionField = MetadataUtils.containsBasicElementCollectionField(m);
+        boolean containsBasicCollectionField = MetadataUtils.containsBasicElementCollectionField(m, kunderaMetadata);
         return autoDdlOption == null || containsBasicCollectionField ? ((AbstractAttribute) m.getIdAttribute())
                 .getJPAColumnName() : CassandraConstants.CQL_KEY;
     }

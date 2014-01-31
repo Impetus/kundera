@@ -65,10 +65,10 @@ import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
@@ -104,8 +104,9 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
     private EntityReader reader;
 
     public CouchDBClient(HttpClient client, HttpHost httpHost, EntityReader reader, String persistenceUnit,
-            Map<String, Object> externalProperties, ClientMetadata clientMetadata)
+            Map<String, Object> externalProperties, ClientMetadata clientMetadata, final KunderaMetadata kunderaMetadata)
     {
+        super(kunderaMetadata);
         this.httpClient = client;
         this.httpHost = httpHost;
         this.externalProperty = externalProperties;
@@ -118,8 +119,8 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
     public Object find(Class entityClass, Object key)
     {
         HttpResponse response = null;
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClass);
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 entityMetadata.getPersistenceUnit());
         try
         {
@@ -159,7 +160,7 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
             }
 
             return CouchDBObjectMapper.getEntityFromJson(entityClass, entityMetadata, jsonObject,
-                    entityMetadata.getRelationNames());
+                    entityMetadata.getRelationNames(), kunderaMetadata);
         }
         catch (Exception e)
         {
@@ -205,8 +206,9 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         HttpResponse response = null;
         try
         {
-            EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
-            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+            EntityMetadata entityMetadata = KunderaMetadataManager
+                    .getEntityMetadata(kunderaMetadata, entity.getClass());
+            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                     entityMetadata.getPersistenceUnit());
             String _id = null;
             if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
@@ -353,7 +355,7 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
     {
         List foreignKeys = new ArrayList();
         HttpResponse response = null;
-        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClazz);
+        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClazz);
         try
         {
             String q = "key=" + CouchDBUtils.appendQuotes(columnValue);
@@ -468,7 +470,7 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
     @Override
     public List<Object> findByRelation(String colName, Object colValue, Class entityClazz)
     {
-        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClazz);
+        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClazz);
         Object[] ids = findIdsByColumn(m.getSchema(), m.getTableName(),
                 ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName(), colName, colValue, m.getEntityClazz());
         List<Object> resultSet = new ArrayList<Object>();
@@ -504,7 +506,8 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         HttpResponse response = null;
         try
         {
-            JsonObject object = CouchDBObjectMapper.getJsonOfEntity(entityMetadata, entity, id, rlHolders);
+            JsonObject object = CouchDBObjectMapper.getJsonOfEntity(entityMetadata, entity, id, rlHolders,
+                    kunderaMetadata);
 
             String _id = object.get("_id").getAsString();
 
@@ -604,10 +607,11 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
                     }
                     else
                     {
-                        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
+                        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
+                                node.getDataClass());
                         databaseName = metadata.getSchema();
                         JsonObject asJsonObject = CouchDBObjectMapper.getJsonOfEntity(metadata, node.getData(),
-                                node.getEntityId(), getRelationHolders(node));
+                                node.getEntityId(), getRelationHolders(node), kunderaMetadata);
                         objectsToPersist.add(asJsonObject);
                         isbulk = true;
                     }
@@ -690,7 +694,7 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         List results = new ArrayList();
         try
         {
-            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                     m.getPersistenceUnit());
             StringBuilder q = new StringBuilder();
             String _id = CouchDBConstants.URL_SAPRATOR + m.getSchema().toLowerCase() + CouchDBConstants.URL_SAPRATOR
@@ -798,7 +802,7 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
             for (JsonElement element : array)
             {
                 Object entityFromJson = CouchDBObjectMapper.getEntityFromJson(m.getEntityClazz(), m, element
-                        .getAsJsonObject().get("value").getAsJsonObject(), m.getRelationNames());
+                        .getAsJsonObject().get("value").getAsJsonObject(), m.getRelationNames(), kunderaMetadata);
                 if (entityFromJson != null)
                 {
                     results.add(entityFromJson);
@@ -900,7 +904,8 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         }
         else
         {
-            PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
+            PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata,
+                    persistenceUnit);
             setBatchSize(puMetadata.getBatchSize());
         }
     }
