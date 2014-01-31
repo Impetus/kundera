@@ -293,7 +293,9 @@ public class PelopsClientFactory extends GenericClientFactory
                 else
                 {
 //                    logger.info("Returning mutator of {} :{} .", nodes[0].getAddress(), thriftPort);
-                    return Pelops.createMutator(PelopsUtils.getPoolName(iThriftPool));
+                    
+                    return iThriftPool.createMutator();
+//                    return Pelops.createMutator(PelopsUtils.getPoolName(iThriftPool));
                 }
             }
             success = false;
