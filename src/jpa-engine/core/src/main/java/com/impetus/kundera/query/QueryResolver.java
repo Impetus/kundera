@@ -60,7 +60,7 @@ public class QueryResolver
         {
             throw new QueryHandlerException("Query String should not be null ");
         }
-        
+
         KunderaQuery kunderaQuery = null;
         ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
         String mappedQuery = appMetadata.getQuery(jpaQuery);
@@ -87,11 +87,11 @@ public class QueryResolver
             {
                 mappedClass = appMetadata.getMappedClass(jpaQuery);
             }
-           
+
             kunderaQuery = new KunderaQuery(jpaQuery, kunderaMetadata);
-            
+
             kunderaQuery.isNativeQuery = true;
-            
+
             m = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, mappedClass);
 
             Field entityClazzField = null;
@@ -152,16 +152,40 @@ public class QueryResolver
      *             the invocation target exception
      */
     private Query getQuery(String jpaQuery, PersistenceDelegator persistenceDelegator, EntityMetadata m,
-            KunderaQuery kunderaQuery, final KunderaMetadata kunderaMetadata) throws ClassNotFoundException, SecurityException, NoSuchMethodException,
-            IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException
+            KunderaQuery kunderaQuery, final KunderaMetadata kunderaMetadata) throws ClassNotFoundException,
+            SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException,
+            IllegalAccessException, InvocationTargetException
     {
         Query query;
+
         Class clazz = persistenceDelegator.getClient(m).getQueryImplementor();
 
         @SuppressWarnings("rawtypes")
-        Constructor constructor = clazz.getConstructor(KunderaQuery.class, PersistenceDelegator.class, KunderaMetadata.class);
+        Constructor constructor = clazz.getConstructor(KunderaQuery.class, PersistenceDelegator.class,
+                KunderaMetadata.class);
         query = (Query) constructor.newInstance(kunderaQuery, persistenceDelegator, kunderaMetadata);
 
         return query;
+    }
+
+    public Query getQueryImplementation(String jpaQuery, Class queryClazz,
+            final PersistenceDelegator persistenceDelegator)
+    {
+        KunderaQuery kunderaQuery = new KunderaQuery(jpaQuery, persistenceDelegator.getKunderaMetadata());
+        kunderaQuery.isNativeQuery = true;
+        Query query = null;
+
+        try
+        {
+            Constructor constructor = queryClazz.getConstructor(KunderaQuery.class, PersistenceDelegator.class, KunderaMetadata.class);
+            query = (Query) constructor.newInstance(kunderaQuery, persistenceDelegator, persistenceDelegator.getKunderaMetadata());
+        }
+        catch (Exception e)
+        {
+            log.error(e.getMessage());
+            throw new QueryHandlerException(e);
+        }
+        return query;
+
     }
 }

@@ -95,6 +95,7 @@ public class PelopsClient extends DB
         Cluster cluster = new Cluster(contactNodes, new IConnection.Config(_port, true, -1), false);
         Pelops.addPool(getPoolName(), cluster, _keyspace);
         pool = Pelops.getDbConnPool(getPoolName());
+        
     }
 
     /**
@@ -162,26 +163,9 @@ public class PelopsClient extends DB
         {
             List<ByteBuffer> keys = new ArrayList<ByteBuffer>();
             keys.add(ByteBufferUtil.bytes(key));
-            Selector selector = Pelops.createSelector(getPoolName());
-            Map<ByteBuffer, List<ColumnOrSuperColumn>> columns = selector./*
-                                                                           * getColumnsFromRow
-                                                                           * (
-                                                                           * column_family
-                                                                           * ,
-                                                                           * key
-                                                                           * ,
-                                                                           * Selector
-                                                                           * .
-                                                                           * newColumnsPredicateAll
-                                                                           * (
-                                                                           * true
-                                                                           * ,
-                                                                           * 1000
-                                                                           * ),
-                                                                           * readConsistencyLevel
-                                                                           * );
-                                                                           */
-            getColumnOrSuperColumnsFromRows(new ColumnParent(column_family), keys,
+            
+            Selector selector = pool.createSelector();/*Pelops.createSelector(getPoolName());*/
+            Map<ByteBuffer, List<ColumnOrSuperColumn>> columns = selector.getColumnOrSuperColumnsFromRows(new ColumnParent(column_family), keys,
                     Selector.newColumnsPredicateAll(false, 10000), readConsistencyLevel);
 
             assert columns != null;
@@ -250,7 +234,8 @@ public class PelopsClient extends DB
      */
     public int insert(String table, String key, HashMap<String, ByteIterator> values)
     {
-        Mutator mutator = Pelops.createMutator(_host + ":" + _port + ":" + _keyspace);
+        Mutator mutator = 
+                Pelops.createMutator(_host + ":" + _port + ":" + _keyspace);
         try
         {
             List<Column> columns = new ArrayList<Column>();

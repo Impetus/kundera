@@ -13,10 +13,10 @@
 			<property name="kundera.dialect" value="cassandra" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.cassandra.pelops.PelopsClientFactory" />
-			<property name="kundera.cache.provider.class"
+<!-- 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
-			<property name="kundera.pool.size.max.active" value="50" />
+ -->			<property name="kundera.pool.size.max.active" value="50" />
 			<property name="kundera.pool.size.max.total" value="50" />
 <!-- 			<property name="kundera.client.property" value="kunderacassandraloadbalancer.xml" />
  -->			<property name="kundera.ddl.auto.prepare" value="update" />
@@ -32,10 +32,10 @@
 			<property name="kundera.dialect" value="cassandra" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
-			<property name="kundera.cache.provider.class"
+<!-- 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
-			<property name="kundera.pool.size.max.active" value="50" />
+ -->			<property name="kundera.pool.size.max.active" value="50" />
 			<property name="kundera.pool.size.max.total" value="50" />
 <!-- 			<property name="kundera.client.property" value="kunderacassandraloadbalancer.xml" />
  -->			<property name="kundera.ddl.auto.prepare" value="update" />
@@ -67,10 +67,10 @@
 			<property name="kundera.dialect" value="mongodb" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.mongodb.MongoDBClientFactory" />
-			<property name="kundera.cache.provider.class"
+<!-- 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
-			<property name="kundera.pool.size.max.active" value="50" />
+ -->			<property name="kundera.pool.size.max.active" value="50" />
 			<property name="kundera.pool.size.max.total" value="50" />
 			<property name="kundera.client.property" value="kunderaMongoTest.xml" />
 		</properties>
@@ -85,9 +85,9 @@
 			<property name="kundera.dialect" value="redis" />
 			<property name="kundera.password" value="Kundera@123" />
 			<property name="kundera.client.lookup.class" value="com.impetus.client.redis.RedisClientFactory" />
-			<property name="kundera.cache.provider.class"
+<!-- 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
-			<!-- <property name="kundera.pool.size.max.active" value="50" /> -->
+ -->			<!-- <property name="kundera.pool.size.max.active" value="50" /> -->
 		</properties>
 	</persistence-unit>
 
@@ -100,10 +100,10 @@
 			<property name="kundera.datastore.file.path" value="target/neo4jPerfKundera.db" />
 			<property name="kundera.dialect" value="neo4j" />
 			<property name="kundera.client.lookup.class" value="com.impetus.client.neo4j.Neo4JClientFactory" />
-			<property name="kundera.cache.provider.class"
+<!-- 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
-			<property name="kundera.client.property" value="kunderaNeo4JTest.xml" />
+ -->			<property name="kundera.client.property" value="kunderaNeo4JTest.xml" />
 			<property name="kundera.transaction.resource.class" value="com.impetus.client.neo4j.Neo4JTransaction" />
 		</properties>
 	</persistence-unit>
@@ -117,10 +117,10 @@
 			<property name="kundera.keyspace" value="kundera" />
 			<property name="kundera.dialect" value="hbase" />
 			<property name="kundera.client.lookup.class" value="com.impetus.client.hbase.HBaseClientFactory" />
-			<property name="kundera.cache.provider.class"
+<!-- 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
-			<property name="kundera.ddl.auto.prepare" value="update" />
+ -->			<property name="kundera.ddl.auto.prepare" value="update" />
 		</properties>
 	</persistence-unit>
 
@@ -134,10 +134,10 @@
 			<property name="kundera.keyspace" value="OracleNoSqlTests" />
 			<property name="kundera.dialect" value="kvstore" />
 			<property name="kundera.client" value="kvstore" />
-			<property name="kundera.cache.provider.class"
+<!-- 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
-		</properties>
+ -->		</properties>
 	</persistence-unit>
 
 	<persistence-unit name="kundera_couchdb_pu">
@@ -151,10 +151,10 @@
 			<property name="kundera.ddl.auto.prepare" value="create" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.couchdb.CouchDBClientFactory" />
-			<property name="kundera.cache.provider.class"
+<!-- 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
-		</properties>
+ -->		</properties>
 	</persistence-unit>
 
 </persistence>

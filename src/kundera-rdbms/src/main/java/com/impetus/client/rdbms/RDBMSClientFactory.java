@@ -15,8 +15,9 @@
  ******************************************************************************/
 package com.impetus.client.rdbms;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -35,12 +36,14 @@ import com.impetus.client.rdbms.query.RDBMSEntityReader;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.loader.GenericClientFactory;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 
 /**
  * A factory for creating RDBMSClient objects.
  * 
- * @author impadmin
+ * @author vivek.mishra
  */
 public class RDBMSClientFactory extends GenericClientFactory
 {
@@ -83,15 +86,15 @@ public class RDBMSClientFactory extends GenericClientFactory
     {
 
         getConfigurationObject();
-
         Set<String> pus = kunderaMetadata.getApplicationMetadata().getMetamodelMap().keySet();
 
-        Collection<Class<?>> classes = new ArrayList<Class<?>>();
+        Map<String, Collection<Class<?>>> classes = new HashMap<String, Collection<Class<?>>>();
 
         for (String pu : pus)
         {
-            classes.addAll(((MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(pu))
-                    .getEntityNameToClassMap().values());
+            classes.put(pu,
+            /* Collection<Class<?>> classes = */((MetamodelImpl) kunderaMetadata.getApplicationMetadata()
+                    .getMetamodel(pu)).getEntityNameToClassMap().values());
         }
         // to keep hibernate happy! As in our case all scanned classes are not
         // meant for rdbms, so initally i have set depth to zero!
@@ -111,11 +114,42 @@ public class RDBMSClientFactory extends GenericClientFactory
 
         serviceRegistry = new ServiceRegistryBuilder().applySettings(conf.getProperties()).buildServiceRegistry();
 
-        for (Class<?> c : classes)
+        Iterator<Collection<Class<?>>> iter = classes.values().iterator();
+
+        while (iter.hasNext())
         {
-            conf.addAnnotatedClass(c);
+            for (Class<?> c : iter.next())
+            {
+                conf.addAnnotatedClass(c);
+            }
         }
         sf = conf.buildSessionFactory(serviceRegistry);
+        
+        synchronized (sf)
+        {
+            for (String pu : pus)
+            {
+                StatelessSession session = sf.openStatelessSession();
+                if (!pu.equals(getPersistenceUnit()))
+                {
+                    Collection<Class<?>> collection = classes.get(pu);
+                    for (Class clazz : collection)
+                    {
+                        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, clazz);
+                        try
+                        {
+                            session.createSQLQuery("Drop table " + metadata.getTableName()).executeUpdate();
+                        }
+                        catch (Exception e)
+                        {
+                            // ignore such drops.
+                        }
+                    }
+                }
+
+            }
+        }
+
         return sf;
     }
 

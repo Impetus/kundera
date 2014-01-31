@@ -70,6 +70,9 @@ public class TransientState extends NodeState
         // this one.
         Object copiedNodeData = ObjectUtils.deepCopy(nodeStateContext.getData(), nodeStateContext.getPersistenceDelegator().getKunderaMetadata());
         nodeStateContext.setData(copiedNodeData);
+        moveNodeToNextState(nodeStateContext, new ManagedState());
+
+        nodeStateContext.getPersistenceCache().getMainCache().addNodeToCache((Node) nodeStateContext);
     }
 
     @Override

@@ -58,7 +58,7 @@ public class AbstractEntityReader
     private AssociationBuilder associationBuilder;
 
     protected KunderaQuery kunderaQuery;
-    
+
     protected KunderaMetadata kunderaMetadata;
     
     public AbstractEntityReader(final KunderaMetadata kunderaMetadata)
@@ -118,6 +118,21 @@ public class AbstractEntityReader
             if (KunderaCoreUtils.isEmptyOrNull(relationalObject) || ProxyHelper.isProxyOrCollection(relationalObject))
             {
                 onRelation(entity, relationsMap, m, pd, relation, relationType, lazilyloaded);
+            } // a bit of hack for neo4j only
+            else if (!ProxyHelper.isProxyOrCollection(relationalObject)
+                    && Map.class.isAssignableFrom(relationalObject.getClass()))
+            {
+                Map relationalMap = (Map) relationalObject;
+                for (Map.Entry entry : (Set<Map.Entry>) relationalMap.entrySet())
+                {
+                    Object entityObject = entry.getValue();
+                    if (entityObject != null)
+                    {
+                        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityObject.getClass());
+                        PersistenceCacheManager.addEntityToPersistenceCache(entityObject, pd,
+                                PropertyAccessorHelper.getId(entityObject, metadata));
+                    }
+                }
             }
         }
         return entity;
@@ -326,7 +341,7 @@ public class AbstractEntityReader
 
                         for (Object immediateRelation : immediateRelations)
                         {
-                            if (!compareTo(getEntity(immediateRelation), originalEntity))
+                            if (immediateRelation != null && !compareTo(getEntity(immediateRelation), originalEntity))
                             {
                                 onParseRelation(relationEntity, pd, targetEntityMetadata, immediateRelation, relation,
                                         lazilyloaded);
@@ -499,7 +514,7 @@ public class AbstractEntityReader
 
         /** The lucene query from jpa query. */
         String luceneQueryFromJPAQuery = KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery, kunderaMetadata);
-        
+
         Map<String, Object> results = client.getIndexManager().search(clazz, luceneQueryFromJPAQuery);
         Set rSet = new HashSet(results.values());
         return rSet;

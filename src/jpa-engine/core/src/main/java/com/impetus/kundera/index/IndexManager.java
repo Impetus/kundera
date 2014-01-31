@@ -120,7 +120,6 @@ public class IndexManager
 
                     if (documentExistsInIndex)
                     {
-
                         ((com.impetus.kundera.index.lucene.Indexer) indexer).update(metadata, metamodel, entity, id,
                                 parentId != null ? parentId.toString() : null);
                     }

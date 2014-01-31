@@ -45,17 +45,24 @@ public class IdGenerator
     /** The Constant log. */
     private static final Logger log = LoggerFactory.getLogger(IdGenerator.class);
 
-    public Object generateAndSetId(Object e, EntityMetadata m, PersistenceDelegator pd, final KunderaMetadata kunderaMetadata)
+    public Object generateAndSetId(Object e, EntityMetadata m, PersistenceDelegator pd,
+            final KunderaMetadata kunderaMetadata)
+    {
+        Metamodel metamodel = KunderaMetadataManager.getMetamodel(kunderaMetadata, m.getPersistenceUnit());
+        Client<?> client = pd.getClient(m);
+        return generateId(e, m, client, kunderaMetadata);
+    }
+
+    private Object generateId(Object e, EntityMetadata m, Client<?> client, final KunderaMetadata kunderaMetadata)
     {
         Metamodel metamodel = KunderaMetadataManager.getMetamodel(kunderaMetadata, m.getPersistenceUnit());
         IdDiscriptor keyValue = ((MetamodelImpl) metamodel).getKeyValue(e.getClass().getName());
 
         if (keyValue != null)
         {
-            Client<?> client = pd.getClient(m);
 
-            String clientFactoryName = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata, m.getPersistenceUnit())
-                    .getClient();
+            String clientFactoryName = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata,
+                    m.getPersistenceUnit()).getClient();
             if (clientFactoryName != null
                     && !clientFactoryName.equalsIgnoreCase("com.impetus.client.rdbms.RDBMSClientFactory"))
             {
@@ -85,7 +92,7 @@ public class IdGenerator
                 return generatedId;
             }
         }
-        
+
         return null;
     }
 

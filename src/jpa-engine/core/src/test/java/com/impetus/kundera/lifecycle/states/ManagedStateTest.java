@@ -15,8 +15,15 @@
  ******************************************************************************/
 package com.impetus.kundera.lifecycle.states;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+
 import javax.persistence.CascadeType;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 import javax.persistence.PersistenceContextType;
+import javax.persistence.Query;
 
 import junit.framework.Assert;
 
@@ -27,16 +34,22 @@ import org.junit.Test;
 import com.impetus.kundera.graph.BillingCounter;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.StoreBuilder;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
+import com.impetus.kundera.persistence.EntityManagerImpl;
+import com.impetus.kundera.persistence.PersistenceDelegator;
+import com.impetus.kundera.persistence.PersistenceDelegatorTest;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.context.PersistenceCache;
+import com.impetus.kundera.query.KunderaQuery;
 
 /**
  * @author amresh.singh
  */
 public class ManagedStateTest
 {
-    PersistenceCache pc;
+    private PersistenceCache pc;
 
-    ManagedState state;
+    private ManagedState state;
 
     /**
      * @throws java.lang.Exception
@@ -104,12 +117,13 @@ public class ManagedStateTest
         Assert.assertEquals(RemovedState.class, storeNode.getCurrentNodeState().getClass());
         Assert.assertTrue(storeNode.isDirty());
 
-//        for (Node childNode : storeNode.getChildren().values())
-//        {
-//            Assert.assertEquals(BillingCounter.class, childNode.getDataClass());
-//            Assert.assertEquals(RemovedState.class, childNode.getCurrentNodeState().getClass());
-//            Assert.assertTrue(childNode.isDirty());
-//        }
+        // for (Node childNode : storeNode.getChildren().values())
+        // {
+        // Assert.assertEquals(BillingCounter.class, childNode.getDataClass());
+        // Assert.assertEquals(RemovedState.class,
+        // childNode.getCurrentNodeState().getClass());
+        // Assert.assertTrue(childNode.isDirty());
+        // }
     }
 
     /**
@@ -136,24 +150,44 @@ public class ManagedStateTest
      * Test method for
      * {@link com.impetus.kundera.lifecycle.states.ManagedState#handleMerge(com.impetus.kundera.lifecycle.NodeStateContext)}
      * .
+     * 
+     * @throws InvocationTargetException
+     * @throws IllegalAccessException
+     * @throws InstantiationException
+     * @throws IllegalArgumentException
+     * @throws NoSuchMethodException
+     * @throws SecurityException
      */
     @Test
-    public void testHandleMerge()
+    public void testHandleMerge() throws IllegalArgumentException, InstantiationException, IllegalAccessException,
+            InvocationTargetException, SecurityException, NoSuchMethodException
     {
         Node storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.MERGE);
+
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("kunderatest");
+        Constructor constructor = PersistenceDelegator.class.getDeclaredConstructor(KunderaMetadata.class,
+                PersistenceCache.class);
+        constructor.setAccessible(true);
+        PersistenceDelegator pd = (PersistenceDelegator) constructor.newInstance(
+                ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance(), new PersistenceCache());
+
+        storeNode.setPersistenceDelegator(pd);
+        
         state.handleMerge(storeNode);
 
         Assert.assertEquals(ManagedState.class, storeNode.getCurrentNodeState().getClass());
         Assert.assertTrue(storeNode.isUpdate());
-        Assert.assertNotNull(storeNode.getPersistenceCache().getMainCache().getNodeFromCache(storeNode.getNodeId(), null));
+        Assert.assertNotNull(storeNode.getPersistenceCache().getMainCache()
+                .getNodeFromCache(storeNode.getNodeId(), null));
 
-//        for (Node childNode : storeNode.getChildren().values())
-//        {
-//            Assert.assertEquals(BillingCounter.class, childNode.getDataClass());
-//            Assert.assertEquals(ManagedState.class, childNode.getCurrentNodeState().getClass());
-//            Assert.assertTrue(childNode.isUpdate());
-//            Assert.assertNotNull(childNode.getPersistenceCache().getMainCache().getNodeFromCache(childNode.getNodeId()));
-//        }
+        // for (Node childNode : storeNode.getChildren().values())
+        // {
+        // Assert.assertEquals(BillingCounter.class, childNode.getDataClass());
+        // Assert.assertEquals(ManagedState.class,
+        // childNode.getCurrentNodeState().getClass());
+        // Assert.assertTrue(childNode.isUpdate());
+        // Assert.assertNotNull(childNode.getPersistenceCache().getMainCache().getNodeFromCache(childNode.getNodeId()));
+        // }
     }
 
     /**

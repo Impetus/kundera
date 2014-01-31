@@ -101,12 +101,15 @@ public interface Indexer extends com.impetus.kundera.index.Indexer
      */
     boolean documentExistsInIndex(EntityMetadata metadata, Object id);
 
+    
     /**
-     * Updates the document
-     * @param metadata entity metadata
-     * @param entity   pojo entity
-     * @param id       primary key
-     * @param parentId owner id
+     * Updates the existing document.
+     * 
+     * @param metadata   entity metadata.
+     * @param entity     entity object. 
+     * @param id         entity id
+     * @param parentId   parent entity id
+     * @param parentClazz  parent class
      */
     void update(EntityMetadata metadata, final MetamodelImpl metaModel, Object entity, Object id, String parentId);
 }

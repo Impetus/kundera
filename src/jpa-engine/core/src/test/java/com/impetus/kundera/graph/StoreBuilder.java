@@ -27,13 +27,13 @@ import com.impetus.kundera.persistence.context.PersistenceCache;
 /**
  * @author amresh.singh
  */
-public class StoreBuilder {
-	
-	public static Node buildStoreNode(PersistenceCache pc, NodeState initialState, CascadeType cascadeType)
-	{
-		
-		
-		Store store = new Store();
+public class StoreBuilder
+{
+
+    public static Node buildStoreNode(PersistenceCache pc, NodeState initialState, CascadeType cascadeType)
+    {
+
+        Store store = new Store();
         BillingCounter b1 = new BillingCounter();
         BillingCounter b2 = new BillingCounter();
         BillingCounter b3 = new BillingCounter();
@@ -55,11 +55,14 @@ public class StoreBuilder {
 
         List<CascadeType> cascadeTypes = new ArrayList<CascadeType>();
         cascadeTypes.add(cascadeType);
-        
-        linkB1.addLinkProperty(LinkProperty.LINK_NAME, "STORE_ID"); linkB1.addLinkProperty(LinkProperty.CASCADE, cascadeTypes);
-        linkB2.addLinkProperty(LinkProperty.LINK_NAME, "STORE_ID"); linkB2.addLinkProperty(LinkProperty.CASCADE, cascadeTypes);
-        linkB3.addLinkProperty(LinkProperty.LINK_NAME, "STORE_ID"); linkB3.addLinkProperty(LinkProperty.CASCADE, cascadeTypes);
- 
+
+        linkB1.addLinkProperty(LinkProperty.LINK_NAME, "STORE_ID");
+        linkB1.addLinkProperty(LinkProperty.CASCADE, cascadeTypes);
+        linkB2.addLinkProperty(LinkProperty.LINK_NAME, "STORE_ID");
+        linkB2.addLinkProperty(LinkProperty.CASCADE, cascadeTypes);
+        linkB3.addLinkProperty(LinkProperty.LINK_NAME, "STORE_ID");
+        linkB3.addLinkProperty(LinkProperty.CASCADE, cascadeTypes);
+
         headNode.addChildNode(linkB1, child1);
         headNode.addChildNode(linkB2, child2);
         headNode.addChildNode(linkB3, child3);
@@ -67,8 +70,8 @@ public class StoreBuilder {
         child1.addParentNode(linkB1, headNode);
         child2.addParentNode(linkB2, headNode);
         child3.addParentNode(linkB3, headNode);
-        
+
         return headNode;
-	}
+    }
 
 }

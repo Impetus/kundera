@@ -151,7 +151,7 @@ public class NativeQueryCQLV3Test
         PelopsClient pc = (PelopsClient) clientMap.get("cassandra");
         pc.setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
 
-        Query q = em.createNativeQuery(useNativeSql, CassandraBatchEntity.class);
+        Query q = em.createNativeQuery(useNativeSql);
         // q.getResultList();
         q.executeUpdate();
 

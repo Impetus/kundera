@@ -214,7 +214,7 @@ public class InheritenceDomainTest
         List<UserAccount> results = q.getResultList();
 
         Assert.assertEquals(1, results.size());
-        Assert.assertEquals("Test", results.get(0).getDispName());
+        Assert.assertEquals("UpdatedTest", results.get(0).getDispName());
         Assert.assertEquals(2, results.get(0).getSocialProfiles().size());
         Assert.assertFalse(results.get(0).getSocialProfiles().get(0).getId().equals(results.get(0).getId()));
 

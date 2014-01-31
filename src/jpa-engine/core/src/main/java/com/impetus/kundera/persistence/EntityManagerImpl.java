@@ -422,7 +422,7 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     public final Query createNativeQuery(String sqlString)
     {
         checkClosed();
-        throw new NotImplementedException("Please use createNativeQuery(String sqlString, Class resultClass) instead.");
+        return getPersistenceDelegator().createQuery(sqlString, getPersistenceUnit());
     }
 
     /*

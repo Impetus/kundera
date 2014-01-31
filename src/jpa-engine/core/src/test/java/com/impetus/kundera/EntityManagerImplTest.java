@@ -39,8 +39,7 @@ import com.impetus.kundera.polyglot.entities.PersonBMM;
 import com.impetus.kundera.query.Person;
 
 /**
- * @author vivek.mishra
- * junit for {@link EntityManagerImpl}
+ * @author vivek.mishra junit for {@link EntityManagerImpl}
  */
 public class EntityManagerImplTest
 {
@@ -55,9 +54,7 @@ public class EntityManagerImplTest
     @Before
     public void setUp()
     {
-        
-        
-        
+
         emf = Persistence.createEntityManagerFactory("kunderatest");
 
         em = emf.createEntityManager();
@@ -103,196 +100,209 @@ public class EntityManagerImplTest
             em.close();
         if (emf != null)
             emf.close();
-        
+
         dropDatabase();
     }
-    
+
     private void dropDatabase()
     {
         DummyDatabase.INSTANCE.dropDatabase();
     }
-    
+
     @Test
     public void testSingleEntityCRUD_EmNotCleared()
     {
-        //Persist
+        // Persist
         final SampleEntity entity = new SampleEntity();
         entity.setKey(1);
         entity.setName("Amry");
-        entity.setCity("Delhi");      
-        em.persist(entity);        
+        entity.setCity("Delhi");
+        em.persist(entity);
         SampleEntity found = em.find(SampleEntity.class, 1);
         assertSampleEntity(found);
-        
+
         Assert.assertTrue(em.contains(found));
-        
+
         found.setName("Xamry");
         found.setCity("Noida");
         em.merge(found);
-        
+
         SampleEntity foundAfterMerge = em.find(SampleEntity.class, 1);
         assertUpdatedSampleEntity(foundAfterMerge);
-        em.flush();       
-        
+        em.flush();
+
         em.remove(foundAfterMerge);
         SampleEntity foundAfterDeletion = em.find(SampleEntity.class, 1);
         Assert.assertNull(foundAfterDeletion);
     }
-    
+
     @Test
     public void testSingleEntityCRUD_EmCleared()
     {
-        //Persist
+        // Persist
         final SampleEntity entity = new SampleEntity();
         entity.setKey(1);
         entity.setName("Amry");
-        entity.setCity("Delhi");      
-        em.persist(entity); 
-        
+        entity.setCity("Delhi");
+        em.persist(entity);
+
         Assert.assertTrue(em.contains(entity));
         em.clear();
         Assert.assertFalse(em.contains(entity));
-        
+
         SampleEntity found = em.find(SampleEntity.class, 1, new HashMap<String, Object>());
-        
-        assertSampleEntity(found); 
-        
+
+        assertSampleEntity(found);
+
         found.setName("Xamry");
         found.setCity("Noida");
         em.clear();
         em.merge(found);
-        
+
         SampleEntity foundAfterMerge = em.find(SampleEntity.class, 1);
         assertUpdatedSampleEntity(foundAfterMerge);
-        
-        //Modify record in dummy database directly
-        SampleEntity se = (SampleEntity)DummyDatabase.INSTANCE.getSchema("KunderaTest").getTable("table").getRecord(new Integer(1));
-        se.setCity("Singapore");     
-        
-        em.refresh(foundAfterMerge);        
+
+        // Modify record in dummy database directly
+        SampleEntity se = (SampleEntity) DummyDatabase.INSTANCE.getSchema("KunderaTest").getTable("table")
+                .getRecord(new Integer(1));
+        se.setCity("Singapore");
+
+        em.refresh(foundAfterMerge);
         SampleEntity found2 = em.find(SampleEntity.class, 1);
         Assert.assertEquals("Singapore", found2.getCity());
-        
-        em.detach(foundAfterMerge);        
+
+        em.detach(foundAfterMerge);
         em.clear();
         found = em.find(SampleEntity.class, 1);
-        
-        em.clear();        
+
         em.remove(found);
+        em.clear();
         SampleEntity foundAfterDeletion = em.find(SampleEntity.class, 1);
         Assert.assertNull(foundAfterDeletion);
     }
 
-    
     @Test
     public void testNativeQuery()
     {
         final String nativeQuery = "Select * from persontable";
         Query query = em.createNativeQuery(nativeQuery, SampleEntity.class);
-        
-        Assert.assertNotNull(query);
-//        Assert.assertTrue(kunderaMetadata.getApplicationMetadata().isNative(nativeQuery));
-    }
-    
 
-    @Test 
+        Assert.assertNotNull(query);
+        // Assert.assertTrue(kunderaMetadata.getApplicationMetadata().isNative(nativeQuery));
+    }
+
+    @Test
     public void testUnsupportedMethod()
     {
-        
+
         try
         {
-            // find(Class<T> paramClass, Object paramObject, LockModeType paramLockModeType)
+            // find(Class<T> paramClass, Object paramObject, LockModeType
+            // paramLockModeType)
             em.find(PersonBMM.class, null, LockModeType.NONE);
             Assert.fail("Should have gone to catch block!");
-        } catch(NotImplementedException niex)
+        }
+        catch (NotImplementedException niex)
         {
             Assert.assertNotNull(niex);
         }
-        
+
         try
         {
-            // find(Class<T> arg0, Object arg1, LockModeType arg2, Map<String, Object> arg3)
+            // find(Class<T> arg0, Object arg1, LockModeType arg2, Map<String,
+            // Object> arg3)
             em.find(PersonBMM.class, null, LockModeType.NONE, null);
             Assert.fail("Should have gone to catch block!");
-        } catch(NotImplementedException niex)
+        }
+        catch (NotImplementedException niex)
         {
             Assert.assertNotNull(niex);
         }
-        
+
         try
         {
             // createNativeQuery(String sqlString)
             em.createNativeQuery("Query without class is not supported");
-            Assert.fail("Should have gone to catch block!");
-        } catch(NotImplementedException niex)
+        }
+        catch (NotImplementedException niex)
         {
-            Assert.assertNotNull(niex);
+            Assert.fail();
         }
         try
         {
-//            createNativeQuery(String sqlString, String resultSetMapping)
+            // createNativeQuery(String sqlString, String resultSetMapping)
             em.createNativeQuery("Query without class is not supported", "noreuslt");
             Assert.fail("Should have gone to catch block!");
-        } catch(NotImplementedException niex)
+        }
+        catch (NotImplementedException niex)
         {
             Assert.assertNotNull(niex);
         }
         try
         {
-            //getReference(Class<T> entityClass, Object primaryKey)
+            // getReference(Class<T> entityClass, Object primaryKey)
             em.getReference(Person.class, null);
             Assert.fail("Should have gone to catch block!");
-        } catch(NotImplementedException niex)
+        }
+        catch (NotImplementedException niex)
         {
             Assert.assertNotNull(niex);
         }
         try
         {
-//            lock(Object paramObject, LockModeType paramLockModeType, Map<String, Object> paramMap)
+            // lock(Object paramObject, LockModeType paramLockModeType,
+            // Map<String, Object> paramMap)
             em.lock(null, LockModeType.NONE, null);
             Assert.fail("Should have gone to catch block!");
-        } catch(NotImplementedException niex)
+        }
+        catch (NotImplementedException niex)
         {
             Assert.assertNotNull(niex);
         }
         try
         {
-//            refresh(Object paramObject, LockModeType paramLockModeType)
+            // refresh(Object paramObject, LockModeType paramLockModeType)
             em.refresh(null, LockModeType.NONE);
             Assert.fail("Should have gone to catch block!");
-        } catch(NotImplementedException niex)
+        }
+        catch (NotImplementedException niex)
         {
             Assert.assertNotNull(niex);
         }
         try
         {
-//            refresh(Object paramObject, LockModeType paramLockModeType, Map<String, Object> paramMap)
+            // refresh(Object paramObject, LockModeType paramLockModeType,
+            // Map<String, Object> paramMap)
             em.refresh(null, LockModeType.NONE, null);
             Assert.fail("Should have gone to catch block!");
-        } catch(NotImplementedException niex)
+        }
+        catch (NotImplementedException niex)
         {
             Assert.assertNotNull(niex);
         }
         try
         {
-//            getLockMode(Object paramObject)
+            // getLockMode(Object paramObject)
             em.getLockMode(null);
             Assert.fail("Should have gone to catch block!");
-        } catch(NotImplementedException niex)
+        }
+        catch (NotImplementedException niex)
         {
             Assert.assertNotNull(niex);
         }
         try
         {
-            //unwrap(Class<T> paramClass)
+            // unwrap(Class<T> paramClass)
             em.unwrap(null);
             Assert.fail("Should have gone to catch block!");
-        } catch(NotImplementedException niex)
+        }
+        catch (NotImplementedException niex)
         {
             Assert.assertNotNull(niex);
         }
-        
+
     }
+
     /**
      * @param found
      */
@@ -303,7 +313,7 @@ public class EntityManagerImplTest
         Assert.assertEquals("Amry", found.getName());
         Assert.assertEquals("Delhi", found.getCity());
     }
-    
+
     /**
      * @param found
      */

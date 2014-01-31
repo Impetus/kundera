@@ -15,7 +15,12 @@
  ******************************************************************************/
 package com.impetus.kundera.lifecycle.states;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+
 import javax.persistence.CascadeType;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 
 import junit.framework.Assert;
 
@@ -26,6 +31,9 @@ import org.junit.Test;
 import com.impetus.kundera.graph.BillingCounter;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.StoreBuilder;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
+import com.impetus.kundera.persistence.PersistenceDelegator;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.context.PersistenceCache;
 import com.impetus.kundera.utils.DeepEquals;
 
@@ -75,24 +83,44 @@ public class TransientStateTest
      * Test method for
      * {@link com.impetus.kundera.lifecycle.states.TransientState#handlePersist(com.impetus.kundera.lifecycle.NodeStateContext)}
      * .
+     * 
+     * @throws NoSuchMethodException
+     * @throws SecurityException
+     * @throws InvocationTargetException
+     * @throws IllegalAccessException
+     * @throws InstantiationException
+     * @throws IllegalArgumentException
      */
     @Test
-    public void testHandlePersist()
+    public void testHandlePersist() throws SecurityException, NoSuchMethodException, IllegalArgumentException,
+            InstantiationException, IllegalAccessException, InvocationTargetException
     {
         Node storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.PERSIST);
+
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("kunderatest");
+        Constructor constructor = PersistenceDelegator.class.getDeclaredConstructor(KunderaMetadata.class,
+                PersistenceCache.class);
+        constructor.setAccessible(true);
+        PersistenceDelegator pd = (PersistenceDelegator) constructor.newInstance(
+                ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance(), new PersistenceCache());
+
+        storeNode.setPersistenceDelegator(pd);
+
         state.handlePersist(storeNode);
 
         Assert.assertEquals(ManagedState.class, storeNode.getCurrentNodeState().getClass());
         Assert.assertTrue(storeNode.isDirty());
-        Assert.assertNotNull(storeNode.getPersistenceCache().getMainCache().getNodeFromCache(storeNode.getNodeId(), null));
+        Assert.assertNotNull(storeNode.getPersistenceCache().getMainCache()
+                .getNodeFromCache(storeNode.getNodeId(), null));
 
-//        for (Node childNode : storeNode.getChildren().values())
-//        {
-//            Assert.assertEquals(BillingCounter.class, childNode.getDataClass());
-//            Assert.assertEquals(ManagedState.class, childNode.getCurrentNodeState().getClass());
-//            Assert.assertTrue(childNode.isDirty());
-//            Assert.assertNotNull(childNode.getPersistenceCache().getMainCache().getNodeFromCache(childNode.getNodeId()));
-//        }
+        // for (Node childNode : storeNode.getChildren().values())
+        // {
+        // Assert.assertEquals(BillingCounter.class, childNode.getDataClass());
+        // Assert.assertEquals(ManagedState.class,
+        // childNode.getCurrentNodeState().getClass());
+        // Assert.assertTrue(childNode.isDirty());
+        // Assert.assertNotNull(childNode.getPersistenceCache().getMainCache().getNodeFromCache(childNode.getNodeId()));
+        // }
     }
 
     /**
@@ -139,11 +167,28 @@ public class TransientStateTest
      * Test method for
      * {@link com.impetus.kundera.lifecycle.states.TransientState#handleMerge(com.impetus.kundera.lifecycle.NodeStateContext)}
      * .
+     * 
+     * @throws NoSuchMethodException
+     * @throws SecurityException
+     * @throws InvocationTargetException
+     * @throws IllegalAccessException
+     * @throws InstantiationException
+     * @throws IllegalArgumentException
      */
     @Test
-    public void testHandleMerge()
+    public void testHandleMerge() throws SecurityException, NoSuchMethodException, IllegalArgumentException,
+            InstantiationException, IllegalAccessException, InvocationTargetException
     {
         Node storeNode = StoreBuilder.buildStoreNode(pc, state, CascadeType.MERGE);
+
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("kunderatest");
+        Constructor constructor = PersistenceDelegator.class.getDeclaredConstructor(KunderaMetadata.class,
+                PersistenceCache.class);
+        constructor.setAccessible(true);
+        PersistenceDelegator pd = (PersistenceDelegator) constructor.newInstance(
+                ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance(), new PersistenceCache());
+
+        storeNode.setPersistenceDelegator(pd);
 
         Object data1 = storeNode.getData();
         state.handleMerge(storeNode);

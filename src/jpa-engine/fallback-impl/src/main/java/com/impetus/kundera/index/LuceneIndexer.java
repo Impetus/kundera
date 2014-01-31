@@ -275,8 +275,8 @@ public class LuceneIndexer extends DocumentIndexer
     }
 
     @Override
-    public final void update(EntityMetadata metadata, final MetamodelImpl metaModel, Object entity, Object id, String parentId)
-
+    public final void update(EntityMetadata metadata, final MetamodelImpl metaModel, Object entity, Object id,
+            String parentId)
     {
         if (log.isDebugEnabled())
         {
@@ -284,7 +284,6 @@ public class LuceneIndexer extends DocumentIndexer
         }
 
         updateDocument(metadata, metaModel, entity, parentId, entity.getClass(), true);
-
     }
 
     @SuppressWarnings("deprecation")
@@ -480,7 +479,8 @@ public class LuceneIndexer extends DocumentIndexer
     }
 
     @Override
-    public void index(EntityMetadata metadata, final MetamodelImpl metaModel, Object object, String parentId, Class<?> clazz)
+    public void index(EntityMetadata metadata, final MetamodelImpl metaModel, Object object, String parentId,
+            Class<?> clazz)
     {
 
         indexDocument(metadata, metaModel, object, parentId, clazz);
@@ -550,7 +550,8 @@ public class LuceneIndexer extends DocumentIndexer
      *            the clazz
      * @return the document
      */
-    private Document indexDocument(EntityMetadata metadata, final MetamodelImpl metaModel, Object object, String parentId, Class<?> clazz)
+    private Document indexDocument(EntityMetadata metadata, final MetamodelImpl metaModel, Object object,
+            String parentId, Class<?> clazz)
     {
 
         if (log.isDebugEnabled())
@@ -579,8 +580,8 @@ public class LuceneIndexer extends DocumentIndexer
      *            the clazz
      * @return the document
      */
-    private Document updateOrIndexDocument(EntityMetadata metadata, final MetamodelImpl metaModel, Object entity, String parentId, Class<?> clazz,
-            boolean isUpdate)
+    private Document updateOrIndexDocument(EntityMetadata metadata, final MetamodelImpl metaModel, Object entity,
+            String parentId, Class<?> clazz, boolean isUpdate)
     {
         if (!metadata.isIndexable())
         {
@@ -602,9 +603,10 @@ public class LuceneIndexer extends DocumentIndexer
 
         if (metadata.getType().equals(EntityMetadata.Type.SUPER_COLUMN_FAMILY))
         {
-//
-//            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
-//                    metadata.getPersistenceUnit());
+            //
+            // MetamodelImpl metaModel = (MetamodelImpl)
+            // kunderaMetadata.getApplicationMetadata().getMetamodel(
+            // metadata.getPersistenceUnit());
 
             Map<String, EmbeddableType> embeddables = metaModel.getEmbeddables(metadata.getEntityClazz());
 
@@ -767,7 +769,7 @@ public class LuceneIndexer extends DocumentIndexer
     }
 
     @Override
-    public Map<String, Object> search(Class<?> clazz, EntityMetadata m , String luceneQuery, int start, int end)
+    public Map<String, Object> search(Class<?> clazz, EntityMetadata m, String luceneQuery, int start, int end)
     {
         throw new UnsupportedOperationException("Method not supported");
     }
