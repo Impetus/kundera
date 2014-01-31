@@ -263,6 +263,11 @@ public class PersonCassandraTest extends BaseTest
         Assert.assertEquals("count",
                 PropertyAccessorHelper.getObject(String.class, ((Column) noOfRows.get(0)).getName()));
 
+        entityManager.clear();
+        q = entityManager.createNamedQuery("q");
+        noOfRows = q.getResultList();
+        Assert.assertEquals(3, noOfRows.size());
+        
         tc.setCqlVersion(CassandraConstants.CQL_VERSION_2_0);
     }
 

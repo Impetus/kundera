@@ -60,7 +60,7 @@ public class QueryResolver
         {
             throw new QueryHandlerException("Query String should not be null ");
         }
-        
+
         KunderaQuery kunderaQuery = null;
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
         String mappedQuery = appMetadata.getQuery(jpaQuery);
@@ -87,11 +87,11 @@ public class QueryResolver
             {
                 mappedClass = appMetadata.getMappedClass(jpaQuery);
             }
-           
+
             kunderaQuery = new KunderaQuery(jpaQuery);
-            
+
             kunderaQuery.isNativeQuery = true;
-            
+
             m = KunderaMetadataManager.getEntityMetadata(mappedClass);
 
             Field entityClazzField = null;
@@ -156,6 +156,7 @@ public class QueryResolver
             IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException
     {
         Query query;
+
         Class clazz = persistenceDelegator.getClient(m).getQueryImplementor();
 
         @SuppressWarnings("rawtypes")
@@ -163,5 +164,26 @@ public class QueryResolver
         query = (Query) constructor.newInstance(kunderaQuery, persistenceDelegator);
 
         return query;
+    }
+
+    public Query getQueryImplementation(String jpaQuery, Class queryClazz,
+            final PersistenceDelegator persistenceDelegator)
+    {
+        KunderaQuery kunderaQuery = new KunderaQuery(jpaQuery);
+        kunderaQuery.isNativeQuery = true;
+        Query query = null;
+
+        try
+        {
+            Constructor constructor = queryClazz.getConstructor(KunderaQuery.class, PersistenceDelegator.class);
+            query = (Query) constructor.newInstance(kunderaQuery, persistenceDelegator);
+        }
+        catch (Exception e)
+        {
+            log.error(e.getMessage());
+            throw new QueryHandlerException(e);
+        }
+        return query;
+
     }
 }
