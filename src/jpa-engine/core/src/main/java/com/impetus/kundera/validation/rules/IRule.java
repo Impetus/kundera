@@ -16,20 +16,14 @@
 
 package com.impetus.kundera.validation.rules;
 
+
 /**
- * Interface for Business and JPA rules.
+ * Marker Interface for Business and JPA rules.
 
  * @author vivek.mishra
  *
  */
-public interface IRule<E>
+public interface IRule
 {
-    
-    /**
-     * Validates object
-     * @param entity  object on which rules to be applied.
-     * @return true, if rule passed successfully, else false.
-     */
-    boolean validate(E object);
     
 }

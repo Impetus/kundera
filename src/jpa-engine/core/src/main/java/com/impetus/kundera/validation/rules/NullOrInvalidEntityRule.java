@@ -26,13 +26,13 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
  *
  * @param <E>
  */
-public class NullOrInvalidEntityRule<E extends Object> implements IRule<E>
+public class NullOrInvalidEntityRule<E extends Object>
 {
 
     /* (non-Javadoc)
      * @see com.impetus.kundera.validation.rules.IRule#validate(java.lang.Object)
      */
-    @Override
+    
     public boolean validate(E entity)
     {
         if (entity != null)

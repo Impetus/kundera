@@ -56,6 +56,7 @@ public class OneToManyRelationMetadataProcessor extends AbstractEntityFieldProce
     @Override
     public void addRelationIntoMetadata(Field relationField, EntityMetadata metadata)
     {
+        
         OneToMany ann = relationField.getAnnotation(OneToMany.class);
         Class<?> targetEntity = PropertyAccessorHelper.getGenericClass(relationField);
 
@@ -65,23 +66,20 @@ public class OneToManyRelationMetadataProcessor extends AbstractEntityFieldProce
             targetEntity = ann.targetEntity();
         }
 
-        validate(targetEntity);
+ 
 
         Relation relation = new Relation(relationField, targetEntity, relationField.getType(), ann.fetch(),
                 Arrays.asList(ann.cascade()), Boolean.TRUE, ann.mappedBy(), Relation.ForeignKey.ONE_TO_MANY);
 
         boolean isJoinedByFK = relationField.isAnnotationPresent(JoinColumn.class);
-        boolean isJoinedByTable = relationField.isAnnotationPresent(JoinTable.class);
+     
 
         if (isJoinedByFK)
         {
             JoinColumn joinColumnAnn = relationField.getAnnotation(JoinColumn.class);
             relation.setJoinColumnName(joinColumnAnn.name());
         }
-        else if (isJoinedByTable)
-        {
-            throw new UnsupportedOperationException("@JoinTable not supported for one to many association");
-        }
+
         else
         {        
             String joinColumnName = ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName();
@@ -106,6 +104,7 @@ public class OneToManyRelationMetadataProcessor extends AbstractEntityFieldProce
             }
             relation.setJoinColumnName(joinColumnName);
         }
+        
         relation.setBiDirectionalField(metadata.getEntityClazz());
         metadata.addRelation(relationField.getName(), relation);
         metadata.setParent(true);
