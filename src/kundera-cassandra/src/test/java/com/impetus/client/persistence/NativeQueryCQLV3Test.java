@@ -15,6 +15,7 @@
  */
 package com.impetus.client.persistence;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +25,7 @@ import javax.persistence.Query;
 
 import junit.framework.Assert;
 
+import org.apache.cassandra.thrift.Compression;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.junit.After;
 import org.junit.Before;
@@ -58,7 +60,8 @@ public class NativeQueryCQLV3Test
         CassandraCli.cassandraSetUp();
         String nativeSql = "CREATE KEYSPACE \"" + schema
                 + "\" with replication = {'class':'SimpleStrategy', 'replication_factor':1}";
-        CassandraCli.executeCqlQuery(nativeSql, schema);
+        CassandraCli.getClient().execute_cql3_query(ByteBuffer.wrap(nativeSql.getBytes("UTF-8")), Compression.NONE,
+                ConsistencyLevel.ONE);
         emf = getEntityManagerFactory();
     }
 

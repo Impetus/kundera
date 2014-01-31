@@ -143,7 +143,6 @@ public abstract class AssociationBase
 
         dao = new IMDBDaoImpl(persistenceUnits);
 
-        em = null;
         dao.closeEntityManager();
         dao.closeEntityManagerFactory();
 

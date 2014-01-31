@@ -45,7 +45,7 @@ public class ProfilePictureDaoTest
     public void setUp() throws Exception
     {
         inputFilePath = "/home/impadmin/input.jpg";
-        dao = new ProfilePictureDao("secIdxAddCassandra");
+//        dao = new ProfilePictureDao("rdbms,addMongo,addCassandra,piccandra,secIdxAddCassandra,picongo");
     }
 
     /**
@@ -54,7 +54,7 @@ public class ProfilePictureDaoTest
     @After
     public void tearDown() throws Exception
     {
-        dao.closeEntityManagerfactory();
+//        dao.closeEntityManagerfactory();
     }
 
     @Test

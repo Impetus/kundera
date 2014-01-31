@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.client.crud.collection;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -24,6 +25,8 @@ import javax.persistence.Query;
 
 import junit.framework.Assert;
 
+import org.apache.cassandra.thrift.Compression;
+import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -520,9 +523,10 @@ public class BlogPostTest
         try
         {
             CassandraCli
-                    .executeCqlQuery(
-                            "CREATE KEYSPACE \"KunderaExamples\" WITH replication = {'class':'SimpleStrategy','replication_factor':3}",
-                            "KunderaExamples");
+                    .getClient()
+                    .execute_cql3_query(
+                            ByteBuffer.wrap("CREATE KEYSPACE \"KunderaExamples\" WITH replication = {'class':'SimpleStrategy','replication_factor':3}"
+                                    .getBytes("UTF-8")), Compression.NONE, ConsistencyLevel.ONE);
         }
         catch (Exception e)
         {

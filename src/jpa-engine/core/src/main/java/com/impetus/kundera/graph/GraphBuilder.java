@@ -253,16 +253,19 @@ public class GraphBuilder
                         {
                             Object relObject = entry.getKey();
                             Object entityObject = entry.getValue();
-                            Node childNode = this.generator.generate(entityObject, pd, pc, null);
-                            // in case node is already in cache.
-                            if (childNode != null)
+                            if (entityObject != null)
                             {
-                                if (StringUtils.isEmpty(relation.getMappedBy())
-                                        && relation.getProperty().getAnnotation(MapKeyJoinColumn.class) != null)
+                                Node childNode = this.generator.generate(entityObject, pd, pc, null);
+                                // in case node is already in cache.
+                                if (childNode != null)
                                 {
-                                    NodeLink nodeLink = new NodeLink(source.getNodeId(), childNode.getNodeId());
-                                    this.generator.setLink(source, relation, childNode, nodeLink);
-                                    nodeLink.addLinkProperty(LinkProperty.LINK_VALUE, relObject);
+                                    if (StringUtils.isEmpty(relation.getMappedBy())
+                                            && relation.getProperty().getAnnotation(MapKeyJoinColumn.class) != null)
+                                    {
+                                        NodeLink nodeLink = new NodeLink(source.getNodeId(), childNode.getNodeId());
+                                        this.generator.setLink(source, relation, childNode, nodeLink);
+                                        nodeLink.addLinkProperty(LinkProperty.LINK_VALUE, relObject);
+                                    }
                                 }
                             }
                         }

@@ -131,9 +131,7 @@ public abstract class AssociationBase
             CassandraCli.createKeySpace("Pickr");
 
             dao = new UserAddressDaoImpl(persistenceUnits);
-            
-            kunderaMetadata.setCoreMetadata(null);
-            em = null;
+
             dao.closeEntityManager();
             dao.closeEntityManagerFactory();
 

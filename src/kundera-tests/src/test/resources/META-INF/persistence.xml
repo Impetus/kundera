@@ -22,6 +22,8 @@
 	<persistence-unit name="secIdxAddCassandraJTA"
 		transaction-type="JTA">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.kundera.tests.persistence.jta.PersonnelOToOFKEntityJTA</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="9160" />
@@ -36,6 +38,8 @@
 
 	<persistence-unit name="addMongoJTA" transaction-type="JTA">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.kundera.tests.persistence.jta.HabitatOToOFKEntityJTA</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<!-- <property name="kundera.nodes" value="192.168.145.168" /> -->
 			<property name="kundera.nodes" value="localhost" />
@@ -144,7 +148,7 @@
 		value="root" /> <property name="hibernate.connection.password" value="impetus" 
 		/> <property name="hibernate.current_session_context_class" value="org.hibernate.context.ThreadLocalSessionContext" 
 		/> <property name="index.home.dir" value="./lucene" /> </properties> </persistence-unit> -->
-		
+
 	<persistence-unit name="piccandra">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>
@@ -241,7 +245,7 @@
 	</persistence-unit>
 	<persistence-unit name="imdbHbase">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
-		
+
 		<properties>
 			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="2181" />
@@ -282,11 +286,11 @@
 				value="com.impetus.client.oraclenosql.index.OracleNoSQLInvertedIndexer" />
 		</properties>
 	</persistence-unit>
-	
+
 	<persistence-unit name="noAnnotationAddCassandra">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
-	    <class>com.impetus.kundera.tests.entities.PersonDetailClassMap</class>
-	    <exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<class>com.impetus.kundera.tests.entities.PersonDetailClassMap</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="9160" />
@@ -333,7 +337,7 @@
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<class>com.impetus.kundera.tests.entities.UserCassandraNoAnnotation</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
-    	<properties>
+		<properties>
 			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="9160" />
 			<property name="kundera.keyspace" value="KunderaTests" />
@@ -358,12 +362,12 @@
 				value="com.impetus.client.couchdb.CouchDBClientFactory" />
 		</properties>
 	</persistence-unit>
-	
+
 	<persistence-unit name="cassandraAddressNoAnnotate">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<class>com.impetus.kundera.tests.entities.AddressCassandra</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
-    	<properties>
+		<properties>
 			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="9160" />
 			<property name="kundera.keyspace" value="KunderaTests" />
@@ -383,12 +387,42 @@
 		<properties>
 			<property name="kundera.client.lookup.class" value="com.impetus.client.rdbms.RDBMSClientFactory" />
 			<property name="current_session_context_class" value="thread" />
-			<!-- <property name="hibernate.show_sql" value="true" /> --> 
+			<!-- <property name="hibernate.show_sql" value="true" /> -->
 			<property name="hibernate.format_sql" value="true" />
 			<property name="hibernate.connection.driver_class" value="org.hsqldb.jdbcDriver" />
 			<property name="hibernate.connection.url" value="jdbc:hsqldb:mem:KunderaTests" />
 			<property name="hibernate.hbm2ddl.auto" value="create-drop" />
-			
+
+		</properties>
+	</persistence-unit>
+
+	<persistence-unit name="commonCouchdb">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.kundera.tests.entities.CommonUser</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="5984" />
+			<property name="kundera.keyspace" value="KunderaTests" />
+			<property name="kundera.dialect" value="couchdb" />
+			<property name="kundera.client" value="couchdb" />
+			<property name="kundera.ddl.auto.prepare" value="create" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.couchdb.CouchDBClientFactory" />
+		</properties>
+	</persistence-unit>
+
+	<persistence-unit name="commonMongo">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.kundera.tests.entities.CommonUser</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="27017" />
+			<property name="kundera.keyspace" value="KunderaTests" />
+			<property name="kundera.dialect" value="mongodb" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.mongodb.MongoDBClientFactory" />
 		</properties>
 	</persistence-unit>
 

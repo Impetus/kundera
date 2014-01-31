@@ -46,15 +46,15 @@ import com.impetus.kundera.KunderaPersistenceProviderUtil;
  */
 public class KunderaPersistenceProviderUtilTest
 {
-    EntityManagerFactory emf;
+    private EntityManagerFactory emf;
 
-    EntityManager em;
+    private EntityManager em;
 
-    KunderaPersistence kp = new KunderaPersistence();
+    private KunderaPersistence kp = new KunderaPersistence();
 
-    KunderaPersistenceProviderUtil util = new KunderaPersistenceProviderUtil(kp);
+    private KunderaPersistenceProviderUtil util = new KunderaPersistenceProviderUtil(kp);
 
-    LazyTestSetup setup = new LazyTestSetup();
+    private LazyTestSetup setup = new LazyTestSetup();
 
     /**
      * @throws java.lang.Exception
@@ -66,7 +66,8 @@ public class KunderaPersistenceProviderUtilTest
         setup.startServer();
         setup.createSchema();
 
-        emf = Persistence.createEntityManagerFactory("piccandra");
+        emf = Persistence
+                .createEntityManagerFactory("rdbms,addMongo,addCassandra,piccandra,secIdxAddCassandra,picongo");
         em = emf.createEntityManager();
     }
 
@@ -210,12 +211,6 @@ public class KunderaPersistenceProviderUtilTest
         {
             Assert.fail(e.getMessage());
         }
-    }
-
-    @Test
-    public void dummyTest()
-    {
-
     }
 
 }
