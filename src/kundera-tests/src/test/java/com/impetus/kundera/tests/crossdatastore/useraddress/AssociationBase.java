@@ -389,11 +389,27 @@ public abstract class AssociationBase
                     db.setAccessible(true);
                 }
                 DB mongoDB = (DB) db.get(client);
-                mongoDB.getCollection("PERSONNEL").drop();
-                mongoDB.getCollection("ADDRESS").drop();
-                mongoDB.getCollection("PERSONNEL_ADDRESS").drop();
-                mongoDB.getCollection("PERSONNEL_INT").drop();
-                mongoDB.getCollection("ADDRESS_INT").drop();
+                if(mongoDB.collectionExists("PERSONNEL"))
+                {
+                   mongoDB.getCollection("PERSONNEL").drop();
+                }
+                if(mongoDB.collectionExists("ADDRESS"))
+                {
+                  mongoDB.getCollection("ADDRESS").drop();
+                }
+                if(mongoDB.collectionExists("PERSONNEL_ADDRESS"))
+                {
+                  mongoDB.getCollection("PERSONNEL_ADDRESS").drop();
+                }
+                if(mongoDB.collectionExists("PERSONNEL_INT"))
+                {
+                 mongoDB.getCollection("PERSONNEL_INT").drop();
+                }
+                if(mongoDB.collectionExists("ADDRESS_INT"))
+                {
+                  mongoDB.getCollection("ADDRESS_INT").drop();
+                }
+                
             }
             catch (SecurityException e)
             {
