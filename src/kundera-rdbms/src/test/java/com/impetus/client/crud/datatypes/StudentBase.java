@@ -57,21 +57,20 @@ public abstract class StudentBase<E extends StudentEntityDef> extends BaseTest
 
     /** The student id3. */
     protected Object studentId3;
-
+    
+    /** The date. */
+    protected long date = System.currentTimeMillis();
+    
     /** The enrolment date. */
-    protected Date enrolmentDate = new Date();
+    protected Date enrolmentDate = new Date(date);
 
     /** The joining date and time. */
-    protected Date joiningDateAndTime = new Date();
-
-    /** The date. */
-    protected long date = new Date().getTime();
-
+    protected Date joiningDateAndTime = new Date(date);
     /** The new sql date. */
     protected java.sql.Date newSqlDate = new java.sql.Date(date);
 
     /** The enrolment time. */
-    protected Date enrolmentTime = new Date();
+    protected Date enrolmentTime = new Date(date);
 
     /** The sql time. */
     protected java.sql.Time sqlTime = new java.sql.Time(date);
