@@ -48,6 +48,19 @@ import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.Type;
 import javax.persistence.metamodel.Type.PersistenceType;
+import javax.validation.constraints.AssertFalse;
+import javax.validation.constraints.AssertTrue;
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Digits;
+import javax.validation.constraints.Future;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
+import javax.validation.constraints.Past;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -368,6 +381,10 @@ public final class MetaModelBuilder<X, T>
             {
                 if (isNonTransient(attribute))
                 {
+                    //Sets whether a class need to be validated for javax validation constraints
+                    if(containsValidationContsraint(attribute)) {
+                        managedType.setValidateConstraints(true);
+                    }
                     if (isPluralAttribute(attribute))
                     {
                         PluralAttribute<X, ?, ?> pluralAttribute = null;
@@ -789,5 +806,24 @@ public final class MetaModelBuilder<X, T>
         return attribute != null && !Modifier.isStatic(attribute.getModifiers())
                 && !Modifier.isTransient(attribute.getModifiers()) && !attribute.isAnnotationPresent(Transient.class);
     }
+    
+    /**
+     * Returns true if an entity contains attributes with validation constraints enabled
+     * 
+     * @param attribute
+     * @return
+     */
+    private boolean containsValidationContsraint(Field attribute) {
+        /// Checks if attribute contains any validation constraint enabled
+        return attribute.isAnnotationPresent(AssertFalse.class) || attribute.isAnnotationPresent(AssertTrue.class)
+        || attribute.isAnnotationPresent(DecimalMax.class) || attribute.isAnnotationPresent(DecimalMin.class) 
+        || attribute.isAnnotationPresent(Digits.class) || attribute.isAnnotationPresent(Future.class)
+        || attribute.isAnnotationPresent(Max.class) || attribute.isAnnotationPresent(Min.class)
+        || attribute.isAnnotationPresent(NotNull.class) || attribute.isAnnotationPresent(Null.class)
+        || attribute.isAnnotationPresent(Past.class) || attribute.isAnnotationPresent(Pattern.class) 
+        || attribute.isAnnotationPresent(Size.class);
+        
+    }
+    
 
 }
