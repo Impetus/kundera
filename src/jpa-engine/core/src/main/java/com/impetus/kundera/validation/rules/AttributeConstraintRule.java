@@ -188,6 +188,8 @@ public class AttributeConstraintRule extends AbstractFieldRule implements FieldR
     }
 
     /**
+     * Checks whether the given attribute's value is within specified limit 
+     * 
      * @param validationObject
      * @param annotate
      * @return
@@ -234,6 +236,8 @@ public class AttributeConstraintRule extends AbstractFieldRule implements FieldR
     }
 
     /**
+     * Checks whether the given string is a valid pattern or not
+     * 
      * @param validationObject
      * @param annotate
      * @return
@@ -251,13 +255,15 @@ public class AttributeConstraintRule extends AbstractFieldRule implements FieldR
         if (!matcherPattern.matches())
         {
             throwValidationException(((Pattern) annotate).message());
-            // throw new ValidationException(((Pattern) annotate).message());
+           
         }
 
         return true;
     }
 
     /**
+     * Checks whether the object is null or not
+     * 
      * @param validationObject
      * @param annotate
      * @return
@@ -292,7 +298,6 @@ public class AttributeConstraintRule extends AbstractFieldRule implements FieldR
         // }
         if (res >= 0)
         {
-            // throw new ValidationException(((Past) annotate).message());
             throwValidationException(((Past) annotate).message());
         }
 
@@ -300,6 +305,8 @@ public class AttributeConstraintRule extends AbstractFieldRule implements FieldR
     }
 
     /**
+     * Checks whether a given date is that in future or not
+     * 
      * @param validationObject
      * @param annotate
      * @return
@@ -336,7 +343,6 @@ public class AttributeConstraintRule extends AbstractFieldRule implements FieldR
         // }
         if (res <= 0)
         {
-            // throw new ValidationException(((Future) annotate).message());
             throwValidationException(((Future) annotate).message());
         }
 
@@ -344,17 +350,21 @@ public class AttributeConstraintRule extends AbstractFieldRule implements FieldR
     }
 
     /**
+     * Checks whether a given date is that in past or not
+     * 
      * @param validationObject
      * @param annotate
      * @return
      */
     private boolean validateNull(Object validationObject, Annotation annotate)
     {
+        if (checkNullObject(validationObject))
+        {
+            return true;
+        }
 
         if (!validationObject.equals(null) || validationObject != null)
         {
-
-            // throw new ValidationException(((Null) annotate).message());
             throwValidationException(((Null) annotate).message());
         }
 
@@ -362,6 +372,9 @@ public class AttributeConstraintRule extends AbstractFieldRule implements FieldR
     }
 
     /**
+     * 
+     * Checks whether a given date is not null
+     * 
      * @param validationObject
      * @param annotate
      * @return
@@ -371,14 +384,14 @@ public class AttributeConstraintRule extends AbstractFieldRule implements FieldR
 
         if (validationObject == null || validationObject.equals(null))
         {
-
-            // throw new ValidationException(((NotNull) annotate).message());
             throwValidationException(((NotNull) annotate).message());
         }
         return true;
     }
 
     /**
+     * Checks whether a given value is greater than given min value or not
+     * 
      * @param validationObject
      * @param annotate
      * @return
@@ -396,7 +409,6 @@ public class AttributeConstraintRule extends AbstractFieldRule implements FieldR
             if ((NumberUtils.toLong(toString(validationObject))) < minValue)
             {
 
-                // throw new ValidationException(((Min) annotate).message());
                 throwValidationException(((Min) annotate).message());
             }
         }
@@ -405,6 +417,8 @@ public class AttributeConstraintRule extends AbstractFieldRule implements FieldR
     }
 
     /**
+     * Checks whether a given value is lesser than given max value or not
+     * 
      * @param validationObject
      * @param annotate
      * @return
@@ -422,7 +436,6 @@ public class AttributeConstraintRule extends AbstractFieldRule implements FieldR
             if ((NumberUtils.toLong(toString(validationObject))) > maxValue)
             {
 
-                // throw new ValidationException(((Max) annotate).message());
                 throwValidationException(((Max) annotate).message());
 
             }
@@ -432,6 +445,8 @@ public class AttributeConstraintRule extends AbstractFieldRule implements FieldR
     }
 
     /**
+     * Checks whether a given value is is a number or not
+     * 
      * @param validationObject
      * @param annotate
      * @return
@@ -448,7 +463,6 @@ public class AttributeConstraintRule extends AbstractFieldRule implements FieldR
             if (!NumberUtils.isDigits(toString(validationObject)))
             {
 
-                // throw new ValidationException(((Digits) annotate).message());
                 throwValidationException(((Digits) annotate).message());
             }
         }
@@ -457,6 +471,9 @@ public class AttributeConstraintRule extends AbstractFieldRule implements FieldR
     }
 
     /**
+     * Checks whether a given value is a valid minimum decimal digit when compared to given value 
+     * or not
+     * 
      * @param validationObject
      * @param annotate
      * @return
@@ -473,11 +490,8 @@ public class AttributeConstraintRule extends AbstractFieldRule implements FieldR
                     BigDecimal minValue = NumberUtils.createBigDecimal(((DecimalMin) annotate).value());
                     BigDecimal actualValue = NumberUtils.createBigDecimal(toString(validationObject));
                     int res = actualValue.compareTo(minValue);
-                    if (res != 1 && res != 0)
+                    if (res < 0)
                     {
-
-                        // throw new ValidationException(((DecimalMin)
-                        // annotate).message());
                         throwValidationException(((DecimalMin) annotate).message());
                     }
 
@@ -485,7 +499,7 @@ public class AttributeConstraintRule extends AbstractFieldRule implements FieldR
             }
             catch (NumberFormatException nfe)
             {
-                throw new NumberFormatException(nfe.getMessage());
+                throw new RuleValidationException(nfe.getMessage());
             }
 
         }
@@ -494,6 +508,9 @@ public class AttributeConstraintRule extends AbstractFieldRule implements FieldR
     }
 
     /**
+     * Checks whether a given value is a valid maximum decimal digit when compared to given value 
+     * or not
+     * 
      * @param validationObject
      * @param annotate
      * @return
@@ -509,11 +526,8 @@ public class AttributeConstraintRule extends AbstractFieldRule implements FieldR
                     BigDecimal maxValue = NumberUtils.createBigDecimal(((DecimalMax) annotate).value());
                     BigDecimal actualValue = NumberUtils.createBigDecimal(toString(validationObject));
                     int res = actualValue.compareTo(maxValue);
-                    if (res != -1 && res != 0)
+                    if (res >  0)
                     {
-
-                        // throw new ValidationException(((DecimalMax)
-                        // annotate).message());
                         throwValidationException(((DecimalMax) annotate).message());
                     }
 
@@ -521,7 +535,7 @@ public class AttributeConstraintRule extends AbstractFieldRule implements FieldR
             }
             catch (NumberFormatException nfe)
             {
-                throw new NumberFormatException(nfe.getMessage());
+                throw new RuleValidationException(nfe.getMessage());
             }
 
         }
@@ -542,8 +556,6 @@ public class AttributeConstraintRule extends AbstractFieldRule implements FieldR
 
         if (checkvalidBooleanTypes(validationObject.getClass()) && !(Boolean) validationObject)
         {
-
-            // throw new ValidationException(((AssertTrue) annotate).message());
             throwValidationException(((AssertTrue) annotate).message());
         }
 
@@ -564,8 +576,6 @@ public class AttributeConstraintRule extends AbstractFieldRule implements FieldR
 
         if (checkvalidBooleanTypes(validationObject.getClass()) && (Boolean) validationObject)
         {
-            // throw new ValidationException(((AssertFalse)
-            // annotate).message());
             throwValidationException(((AssertFalse) annotate).message());
 
         }

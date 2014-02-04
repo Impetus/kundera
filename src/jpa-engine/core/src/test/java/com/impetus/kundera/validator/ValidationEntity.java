@@ -36,6 +36,10 @@ import javax.validation.constraints.Past;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+/**
+ * @author Chhavi Gangwal
+ *
+ */
 @Entity
 public class ValidationEntity
 {
@@ -48,15 +52,15 @@ public class ValidationEntity
     private int age;
     
     @Column
-    @Null(message="Image type must be specified.")
-    private int nullField;
+    @Null(message="The value should be null.")
+    private String nullField;
     
     @Column
     @AssertFalse(message="The  person type must be human")
     private boolean isHuman;
     
     @Column
-    @AssertTrue(message="The  person type must be I-human")
+    @AssertTrue(message="The person type must be I-human")
     private boolean isIHuman;
     
     @Column
@@ -87,7 +91,7 @@ public class ValidationEntity
     
     @Column
     @Size(message="Invalid size.", max= 50, min=10)
-    private int size;
+    private String size;
     
     @Column
     @Max(message="Invalid max value.", value = 100)
@@ -155,7 +159,7 @@ public class ValidationEntity
     /**
      * @param nullField the nullField to set
      */
-    public void setNullField(int nullField)
+    public void setNullField(String nullField)
     {
         this.nullField = nullField;
     }
@@ -163,7 +167,7 @@ public class ValidationEntity
     /**
      * @return the nullField
      */
-    public int getNullField()
+    public String getNullField()
     {
         return nullField;
     }
@@ -283,7 +287,7 @@ public class ValidationEntity
     /**
      * @param size the size to set
      */
-    public void setSize(int size)
+    public void setSize(String  size)
     {
         this.size = size;
     }
@@ -291,7 +295,7 @@ public class ValidationEntity
     /**
      * @return the size
      */
-    public int getSize()
+    public String getSize()
     {
         return size;
     }

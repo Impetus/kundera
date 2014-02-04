@@ -38,7 +38,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
+import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
@@ -51,17 +51,16 @@ import com.impetus.kundera.validation.ValidationFactoryGenerator.ValidationFacto
 
 import com.impetus.kundera.validation.rules.AttributeConstraintRule;
 
-
-
-
-
+/**
+ * @author Chhavi Gangwal
+ * 
+ */
 public class ValidationProcessorTest
 {
-    
+
     /** the log used by this class. */
     private static Logger log = LoggerFactory.getLogger(ValidationProcessorTest.class);
 
-      
     private static final String PU = "kunderatest";
 
     private EntityManagerFactory emf;
@@ -69,152 +68,209 @@ public class ValidationProcessorTest
     private EntityManager em;
 
     protected Map propertyMap = null;
-    
+
     private KunderaMetadata kunderaMetadata;
 
+    private ValidationFactoryGenerator generator = new ValidationFactoryGenerator();
+
+    private ValidationFactory factory = generator.getFactory(ValidationFactoryType.BOOT_STRAP_VALIDATION);
+
+    /**
+     * @throws Exception
+     */
     @Before
     public void setUp() throws Exception
     {
-            emf = Persistence.createEntityManagerFactory(PU, propertyMap);
-            kunderaMetadata = ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance();
-            //kunderaMetadata.setApplicationMetadata(null);
+        emf = Persistence.createEntityManagerFactory(PU, propertyMap);
+        kunderaMetadata = ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance();
+        // kunderaMetadata.setApplicationMetadata(null);
+
+        em = emf.createEntityManager();
+
+    }
+
+    /**
+     * @throws ParseException
+     */
+    @Test
+    public void testValid() throws ParseException
+    {
+        try
+        {
+            String pastStr = "11-11-2012";
+            String futStr = "11-11-2015";
+            DateFormat df = new SimpleDateFormat("dd-mm-yyyy");
+            Date pastDate = df.parse(pastStr);
+            Date futDate = df.parse(futStr);
+
+            ValidationEntity entity = new ValidationEntity();
+            entity.setAge(13);
+            entity.seteId("e1");
+            entity.setHuman(false);
+            entity.setDecimalMax(5);
+            entity.setDecimalMin(59);
+            entity.setDigits(123);
+            entity.setIHuman(true);
+            entity.setMax("90");
+            entity.setMin(20);
+            entity.setNullField(null);
+            entity.setPast(pastDate);
+            entity.setFuture(futDate);
+            entity.setSize("hello232141423423535353453");
+            entity.setEmail("abc@gcd.com");
             
-            em = emf.createEntityManager();
+            validateEntityAttribute("age", entity, "Age should not be null");
+            validateEntityAttribute("nullField", entity, "The value should be null.");
+            validateEntityAttribute("isHuman", entity, "The  person type must be human");
+            validateEntityAttribute("isIHuman", entity, "The person type must be I-human");
+            validateEntityAttribute("decimalMax", entity, "Invalid Decimal max value.");
+            validateEntityAttribute("decimalMin", entity, "Invalid Decimal min value.");
+            validateEntityAttribute("digits", entity, "Invalid number.");
+            validateEntityAttribute("future", entity, "Invalid future date.");
+            validateEntityAttribute("past", entity, "Invalid past date");
+            validateEntityAttribute("pattern", entity, "Invalid pattern.");
+            validateEntityAttribute("size", entity, "Invalid size.");
+            validateEntityAttribute("max", entity, "Invalid max value.");
+            validateEntityAttribute("min", entity, "Invalid min value.");
+
+            //em.persist(entity);
+        }
+        catch (KunderaException e)
+        {
+            Assert.assertNotNull(e.getMessage());
+        }
 
     }
 
+    /**
+     * @throws ParseException
+     */
     @Test
-    public void testValid() throws ParseException{
-        
-        String pastStr = "11-11-2012";
-        String futStr = "11-11-2015";
-        DateFormat df = new SimpleDateFormat("dd-mm-yyyy"); 
-        Date pastDate = df.parse(pastStr);
-        Date futDate = df.parse(futStr);
-        
-        
-        ValidationEntity entity = new ValidationEntity();
-        entity.setAge(13);
-        entity.seteId("e1");
-        entity.setHuman(false);
-        entity.setDecimalMax(5);
-        entity.setDecimalMin(59);
-        entity.setDigits(123);
-        entity.setIHuman(true);
-        entity.setMax("90");
-        entity.setMin(20);
-        entity.setNullField(0);
-        entity.setPast(pastDate);
-        entity.setFuture(futDate);
-        entity.setSize(30);
-        entity.setEmail("abc@gcd.com");
-        validateEntityAttributes(entity);
-        
-        em.persist(entity);
-        
+    public void testNull() throws ParseException
+    {
+        try
+        {
+
+            ValidationEntity entity = new ValidationEntity();
+            entity.setAge(13);
+            entity.seteId("e1");
+            entity.setHuman(false);
+            entity.setDecimalMax(5);
+            entity.setDecimalMin(59);
+            entity.setDigits(123);
+            entity.setIHuman(true);
+            entity.setMax("90");
+            entity.setMin(21);
+            entity.setNullField(null);
+            entity.setPast(null);
+            entity.setFuture(null);
+            entity.setSize(null);
+            entity.setEmail(null);
+
+            validateEntityAttribute("age", entity, "");
+            validateEntityAttribute("nullField", entity, "");
+            validateEntityAttribute("isHuman", entity, "");
+            validateEntityAttribute("isIHuman", entity, "");
+            validateEntityAttribute("decimalMax", entity, "");
+            validateEntityAttribute("decimalMin", entity, "");
+            validateEntityAttribute("digits", entity, "");
+            validateEntityAttribute("future", entity, "");
+            validateEntityAttribute("past", entity, "");
+            validateEntityAttribute("pattern", entity, "");
+            validateEntityAttribute("size", entity, "");
+            validateEntityAttribute("max", entity, "");
+            validateEntityAttribute("min", entity, "");
+        }
+        catch (KunderaException e)
+        {
+
+            Assert.assertNotNull(e.getMessage());
+        }
+
     }
-    
+
+    /**
+     * @throws ParseException
+     */
     @Test
-    public void testNull() throws ParseException{
-        
-              
-        
-        ValidationEntity entity = new ValidationEntity();
-        entity.setAge(13);
-        entity.seteId("e1");
-        entity.setHuman(false);
-        entity.setDecimalMax(5);
-        entity.setDecimalMin(59);
-        entity.setDigits(123);
-        entity.setIHuman(true);
-        entity.setMax("90");
-        entity.setMin(21);
-        entity.setNullField(0);
-        entity.setPast(null);
-        entity.setFuture(null);
-        entity.setSize(40);
-        entity.setEmail(null);
-        validateEntityAttributes(entity);
-        
-        em.persist(entity);
-        
+    public void testInValid() throws ParseException
+    {
+        try
+        {
+            String pastStr = "11-11-2015";
+            String futStr = "11-11-2012";
+            DateFormat df = new SimpleDateFormat("dd-mm-yyyy");
+            Date pastDate = df.parse(pastStr);
+            Date futDate = df.parse(futStr);
+
+            ValidationEntity entity = new ValidationEntity();
+            entity.setAge(13);
+            entity.seteId("e1");
+            entity.setHuman(true);
+            entity.setDecimalMax(50);
+            entity.setDecimalMin(5);
+            entity.setDigits(123);
+            entity.setIHuman(false);
+            entity.setMax("90");
+            entity.setMin(20);
+            entity.setNullField("hello");
+            entity.setPast(pastDate);
+            entity.setFuture(futDate);
+            entity.setSize("123");
+            entity.setEmail("axc");
+
+            validateEntityAttribute("age", entity, "Age should not be null");
+            validateEntityAttribute("nullField", entity, "The value should be null.");
+            validateEntityAttribute("isHuman", entity, "The  person type must be human");
+            validateEntityAttribute("isIHuman", entity, "The person type must be I-human");
+            validateEntityAttribute("decimalMax", entity, "Invalid Decimal max value.");
+            validateEntityAttribute("decimalMin", entity, "Invalid Decimal min value.");
+            validateEntityAttribute("digits", entity, "Invalid number.");
+            validateEntityAttribute("future", entity, "Invalid future date.");
+            validateEntityAttribute("past", entity, "Invalid past date");
+            validateEntityAttribute("pattern", entity, "Invalid pattern.");
+            validateEntityAttribute("size", entity, "Invalid size.");
+            validateEntityAttribute("max", entity, "Invalid max value.");
+            validateEntityAttribute("min", entity, "Invalid min value.");
+
+            em.persist(entity);
+        }
+        catch (KunderaException e)
+        {
+
+            Assert.assertNotNull(e.getMessage());
+        }
+
     }
-    
-    @Test
-    public void testInValid() throws ParseException{
-        
-        String pastStr = "11-11-2015";
-        String futStr = "11-11-2012";
-        DateFormat df = new SimpleDateFormat("dd-mm-yyyy"); 
-        Date pastDate = df.parse(pastStr);
-        Date futDate = df.parse(futStr);
-        
-        
-        ValidationEntity entity = new ValidationEntity();
-        entity.setAge(13);
-        entity.seteId("e1");
-        entity.setHuman(true);
-        entity.setDecimalMax(5);
-        entity.setDecimalMin(59);
-        entity.setDigits(123);
-        entity.setIHuman(true);
-        entity.setMax("90");
-        entity.setMin(20);
-        entity.setNullField(0);
-        entity.setPast(pastDate);
-        entity.setFuture(futDate);
-        entity.setSize(0);
-        entity.setEmail("axc");
-        validateEntityAttributes(entity);
-        
-        em.persist(entity);
-        
-    }
-    
-    
+
     /**
      * @param <X>
      * @param <T>
      * @return
      */
-    private <X extends Class, T extends Object> void validateEntityAttributes(Object validationObject)
+    private <X extends Class, T extends Object> void validateEntityAttribute(String fieldname, Object validationObject,
+            String message)
     {
-       
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, validationObject.getClass());
-        MetaModelBuilder<X, T> metaModelBuilder = kunderaMetadata.getApplicationMetadata()
-                .getMetaModelBuilder(entityMetadata.getPersistenceUnit());
+
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
+                validationObject.getClass());
+        MetaModelBuilder<X, T> metaModelBuilder = kunderaMetadata.getApplicationMetadata().getMetaModelBuilder(
+                entityMetadata.getPersistenceUnit());
         EntityType entityType = (EntityType) metaModelBuilder.getManagedTypes().get(entityMetadata.getEntityClazz());
 
-        Set<Attribute> attributes = entityType.getAttributes();
+        Field field = (Field) entityType.getAttribute(fieldname).getJavaMember();
 
-        Iterator<Attribute> iter = attributes.iterator();
-
-        while (iter.hasNext())
+        try
         {
-            Attribute attribute = iter.next();
-
-            Field f = (Field) ((Field) attribute.getJavaMember());
-            
-            ValidationFactoryGenerator generator = new ValidationFactoryGenerator();
-            ValidationFactory factory = generator.getFactory(ValidationFactoryType.BOOT_STRAP_VALIDATION);
-          
-            boolean isValid = true;
-            
-            try
-            {
-              isValid = factory.validate(f, validationObject, new AttributeConstraintRule());
-              
-            }
-            catch (ValidationException e)
-            {
-           
-                 Assert.assertNotNull(e.getMessage());
-            }
+            factory.validate(field, validationObject, new AttributeConstraintRule());
 
         }
-        
-        
-        
+        catch (ValidationException e)
+        {
+           
+            Assert.assertEquals(message, e.getMessage());
+            Assert.assertNotNull(e.getMessage());
+        }
 
     }
 }

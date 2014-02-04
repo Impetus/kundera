@@ -32,6 +32,7 @@ import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.IdGenerator;
 import com.impetus.kundera.persistence.PersistenceDelegator;
+import com.impetus.kundera.persistence.PersistenceValidator;
 import com.impetus.kundera.persistence.context.PersistenceCache;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.ProxyHelper;
@@ -57,6 +58,8 @@ public final class GraphGenerator
     private GraphBuilder builder = new GraphBuilder();
 
     Set<Node> traversedNodes = new HashSet<Node>();
+    
+    private PersistenceValidator validator = new PersistenceValidator();
 
     /**
      * Generate entity graph and returns after assigning headnode. n
@@ -74,7 +77,6 @@ public final class GraphGenerator
         this.builder.assign(this);
         Node node = generate(entity, delegator, delegator.getPersistenceCache(), null);
         this.builder.assignHeadNode(node);
-
         return this.builder.getGraph();
     }
 
@@ -99,7 +101,6 @@ public final class GraphGenerator
         this.builder.assign(this);
         Node node = generate(entity, delegator, delegator.getPersistenceCache(), state);
         this.builder.assignHeadNode(node);
-
         return this.builder.getGraph();
     }
 
@@ -226,6 +227,8 @@ public final class GraphGenerator
 
         // check if id is set or not.
         new PrimaryKeyNullCheck<Object>().validate(id);
+       
+        validator.validate(entity, delegator.getKunderaMetadata());
 
         // }
 

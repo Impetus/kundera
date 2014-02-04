@@ -89,9 +89,10 @@ public class PersistenceValidator
      * @param entity
      *            Instance of entity object
      */
-    public <X extends Class, T extends Object> void validateEntityAttributes(Object entity,
+    private <X extends Class, T extends Object> void validateEntityAttributes(Object entity,
             KunderaMetadata kunderaMetadata)
     {
+   
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entity.getClass());
 
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
