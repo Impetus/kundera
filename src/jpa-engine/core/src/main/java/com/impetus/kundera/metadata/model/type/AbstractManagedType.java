@@ -80,6 +80,24 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
 
     private List<ManagedType<X>> subManagedTypes = new ArrayList<ManagedType<X>>();
 
+    private boolean validateConstraints;
+
+    /**
+     * @return the validateConstraints
+     */
+    public boolean isValidateConstraints()
+    {
+        return validateConstraints;
+    }
+
+    /**
+     * @param validateConstraints the validateConstraints to set
+     */
+    public void setValidateConstraints(boolean validateConstraints)
+    {
+        this.validateConstraints = validateConstraints;
+    }
+
     /**
      * Super constructor with arguments.
      * 
