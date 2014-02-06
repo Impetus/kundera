@@ -13,6 +13,7 @@
 		<class>com.impetus.kundera.persistence.event.AddressEntityWithList</class>
 		<class>com.impetus.kundera.graph.Store</class>
 		<class>com.impetus.kundera.graph.BillingCounter</class>
+		<class>com.impetus.kundera.validator.ValidationEntity</class>
 		<!-- <class>com.impetus.kundera.configure.CoreEntityAddressUni1To1</class> 
 			<class>com.impetus.kundera.configure.CoreEntityAddressUni1ToM</class> <class>com.impetus.kundera.configure.CoreEntityAddressUniMTo1</class> 
 			<class>com.impetus.kundera.configure.CoreEntityPersonUni1To1</class> <class>com.impetus.kundera.configure.CoreEntityPersonUni1ToM</class> 

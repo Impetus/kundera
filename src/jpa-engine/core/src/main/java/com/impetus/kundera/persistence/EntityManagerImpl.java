@@ -117,6 +117,8 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     EntityManagerImpl(EntityManagerFactory factory, PersistenceUnitTransactionType transactionType,
             PersistenceContextType persistenceContextType)
     {
+        this.factory = factory;
+
         if (logger.isDebugEnabled())
         {
             logger.debug("Creating EntityManager for persistence unit : " + getPersistenceUnit());
@@ -126,7 +128,6 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
 
         this.persistenceCache.setPersistenceContextType(persistenceContextType);
 
-        this.factory = factory;
         this.persistenceContextType = persistenceContextType;
         this.transactionType = transactionType;
         this.persistenceCache = new PersistenceCache();

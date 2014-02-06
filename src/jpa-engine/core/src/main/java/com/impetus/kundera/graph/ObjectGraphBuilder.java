@@ -120,7 +120,7 @@ public class ObjectGraphBuilder
             throw new IllegalArgumentException(
                     "Entity object is invalid, operation failed. Please check previous log message for details");
         }
-
+      
         // id = PropertyAccessorHelper.getId(entity, entityMetadata);
 
         String nodeId = ObjectGraphUtils.getNodeId(id, entity.getClass());
