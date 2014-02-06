@@ -76,7 +76,7 @@ public class CouchDBUtils
 
     /**
      * 
-     * * @param response
+     * @param response
      */
     public static void closeContent(HttpResponse response)
     {

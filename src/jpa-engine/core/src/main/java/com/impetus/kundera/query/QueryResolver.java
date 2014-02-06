@@ -168,12 +168,20 @@ public class QueryResolver
         return query;
     }
 
+    /**
+     * 
+     * @param jpaQuery
+     * @param queryClazz
+     * @param persistenceDelegator
+     * @param metadata
+     * @return
+     */
     public Query getQueryImplementation(String jpaQuery, Class queryClazz,
             final PersistenceDelegator persistenceDelegator, EntityMetadata metadata)
     {
         KunderaQuery kunderaQuery = new KunderaQuery(jpaQuery, persistenceDelegator.getKunderaMetadata());
         kunderaQuery.isNativeQuery = true;
-        
+
         try
         {
             Field entityClazzField = kunderaQuery.getClass().getDeclaredField("entityClass");
@@ -189,13 +197,15 @@ public class QueryResolver
             log.error(e.getMessage());
             throw new QueryHandlerException(e);
         }
-        
+
         Query query = null;
 
         try
         {
-            Constructor constructor = queryClazz.getConstructor(KunderaQuery.class, PersistenceDelegator.class, KunderaMetadata.class);
-            query = (Query) constructor.newInstance(kunderaQuery, persistenceDelegator, persistenceDelegator.getKunderaMetadata());
+            Constructor constructor = queryClazz.getConstructor(KunderaQuery.class, PersistenceDelegator.class,
+                    KunderaMetadata.class);
+            query = (Query) constructor.newInstance(kunderaQuery, persistenceDelegator,
+                    persistenceDelegator.getKunderaMetadata());
         }
         catch (Exception e)
         {
