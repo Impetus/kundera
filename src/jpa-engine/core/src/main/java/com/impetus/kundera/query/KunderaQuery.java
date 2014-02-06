@@ -245,7 +245,7 @@ public class KunderaQuery
      */
     public Set<Parameter<?>> getParameters()
     {
-        return typedParameter.jpaParameters;
+        return typedParameter != null ? typedParameter.jpaParameters : null;
     }
 
     /**
@@ -735,7 +735,6 @@ public class KunderaQuery
         else
         {
             throw new QueryHandlerException("No named parameter present for query");
-
         }
     }
 
