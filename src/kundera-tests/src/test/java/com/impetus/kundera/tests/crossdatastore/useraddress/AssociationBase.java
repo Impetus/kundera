@@ -344,7 +344,6 @@ public abstract class AssociationBase
         if (AUTO_MANAGE_SCHEMA)
         {
 //            truncateColumnFamily();
-//
 //            truncateRdbms();
 
             truncateMongo();

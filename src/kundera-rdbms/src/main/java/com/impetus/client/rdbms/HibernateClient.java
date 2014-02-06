@@ -20,6 +20,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,12 +30,14 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.Parameter;
 import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.EntityType;
 
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
+import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.StatelessSession;
@@ -101,7 +104,8 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      * @param puProperties
      */
     public HibernateClient(final String persistenceUnit, IndexManager indexManager, EntityReader reader,
-            RDBMSClientFactory clientFactory, Map<String, Object> puProperties, final ClientMetadata clientMetadata, final KunderaMetadata kunderaMetadata)
+            RDBMSClientFactory clientFactory, Map<String, Object> puProperties, final ClientMetadata clientMetadata,
+            final KunderaMetadata kunderaMetadata)
     {
 
         super(kunderaMetadata);
@@ -146,7 +150,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         s.delete(entity);
         tx.commit();
 
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,  entity.getClass());
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entity.getClass());
         if (!MetadataUtils.useSecondryIndex(getClientMetadata()))
         {
             getIndexManager().remove(metadata, entity, pKey.toString());
@@ -196,7 +200,8 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         // for each finder to avoid lazy loading.
         Session s = getSession();
 
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, getPersistenceUnit(), arg0);
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, getPersistenceUnit(),
+                arg0);
 
         Object[] pKeys = getDataType(entityMetadata, arg1);
         String id = ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName();
@@ -266,7 +271,8 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     @Override
     public void persistJoinTable(JoinTableData joinTableData)
     {
-        String schemaName = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, joinTableData.getEntityClass()).getSchema();
+        String schemaName = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, joinTableData.getEntityClass())
+                .getSchema();
         String joinTableName = joinTableData.getJoinTableName();
         String joinColumnName = joinTableData.getJoinColumnName();
         String invJoinColumnName = joinTableData.getInverseJoinColumnName();
@@ -437,7 +443,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      */
     public List find(String nativeQuery, List<String> relations, EntityMetadata m)
     {
-         List entities = new ArrayList();
+        List entities = new ArrayList();
 
         s = getStatelessSession();
 
@@ -468,18 +474,21 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
                         Object value = ((Map<String, Object>) o).get(discColumn);
                         if (value != null && value.toString().equals(disColValue))
                         {
-                            subEntityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, subEntity.getJavaType());
+                            subEntityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
+                                    subEntity.getJavaType());
                             break;
                         }
                     }
                     entity = instantiateEntity(subEntityMetadata.getEntityClazz(), entity);
-                    relationValue = HibernateUtils.getTranslatedObject(kunderaMetadata, entity, (Map<String, Object>) o, m);
+                    relationValue = HibernateUtils.getTranslatedObject(kunderaMetadata, entity,
+                            (Map<String, Object>) o, m);
 
                 }
                 else
                 {
                     entity = instantiateEntity(m.getEntityClazz(), entity);
-                    relationValue = HibernateUtils.getTranslatedObject(kunderaMetadata, entity, (Map<String, Object>) o, m);
+                    relationValue = HibernateUtils.getTranslatedObject(kunderaMetadata, entity,
+                            (Map<String, Object>) o, m);
                 }
 
                 if (relationValue != null && !relationValue.isEmpty())
@@ -498,6 +507,50 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
             }
             throw new EntityReaderException(e);
         }
+    }
+
+    /**
+     * Find.
+     * 
+     * @param query
+     *            the native fquery
+     * @param relations
+     *            the relations
+     * @param m
+     *            the m
+     * @return the list
+     */
+    public List findByQuery(String query, Map<Parameter, Object> parameterMap)
+    {
+        s = getStatelessSession();
+
+        Query q = s.createQuery(query);
+
+        setParameters(parameterMap, q);
+
+        return q.list();
+    }
+
+    /**
+     * Find.
+     * 
+     * @param query
+     *            the native fquery
+     * @param relations
+     *            the relations
+     * @param m
+     *            the m
+     * @return the list
+     */
+    public int onExecuteUpdate(String query, Map<Parameter, Object> parameterMap)
+    {
+        s = getStatelessSession();
+
+        Query q = s.createQuery(query);
+
+        setParameters(parameterMap, q);
+
+        return q.executeUpdate();
     }
 
     public SQLQuery getQueryInstance(String nativeQuery, EntityMetadata m)
@@ -540,7 +593,8 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClazz);
         String tableName = m.getTableName();
 
-        // Suffixing the UNDERSCORE instead of prefix as Oracle 11g complains about invalid characters error while executing the request.
+        // Suffixing the UNDERSCORE instead of prefix as Oracle 11g complains
+        // about invalid characters error while executing the request.
         StringBuilder queryBuilder = new StringBuilder("Select ");
 
         queryBuilder.append("* ");
@@ -556,7 +610,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         queryBuilder.append("'");
         s = getStatelessSession();
 
-        List results = find(queryBuilder.toString(), m.getRelationNames(), m);
+        List results = find(queryBuilder.toString(), m.getRelationNames(), m)/*getQueryInstance(queryBuilder.toString(), m).list()*/;
         return populateEnhanceEntities(m, m.getRelationNames(), results);
     }
 
@@ -661,7 +715,8 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
                 Object relationObject = PropertyAccessorHelper.getObject(entity, relation.getProperty());
                 if (relationObject != null && ProxyHelper.isKunderaProxy(relationObject))
                 {
-                    EntityMetadata relMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, relation.getTargetEntity());
+                    EntityMetadata relMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
+                            relation.getTargetEntity());
                     Method idAccessorMethod = relMetadata.getReadIdentifierMethod();
                     Object foreignKey = null;
                     try
@@ -688,7 +743,8 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
                     {
                         relationObject = null;
                         PropertyAccessorHelper.set(entity, relation.getProperty(), relationObject);
-                        relationHolders.add(new RelationHolder(relation.getJoinColumnName(kunderaMetadata), foreignKey));
+                        relationHolders
+                                .add(new RelationHolder(relation.getJoinColumnName(kunderaMetadata), foreignKey));
                         proxyRemoved = true;
                     }
                 }
@@ -774,4 +830,38 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         }
         return null;
     }
+
+    private void setParameters(Map<Parameter, Object> parameterMap, Query q)
+    {
+        if (parameterMap != null && !parameterMap.isEmpty())
+        {
+            for (Parameter parameter : parameterMap.keySet())
+            {
+                Object paramObject = parameterMap.get(parameter);
+                if (parameter.getName() != null)
+                {
+                    if (paramObject instanceof Collection)
+                    {
+                        q.setParameterList(parameter.getName(), (Collection) paramObject);
+                    }
+                    else
+                    {
+                        q.setParameter(parameter.getName(), paramObject);
+                    }
+                }
+                else if (parameter.getPosition() != null)
+                {
+                    if (paramObject instanceof Collection)
+                    {
+                        q.setParameterList(Integer.toString(parameter.getPosition()), (Collection) paramObject);
+                    }
+                    else
+                    {
+                        q.setParameter(Integer.toString(parameter.getPosition()), paramObject);
+                    }
+                }
+            }
+        }
+    }
+
 }

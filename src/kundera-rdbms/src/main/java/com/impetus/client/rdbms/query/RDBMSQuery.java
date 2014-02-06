@@ -17,9 +17,12 @@ package com.impetus.client.rdbms.query;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
+import javax.persistence.Parameter;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
@@ -68,7 +71,8 @@ public class RDBMSQuery extends QueryImpl
      * @param persistenceUnits
      *            the persistence units
      */
-    public RDBMSQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator, final KunderaMetadata kunderaMetadata)
+    public RDBMSQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator,
+            final KunderaMetadata kunderaMetadata)
     {
         super(kunderaQuery, persistenceDelegator, kunderaMetadata);
     }
@@ -81,10 +85,11 @@ public class RDBMSQuery extends QueryImpl
         {
             log.debug("On handleAssociation() retrieve associations ");
         }
-        initializeReader();
-        
-        List<EnhanceEntity> ls = getReader().populateRelation(m, client, this.maxResult);
 
+        initializeReader();
+
+        List<EnhanceEntity> ls = getReader().populateRelation(m, client, this.maxResult);
+        
         return setRelationEntities(ls, client, m);
     }
 
@@ -110,18 +115,20 @@ public class RDBMSQuery extends QueryImpl
             if (MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
             {
                 List<String> relations = new ArrayList<String>();
-                List r = ((HibernateClient) client).find(kunderaQuery.isNative() ? getJPAQuery()
-                        : ((RDBMSEntityReader) getReader()).getSqlQueryFromJPA(m, relations, null), relations, m);
-                result = new ArrayList<Object>(r.size());
-
-                for (Object o : r)
+                if (kunderaQuery.isNative())
                 {
-                    result.add(o);
+                    return ((HibernateClient) client).find(getJPAQuery(), relations, m);
+
+                }
+                else
+                {
+                    return ((HibernateClient) client).findByQuery(getJPAQuery(), getParamaters());
+
                 }
             }
             else
             {
-                result = populateUsingLucene(m, client, result, null);
+                return populateUsingLucene(m, client, result, null);
             }
         }
         catch (Exception e)
@@ -129,7 +136,6 @@ public class RDBMSQuery extends QueryImpl
             log.error("Error during query execution, Caused by: {}.", e);
             throw new QueryHandlerException(e);
         }
-        return result;
     }
 
     /*
@@ -155,7 +161,10 @@ public class RDBMSQuery extends QueryImpl
     @Override
     protected int onExecuteUpdate()
     {
-        return onUpdateDeleteEvent();
+        EntityMetadata m = getEntityMetadata();
+
+        Client client = persistenceDelegeator.getClient(m);
+        return ((HibernateClient) client).onExecuteUpdate(getJPAQuery(), getParamaters());
     }
 
     /**
@@ -188,8 +197,8 @@ public class RDBMSQuery extends QueryImpl
         {
             throw new UnsupportedOperationException("Iteration not supported over native queries");
         }
-        
-        initializeReader();     
+
+        initializeReader();
         EntityMetadata m = getEntityMetadata();
         Client client = persistenceDelegeator.getClient(m);
         return new ResultIterator((HibernateClient) client, m, persistenceDelegeator,
@@ -251,6 +260,22 @@ public class RDBMSQuery extends QueryImpl
             log.info("No record found, returning null.");
         }
         return null;
+    }
+
+    private Map<Parameter, Object> getParamaters()
+    {
+        Map<Parameter, Object> parameterMap = new HashMap<Parameter, Object>();
+
+        if (getKunderaQuery().getParameters() == null || getKunderaQuery().getParameters().isEmpty())
+        {
+            return parameterMap;
+        }
+
+        for (Parameter parameter : getKunderaQuery().getParameters())
+        {
+            parameterMap.put(parameter, getKunderaQuery().getClauseValue(parameter));
+        }
+        return parameterMap;
     }
 
 }

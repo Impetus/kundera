@@ -87,7 +87,7 @@ public abstract class BaseTest
             String fieldName)
     {
 
-        String query = "Select p from " + clazz + " p where p." + fieldName + " = " + name;
+        String query = "Select p from " + clazz + " p where p." + fieldName + " = '" + name +"'";
         // // find by name.
         Query q = em.createQuery(query);
         List<E> results = q.getResultList();
@@ -118,7 +118,7 @@ public abstract class BaseTest
     protected <E extends Object> void assertFindByNameAndAge(EntityManager em, String clazz, E e, String name,
             String minVal, String fieldName)
     {
-        Query q = em.createQuery("Select p from " + clazz + " p where p." + fieldName + " = " + name + " and p.age > "
+        Query q = em.createQuery("Select p from " + clazz + " p where p." + fieldName + " = '" + name + "' and p.age > "
                 + minVal);
         List<E> results = q.getResultList();
         Assert.assertNotNull(results);
@@ -150,7 +150,7 @@ public abstract class BaseTest
             String minVal, String maxVal, String fieldName)
     {
         // // // find by name, age clause
-        Query q = em.createQuery("Select p from " + clazz + " p where p." + fieldName + " = " + name + " and p.age > "
+        Query q = em.createQuery("Select p from " + clazz + " p where p." + fieldName + " = '" + name + "' and p.age > "
                 + minVal + " and p.age < " + maxVal);
         List<E> results = q.getResultList();
         Assert.assertNotNull(results);
@@ -182,8 +182,8 @@ public abstract class BaseTest
             String minVal, String maxVal, String fieldName)
     {
         // // find by between clause
-        Query q = em.createQuery("Select p from " + clazz + " p where p." + fieldName + " = " + name
-                + " and p.age between " + minVal + " and " + maxVal);
+        Query q = em.createQuery("Select p from " + clazz + " p where p." + fieldName + " = '" + name
+                + "' and p.age between " + minVal + " and " + maxVal);
         List<E> results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertFalse(results.isEmpty());
@@ -265,12 +265,12 @@ public abstract class BaseTest
     protected <E extends Object> void assertOnMerge(EntityManager em, String clazz, E e, String oldName,
             String newName, String fieldName)
     {
-        Query q = em.createQuery("Select p from " + clazz + " p where p." + fieldName + " = " + oldName);
+        Query q = em.createQuery("Select p from " + clazz + " p where p." + fieldName + " = '" + oldName+"'");
         List<E> results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(2, results.size());
 
-        q = em.createQuery("Select p from " + clazz + " p where p." + fieldName + " = " + newName);
+        q = em.createQuery("Select p from " + clazz + " p where p." + fieldName + " = '" + newName+"'");
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(1, results.size());

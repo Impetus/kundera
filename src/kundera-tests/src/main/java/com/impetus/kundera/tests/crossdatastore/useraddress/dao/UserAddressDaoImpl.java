@@ -52,7 +52,8 @@ public class UserAddressDaoImpl extends BaseDao
 
     public Object findPerson(Class entityClass, Object personId)
     {
-        if(em != null) em.clear();
+        if (em != null)
+            em.clear();
         em = getEntityManager(persistenceUnit);
         Object personnel = em.find(entityClass, personId);
         return personnel;
@@ -98,10 +99,10 @@ public class UserAddressDaoImpl extends BaseDao
     public Object findPersonByIdColumn(Class entityClass, Object personId)
     {
         EntityManager em = getEntityManager(persistenceUnit);
-        String query = "Select p from " + entityClass.getSimpleName() + " p where p.personId = " + personId;
+        String query = "Select p from " + entityClass.getSimpleName() + " p where p.personId = '" + personId + "'";
         Query q = em.createQuery(query);
         List persons = q.getResultList();
-        //closeEntityManager();
+        // closeEntityManager();
         assert persons != null;
         assert !persons.isEmpty();
         assert persons.size() == 1;
@@ -112,10 +113,10 @@ public class UserAddressDaoImpl extends BaseDao
     public List findPersonByName(Class entityClass, String personName)
     {
         EntityManager em = getEntityManager(persistenceUnit);
-        String query = "Select p from " + entityClass.getSimpleName() + " p where p.personName = " + personName;
+        String query = "Select p from " + entityClass.getSimpleName() + " p where p.personName = '" + personName + "'";
         Query q = em.createQuery(query);
         List persons = q.getResultList();
-        //closeEntityManager();
+        // closeEntityManager();
 
         return persons;
     }
@@ -123,7 +124,7 @@ public class UserAddressDaoImpl extends BaseDao
     public Object findAddressByIdColumn(Class entityClass, Object addressId)
     {
         EntityManager em = getEntityManager(persistenceUnit);
-        String query = "Select a from " + entityClass.getSimpleName() + " a where a.addressId = " + addressId;
+        String query = "Select a from " + entityClass.getSimpleName() + " a where a.addressId = '" + addressId + "'";
         Query q = em.createQuery(query);
         List addresses = q.getResultList();
         closeEntityManager();
@@ -137,7 +138,7 @@ public class UserAddressDaoImpl extends BaseDao
     public List findAddressByStreet(Class entityClass, String street)
     {
         EntityManager em = getEntityManager(persistenceUnit);
-        String query = "Select a from " + entityClass.getSimpleName() + " a where a.street = " + street;
+        String query = "Select a from " + entityClass.getSimpleName() + " a where a.street = '" + street + "'";
         Query q = em.createQuery(query);
         List addresses = q.getResultList();
         closeEntityManager();
