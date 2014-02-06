@@ -27,13 +27,11 @@ import java.util.Set;
 import javax.persistence.spi.PersistenceUnitInfo;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaPersistence;
-import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.loader.PersistenceLoaderException;
 import com.impetus.kundera.loader.PersistenceXMLLoader;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
@@ -108,74 +106,13 @@ public class PersistenceUnitConfiguration extends AbstractSchemaConfiguration im
         log.info("Loading Metadata from persistence.xml ...");
 
         ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
+        Map<String, PersistenceUnitMetadata> metadatas = new HashMap<String, PersistenceUnitMetadata>();
 
-        try
+        this.configure();
+
+        for (String persistenceUnit : persistenceUnits)
         {
-            PersistenceUnitMetadata metadata = new PersistenceUnitMetadata(puInfo.getPersistenceXMLSchemaVersion(),
-                    puInfo.getPersistenceUnitRootUrl(), null);
-
-            metadata.setTransactionType(puInfo.getTransactionType());
-
-            metadata.setClasses(puInfo.getManagedClassNames());
-
-            metadata.setExcludeUnlistedClasses(puInfo.excludeUnlistedClasses());
-
-            if (StringUtils.isBlank(puInfo.getPersistenceUnitName()))
-            {
-                throw new PersistenceUnitConfigurationException(
-                        "Invalid persistence unit name, persistence unit name should not be null or blank.");
-            }
-            else
-            {
-                metadata.setPersistenceUnitName(puInfo.getPersistenceUnitName());
-            }
-
-            if (puInfo.getProperties().getProperty(PersistenceProperties.KUNDERA_CLIENT_FACTORY) != null)
-            {
-                log.error("kundera.client property is missing for persistence unit:" + puInfo.getPersistenceUnitName());
-                throw new IllegalArgumentException("kundera.client property is missing for persistence unit:"
-                        + puInfo.getPersistenceUnitName());
-            }
-            metadata.setProperties(puInfo.getProperties());
-
-            if (puInfo.getPersistenceProviderClassName() == null
-                    || PROVIDER_IMPLEMENTATION_NAME.equalsIgnoreCase(puInfo.getPersistenceProviderClassName()))
-            {
-                metadata.setProvider(puInfo.getPersistenceProviderClassName());
-            }
-            else
-            {
-                throw new PersistenceUnitConfigurationException("Invalid persistence provider : "
-                        + puInfo.getPersistenceProviderClassName() + ", persistence provider must be "
-                        + PROVIDER_IMPLEMENTATION_NAME + ".");
-            }
-
-            metadata.setPackages(puInfo.getMappingFileNames());
-
-            for (URL url : puInfo.getJarFileUrls())
-            {
-                metadata.addJarFile(url.getPath());
-            }
-
-            Map<String, PersistenceUnitMetadata> metadatas = new HashMap<String, PersistenceUnitMetadata>();
-            metadatas.put(puInfo.getPersistenceUnitName(), metadata);
-
-            for (String persistenceUnit : persistenceUnits)
-            {
-                if (!metadatas.containsKey(persistenceUnit))
-                {
-                    log.error("Unconfigured persistence unit: " + persistenceUnit);
-                    throw new PersistenceUnitConfigurationException("Invalid persistence unit: " + persistenceUnit
-                            + " provided");
-                }
-            }
-            log.info("Finishing persistence unit metadata configuration ...");
-            appMetadata.addPersistenceUnitMetadata(metadatas);
-        }
-        catch (InvalidConfigurationException icex)
-        {
-            log.error("Error occurred during persistence unit configuration, Caused by: .", icex);
-            throw new PersistenceLoaderException(icex);
+            mergeProperties(puInfo, appMetadata, persistenceUnit);
         }
     }
 
@@ -244,4 +181,44 @@ public class PersistenceUnitConfiguration extends AbstractSchemaConfiguration im
         }
         return persistenceUnitMap;
     }
+
+    /**
+     * 
+     * @param puInfo
+     * @param appMetadata
+     * @param metadatas
+     * @param persistenceUnit
+     */
+    private void mergeProperties(PersistenceUnitInfo puInfo, ApplicationMetadata appMetadata, String persistenceUnit)
+    {
+        PersistenceUnitMetadata metadata = appMetadata.getPersistenceUnitMetadata(persistenceUnit);
+
+        metadata.setTransactionType(puInfo.getTransactionType());
+
+        metadata.getClasses().addAll(puInfo.getManagedClassNames());
+
+        metadata.setExcludeUnlistedClasses(puInfo.excludeUnlistedClasses());
+
+        metadata.getProperties().putAll(puInfo.getProperties());
+
+        if (puInfo.getPersistenceProviderClassName() == null
+                || PROVIDER_IMPLEMENTATION_NAME.equalsIgnoreCase(puInfo.getPersistenceProviderClassName()))
+        {
+            metadata.setProvider(puInfo.getPersistenceProviderClassName());
+        }
+        else
+        {
+            throw new PersistenceUnitConfigurationException("Invalid persistence provider : "
+                    + puInfo.getPersistenceProviderClassName() + ", persistence provider must be "
+                    + PROVIDER_IMPLEMENTATION_NAME + ".");
+        }
+
+        metadata.getPackages().addAll(puInfo.getMappingFileNames());
+
+        for (URL url : puInfo.getJarFileUrls())
+        {
+            metadata.addJarFile(url.getPath());
+        }
+    }
+
 }
