@@ -123,15 +123,12 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
         {
             logger.debug("Creating EntityManager for persistence unit : " + getPersistenceUnit());
         }
-        // session = new EntityManagerSession((Cache) factory.getCache());
-        this.persistenceCache = new PersistenceCache((Cache) factory.getCache());
-
-        this.persistenceCache.setPersistenceContextType(persistenceContextType);
-
         this.persistenceContextType = persistenceContextType;
+
+        this.persistenceCache = new PersistenceCache((Cache) factory.getCache());
+        this.persistenceCache.setPersistenceContextType(this.persistenceContextType);
+
         this.transactionType = transactionType;
-        this.persistenceCache = new PersistenceCache();
-        this.persistenceCache.setPersistenceContextType(persistenceContextType);
         this.persistenceDelegator = new PersistenceDelegator(
                 ((EntityManagerFactoryImpl) this.factory).getKunderaMetadataInstance(), this.persistenceCache);
 

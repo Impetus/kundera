@@ -81,11 +81,6 @@ public class Node implements NodeStateContext
     // Whether this node for update.
     private boolean isUpdate;
 
-    /*
-     * Depth of this node in the tree Head node has a depth of 1 and so on.
-     */
-    private int depth;
-
     /** Client for this node */
     private Client client;
 

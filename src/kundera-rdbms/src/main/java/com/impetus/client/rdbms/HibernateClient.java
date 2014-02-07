@@ -21,7 +21,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -180,7 +179,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         }
         catch (Exception e)
         {
-            log.error(e.getMessage());
+            log.error("Error while finding, Caused by {}. ", e);
             throw new KunderaException(e);
         }
         return result;
@@ -194,19 +193,19 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      * java.lang.String[])
      */
     @Override
-    public <E> List<E> findAll(Class<E> arg0, String[] columnsToSelect, Object... arg1)
+    public <E> List<E> findAll(Class<E> entityClazz, String[] columnsToSelect, Object... arg1)
     {
         // TODO: Vivek correct it. unfortunately i need to open a new session
         // for each finder to avoid lazy loading.
         Session s = getSession();
 
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, getPersistenceUnit(),
-                arg0);
+                entityClazz);
 
         Object[] pKeys = getDataType(entityMetadata, arg1);
         String id = ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName();
 
-        Criteria c = s.createCriteria(arg0);
+        Criteria c = s.createCriteria(entityClazz);
 
         c.add(Restrictions.in(id, pKeys));
 
@@ -349,10 +348,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         query.append("DELETE FROM ").append(getFromClause(schemaName, tableName)).append(" WHERE ").append(columnName)
                 .append("=").append("'").append(columnValue).append("'");
 
-        s = getStatelessSession();
-        Transaction tx = s.beginTransaction();
-        s.createSQLQuery(query.toString()).executeUpdate();
-        tx.commit();
+        onExecuteUpdate(query.toString(), null);
     }
 
     /**
@@ -547,10 +543,15 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         s = getStatelessSession();
 
         Query q = s.createQuery(query);
-
         setParameters(parameterMap, q);
 
-        return q.executeUpdate();
+        Transaction tx = s.beginTransaction();
+
+        int i = q.executeUpdate();
+
+        tx.commit();
+
+        return i;
     }
 
     public SQLQuery getQueryInstance(String nativeQuery, EntityMetadata m)
@@ -610,7 +611,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         queryBuilder.append("'");
         s = getStatelessSession();
 
-        List results = find(queryBuilder.toString(), m.getRelationNames(), m)/*getQueryInstance(queryBuilder.toString(), m).list()*/;
+        List results = find(queryBuilder.toString(), m.getRelationNames(), m);
         return populateEnhanceEntities(m, m.getRelationNames(), results);
     }
 
@@ -694,7 +695,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
                 String updateSql = "Update " + clause + " SET " + linkName + "= '" + linkValue + "' WHERE "
                         + ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName() + " = '" + id + "'";
 
-                s.createSQLQuery(updateSql).executeUpdate();
+                onExecuteUpdate(updateSql, null);
             }
         }
     }
@@ -791,25 +792,11 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     }
 
     /**
-     * Populate relations.
      * 
-     * @param relations
-     *            the relations
-     * @param o
-     *            the o
-     * @return the map
+     * @param entityClass
+     * @param entity
+     * @return
      */
-    private Map<String, Object> populateRelations(List<String> relations, Object[] o)
-    {
-        Map<String, Object> relationVal = new HashMap<String, Object>(relations.size());
-        int counter = 1;
-        for (String r : relations)
-        {
-            relationVal.put(r, o[counter++]);
-        }
-        return relationVal;
-    }
-
     private Object instantiateEntity(Class entityClass, Object entity)
     {
         try
@@ -831,6 +818,11 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         return null;
     }
 
+    /**
+     * 
+     * @param parameterMap
+     * @param q
+     */
     private void setParameters(Map<Parameter, Object> parameterMap, Query q)
     {
         if (parameterMap != null && !parameterMap.isEmpty())
