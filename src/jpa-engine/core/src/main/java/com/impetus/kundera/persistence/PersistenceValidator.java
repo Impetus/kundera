@@ -16,16 +16,19 @@
 package com.impetus.kundera.persistence;
 
 import java.lang.reflect.Field;
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
-
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.kundera.cache.ElementCollectionCacheManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -47,6 +50,17 @@ public class PersistenceValidator
 {
     private static final Logger log = LoggerFactory.getLogger(PersistenceValidator.class);
 
+    private ValidationFactoryGenerator generator;
+
+    private ValidationFactory factory;
+    
+    
+    public PersistenceValidator(){
+        
+        this.generator = new ValidationFactoryGenerator();
+        this.factory = generator.getFactory(ValidationFactoryType.OPERATIONAL_VALIDATION);
+        
+    }
     /**
      * Validates an entity object for CRUD operations
      * 
@@ -92,34 +106,91 @@ public class PersistenceValidator
     private <X extends Class, T extends Object> void validateEntityAttributes(Object entity,
             KunderaMetadata kunderaMetadata)
     {
-   
+
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entity.getClass());
 
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 entityMetadata.getPersistenceUnit());
         AbstractManagedType managedType = (AbstractManagedType) metaModel.entity(entityMetadata.getEntityClazz());
 
-        if (managedType.isValidateConstraints())
+        MetaModelBuilder<X, T> metaModelBuilder = kunderaMetadata.getApplicationMetadata().getMetaModelBuilder(
+                entityMetadata.getPersistenceUnit());
+        EntityType entityType = (EntityType) metaModelBuilder.getManagedTypes().get(entityMetadata.getEntityClazz());
+
+        Map<String, EmbeddableType> embeddables = metaModel.getEmbeddables(entityMetadata.getEntityClazz());
+
+        for (String embeddedFieldName : embeddables.keySet())
         {
-            MetaModelBuilder<X, T> metaModelBuilder = kunderaMetadata.getApplicationMetadata().getMetaModelBuilder(
-                    entityMetadata.getPersistenceUnit());
-            EntityType entityType = (EntityType) metaModelBuilder.getManagedTypes()
-                    .get(entityMetadata.getEntityClazz());
+
+            EmbeddableType embeddedColumn = embeddables.get(embeddedFieldName);
+            Field embeddedField = (Field) entityType.getAttribute(embeddedFieldName).getJavaMember();
+            
+
+            // if embeddable type has any validation constraint present then
+            // validate the attributes
+            if (((AbstractManagedType) embeddedColumn).hasValidationConstraints())
+            {
+                Object embeddedObject = PropertyAccessorHelper.getObject(entity,
+                        (Field) entityType.getAttribute(embeddedFieldName).getJavaMember());
+                onValidateEmbeddable(embeddedObject, embeddedColumn, embeddedFieldName);
+            }
+
+        }
+
+        // if managed type has any validation constraint present then validate
+        // the attributes
+        if (managedType.hasValidationConstraints())
+        {
 
             Set<Attribute> attributes = entityType.getAttributes();
-
             Iterator<Attribute> iter = attributes.iterator();
-            ValidationFactoryGenerator generator = new ValidationFactoryGenerator();
-            ValidationFactory factory = generator.getFactory(ValidationFactoryType.BOOT_STRAP_VALIDATION);
+
             while (iter.hasNext())
             {
                 Attribute attribute = iter.next();
-
                 Field f = (Field) ((Field) attribute.getJavaMember());
-                factory.validate(f, entity, new AttributeConstraintRule());
+                this.factory.validate(f, entity, new AttributeConstraintRule());
 
             }
 
         }
+
+    }
+
+    /**
+     * Checks constraints present on embeddable attributes
+     * 
+     * @param embeddedObject
+     * @param embeddedColumn
+     * @param embeddedFieldName
+     */
+    private void onValidateEmbeddable(Object embeddedObject, EmbeddableType embeddedColumn, String embeddedFieldName)
+    {
+        if (embeddedObject instanceof Collection)
+        {
+           
+            for (Object obj : (Collection) embeddedObject)
+            {
+                for (Object column : embeddedColumn.getAttributes())
+                {
+
+                    Attribute columnAttribute = (Attribute) column;
+                    Field f = (Field) columnAttribute.getJavaMember();
+                    this.factory.validate(f, embeddedObject, new AttributeConstraintRule());
+                }
+            }
+        }
+        else
+        {
+            for (Object column : embeddedColumn.getAttributes())
+            {
+
+                Attribute columnAttribute = (Attribute) column;
+                Field f = (Field) ((Field) columnAttribute.getJavaMember());
+                this.factory.validate(f, embeddedObject, new AttributeConstraintRule());
+
+            }
+        }
+
     }
 }
