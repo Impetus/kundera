@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.model.type;
 
+import java.lang.reflect.Field;
 import java.util.Set;
 
 import javax.persistence.metamodel.IdentifiableType;
@@ -194,7 +195,10 @@ public abstract class AbstractIdentifiableType<X> extends AbstractManagedType<X>
             return idClassAttributes;
         }
         else if (getSuperClazzType() != null
-                /*&& getSuperClazzType().getJavaType().isAssignableFrom(AbstractIdentifiableType.class)*/)
+        /*
+         * && getSuperClazzType().getJavaType().isAssignableFrom(
+         * AbstractIdentifiableType.class)
+         */)
         {
             idClassAttributes = ((AbstractIdentifiableType) getSuperClazzType()).getIdClassAttributes();
         }
@@ -235,14 +239,19 @@ public abstract class AbstractIdentifiableType<X> extends AbstractManagedType<X>
         this.idAttribute = idAttribute;
         this.isIdClass = isIdClass;
         this.idClassAttributes = idClassAttributes;
+        if (onCheckValidationConstraints((Field) idAttribute.getJavaMember()))
+        {
+            this.hasValidationConstraints = true;
+        }
     }
 
     public SingularAttribute<? super X, ?> getIdAttribute()
     {
         idAttribute = idAttribute == null ? getSuperClazzType() != null
-                /*&& getSuperClazzType().getJavaType().isAssignableFrom(AbstractIdentifiableType.class)*/ ? ((AbstractIdentifiableType) getSuperClazzType())
-                .getIdAttribute() : null
-                : idAttribute;
+        /*
+         * && getSuperClazzType().getJavaType().isAssignableFrom(
+         * AbstractIdentifiableType.class)
+         */? ((AbstractIdentifiableType) getSuperClazzType()).getIdAttribute() : null : idAttribute;
         return idAttribute;
     }
 

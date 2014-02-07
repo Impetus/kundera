@@ -48,19 +48,6 @@ import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.Type;
 import javax.persistence.metamodel.Type.PersistenceType;
-import javax.validation.constraints.AssertFalse;
-import javax.validation.constraints.AssertTrue;
-import javax.validation.constraints.DecimalMax;
-import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.Digits;
-import javax.validation.constraints.Future;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Null;
-import javax.validation.constraints.Past;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -221,14 +208,14 @@ public final class MetaModelBuilder<X, T>
                             .getActualTypeArguments();
 
                     return processOnEmbeddables(getTypedClass(argument[0]));
-                }                
-                else if(attribute != null && Map.class.isAssignableFrom(attribType))
+                }
+                else if (attribute != null && Map.class.isAssignableFrom(attribType))
                 {
                     java.lang.reflect.Type[] argument = ((ParameterizedType) attribute.getGenericType())
-                    .getActualTypeArguments();
+                            .getActualTypeArguments();
                     processOnEmbeddables(getTypedClass(argument[0]));
                     return processOnEmbeddables(getTypedClass(argument[1]));
-                }                
+                }
                 else
                 {
                     LOG.warn("Cannot process for : " + attribute
@@ -259,7 +246,8 @@ public final class MetaModelBuilder<X, T>
                         if (attribType.isAnnotationPresent(Entity.class))
                         {
                             EntityType<T> entityType = new DefaultEntityType<T>((Class<T>) attribType,
-                                    PersistenceType.ENTITY, (AbstractIdentifiableType) getType(attribType.getSuperclass(), false));
+                                    PersistenceType.ENTITY, (AbstractIdentifiableType) getType(
+                                            attribType.getSuperclass(), false));
                             managedTypes.put(attribType, entityType);
                         }
                         else
@@ -286,14 +274,14 @@ public final class MetaModelBuilder<X, T>
             // Check if this embeddable type is already present in
             // collection of MetaModelBuider.
             AbstractManagedType<T> embeddableType = null;
-            
+
             PersistenceType persistenceType = PersistenceType.BASIC;
             Annotation embeddableAnnotation = attribType.getAnnotation(Embeddable.class);
-            if(embeddableAnnotation != null)
+            if (embeddableAnnotation != null)
             {
                 persistenceType = PersistenceType.EMBEDDABLE;
             }
-            
+
             if (!embeddables.containsKey(attribType))
             {
                 embeddableType = new DefaultEmbeddableType<T>(attribType, persistenceType, null);
@@ -381,10 +369,7 @@ public final class MetaModelBuilder<X, T>
             {
                 if (isNonTransient(attribute))
                 {
-                    //Sets whether a class need to be validated for javax validation constraints
-                    if(containsValidationContsraint(attribute)) {
-                        managedType.setValidateConstraints(true);
-                    }
+
                     if (isPluralAttribute(attribute))
                     {
                         PluralAttribute<X, ?, ?> pluralAttribute = null;
@@ -687,17 +672,18 @@ public final class MetaModelBuilder<X, T>
         {
 
             validate(clazz, false);
-//            if (!mappedSuperClassTypes.containsKey(clazz))
-//            {
-                managedType = new DefaultMappedSuperClass<X>(clazz, PersistenceType.MAPPED_SUPERCLASS,
-                        (AbstractIdentifiableType) getType(clazz.getSuperclass(), isIdClass));
-                onDeclaredFields(clazz, managedType);
-                mappedSuperClassTypes.put(clazz, (MappedSuperclassType<?>) managedType);
-//            }
-//            else
-//            {
-//                managedType = (AbstractManagedType<X>) mappedSuperClassTypes.get(clazz);
-//            }
+            // if (!mappedSuperClassTypes.containsKey(clazz))
+            // {
+            managedType = new DefaultMappedSuperClass<X>(clazz, PersistenceType.MAPPED_SUPERCLASS,
+                    (AbstractIdentifiableType) getType(clazz.getSuperclass(), isIdClass));
+            onDeclaredFields(clazz, managedType);
+            mappedSuperClassTypes.put(clazz, (MappedSuperclassType<?>) managedType);
+            // }
+            // else
+            // {
+            // managedType = (AbstractManagedType<X>)
+            // mappedSuperClassTypes.get(clazz);
+            // }
         }
         else if (clazz.isAnnotationPresent(Entity.class) || isIdClass)
         {
@@ -806,24 +792,5 @@ public final class MetaModelBuilder<X, T>
         return attribute != null && !Modifier.isStatic(attribute.getModifiers())
                 && !Modifier.isTransient(attribute.getModifiers()) && !attribute.isAnnotationPresent(Transient.class);
     }
-    
-    /**
-     * Returns true if an entity contains attributes with validation constraints enabled
-     * 
-     * @param attribute
-     * @return
-     */
-    private boolean containsValidationContsraint(Field attribute) {
-        /// Checks if attribute contains any validation constraint enabled
-        return attribute.isAnnotationPresent(AssertFalse.class) || attribute.isAnnotationPresent(AssertTrue.class)
-        || attribute.isAnnotationPresent(DecimalMax.class) || attribute.isAnnotationPresent(DecimalMin.class) 
-        || attribute.isAnnotationPresent(Digits.class) || attribute.isAnnotationPresent(Future.class)
-        || attribute.isAnnotationPresent(Max.class) || attribute.isAnnotationPresent(Min.class)
-        || attribute.isAnnotationPresent(NotNull.class) || attribute.isAnnotationPresent(Null.class)
-        || attribute.isAnnotationPresent(Past.class) || attribute.isAnnotationPresent(Pattern.class) 
-        || attribute.isAnnotationPresent(Size.class);
-        
-    }
-    
 
 }
