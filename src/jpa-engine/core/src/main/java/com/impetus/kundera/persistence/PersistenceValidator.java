@@ -50,10 +50,17 @@ public class PersistenceValidator
 {
     private static final Logger log = LoggerFactory.getLogger(PersistenceValidator.class);
 
-    private ValidationFactoryGenerator generator = new ValidationFactoryGenerator();
+    private ValidationFactoryGenerator generator;
 
-    private ValidationFactory factory = generator.getFactory(ValidationFactoryType.BOOT_STRAP_VALIDATION);
-
+    private ValidationFactory factory;
+    
+    
+    public PersistenceValidator(){
+        
+        this.generator = new ValidationFactoryGenerator();
+        this.factory = generator.getFactory(ValidationFactoryType.OPERATIONAL_VALIDATION);
+        
+    }
     /**
      * Validates an entity object for CRUD operations
      * 
@@ -142,7 +149,7 @@ public class PersistenceValidator
             {
                 Attribute attribute = iter.next();
                 Field f = (Field) ((Field) attribute.getJavaMember());
-                factory.validate(f, entity, new AttributeConstraintRule());
+                this.factory.validate(f, entity, new AttributeConstraintRule());
 
             }
 
@@ -161,8 +168,7 @@ public class PersistenceValidator
     {
         if (embeddedObject instanceof Collection)
         {
-            ElementCollectionCacheManager ecCacheHandler = ElementCollectionCacheManager.getInstance();
-
+           
             for (Object obj : (Collection) embeddedObject)
             {
                 for (Object column : embeddedColumn.getAttributes())
@@ -170,7 +176,7 @@ public class PersistenceValidator
 
                     Attribute columnAttribute = (Attribute) column;
                     Field f = (Field) columnAttribute.getJavaMember();
-                    factory.validate(f, embeddedObject, new AttributeConstraintRule());
+                    this.factory.validate(f, embeddedObject, new AttributeConstraintRule());
                 }
             }
         }
@@ -181,7 +187,7 @@ public class PersistenceValidator
 
                 Attribute columnAttribute = (Attribute) column;
                 Field f = (Field) ((Field) columnAttribute.getJavaMember());
-                factory.validate(f, embeddedObject, new AttributeConstraintRule());
+                this.factory.validate(f, embeddedObject, new AttributeConstraintRule());
 
             }
         }
