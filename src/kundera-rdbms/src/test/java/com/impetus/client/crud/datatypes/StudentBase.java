@@ -59,24 +59,24 @@ public abstract class StudentBase<E extends StudentEntityDef> extends BaseTest
     protected Object studentId3;
     
     /** The date. */
-    protected long date = System.currentTimeMillis();
+//    protected long date =  new Date(2014+1980,03,01).getTime(); /*System.currentTimeMillis();*/
     
     /** The enrolment date. */
-    protected Date enrolmentDate = new Date(date);
+    protected Date enrolmentDate = new Date();
 
     /** The joining date and time. */
-    protected Date joiningDateAndTime = new Date(date);
+    protected Date joiningDateAndTime = new Date();
     /** The new sql date. */
-    protected java.sql.Date newSqlDate = new java.sql.Date(date);
+    protected java.sql.Date newSqlDate = new java.sql.Date(enrolmentDate.getTime());
 
     /** The enrolment time. */
-    protected Date enrolmentTime = new Date(date);
+    protected Date enrolmentTime = new Date();
 
     /** The sql time. */
-    protected java.sql.Time sqlTime = new java.sql.Time(date);
+    protected java.sql.Time sqlTime = new java.sql.Time(5,32,45);
 
     /** The sql timestamp. */
-    protected java.sql.Timestamp sqlTimestamp = new java.sql.Timestamp(date);
+    protected java.sql.Timestamp sqlTimestamp = new java.sql.Timestamp(sqlTime.getTime());
 
     /** The big decimal. */
     protected BigDecimal bigDecimal = new BigDecimal(123456789);
