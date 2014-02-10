@@ -45,6 +45,19 @@ import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.PluralAttribute.CollectionType;
 import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
+import javax.validation.constraints.AssertFalse;
+import javax.validation.constraints.AssertTrue;
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Digits;
+import javax.validation.constraints.Future;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
+import javax.validation.constraints.Past;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 import com.impetus.kundera.metadata.model.annotation.DefaultEntityAnnotationProcessor;
 import com.impetus.kundera.metadata.model.annotation.EntityAnnotationProcessor;
@@ -80,23 +93,7 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
 
     private List<ManagedType<X>> subManagedTypes = new ArrayList<ManagedType<X>>();
 
-    private boolean validateConstraints;
-
-    /**
-     * @return the validateConstraints
-     */
-    public boolean isValidateConstraints()
-    {
-        return validateConstraints;
-    }
-
-    /**
-     * @param validateConstraints the validateConstraints to set
-     */
-    public void setValidateConstraints(boolean validateConstraints)
-    {
-        this.validateConstraints = validateConstraints;
-    }
+    protected boolean hasValidationConstraints = false;
 
     /**
      * Super constructor with arguments.
@@ -791,6 +788,8 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
         }
 
         declaredSingluarAttribs.put(attributeName, attribute);
+
+        onValidateAttributeConstraints((Field) attribute.getJavaMember());
     }
 
     public void addPluralAttribute(String attributeName, PluralAttribute<X, ?, ?> attribute)
@@ -801,6 +800,9 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
         }
 
         declaredPluralAttributes.put(attributeName, attribute);
+
+        onValidateAttributeConstraints((Field) attribute.getJavaMember());
+
     }
 
     public Column getAttributeBinding(Field attribute)
@@ -810,6 +812,7 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
 
     private void addSubManagedType(ManagedType inheritedType)
     {
+
         if (Modifier.isAbstract(this.getJavaType().getModifiers()))
         {
             subManagedTypes.add(inheritedType);
@@ -1317,6 +1320,80 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
     public EntityAnnotationProcessor getEntityAnnotation()
     {
         return entityAnnotationProcessor;
+    }
+
+    /**
+     * @return the hasValidationConstraints
+     */
+    public boolean hasValidationConstraints()
+    {
+        return this.hasValidationConstraints;
+    }
+
+    /**
+     * Returns true if an entity contains attributes with validation constraints
+     * enabled
+     * 
+     * @param attribute
+     * @return
+     */
+    protected boolean onCheckValidationConstraints(Field attribute)
+    {
+        // / Checks if attribute contains any validation constraint enabled
+        return attribute.isAnnotationPresent(AssertFalse.class) || attribute.isAnnotationPresent(AssertTrue.class)
+                || attribute.isAnnotationPresent(DecimalMax.class) || attribute.isAnnotationPresent(DecimalMin.class)
+                || attribute.isAnnotationPresent(Digits.class) || attribute.isAnnotationPresent(Future.class)
+                || attribute.isAnnotationPresent(Max.class) || attribute.isAnnotationPresent(Min.class)
+                || attribute.isAnnotationPresent(NotNull.class) || attribute.isAnnotationPresent(Null.class)
+                || attribute.isAnnotationPresent(Past.class) || attribute.isAnnotationPresent(Pattern.class)
+                || attribute.isAnnotationPresent(Size.class);
+
+    }
+
+    /**
+     * Sets the validation constraint present field if an attribute has a
+     * constraint present
+     * 
+     * @param field
+     */
+    private void onValidateAttributeConstraints(Field field)
+    {
+
+        if (!this.hasValidationConstraints)
+        {
+            if (onCheckValidationConstraints(field))
+            {
+                this.hasValidationConstraints = true;
+            }
+            onValidateSuperTypeAttributeConstraints(superClazzType);
+
+        }
+
+    }
+
+    /**
+     * Checks recursively if any constraint in present in super class of a
+     * managed type containing attribute
+     * 
+     * @param superClazzType2
+     */
+    private void onValidateSuperTypeAttributeConstraints(ManagedType<? super X> superClazzType2)
+    {
+
+        if (!this.hasValidationConstraints() && superClazzType2 != null)
+        {
+            AbstractManagedType managedType = (AbstractManagedType) superClazzType2;
+
+            if (managedType.hasValidationConstraints())
+            {
+                this.hasValidationConstraints = true;
+            }
+            else
+            {
+                onValidateSuperTypeAttributeConstraints(managedType.superClazzType);
+            }
+
+        }
     }
 
 }

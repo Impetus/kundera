@@ -162,9 +162,6 @@ public final class AssociationBuilder
         String joinColumnName = (String) joinColumns.toArray()[0];
         String inverseJoinColumnName = (String) inverseJoinColumns.toArray()[0];
 
-        // EntityMetadata relMetadata =
-        // delegator.getMetadata(relation.getTargetEntity());
-
         Object entityId = PropertyAccessorHelper.getId(entity, entityMetadata);
         List<?> foreignKeys = pClient.getColumnsById(schema, joinTableName, joinColumnName, inverseJoinColumnName,
                 entityId, columnJavaType);
@@ -233,13 +230,8 @@ public final class AssociationBuilder
     {
         EntityMetadata childMetadata = KunderaMetadataManager.getEntityMetadata(delegator.getKunderaMetadata(),
                 relation.getTargetEntity());
-        Map<Object, Object> relationshipEntityMap = new HashMap<Object, Object>(); // Map
-                                                                                   // collection
-                                                                                   // to
-                                                                                   // be
-                                                                                   // set
-                                                                                   // into
-                                                                                   // entity
+        // Map collection to be set into entity
+        Map<Object, Object> relationshipEntityMap = new HashMap<Object, Object>();
 
         if ((relObject == null || ProxyHelper.isProxyCollection(relObject)) && relationsMap != null
                 && !relationsMap.isEmpty())
@@ -251,10 +243,9 @@ public final class AssociationBuilder
                 {
                     Map<Object, Object> relationValueMap = (Map<Object, Object>) relationValue;
 
-                    Client targetEntityClient = delegator.getClient(childMetadata); // Client
-                                                                                    // for
-                                                                                    // target
-                                                                                    // entity
+                    // Client for target entity
+                    Client targetEntityClient = delegator.getClient(childMetadata);
+
                     for (Object targetEntityKey : relationValueMap.keySet())
                     {
                         // Find target entity from database
@@ -320,22 +311,9 @@ public final class AssociationBuilder
         Object relationValue = relationsMap != null ? relationsMap.get(relationName) : null;
 
         if ((relation.getType().equals(ForeignKey.ONE_TO_ONE) || relation.getType().equals(ForeignKey.MANY_TO_ONE)))
-        { // One-To-One or
-          // Many-To-One
-          // relationship
+        { // One-To-One or Many-To-One relationship
 
-            Field biDirectionalField = relation.getBiDirectionalField()/*
-                                                                        * getBiDirectionalField
-                                                                        * (
-                                                                        * entity
-                                                                        * .
-                                                                        * getClass
-                                                                        * (),
-                                                                        * relation
-                                                                        * .
-                                                                        * getTargetEntity
-                                                                        * ())
-                                                                        */;
+            Field biDirectionalField = relation.getBiDirectionalField();
             boolean isBidirectionalRelation = (biDirectionalField != null);
             if (isBidirectionalRelation && (relationValue == null && !relation.isJoinedByPrimaryKey()))
             {

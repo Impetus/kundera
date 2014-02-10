@@ -164,7 +164,7 @@ public class RdbmsCompositeTypeTest
         q = em.createQuery(withAllCompositeColClause);
         q.setParameter("userId", "mevivs");
         q.setParameter("tweetId", 1);
-        q.setParameter("timeLineId", timeLineId);
+        q.setParameter("timeLineId", timeLineId.toString());
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(1, results.size());
@@ -173,7 +173,7 @@ public class RdbmsCompositeTypeTest
         q = em.createQuery(withLastCompositeColGTClause);
         q.setParameter("userId", "mevivs");
         q.setParameter("tweetId", 1);
-        q.setParameter("timeLineId", timeLineId);
+        q.setParameter("timeLineId", timeLineId.toString());
         results = q.getResultList();
         Assert.assertEquals(1, results.size());
 
@@ -219,7 +219,7 @@ public class RdbmsCompositeTypeTest
 
         em = emf.createEntityManager();
 
-        String updateQuery = "Update RdbmsPrimeUser u SET u.tweetBody=after merge where u.tweetBody= :beforeUpdate";
+        String updateQuery = "Update RdbmsPrimeUser u SET u.tweetBody='after merge' where u.tweetBody= :beforeUpdate";
         Query q = em.createQuery(updateQuery);
         q.setParameter("beforeUpdate", "my first tweet");
         q.executeUpdate();

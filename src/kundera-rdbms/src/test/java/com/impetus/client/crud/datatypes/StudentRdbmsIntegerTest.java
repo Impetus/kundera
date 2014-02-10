@@ -154,7 +154,7 @@ public class StudentRdbmsIntegerTest extends RdbmsBase
         int count;
         em = emf.createEntityManager();
         query = "Select s From StudentInteger s where s.age = " + getMinValue(short.class)
-                + " and s.name > Amresh and s.name <= " + getMaxValue(String.class);
+                + " and s.name > 'Amresh' and s.name <= '" + getMaxValue(String.class)+"'";
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -222,7 +222,7 @@ public class StudentRdbmsIntegerTest extends RdbmsBase
         List<StudentInteger> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentInteger s where s.name = Kuldeep and s.age > "
+        query = "Select s From StudentInteger s where s.name = 'Kuldeep' and s.age > "
                 + getMinValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
@@ -249,7 +249,7 @@ public class StudentRdbmsIntegerTest extends RdbmsBase
         List<StudentInteger> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentInteger s where s.name = Kuldeep and s.age > "
+        query = "Select s From StudentInteger s where s.name = 'Kuldeep' and s.age > "
                 + getMinValue(short.class) + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
@@ -304,7 +304,7 @@ public class StudentRdbmsIntegerTest extends RdbmsBase
     private void deleteNamed(boolean useSameEm)
     {
 
-        String deleteQuery = "Delete From StudentInteger s where s.name=Vivek";
+        String deleteQuery = "Delete From StudentInteger s where s.name='Vivek'";
         EntityManager em = emf.createEntityManager();
         Query q = em.createQuery(deleteQuery);
         q.executeUpdate();
@@ -324,7 +324,7 @@ public class StudentRdbmsIntegerTest extends RdbmsBase
     private void updateNamed(boolean useSameEm)
     {
         EntityManager em = emf.createEntityManager();
-        String updateQuery = "Update StudentInteger s SET s.name=Vivek where s.name=Amresh";
+        String updateQuery = "Update StudentInteger s SET s.name='Vivek' where s.name='Amresh'";
         Query q = em.createQuery(updateQuery);
         q.executeUpdate();
         if (!useSameEm)
@@ -347,7 +347,7 @@ public class StudentRdbmsIntegerTest extends RdbmsBase
         List<StudentInteger> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentInteger s where s.name = Amresh and s.age between "
+        query = "Select s From StudentInteger s where s.name = 'Amresh' and s.age between "
                 + getMinValue(short.class) + " and " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
@@ -374,7 +374,7 @@ public class StudentRdbmsIntegerTest extends RdbmsBase
         List<StudentInteger> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentInteger s where s.name = Amresh and s.age > " + getMinValue(short.class)
+        query = "Select s From StudentInteger s where s.name = 'Amresh' and s.age > " + getMinValue(short.class)
                 + " and s.age < " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
@@ -402,7 +402,7 @@ public class StudentRdbmsIntegerTest extends RdbmsBase
         List<StudentInteger> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentInteger s where s.name = Kuldeep and s.age >= "
+        query = "Select s From StudentInteger s where s.name = 'Kuldeep' and s.age >= "
                 + getMinValue(short.class) + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
@@ -467,7 +467,7 @@ public class StudentRdbmsIntegerTest extends RdbmsBase
         List<StudentInteger> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentInteger s where s.name = Kuldeep";
+        query = "Select s From StudentInteger s where s.name = 'Kuldeep'";
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);

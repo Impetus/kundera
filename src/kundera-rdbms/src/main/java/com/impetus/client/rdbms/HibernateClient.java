@@ -20,7 +20,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,12 +29,14 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.Parameter;
 import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.EntityType;
 
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
+import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.StatelessSession;
@@ -101,7 +103,8 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      * @param puProperties
      */
     public HibernateClient(final String persistenceUnit, IndexManager indexManager, EntityReader reader,
-            RDBMSClientFactory clientFactory, Map<String, Object> puProperties, final ClientMetadata clientMetadata, final KunderaMetadata kunderaMetadata)
+            RDBMSClientFactory clientFactory, Map<String, Object> puProperties, final ClientMetadata clientMetadata,
+            final KunderaMetadata kunderaMetadata)
     {
 
         super(kunderaMetadata);
@@ -146,7 +149,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         s.delete(entity);
         tx.commit();
 
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,  entity.getClass());
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entity.getClass());
         if (!MetadataUtils.useSecondryIndex(getClientMetadata()))
         {
             getIndexManager().remove(metadata, entity, pKey.toString());
@@ -176,7 +179,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         }
         catch (Exception e)
         {
-            log.error(e.getMessage());
+            log.error("Error while finding, Caused by {}. ", e);
             throw new KunderaException(e);
         }
         return result;
@@ -190,18 +193,19 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      * java.lang.String[])
      */
     @Override
-    public <E> List<E> findAll(Class<E> arg0, String[] columnsToSelect, Object... arg1)
+    public <E> List<E> findAll(Class<E> entityClazz, String[] columnsToSelect, Object... arg1)
     {
         // TODO: Vivek correct it. unfortunately i need to open a new session
         // for each finder to avoid lazy loading.
         Session s = getSession();
 
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, getPersistenceUnit(), arg0);
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, getPersistenceUnit(),
+                entityClazz);
 
         Object[] pKeys = getDataType(entityMetadata, arg1);
         String id = ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName();
 
-        Criteria c = s.createCriteria(arg0);
+        Criteria c = s.createCriteria(entityClazz);
 
         c.add(Restrictions.in(id, pKeys));
 
@@ -266,7 +270,8 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     @Override
     public void persistJoinTable(JoinTableData joinTableData)
     {
-        String schemaName = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, joinTableData.getEntityClass()).getSchema();
+        String schemaName = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, joinTableData.getEntityClass())
+                .getSchema();
         String joinTableName = joinTableData.getJoinTableName();
         String joinColumnName = joinTableData.getJoinColumnName();
         String invJoinColumnName = joinTableData.getInverseJoinColumnName();
@@ -343,10 +348,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         query.append("DELETE FROM ").append(getFromClause(schemaName, tableName)).append(" WHERE ").append(columnName)
                 .append("=").append("'").append(columnValue).append("'");
 
-        s = getStatelessSession();
-        Transaction tx = s.beginTransaction();
-        s.createSQLQuery(query.toString()).executeUpdate();
-        tx.commit();
+        onExecuteUpdate(query.toString(), null);
     }
 
     /**
@@ -437,7 +439,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      */
     public List find(String nativeQuery, List<String> relations, EntityMetadata m)
     {
-         List entities = new ArrayList();
+        List entities = new ArrayList();
 
         s = getStatelessSession();
 
@@ -468,18 +470,21 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
                         Object value = ((Map<String, Object>) o).get(discColumn);
                         if (value != null && value.toString().equals(disColValue))
                         {
-                            subEntityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, subEntity.getJavaType());
+                            subEntityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
+                                    subEntity.getJavaType());
                             break;
                         }
                     }
                     entity = instantiateEntity(subEntityMetadata.getEntityClazz(), entity);
-                    relationValue = HibernateUtils.getTranslatedObject(kunderaMetadata, entity, (Map<String, Object>) o, m);
+                    relationValue = HibernateUtils.getTranslatedObject(kunderaMetadata, entity,
+                            (Map<String, Object>) o, m);
 
                 }
                 else
                 {
                     entity = instantiateEntity(m.getEntityClazz(), entity);
-                    relationValue = HibernateUtils.getTranslatedObject(kunderaMetadata, entity, (Map<String, Object>) o, m);
+                    relationValue = HibernateUtils.getTranslatedObject(kunderaMetadata, entity,
+                            (Map<String, Object>) o, m);
                 }
 
                 if (relationValue != null && !relationValue.isEmpty())
@@ -498,6 +503,55 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
             }
             throw new EntityReaderException(e);
         }
+    }
+
+    /**
+     * Find.
+     * 
+     * @param query
+     *            the native fquery
+     * @param relations
+     *            the relations
+     * @param m
+     *            the m
+     * @return the list
+     */
+    public List findByQuery(String query, Map<Parameter, Object> parameterMap)
+    {
+        s = getStatelessSession();
+
+        Query q = s.createQuery(query);
+
+        setParameters(parameterMap, q);
+
+        return q.list();
+    }
+
+    /**
+     * Find.
+     * 
+     * @param query
+     *            the native fquery
+     * @param relations
+     *            the relations
+     * @param m
+     *            the m
+     * @return the list
+     */
+    public int onExecuteUpdate(String query, Map<Parameter, Object> parameterMap)
+    {
+        s = getStatelessSession();
+
+        Query q = s.createQuery(query);
+        setParameters(parameterMap, q);
+
+        Transaction tx = s.beginTransaction();
+
+        int i = q.executeUpdate();
+
+        tx.commit();
+
+        return i;
     }
 
     public SQLQuery getQueryInstance(String nativeQuery, EntityMetadata m)
@@ -540,7 +594,8 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClazz);
         String tableName = m.getTableName();
 
-        // Suffixing the UNDERSCORE instead of prefix as Oracle 11g complains about invalid characters error while executing the request.
+        // Suffixing the UNDERSCORE instead of prefix as Oracle 11g complains
+        // about invalid characters error while executing the request.
         StringBuilder queryBuilder = new StringBuilder("Select ");
 
         queryBuilder.append("* ");
@@ -640,7 +695,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
                 String updateSql = "Update " + clause + " SET " + linkName + "= '" + linkValue + "' WHERE "
                         + ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName() + " = '" + id + "'";
 
-                s.createSQLQuery(updateSql).executeUpdate();
+                onExecuteUpdate(updateSql, null);
             }
         }
     }
@@ -661,7 +716,8 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
                 Object relationObject = PropertyAccessorHelper.getObject(entity, relation.getProperty());
                 if (relationObject != null && ProxyHelper.isKunderaProxy(relationObject))
                 {
-                    EntityMetadata relMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, relation.getTargetEntity());
+                    EntityMetadata relMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
+                            relation.getTargetEntity());
                     Method idAccessorMethod = relMetadata.getReadIdentifierMethod();
                     Object foreignKey = null;
                     try
@@ -688,7 +744,8 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
                     {
                         relationObject = null;
                         PropertyAccessorHelper.set(entity, relation.getProperty(), relationObject);
-                        relationHolders.add(new RelationHolder(relation.getJoinColumnName(kunderaMetadata), foreignKey));
+                        relationHolders
+                                .add(new RelationHolder(relation.getJoinColumnName(kunderaMetadata), foreignKey));
                         proxyRemoved = true;
                     }
                 }
@@ -735,25 +792,11 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     }
 
     /**
-     * Populate relations.
      * 
-     * @param relations
-     *            the relations
-     * @param o
-     *            the o
-     * @return the map
+     * @param entityClass
+     * @param entity
+     * @return
      */
-    private Map<String, Object> populateRelations(List<String> relations, Object[] o)
-    {
-        Map<String, Object> relationVal = new HashMap<String, Object>(relations.size());
-        int counter = 1;
-        for (String r : relations)
-        {
-            relationVal.put(r, o[counter++]);
-        }
-        return relationVal;
-    }
-
     private Object instantiateEntity(Class entityClass, Object entity)
     {
         try
@@ -774,4 +817,43 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         }
         return null;
     }
+
+    /**
+     * 
+     * @param parameterMap
+     * @param q
+     */
+    private void setParameters(Map<Parameter, Object> parameterMap, Query q)
+    {
+        if (parameterMap != null && !parameterMap.isEmpty())
+        {
+            for (Parameter parameter : parameterMap.keySet())
+            {
+                Object paramObject = parameterMap.get(parameter);
+                if (parameter.getName() != null)
+                {
+                    if (paramObject instanceof Collection)
+                    {
+                        q.setParameterList(parameter.getName(), (Collection) paramObject);
+                    }
+                    else
+                    {
+                        q.setParameter(parameter.getName(), paramObject);
+                    }
+                }
+                else if (parameter.getPosition() != null)
+                {
+                    if (paramObject instanceof Collection)
+                    {
+                        q.setParameterList(Integer.toString(parameter.getPosition()), (Collection) paramObject);
+                    }
+                    else
+                    {
+                        q.setParameter(Integer.toString(parameter.getPosition()), paramObject);
+                    }
+                }
+            }
+        }
+    }
+
 }

@@ -17,6 +17,7 @@ package com.impetus.client.crud;
 
 import java.sql.SQLException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
@@ -115,6 +116,12 @@ public class RDBMSOTMLazyTest
 
         Assert.assertEquals(2, counter);
 
+
+        List<PersonLazyRDBMSOTM> persons = em.createQuery("Select p from PersonLazyRDBMSOTM p").getResultList();
+        
+        Assert.assertNotNull(persons);
+        Assert.assertFalse(persons.isEmpty());
+        
         foundPerson.setPersonName("KK");
 
         em.merge(foundPerson);

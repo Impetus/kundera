@@ -79,7 +79,6 @@ public class GraphBuilder
      */
     public final Node buildNode(Object entity, PersistenceDelegator pd, Object entityId, NodeState nodeState)
     {
-
         String nodeId = ObjectGraphUtils.getNodeId(entityId, entity.getClass());
 
         Node node = this.graph.getNode(nodeId);

@@ -57,6 +57,12 @@ import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
  */
 public class CouchDBTestUtils
 {
+    /**
+     * 
+     * @param kunderaMetadata
+     * @param persistenceUnit
+     * @return
+     */
     public static HttpClient initiateHttpClient(final KunderaMetadata kunderaMetadata, String persistenceUnit)
     {
         PersistenceUnitMetadata pumMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata,
@@ -109,6 +115,12 @@ public class CouchDBTestUtils
         return httpClient;
     }
 
+    /**
+     * 
+     * @param databaseName
+     * @param client
+     * @param httpHost
+     */
     public static void createDatabase(String databaseName, HttpClient client, HttpHost httpHost)
     {
         HttpResponse response = null;
@@ -137,6 +149,12 @@ public class CouchDBTestUtils
         }
     }
 
+    /**
+     * 
+     * @param databaseName
+     * @param client
+     * @param httpHost
+     */
     public static void dropDatabase(String databaseName, HttpClient client, HttpHost httpHost)
     {
         HttpResponse response = null;
@@ -166,6 +184,17 @@ public class CouchDBTestUtils
         }
     }
 
+    /**
+     * 
+     * @param columns
+     * @param tableName
+     * @param httpHost
+     * @param databaseName
+     * @param httpClient
+     * @throws URISyntaxException
+     * @throws ClientProtocolException
+     * @throws IOException
+     */
     public static void createViews(String[] columns, String tableName, HttpHost httpHost, String databaseName,
             HttpClient httpClient) throws URISyntaxException, ClientProtocolException, IOException
     {

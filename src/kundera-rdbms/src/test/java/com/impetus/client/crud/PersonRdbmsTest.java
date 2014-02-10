@@ -91,12 +91,12 @@ public class PersonRdbmsTest extends BaseTest
         Assert.assertNotNull(allPersons);
         Assert.assertTrue(allPersons.isEmpty());
 
-        findQuery = em.createQuery("Select p from PersonRDBMS p where p.personName = vivek");
+        findQuery = em.createQuery("Select p from PersonRDBMS p where p.personName = 'vivek'");
         allPersons = findQuery.getResultList();
         Assert.assertNotNull(allPersons);
         Assert.assertTrue(allPersons.isEmpty());
 
-        findQuery = em.createQuery("Select p.age from PersonRDBMS p where p.personName = vivek");
+        findQuery = em.createQuery("Select p.age from PersonRDBMS p where p.personName = 'vivek'");
         allPersons = findQuery.getResultList();
         Assert.assertNotNull(allPersons);
         Assert.assertTrue(allPersons.isEmpty());
