@@ -266,9 +266,4 @@ public class DateAccessor implements PropertyAccessor<Date>
         return new Date();
     }
 
-    public static void main(String[] args)
-    {
-        
-      DateAccessor.getDateByPattern("-17151000");   
-    }
 }
