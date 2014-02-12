@@ -260,6 +260,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         catch (HibernateException e)
         {
             log.error("Error while persisting object of {}, Caused by {}.", metadata.getEntityClazz(), e);
+            e.printStackTrace();
             throw new PersistenceException(e);
         }
     }
@@ -347,8 +348,13 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
 
         query.append("DELETE FROM ").append(getFromClause(schemaName, tableName)).append(" WHERE ").append(columnName)
                 .append("=").append("'").append(columnValue).append("'");
-
-        onExecuteUpdate(query.toString(), null);
+        
+        StatelessSession s = getStatelessSession();
+        
+        Transaction tx = s.beginTransaction();
+        onNativeUpdate(query.toString(), null);
+        tx.commit();
+        
     }
 
     /**
@@ -527,6 +533,24 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         return q.list();
     }
 
+    public int onNativeUpdate(String query, Map<Parameter, Object> parameterMap)
+    {
+        s = getStatelessSession();
+
+        Query q = s.createSQLQuery(query);
+        setParameters(parameterMap, q);
+
+        
+//        Transaction tx = s.getTransaction() == null ? s.beginTransaction(): s.getTransaction();
+        
+//        tx.begin();
+        int i = q.executeUpdate();
+
+//        tx.commit();
+
+        return i;
+    }
+
     /**
      * Find.
      * 
@@ -545,8 +569,9 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         Query q = s.createQuery(query);
         setParameters(parameterMap, q);
 
+        System.out.println(query);
         Transaction tx = s.beginTransaction();
-
+        
         int i = q.executeUpdate();
 
         tx.commit();
@@ -691,11 +716,16 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
             if (linkName != null && linkValue != null)
             {
 
+//                String fieldName = metadata.getFieldName(linkName);
+                
                 String clause = getFromClause(metadata.getSchema(), metadata.getTableName());
-                String updateSql = "Update " + clause + " SET " + linkName + "= '" + linkValue + "' WHERE "
-                        + ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName() + " = '" + id + "'";
+//                String updateSql = "Update " + metadata.getEntityClazz().getSimpleName() + " SET " + fieldName + "= '" + linkValue + "' WHERE "
+//                        + ((AbstractAttribute) metadata.getIdAttribute()).getName() + " = '" + id + "'";
 
-                onExecuteUpdate(updateSql, null);
+                String updateSql = "Update " + clause + " SET " + linkName + "= '" + linkValue + "' WHERE "
+                        + ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName()+ " = '" + id + "'";
+
+                onNativeUpdate(updateSql, null);
             }
         }
     }
