@@ -96,8 +96,6 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
 
     protected boolean hasValidationConstraints = false;
 
-   
-
     /**
      * Super constructor with arguments.
      * 
@@ -1330,10 +1328,16 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
      */
     public boolean hasValidationConstraints()
     {
-        return this.hasValidationConstraints;
+        if (this.hasValidationConstraints)
+        {
+            return this.hasValidationConstraints;
+        }
+        if (this.superClazzType != null)
+        {
+            return ((AbstractManagedType) superClazzType).hasValidationConstraints();
+        }
+        return false;
     }
-
-    
 
     /**
      * Sets the validation constraint present field if an attribute has a
@@ -1349,37 +1353,11 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
             if (MetadataUtils.onCheckValidationConstraints(field))
             {
                 this.hasValidationConstraints = true;
-                
-            }
-            onValidateSuperTypeAttributeConstraints(superClazzType);
 
-        }
-
-    }
-
-    /**
-     * Checks recursively if any constraint in present in super class of a
-     * managed type 
-     * 
-     * @param clazzType
-     */
-    private void onValidateSuperTypeAttributeConstraints(ManagedType<? super X> clazzType)
-    {
-
-        if (!this.hasValidationConstraints() && clazzType != null)
-        {
-            AbstractManagedType managedType = (AbstractManagedType) clazzType;
-
-            if (managedType.hasValidationConstraints())
-            {
-                this.hasValidationConstraints = true;
-            }
-            else
-            {
-                onValidateSuperTypeAttributeConstraints(managedType.superClazzType);
             }
 
         }
+
     }
 
 }

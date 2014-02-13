@@ -339,7 +339,8 @@ public final class MetaModelBuilder<X, T>
             }
             catch (Exception e)
             {
-                throw new MetamodelLoaderException("Error setting Contstraint"+e.getMessage());
+                LOG.error("Error setting Contstraint for managed type, Caused by: {}", e);
+                throw new MetamodelLoaderException("Error setting Contstraint for managed type"+e.getMessage());
             }
            
         }
