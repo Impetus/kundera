@@ -1348,13 +1348,10 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
     private void onValidateAttributeConstraints(Field field)
     {
 
-        if (!this.hasValidationConstraints)
+        if (!this.hasValidationConstraints && MetadataUtils.onCheckValidationConstraints(field))
         {
-            if (MetadataUtils.onCheckValidationConstraints(field))
-            {
-                this.hasValidationConstraints = true;
 
-            }
+            this.hasValidationConstraints = true;
 
         }
 
