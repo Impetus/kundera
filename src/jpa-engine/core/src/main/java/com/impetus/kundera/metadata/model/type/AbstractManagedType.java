@@ -59,6 +59,7 @@ import javax.validation.constraints.Past;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.annotation.DefaultEntityAnnotationProcessor;
 import com.impetus.kundera.metadata.model.annotation.EntityAnnotationProcessor;
 
@@ -94,6 +95,8 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
     private List<ManagedType<X>> subManagedTypes = new ArrayList<ManagedType<X>>();
 
     protected boolean hasValidationConstraints = false;
+
+   
 
     /**
      * Super constructor with arguments.
@@ -1330,25 +1333,7 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
         return this.hasValidationConstraints;
     }
 
-    /**
-     * Returns true if an entity contains attributes with validation constraints
-     * enabled
-     * 
-     * @param attribute
-     * @return
-     */
-    protected boolean onCheckValidationConstraints(Field attribute)
-    {
-        // / Checks if attribute contains any validation constraint enabled
-        return attribute.isAnnotationPresent(AssertFalse.class) || attribute.isAnnotationPresent(AssertTrue.class)
-                || attribute.isAnnotationPresent(DecimalMax.class) || attribute.isAnnotationPresent(DecimalMin.class)
-                || attribute.isAnnotationPresent(Digits.class) || attribute.isAnnotationPresent(Future.class)
-                || attribute.isAnnotationPresent(Max.class) || attribute.isAnnotationPresent(Min.class)
-                || attribute.isAnnotationPresent(NotNull.class) || attribute.isAnnotationPresent(Null.class)
-                || attribute.isAnnotationPresent(Past.class) || attribute.isAnnotationPresent(Pattern.class)
-                || attribute.isAnnotationPresent(Size.class);
-
-    }
+    
 
     /**
      * Sets the validation constraint present field if an attribute has a
@@ -1361,9 +1346,10 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
 
         if (!this.hasValidationConstraints)
         {
-            if (onCheckValidationConstraints(field))
+            if (MetadataUtils.onCheckValidationConstraints(field))
             {
                 this.hasValidationConstraints = true;
+                
             }
             onValidateSuperTypeAttributeConstraints(superClazzType);
 
@@ -1373,16 +1359,16 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
 
     /**
      * Checks recursively if any constraint in present in super class of a
-     * managed type containing attribute
+     * managed type 
      * 
-     * @param superClazzType2
+     * @param clazzType
      */
-    private void onValidateSuperTypeAttributeConstraints(ManagedType<? super X> superClazzType2)
+    private void onValidateSuperTypeAttributeConstraints(ManagedType<? super X> clazzType)
     {
 
-        if (!this.hasValidationConstraints() && superClazzType2 != null)
+        if (!this.hasValidationConstraints() && clazzType != null)
         {
-            AbstractManagedType managedType = (AbstractManagedType) superClazzType2;
+            AbstractManagedType managedType = (AbstractManagedType) clazzType;
 
             if (managedType.hasValidationConstraints())
             {

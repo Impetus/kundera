@@ -15,6 +15,13 @@
  ******************************************************************************/
 package com.impetus.client.crud;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
@@ -95,11 +102,48 @@ public class EmbeddableUserTest
 
     }
 
+    /**
+     * Tests validation constraint on embeddable object
+     */
+    @Test
+    public void testConstraints()
+    {
+        try
+        {
+            AppUser user = new AppUser();
+            user.setId("id");
+            List<String> contactName = new LinkedList<String>();
+            Map<String, String> contactMap = new HashMap<String, String>();
+            Set<String> contactNumber = new HashSet<String>();
+            contactName.add("xamry");
+            contactMap.put("xamry", "9891991919");
+            contactMap.put("xamry1", "98919919129");
+            contactMap.put("xamry2", "98919919319");
+            contactNumber.add("9891991919");
+            String phoneDirectoryName = "MyPhoneDirectory";
+            PhoneDirectory properties = new PhoneDirectory(phoneDirectoryName, contactName, contactMap, contactNumber);
+            user.setPropertyContainer(properties);
+            em.persist(user);
+
+            em.clear();
+
+        }
+        catch (Exception e)
+        {
+            Assert.fail();
+            Assert.assertEquals(
+                    "javax.validation.ValidationException: The size should be at least equal to one but not more than 2",
+                    e.getMessage());
+
+        }
+
+    }
+
     @After
     public void tearDown()
     {
         em.close();
         emf.close();
-        
+
     }
 }

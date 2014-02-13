@@ -20,6 +20,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
+import javax.validation.constraints.NotNull;
 
 
 
@@ -32,6 +33,7 @@ public class Shape
     private String id;
     
     @Column(name = "name")
+    @NotNull(message="Name of the object should be defined")
     private String name;
     
     @OneToOne(mappedBy = "shape",fetch = FetchType.EAGER)

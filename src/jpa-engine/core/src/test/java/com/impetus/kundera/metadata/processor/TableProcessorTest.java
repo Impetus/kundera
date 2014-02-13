@@ -233,6 +233,47 @@ public class TableProcessorTest
     }
 
     /**
+     * Test constraints on inherited objects
+     * 
+     */
+    @Test
+    public void testInheritedConstraints()
+    {
+        try
+        {
+
+            final String persistenceUnit = "inheritanceTest";
+
+            EntityManagerFactory emf = Persistence.createEntityManagerFactory(persistenceUnit);
+            EntityManager em = emf.createEntityManager();
+
+            Rectangle rect1 = new Rectangle();
+            rect1.setId("r1");
+            // rect1.setName("Rect1");
+
+            Geometry geo1 = new Geometry();
+            geo1.setGeoId("g1");
+            geo1.setName("Two D");
+
+            rect1.setGeometry(geo1);
+
+            em.persist(rect1);
+
+            em.clear();
+
+            em.close();
+            emf.close();
+        }
+        catch (Exception e)
+        {
+
+            Assert.assertEquals("javax.validation.ValidationException: Name of the object should be defined",
+                    e.getMessage());
+
+        }
+    }
+
+    /**
      * Tear down.
      * 
      * @throws Exception
