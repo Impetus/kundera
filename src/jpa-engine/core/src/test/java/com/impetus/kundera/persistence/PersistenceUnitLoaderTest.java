@@ -76,7 +76,7 @@ public class PersistenceUnitLoaderTest
                 final String _pattern = "/core/target/test-classes/";
                 List<PersistenceUnitMetadata> metadatas = PersistenceXMLLoader.findPersistenceUnits(xmls.nextElement());
                 Assert.assertNotNull(metadatas);
-                Assert.assertEquals(11, metadatas.size());
+                Assert.assertEquals(12, metadatas.size());
 
                 // commented out to keep ConfiguratorTest happy! as it tries to
                 // load it.

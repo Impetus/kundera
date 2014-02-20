@@ -91,7 +91,7 @@ public class EnumAccessor implements PropertyAccessor<Enum>
         {
             try
             {
-                return Enum.valueOf(targetClass, string.trim().toUpperCase());
+                return Enum.valueOf(targetClass, string.trim());
             }
             catch (IllegalArgumentException ex)
             {

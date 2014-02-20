@@ -177,7 +177,8 @@ import com.impetus.kundera.index.IndexCollection;
 
     enum Day
     {
-        MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
+        monday,tuesday,wednesday,thursday,friday, saturday,sunday;
+//        MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
     }
 
 }
