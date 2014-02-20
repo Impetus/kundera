@@ -165,7 +165,7 @@ public class PersonCassandraTest extends BaseTest
         PersonCassandra p = findById(PersonCassandra.class, "1", entityManager);
         Assert.assertNotNull(p);
         Assert.assertEquals("vivek", p.getPersonName());
-        Assert.assertEquals(Day.THURSDAY, p.getDay());
+        Assert.assertEquals(Day.thursday, p.getDay());
 
         entityManager.clear();
         Query q;
