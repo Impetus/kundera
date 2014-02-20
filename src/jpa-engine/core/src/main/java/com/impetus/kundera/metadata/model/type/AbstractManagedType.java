@@ -59,6 +59,7 @@ import javax.validation.constraints.Past;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.annotation.DefaultEntityAnnotationProcessor;
 import com.impetus.kundera.metadata.model.annotation.EntityAnnotationProcessor;
 
@@ -1327,27 +1328,15 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
      */
     public boolean hasValidationConstraints()
     {
-        return this.hasValidationConstraints;
-    }
-
-    /**
-     * Returns true if an entity contains attributes with validation constraints
-     * enabled
-     * 
-     * @param attribute
-     * @return
-     */
-    protected boolean onCheckValidationConstraints(Field attribute)
-    {
-        // / Checks if attribute contains any validation constraint enabled
-        return attribute.isAnnotationPresent(AssertFalse.class) || attribute.isAnnotationPresent(AssertTrue.class)
-                || attribute.isAnnotationPresent(DecimalMax.class) || attribute.isAnnotationPresent(DecimalMin.class)
-                || attribute.isAnnotationPresent(Digits.class) || attribute.isAnnotationPresent(Future.class)
-                || attribute.isAnnotationPresent(Max.class) || attribute.isAnnotationPresent(Min.class)
-                || attribute.isAnnotationPresent(NotNull.class) || attribute.isAnnotationPresent(Null.class)
-                || attribute.isAnnotationPresent(Past.class) || attribute.isAnnotationPresent(Pattern.class)
-                || attribute.isAnnotationPresent(Size.class);
-
+        if (this.hasValidationConstraints)
+        {
+            return this.hasValidationConstraints;
+        }
+        if (this.superClazzType != null)
+        {
+            return ((AbstractManagedType) superClazzType).hasValidationConstraints();
+        }
+        return false;
     }
 
     /**
@@ -1359,41 +1348,13 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
     private void onValidateAttributeConstraints(Field field)
     {
 
-        if (!this.hasValidationConstraints)
+        if (!this.hasValidationConstraints && MetadataUtils.onCheckValidationConstraints(field))
         {
-            if (onCheckValidationConstraints(field))
-            {
-                this.hasValidationConstraints = true;
-            }
-            onValidateSuperTypeAttributeConstraints(superClazzType);
+
+            this.hasValidationConstraints = true;
 
         }
 
-    }
-
-    /**
-     * Checks recursively if any constraint in present in super class of a
-     * managed type containing attribute
-     * 
-     * @param superClazzType2
-     */
-    private void onValidateSuperTypeAttributeConstraints(ManagedType<? super X> superClazzType2)
-    {
-
-        if (!this.hasValidationConstraints() && superClazzType2 != null)
-        {
-            AbstractManagedType managedType = (AbstractManagedType) superClazzType2;
-
-            if (managedType.hasValidationConstraints())
-            {
-                this.hasValidationConstraints = true;
-            }
-            else
-            {
-                onValidateSuperTypeAttributeConstraints(managedType.superClazzType);
-            }
-
-        }
     }
 
 }

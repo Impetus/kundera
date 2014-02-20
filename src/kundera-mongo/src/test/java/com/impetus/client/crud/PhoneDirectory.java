@@ -24,6 +24,7 @@ import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import javax.validation.constraints.Size;
 
 @Embeddable
 public class PhoneDirectory
@@ -35,6 +36,7 @@ public class PhoneDirectory
     private List<String> contactName;
 
     @Column
+    @Size(message = "The size should be at least equal to one but not more than 2", min = 1, max = 2)
     private Map<String, String> contactMap;
 
     @Column
@@ -42,13 +44,22 @@ public class PhoneDirectory
 
     public PhoneDirectory()
     {
-        contactName = new LinkedList<String>();
-        contactMap = new HashMap<String, String>();
-        contactNumber = new HashSet<String>();
-        contactName.add("xamry");
-        contactMap.put("xamry", "9891991919");
-        contactNumber.add("9891991919");
-        phoneDirectoryName = "MyPhoneDirectory";
+        this.contactName = new LinkedList<String>();
+        this.contactMap = new HashMap<String, String>();
+        this.contactNumber = new HashSet<String>();
+        this.contactName.add("xamry");
+        this.contactMap.put("xamry", "9891991919");
+        this.contactNumber.add("9891991919");
+        this.phoneDirectoryName = "MyPhoneDirectory";
+    }
+
+    public PhoneDirectory(String phoneDirectoryName, List<String> contactName, Map<String, String> contactMap,
+            Set<String> contactNumber)
+    {
+        this.contactName = contactName;
+        this.contactMap = contactMap;
+        this.contactNumber = contactNumber;
+        this.phoneDirectoryName = phoneDirectoryName;
     }
 
     public String getPhoneDirectoryName()

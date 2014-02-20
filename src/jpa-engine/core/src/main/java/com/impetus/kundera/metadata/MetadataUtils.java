@@ -33,6 +33,19 @@ import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.Metamodel;
+import javax.validation.constraints.AssertFalse;
+import javax.validation.constraints.AssertTrue;
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Digits;
+import javax.validation.constraints.Future;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
+import javax.validation.constraints.Past;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -637,6 +650,26 @@ public class MetadataUtils
         }    
         
         entityMetadata.setEntityType(entityType);
+    }
+    
+    /**
+     * Returns true if an entity contains attributes with validation constraints
+     * enabled
+     * 
+     * @param attribute
+     * @return
+     */
+    public static boolean onCheckValidationConstraints(Field attribute)
+    {
+        // / Checks if attribute contains any validation constraint enabled
+        return attribute.isAnnotationPresent(AssertFalse.class) || attribute.isAnnotationPresent(AssertTrue.class)
+                || attribute.isAnnotationPresent(DecimalMax.class) || attribute.isAnnotationPresent(DecimalMin.class)
+                || attribute.isAnnotationPresent(Digits.class) || attribute.isAnnotationPresent(Future.class)
+                || attribute.isAnnotationPresent(Max.class) || attribute.isAnnotationPresent(Min.class)
+                || attribute.isAnnotationPresent(NotNull.class) || attribute.isAnnotationPresent(Null.class)
+                || attribute.isAnnotationPresent(Past.class) || attribute.isAnnotationPresent(Pattern.class)
+                || attribute.isAnnotationPresent(Size.class);
+
     }
 
 }

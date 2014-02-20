@@ -137,7 +137,7 @@ public final class MetaModelBuilder<X, T>
     void construct(Class<X> clazz, Field attribute)
     {
         TypeBuilder<X> typeBuilder = new TypeBuilder<X>(attribute);
-        typeBuilder.build(managedType, attribute.getType());
+        typeBuilder.build((AbstractManagedType) managedTypes.get(clazz), attribute.getType());
     }
 
     /**
@@ -304,7 +304,45 @@ public final class MetaModelBuilder<X, T>
                 embeddableType = (AbstractManagedType<T>) embeddables.get(attribType);
             }
 
+            onPostProcess(embeddableType);
+
             return embeddableType;
+        }
+
+        /**
+         * Checks for constraint on embeddabletype  and accordingly set it on managedType
+         * 
+         * @param embeddableType
+         */
+        private void onPostProcess(AbstractManagedType<T> embeddableType)
+        {
+            try
+            {
+                if (managedType != null)
+                {
+                    
+                    Field managedTypeField = managedType.getClass().getSuperclass().getSuperclass()
+                            .getDeclaredField("hasValidationConstraints");
+
+                    if (!managedTypeField.isAccessible())
+                    {
+                        managedTypeField.setAccessible(true);
+                    }
+
+                    if (embeddableType.hasValidationConstraints())
+                    {
+                        managedTypeField.set(managedType, true);
+
+                    }
+
+                }
+            }
+            catch (Exception e)
+            {
+                LOG.error("Error setting Contstraint for managed type, Caused by: {}", e);
+                throw new MetamodelLoaderException("Error setting Contstraint for managed type"+e.getMessage());
+            }
+           
         }
 
         /**

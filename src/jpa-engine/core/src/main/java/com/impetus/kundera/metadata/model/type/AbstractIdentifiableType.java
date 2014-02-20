@@ -25,6 +25,8 @@ import javax.persistence.metamodel.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.kundera.metadata.MetadataUtils;
+
 /**
  * Abstract implementation for <code>IdentifiableType</code>.
  * 
@@ -239,7 +241,7 @@ public abstract class AbstractIdentifiableType<X> extends AbstractManagedType<X>
         this.idAttribute = idAttribute;
         this.isIdClass = isIdClass;
         this.idClassAttributes = idClassAttributes;
-        if (onCheckValidationConstraints((Field) idAttribute.getJavaMember()))
+        if (MetadataUtils.onCheckValidationConstraints((Field) idAttribute.getJavaMember()))
         {
             this.hasValidationConstraints = true;
         }

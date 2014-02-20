@@ -201,25 +201,27 @@ public class AttributeConstraintRule extends AbstractFieldRule implements FieldR
         {
             return true;
         }
+        
         int objectSize = 0;
         int minSize = ((Size) annotate).min();
         int maxSize = ((Size) annotate).max();
         if (validationObject != null)
         {
-            if (validationObject.getClass().isAssignableFrom(String.class))
+            if (String.class.isAssignableFrom(validationObject.getClass()))
             {
                 objectSize = ((String) validationObject).length();
 
             }
-            else if (validationObject.getClass().isAssignableFrom(Collection.class))
+            else if (Collection.class.isAssignableFrom(validationObject.getClass()))
             {
+                
                 objectSize = ((Collection) validationObject).size();
             }
-            else if (validationObject.getClass().isAssignableFrom(Map.class))
+            else if (Map.class.isAssignableFrom(validationObject.getClass()))
             {
                 objectSize = ((Map) validationObject).size();
             }
-            else if (validationObject.getClass().isAssignableFrom(ArrayList.class))
+            else if (ArrayList.class.isAssignableFrom(validationObject.getClass()))
             {
 
                 objectSize = ((ArrayList) validationObject).size();
