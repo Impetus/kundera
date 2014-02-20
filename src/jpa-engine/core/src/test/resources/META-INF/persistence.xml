@@ -281,7 +281,13 @@
 				value="com.impetus.kundera.client.CoreTestClientFactory" />
 		</properties>
 	</persistence-unit>
-
+	<persistence-unit name="extConfig">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.kundera.persistence.User</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+		</properties>
+	</persistence-unit>
 
 
 </persistence>
