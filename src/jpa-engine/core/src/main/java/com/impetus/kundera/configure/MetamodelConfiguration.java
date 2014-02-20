@@ -149,16 +149,7 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
             PersistenceUnitMetadata puMetadata = persistentUnitMetadataMap.get(persistenceUnit);
             classesToScan = puMetadata.getManagedClassNames();
             managedURLs = puMetadata.getManagedURLs();
-            Map<String, Object> externalProperties = KunderaCoreUtils.getExternalProperties(persistenceUnit,
-                    externalPropertyMap, persistenceUnits);
-
-            client = externalProperties != null ? (String) externalProperties
-                    .get(PersistenceProperties.KUNDERA_CLIENT_FACTORY) : null;
-
-            if (client == null)
-            {
-                client = puMetadata.getClient();
-            }
+            client = getClientFactoryName(persistenceUnit);
         }
 
         /*
@@ -471,14 +462,15 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
 
         return clazzToPuMap;
     }
-
+    
     private void processGeneratedValueAnnotation(Class<?> clazz, String persistenceUnit, EntityMetadata m,
             Map<String, IdDiscriptor> entityNameToKeyDiscriptorMap)
     {
         GeneratedValueProcessor processer = new GeneratedValueProcessor();
-        String pu = m.getPersistenceUnit()/* getPersistenceUnitOfEntity(clazz) */;
-        String clientFactoryName = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata,
-                m.getPersistenceUnit()).getClient();
+        String pu = m.getPersistenceUnit();
+
+        String clientFactoryName = getClientFactoryName(persistenceUnit);
+
         if (pu != null && pu.equals(persistenceUnit)
                 || clientFactoryName.equalsIgnoreCase("com.impetus.client.rdbms.RDBMSClientFactory"))
         {
@@ -490,4 +482,51 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
             }
         }
     }
+
+    private String getClientFactoryName(String persistenceUnit)
+    {
+        Map<String, Object> externalProperties = KunderaCoreUtils.getExternalProperties(persistenceUnit,
+                externalPropertyMap, persistenceUnits);
+
+        String clientFactoryName  = externalProperties != null ? (String) externalProperties
+                .get(PersistenceProperties.KUNDERA_CLIENT_FACTORY) : null;
+
+        if (clientFactoryName == null)
+        {
+            clientFactoryName = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata,
+                    persistenceUnit).getClient();
+        }
+        return clientFactoryName;
+    }
+ 
+/*
+    private void processGeneratedValueAnnotation(Class<?> clazz, String persistenceUnit, EntityMetadata m,
+            Map<String, IdDiscriptor> entityNameToKeyDiscriptorMap)
+    {
+        GeneratedValueProcessor processer = new GeneratedValueProcessor();
+        String pu = m.getPersistenceUnit() getPersistenceUnitOfEntity(clazz) ;
+        
+        Map<String, Object> externalProperties = KunderaCoreUtils.getExternalProperties(persistenceUnit,
+                externalPropertyMap, persistenceUnits);
+
+        String clientFactoryName  = externalProperties != null ? (String) externalProperties
+                .get(PersistenceProperties.KUNDERA_CLIENT_FACTORY) : null;
+
+        if (clientFactoryName == null)
+        {
+            clientFactoryName = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata,
+                    m.getPersistenceUnit()).getClient();
+        }
+        
+        if (pu != null && pu.equals(persistenceUnit)
+                || clientFactoryName.equalsIgnoreCase("com.impetus.client.rdbms.RDBMSClientFactory"))
+        {
+            Field f = (Field) m.getIdAttribute().getJavaMember();
+
+            if (f.isAnnotationPresent(GeneratedValue.class))
+            {
+                processer.process(clazz, f, m, entityNameToKeyDiscriptorMap);
+            }
+        }
+    }*/
 }

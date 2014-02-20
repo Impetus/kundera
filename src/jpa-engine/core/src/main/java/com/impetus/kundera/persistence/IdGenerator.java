@@ -61,10 +61,7 @@ public class IdGenerator
         if (keyValue != null)
         {
 
-            String clientFactoryName = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata,
-                    m.getPersistenceUnit()).getClient();
-            if (clientFactoryName != null
-                    && !clientFactoryName.equalsIgnoreCase("com.impetus.client.rdbms.RDBMSClientFactory"))
+            if (!client.getQueryImplementor().getSimpleName().equalsIgnoreCase("RDBMSQuery"))
             {
                 if (client != null)
                 {
