@@ -67,7 +67,7 @@ public class KunderaPersistence implements PersistenceProvider
             catch (PersistenceUnitConfigurationException pcex)
             {
                 // Means it is not for kundera persistence!
-                logger.error("EnrityManagerFactory not created, returning null.");
+                logger.error("EntityManagerFactory not created, returning null.");
                 return null;
             }
         }
@@ -89,7 +89,7 @@ public class KunderaPersistence implements PersistenceProvider
             catch (PersistenceUnitConfigurationException pcex)
             {
                 // Means it is not for kundera persistence!
-                logger.error("EnrityManagerFactory not created, returning null.");
+                logger.error("EntityManagerFactory not created, returning null.");
                 return null;
             }
         }
