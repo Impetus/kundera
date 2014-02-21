@@ -363,10 +363,6 @@ public final class CQLTranslator
             boolean useToken)
     {
 
-        builder = ensureCase(builder, field, useToken);
-        builder.append(SPACE_STRING);
-        builder.append(clause);
-        builder.append(SPACE_STRING);
         builder = onWhereClause(builder, fieldClazz, field, value, clause, useToken);
         builder.append(AND_CLAUSE);
     }
@@ -383,6 +379,16 @@ public final class CQLTranslator
     public StringBuilder onWhereClause(StringBuilder builder, Class fieldClazz, String field, Object value,
             String clause, boolean useToken)
     {
+
+        if (clause.trim().equals(IN_CLAUSE))
+        {
+            useToken = false;
+
+        }
+        builder = ensureCase(builder, field, useToken);
+        builder.append(SPACE_STRING);
+        builder.append(clause);
+        builder.append(SPACE_STRING);
 
         if (clause.trim().equals(IN_CLAUSE))
         {
