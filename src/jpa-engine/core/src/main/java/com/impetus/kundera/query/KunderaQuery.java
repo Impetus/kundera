@@ -71,7 +71,7 @@ public class KunderaQuery
     private static final Pattern INTRA_CLAUSE_PATTERN = Pattern.compile("=|\\s\\blike\\b|\\bin\\b|>=|>|<=|<|\\s\\bset",
             Pattern.CASE_INSENSITIVE);
 
-    /** The logger. */
+     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(KunderaQuery.class);
 
     /** The result. */
@@ -585,15 +585,53 @@ public class KunderaQuery
      */
     private void onTypedParameter(List<String> tokens, FilterClause filterClause, String fieldName)
     {
-        if (tokens.get(2) != null && tokens.get(2).startsWith(":"))
+        // parseandApplyToken(:nae1,:nae2) OR (?1,?2)
+        // if tokens.get(2) is not null and enclose within bracket. extract out
+        // group of parameters(use tokenizer)
+        // run a for loop to set parameter
+        // [u.key.userId, IN, (:1,:2)]
+
+        if (filterClause.getCondition().equalsIgnoreCase("IN"))
         {
-            addTypedParameter(Type.NAMED, tokens.get(2), filterClause);
-            filterJPAParameterInfo(Type.NAMED, tokens.get(2).substring(1), fieldName);
+            String token = tokens.get(2);
+            token = token.substring(token.indexOf("(") + 1, token.indexOf(")"));
+
+            StringTokenizer tokenizer = new StringTokenizer(token, ",");
+            while (tokenizer.hasMoreElements())
+            {
+                String parameter = tokenizer.nextToken();
+                onTypedParameter(parameter, filterClause, fieldName);
+
+            }
+
         }
-        else if (tokens.get(2) != null && tokens.get(2).startsWith("?"))
+        else
         {
-            addTypedParameter(Type.INDEXED, tokens.get(2), filterClause);
-            filterJPAParameterInfo(Type.INDEXED, tokens.get(2).substring(1), fieldName);
+            onTypedParameter(tokens.get(2), filterClause, fieldName);
+
+        }
+
+    }
+
+    /**
+     * @param token
+     * @param filterClause
+     * @param fieldName
+     */
+    private void onTypedParameter(String token, FilterClause filterClause, String fieldName)
+    {
+        if (token != null)
+        {
+            if (token.startsWith(":"))
+            {
+                addTypedParameter(Type.NAMED, token, filterClause);
+                filterJPAParameterInfo(Type.NAMED, token.substring(1), fieldName);
+            }
+            else if (token.startsWith("?"))
+            {
+                addTypedParameter(Type.INDEXED, token, filterClause);
+                filterJPAParameterInfo(Type.INDEXED, token.substring(1), fieldName);
+            }
         }
     }
 
@@ -714,9 +752,18 @@ public class KunderaQuery
         {
             FilterClause clause = typedParameter.getParameters() != null ? typedParameter.getParameters().get(name)
                     : null;
+
             if (clause != null)
             {
-                clause.setValue(value);
+                if (clause.getCondition().equalsIgnoreCase("IN"))
+                {
+                    clause.setValue(StringUtils.replace(clause.getValue().toString(), name, value.toString()));
+
+                }
+                else
+                {
+                    clause.setValue(value);
+                }
             }
             else
             {

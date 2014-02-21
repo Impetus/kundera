@@ -691,5 +691,73 @@ public class PersonCassandraTest extends BaseTest
             }
         }
     }
+    
+    
+    /**
+     * On typed create query
+     * 
+     * @throws TException
+     * @throws InvalidRequestException
+     * @throws UnavailableException
+     * @throws TimedOutException
+     * @throws SchemaDisagreementException
+     */
+    @Test
+    public void onInClauseQuery() throws TException, InvalidRequestException, UnavailableException, TimedOutException,
+            SchemaDisagreementException
+    {
+        Map<String, Client> clientMap = (Map<String, Client>) entityManager.getDelegate();
+        ThriftClient tc = (ThriftClient) clientMap.get(SEC_IDX_CASSANDRA_TEST);
+        tc.setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
+
+        Object p1 = prepareData("1", 10);
+        Object p2 = prepareData("2", 20);
+        Object p3 = prepareData("3", 15);
+        entityManager.persist(p1);
+        entityManager.persist(p2);
+        entityManager.persist(p3);
+        String qry = "Select p.personId,p.personName from PersonCassandra p where p.personId IN (1,2,3)";
+        Query q = entityManager.createQuery(qry);
+        List<PersonCassandra> persons = q.getResultList();
+        Assert.assertNotNull(persons);
+        Assert.assertFalse(persons.isEmpty());
+        Assert.assertEquals(3, persons.size());
+        
+        
+        String updateQuery = "Update PersonCassandra p set p.personName=''KK MISHRA'' where p.personId IN (1,2)";
+        q = entityManager.createQuery(updateQuery);
+        q.executeUpdate();
+        
+        qry = "Select p.personId,p.personName from PersonCassandra p where p.personId IN (1,2)";
+        q = entityManager.createQuery(qry);
+        persons = q.getResultList();
+        Assert.assertNotNull(persons);
+        Assert.assertFalse(persons.isEmpty());
+        Assert.assertEquals(2, persons.size());
+        Assert.assertEquals("'KK MISHRA'", persons.get(0).getPersonName());
+        
+        String inClause = "Select p.personId,p.personName from PersonCassandra p where p.personId IN (?1,?2)";
+        
+        q = entityManager.createQuery(inClause);
+        q.setParameter(1, '1');
+        q.setParameter(2, '2');
+        persons = q.getResultList();
+        Assert.assertEquals(2, persons.size());
+        Assert.assertEquals("'KK MISHRA'", persons.get(0).getPersonName());
+        
+        updateQuery = "Update PersonCassandra p set p.personName=''vivek'' where p.personId IN (?1,?2)";
+        q = entityManager.createQuery(updateQuery);
+        q.setParameter(1, '1');
+        q.setParameter(2, '2');
+        q.executeUpdate();
+        
+        qry = "Select p.personId,p.personName from PersonCassandra p where p.personId IN (1,2)";
+        q = entityManager.createQuery(qry);
+        persons = q.getResultList();
+        Assert.assertEquals(2, persons.size());
+        Assert.assertEquals("'vivek'", persons.get(0).getPersonName());
+        tc.setCqlVersion(CassandraConstants.CQL_VERSION_2_0);
+      
+    }
 
 }
