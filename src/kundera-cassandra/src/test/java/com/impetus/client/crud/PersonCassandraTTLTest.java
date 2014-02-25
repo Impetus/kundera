@@ -33,10 +33,10 @@ import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SliceRange;
+import org.apache.cassandra.utils.ByteBufferUtil;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.scale7.cassandra.pelops.Bytes;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.persistence.CassandraCli;
@@ -120,7 +120,7 @@ public class PersonCassandraTTLTest extends BaseTest
         PersonCassandra p = findById(PersonCassandra.class, "1", em);
 
         SlicePredicate predicate = new SlicePredicate();
-        predicate.setSlice_range(new SliceRange(Bytes.EMPTY.getBytes(), Bytes.EMPTY.getBytes(), true, 10000));
+        predicate.setSlice_range(new SliceRange(ByteBufferUtil.EMPTY_BYTE_BUFFER, ByteBufferUtil.EMPTY_BYTE_BUFFER, true, 10000));
         ByteBuffer key = ByteBuffer.wrap("1".getBytes());
 
         CassandraCli.client.set_keyspace("KunderaExamples");
@@ -204,7 +204,7 @@ public class PersonCassandraTTLTest extends BaseTest
         PersonCassandra p = findById(PersonCassandra.class, "1", em);
 
         SlicePredicate predicate = new SlicePredicate();
-        predicate.setSlice_range(new SliceRange(Bytes.EMPTY.getBytes(), Bytes.EMPTY.getBytes(), true, 10000));
+        predicate.setSlice_range(new SliceRange(ByteBufferUtil.EMPTY_BYTE_BUFFER, ByteBufferUtil.EMPTY_BYTE_BUFFER, true, 10000));
         ByteBuffer key = ByteBuffer.wrap("1".getBytes());
 
         CassandraCli.client.set_keyspace("KunderaExamples");
@@ -286,7 +286,7 @@ public class PersonCassandraTTLTest extends BaseTest
         PersonCassandra p = findById(PersonCassandra.class, "1", em);
 
         SlicePredicate predicate = new SlicePredicate();
-        predicate.setSlice_range(new SliceRange(Bytes.EMPTY.getBytes(), Bytes.EMPTY.getBytes(), true, 10000));
+        predicate.setSlice_range(new SliceRange(ByteBufferUtil.EMPTY_BYTE_BUFFER, ByteBufferUtil.EMPTY_BYTE_BUFFER, true, 10000));
         ByteBuffer key = ByteBuffer.wrap("1".getBytes());
 
         CassandraCli.client.set_keyspace("KunderaExamples");
@@ -348,7 +348,7 @@ public class PersonCassandraTTLTest extends BaseTest
         q.executeUpdate();
 
         predicate = new SlicePredicate();
-        predicate.setSlice_range(new SliceRange(Bytes.EMPTY.getBytes(), Bytes.EMPTY.getBytes(), true, 10000));
+        predicate.setSlice_range(new SliceRange(ByteBufferUtil.EMPTY_BYTE_BUFFER, ByteBufferUtil.EMPTY_BYTE_BUFFER, true, 10000));
         key = ByteBuffer.wrap("2".getBytes());
 
         CassandraCli.client.set_keyspace("KunderaExamples");
@@ -407,7 +407,7 @@ public class PersonCassandraTTLTest extends BaseTest
         em.clear();
 
         predicate = new SlicePredicate();
-        predicate.setSlice_range(new SliceRange(Bytes.EMPTY.getBytes(), Bytes.EMPTY.getBytes(), true, 10000));
+        predicate.setSlice_range(new SliceRange(ByteBufferUtil.EMPTY_BYTE_BUFFER, ByteBufferUtil.EMPTY_BYTE_BUFFER, true, 10000));
         key = ByteBuffer.wrap("3".getBytes());
 
         CassandraCli.client.set_keyspace("KunderaExamples");
@@ -459,7 +459,7 @@ public class PersonCassandraTTLTest extends BaseTest
         em.clear();
 
         predicate = new SlicePredicate();
-        predicate.setSlice_range(new SliceRange(Bytes.EMPTY.getBytes(), Bytes.EMPTY.getBytes(), true, 10000));
+        predicate.setSlice_range(new SliceRange(ByteBufferUtil.EMPTY_BYTE_BUFFER, ByteBufferUtil.EMPTY_BYTE_BUFFER, true, 10000));
         key = ByteBuffer.wrap("4".getBytes());
 
         CassandraCli.client.set_keyspace("KunderaExamples");

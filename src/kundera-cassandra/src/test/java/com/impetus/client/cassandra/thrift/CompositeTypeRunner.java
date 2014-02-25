@@ -40,9 +40,9 @@ import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SliceRange;
 import org.apache.cassandra.thrift.TBinaryProtocol;
+import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TSocket;
-import org.scale7.cassandra.pelops.Bytes;
 
 /**
  * @author vivek.mishra
@@ -126,7 +126,7 @@ public class CompositeTypeRunner
         client.insert(ByteBuffer.wrap("1".getBytes()), parent, column, ConsistencyLevel.ONE);
 
         SlicePredicate slicePredicate = new SlicePredicate();
-        slicePredicate.setSlice_range(new SliceRange(Bytes.EMPTY.getBytes(), Bytes.EMPTY.getBytes(), true, 10000));
+        slicePredicate.setSlice_range(new SliceRange(ByteBufferUtil.EMPTY_BYTE_BUFFER, ByteBufferUtil.EMPTY_BYTE_BUFFER, true, 10000));
         List<ColumnOrSuperColumn> columns = client.get_slice(ByteBuffer.wrap("1".getBytes()), parent, slicePredicate,
                 ConsistencyLevel.ONE);
 

@@ -58,6 +58,7 @@ public class NativeQueryCQLV3Test
     public void setUp() throws Exception
     {
         CassandraCli.cassandraSetUp();
+        CassandraCli.dropKeySpace(schema);
         String nativeSql = "CREATE KEYSPACE \"" + schema
                 + "\" with replication = {'class':'SimpleStrategy', 'replication_factor':1}";
         CassandraCli.getClient().execute_cql3_query(ByteBuffer.wrap(nativeSql.getBytes("UTF-8")), Compression.NONE,

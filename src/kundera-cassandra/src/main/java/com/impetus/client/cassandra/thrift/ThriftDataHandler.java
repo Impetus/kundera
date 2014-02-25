@@ -27,7 +27,7 @@ import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SliceRange;
 import org.apache.cassandra.thrift.SuperColumn;
-import org.scale7.cassandra.pelops.Bytes;
+import org.apache.cassandra.utils.ByteBufferUtil;
 
 import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
@@ -76,10 +76,10 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
 
         Object e = null;
         SlicePredicate predicate = new SlicePredicate();
-        predicate.setSlice_range(new SliceRange(Bytes.EMPTY.getBytes(), Bytes.EMPTY.getBytes(), true, 10000));
+        predicate.setSlice_range(new SliceRange(ByteBufferUtil.EMPTY_BYTE_BUFFER, ByteBufferUtil.EMPTY_BYTE_BUFFER, true, 10000));
 
         ByteBuffer key = ByteBuffer.wrap(PropertyAccessorHelper.toBytes(rowKey, m.getIdAttribute().getJavaType()));
-        Connection conn = thriftClient.getConection();
+        Connection conn = thriftClient.getConnection();
         try
         {
             MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(

@@ -85,7 +85,7 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
 
             List<ThriftRow> indexThriftyRows = thriftDataHandler.toIndexThriftRow(node.getData(), entityMetadata,
                     indexColumnFamily);
-            Connection conn = thriftClient.getConection();
+            Connection conn = thriftClient.getConnection();
             try
             {
                 for (ThriftRow thriftRow : indexThriftyRows)
@@ -177,7 +177,7 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
         sliceRange.setStart(start);
         sliceRange.setFinish(finish);
         colPredicate.setSlice_range(sliceRange);
-        Connection conn = thriftClient.getConection();
+        Connection conn = thriftClient.getConnection();
 
         List<ColumnOrSuperColumn> coscList = null;
         try
@@ -231,7 +231,7 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
         ColumnPath cp = new ColumnPath(columnFamilyName);
         cp.setSuper_column(superColumnName);
         ColumnOrSuperColumn cosc = null;
-        Connection conn = thriftClient.getConection();
+        Connection conn = thriftClient.getConnection();
 
         try
         {
@@ -284,7 +284,7 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
     {
         ColumnPath cp = new ColumnPath(indexColumnFamily);
         cp.setSuper_column(superColumnName);
-        Connection conn = thriftClient.getConection();
+        Connection conn = thriftClient.getConnection();
         try
         {
             ColumnOrSuperColumn cosc;
