@@ -45,7 +45,7 @@ public class StringAccessor implements PropertyAccessor<String>
 
         try
         {
-            return bytes != null ? new String(bytes, Constants.ENCODING) : null;
+            return bytes != null ? new String(bytes, Constants.CHARSET_UTF8) : null;
         }
         catch (UnsupportedEncodingException e)
         {
@@ -67,7 +67,7 @@ public class StringAccessor implements PropertyAccessor<String>
 
         try
         {
-            return s != null ? ((String) s).getBytes(Constants.ENCODING) : null;
+            return s != null ? ((String) s).getBytes(Constants.CHARSET_UTF8) : null;
         }
         catch (UnsupportedEncodingException e)
         {

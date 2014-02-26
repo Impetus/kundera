@@ -16,23 +16,28 @@
 package com.impetus.client.cassandra.index;
 
 import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 
+import org.apache.cassandra.db.marshal.UTF8Type;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.IndexExpression;
 import org.apache.cassandra.thrift.IndexOperator;
 import org.apache.cassandra.thrift.SuperColumn;
-import org.scale7.cassandra.pelops.Bytes;
+import org.apache.cassandra.utils.ByteBufferUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,9 +93,19 @@ public abstract class InvertedIndexHandlerBase
     {
         SearchResult searchResult = new SearchResult();
 
-        String rowKey = Bytes.toUTF8(expression.getColumn_name());
         byte[] superColumnName = expression.getValue();
-        String superColumnNameStr = Bytes.toUTF8(expression.getValue());
+        String superColumnNameStr=null;
+        String rowKey = null;
+		try 
+		{
+			
+			rowKey = ByteBufferUtil.string(ByteBuffer.wrap(expression.getColumn_name()), Charset.forName(Constants.CHARSET_UTF8));/*UTF8Type.instance.compose(ByteBuffer.wrap(expression.getColumn_name()));*/
+			superColumnNameStr = new String(expression.getValue(), Charset.forName(Constants.CHARSET_UTF8));/*ByteBufferUtil.string(ByteBuffer.wrap(expression.getValue()), Charset.forName(Constants.CHARSET_UTF8));*/
+		} catch (CharacterCodingException e) 
+		{
+			log.error("Error while retrieving records {}, Caused by:", e);
+			throw new PersistenceException(e);
+		}
         Object pk = PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(), superColumnName);
         IndexOperator condition = expression.getOp();
 
@@ -185,7 +200,7 @@ public abstract class InvertedIndexHandlerBase
                     searchResult.setPrimaryKey(PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(),
                             columnName));
                     byte[] columnValue = column.getValue();
-                    String ecValue = Bytes.toUTF8(columnValue);
+                    String ecValue = UTF8Type.instance.compose(ByteBuffer.wrap(columnValue));
 
                     if (ecValue != null && !"".equals(ecValue.trim()))
                     {

@@ -29,6 +29,8 @@ import javax.persistence.metamodel.EntityType;
 
 import net.dataforte.cassandra.pool.ConnectionPool;
 
+import org.apache.cassandra.db.marshal.UTF8Type;
+import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.ColumnParent;
@@ -48,8 +50,8 @@ import org.apache.cassandra.thrift.SliceRange;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
+import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.thrift.TException;
-import org.scale7.cassandra.pelops.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -139,7 +141,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     @Override
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
     {
-        Connection conn = getConection();
+        Connection conn = getConnection();
         try
         {
 
@@ -261,7 +263,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
 
                 // Write Mutation map to database
 
-                conn = getConection();
+                conn = getConnection();
 
                 conn.getClient().set_keyspace(entityMetadata.getSchema());
 
@@ -376,7 +378,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         Connection conn = null;
         try
         {
-            conn = getConection();
+            conn = getConnection();
 
             coscList = conn.getClient().get_slice(ByteBuffer.wrap(rowKey), parent, predicate, getConsistencyLevel());
 
@@ -442,7 +444,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             Connection conn = null;
             try
             {
-                conn = getConection();
+                conn = getConnection();
                 results = conn.getClient().get_slice(ByteBuffer.wrap(rowKey), parent, predicate, getConsistencyLevel());
             }
             catch (InvalidRequestException e)
@@ -491,19 +493,18 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
 
         SlicePredicate slicePredicate = new SlicePredicate();
 
-        slicePredicate.setSlice_range(new SliceRange(Bytes.EMPTY.getBytes(), Bytes.EMPTY.getBytes(), false,
+        slicePredicate.setSlice_range(new SliceRange(ByteBufferUtil.EMPTY_BYTE_BUFFER, ByteBufferUtil.EMPTY_BYTE_BUFFER, false,
                 Integer.MAX_VALUE));
 
         String childIdStr = PropertyAccessorHelper.getString(columnValue);
-        IndexExpression ie = new IndexExpression(Bytes.fromUTF8(
-                columnName + Constants.JOIN_COLUMN_NAME_SEPARATOR + childIdStr).getBytes(), IndexOperator.EQ, Bytes
-                .fromUTF8(childIdStr).getBytes());
+        IndexExpression ie = new IndexExpression(UTF8Type.instance.decompose(
+                columnName + Constants.JOIN_COLUMN_NAME_SEPARATOR + childIdStr), IndexOperator.EQ, UTF8Type.instance.decompose(childIdStr));
 
         List<IndexExpression> expressions = new ArrayList<IndexExpression>();
         expressions.add(ie);
 
         IndexClause ix = new IndexClause();
-        ix.setStart_key(Bytes.EMPTY.toByteArray());
+        ix.setStart_key(ByteBufferUtil.EMPTY_BYTE_BUFFER);
         ix.setCount(Integer.MAX_VALUE);
         ix.setExpressions(expressions);
 
@@ -511,7 +512,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         Connection conn = null;
         try
         {
-            conn = getConection();
+            conn = getConnection();
             List<KeySlice> keySlices = conn.getClient().get_indexed_slices(columnParent, ix, slicePredicate,
                     getConsistencyLevel());
 
@@ -605,16 +606,16 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         else
         {
             SlicePredicate slicePredicate = new SlicePredicate();
-            slicePredicate.setSlice_range(new SliceRange(Bytes.EMPTY.getBytes(), Bytes.EMPTY.getBytes(), false,
+            slicePredicate.setSlice_range(new SliceRange(ByteBufferUtil.EMPTY_BYTE_BUFFER, ByteBufferUtil.EMPTY_BYTE_BUFFER, false,
                     Integer.MAX_VALUE));
 
-            IndexExpression ie = new IndexExpression(Bytes.fromUTF8(colName).getBytes(), IndexOperator.EQ,
+            IndexExpression ie = new IndexExpression(UTF8Type.instance.decompose(colName), IndexOperator.EQ,
                     ByteBuffer.wrap(PropertyAccessorHelper.getBytes(colValue)));
             List<IndexExpression> expressions = new ArrayList<IndexExpression>();
             expressions.add(ie);
 
             IndexClause ix = new IndexClause();
-            ix.setStart_key(Bytes.EMPTY.toByteArray());
+            ix.setStart_key(ByteBufferUtil.EMPTY_BYTE_BUFFER);
             ix.setCount(Integer.MAX_VALUE);
             ix.setExpressions(expressions);
             ColumnParent columnParent = new ColumnParent(m.getTableName());
@@ -623,7 +624,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             Connection conn = null;
             try
             {
-                conn = getConection();
+                conn = getConnection();
                 keySlices = conn.getClient()
                         .get_indexed_slices(columnParent, ix, slicePredicate, getConsistencyLevel());
             }
@@ -704,7 +705,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         Connection conn = null;
         try
         {
-            conn = getConection();
+            conn = getConnection();
             MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                     metadata.getPersistenceUnit());
 
@@ -732,8 +733,8 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                         ColumnPath path = new ColumnPath(tableName);
 
                         conn.getClient().remove(
-                                ByteBuffer.wrap(CassandraUtilities.toBytes(pKey,
-                                        metadata.getIdAttribute().getJavaType()).toByteArray()), path,
+                                CassandraUtilities.toBytes(pKey,
+                                        metadata.getIdAttribute().getJavaType()), path,
                                 System.currentTimeMillis(), getConsistencyLevel());
                     }
                 }
@@ -785,10 +786,10 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         Connection conn = null;
         try
         {
-            conn = getConection();
+            conn = getConnection();
             ColumnPath path = new ColumnPath(tableName);
             conn.getClient().remove(
-                    ByteBuffer.wrap(CassandraUtilities.toBytes(columnValue, columnValue.getClass()).toByteArray()),
+                    CassandraUtilities.toBytes(columnValue, columnValue.getClass()),
                     path, System.currentTimeMillis(), getConsistencyLevel());
 
         }
@@ -934,7 +935,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                 {
                     if (colName != null)
                     {
-                        asList.add(Bytes.fromUTF8(colName).getBytes());
+                        asList.add(UTF8Type.instance.decompose(colName));
                     }
                 }
                 slicePredicate.setColumn_names(asList);
@@ -942,18 +943,18 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             else
             {
                 SliceRange sliceRange = new SliceRange();
-                sliceRange.setStart(Bytes.EMPTY.getBytes());
-                sliceRange.setFinish(Bytes.EMPTY.getBytes());
+                sliceRange.setStart(ByteBufferUtil.EMPTY_BYTE_BUFFER);
+                sliceRange.setFinish(ByteBufferUtil.EMPTY_BYTE_BUFFER);
                 sliceRange.setCount(maxResult);
                 slicePredicate.setSlice_range(sliceRange);
             }
-            conn = getConection();
+            conn = getConnection();
 
             if (ixClause.isEmpty())
             {
                 KeyRange keyRange = new KeyRange(maxResult);
-                keyRange.setStart_key(Bytes.nullSafeGet(Bytes.fromUTF8("")));
-                keyRange.setEnd_key(Bytes.nullSafeGet(Bytes.fromUTF8("")));
+                keyRange.setStart_key(ByteBufferUtil.EMPTY_BYTE_BUFFER);
+                keyRange.setEnd_key(ByteBufferUtil.EMPTY_BYTE_BUFFER);
 
                 if (m.isCounterColumnType())
                 {
@@ -971,14 +972,14 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
 
                     if (m.getType().isSuperColumnFamilyMetadata())
                     {
-                        Map<Bytes, List<SuperColumn>> qResults = ThriftDataResultHelper.transformThriftResult(
+                        Map<ByteBuffer, List<SuperColumn>> qResults = ThriftDataResultHelper.transformThriftResult(
                                 ColumnFamilyType.SUPER_COLUMN, keySlices, null);
                         entities = new ArrayList<Object>(qResults.size());
                         computeEntityViaSuperColumns(m, isRelation, relations, entities, qResults);
                     }
                     else
                     {
-                        Map<Bytes, List<Column>> qResults = ThriftDataResultHelper.transformThriftResult(
+                        Map<ByteBuffer, List<Column>> qResults = ThriftDataResultHelper.transformThriftResult(
                                 ColumnFamilyType.COLUMN, keySlices, null);
                         entities = new ArrayList<Object>(qResults.size());
                         computeEntityViaColumns(m, isRelation, relations, entities, qResults);
@@ -993,7 +994,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                     List<KeySlice> keySlices = conn.getClient().get_indexed_slices(new ColumnParent(m.getTableName()),
                             ix, slicePredicate, getConsistencyLevel());
 
-                    Map<Bytes, List<Column>> qResults = ThriftDataResultHelper.transformThriftResult(
+                    Map<ByteBuffer, List<Column>> qResults = ThriftDataResultHelper.transformThriftResult(
                             ColumnFamilyType.COLUMN, keySlices, null);
                     // iterate through complete map and
                     entities = new ArrayList<Object>(qResults.size());
@@ -1050,7 +1051,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             {
                 if (colName != null)
                 {
-                    asList.add(Bytes.fromUTF8(colName).getBytes());
+                    asList.add(UTF8Type.instance.decompose(colName));
                 }
             }
             slicePredicate.setColumn_names(asList);
@@ -1058,8 +1059,8 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         else
         {
             SliceRange sliceRange = new SliceRange();
-            sliceRange.setStart(Bytes.EMPTY.getBytes());
-            sliceRange.setFinish(Bytes.EMPTY.getBytes());
+            sliceRange.setStart(ByteBufferUtil.EMPTY_BYTE_BUFFER);
+            sliceRange.setFinish(ByteBufferUtil.EMPTY_BYTE_BUFFER);
             slicePredicate.setSlice_range(sliceRange);
         }
 
@@ -1074,7 +1075,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             keyRange.setRow_filterIsSet(true);
         }
 
-        Connection conn = getConection();
+        Connection conn = getConnection();
 
         List<KeySlice> keys = conn.getClient().get_range_slices(cp, slicePredicate, keyRange, getConsistencyLevel());
 
@@ -1107,10 +1108,27 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         return dataHandler;
     }
 
-    protected Connection getConection()
+    protected Connection getConnection()
     {
         Connection connection = clientFactory.getConnection(pool);
         return connection;
+    }
+
+    /**
+     * Return cassandra client instance.
+     * 
+     * @param connection
+     * @return
+     */
+    protected Cassandra.Client getConnection(Object connection)
+    {
+        if (connection != null)
+        {
+                return ((Connection) connection).getClient();
+        }
+
+        throw new KunderaException("Invalid configuration!, no available pooled connection found for:"
+                + this.getClass().getSimpleName());
     }
 
     protected void releaseConnection(Object conn)

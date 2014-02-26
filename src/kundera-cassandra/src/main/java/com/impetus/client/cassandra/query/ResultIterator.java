@@ -16,6 +16,7 @@
 package com.impetus.client.cassandra.query;
 
 import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,7 +31,6 @@ import javax.persistence.metamodel.EmbeddableType;
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.IndexExpression;
 import org.apache.commons.lang.StringUtils;
-import org.scale7.cassandra.pelops.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -416,7 +416,7 @@ class ResultIterator<E> implements IResultIterator<E>
                     entityMetadata.getPersistenceUnit());
 
             EmbeddableType keyObj = null;
-            Bytes bytes = null;
+//            Bytes bytes = null;
             String columnName;
             if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
             {
@@ -492,7 +492,7 @@ class ResultIterator<E> implements IResultIterator<E>
                 entityMetadata.getPersistenceUnit());
 
         EmbeddableType keyObj = null;
-        Bytes bytes = null;
+        ByteBuffer bytes = null;
 
         // if the key attribute is composite
         if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
@@ -508,7 +508,7 @@ class ResultIterator<E> implements IResultIterator<E>
             bytes = query.getBytesValue(idName, entityMetadata, id);
         }
 
-        return bytes.toByteArray();
+        return bytes.array();
 
     }
 

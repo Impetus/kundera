@@ -24,7 +24,6 @@ import java.util.Map;
 
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.KeySlice;
-import org.scale7.cassandra.pelops.Bytes;
 
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata.Type;
@@ -124,15 +123,15 @@ public class ThriftDataResultHelper
         return output;
     }
 
-    public static <T> Map<Bytes, List<T>> transformThriftResult(ColumnFamilyType columnFamilyType,
+    public static <T> Map<ByteBuffer, List<T>> transformThriftResult(ColumnFamilyType columnFamilyType,
             List<KeySlice> keySlices, ThriftRow row)
     {
 
-        Map<Bytes, List<T>> output = new HashMap<Bytes, List<T>>();
+        Map<ByteBuffer, List<T>> output = new HashMap<ByteBuffer, List<T>>();
 
         for (KeySlice keySlice : keySlices)
         {
-            output.put(Bytes.fromByteArray(keySlice.getKey()),
+            output.put(ByteBuffer.wrap(keySlice.getKey()),
                     (List<T>) transformThriftResult(keySlice.getColumns(), columnFamilyType, row));
         }
 

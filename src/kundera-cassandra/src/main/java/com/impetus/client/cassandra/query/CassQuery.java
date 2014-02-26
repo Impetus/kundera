@@ -16,6 +16,7 @@
 package com.impetus.client.cassandra.query;
 
 import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -35,9 +36,8 @@ import javax.persistence.metamodel.Metamodel;
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.IndexExpression;
 import org.apache.cassandra.thrift.IndexOperator;
+import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.commons.lang.StringUtils;
-import org.scale7.cassandra.pelops.Bytes;
-import org.scale7.cassandra.pelops.Selector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -389,7 +389,11 @@ public class CassQuery extends QueryImpl
      */
     Map<Boolean, List<IndexClause>> prepareIndexClause(EntityMetadata m, boolean isQueryForInvertedIndex)
     {
-        IndexClause indexClause = Selector.newIndexClause(Bytes.EMPTY, maxResult);
+//        IndexClause indexClause = Selector.newIndexClause(Bytes.EMPTY, maxResult);
+		IndexClause indexClause = new IndexClause(
+				new ArrayList<IndexExpression>(),
+				ByteBufferUtil.EMPTY_BYTE_BUFFER, maxResult);
+        
         List<IndexClause> clauses = new ArrayList<IndexClause>();
         List<IndexExpression> expr = new ArrayList<IndexExpression>();
 
@@ -421,8 +425,12 @@ public class CassQuery extends QueryImpl
                 Object value = clause.getValue();
                 IndexOperator operator = getOperator(condition, idPresent);
 
-                IndexExpression expression = Selector.newIndexExpression(fieldName, operator,
+//                IndexExpression expression = Selector.newIndexExpression(fieldName, operator,
+//                        getBytesValue(fieldName, m, value));
+//                
+                IndexExpression expression = new IndexExpression(ByteBufferUtil.bytes(fieldName),operator,
                         getBytesValue(fieldName, m, value));
+                
 
                 expr.add(expression);
             }
@@ -524,7 +532,7 @@ public class CassQuery extends QueryImpl
      *            value.
      * @return bytes value.
      */
-    Bytes getBytesValue(String jpaFieldName, EntityMetadata m, Object value)
+    ByteBuffer getBytesValue(String jpaFieldName, EntityMetadata m, Object value)
     {
         // Column idCol = m.getIdColumn();
         Attribute idCol = m.getIdAttribute();

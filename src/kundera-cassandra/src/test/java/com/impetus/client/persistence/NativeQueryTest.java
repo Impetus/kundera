@@ -26,7 +26,6 @@ import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 import com.impetus.kundera.query.QueryImpl;

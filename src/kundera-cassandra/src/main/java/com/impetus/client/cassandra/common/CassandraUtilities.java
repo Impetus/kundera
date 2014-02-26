@@ -16,6 +16,7 @@
 package com.impetus.client.cassandra.common;
 
 import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.List;
@@ -23,8 +24,16 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 
+import org.apache.cassandra.db.marshal.BooleanType;
+import org.apache.cassandra.db.marshal.BytesType;
+import org.apache.cassandra.db.marshal.DateType;
+import org.apache.cassandra.db.marshal.DoubleType;
+import org.apache.cassandra.db.marshal.FloatType;
+import org.apache.cassandra.db.marshal.Int32Type;
+import org.apache.cassandra.db.marshal.LongType;
+import org.apache.cassandra.db.marshal.UTF8Type;
+import org.apache.cassandra.db.marshal.UUIDType;
 import org.apache.commons.lang.StringUtils;
-import org.scale7.cassandra.pelops.Bytes;
 
 import com.impetus.client.cassandra.thrift.CQLTranslator;
 import com.impetus.kundera.Constants;
@@ -60,7 +69,7 @@ public class CassandraUtilities
         return keyspace;
     }
 
-    public static Bytes toBytes(Object value, Field f)
+    public static ByteBuffer toBytes(Object value, Field f)
     {
         return toBytes(value, f.getType());
 
@@ -70,7 +79,7 @@ public class CassandraUtilities
     {
         if (value != null)
         {
-            return toBytes(value, value.getClass()).toByteArray();
+            return toBytes(value, value.getClass()).array();
         }
 
         return null;
@@ -81,40 +90,41 @@ public class CassandraUtilities
      * @param f
      * @return
      */
-    public static Bytes toBytes(Object value, Class<?> clazz)
+    public static ByteBuffer toBytes(Object value, Class<?> clazz)
     {
         if (clazz.isAssignableFrom(String.class))
         {
-            return Bytes.fromByteArray(((String) value).getBytes());
+            return UTF8Type.instance.decompose((String) value);
         }
         else if (clazz.equals(int.class) || clazz.isAssignableFrom(Integer.class))
         {
-            return Bytes.fromInt(Integer.parseInt(value.toString()));
+            return Int32Type.instance.decompose(Integer.parseInt(value.toString()));
         }
         else if (clazz.equals(long.class) || clazz.isAssignableFrom(Long.class))
         {
-            return Bytes.fromLong(Long.parseLong(value.toString()));
+            return LongType.instance.decompose(Long.parseLong(value.toString()));
         }
         else if (clazz.equals(boolean.class) || clazz.isAssignableFrom(Boolean.class))
         {
-            return Bytes.fromBoolean(Boolean.valueOf(value.toString()));
+            return BooleanType.instance.decompose(Boolean.valueOf(value.toString()));
         }
         else if (clazz.equals(double.class) || clazz.isAssignableFrom(Double.class))
         {
-            return Bytes.fromDouble(Double.valueOf(value.toString()));
+            return DoubleType.instance.decompose(Double.valueOf(value.toString()));
         }
         else if (clazz.isAssignableFrom(java.util.UUID.class))
         {
-            return Bytes.fromUuid(UUID.fromString(value.toString()));
+            return UUIDType.instance.decompose(UUID.fromString(value.toString()));
         }
         else if (clazz.equals(float.class) || clazz.isAssignableFrom(Float.class))
         {
-            return Bytes.fromFloat(Float.valueOf(value.toString()));
+            return FloatType.instance.decompose(Float.valueOf(value.toString()));
         }
         else if (clazz.isAssignableFrom(Date.class))
         {
+        	
             DateAccessor dateAccessor = new DateAccessor();
-            return Bytes.fromByteArray(dateAccessor.toBytes(value));
+            return DateType.instance.decompose((Date)value);
         }
         else
         {
@@ -122,7 +132,8 @@ public class CassandraUtilities
             {
                 value = PropertyAccessorFactory.getPropertyAccessor(clazz).fromString(clazz, value.toString());
             }
-            return Bytes.fromByteArray(PropertyAccessorFactory.getPropertyAccessor(clazz).toBytes(value));
+            
+            return BytesType.instance.decompose(ByteBuffer.wrap(PropertyAccessorFactory.getPropertyAccessor(clazz).toBytes(value)));
         }
     }
 
