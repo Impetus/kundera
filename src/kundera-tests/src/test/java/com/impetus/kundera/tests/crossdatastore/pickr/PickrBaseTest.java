@@ -33,7 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.client.crud.RDBMSCli;
-import com.impetus.client.persistence.CassandraCli;
+import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
 import com.impetus.kundera.tests.crossdatastore.pickr.dao.Pickr;
 import com.impetus.kundera.tests.crossdatastore.pickr.dao.PickrImpl;
 import com.mongodb.Mongo;

@@ -42,9 +42,9 @@ import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 
 import com.impetus.client.crud.RDBMSCli;
-import com.impetus.client.persistence.CassandraCli;
 import com.impetus.client.redis.RedisPropertyReader;
 import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.CoreMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;

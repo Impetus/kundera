@@ -51,7 +51,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.impetus.client.persistence.CassandraCli;
+import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
 import com.impetus.kundera.rest.common.Book;
 import com.impetus.kundera.rest.common.Constants;
 import com.impetus.kundera.rest.common.HabitatUni1ToM;

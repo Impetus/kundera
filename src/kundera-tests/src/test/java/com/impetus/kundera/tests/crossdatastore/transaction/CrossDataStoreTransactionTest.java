@@ -41,7 +41,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.persistence.CassandraCli;
+import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
 import com.impetus.kundera.tests.crossdatastore.useraddress.entities.HabitatOToOFKEntity;
 import com.impetus.kundera.tests.crossdatastore.useraddress.entities.PersonnelOToOFKEntity;
 

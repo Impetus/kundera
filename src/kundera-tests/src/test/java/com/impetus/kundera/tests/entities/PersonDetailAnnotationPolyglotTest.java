@@ -28,8 +28,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
 
 /**
  * @author Chhavi Gangwal
