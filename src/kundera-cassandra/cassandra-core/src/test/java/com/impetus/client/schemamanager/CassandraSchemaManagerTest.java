@@ -17,6 +17,8 @@
 package com.impetus.client.schemamanager;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -32,7 +34,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.client.cassandra.common.CassandraConstants;
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
+import com.impetus.kundera.configure.schema.SchemaGenerationException;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
 /**
@@ -89,7 +94,7 @@ public class CassandraSchemaManagerTest
     public void schemaOperation() throws IOException, TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException
     {
-        getEntityManagerFactory();
+        EntityManagerFactory emf = getEntityManagerFactory(null, _PU);
         Assert.assertTrue(CassandraCli.keyspaceExist(_KEYSPACE));
         Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntitySuper", _KEYSPACE));
         Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressUni1To1", _KEYSPACE));
@@ -110,6 +115,36 @@ public class CassandraSchemaManagerTest
         Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressBiMTo1", _KEYSPACE));
         Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEmbeddedPersonUniMto1", _KEYSPACE));
 
+        emf.close();
+
+    }
+
+    @Test
+    public void testValidate()
+    {
+        try
+        {
+            final String pu = "CassandraSchemaOperationTest";
+            Map propertyMap = new HashMap();
+            propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create");
+            propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
+            EntityManagerFactory emf = getEntityManagerFactory(propertyMap, pu);
+
+            String keyspaceName = "KunderaCoreExmples";
+            CassandraCli.dropColumnFamily("CassandraEntitySimple", keyspaceName);
+            String colFamilySql = "CREATE table \"CassandraEntitySimple\" (\"PERSON_ID\" varchar PRIMARY KEY,\"PERSON_NAME\" varchar, \"AGE\" int)";
+            CassandraCli.executeCqlQuery(colFamilySql, keyspaceName);
+            propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "validate");
+            propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
+            EntityManagerFactory emf1 = getEntityManagerFactory(propertyMap, pu);
+            emf1.close();
+            CassandraCli.dropKeySpace(keyspaceName);
+        }
+        catch (SchemaGenerationException sgex)
+        {
+            Assert.fail(sgex.getMessage());
+        }
+
     }
 
     /**
@@ -117,9 +152,9 @@ public class CassandraSchemaManagerTest
      * 
      * @return the entity manager factory
      */
-    private EntityManagerFactoryImpl getEntityManagerFactory()
+    private EntityManagerFactoryImpl getEntityManagerFactory(Map propertyMap, final String persistenceUnit)
     {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory(_PU);
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory(persistenceUnit, propertyMap);
         return (EntityManagerFactoryImpl) emf;
     }
 }

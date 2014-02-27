@@ -18,6 +18,9 @@ package com.impetus.client.cassandra.schemamanager;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -26,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.logging.XMLFormatter;
 
 import javax.persistence.Embeddable;
 import javax.persistence.metamodel.Attribute;
@@ -45,6 +49,8 @@ import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.ColumnDef;
 import org.apache.cassandra.thrift.Compression;
 import org.apache.cassandra.thrift.ConsistencyLevel;
+import org.apache.cassandra.thrift.CqlMetadata;
+import org.apache.cassandra.thrift.CqlResult;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.NotFoundException;
@@ -52,6 +58,7 @@ import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.TBinaryProtocol;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
+import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TProtocol;
@@ -126,7 +133,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      *            the configured client clientFactory
      * @param puProperties
      */
-    public CassandraSchemaManager(String clientFactory, Map<String, Object> puProperties, final KunderaMetadata kunderaMetadata)
+    public CassandraSchemaManager(String clientFactory, Map<String, Object> puProperties,
+            final KunderaMetadata kunderaMetadata)
     {
         super(clientFactory, puProperties, kunderaMetadata);
     }
@@ -546,24 +554,25 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             primaryKeyBuilder.deleteCharAt(primaryKeyBuilder.length() - 1);
             queryBuilder = new StringBuilder(StringUtils.replace(queryBuilder.toString(), CQLTranslator.COLUMNS,
                     primaryKeyBuilder.toString()));
-            
+
             StringBuilder clusterKeyOrderingBuilder = new StringBuilder();
-            appendClusteringOrder(translator, compositeColumns.get(0).getColumns(), clusterKeyOrderingBuilder, 
+            appendClusteringOrder(translator, compositeColumns.get(0).getColumns(), clusterKeyOrderingBuilder,
                     primaryKeyBuilder);
             if (clusterKeyOrderingBuilder.length() != 0)
             {
-             // append cluster key order clause
-               queryBuilder.append(translator.CREATE_COLUMNFAMILY_CLUSTER_ORDER.replace(CQLTranslator.COLUMNS, clusterKeyOrderingBuilder.toString()));
-              
+                // append cluster key order clause
+                queryBuilder.append(translator.CREATE_COLUMNFAMILY_CLUSTER_ORDER.replace(CQLTranslator.COLUMNS,
+                        clusterKeyOrderingBuilder.toString()));
+
             }
-            
+
         }
         else
         {
             queryBuilder = new StringBuilder(StringUtils.replace(queryBuilder.toString(), CQLTranslator.COLUMNS,
                     tableInfo.getIdColumnName()));
         }
-   
+
         // set column family properties defined in configuration property/xml
         // files.
         setColumnFamilyProperties(null, getColumnFamilyProperties(tableInfo), queryBuilder);
@@ -600,26 +609,25 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     private void appendClusteringOrder(CQLTranslator translator, List<ColumnInfo> compositeColumns,
             StringBuilder clusterKeyOrderingBuilder, StringBuilder primaryKeyBuilder)
     {
-        //to retrieve the order in which cluster key is formed
+        // to retrieve the order in which cluster key is formed
         String[] primaryKeys = primaryKeyBuilder.toString().split("\\s*,\\s*");
         for (String primaryKey : primaryKeys)
         {
-            //to compare the objects without enclosing quotes
+            // to compare the objects without enclosing quotes
             primaryKey = primaryKey.trim().substring(1, primaryKey.trim().length() - 1);
             for (ColumnInfo colInfo : compositeColumns)
             {
 
                 if (primaryKey.equals(colInfo.getColumnName()))
                 {
-                     if (colInfo.getOrderBy() != null)
-                        {
-                            translator.appendColumnName(clusterKeyOrderingBuilder, colInfo.getColumnName());
-                            clusterKeyOrderingBuilder.append(translator.SPACE_STRING);
-                            clusterKeyOrderingBuilder.append(colInfo.getOrderBy());
-                            clusterKeyOrderingBuilder.append(translator.COMMA_STR);
-                        }
+                    if (colInfo.getOrderBy() != null)
+                    {
+                        translator.appendColumnName(clusterKeyOrderingBuilder, colInfo.getColumnName());
+                        clusterKeyOrderingBuilder.append(translator.SPACE_STRING);
+                        clusterKeyOrderingBuilder.append(colInfo.getOrderBy());
+                        clusterKeyOrderingBuilder.append(translator.COMMA_STR);
+                    }
 
-                    
                 }
             }
         }
@@ -967,10 +975,58 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         cassandra_client.set_keyspace(ksDef.getName());
         for (TableInfo tableInfo : tableInfos)
         {
-            onValidateTable(ksDef, tableInfo);
+            if (isCql3Enabled(tableInfo) && !tableInfo.getType().equals(Type.SUPER_COLUMN_FAMILY.name()))
+            {
+                CqlMetadata metadata = new CqlMetadata();
+                Map<ByteBuffer, String> name_types = new HashMap<ByteBuffer, String>();
+                Map<ByteBuffer, String> value_types = new HashMap<ByteBuffer, String>();
+                List<ColumnInfo> columnInfos = tableInfo.getColumnMetadatas();
+                name_types.put(ByteBufferUtil.bytes(tableInfo.getIdColumnName()), "UTF8Type");
+                value_types.put(ByteBufferUtil.bytes(tableInfo.getIdColumnName()), CassandraValidationClassMapper
+                        .getValidationClassInstance(tableInfo.getTableIdType(), true).getName());
+
+                for (ColumnInfo info : columnInfos)
+                {
+                    name_types.put(ByteBufferUtil.bytes(info.getColumnName()), "UTF8Type");
+                    value_types.put(ByteBufferUtil.bytes(info.getColumnName()), CassandraValidationClassMapper
+                            .getValidationClassInstance(info.getType(), true).getName());
+                }
+
+                metadata.setDefault_name_type("UTF8Type");
+                metadata.setDefault_value_type("UTF8Type");
+                metadata.setName_types(name_types);
+                metadata.setValue_types(value_types);
+                CQLTranslator translator = new CQLTranslator();
+                final String describeTable = "select now() from ";
+                StringBuilder builder = new StringBuilder(describeTable);
+                translator.ensureCase(builder, tableInfo.getTableName(), false);
+//                builder.append("LIMIT 1");
+                cassandra_client.set_cql_version(CassandraConstants.CQL_VERSION_3_0);
+                CqlResult cqlResult = cassandra_client.execute_cql3_query(ByteBufferUtil.bytes(builder.toString()),
+                        Compression.NONE, ConsistencyLevel.ONE);
+                CqlMetadata originalMetadata = cqlResult.getSchema();
+
+                int compareResult = originalMetadata.compareTo(metadata);
+                if (compareResult > 0)
+                {
+                    onLog(tableInfo, metadata, value_types, originalMetadata);
+                    throw new SchemaGenerationException(
+                            "Schema mismatch!, validation failed. see above table for mismatch");
+                }
+
+            }
+            else
+            {
+                onValidateTable(ksDef, tableInfo);
+            }
         }
     }
 
+    /**
+     * @param ksDef
+     * @param tableInfo
+     * @throws Exception
+     */
     private void onValidateTable(KsDef ksDef, TableInfo tableInfo) throws Exception
     {
         boolean tablefound = false;
@@ -1916,8 +1972,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             boolean isValid = true;
             for (Relation relation : metadata.getRelations())
             {
-                EntityMetadata targetEntityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, relation
-                        .getTargetEntity());
+                EntityMetadata targetEntityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
+                        relation.getTargetEntity());
                 if (((relation.getType().equals(ForeignKey.ONE_TO_ONE) && !relation.isJoinedByPrimaryKey()) || relation
                         .getType().equals(ForeignKey.MANY_TO_MANY)) && relation.getMappedBy() == null)
                 {
@@ -2003,4 +2059,64 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             return isValid;
         }
     }
+
+    /**
+     * Print log in case schema doesn't match!
+     * 
+     * @param tableInfo
+     * @param metadata
+     * @param value_types
+     * @param originalMetadata
+     * @throws CharacterCodingException
+     */
+    private void onLog(TableInfo tableInfo, CqlMetadata metadata, Map<ByteBuffer, String> value_types,
+            CqlMetadata originalMetadata) throws CharacterCodingException
+    {
+        System.out.format("Persisted Schema for " + tableInfo.getTableName());
+        System.out.format("\n");
+        
+        System.out.format("Column Name: \t\t  Column name type");
+        System.out.format("\n");
+        
+        printInfo(originalMetadata);
+
+        System.out.format("\n");
+        System.out.format("Mapped schema for " + tableInfo.getTableName());
+
+        System.out.format("\n");
+        System.out.format("Column Name: \t\t  Column name type");
+        System.out.format("\n");
+        printInfo(metadata);
+    }
+
+    /**
+     * TODO:: need to use Message formatter for formatting message.
+     * 
+     * @param metadata    CQL metadata
+     * @throws CharacterCodingException
+     */
+    private void printInfo(CqlMetadata metadata) throws CharacterCodingException
+    {
+        
+        Iterator<ByteBuffer> nameIter = metadata.getName_types().keySet().iterator();
+        Iterator<ByteBuffer> valueIter = metadata.getValue_types().keySet().iterator();
+
+        while (nameIter.hasNext())
+        {
+            ByteBuffer key = nameIter.next();
+            System.out.format(ByteBufferUtil.string(key) + " \t\t " + metadata.getName_types().get(key));
+            System.out.format("\n");
+        }
+
+        System.out.format("Column Name: \t\t  Column Value type");
+        System.out.format("\n");
+        while (valueIter.hasNext())
+        {
+            ByteBuffer key = valueIter.next();
+            System.out.format(ByteBufferUtil.string(key) + " \t\t " + metadata.getValue_types().get(key));
+            System.out.format("\n");
+        }
+        System.out.format("\n");
+    }
+
 }
