@@ -117,7 +117,6 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         setBatchSize(persistenceUnit, factory.getOverridenProperties());
     }
 
-
     /*
      * (non-Javadoc)
      * 
@@ -250,9 +249,11 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                 if (resource != null && resource.isActive())
                 {
                     Response response = ((Transaction) connection).hmget(getEncodedBytes(hashKey), fields);
-                    ((Transaction) connection).exec();
+                    // ((Transaction) connection).exec();
+                    ((RedisTransaction) resource).onExecute(((Transaction) connection));
 
                     fieldValues = (List<byte[]>) response.get();
+                    connection = getConnection();
 
                 }
                 else
@@ -264,7 +265,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                 {
                     for (int i = 0; i < fields.length; i++)
                     {
-                        if(fieldValues.get(i) != null)
+                        if (fieldValues.get(i) != null)
                         {
                             columns.put(fields[i], fieldValues.get(i));
                         }
@@ -294,8 +295,10 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         {
             // Why transaction API returns response in byte[] format/?
             Response response = ((Transaction) connection).hgetAll(getEncodedBytes(hashKey));
-            ((Transaction) connection).exec();
+            ((RedisTransaction) resource).onExecute(((Transaction) connection));
+            // ((Transaction) connection).exec();
             Map<String, String> cols = (Map<String, String>) response.get();
+            connection = getConnection();
 
             if (cols != null)
             {
@@ -563,7 +566,9 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             {
                 Response response = ((Transaction) connection).zrangeByScore(getHashKey(tableName, valueAsStr), score,
                         score);
-                ((Transaction) connection).exec();
+                // ((Transaction) connection).exec();
+                ((RedisTransaction) resource).onExecute(((Transaction) connection));
+
                 // ((Transaction)
                 // connection).zrangeByScore(getHashKey(tableName, valueAsStr),
                 // score, score);
@@ -602,7 +607,8 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             if (resource != null && resource.isActive())
             {
                 Response response = ((Transaction) connection).hmget(hashKey, columnName);
-                ((Transaction) connection).exec();
+                // ((Transaction) connection).exec();
+                ((RedisTransaction) resource).onExecute(((Transaction) connection));
 
                 columnValues = (List) response.get();
             }
@@ -641,7 +647,8 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             {
                 Response response = ((Transaction) connection).zrangeByScore(getHashKey(tableName, valueAsStr),
                         getDouble(valueAsStr), getDouble(valueAsStr));
-                ((Transaction) connection).exec();
+                // ((Transaction) connection).exec();
+                ((RedisTransaction) resource).onExecute(((Transaction) connection));
 
                 results = (Set<String>) response.get();
             }
@@ -691,7 +698,8 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             {
                 Response response = ((Transaction) connection).zrangeByScore(getHashKey(tableName, valueAsStr), score,
                         score);
-                ((Transaction) connection).exec();
+                // ((Transaction) connection).exec();
+                ((RedisTransaction) resource).onExecute(((Transaction) connection));
 
                 results = (Set<String>) response.get();
             }
@@ -843,7 +851,8 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                     {
 
                         List<RelationHolder> relationHolders = getRelationHolders(node);
-                        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, node.getDataClass());
+                        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
+                                node.getDataClass());
 
                         onPersist(metadata, node.getData(), node.getEntityId(), relationHolders,
                                 pipeLine != null ? pipeLine : connection);
@@ -908,7 +917,8 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             {
                 Response response = ((Transaction) connection).zrangeByScore(getHashKey(tableName, columnName),
                         getDouble(valueAsStr), getDouble(valueAsStr));
-                ((Transaction) connection).exec();
+                // ((Transaction) connection).exec();
+                ((RedisTransaction) resource).onExecute(((Transaction) connection));
 
                 results = (Set<String>) response.get();
             }
@@ -1051,20 +1061,22 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     private void addIndex(final Object connection, final AttributeWrapper wrapper, final String rowKey,
             final EntityMetadata metadata)
     {
-        
+
         Indexer indexer = indexManager.getIndexer();
 
         if (indexer != null)
         {
-         // Add row key to list(Required for wild search over table).
-            wrapper.addIndex(getHashKey(metadata.getTableName(),
-                    ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName()), getDouble(rowKey));
+            // Add row key to list(Required for wild search over table).
+            wrapper.addIndex(
+                    getHashKey(metadata.getTableName(),
+                            ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName()), getDouble(rowKey));
 
             // Add row-key as inverted index as well needed for multiple clause
             // search with key and non row key.
-            wrapper.addIndex(getHashKey(
-                    metadata.getTableName(),
-                    getHashKey(((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName(), rowKey)), getDouble(rowKey));
+            wrapper.addIndex(
+                    getHashKey(metadata.getTableName(),
+                            getHashKey(((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName(), rowKey)),
+                    getDouble(rowKey));
 
             indexer.index(metadata.getEntityClazz(), metadata, wrapper.getIndexes(), rowKey, null);
         }
@@ -1080,7 +1092,6 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
      * @param member
      *            sorted set member name.
      */
-
 
     private void unIndex(final Object connection, final AttributeWrapper wrapper, final String member)
     {
@@ -1099,7 +1110,6 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             }
         }
     }
-    
 
     /**
      * On release connection.
@@ -1179,7 +1189,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         // PropertyAccessorHelper.get(entity,
         for (Attribute attr : attributes)
         {
-            if (/*!entityMetadata.getIdAttribute().equals(attr) && */!attr.isAssociation())
+            if (/* !entityMetadata.getIdAttribute().equals(attr) && */!attr.isAssociation())
             {
                 if (metaModel.isEmbeddable(((AbstractAttribute) attr).getBindableJavaType()))
                 {
@@ -1326,8 +1336,8 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                     if (relationNames != null && relationNames.contains(columnName))
                     {
                         Field field = (Field) attribute.getJavaMember();
-                        EntityMetadata associationMetadata = KunderaMetadataManager
-                                .getEntityMetadata(kunderaMetadata, ((AbstractAttribute) attribute).getBindableJavaType());
+                        EntityMetadata associationMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
+                                ((AbstractAttribute) attribute).getBindableJavaType());
                         relations.put(columnName, PropertyAccessorHelper.getObject(associationMetadata.getIdAttribute()
                                 .getBindableJavaType(), value));
                     }
@@ -1454,9 +1464,11 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                 if (resource != null && resource.isActive())
                 {
                     Response response = ((Transaction) connection).zrange(destStore, 0, -1);
-                    ((Transaction) connection).exec();
+                    // ((Transaction) connection).exec();
+                    ((RedisTransaction) resource).onExecute(((Transaction) connection));
 
                     rowKeys = (Set<String>) response.get();
+                    // connection = reInitialize(connection, rowKeys);
                     //
                     // ((Transaction) connection).del(destStore);
 
@@ -1485,9 +1497,11 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                     Response response = ((Transaction) connection)
                             .zrangeByScore(getHashKey(entityMetadata.getTableName(), column), minimum.get(column),
                                     maximum.get(column));
-                    ((Transaction) connection).exec();
+                    // ((Transaction) connection).exec();
+                    ((RedisTransaction) resource).onExecute(((Transaction) connection));
 
                     rowKeys = (Set<String>) response.get();
+                    // connection = reInitialize(connection, rowKeys);
 
                 }
                 else
@@ -1519,9 +1533,11 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                     {
                         Response response = ((Transaction) connection).zrangeByScore(
                                 getHashKey(entityMetadata.getTableName(), column), value, value);
-                        ((Transaction) connection).exec();
+                        // ((Transaction) connection).exec();
+                        ((RedisTransaction) resource).onExecute(((Transaction) connection));
 
                         rowKeys = (Set<String>) response.get();
+                        // connection = reInitialize(connection, rowKeys);
 
                     }
                     else
@@ -1540,7 +1556,9 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                     Response response = ((Transaction) connection).zrange(
                             getHashKey(entityMetadata.getTableName(),
                                     ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName()), 0, -1);
-                    ((Transaction) connection).exec();
+                    // resource.onCommit()
+                    // ((Transaction) connection).exec();
+                    ((RedisTransaction) resource).onExecute(((Transaction) connection));
 
                     rowKeys = new HashSet<String>((Collection<? extends String>) response.get());
                 }
@@ -1555,7 +1573,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             // fetch fr
             for (String k : rowKeys)
             {
-
+                connection = reInitialize(connection, rowKeys);
                 Object record = fetch(entityClazz, k, connection, (queryParameter.getColumns() != null ? queryParameter
                         .getColumns().toArray(new byte[][] {}) : null));
                 if (record != null)
@@ -1575,6 +1593,11 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             logger.error("Error during persist, Caused by:", e);
             throw new PersistenceException(e);
         }
+        catch (Exception e)
+        {
+            logger.error("Error during persist, Caused by:", e);
+            throw new PersistenceException(e);
+        }
         finally
         {
             onCleanup(connection);
@@ -1582,6 +1605,16 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         }
 
         return results;
+    }
+
+    private Object reInitialize(Object connection, Set<String> rowKeys)
+    {
+        /*
+         * if(!rowKeys.isEmpty()) {
+         */
+        connection = getConnection();
+        // }
+        return connection;
     }
 
     private <E> List<E> findAllColumns(Class<E> entityClass, byte[][] columns, Object... keys)
@@ -1715,7 +1748,8 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         }
         else if (batch_Size == null)
         {
-            PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata, persistenceUnit);
+            PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata,
+                    persistenceUnit);
             setBatchSize(puMetadata.getBatchSize());
         }
     }
@@ -1789,7 +1823,6 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
         String hashKey = getHashKey(entityMetadata.getTableName(), rowKey);
 
-
         if (resource != null && resource.isActive())
         {
             ((Transaction) connection).hmset(getEncodedBytes(hashKey), wrapper.getColumns());
@@ -1800,25 +1833,29 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         }
 
         // Add inverted indexes for column based search.
-        
-//        // Add row key to list(Required for wild search over table).
-//
-//        wrapper.addIndex(getHashKey(entityMetadata.getTableName(),
-//                ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName()), getDouble(rowKey));
-//
-//        // Add row-key as inverted index as well needed for multiple clause
-//        // search with key and non row key.
-//        wrapper.addIndex(getHashKey(
-//                entityMetadata.getTableName(),
-//                getHashKey(((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName(), rowKey)), getDouble(rowKey));
 
-        addIndex(connection, wrapper, rowKey,entityMetadata);
+        // // Add row key to list(Required for wild search over table).
+        //
+        // wrapper.addIndex(getHashKey(entityMetadata.getTableName(),
+        // ((AbstractAttribute)
+        // entityMetadata.getIdAttribute()).getJPAColumnName()),
+        // getDouble(rowKey));
+        //
+        // // Add row-key as inverted index as well needed for multiple clause
+        // // search with key and non row key.
+        // wrapper.addIndex(getHashKey(
+        // entityMetadata.getTableName(),
+        // getHashKey(((AbstractAttribute)
+        // entityMetadata.getIdAttribute()).getJPAColumnName(), rowKey)),
+        // getDouble(rowKey));
+
+        addIndex(connection, wrapper, rowKey, entityMetadata);
 
     }
 
     private void onDelete(Object entity, Object pKey, Object connection)
     {
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,  entity.getClass());
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entity.getClass());
         AttributeWrapper wrapper = wrap(entityMetadata, entity);
 
         Set<byte[]> columnNames = wrapper.columns.keySet();
@@ -1858,7 +1895,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         deleteRelation(connection, entityMetadata, rowKey);
 
         // Delete inverted indexes.
-        unIndex(connection,wrapper, rowKey);
+        unIndex(connection, wrapper, rowKey);
 
         if (resource != null && resource.isActive())
         {
@@ -1892,18 +1929,17 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         }
     }
 
-
     @Override
     protected void indexNode(Node node, EntityMetadata entityMetadata)
     {
-        // Do nothing as 
+        // Do nothing as
     }
- 
+
     private void initializeIndexer()
     {
-        if(this.indexManager.getIndexer() != null)
+        if (this.indexManager.getIndexer() != null)
         {
-            ((RedisIndexer)this.indexManager.getIndexer()).assignConnection(getConnection());
+            ((RedisIndexer) this.indexManager.getIndexer()).assignConnection(getConnection());
         }
     }
 
