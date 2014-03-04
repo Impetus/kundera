@@ -1,6 +1,6 @@
 package com.impetus.client.crud;
 
-enum Month
+public enum Month
 {
     JAN, FEB, MARCH, APRIL, MAY, JUNE;
 }

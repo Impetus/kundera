@@ -123,6 +123,7 @@
       <modules>
         <module>cassandra-core</module>
         <module>cassandra-pelops</module>
+        <module>cassandra-ds-driver</module>
       </modules>
     </profile>
 
@@ -137,6 +138,17 @@
       </modules>
     </profile>
 
+
+    <profile>
+      <id>ds-driver</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <modules>
+        <module>cassandra-core</module>
+        <module>cassandra-ds-driver</module>
+      </modules>
+    </profile>
     <profile>
       <id>thrift</id>
       <activation>
