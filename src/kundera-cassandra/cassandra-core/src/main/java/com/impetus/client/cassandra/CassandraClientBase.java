@@ -929,7 +929,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
         try
         {
-            CqlResult result = executeCQLQuery(cqlQuery, true);
+            CqlResult result = (CqlResult) executeCQLQuery(cqlQuery, true);
             return result.getNum();
         }
         catch (Exception e)
@@ -1887,7 +1887,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      * @throws SchemaDisagreementException
      * @throws TException
      */
-    protected CqlResult executeCQLQuery(String cqlQuery, boolean isCql3Enabled)
+    protected Object executeCQLQuery(String cqlQuery, boolean isCql3Enabled)
     {
         Cassandra.Client conn = null;
         Object pooledConnection = null;
@@ -2069,7 +2069,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 {
                     log.info("Executing query {}.", cqlQuery);
                 }
-                result = executeCQLQuery(cqlQuery, isCql3Enabled);
+                result = (CqlResult) executeCQLQuery(cqlQuery, isCql3Enabled);
                 if (result != null && (result.getRows() != null || result.getRowsSize() > 0))
                 {
                     returnedEntities = new ArrayList<Object>(result.getRowsSize());
@@ -2150,7 +2150,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                     queryBuilder.delete(queryBuilder.lastIndexOf(CQLTranslator.AND_CLAUSE), queryBuilder.length());
 
                     // Executing.
-                    result = executeCQLQuery(queryBuilder.toString(), isCql3Enabled);
+                    result = (CqlResult) executeCQLQuery(queryBuilder.toString(), isCql3Enabled);
 
                     if (result != null && (result.getRows() != null || result.getRowsSize() > 0))
                     {

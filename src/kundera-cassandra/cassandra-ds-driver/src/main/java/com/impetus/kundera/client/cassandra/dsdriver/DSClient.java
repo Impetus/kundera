@@ -61,11 +61,10 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.db.SearchResult;
-import com.impetus.kundera.generator.TableGenerator;
+import com.impetus.kundera.generator.AutoGenerator;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
-import com.impetus.kundera.metadata.model.TableGeneratorDiscriptor;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
@@ -79,7 +78,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  * @author vivek.mishra
  * 
  */
-public class DSClient extends CassandraClientBase implements Client<CassQuery>, Batcher, TableGenerator
+public class DSClient extends CassandraClientBase implements Client<CassQuery>, Batcher, AutoGenerator
 {
 
     /** log for this class. */
@@ -190,13 +189,14 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
     }
 
     @Override
-    public Object generate(TableGeneratorDiscriptor discriptor)
+    public Object generate()
     {
         final String generatedId = "Select now() from system.schema_columns";
         ResultSet rSet = this.execute(generatedId, null);
 
         UUID uuid = rSet.iterator().next().getUUID(0);
-        return uuid.timestamp();
+        return uuid;
+//        return uuid.timestamp();
     }
 
     @Override
@@ -357,19 +357,20 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
     @Override
     protected Object getConnection()
     {
-        throw new UnsupportedOperationException("Support available only for thrift/pelops.");
+        // do nothing returning null.
+        return null;
     }
 
     @Override
     protected Object getConnection(Object connection)
     {
-        throw new UnsupportedOperationException("Support available only for thrift/pelops.");
+        return null;
     }
 
     @Override
     protected void releaseConnection(Object conn)
     {
-        throw new UnsupportedOperationException("Support available only for thrift/pelops.");
+        // do nothing
     }
 
     @Override

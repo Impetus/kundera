@@ -493,8 +493,11 @@ public class AbstractEntityReader
         }
         for (Object r : resultList)
         {
-            EnhanceEntity e = new EnhanceEntity(r, getId(r, m), null);
-            ls.add(e);
+            if(r != null && !r.getClass().isAssignableFrom(EnhanceEntity.class))
+            {
+                EnhanceEntity e = new EnhanceEntity(r, getId(r, m), null);
+                ls.add(e);
+            }
         }
         return ls;
     }
