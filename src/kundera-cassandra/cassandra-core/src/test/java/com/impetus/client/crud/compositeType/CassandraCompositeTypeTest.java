@@ -421,9 +421,8 @@ public class CassandraCompositeTypeTest
         }
         catch (Exception e)
         {
-
             Assert.assertEquals(
-                    "javax.persistence.PersistenceException: InvalidRequestException(why:Order by is currently only supported on the clustered columns of the PRIMARY KEY, got userId)",
+                    "javax.persistence.PersistenceException: com.impetus.kundera.KunderaException: InvalidRequestException(why:Order by is currently only supported on the clustered columns of the PRIMARY KEY, got userId)",
                     e.getMessage());
         }
 
@@ -502,7 +501,7 @@ public class CassandraCompositeTypeTest
         catch (Exception e)
         {
             Assert.assertEquals(
-                    "javax.persistence.PersistenceException: InvalidRequestException(why:PRIMARY KEY part tweetId cannot be restricted by IN relation)",
+                    "javax.persistence.PersistenceException: com.impetus.kundera.KunderaException: InvalidRequestException(why:PRIMARY KEY part tweetId cannot be restricted by IN relation)",
                     e.getMessage());
         }
 
