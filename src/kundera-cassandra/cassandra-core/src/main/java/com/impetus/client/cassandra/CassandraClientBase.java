@@ -1897,8 +1897,9 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         {
             if (isCql3Enabled || isCql3Enabled())
             {
-                return conn.execute_cql3_query(ByteBufferUtil.bytes(cqlQuery),
-                        org.apache.cassandra.thrift.Compression.NONE, consistencyLevel);
+                return execute(cqlQuery, conn);
+//                return conn.execute_cql3_query(ByteBufferUtil.bytes(cqlQuery),
+//                        org.apache.cassandra.thrift.Compression.NONE, consistencyLevel);
             }
 
             if (log.isInfoEnabled())

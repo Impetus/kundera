@@ -806,7 +806,7 @@ public final class CQLTranslator
 
             validationClassMapper.put(UTF8Type.class.getSimpleName(), "text");
 
-            validationClassMapper.put(IntegerType.class.getSimpleName(), "int");
+            validationClassMapper.put(IntegerType.class.getSimpleName(), "varint");
 
             validationClassMapper.put(Int32Type.class.getSimpleName(), "int");
 

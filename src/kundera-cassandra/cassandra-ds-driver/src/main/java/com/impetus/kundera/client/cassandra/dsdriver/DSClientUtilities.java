@@ -17,16 +17,21 @@ package com.impetus.kundera.client.cassandra.dsdriver;
 
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.metamodel.EntityType;
 
+import org.apache.cassandra.utils.ByteBufferUtil;
+
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.DataType.Name;
 import com.impetus.client.cassandra.common.CassandraUtilities;
+import com.impetus.client.cassandra.schemamanager.CassandraDataTranslator;
 import com.impetus.client.cassandra.schemamanager.CassandraValidationClassMapper;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.property.accessor.CharAccessor;
 import com.impetus.kundera.property.accessor.EnumAccessor;
 
 /**
@@ -58,25 +63,29 @@ public final class DSClientUtilities
      *         then returns value of mapped java class.
      */
     static Object assign(Row row, Object entity, EntityMetadata metadata, Name dataType, EntityType entityType,
-            String columnName)
+            String columnName, Field member)
     {
         String fieldName = null;
-        Field member=null;
-        if(!columnName.equalsIgnoreCase("key"))
+        // Field member=null;
+        if (metadata.getRelationNames() == null || !metadata.getRelationNames().contains(columnName))
         {
-            fieldName = metadata.getFieldName(columnName);
-            if(fieldName !=null)
+            if (!columnName.equalsIgnoreCase("key"))
+            {
+                fieldName = metadata.getFieldName(columnName);
+                if (fieldName != null)
+                {
+                    entity = CassandraUtilities.initialize(metadata, entity, null);
+                    member = (Field) entityType.getAttribute(fieldName).getJavaMember();
+                }
+            }
+            else
             {
                 entity = CassandraUtilities.initialize(metadata, entity, null);
-                member = (Field) entityType.getAttribute(fieldName).getJavaMember();
+                fieldName = metadata.getIdAttribute().getName();
+                member = (Field) metadata.getIdAttribute().getJavaMember();
             }
-       }else
-       {
-           entity = CassandraUtilities.initialize(metadata, entity, null);
-           fieldName=metadata.getIdAttribute().getName();
-           member = (Field) metadata.getIdAttribute().getJavaMember();
-       }
 
+        }
         Object retVal = null;
 
         switch (dataType)
@@ -84,105 +93,97 @@ public final class DSClientUtilities
         case BLOB:
         case CUSTOM:
             retVal = row.getBytes(columnName);
-            if(retVal !=null)
+            if (retVal != null)
             {
-                PropertyAccessorHelper.set(entity, member, ((ByteBuffer)retVal).array());
-//                setFieldValue(entity, member, retVal);
+                PropertyAccessorHelper.set(entity, member, ((ByteBuffer) retVal).array());
+                // setFieldValue(entity, member, retVal);
             }
             break;
 
         case BOOLEAN:
             retVal = row.getBool(columnName);
             setFieldValue(entity, member, retVal);
-//            PropertyAccessorHelper.set(entity, member, retVal);
+            // PropertyAccessorHelper.set(entity, member, retVal);
             break;
-            
+
         case BIGINT:
         case COUNTER:
             retVal = row.getLong(columnName);
             setFieldValue(entity, member, retVal);
-//            PropertyAccessorHelper.set(entity, member, retVal);
+            // PropertyAccessorHelper.set(entity, member, retVal);
             break;
-            
+
         case DECIMAL:
             retVal = row.getDecimal(columnName);
             setFieldValue(entity, member, retVal);
-//            PropertyAccessorHelper.set(entity, member, retVal);
+            // PropertyAccessorHelper.set(entity, member, retVal);
             break;
-            
+
         case DOUBLE:
             retVal = row.getDouble(columnName);
             setFieldValue(entity, member, retVal);
-//            PropertyAccessorHelper.set(entity, member, retVal);
+            // PropertyAccessorHelper.set(entity, member, retVal);
             break;
-            
+
         case FLOAT:
             retVal = row.getFloat(columnName);
             setFieldValue(entity, member, retVal);
-//            PropertyAccessorHelper.set(entity, member, retVal);
+            // PropertyAccessorHelper.set(entity, member, retVal);
             break;
-            
+
         case INET:
             retVal = row.getInet(columnName);
             setFieldValue(entity, member, retVal);
-//            PropertyAccessorHelper.set(entity, member, retVal);
+            // PropertyAccessorHelper.set(entity, member, retVal);
             break;
-            
+
         case INT:
             retVal = row.getInt(columnName);
+            retVal = setIntValue(member, retVal);
             setFieldValue(entity, member, retVal);
-//            PropertyAccessorHelper.set(entity, member, retVal);
             break;
-            
+
         case ASCII:
         case TEXT:
         case VARCHAR:
             retVal = row.getString(columnName);
-            if(member.getType().isEnum())
-            {
-                EnumAccessor accessor = new EnumAccessor();
-                if(member !=null)
-                PropertyAccessorHelper.set(entity, member, accessor.fromString(member.getType(), (String) retVal));
-            } else
-            {
-                setFieldValue(entity, member, retVal);
-//                PropertyAccessorHelper.set(entity, member, retVal);
-            }
+            retVal = setTextValue(entity, member, retVal);
+            setFieldValue(entity, member, retVal);
             break;
-            
+
         case TIMESTAMP:
             retVal = row.getDate(columnName);
+            if (retVal != null && member != null)
+                retVal = CassandraDataTranslator.decompose(member.getType(),
+                        ByteBufferUtil.bytes(((Date) retVal).getTime()).array(), true);
             setFieldValue(entity, member, retVal);
-//            PropertyAccessorHelper.set(entity, member, retVal);
             break;
-            
+
         case VARINT:
             retVal = row.getVarint(columnName);
             setFieldValue(entity, member, retVal);
-//            PropertyAccessorHelper.set(entity, member, retVal);
             break;
-            
+
         case UUID:
         case TIMEUUID:
             retVal = row.getUUID(columnName);
             setFieldValue(entity, member, retVal);
-//            PropertyAccessorHelper.set(entity, member, retVal);
             break;
-            
+
         case LIST:
             retVal = row.getList(columnName, PropertyAccessorHelper.getGenericClass(member));
             PropertyAccessorHelper.set(entity, member, retVal);
             break;
-            
+
         case SET:
             retVal = row.getSet(columnName, PropertyAccessorHelper.getGenericClass(member));
             PropertyAccessorHelper.set(entity, member, retVal);
             break;
-            /*
-             * ASCII, BIGINT, BLOB, BOOLEAN, COUNTER, DECIMAL, DOUBLE, FLOAT,
-             * INET, INT, TEXT, TIMESTAMP, UUID, VARCHAR, VARINT, TIMEUUID,
-             * LIST, SET, MAP, CUSTOM;
-             */
+        /*
+         * ASCII, BIGINT, BLOB, BOOLEAN, COUNTER, DECIMAL, DOUBLE, FLOAT, INET,
+         * INT, TEXT, TIMESTAMP, UUID, VARCHAR, VARINT, TIMEUUID, LIST, SET,
+         * MAP, CUSTOM;
+         */
         case MAP:
             List<Class<?>> mapGenericClasses = PropertyAccessorHelper.getGenericClasses(member);
 
@@ -198,9 +199,43 @@ public final class DSClientUtilities
         return entity != null ? entity : retVal;
     }
 
+    private static Object setIntValue(Field member, Object retVal)
+    {
+        if (member != null)
+        {
+            if (member.getType().isAssignableFrom(byte.class))
+            {
+                retVal = ((Integer) retVal).byteValue();
+            }
+            else if (member.getType().isAssignableFrom(short.class))
+            {
+                retVal = ((Integer) retVal).shortValue();
+            }
+        }
+        return retVal;
+    }
+
+    private static Object setTextValue(Object entity, Field member, Object retVal)
+    {
+        if (member != null && member.getType().isEnum())
+        {
+            EnumAccessor accessor = new EnumAccessor();
+            if (member != null)
+            {
+                retVal = accessor.fromString(member.getType(), (String) retVal);
+            }
+        }
+        else if (member != null
+                && (member.getType().isAssignableFrom(char.class) || member.getType().isAssignableFrom(Character.class)))
+        {
+            retVal = new CharAccessor().fromString(member.getType(), (String) retVal);
+        }
+        return retVal;
+    }
+
     private static void setFieldValue(Object entity, Field member, Object retVal)
     {
-        if(member !=null)
+        if (member != null && retVal != null && entity != null)
         {
             PropertyAccessorHelper.set(entity, member, retVal);
         }

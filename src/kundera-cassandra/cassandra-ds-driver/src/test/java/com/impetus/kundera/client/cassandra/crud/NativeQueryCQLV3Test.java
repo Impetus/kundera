@@ -16,6 +16,7 @@
 package com.impetus.kundera.client.cassandra.crud;
 
 import java.nio.ByteBuffer;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +33,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.cassandra.dsdriver.DSClient;
 import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
@@ -124,7 +126,7 @@ public class NativeQueryCQLV3Test
 
         // select all
         String selectAll = "SELECT * FROM users WHERE state='UT' AND birth_date > 1970 Allow Filtering";
-        q = em.createNativeQuery(selectAll);
+        q = em.createNativeQuery(selectAll, CassandraEntity.class);
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(1, results.size());
@@ -142,7 +144,14 @@ public class NativeQueryCQLV3Test
      */
     private EntityManagerFactoryImpl getEntityManagerFactory()
     {
-        return (EntityManagerFactoryImpl) Persistence.createEntityManagerFactory(_PU);
+        Map propertyMap = null;
+        if (propertyMap  == null)
+        {
+            propertyMap = new HashMap();
+            propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "");
+        }
+
+        return (EntityManagerFactoryImpl) Persistence.createEntityManagerFactory(_PU,propertyMap);
     }
 
     @Test

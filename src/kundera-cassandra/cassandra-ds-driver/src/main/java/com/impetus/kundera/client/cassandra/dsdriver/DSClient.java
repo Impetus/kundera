@@ -48,9 +48,11 @@ import com.datastax.driver.core.DataType;
 import com.datastax.driver.core.Query;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
+import com.datastax.driver.core.Session;
 import com.datastax.driver.core.SimpleStatement;
 import com.impetus.client.cassandra.CassandraClientBase;
 import com.impetus.client.cassandra.common.CassandraConstants;
+import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.client.cassandra.query.CassQuery;
 import com.impetus.client.cassandra.thrift.CQLTranslator;
@@ -142,7 +144,6 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
 
     }
 
-
     /**
      * Finds an entity from database
      */
@@ -163,40 +164,39 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         onWhereClause(metadata, rowId, translator, builder, metaModel);
         ResultSet rSet = this.execute(builder.toString(), null);
         List results = iterateAndReturn(rSet, entityClass, metadata);
-        return results.isEmpty()? null:results.get(0);
+        return results.isEmpty() ? null : results.get(0);
     }
 
     @Override
     public final <E> List<E> findAll(Class<E> entityClass, String[] columnsToSelect, Object... rowIds)
     {
-        //TODO: need to think about selected column case.
+        // TODO: need to think about selected column case.
         // Bring in IN Clause in place of each read.
-        
-        
+
         List results = new ArrayList<E>();
-        if(rowIds != null)
+        if (rowIds != null)
         {
-            for(Object rowId : rowIds)
+            for (Object rowId : rowIds)
             {
                 Object result = find(entityClass, rowId);
-                if(result != null)
+                if (result != null)
                 {
                     results.add(result);
                 }
             }
         }
-        
+
         return results;
     }
-    
+
     @Override
     public Object generate(TableGeneratorDiscriptor discriptor)
     {
         final String generatedId = "Select now() from system.schema_columns";
         ResultSet rSet = this.execute(generatedId, null);
-        
-       UUID uuid = rSet.iterator().next().getUUID(0);
-       return uuid.timestamp();
+
+        UUID uuid = rSet.iterator().next().getUUID(0);
+        return uuid.timestamp();
     }
 
     @Override
@@ -209,8 +209,8 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
     @Override
     public void persistJoinTable(JoinTableData joinTableData)
     {
-        //TODO:: Add support for Many-to-Many join tables.
-        
+        // TODO:: Add support for Many-to-Many join tables.
+
         // TODO Auto-generated method stub
 
     }
@@ -219,8 +219,8 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
     public <E> List<E> getColumnsById(String schemaName, String tableName, String pKeyColumnName, String columnName,
             Object pKeyColumnValue, Class columnJavaType)
     {
-      //TODO:: Add support for Many-to-Many join tables.
-        
+        // TODO:: Add support for Many-to-Many join tables.
+
         // TODO Auto-generated method stub
         return null;
     }
@@ -229,8 +229,8 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
     public Object[] findIdsByColumn(String schemaName, String tableName, String pKeyName, String columnName,
             Object columnValue, Class entityClazz)
     {
-      //TODO:: Add support for Many-to-Many join tables.
-        
+        // TODO:: Add support for Many-to-Many join tables.
+
         return null;
     }
 
@@ -273,7 +273,6 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         return iterateAndReturn(rSet, entityClazz, m);
     }
 
-
     @Override
     public EntityReader getReader()
     {
@@ -314,16 +313,14 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
     public List find(List<IndexClause> ixClause, EntityMetadata m, boolean isRelation, List<String> relations,
             int maxResult, List<String> columns)
     {
-        throw new UnsupportedOperationException(
-                "Support available only for thrift/pelops.");
+        throw new UnsupportedOperationException("Support available only for thrift/pelops.");
     }
 
     @Override
     public List findByRange(byte[] muinVal, byte[] maxVal, EntityMetadata m, boolean isWrapReq, List<String> relations,
             List<String> columns, List<IndexExpression> conditions, int maxResults) throws Exception
     {
-        throw new UnsupportedOperationException(
-                "Support available only for thrift/pelops.");
+        throw new UnsupportedOperationException("Support available only for thrift/pelops.");
     }
 
     @Override
@@ -378,32 +375,42 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
     @Override
     protected <T> T execute(final String query, Object connection)
     {
+        Session session=factory.getConnection();
         try
         {
             Query queryStmt = new SimpleStatement(query);
             queryStmt.setConsistencyLevel(ConsistencyLevel.valueOf(this.consistencyLevel.name()));
-            return (T) factory.getConnection().execute(queryStmt);
+            return (T) session.execute(queryStmt);
         }
         catch (Exception e)
         {
             log.error("Error while executing query {}", query);
             throw new KunderaException(e);
+        }finally
+        {
+            factory.releaseConnection(session);
         }
     }
 
     public int executeUpdateDeleteQuery(String cqlQuery)
     {
+        Session session = null;
+        try
+        {
         if (log.isInfoEnabled())
         {
             log.info("Executing cql query {}.", cqlQuery);
         }
-
-        factory.getConnection().execute(cqlQuery);
+        session = factory.getConnection();
+        session.execute(cqlQuery);
+        }finally
+        {
+            factory.releaseConnection(session);
+        }
         // TODO: can't find a way to return number of updated records.
         return 0;
 
     }
-
 
     private List iterateAndReturn(ResultSet rSet, Class entityClazz, EntityMetadata metadata)
     {
@@ -421,10 +428,10 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         Map<String, Field> compositeColumns = new HashMap<String, Field>();
 
         Object compositeKeyInstance = null;
-        if (metaModel.isEmbeddable(entityClazz))
+        if (metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
         {
             compositeKeyInstance = getCompositeKeyInstance(metadata);
-            EmbeddableType compositeKey = metaModel.embeddable(entityClazz);
+            EmbeddableType compositeKey = metaModel.embeddable(metadata.getIdAttribute().getBindableJavaType());
             Iterator<Attribute> attributes = compositeKey.getAttributes().iterator();
             while (attributes.hasNext())
             {
@@ -446,7 +453,7 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
 
             if (compositeKeyInstance != null)
             {
-                PropertyAccessorHelper.setId(entity, metadata, compositeKeyInstance);
+                entity = CassandraUtilities.initialize(metadata, entity, compositeKeyInstance);
             }
 
             if (!relationalValues.isEmpty())
@@ -466,31 +473,30 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
             Map<String, Object> relationalValues, Map<String, Field> compositeColumns, Object compositeKeyInstance,
             Object entity, Row row, Iterator<Definition> columnDefIter)
     {
-//        row.
         while (columnDefIter.hasNext())
         {
             Definition columnDef = columnDefIter.next();
             final String columnName = columnDef.getName(); // column name
-            
+
             DataType dataType = columnDef.getType(); // data type
 
-            if (metadata.getRelationNames()!=null && metadata.getRelationNames().contains(columnName))
+            if (metadata.getRelationNames() != null && metadata.getRelationNames().contains(columnName))
             {
-                Object relationalValue = DSClientUtilities.assign(row, null, metadata, dataType.getName(),
-                        entityType, columnName);
+                Object relationalValue = DSClientUtilities.assign(row, null, metadata, dataType.getName(), entityType,
+                        columnName, null);
                 relationalValues.put(columnName, relationalValue);
             }
             else if (compositeColumns.containsKey(columnName))
             {
-                Object compositeKeyAttributeValue = DSClientUtilities.assign(row, null, metadata,
-                        dataType.getName(), entityType, columnName);
+                Object compositeKeyAttributeValue = DSClientUtilities.assign(row, null, metadata, dataType.getName(),
+                        entityType, columnName, compositeColumns.get(columnName));
                 PropertyAccessorHelper.set(compositeKeyInstance, compositeColumns.get(columnName),
                         compositeKeyAttributeValue);
             }
             else
             {
-                entity = DSClientUtilities
-                        .assign(row, entity, metadata, dataType.getName(), entityType, columnName);
+                entity = DSClientUtilities.assign(row, entity, metadata, dataType.getName(), entityType, columnName,
+                        null);
             }
 
         }
@@ -502,7 +508,7 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
     {
         return super.getPersistenceUnit();
     }
-    
+
     /**
      * @param metadata
      * @return

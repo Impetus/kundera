@@ -68,6 +68,8 @@ public class DSClientFactory extends GenericClientFactory implements CassandraCl
 
     private CassandraHostConfiguration configuration;
 
+    private String keyspace;
+
     /*
      * (non-Javadoc)
      * 
@@ -81,8 +83,7 @@ public class DSClientFactory extends GenericClientFactory implements CassandraCl
         {
             initializePropertyReader();
             externalProperties.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
-            schemaManager = new CassandraSchemaManager(this.getClass().getName(), externalProperties,
-                    kunderaMetadata);
+            schemaManager = new CassandraSchemaManager(this.getClass().getName(), externalProperties, kunderaMetadata);
         }
         return schemaManager;
 
@@ -107,8 +108,7 @@ public class DSClientFactory extends GenericClientFactory implements CassandraCl
         schemaManager = null;
         externalProperties = null;
 
-        // TODO: check for connection pool destroy.
-
+        ((Cluster) getConnectionPoolOrConnection()).shutdown();
     }
 
     /*
@@ -159,11 +159,11 @@ public class DSClientFactory extends GenericClientFactory implements CassandraCl
         // RetryPolicy,ProtocolOptions.Compression, SSLOptions,
         // PoolingOptions,SocketOptions
 
-        if(logger.isDebugEnabled())
+        if (logger.isDebugEnabled())
         {
             logger.debug("Intiatilzing connection");
         }
-        
+
         Properties connectionProperties = CassandraPropertyReader.csmd.getConnectionProperties();
         Builder connectionBuilder = Cluster.builder();
 
@@ -241,7 +241,6 @@ public class DSClientFactory extends GenericClientFactory implements CassandraCl
         PersistenceUnitMetadata persistenceUnitMetadata = kunderaMetadata.getApplicationMetadata()
                 .getPersistenceUnitMetadata(getPersistenceUnit());
         Properties props = persistenceUnitMetadata.getProperties();
-        String keyspace = null;
 
         if (externalProperties != null)
         {
@@ -253,9 +252,10 @@ public class DSClientFactory extends GenericClientFactory implements CassandraCl
             keyspace = (String) props.get(PersistenceProperties.KUNDERA_KEYSPACE);
         }
 
-        Session session = cluster.connect("\""+keyspace+"\"");
+        // Session session = cluster.connect("\""+keyspace+"\"");
 
-        return session;
+        // cluster.s
+        return cluster;
     }
 
     /*
@@ -268,13 +268,23 @@ public class DSClientFactory extends GenericClientFactory implements CassandraCl
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
-        return new DSClient(this,persistenceUnit, externalProperties, kunderaMetadata,reader);
+        return new DSClient(this, persistenceUnit, externalProperties, kunderaMetadata, reader);
     }
 
     Session getConnection()
     {
-        return (Session) this.getConnectionPoolOrConnection();
+        Session session = ((Cluster) this.getConnectionPoolOrConnection()).connect("\"" + keyspace + "\"");
+        return session;
     }
+
+    void releaseConnection(Session session)
+    {
+        if (session != null)
+        {
+            session.shutdown();
+        }
+    }
+
     /*
      * (non-Javadoc)
      * 

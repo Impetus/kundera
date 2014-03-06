@@ -15,7 +15,9 @@
  ******************************************************************************/
 package com.impetus.kundera.client.cassandra.crud;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Persistence;
@@ -27,6 +29,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 import com.impetus.kundera.query.QueryImpl;
@@ -56,6 +59,7 @@ public class NativeQueryTest
     public void setUp() throws Exception
     {
         CassandraCli.cassandraSetUp();
+        CassandraCli.dropKeySpace(schema);
         CassandraCli.createKeySpace(schema);
         emf = getEntityManagerFactory();
     }
@@ -179,7 +183,14 @@ public class NativeQueryTest
      */
     private EntityManagerFactoryImpl getEntityManagerFactory()
     {
-        return (EntityManagerFactoryImpl) Persistence.createEntityManagerFactory(_PU);
+        Map propertyMap = null;
+        if (propertyMap  == null)
+        {
+            propertyMap = new HashMap();
+            propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "");
+        }
+
+        return (EntityManagerFactoryImpl) Persistence.createEntityManagerFactory(_PU, propertyMap);
     }
 
     /**
