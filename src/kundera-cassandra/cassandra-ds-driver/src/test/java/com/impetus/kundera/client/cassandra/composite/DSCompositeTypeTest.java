@@ -1,5 +1,5 @@
 /*******************************************************************************
- * * Copyright 2012 Impetus Infotech.
+ * * Copyright 2013 Impetus Infotech.
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.client.crud.compositeType;
+package com.impetus.kundera.client.cassandra.composite;
 
 import java.nio.ByteBuffer;
 import java.util.Date;
@@ -33,13 +33,11 @@ import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.impetus.client.cassandra.CassandraClientBase;
 import com.impetus.client.cassandra.common.CassandraConstants;
-import com.impetus.client.crud.compositeType.CassandraPrimeUser.NickName;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.cassandra.composite.PrimeUser.NickName;
 import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
 
 /**
@@ -49,23 +47,15 @@ import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
  * 
  */
 
-public class CassandraCompositeTypeTest
+public class DSCompositeTypeTest
 {
 
     /**
      * 
      */
-    private static final String PERSISTENCE_UNIT = "composite_pu";
+    private static final String PERSISTENCE_UNIT = "ds_pu";
 
     private EntityManagerFactory emf;
-
-    /** The Constant logger. */
-    private static final Logger logger = LoggerFactory.getLogger(CassandraCompositeTypeTest.class);
-
-    // @Rule
-    // public ContiPerfRule i = new ContiPerfRule(new ReportModule[] { new
-    // CSVSummaryReportModule(),
-    // new HtmlReportModule() });
 
     private Date currentDate = new Date();
 
@@ -94,13 +84,13 @@ public class CassandraCompositeTypeTest
         EntityManager em = emf.createEntityManager();
 
         UUID timeLineId = UUID.randomUUID();
-        CassandraCompoundKey key = new CassandraCompoundKey("mevivs", 1, timeLineId);
+        UserTimeLine key = new UserTimeLine("mevivs", 1, timeLineId);
         onCRUD(em, key);
         em = emf.createEntityManager();
         Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
         Client client = clients.get(PERSISTENCE_UNIT);
         ((CassandraClientBase) client).setCqlVersion("3.0.0");
-        CassandraPrimeUser result = em.find(CassandraPrimeUser.class, key);
+        PrimeUser result = em.find(PrimeUser.class, key);
         Assert.assertNotNull(result);
         Assert.assertEquals("After merge", result.getTweetBody()); // assertion
                                                                    // of newly
@@ -113,8 +103,7 @@ public class CassandraCompositeTypeTest
         em = emf.createEntityManager();
         clients = (Map<String, Client>) em.getDelegate();
         client = clients.get(PERSISTENCE_UNIT);
-        ((CassandraClientBase) client).setCqlVersion("3.0.0");
-        result = em.find(CassandraPrimeUser.class, key);
+        result = em.find(PrimeUser.class, key);
         Assert.assertNull(result);
 
         em.close();
@@ -132,13 +121,12 @@ public class CassandraCompositeTypeTest
         emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT);
         EntityManager em = emf.createEntityManager();
         UUID timeLineId = UUID.randomUUID();
-        CassandraCompoundKey key = new CassandraCompoundKey("mevivs", 1, timeLineId);
+        UserTimeLine key = new UserTimeLine("mevivs", 1, timeLineId);
         onCRUD(em, key);
         em = emf.createEntityManager();
         Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
         Client client = clients.get(PERSISTENCE_UNIT);
-        ((CassandraClientBase) client).setCqlVersion("3.0.0");
-        CassandraPrimeUser result = em.find(CassandraPrimeUser.class, key);
+        PrimeUser result = em.find(PrimeUser.class, key);
         Assert.assertNotNull(result);
         Assert.assertEquals(currentDate.getTime(), result.getTweetDate().getTime()); // assertion
                                                                                      // of
@@ -151,7 +139,7 @@ public class CassandraCompositeTypeTest
         clients = (Map<String, Client>) em.getDelegate();
         client = clients.get(PERSISTENCE_UNIT);
         ((CassandraClientBase) client).setCqlVersion("3.0.0");
-        result = em.find(CassandraPrimeUser.class, key);
+        result = em.find(PrimeUser.class, key);
         Assert.assertNull(result);
 
         em.close();
@@ -165,13 +153,13 @@ public class CassandraCompositeTypeTest
 
         UUID timeLineId = UUID.randomUUID();
 
-        CassandraCompoundKey key = new CassandraCompoundKey("mevivs", 1, timeLineId);
+        UserTimeLine key = new UserTimeLine("mevivs", 1, timeLineId);
 
         Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
         Client client = clients.get(PERSISTENCE_UNIT);
         ((CassandraClientBase) client).setCqlVersion("3.0.0");
 
-        CassandraPrimeUser user = new CassandraPrimeUser(key);
+        PrimeUser user = new PrimeUser(key);
         user.setTweetBody("my first tweet");
         user.setTweetDate(currentDate);
         em.persist(user);
@@ -181,9 +169,9 @@ public class CassandraCompositeTypeTest
         em.clear();
 
         ((CassandraClientBase) client).setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
-        final String noClause = "Select u from CassandraPrimeUser u";
+        final String noClause = "Select u from PrimeUser u";
 
-        final String withFirstCompositeColClause = "Select u from CassandraPrimeUser u where u.key.userId = :userId";
+        final String withFirstCompositeColClause = "Select u from PrimeUser u where u.key.userId = :userId";
 
         // secondary index support over compound key is not enabled in cassandra
         // composite keys yet. DO NOT DELETE/UNCOMMENT.
@@ -192,18 +180,18 @@ public class CassandraCompositeTypeTest
         // "Select u from CassandraPrimeUser u where u.tweetDate = ?1";
         //
 
-        final String withSecondCompositeColClause = "Select u from CassandraPrimeUser u where u.key.tweetId = :tweetId";
-        final String withBothCompositeColClause = "Select u from CassandraPrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId";
-        final String withAllCompositeColClause = "Select u from CassandraPrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId = :timeLineId";
-        final String withLastCompositeColGTClause = "Select u from CassandraPrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId >= :timeLineId";
+        final String withSecondCompositeColClause = "Select u from PrimeUser u where u.key.tweetId = :tweetId";
+        final String withBothCompositeColClause = "Select u from PrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId";
+        final String withAllCompositeColClause = "Select u from PrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId = :timeLineId";
+        final String withLastCompositeColGTClause = "Select u from PrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId >= :timeLineId";
 
-        final String withSelectiveCompositeColClause = "Select u.key from CassandraPrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId = :timeLineId";
+        final String withSelectiveCompositeColClause = "Select u.key from PrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId = :timeLineId";
 
         // query over 1 composite and 1 non-column
 
         // query with no clause.
         Query q = em.createQuery(noClause);
-        List<CassandraPrimeUser> results = q.getResultList();
+        List<PrimeUser> results = q.getResultList();
         Assert.assertEquals(1, results.size());
 
         // Query with composite key clause.
@@ -252,7 +240,7 @@ public class CassandraCompositeTypeTest
         Assert.assertEquals(1, results.size());
         Assert.assertNull(results.get(0).getTweetBody());
 
-        final String selectiveColumnTweetBodyWithAllCompositeColClause = "Select u.tweetBody from CassandraPrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId = :timeLineId";
+        final String selectiveColumnTweetBodyWithAllCompositeColClause = "Select u.tweetBody from PrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId = :timeLineId";
         // Query for selective column tweetBody with composite key clause.
         q = em.createQuery(selectiveColumnTweetBodyWithAllCompositeColClause);
         q.setParameter("userId", "mevivs");
@@ -263,7 +251,7 @@ public class CassandraCompositeTypeTest
         Assert.assertEquals("my first tweet", results.get(0).getTweetBody());
         Assert.assertNull(results.get(0).getTweetDate());
 
-        final String selectiveColumnTweetDateWithAllCompositeColClause = "Select u.tweetDate from CassandraPrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId = :timeLineId";
+        final String selectiveColumnTweetDateWithAllCompositeColClause = "Select u.tweetDate from PrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId = :timeLineId";
         // Query for selective column tweetDate with composite key clause.
         q = em.createQuery(selectiveColumnTweetDateWithAllCompositeColClause);
         q.setParameter("userId", "mevivs");
@@ -274,7 +262,7 @@ public class CassandraCompositeTypeTest
         Assert.assertEquals(currentDate.getTime(), results.get(0).getTweetDate().getTime());
         Assert.assertNull(results.get(0).getTweetBody());
 
-        final String withCompositeKeyClause = "Select u from CassandraPrimeUser u where u.key = :key";
+        final String withCompositeKeyClause = "Select u from PrimeUser u where u.key = :key";
         // Query with composite key clause.
         q = em.createQuery(withCompositeKeyClause);
         q.setParameter("key", key);
@@ -302,24 +290,24 @@ public class CassandraCompositeTypeTest
         EntityManager em = emf.createEntityManager();
 
         UUID timeLineId = UUID.randomUUID();
-        CassandraCompoundKey key = new CassandraCompoundKey("mevivs", 1, timeLineId);
+        UserTimeLine key = new UserTimeLine("mevivs", 1, timeLineId);
         Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
         Client client = clients.get(PERSISTENCE_UNIT);
         ((CassandraClientBase) client).setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
 
-        CassandraPrimeUser user1 = new CassandraPrimeUser(key);
+        PrimeUser user1 = new PrimeUser(key);
         user1.setTweetBody("my first tweet");
         user1.setTweetDate(currentDate);
         em.persist(user1);
 
-        key = new CassandraCompoundKey("mevivs", 2, timeLineId);
-        CassandraPrimeUser user2 = new CassandraPrimeUser(key);
+        key = new UserTimeLine("mevivs", 2, timeLineId);
+        PrimeUser user2 = new PrimeUser(key);
         user2.setTweetBody("my first tweet");
         user2.setTweetDate(currentDate);
         em.persist(user2);
 
-        key = new CassandraCompoundKey("mevivs", 3, timeLineId);
-        CassandraPrimeUser user3 = new CassandraPrimeUser(key);
+        key = new UserTimeLine("mevivs", 3, timeLineId);
+        PrimeUser user3 = new PrimeUser(key);
         user3.setTweetBody("my first tweet");
         user3.setTweetDate(currentDate);
         em.persist(user3);
@@ -331,9 +319,9 @@ public class CassandraCompositeTypeTest
         // em = emf.createEntityManager();
         em.clear();
 
-        final String noClause = "Select u from CassandraPrimeUser u";
+        final String noClause = "Select u from PrimeUser u";
         Query q = em.createQuery(noClause);
-        List<CassandraPrimeUser> results = q.getResultList();
+        List<PrimeUser> results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(3, results.size());
 
@@ -352,24 +340,24 @@ public class CassandraCompositeTypeTest
         EntityManager em = emf.createEntityManager();
 
         UUID timeLineId = UUID.randomUUID();
-        CassandraCompoundKey key = new CassandraCompoundKey("mevivs", 1, timeLineId);
+        UserTimeLine key = new UserTimeLine("mevivs", 1, timeLineId);
         Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
         Client client = clients.get(PERSISTENCE_UNIT);
         ((CassandraClientBase) client).setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
 
-        CassandraPrimeUser user1 = new CassandraPrimeUser(key);
+        PrimeUser user1 = new PrimeUser(key);
         user1.setTweetBody("my first tweet");
         user1.setTweetDate(currentDate);
         em.persist(user1);
 
-        key = new CassandraCompoundKey("mevivs", 2, timeLineId);
-        CassandraPrimeUser user2 = new CassandraPrimeUser(key);
+        key = new UserTimeLine("mevivs", 2, timeLineId);
+        PrimeUser user2 = new PrimeUser(key);
         user2.setTweetBody("my second tweet");
         user2.setTweetDate(currentDate);
         em.persist(user2);
 
-        key = new CassandraCompoundKey("mevivs", 3, timeLineId);
-        CassandraPrimeUser user3 = new CassandraPrimeUser(key);
+        key = new UserTimeLine("mevivs", 3, timeLineId);
+        PrimeUser user3 = new PrimeUser(key);
         user3.setTweetBody("my third tweet");
         user3.setTweetDate(currentDate);
         em.persist(user3);
@@ -381,17 +369,17 @@ public class CassandraCompositeTypeTest
         // em = emf.createEntityManager();
         em.clear();
 
-        String orderClause = "Select u from CassandraPrimeUser u where u.key.userId = :userId ORDER BY tweetId ASC";
+        String orderClause = "Select u from PrimeUser u where u.key.userId = :userId ORDER BY tweetId ASC";
         Query q = em.createQuery(orderClause);
         q.setParameter("userId", "mevivs");
-        List<CassandraPrimeUser> results = q.getResultList();
+        List<PrimeUser> results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals("my first tweet", results.get(0).getTweetBody());
         Assert.assertEquals("my second tweet", results.get(1).getTweetBody());
         Assert.assertEquals("my third tweet", results.get(2).getTweetBody());
         Assert.assertEquals(3, results.size());
 
-        orderClause = "Select u from CassandraPrimeUser u where u.key.userId = :userId ORDER BY tweetId DESC";
+        orderClause = "Select u from PrimeUser u where u.key.userId = :userId ORDER BY tweetId DESC";
         q = em.createQuery(orderClause);
         q.setParameter("userId", "mevivs");
         results = q.getResultList();
@@ -412,7 +400,7 @@ public class CassandraCompositeTypeTest
 
         try
         {
-            orderClause = "Select u from CassandraPrimeUser u where u.key.userId = :userId ORDER BY userId DESC";
+            orderClause = "Select u from PrimeUser u where u.key.userId = :userId ORDER BY userId DESC";
             q = em.createQuery(orderClause);
             q.setParameter("userId", "mevivs");
             results = q.getResultList();
@@ -421,9 +409,7 @@ public class CassandraCompositeTypeTest
         }
         catch (Exception e)
         {
-            Assert.assertEquals(
-                    "javax.persistence.PersistenceException: com.impetus.kundera.KunderaException: InvalidRequestException(why:Order by is currently only supported on the clustered columns of the PRIMARY KEY, got userId)",
-                    e.getMessage());
+            Assert.assertEquals("com.datastax.driver.core.exceptions.InvalidQueryException: Order by is currently only supported on the clustered columns of the PRIMARY KEY, got userId", e.getMessage());
         }
 
     }
@@ -435,24 +421,24 @@ public class CassandraCompositeTypeTest
         EntityManager em = emf.createEntityManager();
 
         UUID timeLineId = UUID.randomUUID();
-        CassandraCompoundKey key = new CassandraCompoundKey("mevivs", 1, timeLineId);
+        UserTimeLine key = new UserTimeLine("mevivs", 1, timeLineId);
         Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
         Client client = clients.get(PERSISTENCE_UNIT);
         ((CassandraClientBase) client).setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
 
-        CassandraPrimeUser user1 = new CassandraPrimeUser(key);
+        PrimeUser user1 = new PrimeUser(key);
         user1.setTweetBody("my first tweet");
         user1.setTweetDate(currentDate);
         em.persist(user1);
 
-        key = new CassandraCompoundKey("cgangwal's", 2, timeLineId);
-        CassandraPrimeUser user2 = new CassandraPrimeUser(key);
+        key = new UserTimeLine("cgangwal's", 2, timeLineId);
+        PrimeUser user2 = new PrimeUser(key);
         user2.setTweetBody("my second tweet");
         user2.setTweetDate(currentDate);
         em.persist(user2);
 
-        key = new CassandraCompoundKey("kmishra", 3, timeLineId);
-        CassandraPrimeUser user3 = new CassandraPrimeUser(key);
+        key = new UserTimeLine("kmishra", 3, timeLineId);
+        PrimeUser user3 = new PrimeUser(key);
         user3.setTweetBody("my third tweet");
         user3.setTweetDate(currentDate);
         em.persist(user3);
@@ -461,17 +447,17 @@ public class CassandraCompositeTypeTest
 
         em.clear();
 
-        String inClause = "Select u from CassandraPrimeUser u where u.key.userId IN (mevivs,cgangwal's,kmishra) ORDER BY tweetId ASC";
+        String inClause = "Select u from PrimeUser u where u.key.userId IN (mevivs,cgangwal's,kmishra) ORDER BY tweetId ASC";
         Query q = em.createQuery(inClause);
 
-        List<CassandraPrimeUser> results = q.getResultList();
+        List<PrimeUser> results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals("my first tweet", results.get(0).getTweetBody());
         Assert.assertEquals("my second tweet", results.get(1).getTweetBody());
         Assert.assertEquals("my third tweet", results.get(2).getTweetBody());
         Assert.assertEquals(3, results.size());
 
-        inClause = "Select u from CassandraPrimeUser u where u.key.userId IN (\"mevivs\",\"cgangwal's\",\"kmishra\") ORDER BY tweetId ASC";
+        inClause = "Select u from PrimeUser u where u.key.userId IN (\"mevivs\",\"cgangwal's\",\"kmishra\") ORDER BY tweetId ASC";
         q = em.createQuery(inClause);
 
         results = q.getResultList();
@@ -481,7 +467,7 @@ public class CassandraCompositeTypeTest
         Assert.assertEquals("my third tweet", results.get(2).getTweetBody());
         Assert.assertEquals(3, results.size());
 
-        inClause = "Select u from CassandraPrimeUser u where u.key.userId IN ('mevivs','cgangwal's') ORDER BY tweetId ASC";
+        inClause = "Select u from PrimeUser u where u.key.userId IN ('mevivs','cgangwal's') ORDER BY tweetId ASC";
         q = em.createQuery(inClause);
 
         results = q.getResultList();
@@ -492,7 +478,7 @@ public class CassandraCompositeTypeTest
 
         try
         {
-            inClause = "Select u from CassandraPrimeUser u where u.key.tweetId IN (1,2,3) ORDER BY tweetId DESC";
+            inClause = "Select u from PrimeUser u where u.key.tweetId IN (1,2,3) ORDER BY tweetId DESC";
             q = em.createQuery(inClause);
             results = q.getResultList();
 
@@ -501,7 +487,7 @@ public class CassandraCompositeTypeTest
         catch (Exception e)
         {
             Assert.assertEquals(
-                    "javax.persistence.PersistenceException: com.impetus.kundera.KunderaException: InvalidRequestException(why:PRIMARY KEY part tweetId cannot be restricted by IN relation)",
+                    "com.datastax.driver.core.exceptions.InvalidQueryException: PRIMARY KEY part tweetId cannot be restricted by IN relation",
                     e.getMessage());
         }
 
@@ -517,11 +503,11 @@ public class CassandraCompositeTypeTest
         long t1 = System.currentTimeMillis();
         for (int i = 0; i < 500; i++)
         {
-            CassandraCompoundKey key = new CassandraCompoundKey("mevivs", i, timeLineId);
+            UserTimeLine key = new UserTimeLine("mevivs", i, timeLineId);
             Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
             Client client = clients.get(PERSISTENCE_UNIT);
             ((CassandraClientBase) client).setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
-            CassandraPrimeUser user = new CassandraPrimeUser(key);
+            PrimeUser user = new PrimeUser(key);
             user.setTweetBody("my first tweet");
             user.setTweetDate(currentDate);
             em.persist(user);
@@ -531,7 +517,7 @@ public class CassandraCompositeTypeTest
 
         em.clear();
 
-        CassandraPrimeUser u = em.find(CassandraPrimeUser.class, new CassandraCompoundKey("mevivs", 499, timeLineId));
+        PrimeUser u = em.find(PrimeUser.class, new UserTimeLine("mevivs", 499, timeLineId));
         Assert.assertNotNull(u);
     }
 
@@ -544,11 +530,11 @@ public class CassandraCompositeTypeTest
     public void tearDown() throws Exception
     {
         emf.close();
-        CassandraCli.client.execute_cql3_query(ByteBuffer.wrap("use \"CompositeCassandra\"".getBytes()),
+        CassandraCli.client.execute_cql3_query(ByteBuffer.wrap("use \"KunderaExamples\"".getBytes()),
                 Compression.NONE, ConsistencyLevel.ONE);
         CassandraCli.client.execute_cql3_query(ByteBuffer.wrap("truncate \"CompositeUser\"".getBytes()),
                 Compression.NONE, ConsistencyLevel.ONE);
-        CassandraCli.dropKeySpace("CompositeCassandra");
+        CassandraCli.dropKeySpace("KunderaExamples");
     }
 
     // DO NOT DELETE IT!! though it is automated with schema creation option.
@@ -557,21 +543,21 @@ public class CassandraCompositeTypeTest
      */
     private void executeScript(final String cql)
     {
-        CassandraCli.createKeySpace("CompositeCassandra");
-        CassandraCli.executeCqlQuery(cql, "CompositeCassandra");
+        CassandraCli.createKeySpace("KunderaExamples");
+        CassandraCli.executeCqlQuery(cql, "KunderaExamples");
     }
 
     /**
      * CRUD over Compound primary Key.
      */
 
-    private void onCRUD(final EntityManager em, CassandraCompoundKey key)
+    private void onCRUD(final EntityManager em, UserTimeLine key)
     {
 
         Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
         Client client = clients.get(PERSISTENCE_UNIT);
         ((CassandraClientBase) client).setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
-        CassandraPrimeUser user = new CassandraPrimeUser(key);
+        PrimeUser user = new PrimeUser(key);
         user.setTweetBody("my first tweet");
         user.setTweetDate(currentDate);
         user.setNickName(NickName.KK);
@@ -587,7 +573,7 @@ public class CassandraCompositeTypeTest
         client = clients.get(PERSISTENCE_UNIT);
         ((CassandraClientBase) client).setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
 
-        CassandraPrimeUser result = em.find(CassandraPrimeUser.class, key);
+        PrimeUser result = em.find(PrimeUser.class, key);
         Assert.assertNotNull(result);
         Assert.assertEquals("my first tweet", result.getTweetBody());
         // Assert.assertEquals(timeLineId, result.getKey().getTimeLineId());
@@ -607,7 +593,7 @@ public class CassandraCompositeTypeTest
         client = clients.get(PERSISTENCE_UNIT);
         ((CassandraClientBase) client).setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
 
-        result = em1.find(CassandraPrimeUser.class, key);
+        result = em1.find(PrimeUser.class, key);
         Assert.assertNotNull(result);
         Assert.assertEquals("After merge", result.getTweetBody());
         // Assert.assertEquals(timeLineId, result.getKey().getTimeLineId());
@@ -634,8 +620,8 @@ public class CassandraCompositeTypeTest
 
         UUID timeLineId = UUID.randomUUID();
 
-        CassandraCompoundKey key = new CassandraCompoundKey("mevivs", 1, timeLineId);
-        CassandraPrimeUser user = new CassandraPrimeUser(key);
+        UserTimeLine key = new UserTimeLine("mevivs", 1, timeLineId);
+        PrimeUser user = new PrimeUser(key);
         user.setTweetBody("my first tweet");
         user.setTweetDate(currentDate);
         em.persist(user);
@@ -646,7 +632,7 @@ public class CassandraCompositeTypeTest
         client = clients.get(PERSISTENCE_UNIT);
         ((CassandraClientBase) client).setCqlVersion("3.0.0");
 
-        String updateQuery = "Update CassandraPrimeUser u SET u.tweetBody=after merge where u.key= :beforeUpdate";
+        String updateQuery = "Update PrimeUser u SET u.tweetBody=after merge where u.key= :beforeUpdate";
         Query q = em.createQuery(updateQuery);
         q.setParameter("beforeUpdate", key);
         q.executeUpdate();
@@ -658,7 +644,7 @@ public class CassandraCompositeTypeTest
         client = clients.get(PERSISTENCE_UNIT);
         ((CassandraClientBase) client).setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
 
-        CassandraPrimeUser result = em.find(CassandraPrimeUser.class, key);
+        PrimeUser result = em.find(PrimeUser.class, key);
         Assert.assertNotNull(result);
         Assert.assertEquals("after merge", result.getTweetBody());
         Assert.assertEquals(timeLineId, result.getKey().getTimeLineId());
@@ -673,9 +659,9 @@ public class CassandraCompositeTypeTest
     {
         UUID timeLineId = UUID.randomUUID();
 
-        CassandraCompoundKey key = new CassandraCompoundKey("mevivs", 1, timeLineId);
+        UserTimeLine key = new UserTimeLine("mevivs", 1, timeLineId);
 
-        String deleteQuery = "Delete From CassandraPrimeUser u where u.key= :key";
+        String deleteQuery = "Delete From PrimeUser u where u.key= :key";
         EntityManager em = emf.createEntityManager();
         Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
         Client client = clients.get(PERSISTENCE_UNIT);
@@ -685,7 +671,7 @@ public class CassandraCompositeTypeTest
         q.setParameter("key", key);
         q.executeUpdate();
 
-        CassandraPrimeUser result = em.find(CassandraPrimeUser.class, key);
+        PrimeUser result = em.find(PrimeUser.class, key);
         Assert.assertNull(result);
         em.close();
     }

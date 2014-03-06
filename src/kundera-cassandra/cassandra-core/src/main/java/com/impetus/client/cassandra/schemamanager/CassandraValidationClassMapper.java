@@ -84,11 +84,11 @@ public final class CassandraValidationClassMapper
         validationClassMapper.put(char.class, UTF8Type.class);
 
         validationClassMapper.put(java.sql.Time.class, DateType.class);
-        validationClassMapper.put(java.lang.Integer.class, IntegerType.class);
-        validationClassMapper.put(int.class, IntegerType.class);
+        validationClassMapper.put(java.lang.Integer.class, Int32Type.class);
+        validationClassMapper.put(int.class, Int32Type.class);
         validationClassMapper.put(java.sql.Timestamp.class, DateType.class);
-        validationClassMapper.put(Short.class, IntegerType.class);
-        validationClassMapper.put(short.class, IntegerType.class);
+        validationClassMapper.put(Short.class, Int32Type.class);
+        validationClassMapper.put(short.class, Int32Type.class);
         validationClassMapper.put(java.math.BigDecimal.class, DecimalType.class);
         validationClassMapper.put(java.sql.Date.class, DateType.class);
         validationClassMapper.put(java.util.Date.class, DateType.class);

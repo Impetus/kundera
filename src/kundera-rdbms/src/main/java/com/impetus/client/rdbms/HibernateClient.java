@@ -42,6 +42,7 @@ import org.hibernate.Session;
 import org.hibernate.StatelessSession;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.internal.StatelessSessionImpl;
 import org.hibernate.transform.AliasToEntityMapResultTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -145,15 +146,29 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     public void delete(Object entity, Object pKey)
     {
         s = getStatelessSession();
-        Transaction tx = s.beginTransaction();
+        Transaction tx = null;
+        tx = onBegin();
         s.delete(entity);
-        tx.commit();
+        onCommit(tx);
 
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entity.getClass());
         if (!MetadataUtils.useSecondryIndex(getClientMetadata()))
         {
             getIndexManager().remove(metadata, entity, pKey.toString());
         }
+    }
+
+    private Transaction onBegin()
+    {
+        Transaction tx;
+        if(((StatelessSessionImpl)s).getTransactionCoordinator().isTransactionInProgress())
+        {
+            tx = s.beginTransaction();
+        } else
+        {
+            tx = ((StatelessSessionImpl)s).getTransactionCoordinator().getTransaction();
+        }
+        return tx;
     }
 
     /*
@@ -226,7 +241,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         Transaction tx = null;
 
         s = getStatelessSession();
-        tx = s.beginTransaction();
+        tx = onBegin();
         try
         {
             if (!isUpdate)
@@ -235,7 +250,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
 
                 // Update foreign Keys
                 updateForeignKeys(metadata, id, relationHolders);
-                tx.commit();
+                onCommit(tx);/*tx.commit();*/
             }
             else
             {
@@ -246,7 +261,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
                     updateForeignKeys(metadata, id, relationHolders);
                 }
 
-                tx.commit();
+                onCommit(tx);
             }
         }
         // TODO: Bad code, get rid of these exceptions, currently necessary for
@@ -255,13 +270,22 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         {
             s.update(entity);
             log.info(e.getMessage());
-            tx.commit();
+            onCommit(tx);
+//            tx.commit();
         }
         catch (HibernateException e)
         {
             log.error("Error while persisting object of {}, Caused by {}.", metadata.getEntityClazz(), e);
             e.printStackTrace();
             throw new PersistenceException(e);
+        }
+    }
+
+    private void onCommit(Transaction tx)
+    {
+        if(tx.isActive())
+        {
+            tx.commit();
         }
     }
 
@@ -351,9 +375,9 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         
         StatelessSession s = getStatelessSession();
         
-        Transaction tx = s.beginTransaction();
+        Transaction tx = onBegin();
         onNativeUpdate(query.toString(), null);
-        tx.commit();
+        onCommit(tx);
         
     }
 
@@ -378,7 +402,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
             String inverseJoinColumnName, Object parentId, Set<Object> childrenIds)
     {
         s = getStatelessSession();
-        Transaction tx = s.beginTransaction();
+        Transaction tx = onBegin();
         for (Object childId : childrenIds)
         {
             StringBuffer query = new StringBuffer();
@@ -409,7 +433,8 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
                 s.createSQLQuery(query.toString()).executeUpdate();
             }
         }
-        tx.commit();
+        onCommit(tx);
+//        tx.commit();
     }
 
     /**
@@ -570,11 +595,12 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         setParameters(parameterMap, q);
 
         System.out.println(query);
-        Transaction tx = s.beginTransaction();
+        Transaction tx = onBegin();
         
         int i = q.executeUpdate();
 
-        tx.commit();
+        onCommit(tx);
+//        tx.commit();
 
         return i;
     }

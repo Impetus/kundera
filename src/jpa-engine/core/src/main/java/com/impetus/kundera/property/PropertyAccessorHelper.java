@@ -95,23 +95,26 @@ public class PropertyAccessorHelper
      */
     public static void set(Object target, Field field, Object value)
     {
+        if (target != null)
+        {
 
-        if (!field.isAccessible())
-        {
-            field.setAccessible(true);
-        }
-        try
-        {
-            field.set(target, value);
-        }
-        catch (IllegalArgumentException iarg)
-        {
-            throw new PropertyAccessException(iarg);
-        }
-        catch (IllegalAccessException iacc)
-        {
-            throw new PropertyAccessException(iacc);
-        }
+            if (!field.isAccessible())
+            {
+                field.setAccessible(true);
+            }
+            try
+            {
+                field.set(target, value);
+            }
+            catch (IllegalArgumentException iarg)
+            {
+                throw new PropertyAccessException(iarg);
+            }
+            catch (IllegalAccessException iacc)
+            {
+                throw new PropertyAccessException(iacc);
+            }
+        } // ignore if object is null;
     }
 
     /**
@@ -415,11 +418,11 @@ public class PropertyAccessorHelper
                 }
             }
         }
-        if(collectionField.getType().isAssignableFrom(Map.class))
+        if (collectionField.getType().isAssignableFrom(Map.class))
         {
             java.lang.reflect.Type[] arguments = ((ParameterizedType) collectionField.getGenericType())
                     .getActualTypeArguments();
-            if(arguments != null && arguments.length > 1)
+            if (arguments != null && arguments.length > 1)
             {
                 genericClass = getTypedClass(arguments[1]);
             }
@@ -568,10 +571,11 @@ public class PropertyAccessorHelper
 
     /**
      * Borrowed from java.lang.class
+     * 
      * @param o
      * @return
      */
-    
+
     private static Class<?> toClass(Type o)
     {
         if (o instanceof GenericArrayType)
@@ -581,8 +585,7 @@ public class PropertyAccessorHelper
         }
         return (Class<?>) o;
     }
-    
-    
+
     /**
      * Gets the typed class.
      * 
