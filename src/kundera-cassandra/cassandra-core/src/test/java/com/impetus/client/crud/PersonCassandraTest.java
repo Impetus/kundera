@@ -407,8 +407,7 @@ public class PersonCassandraTest extends BaseTest
         }
         else
         {
-            CQLTranslator translator = new CQLTranslator();
-            String query = "insert into \"PERSONCASSANDRA\" (key,\"PERSON_NAME\",\"AGE\") values ('1','Amry',10 )";
+            String query = "insert into \"PERSONCASSANDRA\" (\"personId\",\"PERSON_NAME\",\"AGE\") values ('1','Amry',10 )";
             CassandraCli.client.execute_cql3_query(ByteBuffer.wrap(query.getBytes()), Compression.NONE,
                     ConsistencyLevel.ONE);
         }

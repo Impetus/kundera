@@ -183,7 +183,7 @@ public class CassQuery extends QueryImpl
         return result;
     }
 
-    /*
+    /**
      * (non-Javadoc)
      * 
      * @see
@@ -389,11 +389,9 @@ public class CassQuery extends QueryImpl
      */
     Map<Boolean, List<IndexClause>> prepareIndexClause(EntityMetadata m, boolean isQueryForInvertedIndex)
     {
-//        IndexClause indexClause = Selector.newIndexClause(Bytes.EMPTY, maxResult);
-		IndexClause indexClause = new IndexClause(
-				new ArrayList<IndexExpression>(),
-				ByteBufferUtil.EMPTY_BYTE_BUFFER, maxResult);
-        
+        IndexClause indexClause = new IndexClause(new ArrayList<IndexExpression>(), ByteBufferUtil.EMPTY_BYTE_BUFFER,
+                maxResult);
+
         List<IndexClause> clauses = new ArrayList<IndexClause>();
         List<IndexExpression> expr = new ArrayList<IndexExpression>();
 
@@ -412,7 +410,6 @@ public class CassQuery extends QueryImpl
             if (o instanceof FilterClause)
             {
                 FilterClause clause = ((FilterClause) o);
-                // String fieldName = getColumnName(clause.getProperty());
                 String fieldName = clause.getProperty();
                 // in case id column matches with field name, set it for first
                 // time.
@@ -425,12 +422,8 @@ public class CassQuery extends QueryImpl
                 Object value = clause.getValue();
                 IndexOperator operator = getOperator(condition, idPresent);
 
-//                IndexExpression expression = Selector.newIndexExpression(fieldName, operator,
-//                        getBytesValue(fieldName, m, value));
-//                
-                IndexExpression expression = new IndexExpression(ByteBufferUtil.bytes(fieldName),operator,
+                IndexExpression expression = new IndexExpression(ByteBufferUtil.bytes(fieldName), operator,
                         getBytesValue(fieldName, m, value));
-                
 
                 expr.add(expression);
             }
@@ -534,7 +527,6 @@ public class CassQuery extends QueryImpl
      */
     ByteBuffer getBytesValue(String jpaFieldName, EntityMetadata m, Object value)
     {
-        // Column idCol = m.getIdColumn();
         Attribute idCol = m.getIdAttribute();
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
@@ -593,7 +585,6 @@ public class CassQuery extends QueryImpl
                     String fieldName = m.getFieldName(jpaFieldName);
 
                     Attribute col = entity.getAttribute(fieldName);
-                    // Column col = m.getColumn(jpaFieldName);
                     if (col == null)
                     {
                         throw new QueryHandlerException("column type is null for: " + jpaFieldName);
@@ -609,12 +600,7 @@ public class CassQuery extends QueryImpl
         if (f != null && f.getType() != null)
         {
             return CassandraUtilities.toBytes(value, f);
-        }/*
-          * else if(f == null || value == null) {
-          * log.error("Error while handling data type for " + jpaFieldName +
-          * "."); throw new QueryHandlerException("Field type is null for " +
-          * jpaFieldName + "."); }
-          */
+        }
         else
         {
             // default is String type
@@ -635,8 +621,6 @@ public class CassQuery extends QueryImpl
      */
     String onQueryOverCQL3(EntityMetadata m, Client client, MetamodelImpl metaModel, List<String> relations)
     {
-        List<Object> result = new ArrayList<Object>();
-
         // select column will always be of entity field only!
         // where clause ordering
 
@@ -671,12 +655,6 @@ public class CassQuery extends QueryImpl
         onCondition(m, metaModel, compoundKey, idColumn, builder, isPresent, translator);
 
         return builder.toString();
-        // onLimit(builder);
-
-        // result = ((CassandraClientBase)
-        // client).executeQuery(builder.toString(), m.getEntityClazz(),
-        // relations);
-        // return result;
     }
 
     /**
@@ -776,7 +754,8 @@ public class CassQuery extends QueryImpl
                 {
                     translator.buildWhereClause(builder,
                             ((AbstractAttribute) m.getIdAttribute()).getBindableJavaType(),
-                            CassandraUtilities.getIdColumnName(kunderaMetadata, m, externalProperties), value, condition, true);
+                            CassandraUtilities.getIdColumnName(kunderaMetadata, m, externalProperties), value,
+                            condition, true);
                 }
                 else
                 {
@@ -907,6 +886,7 @@ public class CassQuery extends QueryImpl
             {
                 builder.append(" USING TTL ");
                 builder.append(ttl);
+                builder.append(" ");
             }
         }
 

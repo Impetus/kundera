@@ -987,10 +987,18 @@ public abstract class CassandraDataHandlerBase
         {
             if (m.isCounterColumnType())
             {
-                LongAccessor accessor = new LongAccessor();
-                Long value = accessor.fromBytes(Long.class, column.getValue());
-                return populateViaThrift(m, entity, entityType, relationNames, relations, thriftColumnName,
-                        value.toString(), isCql3Enabled);
+                if (thriftColumnName.equals(((AbstractAttribute) m.getIdAttribute()).getJPAColumnName()))
+                {
+                    return populateViaThrift(m, entity, entityType, relationNames, relations, thriftColumnName,
+                            column.getValue(), isCql3Enabled);
+                }
+                else
+                {
+                    LongAccessor accessor = new LongAccessor();
+                    Long value = accessor.fromBytes(Long.class, column.getValue());
+                    return populateViaThrift(m, entity, entityType, relationNames, relations, thriftColumnName,
+                            value != null ? value.toString() : null, isCql3Enabled);
+                }
             }
 
             return populateViaThrift(m, entity, entityType, relationNames, relations, thriftColumnName,

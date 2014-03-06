@@ -75,10 +75,10 @@ public class LoggingConfigurationTest
         em.clear();
 
         em.createNativeQuery(
-                "insert into \"LoggingConfiguration\" (key,label,logname,nnow) values ('1','one','first lc','now')",
+                "insert into \"LoggingConfiguration\" (id,label,logname,nnow) values ('1','one','first lc','now')",
                 LoggingConfiguration.class).executeUpdate();
         em.createNativeQuery(
-                "insert into \"LoggingConfiguration\" (key,label,logname,nnow) values ('2','two','second log','now')",
+                "insert into \"LoggingConfiguration\" (id,label,logname,nnow) values ('2','two','second log','now')",
                 LoggingConfiguration.class).executeUpdate();
 
         Query query = em.createQuery("SELECT lc FROM LoggingConfiguration lc WHERE lc.logname = :logname",
