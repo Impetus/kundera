@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.persistence.PersistenceException;
@@ -45,6 +46,8 @@ import com.datastax.driver.core.ColumnDefinitions;
 import com.datastax.driver.core.ColumnDefinitions.Definition;
 import com.datastax.driver.core.ConsistencyLevel;
 import com.datastax.driver.core.DataType;
+import com.datastax.driver.core.DataType.Name;
+import com.datastax.driver.core.ColumnMetadata;
 import com.datastax.driver.core.Query;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
@@ -56,6 +59,7 @@ import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.client.cassandra.query.CassQuery;
 import com.impetus.client.cassandra.thrift.CQLTranslator;
+import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
@@ -70,6 +74,8 @@ import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
+import com.impetus.kundera.property.PropertyAccessor;
+import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
@@ -196,7 +202,7 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
 
         UUID uuid = rSet.iterator().next().getUUID(0);
         return uuid;
-//        return uuid.timestamp();
+        // return uuid.timestamp();
     }
 
     @Override
@@ -210,45 +216,164 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
     public void persistJoinTable(JoinTableData joinTableData)
     {
         // TODO:: Add support for Many-to-Many join tables.
+        String joinTableName = joinTableData.getJoinTableName();
+        String invJoinColumnName = joinTableData.getInverseJoinColumnName();
+        Map<Object, Set<Object>> joinTableRecords = joinTableData.getJoinTableRecords();
 
-        // TODO Auto-generated method stub
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
+                joinTableData.getEntityClass());
 
+        // need to bring in an insert query for this
+        // add columns & execute query
+        //
+        CQLTranslator translator = new CQLTranslator();
+
+        String batch_Query = CQLTranslator.BATCH_QUERY;
+
+        String insert_Query = translator.INSERT_QUERY;
+
+        StringBuilder builder = new StringBuilder();
+        builder.append(CQLTranslator.DEFAULT_KEY_NAME);
+        builder.append(CQLTranslator.COMMA_STR);
+        builder.append(translator.ensureCase(new StringBuilder(), joinTableData.getJoinColumnName(), false));
+        builder.append(CQLTranslator.COMMA_STR);
+        builder.append(translator.ensureCase(new StringBuilder(), joinTableData.getInverseJoinColumnName(), false));
+
+        insert_Query = StringUtils.replace(insert_Query, CQLTranslator.COLUMN_FAMILY,
+                translator.ensureCase(new StringBuilder(), joinTableName, false).toString());
+
+        insert_Query = StringUtils.replace(insert_Query, CQLTranslator.COLUMNS, builder.toString());
+
+        StringBuilder columnValueBuilder = new StringBuilder();
+
+        StringBuilder statements = new StringBuilder();
+
+        // if
+        // insert query for for each row key and
+
+        for (Object key : joinTableRecords.keySet())
+        {
+            PropertyAccessor accessor = PropertyAccessorFactory.getPropertyAccessor((Field) entityMetadata
+                    .getIdAttribute().getJavaMember());
+
+            Set<Object> values = joinTableRecords.get(key); // join column value
+
+            for (Object value : values)
+            {
+                if (value != null)
+                {
+                    String insertQuery = insert_Query;
+                    columnValueBuilder.append(CQLTranslator.QUOTE_STR);
+                    columnValueBuilder.append(PropertyAccessorHelper.getString(key) + "\001"
+                            + PropertyAccessorHelper.getString(value));
+                    columnValueBuilder.append(CQLTranslator.QUOTE_STR);
+                    columnValueBuilder.append(CQLTranslator.COMMA_STR);
+                    translator.appendValue(columnValueBuilder, key.getClass(), key, true, false);
+                    columnValueBuilder.append(CQLTranslator.COMMA_STR);
+                    translator.appendValue(columnValueBuilder, value.getClass(), value, true, false);
+
+                    insertQuery = StringUtils.replace(insertQuery, CQLTranslator.COLUMN_VALUES,
+                            columnValueBuilder.toString());
+                    statements.append(insertQuery);
+                    statements.append(" ");
+                }
+
+            }
+
+        }
+
+        if (!StringUtils.isBlank(statements.toString()))
+        {
+            batch_Query = StringUtils.replace(batch_Query, CQLTranslator.STATEMENT, statements.toString());
+            StringBuilder batchBuilder = new StringBuilder();
+            batchBuilder.append(batch_Query);
+            batchBuilder.append(CQLTranslator.APPLY_BATCH);
+            execute(batchBuilder.toString(), null);
+        }
     }
 
     @Override
     public <E> List<E> getColumnsById(String schemaName, String tableName, String pKeyColumnName, String columnName,
             Object pKeyColumnValue, Class columnJavaType)
     {
-        // TODO:: Add support for Many-to-Many join tables.
+        // select columnName from tableName where pKeyColumnName =
+        // pKeyColumnValue
+        List results = new ArrayList();
+        CQLTranslator translator = new CQLTranslator();
+        String selectQuery = translator.SELECT_QUERY;
+        selectQuery = StringUtils.replace(selectQuery, CQLTranslator.COLUMN_FAMILY,
+                translator.ensureCase(new StringBuilder(), tableName, false).toString());
+        selectQuery = StringUtils.replace(selectQuery, CQLTranslator.COLUMNS,
+                translator.ensureCase(new StringBuilder(), columnName, false).toString());
 
-        // TODO Auto-generated method stub
-        return null;
+        StringBuilder selectQueryBuilder = new StringBuilder(selectQuery);
+
+        selectQueryBuilder.append(CQLTranslator.ADD_WHERE_CLAUSE);
+
+        translator.buildWhereClause(selectQueryBuilder, columnJavaType, pKeyColumnName, pKeyColumnValue,
+                CQLTranslator.EQ_CLAUSE, false);
+        selectQueryBuilder
+                .delete(selectQueryBuilder.lastIndexOf(CQLTranslator.AND_CLAUSE), selectQueryBuilder.length());
+
+        ResultSet rSet = execute(selectQueryBuilder.toString(), null);
+
+        Iterator<Row> rowIter = rSet.iterator();
+        while (rowIter.hasNext())
+        {
+            Row row = rowIter.next();
+            DataType dataType = row.getColumnDefinitions().getType(columnName);
+            Object columnValue = DSClientUtilities.assign(row, null, null, dataType.getName(), null, columnName, null);
+            results.add(columnValue);
+        }
+        return results;
     }
 
     @Override
     public Object[] findIdsByColumn(String schemaName, String tableName, String pKeyName, String columnName,
             Object columnValue, Class entityClazz)
     {
-        // TODO:: Add support for Many-to-Many join tables.
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClazz);
 
-        return null;
+        return getColumnsById(schemaName, tableName, columnName,
+                ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName(), columnValue,
+                metadata.getIdAttribute().getBindableJavaType()).toArray();
     }
 
     @Override
     public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
     {
+
+        Session session = factory.getConnection();
+        String rowKeyName = null;
         CQLTranslator translator = new CQLTranslator();
-        String deleteQuery = CQLTranslator.DELETE_QUERY;
+        try
+        {
+            List<ColumnMetadata> primaryKeys = session.getCluster().getMetadata().getKeyspace(schemaName)
+                    .getTable(tableName).getPrimaryKey();
+            rowKeyName = primaryKeys.get(0).getName();
+        }
+        finally
+        {
+            factory.releaseConnection(session);
+        }
 
-        deleteQuery = StringUtils.replace(deleteQuery, CQLTranslator.COLUMN_FAMILY,
-                translator.ensureCase(new StringBuilder(), tableName, false).toString());
+        List rowKeys = getColumnsById(schemaName,tableName,columnName,rowKeyName,columnValue,columnValue.getClass());
+        for (Object rowKey : rowKeys)
+        {
+            if (rowKey != null)
+            {
+                String deleteQuery = CQLTranslator.DELETE_QUERY;
 
-        StringBuilder deleteQueryBuilder = new StringBuilder(deleteQuery);
-        deleteQueryBuilder.append(CQLTranslator.ADD_WHERE_CLAUSE);
-        deleteQueryBuilder = translator.ensureCase(deleteQueryBuilder, columnName, false);
-        deleteQueryBuilder.append(CQLTranslator.EQ_CLAUSE);
-        translator.appendValue(deleteQueryBuilder, columnValue.getClass(), columnValue, false, false);
-        this.execute(deleteQueryBuilder.toString(), null);
+                deleteQuery = StringUtils.replace(deleteQuery, CQLTranslator.COLUMN_FAMILY,
+                        translator.ensureCase(new StringBuilder(), tableName, false).toString());
+                StringBuilder deleteQueryBuilder = new StringBuilder(deleteQuery);
+                deleteQueryBuilder.append(CQLTranslator.ADD_WHERE_CLAUSE);
+                deleteQueryBuilder = translator.ensureCase(deleteQueryBuilder, rowKeyName, false);
+                deleteQueryBuilder.append(CQLTranslator.EQ_CLAUSE);
+                translator.appendValue(deleteQueryBuilder, rowKey.getClass(), rowKey, false, false);
+                this.execute(deleteQueryBuilder.toString(), null);
+            }
+        }
     }
 
     @Override
@@ -376,7 +501,7 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
     @Override
     protected <T> T execute(final String query, Object connection)
     {
-        Session session=factory.getConnection();
+        Session session = factory.getConnection();
         try
         {
             Query queryStmt = new SimpleStatement(query);
@@ -387,7 +512,8 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         {
             log.error("Error while executing query {}", query);
             throw new KunderaException(e);
-        }finally
+        }
+        finally
         {
             factory.releaseConnection(session);
         }
@@ -398,13 +524,14 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         Session session = null;
         try
         {
-        if (log.isInfoEnabled())
-        {
-            log.info("Executing cql query {}.", cqlQuery);
+            if (log.isInfoEnabled())
+            {
+                log.info("Executing cql query {}.", cqlQuery);
+            }
+            session = factory.getConnection();
+            session.execute(cqlQuery);
         }
-        session = factory.getConnection();
-        session.execute(cqlQuery);
-        }finally
+        finally
         {
             factory.releaseConnection(session);
         }
