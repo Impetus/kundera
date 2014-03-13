@@ -1148,6 +1148,7 @@ public abstract class CassandraDataHandlerBase
             			String msg = "Decomposing failed for `" + tableName + "`.`"
             					+ fieldName
             					+ "`, did you set the correct type in your entity class?";
+            			log.error(msg, e);
             			throw new KunderaException(msg, e);
             		}
             		PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), decomposed);
