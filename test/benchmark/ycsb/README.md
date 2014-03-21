@@ -15,6 +15,10 @@ MongoDB
 =======
 1. Kundera's MongoDB client vs. MongoDB client.
 
+HBase
+=======
+1. Kundera's HBase client vs. Raw HBase client.
+
 Redis
 =====
 1. Kundera Redis client vs. Jedis

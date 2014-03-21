@@ -1138,9 +1138,20 @@ public abstract class CassandraDataHandlerBase
                 else if (CassandraDataTranslator.isCassandraDataTypeClass(((AbstractAttribute) attribute)
                         .getBindableJavaType()))
                 {
-                    PropertyAccessorHelper
-                            .set(entity, (Field) attribute.getJavaMember(), CassandraDataTranslator.decompose(
-                                    ((AbstractAttribute) attribute).getBindableJavaType(), thriftColumnValue, false));
+            		Object decomposed = null;
+            		try {
+            			Class<?> clazz = ((AbstractAttribute) attribute).getBindableJavaType();
+            			decomposed = CassandraDataTranslator.decompose(clazz, thriftColumnValue, false);
+            		} catch (Exception e) {
+            			String tableName = entity.getClass().getSimpleName();
+            			String fieldName = attribute.getName();
+            			String msg = "Decomposing failed for `" + tableName + "`.`"
+            					+ fieldName
+            					+ "`, did you set the correct type in your entity class?";
+            			log.error(msg, e);
+            			throw new KunderaException(msg, e);
+            		}
+            		PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), decomposed);
                 }
                 else
                 {
