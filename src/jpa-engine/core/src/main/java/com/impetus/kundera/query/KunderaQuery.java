@@ -17,6 +17,7 @@ package com.impetus.kundera.query;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -265,7 +266,7 @@ public class KunderaQuery
      * @param paramString
      * @return
      */
-    public Object getClauseValue(String paramString)
+    public List<Object> getClauseValue(String paramString)
     {
         if (typedParameter != null && typedParameter.getParameters() != null)
         {
@@ -280,8 +281,8 @@ public class KunderaQuery
             }
         }
 
-        logger.error("parameter{} is not a parameter of the query", paramString);
-        throw new IllegalArgumentException("parameter is not a parameter of the query");
+        logger.error("Parameter {} is not a parameter of the query.", paramString);
+        throw new IllegalArgumentException("Parameter is not a parameter of the query.");
     }
 
     /**
@@ -292,7 +293,7 @@ public class KunderaQuery
      * 
      * @return clause value.
      */
-    public Object getClauseValue(Parameter param)
+    public List<Object> getClauseValue(Parameter param)
     {
         Parameter match = null;
         if (typedParameter != null && typedParameter.jpaParameters != null)
@@ -322,7 +323,9 @@ public class KunderaQuery
                             UpdateClause updateClause = typedParameter.getUpdateParameters().get("?" + p.getPosition());
                             if (updateClause != null)
                             {
-                                return updateClause.getValue();
+                                List<Object> value = new ArrayList<Object>();
+                                value.add(updateClause.getValue());
+                                return value;
                             }
 
                         }
@@ -727,8 +730,8 @@ public class KunderaQuery
                 }
                 else
                 {
-                    logger.error("Error while setting parameter by clause:");
-                    throw new QueryHandlerException("named parameter:" + name + " not found!");
+                    logger.error("Error while setting parameter.");
+                    throw new QueryHandlerException("named parameter : " + name + " not found!");
                 }
             }
         }
@@ -763,7 +766,7 @@ public class KunderaQuery
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClass);
         if (metadata == null)
         {
-            throw new KunderaException("Unable to load entity metadata for :" + entityClass);
+            throw new KunderaException("Unable to load entity metadata for : " + entityClass);
         }
         return metadata;
     }
@@ -778,9 +781,8 @@ public class KunderaQuery
         return filtersQueue;
     }
 
-    // class to keep hold of a where clause predicate
     /**
-     * The Class FilterClause.
+     * The FilterClause class to hold a where clause predicate.
      */
     public final class FilterClause
     {
@@ -792,7 +794,7 @@ public class KunderaQuery
         private String condition;
 
         /** The value. */
-        Object value;
+        private List<Object> value = new ArrayList<Object>();
 
         /**
          * The Constructor.
@@ -809,7 +811,17 @@ public class KunderaQuery
             super();
             this.property = property;
             this.condition = condition.trim();
-            this.value = KunderaQuery.getValue(value);
+            if (value instanceof Collection)
+            {
+                for (Object valueObject : (Collection) value)
+                {
+                    this.value.add(KunderaQuery.getValue(valueObject));
+                }
+            }
+            else
+            {
+                this.value.add(KunderaQuery.getValue(value));
+            }
         }
 
         /**
@@ -837,7 +849,7 @@ public class KunderaQuery
          * 
          * @return the value
          */
-        public final Object getValue()
+        public final List<Object> getValue()
         {
             return value;
         }
@@ -850,7 +862,20 @@ public class KunderaQuery
          */
         protected void setValue(Object value)
         {
-            this.value = KunderaQuery.getValue(value);
+            List<Object> valObjects = new ArrayList<Object>();
+            if (value instanceof Collection)
+            {
+                for (Object valueObject : (Collection) value)
+                {
+                    valObjects.add(KunderaQuery.getValue(valueObject));
+                }
+            }
+            else
+            {
+                valObjects.add(KunderaQuery.getValue(value));
+            }
+
+            this.value = valObjects;
         }
 
         /* @see java.lang.Object#toString() */

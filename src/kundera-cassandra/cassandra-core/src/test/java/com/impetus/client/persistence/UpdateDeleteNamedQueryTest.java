@@ -107,7 +107,7 @@ public class UpdateDeleteNamedQueryTest
         EntityManagerFactory emf = getEntityManagerFactory();
         EntityManager em = emf.createEntityManager();
 
-       CassandraEntitySample entity = new CassandraEntitySample();
+        CassandraEntitySample entity = new CassandraEntitySample();
         entity.setBirth_date(new Integer(100112));
         entity.setFull_name("impetus_emp");
         entity.setKey("k");
@@ -123,18 +123,24 @@ public class UpdateDeleteNamedQueryTest
         updateQuery = "Update CassandraEntitySample c SET c.state = Bengalore where c.key = k";
         q = em.createQuery(updateQuery);
         q.executeUpdate();
+        
+        em.clear();
+        
         result = em.find(CassandraEntitySample.class, "k");
         Assert.assertNotNull(result);
 
-        // Assert.assertEquals("DELHI", result.getState()); // This should be
+        Assert.assertEquals("Bengalore", result.getState()); // This should be
         // uncommented later. as merge got some issue.
-        String deleteQuery = "Delete From CassandraEntitySample c where c.state=UP";
+        String deleteQuery = "Delete From CassandraEntitySample c where c.state=Bengalore";
 
         q = em.createQuery(deleteQuery);
         // q = em.createNamedQuery("delete.query");
         q.executeUpdate();
+        
+        em.clear();
+        
         result = em.find(CassandraEntitySample.class, "k");
-        // Assert.assertNull(result); // This should be uncommented later. as
+//        Assert.assertNull(result); // This should be uncommented later. as
         // merge got some issue.
         emf.close();
     }
@@ -155,18 +161,23 @@ public class UpdateDeleteNamedQueryTest
         String updateQuery = "Update CassandraEntitySample c SET c.state = DELHI where c.key = k";
         Query q = em.createQuery(updateQuery);
         q.executeUpdate();
+        
+        em.clear();
+        
         CassandraEntitySample result = em.find(CassandraEntitySample.class, "k");
         Assert.assertNotNull(result);
-
-        // Assert.assertEquals("DELHI", result.getState()); // This should be
+        Assert.assertEquals("DELHI", result.getState()); // This should be
         // uncommented later. as merge got some issue.
         String deleteQuery = "Delete From CassandraEntitySample c where c.key=k";
 
         q = em.createQuery(deleteQuery);
         // q = em.createNamedQuery("delete.query");
         q.executeUpdate();
+        
+        em.clear();
+        
         result = em.find(CassandraEntitySample.class, "k");
-        // Assert.assertNull(result); // This should be uncommented later. as
+        Assert.assertNull(result); // This should be uncommented later. as
         // merge got some issue.
         emf.close();
     }

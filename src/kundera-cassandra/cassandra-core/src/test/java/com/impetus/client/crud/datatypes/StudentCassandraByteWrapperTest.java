@@ -596,7 +596,7 @@ public class StudentCassandraByteWrapperTest extends CassandraBase
             CfDef cfDef = new CfDef();
             cfDef.name = "StudentByteWrapper";
             cfDef.keyspace = keyspace;
-            cfDef.setKey_validation_class("Int32Type");
+            cfDef.setKey_validation_class("BytesType");
             cfDef.setComparator_type("UTF8Type");
 
             ColumnDef name = new ColumnDef(ByteBuffer.wrap("NAME".getBytes()), "UTF8Type");

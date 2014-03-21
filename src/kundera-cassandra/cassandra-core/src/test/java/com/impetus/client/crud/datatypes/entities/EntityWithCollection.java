@@ -36,11 +36,13 @@ public class EntityWithCollection
     @Id
     private String id;
 
-    @Column(name = "dm")
+    @Column
     private Map<String, byte[]> dataMap;
 
+    @Column
     private Set<byte[]> setAsBytes;
 
+    @Column
     private List<byte[]> listAsBytes;
 
     public EntityWithCollection()

@@ -113,7 +113,7 @@ public class PersonCassandraESIndexerTest extends BaseTest
     @Before
     public void setUp() throws Exception
     {
-        
+
         CassandraCli.cassandraSetUp();
         CassandraCli.createKeySpace("KunderaExamples");
         loadData();
@@ -250,7 +250,6 @@ public class PersonCassandraESIndexerTest extends BaseTest
         p1 = prepare("1", 10);
         em.persist(p1);
 
-        
         waitThread();
 
         query = em.createQuery("Select p from PersonESIndexerCassandra p", PersonESIndexerCassandra.class);
@@ -559,7 +558,7 @@ public class PersonCassandraESIndexerTest extends BaseTest
         }
         catch (InterruptedException e)
         {
-            
+
         }
     }
 }

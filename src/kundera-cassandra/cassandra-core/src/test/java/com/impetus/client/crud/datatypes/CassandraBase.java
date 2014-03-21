@@ -48,7 +48,7 @@ public abstract class CassandraBase
         propertyMap = new HashMap();
         propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
 
-        if (propertyMap == null && !CassandraCli.isArchived(_PU))
+        if (propertyMap != null && !CassandraCli.isArchived(_PU))
         {
             propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create");
         }

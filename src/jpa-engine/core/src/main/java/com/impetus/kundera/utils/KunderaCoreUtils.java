@@ -139,20 +139,13 @@ public class KunderaCoreUtils
     public static String prepareCompositeKey(final EntityMetadata m, final MetamodelImpl metaModel,
             final Object compositeKey)
     {
-        // EmbeddableType keyObject =
-        // metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
-
         Field[] fields = m.getIdAttribute().getBindableJavaType().getDeclaredFields();
-
-        // Arrays.sort(fields);
 
         StringBuilder stringBuilder = new StringBuilder();
         for (Field f : fields)
         {
             if (!ReflectUtils.isTransientOrStatic(f))
             {
-                // Attribute compositeColumn =
-                // keyObject.getAttribute(f.getName());
                 try
                 {
                     String fieldValue = PropertyAccessorHelper.getString(compositeKey, f); // field
@@ -193,8 +186,6 @@ public class KunderaCoreUtils
         }
 
         // matching for 2 groups match ${VAR_NAME} or $VAR_NAME
-
-        // Pattern pattern = Pattern.compile("\\$\\{(\\w+)\\}|\\$(\\w+)");
         Pattern pathPattern = Pattern.compile("\\$\\{(.+?)\\}");
         Matcher matcherPattern = pathPattern.matcher(input); // get a matcher
                                                              // object
@@ -265,7 +256,7 @@ public class KunderaCoreUtils
                 FilterClause filter = (FilterClause) object;
                 String property = filter.getProperty();
                 String condition = filter.getCondition();
-                String valueAsString = filter.getValue().toString();
+                String valueAsString = filter.getValue().get(0).toString();
                 String fieldName = metadata.getFieldName(property);
                 Class valueClazz = getValueType(entity, fieldName);
 
@@ -301,6 +292,5 @@ public class KunderaCoreUtils
         }
 
         return property;
-
     }
 }
