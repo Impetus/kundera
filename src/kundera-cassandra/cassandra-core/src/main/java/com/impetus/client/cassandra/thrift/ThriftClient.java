@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.EntityType;
@@ -38,6 +39,7 @@ import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.cassandra.thrift.CounterSuperColumn;
 import org.apache.cassandra.thrift.CqlResult;
+import org.apache.cassandra.thrift.CqlRow;
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.IndexExpression;
 import org.apache.cassandra.thrift.IndexOperator;
@@ -69,6 +71,7 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.db.SearchResult;
+import com.impetus.kundera.generator.AutoGenerator;
 import com.impetus.kundera.generator.TableGenerator;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
@@ -93,7 +96,8 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  * 
  * @author amresh.singh
  */
-public class ThriftClient extends CassandraClientBase implements Client<CassQuery>, Batcher, TableGenerator
+public class ThriftClient extends CassandraClientBase implements Client<CassQuery>, Batcher, TableGenerator,
+        AutoGenerator
 {
 
     /** log for this class. */
@@ -241,8 +245,6 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                     Column column = new Column();
                     column.setName(PropertyAccessorFactory.STRING.toBytes(invJoinColumnName
                             + Constants.JOIN_COLUMN_NAME_SEPARATOR + value));
-                    // column.setValue(PropertyAccessorFactory.STRING.toBytes((String)
-                    // value));
                     column.setValue(PropertyAccessorHelper.getBytes(value));
 
                     column.setTimestamp(System.currentTimeMillis());
@@ -494,12 +496,13 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
 
         SlicePredicate slicePredicate = new SlicePredicate();
 
-        slicePredicate.setSlice_range(new SliceRange(ByteBufferUtil.EMPTY_BYTE_BUFFER, ByteBufferUtil.EMPTY_BYTE_BUFFER, false,
-                Integer.MAX_VALUE));
+        slicePredicate.setSlice_range(new SliceRange(ByteBufferUtil.EMPTY_BYTE_BUFFER,
+                ByteBufferUtil.EMPTY_BYTE_BUFFER, false, Integer.MAX_VALUE));
 
         String childIdStr = PropertyAccessorHelper.getString(columnValue);
-        IndexExpression ie = new IndexExpression(UTF8Type.instance.decompose(
-                columnName + Constants.JOIN_COLUMN_NAME_SEPARATOR + childIdStr), IndexOperator.EQ, UTF8Type.instance.decompose(childIdStr));
+        IndexExpression ie = new IndexExpression(UTF8Type.instance.decompose(columnName
+                + Constants.JOIN_COLUMN_NAME_SEPARATOR + childIdStr), IndexOperator.EQ,
+                UTF8Type.instance.decompose(childIdStr));
 
         List<IndexExpression> expressions = new ArrayList<IndexExpression>();
         expressions.add(ie);
@@ -607,8 +610,8 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         else
         {
             SlicePredicate slicePredicate = new SlicePredicate();
-            slicePredicate.setSlice_range(new SliceRange(ByteBufferUtil.EMPTY_BYTE_BUFFER, ByteBufferUtil.EMPTY_BYTE_BUFFER, false,
-                    Integer.MAX_VALUE));
+            slicePredicate.setSlice_range(new SliceRange(ByteBufferUtil.EMPTY_BYTE_BUFFER,
+                    ByteBufferUtil.EMPTY_BYTE_BUFFER, false, Integer.MAX_VALUE));
 
             IndexExpression ie = new IndexExpression(UTF8Type.instance.decompose(colName), IndexOperator.EQ,
                     ByteBuffer.wrap(PropertyAccessorHelper.getBytes(colValue)));
@@ -734,8 +737,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                         ColumnPath path = new ColumnPath(tableName);
 
                         conn.getClient().remove(
-                                CassandraUtilities.toBytes(pKey,
-                                        metadata.getIdAttribute().getJavaType()), path,
+                                CassandraUtilities.toBytes(pKey, metadata.getIdAttribute().getJavaType()), path,
                                 System.currentTimeMillis(), getConsistencyLevel());
                     }
                 }
@@ -789,9 +791,8 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         {
             conn = getConnection();
             ColumnPath path = new ColumnPath(tableName);
-            conn.getClient().remove(
-                    CassandraUtilities.toBytes(columnValue, columnValue.getClass()),
-                    path, System.currentTimeMillis(), getConsistencyLevel());
+            conn.getClient().remove(CassandraUtilities.toBytes(columnValue, columnValue.getClass()), path,
+                    System.currentTimeMillis(), getConsistencyLevel());
 
         }
         catch (InvalidRequestException e)
@@ -946,7 +947,6 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                 SliceRange sliceRange = new SliceRange();
                 sliceRange.setStart(ByteBufferUtil.EMPTY_BYTE_BUFFER);
                 sliceRange.setFinish(ByteBufferUtil.EMPTY_BYTE_BUFFER);
-                sliceRange.setCount(maxResult);
                 slicePredicate.setSlice_range(sliceRange);
             }
             conn = getConnection();
@@ -1125,7 +1125,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     {
         if (connection != null)
         {
-                return ((Connection) connection).getClient();
+            return ((Connection) connection).getClient();
         }
 
         throw new KunderaException("Invalid configuration!, no available pooled connection found for:"
@@ -1141,5 +1141,11 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     public Long generate(TableGeneratorDiscriptor discriptor)
     {
         return getGeneratedValue(discriptor, getPersistenceUnit());
+    }
+
+    @Override
+    public Object generate()
+    {
+        return super.getAutoGeneratedValue();
     }
 }
