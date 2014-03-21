@@ -149,7 +149,7 @@ public class OracleNoSQLQuery extends QueryImpl
                     // To convert rowkey string to object.
                     Object keyObj = PropertyAccessorHelper.fromSourceToTargetClass(
                             ((AbstractAttribute) idAttribute).getBindableJavaType(), String.class,
-                            ((FilterClause) clause).getValue());
+                            ((FilterClause) clause).getValue().get(0));
                     interpreter.setRowKey(keyObj/*
                                                  * ((FilterClause)
                                                  * clause).getValue()

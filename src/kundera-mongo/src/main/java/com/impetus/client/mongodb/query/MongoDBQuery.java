@@ -210,7 +210,7 @@ public class MongoDBQuery extends QueryImpl
                 FilterClause filter = (FilterClause) object;
                 String property = filter.getProperty();
                 String condition = filter.getCondition();
-                Object value = filter.getValue();
+                Object value = filter.getValue().get(0);
 
                 // value is string but field.getType is different, then get
                 // value using

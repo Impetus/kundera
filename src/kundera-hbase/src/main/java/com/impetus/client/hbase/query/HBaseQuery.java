@@ -350,7 +350,7 @@ public class HBaseQuery extends QueryImpl
                 {
                     String condition = ((FilterClause) obj).getCondition();
                     String name = ((FilterClause) obj).getProperty();
-                    Object value = ((FilterClause) obj).getValue();
+                    Object value = ((FilterClause) obj).getValue().get(0);
                     if (idColumn.equalsIgnoreCase(name))
                     {
                         isIdColumn = true;
