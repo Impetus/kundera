@@ -67,12 +67,14 @@ public final class DSClientUtilities
             String columnName, Field member)
     {
         String fieldName = null;
-        if (metadata.getRelationNames() == null || !metadata.getRelationNames().contains(columnName))
+        // Field member=null;
+        if (metadata != null
+                && (metadata.getRelationNames() == null || !metadata.getRelationNames().contains(columnName)))
         {
             if (!columnName.equals(((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName()))
             {
                 fieldName = metadata.getFieldName(columnName);
-                if (fieldName != null)
+                if (fieldName != null && entityType != null)
                 {
                     entity = CassandraUtilities.initialize(metadata, entity, null);
                     member = (Field) entityType.getAttribute(fieldName).getJavaMember();

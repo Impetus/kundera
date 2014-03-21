@@ -29,6 +29,8 @@ TO
 		<version>2.9.1</version>
 	</dependency>
 ```
+Note: Above information is to notify regarding change in groupId. In case using HBase or any other supported datastore. You need to simply point to corresponding artifactId.
+
 Up and running in 5 minutes
 ============================
 If you have worked upon Hibernate or any JPA Compliant ORM Solution, then the whole process, right from learning to coming up with first sample implementation will not take more than 5 minutes. Please follow below steps from [this link] (https://github.com/impetus-opensource/Kundera/wiki/Getting-Started-in-5-minutes "Getting started in 5 minutes"):

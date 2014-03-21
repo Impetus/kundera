@@ -215,7 +215,7 @@ public class ApplicationMetadata
                 {
                     onError(clazzName);
                 }
-                else if (clazz.endsWith("." + clazzName))
+                else if (clazz.endsWith("." + clazzName) ||  clazz.endsWith("$" + clazzName))
                 {
                     pu = clazzToPuMap.get(clazz).get(_first);
                     found = true;

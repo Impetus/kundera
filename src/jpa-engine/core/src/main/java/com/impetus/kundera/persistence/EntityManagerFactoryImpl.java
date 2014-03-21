@@ -32,7 +32,6 @@ import javax.persistence.spi.LoadState;
 import javax.persistence.spi.PersistenceUnitInfo;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -298,7 +297,8 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     {
         if (isOpen())
         {
-            throw new NotImplementedException("Criteria Query currently not supported by Kundera");
+            return new KunderaCriteriaBuilder(this);
+//            throw new NotImplementedException("Criteria Query currently not supported by Kundera");
         }
         throw new IllegalStateException("Entity manager factory has been closed.");
     }

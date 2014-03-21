@@ -141,6 +141,8 @@ public final class CQLTranslator
     public static final String OPEN_BRACKET = "(";
 
     public static final String CREATE_COLUMNFAMILY_CLUSTER_ORDER = " WITH CLUSTERING ORDER BY ($COLUMNS";
+    
+    public static final String DEFAULT_KEY_NAME="key";
 
     public CQLTranslator()
     {

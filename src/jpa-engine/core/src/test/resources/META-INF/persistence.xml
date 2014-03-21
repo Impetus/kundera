@@ -209,6 +209,7 @@
 		<class>com.impetus.kundera.metadata.entities.SingularEntityEmbeddable</class>
 		<class>com.impetus.kundera.metadata.entities.Article</class>
 		<class>com.impetus.kundera.query.PersonEntityNameAnnotation</class>
+		<class>com.impetus.kundera.persistence.PersonnelEmbedded</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<property name="kundera.nodes" value="localhost" />
