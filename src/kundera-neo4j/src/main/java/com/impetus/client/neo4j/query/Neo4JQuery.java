@@ -155,17 +155,17 @@ public class Neo4JQuery extends QueryImpl
                     }
                     else if (condition.equalsIgnoreCase(">="))
                     {
-                        sb.append(appendRange(filter.getValue().toString(), true, true, String.class));
+                        sb.append(appendRange(filter.getValue().get(0).toString(), true, true, String.class));
                         appended = true;
                     }
                     else if (condition.equalsIgnoreCase("<"))
                     {
-                        sb.append(appendRange(filter.getValue().toString(), false, false, String.class));
+                        sb.append(appendRange(filter.getValue().get(0).toString(), false, false, String.class));
                         appended = true;
                     }
                     else if (condition.equalsIgnoreCase("<="))
                     {
-                        sb.append(appendRange(filter.getValue().toString(), true, false, String.class));
+                        sb.append(appendRange(filter.getValue().get(0).toString(), true, false, String.class));
                         appended = true;
                     }
 
@@ -173,15 +173,15 @@ public class Neo4JQuery extends QueryImpl
                     if (!appended)
                     {
                         if (appender.equals("") && filter.getValue() != null
-                                && filter.getValue().toString().contains(" "))
+                                && filter.getValue().get(0).toString().contains(" "))
                         {
                             sb.append("\"");
-                            sb.append(filter.getValue().toString());
+                            sb.append(filter.getValue().get(0).toString());
                             sb.append("\"");
                         }
                         else
                         {
-                            sb.append(filter.getValue());
+                            sb.append(filter.getValue().get(0));
                             sb.append(appender);
                         }
 

@@ -90,8 +90,8 @@ public final class CassandraValidationClassMapper
         validationClassMapper.put(java.lang.Integer.class, Int32Type.class);
         validationClassMapper.put(int.class, Int32Type.class);
         validationClassMapper.put(java.sql.Timestamp.class, DateType.class);
-        validationClassMapper.put(Short.class, Int32Type.class);
-        validationClassMapper.put(short.class, Int32Type.class);
+        validationClassMapper.put(Short.class, IntegerType.class);
+        validationClassMapper.put(short.class, IntegerType.class);
         validationClassMapper.put(java.math.BigDecimal.class, DecimalType.class);
         validationClassMapper.put(java.sql.Date.class, DateType.class);
         validationClassMapper.put(java.util.Date.class, DateType.class);
@@ -146,7 +146,8 @@ public final class CassandraValidationClassMapper
         return validation_class;
     }
 
-    public static String getValueTypeName(Class<?> dataType, List<Class<?>> genericClasses, boolean isCql3Enabled) throws SyntaxException, ConfigurationException
+    public static String getValueTypeName(Class<?> dataType, List<Class<?>> genericClasses, boolean isCql3Enabled)
+            throws SyntaxException, ConfigurationException
     {
         String valueType;
 
@@ -189,10 +190,10 @@ public final class CassandraValidationClassMapper
     {
         if (isCql3Enabled)
         {
-            validationClassMapper.put(Integer.class, Int32Type.class);
-            validationClassMapper.put(int.class, Int32Type.class);
-            validationClassMapper.put(short.class, Int32Type.class);
+            validationClassMapper.put(Byte.class, Int32Type.class);
+            validationClassMapper.put(byte.class, Int32Type.class);
             validationClassMapper.put(Short.class, Int32Type.class);
+            validationClassMapper.put(short.class, Int32Type.class);
         }
     }
 
@@ -200,10 +201,10 @@ public final class CassandraValidationClassMapper
     {
         if (isCql3Enabled)
         {
-            validationClassMapper.put(Integer.class, IntegerType.class);
-            validationClassMapper.put(int.class, IntegerType.class);
-            validationClassMapper.put(short.class, IntegerType.class);
+            validationClassMapper.put(Byte.class, BytesType.class);
+            validationClassMapper.put(byte.class, BytesType.class);
             validationClassMapper.put(Short.class, IntegerType.class);
+            validationClassMapper.put(short.class, IntegerType.class);
         }
     }
 }

@@ -28,7 +28,6 @@ import java.util.Map;
 import javassist.Modifier;
 
 import javax.persistence.Transient;
-import javax.persistence.criteria.CriteriaBuilder.In;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
@@ -922,19 +921,35 @@ public class CassQuery extends QueryImpl
      */
     private boolean buildWhereClause(StringBuilder builder, boolean isPresent, CQLTranslator translator,
             String condition, List<Object> value, boolean useInClause, AbstractAttribute idAttributeColumn,
-            String ColumnName, boolean useToken)
+            String columnName, boolean useToken)
     {
-        if (useInClause)
+        
+        if (value.isEmpty())
         {
-            isPresent = appendInClause(builder, translator, value, idAttributeColumn.getBindableJavaType(), ColumnName,
+            isPresent = appendIn(builder, translator, columnName);
+            builder.append("( )");
+            builder.append(" AND ");
+        }
+        else if (useInClause && value.size() > 1)
+        {
+            isPresent = appendInClause(builder, translator, value, idAttributeColumn.getBindableJavaType(), columnName,
                     isPresent);
         }
         else
         {
             // TODO for partition key in case of embedded key.
-            translator.buildWhereClause(builder, idAttributeColumn.getBindableJavaType(), ColumnName,
+            translator.buildWhereClause(builder, idAttributeColumn.getBindableJavaType(), columnName,
                     value.isEmpty() ? null : value.get(0), condition, useToken);
         }
+        return isPresent;
+    }
+
+    private boolean appendIn(StringBuilder builder, CQLTranslator translator, String columnName)
+    {
+        boolean isPresent;
+        isPresent = true;
+        translator.ensureCase(builder, columnName, false);
+        builder.append(" IN ");
         return isPresent;
     }
 
@@ -951,13 +966,11 @@ public class CassQuery extends QueryImpl
     private boolean appendInClause(StringBuilder queryBuilder, CQLTranslator translator, List<Object> value,
             Class fieldClazz, String columnName, boolean isPresent)
     {
-        isPresent = true;
-        translator.ensureCase(queryBuilder, columnName, false);
-        queryBuilder.append(" IN ");
+        isPresent = appendIn(queryBuilder, translator, columnName);
 
-        if (!value.isEmpty() && value.size() > 1)
+/*        if (!value.isEmpty())
         {
-            queryBuilder.append("(");
+*/            queryBuilder.append("(");
             for (Object objectvalue : value)
             {
                 translator.appendValue(queryBuilder, fieldClazz, objectvalue, isPresent, false);
@@ -967,15 +980,11 @@ public class CassQuery extends QueryImpl
             queryBuilder.deleteCharAt(queryBuilder.lastIndexOf(", "));
             queryBuilder.append(") ");
 
-        }
-        else if (!value.isEmpty() && value.size() == 1)
-        {
-            queryBuilder.append(value.get(0));
-        }
+        /*}
         else
         {
             queryBuilder.append("( )");
-        }
+        }*/
         queryBuilder.append(" AND ");
         return isPresent;
     }

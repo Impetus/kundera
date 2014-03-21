@@ -369,7 +369,7 @@ public class DSCompositeTypeTest
         // em = emf.createEntityManager();
         em.clear();
 
-        String orderClause = "Select u from PrimeUser u where u.key.userId = :userId ORDER BY tweetId ASC";
+        String orderClause = "Select u from PrimeUser u where u.key.userId = :userId ORDER BY u.key.tweetId ASC";
         Query q = em.createQuery(orderClause);
         q.setParameter("userId", "mevivs");
         List<PrimeUser> results = q.getResultList();
@@ -379,7 +379,7 @@ public class DSCompositeTypeTest
         Assert.assertEquals("my third tweet", results.get(2).getTweetBody());
         Assert.assertEquals(3, results.size());
 
-        orderClause = "Select u from PrimeUser u where u.key.userId = :userId ORDER BY tweetId DESC";
+        orderClause = "Select u from PrimeUser u where u.key.userId = :userId ORDER BY u.key.tweetId DESC";
         q = em.createQuery(orderClause);
         q.setParameter("userId", "mevivs");
         results = q.getResultList();
@@ -400,7 +400,7 @@ public class DSCompositeTypeTest
 
         try
         {
-            orderClause = "Select u from PrimeUser u where u.key.userId = :userId ORDER BY userId DESC";
+            orderClause = "Select u from PrimeUser u where u.key.userId = :userId ORDER BY u.key.userId DESC";
             q = em.createQuery(orderClause);
             q.setParameter("userId", "mevivs");
             results = q.getResultList();
@@ -447,7 +447,7 @@ public class DSCompositeTypeTest
 
         em.clear();
 
-        String inClause = "Select u from PrimeUser u where u.key.userId IN (mevivs,cgangwal's,kmishra) ORDER BY tweetId ASC";
+        String inClause = "Select u from PrimeUser u where u.key.userId IN ('mevivs','cgangwal''s','kmishra') ORDER BY u.key.tweetId ASC";
         Query q = em.createQuery(inClause);
 
         List<PrimeUser> results = q.getResultList();
@@ -457,7 +457,7 @@ public class DSCompositeTypeTest
         Assert.assertEquals("my third tweet", results.get(2).getTweetBody());
         Assert.assertEquals(3, results.size());
 
-        inClause = "Select u from PrimeUser u where u.key.userId IN (\"mevivs\",\"cgangwal's\",\"kmishra\") ORDER BY tweetId ASC";
+        inClause = "Select u from PrimeUser u where u.key.userId IN (\"mevivs\",\"cgangwal's\",\"kmishra\") ORDER BY u.key.tweetId ASC";
         q = em.createQuery(inClause);
 
         results = q.getResultList();
@@ -467,7 +467,7 @@ public class DSCompositeTypeTest
         Assert.assertEquals("my third tweet", results.get(2).getTweetBody());
         Assert.assertEquals(3, results.size());
 
-        inClause = "Select u from PrimeUser u where u.key.userId IN ('mevivs','cgangwal's') ORDER BY tweetId ASC";
+        inClause = "Select u from PrimeUser u where u.key.userId IN ('mevivs','cgangwal''s') ORDER BY u.key.tweetId ASC";
         q = em.createQuery(inClause);
 
         results = q.getResultList();
@@ -478,7 +478,7 @@ public class DSCompositeTypeTest
 
         try
         {
-            inClause = "Select u from PrimeUser u where u.key.tweetId IN (1,2,3) ORDER BY tweetId DESC";
+            inClause = "Select u from PrimeUser u where u.key.tweetId IN (1,2,3) ORDER BY u.key.tweetId DESC";
             q = em.createQuery(inClause);
             results = q.getResultList();
 

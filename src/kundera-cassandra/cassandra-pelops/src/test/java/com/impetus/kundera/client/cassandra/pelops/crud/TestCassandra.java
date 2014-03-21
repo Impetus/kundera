@@ -67,7 +67,14 @@ public class TestCassandra
         ColumnDef columnDef3 = new ColumnDef(ByteBuffer.wrap("age".getBytes()), "Int32Type");
         columnDef3.index_type = IndexType.KEYS;
         cf_def.addToColumn_metadata(columnDef3);
-        client.system_add_column_family(cf_def);
+        try
+        {
+            client.system_add_column_family(cf_def);
+        }
+        catch (Exception e)
+        {
+            // Do noyhing
+        }
     }
 
     @Test

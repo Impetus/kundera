@@ -67,8 +67,29 @@ public final class DSClientUtilities
             String columnName, Field member)
     {
         String fieldName = null;
+        
+        // if metadata is null or it is relational attribute do not set fieldName and member.
+        
+        if(metadata != null)
+        {
+            if(columnName.equals(((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName()))
+            {
+                entity = CassandraUtilities.initialize(metadata, entity, null);
+                fieldName = metadata.getIdAttribute().getName();
+                member = (Field) metadata.getIdAttribute().getJavaMember();
+            } else if(metadata.getRelationNames() == null || !metadata.getRelationNames().contains(columnName))
+            {
+                fieldName = metadata.getFieldName(columnName);
+                if (fieldName != null && entityType != null)
+                {
+                    entity = CassandraUtilities.initialize(metadata, entity, null);
+                    member = (Field) entityType.getAttribute(fieldName).getJavaMember();
+                }
+            }
+        }
+        
         // Field member=null;
-        if (metadata != null
+     /*   if (metadata != null
                 && (metadata.getRelationNames() == null || !metadata.getRelationNames().contains(columnName)))
         {
             if (!columnName.equals(((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName()))
@@ -87,7 +108,7 @@ public final class DSClientUtilities
                 member = (Field) metadata.getIdAttribute().getJavaMember();
             }
 
-        }
+        }*/
         Object retVal = null;
 
         switch (dataType)

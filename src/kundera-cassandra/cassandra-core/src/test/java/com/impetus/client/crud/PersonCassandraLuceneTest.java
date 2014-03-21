@@ -138,8 +138,8 @@ public class PersonCassandraLuceneTest extends BaseTest
                 "personName");
         assertFindByNameAndAgeBetween(em, "PersonLuceneCassandra", PersonLuceneCassandra.class, "vivek", "10", "15",
                 "personName");
-        assertFindByRange(em, "PersonLuceneCassandra", PersonLuceneCassandra.class, "1", "2", "personId");
-        assertFindWithoutWhereClause(em, "PersonLuceneCassandra", PersonLuceneCassandra.class);
+        assertFindByRange(em, "PersonLuceneCassandra", PersonLuceneCassandra.class, "1", "2", "personId", false);
+        assertFindWithoutWhereClause(em, "PersonLuceneCassandra", PersonLuceneCassandra.class, false);
 
         // OR clause test case.
         String orClauseQuery = "Select p from PersonLuceneCassandra p where p.personName = 'vivek1' OR p.age = 10";

@@ -26,6 +26,7 @@ import javax.persistence.Persistence;
 import junit.framework.Assert;
 
 import org.apache.cassandra.db.marshal.Int32Type;
+import org.apache.cassandra.db.marshal.IntegerType;
 import org.apache.cassandra.db.marshal.UTF8Type;
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.ColumnDef;
@@ -204,7 +205,7 @@ public class CassandraSchemaOperationTest
                     {
                         Assert.assertTrue(columnDef.isSetIndex_type());
                         Assert.assertNotNull(columnDef.index_name);
-                        Assert.assertEquals(Int32Type.class.getName(), columnDef.getValidation_class());
+                        Assert.assertEquals(IntegerType.class.getName(), columnDef.getValidation_class());
                         // Assert.assertEquals("age_index",
                         // columnDef.index_name);
                         counter++;
@@ -276,10 +277,11 @@ public class CassandraSchemaOperationTest
                 {
                     if (new String(columnDef.getName(), Constants.ENCODING).equals("AGE"))
                     {
-                        Assert.assertTrue(columnDef.isSetIndex_type());
-                        Assert.assertNotNull(columnDef.index_name);
-                        Assert.assertEquals(Int32Type.class.getName(), columnDef.getValidation_class());
-//                        Assert.assertEquals("age_index", columnDef.index_name);
+                        Assert.assertFalse(columnDef.isSetIndex_type());
+                        Assert.assertNull(columnDef.index_name);
+                        Assert.assertEquals(IntegerType.class.getName(), columnDef.getValidation_class());
+                        // Assert.assertEquals("age_index",
+                        // columnDef.index_name);
                         counter++;
                     }
                     else
@@ -288,7 +290,8 @@ public class CassandraSchemaOperationTest
                         Assert.assertEquals("PERSON_NAME", new String(columnDef.getName(), Constants.ENCODING));
                         Assert.assertNotNull(columnDef.index_name);
                         Assert.assertEquals(UTF8Type.class.getName(), columnDef.getValidation_class());
-//                        Assert.assertEquals("name_index", columnDef.index_name);
+                        // Assert.assertEquals("name_index",
+                        // columnDef.index_name);
                         counter++;
                     }
                 }

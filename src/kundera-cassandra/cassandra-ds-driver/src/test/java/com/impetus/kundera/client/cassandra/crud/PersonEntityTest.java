@@ -156,8 +156,8 @@ public class PersonEntityTest extends BaseTest
                 "personName");
         assertFindByNameAndAgeBetween(entityManager, "PersonCassandra", PersonCassandra.class, "vivek", "10", "15",
                 "personName");
-        assertFindByRange(entityManager, "PersonCassandra", PersonCassandra.class, "1", "2", "personId");
-        assertFindWithoutWhereClause(entityManager, "PersonCassandra", PersonCassandra.class);
+        assertFindByRange(entityManager, "PersonCassandra", PersonCassandra.class, "1", "2", "personId", true);
+        assertFindWithoutWhereClause(entityManager, "PersonCassandra", PersonCassandra.class, true);
 
         // perform merge after query.
         for (PersonCassandra person : persons)
@@ -186,7 +186,7 @@ public class PersonEntityTest extends BaseTest
 
         String deleteQuery = "DELETE from PersonCassandra";
         q = entityManager.createQuery(deleteQuery);
-        Assert.assertEquals(3, q.executeUpdate());
+        Assert.assertEquals(4, q.executeUpdate());
 
     }
 
@@ -236,12 +236,12 @@ public class PersonEntityTest extends BaseTest
                 + translator.ensureCase(new StringBuilder(), "PERSON", false).toString();
         Query q = entityManager.createNativeQuery(query, PersonCassandra.class);
         List noOfRows = q.getResultList();
-        Assert.assertEquals(new Long(3),noOfRows.get(0));
+        Assert.assertEquals(new Long(4),noOfRows.get(0));
 
         entityManager.clear();
         q = entityManager.createNamedQuery("q");
         noOfRows = q.getResultList();
-        Assert.assertEquals(3, noOfRows.size());
+        Assert.assertEquals(4, noOfRows.size());
     }
 
     /**
@@ -359,7 +359,7 @@ public class PersonEntityTest extends BaseTest
         entityManager = emf.createEntityManager();
         Object o1 = entityManager.find(PersonCassandra.class, "1");
         CQLTranslator translator = new CQLTranslator();
-        String query = "insert into \"PERSON\" (key,\"PERSON_NAME\",\"AGE\") values ('1','Amry',10 )";
+        String query = "insert into \"PERSON\" (\"personId\",\"PERSON_NAME\",\"AGE\") values ('1','Amry',10 )";
         CassandraCli.client.execute_cql3_query(ByteBuffer.wrap(query.getBytes()), Compression.NONE,
                     ConsistencyLevel.ONE);
         entityManager.refresh(o1);

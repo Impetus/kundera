@@ -48,6 +48,9 @@ public abstract class HostConfiguration
      */
     protected PersistenceUnitMetadata persistenceUnitMetadata;
 
+
+    protected Properties connectionProperties = new Properties();
+
     /**
      * External configuration passed at the time of emf creation.
      */

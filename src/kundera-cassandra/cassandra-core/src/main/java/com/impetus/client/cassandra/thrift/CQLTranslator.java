@@ -141,8 +141,8 @@ public final class CQLTranslator
     public static final String OPEN_BRACKET = "(";
 
     public static final String CREATE_COLUMNFAMILY_CLUSTER_ORDER = " WITH CLUSTERING ORDER BY ($COLUMNS";
-    
-    public static final String DEFAULT_KEY_NAME="key";
+
+    public static final String DEFAULT_KEY_NAME = "key";
 
     public CQLTranslator()
     {
@@ -327,10 +327,10 @@ public final class CQLTranslator
      */
     public void buildWhereClause(StringBuilder builder, String field, Field member, Object entity)
     {
-//        builder = ensureCase(builder, field, false);
-//        builder.append(EQ_CLAUSE);
-//        appendColumnValue(builder, entity, member);
-//        builder.append(AND_CLAUSE);
+        // builder = ensureCase(builder, field, false);
+        // builder.append(EQ_CLAUSE);
+        // appendColumnValue(builder, entity, member);
+        // builder.append(AND_CLAUSE);
         Object value = PropertyAccessorHelper.getObject(entity, member);
         buildWhereClause(builder, member.getType(), field, value, EQ_CLAUSE, false);
     }
@@ -364,42 +364,43 @@ public final class CQLTranslator
             String clause, boolean useToken)
     {
 
-//        if (clause.trim().equals(IN_CLAUSE))
-//        {
-//            useToken = false;
-//        }
-//
+        if (clause.trim().equals(IN_CLAUSE))
+        {
+            useToken = false;
+        }
+
         builder = ensureCase(builder, field, useToken);
-//        builder.append(SPACE_STRING);
+        builder.append(SPACE_STRING);
         builder.append(clause);
-//        builder.append(SPACE_STRING);
-//
-//        if (clause.trim().equals(IN_CLAUSE))
-//        {
-//            builder.append(OPEN_BRACKET);
-//            String itemValues = String.valueOf(value);
-//            itemValues = itemValues.startsWith(OPEN_BRACKET) && itemValues.endsWith(CLOSE_BRACKET) ? itemValues
-//                    .substring(1, itemValues.length() - 1) : itemValues;
-//            List<String> items = Arrays.asList(((String) itemValues).split("\\s*,\\s*"));
-//            int counter = 0;
-//            for (String str : items)
-//            {
-//                str = (str.startsWith("\"") && str.endsWith("\"")) || (str.startsWith("'") && str.endsWith("'")) ? str
-//                        .substring(1, str.length() - 1) : str;
-//                appendValue(builder, fieldClazz, str, false, false);
-//                counter++;
-//                if (counter < items.size())
-//                {
-//                    builder.append(COMMA_STR);
-//                }
-//
-//            }
-//            builder.append(CLOSE_BRACKET);
-//        }
-//        else
-//        {
+        builder.append(SPACE_STRING);
+
+        if (clause.trim().equals(IN_CLAUSE))
+        {
+            builder.append(OPEN_BRACKET);
+            String itemValues = String.valueOf(value);
+            itemValues = itemValues.startsWith(OPEN_BRACKET) && itemValues.endsWith(CLOSE_BRACKET) ? itemValues
+                    .substring(1, itemValues.length() - 1) : itemValues;
+            List<String> items = Arrays.asList(((String) itemValues).split("\\s*,\\s*"));
+            int counter = 0;
+            for (String str : items)
+            {
+                str = str.trim();
+                str = (str.startsWith("\"") && str.endsWith("\"")) || (str.startsWith("'") && str.endsWith("'")) ? str
+                        .substring(1, str.length() - 1) : str;
+                appendValue(builder, fieldClazz, str, false, false);
+                counter++;
+                if (counter < items.size())
+                {
+                    builder.append(COMMA_STR);
+                }
+
+            }
+            builder.append(CLOSE_BRACKET);
+        }
+        else
+        {
             appendValue(builder, fieldClazz, value, false, useToken);
-//        }
+        }
         return builder;
     }
 
@@ -678,15 +679,6 @@ public final class CQLTranslator
             StringBuilder hexstr = new StringBuilder("0x");
             builder.append(hexstr.append((Hex.encodeHex((byte[]) value))));
         }
-
-        else if (fieldClazz.isAssignableFrom(byte.class) || fieldClazz.isAssignableFrom(Byte.class))
-        {
-            StringBuilder hexstr = new StringBuilder("intAsBlob(");
-            hexstr.append(value);
-            hexstr.append(")");
-            builder.append(hexstr.toString());
-        }
-
         else
         {
             if (useToken)

@@ -298,7 +298,6 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         if (isOpen())
         {
             return new KunderaCriteriaBuilder(this);
-//            throw new NotImplementedException("Criteria Query currently not supported by Kundera");
         }
         throw new IllegalStateException("Entity manager factory has been closed.");
     }

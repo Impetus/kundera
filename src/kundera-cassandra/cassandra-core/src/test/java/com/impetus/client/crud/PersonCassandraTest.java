@@ -155,9 +155,9 @@ public class PersonCassandraTest extends BaseTest
         entityManager.persist(p2);
         entityManager.persist(p3);
 
-        // PersonCassandra personWithKey = new PersonCassandra();
-        // personWithKey.setPersonId("111");
-        // entityManager.persist(personWithKey);
+        PersonCassandra personWithKey = new PersonCassandra();
+        personWithKey.setPersonId("111");
+        entityManager.persist(personWithKey);
         col.put("1", p1);
         col.put("2", p2);
         col.put("3", p3);
@@ -178,8 +178,8 @@ public class PersonCassandraTest extends BaseTest
                 "personName");
         assertFindByNameAndAgeBetween(entityManager, "PersonCassandra", PersonCassandra.class, "vivek", "10", "15",
                 "personName");
-        assertFindByRange(entityManager, "PersonCassandra", PersonCassandra.class, "1", "2", "personId");
-        assertFindWithoutWhereClause(entityManager, "PersonCassandra", PersonCassandra.class);
+        assertFindByRange(entityManager, "PersonCassandra", PersonCassandra.class, "1", "2", "personId", USE_CQL);
+        assertFindWithoutWhereClause(entityManager, "PersonCassandra", PersonCassandra.class, USE_CQL);
 
         // perform merge after query.
         for (PersonCassandra person : persons)
@@ -229,7 +229,14 @@ public class PersonCassandraTest extends BaseTest
         // Delete without WHERE clause.
         String deleteQuery = "DELETE from PersonCassandra";
         q = entityManager.createQuery(deleteQuery);
-        Assert.assertEquals(3, q.executeUpdate());
+        if (USE_CQL)
+        {
+            Assert.assertEquals(4, q.executeUpdate());
+        }
+        else
+        {
+            Assert.assertEquals(3, q.executeUpdate());
+        }
 
     }
 
@@ -240,6 +247,10 @@ public class PersonCassandraTest extends BaseTest
     {
         if (USE_CQL)
         {
+            Map<String, Client> clientMap = (Map<String, Client>) entityManager.getDelegate();
+            ThriftClient tc = (ThriftClient) clientMap.get(SEC_IDX_CASSANDRA_TEST);
+            tc.setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
+            
             Query findQuery;
             List<PersonCassandra> allPersons;
             findQuery = entityManager.createQuery("Select p from PersonCassandra p where p.personId IN :idList");
@@ -290,6 +301,7 @@ public class PersonCassandraTest extends BaseTest
                         e.getMessage());
             }
 
+            tc.setCqlVersion(CassandraConstants.CQL_VERSION_2_0);
         }
         else
         {
@@ -361,16 +373,31 @@ public class PersonCassandraTest extends BaseTest
                 + translator.ensureCase(new StringBuilder(), "PERSONCASSANDRA", false).toString();
         Query q = entityManager.createNativeQuery(query, PersonCassandra.class);
         List noOfRows = q.getResultList();
-        Assert.assertEquals(new Long(3),
-                PropertyAccessorHelper.getObject(Long.class, ((Column) noOfRows.get(0)).getValue()));
+
+        if (USE_CQL)
+        {
+            Assert.assertEquals(new Long(4),
+                    PropertyAccessorHelper.getObject(Long.class, ((Column) noOfRows.get(0)).getValue()));
+        }
+        else
+        {
+            Assert.assertEquals(new Long(3),
+                    PropertyAccessorHelper.getObject(Long.class, ((Column) noOfRows.get(0)).getValue()));
+        }
         Assert.assertEquals("count",
                 PropertyAccessorHelper.getObject(String.class, ((Column) noOfRows.get(0)).getName()));
 
         entityManager.clear();
         q = entityManager.createNamedQuery("q");
         noOfRows = q.getResultList();
-        Assert.assertEquals(3, noOfRows.size());
-
+        if (USE_CQL)
+        {
+            Assert.assertEquals(4, noOfRows.size());
+        }
+        else
+        {
+            Assert.assertEquals(3, noOfRows.size());
+        }
         tc.setCqlVersion(CassandraConstants.CQL_VERSION_2_0);
     }
 

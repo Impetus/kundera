@@ -1159,8 +1159,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      */
     protected String getCqlVersion()
     {
-        return (String) (externalProperties != null && externalProperties.get(CassandraConstants.CQL_VERSION) != null ? externalProperties
-                .get(CassandraConstants.CQL_VERSION) : this.cqlVersion);
+        return this.cqlVersion;
     }
 
     /**

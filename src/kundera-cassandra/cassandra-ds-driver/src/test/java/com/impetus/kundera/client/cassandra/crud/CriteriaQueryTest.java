@@ -136,8 +136,8 @@ public class CriteriaQueryTest extends BaseTest
                 "personName");
         assertFindByNameAndAgeBetween(entityManager, PersonCassandra.class, PersonCassandra.class, "vivek", "10", "15",
                 "personName");
-        assertFindByRange(entityManager, PersonCassandra.class, PersonCassandra.class, "1", "2", "personId");
-        assertFindWithoutWhereClause(entityManager, PersonCassandra.class, PersonCassandra.class);
+        assertFindByRange(entityManager, PersonCassandra.class, PersonCassandra.class, "1", "2", "personId", true);
+        assertFindWithoutWhereClause(entityManager, PersonCassandra.class, PersonCassandra.class, true);
 
         // perform merge after query.
         for (PersonCassandra person : persons)
@@ -166,7 +166,7 @@ public class CriteriaQueryTest extends BaseTest
 
         String deleteQuery = "DELETE from PersonCassandra";
         q = entityManager.createQuery(deleteQuery);
-        Assert.assertEquals(3, q.executeUpdate());
+        Assert.assertEquals(4, q.executeUpdate());
 
     }
 

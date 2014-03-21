@@ -1,4 +1,4 @@
-package com.impetus.client.crud.entities;
+package com.impetus.client.crud;
 
 import javax.persistence.Column;
 import javax.persistence.Embedded;
@@ -6,6 +6,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.SecondaryTable;
 import javax.persistence.Table;
+
 
 @Table(name = "PRIMARY_TABLE")
 @SecondaryTable(name = "SECONDARY_TABLE")

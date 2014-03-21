@@ -1224,8 +1224,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
 //                    }
 //                    else
 //                    {
-//                        columnDef.setIndex_nameIsSet(false);
-//                        columnDef.setIndex_typeIsSet(false);
+                        columnDef.setIndex_nameIsSet(false);
+                        columnDef.setIndex_typeIsSet(false);
 //                    }
                     isUpdated = true;
                 }

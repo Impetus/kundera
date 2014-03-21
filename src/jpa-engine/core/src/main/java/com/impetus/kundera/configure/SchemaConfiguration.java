@@ -322,7 +322,7 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
                 if (joinTableName != null)
                 {
                     TableInfo joinTableInfo = new TableInfo(joinTableName, Type.COLUMN_FAMILY.name(), String.class,
-                            joinColumnName.concat(inverseJoinColumnName));
+                            "key");
                     if (!tableInfos.isEmpty() && !tableInfos.contains(joinTableInfo) || tableInfos.isEmpty())
                     {
                         joinTableInfo.addColumnInfo(getJoinColumn(joinTableInfo, joinColumnName, entityMetadata
@@ -355,12 +355,12 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
     private void addJoinColumnToInfo(String joinColumn, TableInfo targetTableInfo, List<TableInfo> targetTableInfos,
             EntityMetadata m)
     {
-        ColumnInfo columnInfoOfJoinColumn = getJoinColumn(targetTableInfo, joinColumn, m.getIdAttribute()
-                .getBindableJavaType());
         if (!targetTableInfos.isEmpty() && targetTableInfos.contains(targetTableInfo))
         {
             int idx = targetTableInfos.indexOf(targetTableInfo);
             targetTableInfo = targetTableInfos.get(idx);
+            ColumnInfo columnInfoOfJoinColumn = getJoinColumn(targetTableInfo, joinColumn, m.getIdAttribute()
+                    .getBindableJavaType());
             if (!targetTableInfo.getColumnMetadatas().contains(columnInfoOfJoinColumn))
             {
                 targetTableInfo.addColumnInfo(columnInfoOfJoinColumn);
@@ -368,6 +368,8 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
         }
         else
         {
+            ColumnInfo columnInfoOfJoinColumn = getJoinColumn(targetTableInfo, joinColumn, m.getIdAttribute()
+                    .getBindableJavaType());
             if (!targetTableInfo.getColumnMetadatas().contains(columnInfoOfJoinColumn))
             {
                 targetTableInfo.addColumnInfo(columnInfoOfJoinColumn);
@@ -569,7 +571,8 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
         {
             columnInfo.setIndexable(true);
             IndexInfo indexInfo = new IndexInfo(((AbstractAttribute) column).getJPAColumnName(),
-                    indexedColumn.getMax(), indexedColumn.getMin(), indexedColumn.getIndexType(), indexedColumn.getName());
+                    indexedColumn.getMax(), indexedColumn.getMin(), indexedColumn.getIndexType(),
+                    indexedColumn.getName());
             tableInfo.addToIndexedColumnList(indexInfo);
             // Add more if required
         }

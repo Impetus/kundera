@@ -106,8 +106,8 @@ public class StudentCassandraTest extends StudentCassandraBase<StudentCassandra>
     {
         if (propertyMap == null)
         {
-             propertyMap = new HashMap();
-             propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create");
+            propertyMap = new HashMap();
+            propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create");
             // propertyMap.put(CassandraConstants.CQL_VERSION,
             // CassandraConstants.CQL_VERSION_2_0);
         }
@@ -185,7 +185,7 @@ public class StudentCassandraTest extends StudentCassandraBase<StudentCassandra>
             // "12345677", "12345678", "studentId");
             //
             // // find by without where clause.
-            assertFindWithoutWhereClause(em, "StudentCassandra", StudentCassandra.class);
+            assertFindWithoutWhereClause(em, "StudentCassandra", StudentCassandra.class, false);
             em.clear();
             //
 
@@ -634,7 +634,7 @@ public class StudentCassandraTest extends StudentCassandraBase<StudentCassandra>
         }
         catch (Exception e)
         {
-            
+
             Assert.fail("Failure onInsert test, caused by :" + e);
         }
     }
@@ -743,7 +743,7 @@ public class StudentCassandraTest extends StudentCassandraBase<StudentCassandra>
         else
         {
             columnDef5 = new ColumnDef(ByteBuffer.wrap("AGE".getBytes()), "IntegerType");
-            columnDef8 = new ColumnDef(ByteBuffer.wrap("CGPA".getBytes()), "IntegerType");
+            columnDef8 = new ColumnDef(ByteBuffer.wrap("CGPA".getBytes()), "Int32Type");
             columnDef11 = new ColumnDef(ByteBuffer.wrap("YEARS_SPENT".getBytes()), "IntegerType");
             columnDef16 = new ColumnDef(ByteBuffer.wrap("BIG_INT".getBytes()), "IntegerType");
             columnDef7 = new ColumnDef(ByteBuffer.wrap("DIGITAL_SIGNATURE".getBytes()), "BytesType");
@@ -866,27 +866,27 @@ public class StudentCassandraTest extends StudentCassandraBase<StudentCassandra>
         }
         catch (IOException e)
         {
-            
+
         }
         catch (TException e)
         {
-            
+
         }
         catch (InvalidRequestException e)
         {
-            
+
         }
         catch (UnavailableException e)
         {
-            
+
         }
         catch (TimedOutException e)
         {
-            
+
         }
         catch (SchemaDisagreementException e)
         {
-            
+
         }
     }
 
@@ -904,23 +904,23 @@ public class StudentCassandraTest extends StudentCassandraBase<StudentCassandra>
         }
         catch (TException e)
         {
-            
+
         }
         catch (InvalidRequestException e)
         {
-            
+
         }
         catch (UnavailableException e)
         {
-            
+
         }
         catch (TimedOutException e)
         {
-            
+
         }
         catch (SchemaDisagreementException e)
         {
-            
+
         }
     }
 

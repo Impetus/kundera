@@ -44,10 +44,9 @@ import org.slf4j.LoggerFactory;
 
 import com.datastax.driver.core.ColumnDefinitions;
 import com.datastax.driver.core.ColumnDefinitions.Definition;
+import com.datastax.driver.core.ColumnMetadata;
 import com.datastax.driver.core.ConsistencyLevel;
 import com.datastax.driver.core.DataType;
-import com.datastax.driver.core.DataType.Name;
-import com.datastax.driver.core.ColumnMetadata;
 import com.datastax.driver.core.Query;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
@@ -59,7 +58,6 @@ import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.client.cassandra.query.CassQuery;
 import com.impetus.client.cassandra.thrift.CQLTranslator;
-import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
@@ -362,7 +360,8 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
             factory.releaseConnection(session);
         }
 
-        List rowKeys = getColumnsById(schemaName,tableName,columnName,rowKeyName,columnValue,columnValue.getClass());
+        List rowKeys = getColumnsById(schemaName, tableName, columnName, rowKeyName, columnValue,
+                columnValue.getClass());
         for (Object rowKey : rowKeys)
         {
             if (rowKey != null)
@@ -433,7 +432,6 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
     @Override
     public List executeQuery(Class clazz, List<String> relationalField, boolean isNative, String cqlQuery)
     {
-        // TODO:: Handle secondary table support case
         ResultSet rSet = (ResultSet) this.execute(cqlQuery, null);
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, clazz);
         return iterateAndReturn(rSet, clazz, metadata);
@@ -598,16 +596,23 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
                 entity = CassandraUtilities.initialize(metadata, entity, compositeKeyInstance);
             }
 
-            Object rowKey = PropertyAccessorHelper.getId(entity, metadata);
-            
-            // populate secondary tables data if there is any.
-            populateSecondaryTableData(rowKey, entity, metaModel, metadata);
-
-            if (!relationalValues.isEmpty())
+            if (entity != null && entity.getClass().isAssignableFrom(metadata.getEntityClazz()))
             {
-                results.add(new EnhanceEntity(entity, rowKey, relationalValues));
+                Object rowKey = PropertyAccessorHelper.getId(entity, metadata);
+
+                // populate secondary tables data if there is any.
+                populateSecondaryTableData(rowKey, entity, metaModel, metadata);
+
+                if (!relationalValues.isEmpty())
+                {
+                    results.add(new EnhanceEntity(entity, rowKey, relationalValues));
+                }
+                else
+                {
+                    results.add(entity);
+                }
             }
-            else
+            else if(entity != null)
             {
                 results.add(entity);
             }
@@ -640,15 +645,15 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
 
             Iterator<Row> rowIter = rSet.iterator();
 
-//            while (rowIter.hasNext())
-//            {
-                Row row = rowIter.next();
-                ColumnDefinitions columnDefs = row.getColumnDefinitions();
-                Iterator<Definition> columnDefIter = columnDefs.iterator();
+            // while (rowIter.hasNext())
+            // {
+            Row row = rowIter.next();
+            ColumnDefinitions columnDefs = row.getColumnDefinitions();
+            Iterator<Definition> columnDefIter = columnDefs.iterator();
 
-                entity = iteratorColumns(metadata, metaModel.entity(metadata.getEntityClazz()), new HashMap<String, Object>(), new HashMap<String, Field>(),
-                        null, entity, row, columnDefIter);
-//            }
+            entity = iteratorColumns(metadata, metaModel.entity(metadata.getEntityClazz()),
+                    new HashMap<String, Object>(), new HashMap<String, Field>(), null, entity, row, columnDefIter);
+            // }
         }
     }
 
@@ -663,7 +668,8 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
 
             DataType dataType = columnDef.getType(); // data type
 
-            if (metadata.getRelationNames() != null && metadata.getRelationNames().contains(columnName))
+            if (metadata.getRelationNames() != null && metadata.getRelationNames().contains(columnName)
+                    && !columnName.equals(((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName()))
             {
                 Object relationalValue = DSClientUtilities.assign(row, null, metadata, dataType.getName(), entityType,
                         columnName, null);

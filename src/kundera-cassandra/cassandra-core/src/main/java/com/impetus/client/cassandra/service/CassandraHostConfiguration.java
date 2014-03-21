@@ -52,6 +52,7 @@ public class CassandraHostConfiguration extends HostConfiguration
     {
         super(externalProperties, csmd != null ? csmd.getConnectionServers() : new ArrayList<Server>(),
                 persistenceUnit, kunderaMetadata);
+        connectionProperties.putAll(csmd.getConnectionProperties());
         String property = csmd.getConnectionProperties().getProperty(Constants.RETRY_DELAY);
         if (StringUtils.isNumeric(property))
         {
@@ -113,18 +114,20 @@ public class CassandraHostConfiguration extends HostConfiguration
         boolean hostRetry = false;
         if (externalProperties != null)
         {
-            maxActivePerNode = (String) externalProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
-            maxIdlePerNode = (String) externalProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_IDLE);
-            minIdlePerNode = (String) externalProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MIN_IDLE);
-            maxTotal = (String) externalProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_TOTAL);
-            testOnBorrow = (String) externalProperties.get(CassandraConstants.TEST_ON_BORROW);
-            testOnConnect = (String) externalProperties.get(CassandraConstants.TEST_ON_CONNECT);
-            testOnReturn = (String) externalProperties.get(CassandraConstants.TEST_ON_RETURN);
-            testWhileIdle = (String) externalProperties.get(CassandraConstants.TEST_WHILE_IDLE);
-            socketTimeOut = (String) externalProperties.get(CassandraConstants.SOCKET_TIMEOUT);
-            userName = (String) externalProperties.get(PersistenceProperties.KUNDERA_USERNAME);
-            password = (String) externalProperties.get(PersistenceProperties.KUNDERA_PASSWORD);
-            maxWaitInMilli = (String) externalProperties.get(CassandraConstants.MAX_WAIT);
+            connectionProperties.putAll(externalProperties);
+
+            maxActivePerNode = (String) connectionProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
+            maxIdlePerNode = (String) connectionProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_IDLE);
+            minIdlePerNode = (String) connectionProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MIN_IDLE);
+            maxTotal = (String) connectionProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_TOTAL);
+            testOnBorrow = (String) connectionProperties.get(CassandraConstants.TEST_ON_BORROW);
+            testOnConnect = (String) connectionProperties.get(CassandraConstants.TEST_ON_CONNECT);
+            testOnReturn = (String) connectionProperties.get(CassandraConstants.TEST_ON_RETURN);
+            testWhileIdle = (String) connectionProperties.get(CassandraConstants.TEST_WHILE_IDLE);
+            socketTimeOut = (String) connectionProperties.get(CassandraConstants.SOCKET_TIMEOUT);
+            userName = (String) connectionProperties.get(PersistenceProperties.KUNDERA_USERNAME);
+            password = (String) connectionProperties.get(PersistenceProperties.KUNDERA_PASSWORD);
+            maxWaitInMilli = (String) connectionProperties.get(CassandraConstants.MAX_WAIT);
         }
 
         if (props != null)

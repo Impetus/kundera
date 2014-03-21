@@ -1,4 +1,4 @@
-package com.impetus.client.crud.entities;
+package com.impetus.client.crud;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;

@@ -92,10 +92,9 @@ public abstract class BaseTest
      * @param fieldName
      *            the field name
      */
-    protected <E extends Object> void assertFindByName(EntityManager em, Class clazz, E e, String name, 
-            String fieldName)
+    protected <E extends Object> void assertFindByName(EntityManager em, Class clazz, E e, String name, String fieldName)
     {
-        
+
         CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
         CriteriaQuery<E> query = criteriaBuilder.createQuery(clazz);
         Root<E> from = query.from(clazz);
@@ -171,13 +170,13 @@ public abstract class BaseTest
     protected <E extends Object> void assertFindByNameAndAge(EntityManager em, Class clazz, E e, String name,
             String minVal, String fieldName)
     {
-        
+
         CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
         CriteriaQuery<E> query = criteriaBuilder.createQuery(clazz);
         Root<E> from = query.from(clazz);
         query.select(from.alias("p"));
         query.where(criteriaBuilder.and(criteriaBuilder.equal(from.get(fieldName), name),
-                criteriaBuilder.gt((Expression)from.get("age"), Integer.parseInt(minVal))));
+                criteriaBuilder.gt((Expression) from.get("age"), Integer.parseInt(minVal))));
 
         TypedQuery<E> q = em.createQuery(query);
         List<E> results = q.getResultList();
@@ -278,8 +277,10 @@ public abstract class BaseTest
         CriteriaQuery<E> query = criteriaBuilder.createQuery(clazz);
         Root<E> from = query.from(clazz);
         query.select(from.alias("p"));
-        query.where(criteriaBuilder.and(criteriaBuilder.equal(from.get(fieldName), name),
-                criteriaBuilder.between((Expression) from.get("age"), Integer.parseInt(minVal), Integer.parseInt(maxVal))));
+        query.where(criteriaBuilder.and(
+                criteriaBuilder.equal(from.get(fieldName), name),
+                criteriaBuilder.between((Expression) from.get("age"), Integer.parseInt(minVal),
+                        Integer.parseInt(maxVal))));
 
         TypedQuery<E> q = em.createQuery(query);
         List<E> results = q.getResultList();
@@ -289,6 +290,7 @@ public abstract class BaseTest
         Assert.assertEquals(2, results.size());
 
     }
+
     /**
      * Assert find by range.
      * 
@@ -308,7 +310,7 @@ public abstract class BaseTest
      *            the field name
      */
     protected <E extends Object> void assertFindByRange(EntityManager em, String clazz, E e, String minVal,
-            String maxVal, String fieldName)
+            String maxVal, String fieldName, boolean useCql)
 
     {
         // find by Range.
@@ -317,18 +319,26 @@ public abstract class BaseTest
         List<E> results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertFalse(results.isEmpty());
-        Assert.assertEquals(2, results.size());
+        if (useCql)
+        {
+            Assert.assertEquals(3, results.size());
+        }
+        else
+        {
+            Assert.assertEquals(2, results.size());
+        }
     }
 
     protected <E extends Object> void assertFindByRange(EntityManager em, Class clazz, E e, String minVal,
-            String maxVal, String fieldName)
+            String maxVal, String fieldName, boolean useCql)
 
     {
         CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
         CriteriaQuery<E> query = criteriaBuilder.createQuery(clazz);
         Root<E> from = query.from(clazz);
         query.select(from.alias("p"));
-        query.where(criteriaBuilder.between((Expression) from.get(fieldName), Integer.parseInt(minVal), Integer.parseInt(maxVal)));
+        query.where(criteriaBuilder.between((Expression) from.get(fieldName), Integer.parseInt(minVal),
+                Integer.parseInt(maxVal)));
 
         TypedQuery<E> q = em.createQuery(query);
         List<E> results = q.getResultList();
@@ -336,7 +346,15 @@ public abstract class BaseTest
         // find by Range.
         Assert.assertNotNull(results);
         Assert.assertFalse(results.isEmpty());
-        Assert.assertEquals(2, results.size());
+
+        if (useCql)
+        {
+            Assert.assertEquals(3, results.size());
+        }
+        else
+        {
+            Assert.assertEquals(2, results.size());
+        }
     }
 
     /**
@@ -351,17 +369,24 @@ public abstract class BaseTest
      * @param e
      *            the e
      */
-    protected <E extends Object> void assertFindWithoutWhereClause(EntityManager em, String clazz, E e)
+    protected <E extends Object> void assertFindWithoutWhereClause(EntityManager em, String clazz, E e, boolean useCql)
     {
         // find by without where clause.
         Query q = em.createQuery("Select p from " + clazz + " p");
         List<E> results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertFalse(results.isEmpty());
-        Assert.assertEquals(3, results.size());
+        if (useCql)
+        {
+            Assert.assertEquals(4, results.size());
+        }
+        else
+        {
+            Assert.assertEquals(3, results.size());
+        }
     }
 
-    protected <E extends Object> void assertFindWithoutWhereClause(EntityManager em, Class clazz, E e)
+    protected <E extends Object> void assertFindWithoutWhereClause(EntityManager em, Class clazz, E e, boolean useCql)
     {
         CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
         CriteriaQuery<E> query = criteriaBuilder.createQuery(clazz);
@@ -373,7 +398,14 @@ public abstract class BaseTest
         List<E> results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertFalse(results.isEmpty());
-        Assert.assertEquals(3, results.size());
+        if (useCql)
+        {
+            Assert.assertEquals(4, results.size());
+        }
+        else
+        {
+            Assert.assertEquals(3, results.size());
+        }
     }
 
     /**
@@ -410,8 +442,8 @@ public abstract class BaseTest
         Assert.assertEquals(newName, getPersonName(e, results.get(0)));
     }
 
-    protected <E extends Object> void assertOnMerge(EntityManager em, Class clazz, E e, String oldName,
-            String newName, String fieldName)
+    protected <E extends Object> void assertOnMerge(EntityManager em, Class clazz, E e, String oldName, String newName,
+            String fieldName)
     {
         CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
         CriteriaQuery<E> query = criteriaBuilder.createQuery(clazz);
@@ -437,6 +469,7 @@ public abstract class BaseTest
         Assert.assertNotSame(oldName, getPersonName(e, results.get(0)));
         Assert.assertEquals(newName, getPersonName(e, results.get(0)));
     }
+
     /**
      * Gets the person name.
      * 
