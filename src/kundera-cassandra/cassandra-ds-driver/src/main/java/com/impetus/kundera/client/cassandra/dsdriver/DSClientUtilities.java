@@ -30,6 +30,7 @@ import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.schemamanager.CassandraDataTranslator;
 import com.impetus.client.cassandra.schemamanager.CassandraValidationClassMapper;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.property.accessor.CharAccessor;
 import com.impetus.kundera.property.accessor.EnumAccessor;
@@ -66,10 +67,9 @@ public final class DSClientUtilities
             String columnName, Field member)
     {
         String fieldName = null;
-        // Field member=null;
         if (metadata.getRelationNames() == null || !metadata.getRelationNames().contains(columnName))
         {
-            if (!columnName.equalsIgnoreCase("key"))
+            if (!columnName.equals(((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName()))
             {
                 fieldName = metadata.getFieldName(columnName);
                 if (fieldName != null)
