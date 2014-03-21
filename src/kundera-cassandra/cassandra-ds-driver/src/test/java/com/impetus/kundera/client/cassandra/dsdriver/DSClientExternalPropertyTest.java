@@ -43,9 +43,9 @@ import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 /**
  * 
  * @author shaheed.hussain Test case to check the ds client properties set via a
- *         xml file.  
+ *         xml file.
  * 
- * {@link DSClientFactory}
+ *         {@link DSClientFactory}
  */
 
 public class DSClientExternalPropertyTest
@@ -54,8 +54,8 @@ public class DSClientExternalPropertyTest
     private EntityManagerFactory emf;
 
     private final String keyspaceName = "KunderaExamples";
-    
-    private final String _PU="external_pu";
+
+    private final String _PU = "external_pu";
 
     private Map propertyMap = new HashMap();
 
@@ -68,7 +68,7 @@ public class DSClientExternalPropertyTest
         CassandraCli.cassandraSetUp();
         CassandraCli.createKeySpace(keyspaceName);
         propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
-        emf = Persistence.createEntityManagerFactory(_PU, propertyMap);
+        // emf = Persistence.createEntityManagerFactory(_PU, propertyMap);
     }
 
     /**
@@ -81,40 +81,28 @@ public class DSClientExternalPropertyTest
         CassandraCli.dropKeySpace(keyspaceName);
     }
 
+    /**
+     * Test to check external xml properties in case of
+     * RoundRobinPolicy,ExponentialReconnectionPolicy,FallthroughRetryPolicy
+     * with baseDelayMs,maxDelayMs available in the external xml file
+     * 
+     * @throws NoSuchMethodException
+     * @throws SecurityException
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     * @throws InvocationTargetException
+     */
     @Test
-    public void test() throws NoSuchMethodException, SecurityException, IllegalAccessException,
+    public void withAllPropertyTest() throws NoSuchMethodException, SecurityException, IllegalAccessException,
             IllegalArgumentException, InvocationTargetException
     {
+
+        emf = Persistence.createEntityManagerFactory(_PU, propertyMap);
         DSClientFactory ds = new DSClientFactory();
         final String RRP = "com.datastax.driver.core.policies.RoundRobinPolicy";
         final String ERP = "com.datastax.driver.core.policies.ExponentialReconnectionPolicy";
         final String DCRP = "com.datastax.driver.core.policies.FallthroughRetryPolicy";
-        Properties connectionProperties = CassandraPropertyReader.csmd.getConnectionProperties();
-
-        Method m = GenericClientFactory.class.getDeclaredMethod("setKunderaMetadata", KunderaMetadata.class);
-        if (!m.isAccessible())
-        {
-            m.setAccessible(true);
-        }
-
-        KunderaMetadata kunderaMetadata = ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance();
-        m.invoke(ds, kunderaMetadata);
-
-        m = GenericClientFactory.class.getDeclaredMethod("setPersistenceUnit", String.class);
-        if (!m.isAccessible())
-        {
-            m.setAccessible(true);
-        }
-
-        m.invoke(ds, _PU);
-
-        m = GenericClientFactory.class.getDeclaredMethod("setExternalProperties", Map.class);
-        if (!m.isAccessible())
-        {
-            m.setAccessible(true);
-        }
-
-        m.invoke(ds, propertyMap);
+        Properties connectionProperties = initialize(ds);
 
         ds.initialize(propertyMap);
         Object conn = ds.createPoolOrConnection();
@@ -145,6 +133,222 @@ public class DSClientExternalPropertyTest
 
         Assert.assertEquals(connectionProperties.getProperty("baseDelayMs"), "11000");
         Assert.assertEquals(connectionProperties.getProperty("maxDelayMs"), "13000");
+
+    }
+
+    private Properties initialize(DSClientFactory ds) throws NoSuchMethodException, IllegalAccessException,
+            InvocationTargetException
+    {
+        Properties connectionProperties = CassandraPropertyReader.csmd.getConnectionProperties();
+
+        Method m = GenericClientFactory.class.getDeclaredMethod("setKunderaMetadata", KunderaMetadata.class);
+        if (!m.isAccessible())
+        {
+            m.setAccessible(true);
+        }
+
+        KunderaMetadata kunderaMetadata = ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance();
+        m.invoke(ds, kunderaMetadata);
+
+        m = GenericClientFactory.class.getDeclaredMethod("setPersistenceUnit", String.class);
+        if (!m.isAccessible())
+        {
+            m.setAccessible(true);
+        }
+
+        m.invoke(ds, _PU);
+
+        m = GenericClientFactory.class.getDeclaredMethod("setExternalProperties", Map.class);
+        if (!m.isAccessible())
+        {
+            m.setAccessible(true);
+        }
+
+        m.invoke(ds, propertyMap);
+        return connectionProperties;
+    }
+
+    /**
+     * Test to check external xml properties in case of
+     * DCAwareRoundRobinPolicy,ConstantReonnectionPolicy
+     * ,DowngradingConsistencyRetryPolicy with
+     * localdc,usedHostsPerRemoteDc,constantDelayMs available in the external
+     * xml file
+     * 
+     * @throws NoSuchMethodException
+     * @throws SecurityException
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     * @throws InvocationTargetException
+     */
+
+    @Test
+    public void withPropertyTest2() throws NoSuchMethodException, SecurityException, IllegalAccessException,
+            IllegalArgumentException, InvocationTargetException
+    {
+        propertyMap.put("kundera.client.property", "dsclienttest2.xml");
+        emf = Persistence.createEntityManagerFactory(_PU, propertyMap);
+
+        DSClientFactory ds = new DSClientFactory();
+        final String DRRP = "com.datastax.driver.core.policies.DCAwareRoundRobinPolicy";
+        final String CRP = "com.datastax.driver.core.policies.ConstantReconnectionPolicy";
+        final String DCRP = "com.datastax.driver.core.policies.DowngradingConsistencyRetryPolicy";
+        Properties connectionProperties = initialize(ds);
+
+        ds.initialize(propertyMap);
+        Object conn = ds.createPoolOrConnection();
+        Cluster cluster = (Cluster) conn;
+
+        HostDistance distance = HostDistance.LOCAL;
+
+        Configuration configuration = cluster.getConfiguration();
+
+        Assert.assertEquals(configuration.getSocketOptions().getReadTimeoutMillis(), 110000);
+        Assert.assertEquals(configuration.getSocketOptions().getKeepAlive().booleanValue(), false);
+        Assert.assertEquals(configuration.getSocketOptions().getReceiveBufferSize().intValue(), 12);
+        Assert.assertEquals(configuration.getSocketOptions().getReuseAddress().booleanValue(), true);
+        Assert.assertEquals(configuration.getSocketOptions().getSendBufferSize().intValue(), 11);
+        Assert.assertEquals(configuration.getSocketOptions().getSoLinger().intValue(), 10);
+        Assert.assertEquals(configuration.getSocketOptions().getTcpNoDelay().booleanValue(), true);
+
+        Assert.assertEquals(configuration.getPoolingOptions().getCoreConnectionsPerHost(distance), 5);
+        Assert.assertEquals(configuration.getPoolingOptions().getMaxConnectionsPerHost(distance), 12);
+        Assert.assertEquals(configuration.getPoolingOptions()
+                .getMaxSimultaneousRequestsPerConnectionThreshold(distance), 200);
+        Assert.assertEquals(configuration.getPoolingOptions()
+                .getMinSimultaneousRequestsPerConnectionThreshold(distance), 65);
+
+        Assert.assertEquals(configuration.getPolicies().getLoadBalancingPolicy().getClass().getName(), DRRP);
+        Assert.assertEquals(configuration.getPolicies().getReconnectionPolicy().getClass().getName(), CRP);
+        Assert.assertEquals(configuration.getPolicies().getRetryPolicy().getClass().getName(), DCRP);
+
+        Assert.assertEquals(connectionProperties.getProperty("constantDelayMs"), 110000);
+        Assert.assertEquals(connectionProperties.getProperty("localdc"), "dc1");
+        Assert.assertEquals(connectionProperties.getProperty("usedHostsPerRemoteDc"), 2);
+        Assert.assertEquals(connectionProperties.getProperty("isTokenAware"), true);
+        Assert.assertEquals(connectionProperties.getProperty("isLoggingRetry"), true);
+
+        emf.close();
+
+    }
+
+    /**
+     * Test to check external xml properties in case of
+     * RoundRobinPolicy,ExponentialReconnectionPolicy,FallthroughRetryPolicy
+     * with baseDelayMs,maxDelayMs missing from external xml file
+     * 
+     * @throws NoSuchMethodException
+     * @throws SecurityException
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     * @throws InvocationTargetException
+     */
+
+    @Test
+    public void missingPropertytest() throws NoSuchMethodException, SecurityException, IllegalAccessException,
+            IllegalArgumentException, InvocationTargetException
+    {
+
+        propertyMap.put("kundera.client.property", "DSClientTestWithMissingProperties.xml");
+        emf = Persistence.createEntityManagerFactory(_PU, propertyMap);
+
+        DSClientFactory ds = new DSClientFactory();
+        final String RRP = "com.datastax.driver.core.policies.RoundRobinPolicy";
+        final String ERP = "com.datastax.driver.core.policies.ExponentialReconnectionPolicy";
+        final String DCRP = "com.datastax.driver.core.policies.FallthroughRetryPolicy";
+        Properties connectionProperties = initialize(ds);
+
+        ds.initialize(propertyMap);
+        Object conn = ds.createPoolOrConnection();
+        Cluster cluster = (Cluster) conn;
+
+        HostDistance distance = HostDistance.LOCAL;
+
+        Configuration configuration = cluster.getConfiguration();
+
+        Assert.assertEquals(configuration.getSocketOptions().getReadTimeoutMillis(), 110000);
+        Assert.assertEquals(configuration.getSocketOptions().getKeepAlive().booleanValue(), false);
+        Assert.assertEquals(configuration.getSocketOptions().getReceiveBufferSize().intValue(), 12);
+        Assert.assertEquals(configuration.getSocketOptions().getReuseAddress().booleanValue(), true);
+        Assert.assertEquals(configuration.getSocketOptions().getSendBufferSize().intValue(), 11);
+        Assert.assertEquals(configuration.getSocketOptions().getSoLinger().intValue(), 10);
+        Assert.assertEquals(configuration.getSocketOptions().getTcpNoDelay().booleanValue(), true);
+
+        Assert.assertEquals(configuration.getPoolingOptions().getCoreConnectionsPerHost(distance), 5);
+        Assert.assertEquals(configuration.getPoolingOptions().getMaxConnectionsPerHost(distance), 12);
+        Assert.assertEquals(configuration.getPoolingOptions()
+                .getMaxSimultaneousRequestsPerConnectionThreshold(distance), 200);
+        Assert.assertEquals(configuration.getPoolingOptions()
+                .getMinSimultaneousRequestsPerConnectionThreshold(distance), 65);
+
+        Assert.assertEquals(configuration.getPolicies().getLoadBalancingPolicy().getClass().getName(), RRP);
+        Assert.assertEquals(configuration.getPolicies().getReconnectionPolicy().getClass().getName(), ERP);
+        Assert.assertEquals(configuration.getPolicies().getRetryPolicy().getClass().getName(), DCRP);
+
+        Assert.assertEquals(connectionProperties.getProperty("baseDelayMs"), null);
+        Assert.assertEquals(connectionProperties.getProperty("maxDelayMs"), null);
+        emf.close();
+
+    }
+
+    /**
+     * Test to check external xml properties in case of
+     * DCAwareRoundRobinPolicy,ConstantReonnectionPolicy
+     * ,DowngradingConsistencyRetryPolicy with
+     * localdc,usedHostsPerRemoteDc,constantDelayMs missing from the external
+     * xml file
+     * 
+     * @throws NoSuchMethodException
+     * @throws SecurityException
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     * @throws InvocationTargetException
+     */
+
+    @Test
+    public void missingPropertyTest2() throws NoSuchMethodException, SecurityException, IllegalAccessException,
+            IllegalArgumentException, InvocationTargetException
+    {
+
+        propertyMap.put("kundera.client.property", "DSClientTestWithMissingProperties2.xml");
+        emf = Persistence.createEntityManagerFactory(_PU, propertyMap);
+
+        DSClientFactory ds = new DSClientFactory();
+        final String DRRP = "com.datastax.driver.core.policies.DCAwareRoundRobinPolicy";
+        final String CRP = "com.datastax.driver.core.policies.ConstantReconnectionPolicy";
+        final String DCRP = "com.datastax.driver.core.policies.DowngradingConsistencyRetryPolicy";
+        Properties connectionProperties = initialize(ds);
+
+        ds.initialize(propertyMap);
+        Object conn = ds.createPoolOrConnection();
+        Cluster cluster = (Cluster) conn;
+
+        HostDistance distance = HostDistance.LOCAL;
+
+        Configuration configuration = cluster.getConfiguration();
+
+        Assert.assertEquals(configuration.getSocketOptions().getReadTimeoutMillis(), 110000);
+        Assert.assertEquals(configuration.getSocketOptions().getKeepAlive().booleanValue(), false);
+        Assert.assertEquals(configuration.getSocketOptions().getReceiveBufferSize().intValue(), 12);
+        Assert.assertEquals(configuration.getSocketOptions().getReuseAddress().booleanValue(), true);
+        Assert.assertEquals(configuration.getSocketOptions().getSendBufferSize().intValue(), 11);
+        Assert.assertEquals(configuration.getSocketOptions().getSoLinger().intValue(), 10);
+        Assert.assertEquals(configuration.getSocketOptions().getTcpNoDelay().booleanValue(), true);
+
+        Assert.assertEquals(configuration.getPoolingOptions().getCoreConnectionsPerHost(distance), 5);
+        Assert.assertEquals(configuration.getPoolingOptions().getMaxConnectionsPerHost(distance), 12);
+        Assert.assertEquals(configuration.getPoolingOptions()
+                .getMaxSimultaneousRequestsPerConnectionThreshold(distance), 200);
+        Assert.assertEquals(configuration.getPoolingOptions()
+                .getMinSimultaneousRequestsPerConnectionThreshold(distance), 65);
+
+        Assert.assertEquals(configuration.getPolicies().getLoadBalancingPolicy().getClass().getName(), DRRP);
+        Assert.assertEquals(configuration.getPolicies().getReconnectionPolicy().getClass().getName(), CRP);
+        Assert.assertEquals(configuration.getPolicies().getRetryPolicy().getClass().getName(), DCRP);
+
+        Assert.assertEquals(connectionProperties.getProperty("constantDelayMs"), null);
+
+        emf.close();
 
     }
 

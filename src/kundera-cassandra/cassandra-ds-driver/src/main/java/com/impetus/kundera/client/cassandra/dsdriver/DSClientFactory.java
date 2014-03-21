@@ -324,7 +324,7 @@ public class DSClientFactory extends GenericClientFactory implements CassandraCl
 
     enum ReconnectionPolicy
     {
-        ConstantReonnectionPolicy, ExponentialReconnectionPolicy;
+        ConstantReconnectionPolicy, ExponentialReconnectionPolicy;
 
         static ReconnectionPolicy getPolicy(String name)
         {
@@ -396,7 +396,8 @@ public class DSClientFactory extends GenericClientFactory implements CassandraCl
         case DCAwareRoundRobinPolicy:
 
             String usedHostsPerRemoteDc = (String) conProperties.get("usedHostsPerRemoteDc");
-            loadBalancingPolicy = new DCAwareRoundRobinPolicy((String) conProperties.get("localdc"),
+            String localdc = (String) conProperties.get("localdc");
+            loadBalancingPolicy = new DCAwareRoundRobinPolicy(localdc==null?"DC1":localdc,
                     usedHostsPerRemoteDc != null ? Integer.parseInt(usedHostsPerRemoteDc):0);
             break;
 
@@ -422,7 +423,7 @@ public class DSClientFactory extends GenericClientFactory implements CassandraCl
         com.datastax.driver.core.policies.ReconnectionPolicy reconnectionPolicy = null;
         switch (policy)
         {
-        case ConstantReonnectionPolicy:
+        case ConstantReconnectionPolicy:
             String property = props.getProperty("constantDelayMs");
             long constantDelayMs = property != null ? new Long(property): 0l;
             reconnectionPolicy = new ConstantReconnectionPolicy(constantDelayMs);
