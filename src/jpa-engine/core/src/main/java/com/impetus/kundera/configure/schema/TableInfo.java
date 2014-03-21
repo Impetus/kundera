@@ -35,7 +35,7 @@ public class TableInfo
     private List<ColumnInfo> columnMetadatas;
 
     /** The table id class. */
-    private Class idClazz;
+    private Class<?> idClazz;
 
     /** The table id name. */
     private String idColumnName;
@@ -66,7 +66,7 @@ public class TableInfo
      * @param idClassType
      *            the id class type
      */
-    public TableInfo(String tableName, String tableSchemaType, Class idClassType, String idColumnName)
+    public TableInfo(String tableName, String tableSchemaType, Class<?> idClassType, String idColumnName)
     {
         this.tableName = tableName;
         this.type = tableSchemaType;
@@ -143,7 +143,7 @@ public class TableInfo
      * 
      * @return the tableIdType
      */
-    public Class getTableIdType()
+    public Class<?> getTableIdType()
     {
         return idClazz;
     }
@@ -154,7 +154,7 @@ public class TableInfo
      * @param tableIdType
      *            the tableIdType to set
      */
-    public void setTableIdType(Class tableIdType)
+    public void setTableIdType(Class<?> tableIdType)
     {
         this.idClazz = tableIdType;
     }

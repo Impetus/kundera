@@ -304,8 +304,11 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
             // if relation type is one to one or many to one.
             else if (relation.isUnary() && relation.getJoinColumnName(kunderaMetadata) != null)
             {
-                tableInfo.addColumnInfo(getJoinColumn(tableInfo, relation.getJoinColumnName(kunderaMetadata),
-                        targetEntityMetadata.getIdAttribute().getJavaType()));
+                if (!relation.isJoinedByPrimaryKey())
+                {
+                    tableInfo.addColumnInfo(getJoinColumn(tableInfo, relation.getJoinColumnName(kunderaMetadata),
+                            targetEntityMetadata.getIdAttribute().getJavaType()));
+                }
             }
             // if relation type is many to many and relation via join table.
             else if ((relationType.equals(ForeignKey.MANY_TO_MANY)) && (entityMetadata.isRelationViaJoinTable()))
@@ -566,7 +569,7 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
         {
             columnInfo.setIndexable(true);
             IndexInfo indexInfo = new IndexInfo(((AbstractAttribute) column).getJPAColumnName(),
-                    indexedColumn.getMax(), indexedColumn.getMin(), indexedColumn.getIndexType());
+                    indexedColumn.getMax(), indexedColumn.getMin(), indexedColumn.getIndexType(), indexedColumn.getName());
             tableInfo.addToIndexedColumnList(indexInfo);
             // Add more if required
         }

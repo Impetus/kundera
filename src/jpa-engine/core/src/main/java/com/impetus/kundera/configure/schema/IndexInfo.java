@@ -20,17 +20,21 @@ public class IndexInfo
     /** The index type. */
     private String indexType;
 
-    public IndexInfo(String columnName, Integer maxValue, Integer minValue, String indexType)
+    /** Index name value */
+    private String indexName;
+
+    public IndexInfo(String columnName, Integer maxValue, Integer minValue, String indexType, String indexName)
     {
         this.columnName = columnName;
         this.maxValue = maxValue;
         this.minValue = minValue;
         this.indexType = indexType;
+        this.indexName = indexName;
     }
 
     public IndexInfo(String columnName)
     {
-        this(columnName, null, null, null);
+        this(columnName, null, null, null, columnName);
     }
 
     public String getColumnName()
@@ -85,8 +89,7 @@ public class IndexInfo
     @Override
     public boolean equals(Object columnName)
     {
-        // / if column name matches then return true;
-
+        // if column name matches then return true;
         return columnName != null ? this.columnName.equals(columnName.toString()) : false;
     }
 
@@ -99,4 +102,14 @@ public class IndexInfo
     {
         return columnName;
     }
+
+    /**
+     * 
+     * @return index name
+     */
+    public String getIndexName()
+    {
+        return indexName;
+    }
+
 }
