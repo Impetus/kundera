@@ -700,7 +700,9 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     public <T> TypedQuery<T> createQuery(CriteriaQuery<T> paramCriteriaQuery)
     {
         checkClosed();
-        throw new NotImplementedException("Criteria Query currently not supported by Kundera.");
+
+        return this.createQuery(CriteriaQueryTranslator.translate(paramCriteriaQuery),
+                paramCriteriaQuery.getResultType());
     }
 
     /*

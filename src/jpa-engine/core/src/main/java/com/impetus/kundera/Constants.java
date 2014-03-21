@@ -104,6 +104,8 @@ public interface Constants
     public final static String PERSISTENCE_UNIT_LOCATIION = "persistenceunit.location";
     
     public final static String DEFAULT_PERSISTENCE_UNIT_LOCATIION = "META-INF/persistence.xml";
+    
+    public final static String SPACE=" ";
 
     // public final static String INVERTED_INDEXING_ENABLED =
     // "inverted.indexing.enabled";

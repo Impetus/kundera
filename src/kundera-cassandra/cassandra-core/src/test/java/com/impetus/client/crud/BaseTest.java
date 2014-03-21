@@ -19,10 +19,16 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Root;
 
 import junit.framework.Assert;
 
 import com.impetus.client.crud.PersonCassandra.Day;
+import com.impetus.kundera.query.Person;
 
 /**
  * The Class BaseTest.
@@ -86,6 +92,39 @@ public abstract class BaseTest
      * @param fieldName
      *            the field name
      */
+    protected <E extends Object> void assertFindByName(EntityManager em, Class clazz, E e, String name, 
+            String fieldName)
+    {
+        
+        CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+        CriteriaQuery<E> query = criteriaBuilder.createQuery(clazz);
+        Root<E> from = query.from(clazz);
+        query.select(from.alias("p"));
+        query.where(criteriaBuilder.equal(from.get(fieldName), name));
+        // // find by name.
+        TypedQuery<E> q = em.createQuery(query);
+        List<E> results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertFalse(results.isEmpty());
+        Assert.assertEquals(3, results.size());
+    }
+
+    /**
+     * Assert find by name.
+     * 
+     * @param <E>
+     *            the element type
+     * @param em
+     *            the em
+     * @param clazz
+     *            the clazz
+     * @param e
+     *            the e
+     * @param name
+     *            the name
+     * @param fieldName
+     *            the field name
+     */
     protected <E extends Object> void assertFindByName(EntityManager em, String clazz, E e, String name,
             String fieldName)
     {
@@ -98,17 +137,6 @@ public abstract class BaseTest
         Assert.assertFalse(results.isEmpty());
         Assert.assertEquals(3, results.size());
 
-    }
-
-    protected <E extends Object> void assertFindByGTId(EntityManager em, String clazz, E e, String id, String fieldName)
-    {
-        String query = "Select p from " + clazz + " p where p." + fieldName + " = " + id;
-        // // find by name.
-        Query q = em.createQuery(query);
-        List<E> results = q.getResultList();
-        Assert.assertNotNull(results);
-        Assert.assertFalse(results.isEmpty());
-        Assert.assertEquals(3, results.size());
     }
 
     /**
@@ -134,6 +162,24 @@ public abstract class BaseTest
     {
         Query q = em.createQuery("Select p from " + clazz + " p where p." + fieldName + " = " + name + " and p.age > "
                 + minVal);
+        List<E> results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertFalse(results.isEmpty());
+        Assert.assertEquals(2, results.size());
+    }
+
+    protected <E extends Object> void assertFindByNameAndAge(EntityManager em, Class clazz, E e, String name,
+            String minVal, String fieldName)
+    {
+        
+        CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+        CriteriaQuery<E> query = criteriaBuilder.createQuery(clazz);
+        Root<E> from = query.from(clazz);
+        query.select(from.alias("p"));
+        query.where(criteriaBuilder.and(criteriaBuilder.equal(from.get(fieldName), name),
+                criteriaBuilder.gt((Expression)from.get("age"), Integer.parseInt(minVal))));
+
+        TypedQuery<E> q = em.createQuery(query);
         List<E> results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertFalse(results.isEmpty());
@@ -166,6 +212,25 @@ public abstract class BaseTest
         // // // find by name, age clause
         Query q = em.createQuery("Select p from " + clazz + " p where p." + fieldName + " = " + name + " and p.age > "
                 + minVal + " and p.age < " + maxVal);
+        List<E> results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertFalse(results.isEmpty());
+        Assert.assertEquals(1, results.size());
+    }
+
+    protected <E extends Object> void assertFindByNameAndAgeGTAndLT(EntityManager em, Class clazz, E e, String name,
+            String minVal, String maxVal, String fieldName)
+    {
+        CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+        CriteriaQuery<E> query = criteriaBuilder.createQuery(clazz);
+        Root<E> from = query.from(clazz);
+        query.select(from.alias("p"));
+        query.where(criteriaBuilder.and(criteriaBuilder.equal(from.get(fieldName), name),
+                criteriaBuilder.gt((Expression) from.get("age"), Integer.parseInt(minVal)),
+                criteriaBuilder.lt((Expression) from.get("age"), Integer.parseInt(maxVal))));
+
+        // // // find by name, age clause
+        TypedQuery<E> q = em.createQuery(query);
         List<E> results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertFalse(results.isEmpty());
@@ -205,6 +270,25 @@ public abstract class BaseTest
 
     }
 
+    protected <E extends Object> void assertFindByNameAndAgeBetween(EntityManager em, Class clazz, E e, String name,
+            String minVal, String maxVal, String fieldName)
+    {
+        // // find by between clause
+        CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+        CriteriaQuery<E> query = criteriaBuilder.createQuery(clazz);
+        Root<E> from = query.from(clazz);
+        query.select(from.alias("p"));
+        query.where(criteriaBuilder.and(criteriaBuilder.equal(from.get(fieldName), name),
+                criteriaBuilder.between((Expression) from.get("age"), Integer.parseInt(minVal), Integer.parseInt(maxVal))));
+
+        TypedQuery<E> q = em.createQuery(query);
+        List<E> results = q.getResultList();
+
+        Assert.assertNotNull(results);
+        Assert.assertFalse(results.isEmpty());
+        Assert.assertEquals(2, results.size());
+
+    }
     /**
      * Assert find by range.
      * 
@@ -236,6 +320,25 @@ public abstract class BaseTest
         Assert.assertEquals(2, results.size());
     }
 
+    protected <E extends Object> void assertFindByRange(EntityManager em, Class clazz, E e, String minVal,
+            String maxVal, String fieldName)
+
+    {
+        CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+        CriteriaQuery<E> query = criteriaBuilder.createQuery(clazz);
+        Root<E> from = query.from(clazz);
+        query.select(from.alias("p"));
+        query.where(criteriaBuilder.between((Expression) from.get(fieldName), Integer.parseInt(minVal), Integer.parseInt(maxVal)));
+
+        TypedQuery<E> q = em.createQuery(query);
+        List<E> results = q.getResultList();
+
+        // find by Range.
+        Assert.assertNotNull(results);
+        Assert.assertFalse(results.isEmpty());
+        Assert.assertEquals(2, results.size());
+    }
+
     /**
      * Assert find without where clause.
      * 
@@ -252,6 +355,21 @@ public abstract class BaseTest
     {
         // find by without where clause.
         Query q = em.createQuery("Select p from " + clazz + " p");
+        List<E> results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertFalse(results.isEmpty());
+        Assert.assertEquals(3, results.size());
+    }
+
+    protected <E extends Object> void assertFindWithoutWhereClause(EntityManager em, Class clazz, E e)
+    {
+        CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+        CriteriaQuery<E> query = criteriaBuilder.createQuery(clazz);
+        Root<E> from = query.from(clazz);
+        query.select(from.alias("p"));
+
+        // find by without where clause.
+        TypedQuery<E> q = em.createQuery(query);
         List<E> results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertFalse(results.isEmpty());
@@ -292,6 +410,33 @@ public abstract class BaseTest
         Assert.assertEquals(newName, getPersonName(e, results.get(0)));
     }
 
+    protected <E extends Object> void assertOnMerge(EntityManager em, Class clazz, E e, String oldName,
+            String newName, String fieldName)
+    {
+        CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+        CriteriaQuery<E> query = criteriaBuilder.createQuery(clazz);
+        Root<E> from = query.from(clazz);
+        query.select(from.alias("p"));
+        query.where(criteriaBuilder.equal(from.get(fieldName), oldName));
+        // // find by name.
+        TypedQuery<E> q = em.createQuery(query);
+        List<E> results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(2, results.size());
+
+        criteriaBuilder = em.getCriteriaBuilder();
+        query = criteriaBuilder.createQuery(clazz);
+        from = query.from(clazz);
+        query.select(from.alias("p"));
+        query.where(criteriaBuilder.equal(from.get(fieldName), newName));
+        // // find by name.
+        q = em.createQuery(query);
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(1, results.size());
+        Assert.assertNotSame(oldName, getPersonName(e, results.get(0)));
+        Assert.assertEquals(newName, getPersonName(e, results.get(0)));
+    }
     /**
      * Gets the person name.
      * 
