@@ -33,6 +33,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.client.crud.entities.AppUser;
+import com.impetus.client.crud.entities.PhoneDirectory;
+
 /**
  * EmbeddableUserTest tests @{@link Entity} and {@link Embeddable} having
  * {@link Set, List, Map} as its attribute.

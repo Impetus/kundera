@@ -13,73 +13,67 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.client.crud;
+
+package com.impetus.client.crud.entities;
 
 import javax.persistence.Column;
+import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
 
 /**
- * 
  * @author Kuldeep Mishra
- *
+ * 
  */
-@Table(name = "PERSONNEL", schema = "KunderaExamples@mongoTest")
-@Entity
-public class PersonnelEmbedded
+@Embeddable
+public class PersonalDetailEmbedded
 {
-    @Id
-    @Column
-    private int id;
+    @Column(name="PHONENO")
+    private long phoneNo;
 
-    @Column
-    private String name;
+    private String emailId;
 
-    @Column
-    private int age;
+    private String address;
 
     @Embedded
-    private PersonalDetailEmbedded personalDetail;
+    private PhoneDirectory phone;
 
-    public int getId()
+    public String getEmailId()
     {
-        return id;
+        return emailId;
     }
 
-    public void setId(int id)
+    public void setEmailId(String emailId)
     {
-        this.id = id;
+        this.emailId = emailId;
     }
 
-    public String getName()
+    public String getAddress()
     {
-        return name;
+        return address;
     }
 
-    public void setName(String name)
+    public void setAddress(String address)
     {
-        this.name = name;
+        this.address = address;
     }
 
-    public int getAge()
+    public long getPhoneNo()
     {
-        return age;
+        return phoneNo;
     }
 
-    public void setAge(int age)
+    public void setPhoneNo(long phoneNo)
     {
-        this.age = age;
+        this.phoneNo = phoneNo;
     }
 
-    public PersonalDetailEmbedded getPersonalDetail()
+    public PhoneDirectory getPhone()
     {
-        return personalDetail;
+        return phone;
     }
 
-    public void setPersonalDetail(PersonalDetailEmbedded personalDetail)
+    public void setPhone(PhoneDirectory phone)
     {
-        this.personalDetail = personalDetail;
+        this.phone = phone;
     }
 }

@@ -31,7 +31,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.crud.PersonMongo.Month;
+import com.impetus.client.crud.entities.Day;
+import com.impetus.client.crud.entities.PersonBatchMongoEntity;
+import com.impetus.client.crud.entities.PersonMongo;
+import com.impetus.client.crud.entities.PersonMongo.Month;
 import com.impetus.client.mongodb.MongoDBClient;
 import com.impetus.client.utils.MongoUtils;
 import com.impetus.kundera.client.Client;

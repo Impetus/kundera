@@ -29,7 +29,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.crud.PersonMongoNameAnnotation.Day;
+import com.impetus.client.crud.entities.Day;
+import com.impetus.client.crud.entities.PersonMongoEmptyTableName;
+import com.impetus.client.crud.entities.PersonMongoNameAnnotation;
 import com.impetus.kundera.client.DummyDatabase;
 
 /**

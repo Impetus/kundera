@@ -1,4 +1,4 @@
-package com.impetus.client.crud;
+package com.impetus.client.crud.entities;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;

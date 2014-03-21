@@ -13,67 +13,45 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-
 package com.impetus.client.crud;
 
 import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
-/**
- * @author Kuldeep Mishra
- * 
- */
-@Embeddable
-public class PersonalDetailEmbedded
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
+
+@Entity
+@Table(name = "AddressMongoMTO", schema = "KunderaExamples@mongoTest")
+@IndexCollection(columns = { @Index(name = "street") })
+public class AddressMongoMTO
 {
-    @Column(name="PHONENO")
-    private long phoneNo;
+    @Id
+    @Column(name = "ADDRESS_ID")
+    private String addressId;
 
-    private String emailId;
+    @Column(name = "STREET")
+    private String street;
 
-    private String address;
-
-    @Embedded
-    private PhoneDirectory phone;
-
-    public String getEmailId()
+    public String getAddressId()
     {
-        return emailId;
+        return addressId;
     }
 
-    public void setEmailId(String emailId)
+    public void setAddressId(String addressId)
     {
-        this.emailId = emailId;
+        this.addressId = addressId;
     }
 
-    public String getAddress()
+    public String getStreet()
     {
-        return address;
+        return street;
     }
 
-    public void setAddress(String address)
+    public void setStreet(String street)
     {
-        this.address = address;
-    }
-
-    public long getPhoneNo()
-    {
-        return phoneNo;
-    }
-
-    public void setPhoneNo(long phoneNo)
-    {
-        this.phoneNo = phoneNo;
-    }
-
-    public PhoneDirectory getPhone()
-    {
-        return phone;
-    }
-
-    public void setPhone(PhoneDirectory phone)
-    {
-        this.phone = phone;
+        this.street = street;
     }
 }

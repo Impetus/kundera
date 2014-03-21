@@ -28,6 +28,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.client.crud.entities.MongoDBCappedEntity;
 import com.impetus.client.mongodb.MongoDBClient;
 import com.impetus.client.mongodb.MongoDBConstants;
 import com.impetus.kundera.client.Client;

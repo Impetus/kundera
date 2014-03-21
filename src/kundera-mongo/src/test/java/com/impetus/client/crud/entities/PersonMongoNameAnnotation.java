@@ -13,7 +13,7 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.client.crud;
+package com.impetus.client.crud.entities;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -126,11 +126,6 @@ public class PersonMongoNameAnnotation
     public Day getDay()
     {
         return day;
-    }
-
-    public enum Day
-    {
-        MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
     }
 
     /**

@@ -1,6 +1,6 @@
-package com.impetus.client.crud;
+package com.impetus.client.crud.entities;
 
-enum Day
+public enum Day
 {
     MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
 }
