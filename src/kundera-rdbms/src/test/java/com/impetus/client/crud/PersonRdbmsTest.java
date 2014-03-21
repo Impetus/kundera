@@ -73,7 +73,7 @@ public class PersonRdbmsTest extends BaseTest
         }
         catch (Exception e)
         {
-            
+
             cli.update("DELETE FROM TESTDB.PERSON");
             cli.update("DROP TABLE TESTDB.PERSON");
             cli.update("DROP SCHEMA TESTDB");
@@ -165,8 +165,9 @@ public class PersonRdbmsTest extends BaseTest
         }
         catch (Exception e)
         {
-            // Assert.assertEquals("org.hibernate.exception.SQLGrammarException: unexpected token: )",
-            // e.getMessage());
+            Assert.assertEquals(
+                    "org.hibernate.hql.internal.ast.QuerySyntaxException: unexpected end of subtree [Select p from com.impetus.client.crud.entities.PersonRDBMS p where p.personName IN ()]",
+                    e.getMessage());
         }
         findQuery = em.createQuery("Select p from PersonRDBMS p where p.personName IN ('vivek', 'kk')");
         allPersons = findQuery.getResultList();
