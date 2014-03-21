@@ -143,7 +143,7 @@ public class CouchDBQuery extends QueryImpl
         {
             if (clause.getClass().isAssignableFrom(FilterClause.class))
             {
-                Object value = ((FilterClause) clause).getValue();
+                Object value = ((FilterClause) clause).getValue().get(0);
                 String condition = ((FilterClause) clause).getCondition();
                 String columnName = ((FilterClause) clause).getProperty();
 

@@ -13,67 +13,62 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-
 package com.impetus.client.crud;
 
 import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.SecondaryTable;
+import javax.persistence.Table;
 
 /**
- * @author Kuldeep Mishra
  * 
+ * @author Kuldeep.Mishra
+ *
  */
-@Embeddable
-public class PersonalDetailEmbedded
+@Table(name = "PRIMARY_TABLE")
+@SecondaryTable(name = "SECONDARY_TABLE")
+@Entity
+public class SecondaryTableEntity
 {
-    @Column(name="PHONENO")
-    private long phoneNo;
+    @Id
+    @Column(name = "OBJECT_ID")
+    private String objectId;
 
-    private String emailId;
+    @Column(name = "NAME")
+    private String name;
 
-    private String address;
+    @Column(name = "AGE", table = "SECONDARY_TABLE")
+    private int age;
 
-    @Embedded
-    private PhoneDirectory phone;
-
-    public String getEmailId()
+    public String getObjectId()
     {
-        return emailId;
+        return objectId;
     }
 
-    public void setEmailId(String emailId)
+    public void setObjectId(String objectId)
     {
-        this.emailId = emailId;
+        this.objectId = objectId;
     }
 
-    public String getAddress()
+    public String getName()
     {
-        return address;
+        return name;
     }
 
-    public void setAddress(String address)
+    public void setName(String name)
     {
-        this.address = address;
+        this.name = name;
     }
 
-    public long getPhoneNo()
+    public int getAge()
     {
-        return phoneNo;
+        return age;
     }
 
-    public void setPhoneNo(long phoneNo)
+    public void setAge(int age)
     {
-        this.phoneNo = phoneNo;
+        this.age = age;
     }
 
-    public PhoneDirectory getPhone()
-    {
-        return phone;
-    }
-
-    public void setPhone(PhoneDirectory phone)
-    {
-        this.phone = phone;
-    }
 }

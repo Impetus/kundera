@@ -329,7 +329,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
                 if (o instanceof FilterClause)
                 {
                     FilterClause clause = ((FilterClause) o);
-                    Object value = clause.getValue();
+                    Object value = clause.getValue().get(0);
                     String propertyName = clause.getProperty();
                     String condition = clause.getCondition();
 

@@ -156,7 +156,7 @@ public class ESQuery<E> extends QueryImpl
     private FilterBuilder getFilter(FilterClause clause, final EntityMetadata metadata, final EntityType entityType)
     {
         String condition = clause.getCondition();
-        Object value = clause.getValue();
+        Object value = clause.getValue().get(0);
         String name = clause.getProperty();
 
         FilterBuilder filterBuilder = null;

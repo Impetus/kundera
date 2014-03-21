@@ -13,86 +13,73 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.client.cassandra.thrift.cql;
-
-import java.sql.Timestamp;
+package com.impetus.client.crud.entities;
 
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import com.impetus.kundera.index.Index;
-import com.impetus.kundera.index.IndexCollection;
-
+/**
+ * 
+ * @author Kuldeep Mishra
+ *
+ */
+@Table(name = "PERSONNEL", schema = "KunderaExamples@mongoTest")
 @Entity
-@Table(name = "LoggingConfiguration", schema = "KunderaExamples@twissandraTest")
-@IndexCollection(columns = { @Index(name = "logname") })
-public class LoggingConfiguration
+public class PersonnelEmbedded
 {
     @Id
-    private String id;
+    @Column
+    private int id;
 
     @Column
-    private String label;
+    private String name;
 
     @Column
-    private String logname;
+    private int age;
 
-    @Column
-    private Timestamp nnow;
+    @Embedded
+    private PersonalDetailEmbedded personalDetail;
 
-    @Column
-    private String lvl;
-
-    public String getId()
+    public int getId()
     {
         return id;
     }
 
-    public void setId(String id)
+    public void setId(int id)
     {
         this.id = id;
     }
 
-    public String getLable()
+    public String getName()
     {
-        return label;
+        return name;
     }
 
-    public void setLable(String lable)
+    public void setName(String name)
     {
-        this.label = lable;
+        this.name = name;
     }
 
-    public String getLongName()
+    public int getAge()
     {
-        return logname;
+        return age;
     }
 
-    public void setLongName(String longName)
+    public void setAge(int age)
     {
-        this.logname = longName;
+        this.age = age;
     }
 
-    public String getLvl()
+    public PersonalDetailEmbedded getPersonalDetail()
     {
-        return lvl;
+        return personalDetail;
     }
 
-    public void setLvl(String lvl)
+    public void setPersonalDetail(PersonalDetailEmbedded personalDetail)
     {
-        this.lvl = lvl;
+        this.personalDetail = personalDetail;
     }
-
-    public Timestamp getNnow()
-    {
-        return nnow;
-    }
-
-    public void setNnow(Timestamp nnow)
-    {
-        this.nnow = nnow;
-    }
-
 }

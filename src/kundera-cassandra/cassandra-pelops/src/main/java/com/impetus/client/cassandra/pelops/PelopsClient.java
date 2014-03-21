@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.EntityType;
@@ -35,6 +36,8 @@ import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.cassandra.thrift.CounterSuperColumn;
+import org.apache.cassandra.thrift.CqlResult;
+import org.apache.cassandra.thrift.CqlRow;
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.IndexExpression;
 import org.apache.cassandra.thrift.IndexOperator;
@@ -69,6 +72,7 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.db.SearchResult;
+import com.impetus.kundera.generator.AutoGenerator;
 import com.impetus.kundera.generator.TableGenerator;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
@@ -93,7 +97,8 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  * @author animesh.kumar
  * @since 0.1
  */
-public class PelopsClient extends CassandraClientBase implements Client<CassQuery>, Batcher, TableGenerator
+public class PelopsClient extends CassandraClientBase implements Client<CassQuery>, Batcher, TableGenerator,
+        AutoGenerator
 {
     /** log for this class. */
     private static Logger log = LoggerFactory.getLogger(PelopsClient.class);
@@ -220,9 +225,8 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
                 else
                 {
                     RowDeletor rowDeletor = clientFactory.getRowDeletor(pool);
-                    rowDeletor.deleteRow(tableName,
-                            Bytes.fromByteBuffer(CassandraUtilities.toBytes(pKey, metadata.getIdAttribute().getJavaType())),
-                            getConsistencyLevel());
+                    rowDeletor.deleteRow(tableName, Bytes.fromByteBuffer(CassandraUtilities.toBytes(pKey, metadata
+                            .getIdAttribute().getJavaType())), getConsistencyLevel());
 
                 }
             }
@@ -376,7 +380,8 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         RowDeletor rowDeletor = clientFactory.getRowDeletor(pool);
         // rowDeletor.deleteRow(tableName, columnValue.toString(),
         // getConsistencyLevel());
-        rowDeletor.deleteRow(tableName, Bytes.fromByteBuffer(CassandraUtilities.toBytes(columnValue, columnValue.getClass())),
+        rowDeletor.deleteRow(tableName,
+                Bytes.fromByteBuffer(CassandraUtilities.toBytes(columnValue, columnValue.getClass())),
                 getConsistencyLevel());
 
     }
@@ -494,7 +499,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         String insert_Query = null;
         if (isCql3Enabled(metadata))
         {
-            Cassandra.Client client = getRawClient(metadata.getPersistenceUnit(), metadata.getSchema());
+            Cassandra.Client client = getRawClient(metadata.getSchema());
             try
             {
                 cqlClient.persist(metadata, entity, client, rlHolders, getTtlValues().get(metadata.getTableName()));
@@ -570,8 +575,9 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
                     {
                         for (CounterSuperColumn sc : thriftCounterSuperColumns)
                         {
-                            mutator.writeSubCounterColumns(tf.getColumnFamilyName(),
-                            		Bytes.fromByteBuffer(CassandraUtilities.toBytes(tf.getId(), tf.getId().getClass())),
+                            mutator.writeSubCounterColumns(
+                                    tf.getColumnFamilyName(),
+                                    Bytes.fromByteBuffer(CassandraUtilities.toBytes(tf.getId(), tf.getId().getClass())),
                                     Bytes.fromByteArray(sc.getName()), sc.getColumns());
                         }
                     }
@@ -590,7 +596,8 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
 
                         // Bytes.from
                         mutator.writeColumns(tf.getColumnFamilyName(),
-                        		Bytes.fromByteBuffer(CassandraUtilities.toBytes(tf.getId(), tf.getId().getClass())), tf.getColumns()
+                                Bytes.fromByteBuffer(CassandraUtilities.toBytes(tf.getId(), tf.getId().getClass())),
+                                tf.getColumns()
                         /* Arrays.asList(tf.getColumns().toArray(new Column[0])) */);
                     }
 
@@ -603,8 +610,9 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
                                 log.info("Persisting super column family record for row key {}", tf.getId());
                             }
 
-                            mutator.writeSubColumns(tf.getColumnFamilyName(),
-                            		Bytes.fromByteBuffer(CassandraUtilities.toBytes(tf.getId(), tf.getId().getClass())),
+                            mutator.writeSubColumns(
+                                    tf.getColumnFamilyName(),
+                                    Bytes.fromByteBuffer(CassandraUtilities.toBytes(tf.getId(), tf.getId().getClass())),
                                     Bytes.fromByteArray(sc.getName()), sc.getColumns());
                         }
                     }
@@ -764,7 +772,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
                     Map<Bytes, List<SuperColumn>> qResults = selector.getSuperColumnsFromRows(m.getTableName(),
                             selector.newKeyRange("", "", maxResult), slicePredicate, getConsistencyLevel());
                     entities = new ArrayList<Object>(qResults.size());
-                    
+
                     MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                             m.getPersistenceUnit());
 
@@ -772,11 +780,12 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
 
                     List<AbstractManagedType> subManagedType = ((AbstractManagedType) entityType).getSubManagedType();
 
-                    for(Bytes key : qResults.keySet())
+                    for (Bytes key : qResults.keySet())
                     {
-                    	onSuperColumn(m, isRelation, relations, entities, qResults.get(key), key.getBytes());
+                        onSuperColumn(m, isRelation, relations, entities, qResults.get(key), key.getBytes());
                     }
-//                    computeEntityViaSuperColumns(m, isRelation, relations, entities, qResults);
+                    // computeEntityViaSuperColumns(m, isRelation, relations,
+                    // entities, qResults);
                 }
                 else
                 {
@@ -792,11 +801,12 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
 
                     // populateData(m, qResults, entities, isRelation,
                     // relations, dataHandler);
-                    for(Bytes key : qResults.keySet())
+                    for (Bytes key : qResults.keySet())
                     {
-                    	onColumn(m, isRelation, relations, entities, qResults.get(key), subManagedType, key.getBytes());
+                        onColumn(m, isRelation, relations, entities, qResults.get(key), subManagedType, key.getBytes());
                     }
-//                    	computeEntityViaColumns(m, isRelation, relations, entities, qResults);
+                    // computeEntityViaColumns(m, isRelation, relations,
+                    // entities, qResults);
                 }
 
             }
@@ -816,11 +826,12 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
 
                 List<AbstractManagedType> subManagedType = ((AbstractManagedType) entityType).getSubManagedType();
 
-                for(Bytes key : qResults.keySet())
+                for (Bytes key : qResults.keySet())
                 {
-                	onColumn(m, isRelation, relations, entities, qResults.get(key), subManagedType, key.getBytes());
+                    onColumn(m, isRelation, relations, entities, qResults.get(key), subManagedType, key.getBytes());
                 }
-//                computeEntityViaColumns(m, isRelation, relations, entities, qResults);
+                // computeEntityViaColumns(m, isRelation, relations, entities,
+                // qResults);
                 // // iterate through complete map and
                 // populateData(m, qResults, entities, isRelation, relations,
                 // dataHandler);
@@ -930,7 +941,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     {
         return clientFactory.getConnection(pool);
     }
-    
+
     /**
      * Return cassandra client instance.
      * 
@@ -941,13 +952,12 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     {
         if (connection != null)
         {
-                return ((IPooledConnection) connection).getAPI();
+            return ((IPooledConnection) connection).getAPI();
         }
 
         throw new KunderaException("Invalid configuration!, no available pooled connection found for:"
                 + this.getClass().getSimpleName());
     }
-
 
     protected void releaseConnection(Object conn)
     {
@@ -1052,6 +1062,12 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
 
         return entities;
 
+    }
+
+    @Override
+    public Object generate()
+    {
+        return super.getAutoGeneratedValue();
     }
 
 }

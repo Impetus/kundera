@@ -16,70 +16,42 @@
 package com.impetus.client.crud;
 
 import javax.persistence.Column;
-import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-/**
- * 
- * @author Kuldeep Mishra
- *
- */
-@Table(name = "PERSONNEL", schema = "KunderaExamples@mongoTest")
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
+
 @Entity
-public class PersonnelEmbedded
+@Table(name = "AddressMongoMTO", schema = "KunderaExamples@mongoTest")
+@IndexCollection(columns = { @Index(name = "street") })
+public class AddressMongoMTO
 {
     @Id
-    @Column
-    private int id;
+    @Column(name = "ADDRESS_ID")
+    private String addressId;
 
-    @Column
-    private String name;
+    @Column(name = "STREET")
+    private String street;
 
-    @Column
-    private int age;
-
-    @Embedded
-    private PersonalDetailEmbedded personalDetail;
-
-    public int getId()
+    public String getAddressId()
     {
-        return id;
+        return addressId;
     }
 
-    public void setId(int id)
+    public void setAddressId(String addressId)
     {
-        this.id = id;
+        this.addressId = addressId;
     }
 
-    public String getName()
+    public String getStreet()
     {
-        return name;
+        return street;
     }
 
-    public void setName(String name)
+    public void setStreet(String street)
     {
-        this.name = name;
-    }
-
-    public int getAge()
-    {
-        return age;
-    }
-
-    public void setAge(int age)
-    {
-        this.age = age;
-    }
-
-    public PersonalDetailEmbedded getPersonalDetail()
-    {
-        return personalDetail;
-    }
-
-    public void setPersonalDetail(PersonalDetailEmbedded personalDetail)
-    {
-        this.personalDetail = personalDetail;
+        this.street = street;
     }
 }

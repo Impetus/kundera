@@ -406,7 +406,7 @@ public class CompositeDataTypeTest
     @After
     public void tearDown() throws Exception
     {
-        CassandraCli.dropKeySpace("CompositeCassandra");
+//        CassandraCli.dropKeySpace("CompositeCassandra");
         emf.close();
     }
 

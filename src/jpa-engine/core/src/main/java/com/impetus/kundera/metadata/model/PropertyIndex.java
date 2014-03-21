@@ -40,23 +40,6 @@ public final class PropertyIndex
 
     private Integer min;
 
-    // /**
-    // * The Constructor.
-    // *
-    // * @param property
-    // * the property
-    // */
-    // public PropertyIndex(Field property)
-    // {
-    // this.property = property;
-    // this.name = property.getName();
-    // }
-
-    public PropertyIndex()
-    {
-
-    }
-
     /**
      * Instantiates a new property index.
      * 
@@ -119,33 +102,6 @@ public final class PropertyIndex
     public String getIndexType()
     {
         return indexType;
-    }
-
-    /**
-     * @param indexType
-     *            the indexType to set
-     */
-    public void setIndexType(String indexType)
-    {
-        this.indexType = indexType;
-    }
-
-    /**
-     * @param name
-     *            the name to set
-     */
-    public void setName(String name)
-    {
-        this.name = name;
-    }
-
-    /**
-     * @param property
-     *            the property to set
-     */
-    public void setProperty(Field property)
-    {
-        this.property = property;
     }
 
     /**

@@ -13,29 +13,23 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.client.crud;
-
-import java.util.Map;
+package com.impetus.client.crud.entities;
 
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
 
 /**
  * The Class Person.
  */
 @Entity
-@Table(name = "PERSON", schema = "KunderaExamples@mongoTest")
-@NamedQueries(value = {
-        @NamedQuery(name = "mongo.named.query", query = "Select p from PersonMongo p where p.personName = :name"),
-        @NamedQuery(name = "mongo.position.query", query = "Select p from PersonMongo p where p.personName = ?1") })
-public class PersonMongo
+@Table(name = "PERSON_BATCH", schema = "KunderaMongoDataType@MongoBatchTest")
+@IndexCollection(columns = { @Index(name = "personName"), @Index(name = "age") })
+public class PersonBatchMongoEntity
 {
 
     /** The person id. */
@@ -51,17 +45,25 @@ public class PersonMongo
     @Column(name = "AGE")
     private Integer age;
 
-    @Column(name = "DAY_ENUM")
-    @Enumerated(EnumType.STRING)
-    private Day day;
+    @Column(name = "AGEss")
+    private byte[] a;
 
-    @Column(name = "MONTH_ENUM")
-    @Enumerated(EnumType.STRING)
-    private Month month;
+    /**
+     * @return the a
+     */
+    public byte[] getA()
+    {
+        return a;
+    }
 
-    @ElementCollection
-    @Column(name = "map")
-    private Map<String, Month> map;
+    /**
+     * @param a
+     *            the a to set
+     */
+    public void setA(byte[] a)
+    {
+        this.a = a;
+    }
 
     /**
      * Gets the person id.
@@ -108,7 +110,7 @@ public class PersonMongo
     /**
      * @return the age
      */
-    public Integer getAge()
+    public int getAge()
     {
         return age;
     }
@@ -122,38 +124,4 @@ public class PersonMongo
         this.age = age;
     }
 
-    public void setDay(Day day)
-    {
-        this.day = day;
-    }
-
-    public Day getDay()
-    {
-        return day;
-    }
-
-    public Month getMonth()
-    {
-        return month;
-    }
-
-    public void setMonth(Month month)
-    {
-        this.month = month;
-    }
-
-    enum Month
-    {
-        JAN, FEB, MARCH, APRIL, MAY, JUNE;
-    }
-
-    public Map<String, Month> getMap()
-    {
-        return map;
-    }
-
-    public void setMap(Map<String, Month> map)
-    {
-        this.map = map;
-    }
 }

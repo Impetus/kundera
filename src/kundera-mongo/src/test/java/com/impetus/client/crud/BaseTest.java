@@ -24,7 +24,9 @@ import javax.persistence.Query;
 
 import junit.framework.Assert;
 
-import com.impetus.client.crud.PersonMongo.Month;
+import com.impetus.client.crud.entities.Day;
+import com.impetus.client.crud.entities.PersonMongo;
+import com.impetus.client.crud.entities.PersonMongo.Month;
 
 /**
  * The Class BaseTest.

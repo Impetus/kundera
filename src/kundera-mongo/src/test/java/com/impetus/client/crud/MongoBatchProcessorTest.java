@@ -30,6 +30,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.client.crud.entities.PersonBatchMongoEntity;
 import com.impetus.client.utils.MongoUtils;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.persistence.api.Batcher;

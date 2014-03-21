@@ -1,5 +1,7 @@
 package com.impetus.client.generatedId.entites;
 
+import java.util.UUID;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -12,7 +14,7 @@ public class CassandraGeneratedIdDefault
 {
     @Id
     @GeneratedValue
-    private int id;
+    private UUID id;
 
     @Column
     private String name;
@@ -20,7 +22,7 @@ public class CassandraGeneratedIdDefault
     /**
      * @return the id
      */
-    public int getId()
+    public UUID getId()
     {
         return id;
     }
@@ -29,7 +31,7 @@ public class CassandraGeneratedIdDefault
      * @param id
      *            the id to set
      */
-    public void setId(int id)
+    public void setId(UUID id)
     {
         this.id = id;
     }

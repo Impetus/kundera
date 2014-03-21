@@ -13,62 +13,67 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.client.cassandra.thrift.cql;
+
+package com.impetus.client.crud.entities;
 
 import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.SecondaryTable;
-import javax.persistence.Table;
+import javax.persistence.Embeddable;
+import javax.persistence.Embedded;
 
 /**
+ * @author Kuldeep Mishra
  * 
- * @author Kuldeep.Mishra
- *
  */
-@Table(name = "PRIMARY_TABLE")
-@SecondaryTable(name = "SECONDARY_TABLE")
-@Entity
-public class SecondaryTableCqlEntity
+@Embeddable
+public class PersonalDetailEmbedded
 {
-    @Id
-    @Column(name = "OBJECT_ID")
-    private String objectId;
+    @Column(name="PHONENO")
+    private long phoneNo;
 
-    @Column(name = "NAME")
-    private String name;
+    private String emailId;
 
-    @Column(name = "AGE", table = "SECONDARY_TABLE")
-    private int age;
+    private String address;
 
-    public String getObjectId()
+    @Embedded
+    private PhoneDirectory phone;
+
+    public String getEmailId()
     {
-        return objectId;
+        return emailId;
     }
 
-    public void setObjectId(String objectId)
+    public void setEmailId(String emailId)
     {
-        this.objectId = objectId;
+        this.emailId = emailId;
     }
 
-    public String getName()
+    public String getAddress()
     {
-        return name;
+        return address;
     }
 
-    public void setName(String name)
+    public void setAddress(String address)
     {
-        this.name = name;
+        this.address = address;
     }
 
-    public int getAge()
+    public long getPhoneNo()
     {
-        return age;
+        return phoneNo;
     }
 
-    public void setAge(int age)
+    public void setPhoneNo(long phoneNo)
     {
-        this.age = age;
+        this.phoneNo = phoneNo;
     }
 
+    public PhoneDirectory getPhone()
+    {
+        return phone;
+    }
+
+    public void setPhone(PhoneDirectory phone)
+    {
+        this.phone = phone;
+    }
 }

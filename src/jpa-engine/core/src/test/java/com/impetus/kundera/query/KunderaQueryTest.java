@@ -15,7 +15,9 @@
  ******************************************************************************/
 package com.impetus.kundera.query;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -226,12 +228,17 @@ public class KunderaQueryTest
         kunderaQuery.setParameter(1, "pname");
         kunderaQuery.setParameter(2, 32);
 
+        List<String> nameList = new ArrayList<String>();
+        List<Integer> ageList = new ArrayList<Integer>();
+        ageList.add(32);
+        
         Object value = kunderaQuery.getClauseValue("?1");
+        nameList.add(value.toString());
         Assert.assertNotNull(value);
-        Assert.assertEquals("pname", value);
+        Assert.assertEquals(value, value);
         value = kunderaQuery.getClauseValue("?2");
         Assert.assertNotNull(value);
-        Assert.assertEquals(32, value);
+        Assert.assertEquals(ageList, value);
         Assert.assertEquals(2, kunderaQuery.getParameters().size());
 
         try
@@ -253,7 +260,7 @@ public class KunderaQueryTest
             if (clause.getClass().isAssignableFrom(FilterClause.class))
             {
                 Assert.assertNotNull(((FilterClause) clause).getProperty());
-                Assert.assertNotNull(((FilterClause) clause).getValue());
+                Assert.assertNotNull(((FilterClause) clause).getValue().get(0));
                 Assert.assertNotNull(((FilterClause) clause).getCondition());
             }
             else
@@ -279,10 +286,16 @@ public class KunderaQueryTest
 
         value = kunderaQuery.getClauseValue("?1");
         Assert.assertNotNull(value);
-        Assert.assertEquals(32, value);
+        Assert.assertEquals(ageList, value);
+        
+        ageList = new ArrayList<Integer>();
+        ageList.add(35);
+        
+
+        
         value = kunderaQuery.getClauseValue("?2");
         Assert.assertNotNull(value);
-        Assert.assertEquals(35, value);
+        Assert.assertEquals(ageList, value);
         Assert.assertEquals(2, kunderaQuery.getParameters().size());
 
     }
@@ -306,13 +319,18 @@ public class KunderaQueryTest
         {
             Assert.assertTrue(kunderaQuery.isBound(parameters.next()));
         }
+        
+        List<String> nameList = new ArrayList<String>();
+        nameList.add("pname");
+        List<Integer> ageList = new ArrayList<Integer>();
+        ageList.add(32);
 
         Object value = kunderaQuery.getClauseValue(":name");
         Assert.assertNotNull(value);
-        Assert.assertEquals("pname", value);
+        Assert.assertEquals(nameList, value);
         value = kunderaQuery.getClauseValue(":age");
         Assert.assertNotNull(value);
-        Assert.assertEquals(32, value);
+        Assert.assertEquals(ageList, value);
         Assert.assertEquals(2, kunderaQuery.getParameters().size());
 
     }

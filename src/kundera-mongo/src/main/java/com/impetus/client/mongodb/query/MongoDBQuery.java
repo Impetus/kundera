@@ -141,17 +141,6 @@ public class MongoDBQuery extends QueryImpl
     }
 
     @Override
-    public Object getSingleResult()
-    {
-        // to fetch a single result form database.
-        isSingleResult = true;
-        List results = getResultList();
-        isSingleResult = false;
-        return onReturnResults(results);
-
-    }
-
-    @Override
     protected List<Object> recursivelyPopulateEntities(EntityMetadata m, Client client)
     {
         // TODO : required to modify client return relation.
@@ -221,7 +210,7 @@ public class MongoDBQuery extends QueryImpl
                 FilterClause filter = (FilterClause) object;
                 String property = filter.getProperty();
                 String condition = filter.getCondition();
-                Object value = filter.getValue();
+                Object value = filter.getValue().get(0);
 
                 // value is string but field.getType is different, then get
                 // value using

@@ -27,6 +27,7 @@ import java.util.concurrent.Future;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.NoResultException;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
@@ -103,7 +104,7 @@ public class PersonCassandraTest extends BaseTest
     @Before
     public void setUp() throws Exception
     {
-        
+
         CassandraCli.cassandraSetUp();
         CassandraCli.createKeySpace("KunderaExamples");
 
@@ -154,9 +155,9 @@ public class PersonCassandraTest extends BaseTest
         entityManager.persist(p2);
         entityManager.persist(p3);
 
-        PersonCassandra personWithKey = new PersonCassandra();
-        personWithKey.setPersonId("111");
-        entityManager.persist(personWithKey);
+        // PersonCassandra personWithKey = new PersonCassandra();
+        // personWithKey.setPersonId("111");
+        // entityManager.persist(personWithKey);
         col.put("1", p1);
         col.put("2", p2);
         col.put("3", p3);
@@ -202,12 +203,115 @@ public class PersonCassandraTest extends BaseTest
         Assert.assertNotNull(p);
         Assert.assertEquals("'KK MISHRA'", p.getPersonName());
 
-        testCountResult();
-        // Delete without WHERE clause.
+        // Test single result.
+        Query query = entityManager.createQuery("select p from PersonCassandra p");
+        query.setMaxResults(1);
+        PersonCassandra result = (PersonCassandra) (query.getSingleResult());
+        Assert.assertNotNull(result);
+        Assert.assertEquals(Month.APRIL, result.getMonth());
 
+        query = entityManager.createQuery("select p from PersonCassandra p where p.personName = vivek");
+        try
+        {
+            result = (PersonCassandra) (query.getSingleResult());
+            Assert.fail("Should have gone to catch block!");
+        }
+        catch (NoResultException nrex)
+        {
+            Assert.assertNotNull(nrex.getMessage());
+        }
+
+        // Test count native query.
+        testCountResult();
+
+        testINClause();
+
+        // Delete without WHERE clause.
         String deleteQuery = "DELETE from PersonCassandra";
         q = entityManager.createQuery(deleteQuery);
         Assert.assertEquals(3, q.executeUpdate());
+
+    }
+
+    /**
+     * test IN clause in select query.
+     */
+    private void testINClause()
+    {
+        if (USE_CQL)
+        {
+            Query findQuery;
+            List<PersonCassandra> allPersons;
+            findQuery = entityManager.createQuery("Select p from PersonCassandra p where p.personId IN :idList");
+            List<String> idList = new ArrayList<String>();
+            idList.add("1");
+            idList.add("2");
+            idList.add("3");
+
+            findQuery.setParameter("idList", idList);
+            allPersons = findQuery.getResultList();
+            Assert.assertNotNull(allPersons);
+            Assert.assertEquals(3, allPersons.size());
+
+            findQuery = entityManager.createQuery("Select p from PersonCassandra p where p.personId IN ?1");
+            findQuery.setParameter(1, idList);
+            allPersons = findQuery.getResultList();
+            Assert.assertNotNull(allPersons);
+            Assert.assertEquals(3, allPersons.size());
+
+            entityManager.close();
+
+            entityManager = emf.createEntityManager();
+
+            findQuery = entityManager.createQuery("Select p from PersonCassandra p where p.personId IN :idList");
+            findQuery.setParameter("idList", new ArrayList<String>());
+            allPersons = findQuery.getResultList();
+            Assert.assertNotNull(allPersons);
+            Assert.assertTrue(allPersons.isEmpty());
+
+            findQuery = entityManager.createQuery("Select p from PersonCassandra p where p.personId IN ('1', '2')");
+            allPersons = findQuery.getResultList();
+            Assert.assertNotNull(allPersons);
+            Assert.assertEquals(2, allPersons.size());
+
+            entityManager.close();
+
+            try
+            {
+                entityManager = emf.createEntityManager();
+                findQuery = entityManager.createQuery("Select p from PersonCassandra p where p.age IN (10 , 20)");
+                allPersons = findQuery.getResultList();
+                Assert.fail();
+            }
+            catch (Exception e)
+            {
+                Assert.assertEquals(
+                        "javax.persistence.PersistenceException: com.impetus.kundera.KunderaException: InvalidRequestException(why:Cannot use IN operator on column not part of the partition key)",
+                        e.getMessage());
+            }
+
+        }
+        else
+        {
+            Query findQuery;
+            List<PersonCassandra> allPersons;
+            findQuery = entityManager.createQuery("Select p from PersonCassandra p where p.personName IN :nameList");
+            List<String> nameList = new ArrayList<String>();
+            nameList.add("vivek");
+            nameList.add("kk");
+
+            findQuery.setParameter("nameList", nameList);
+            try
+            {
+                allPersons = findQuery.getResultList();
+                Assert.fail();
+            }
+            catch (Exception e)
+            {
+                Assert.assertEquals("IN clause is not enabled for thrift, use cql3.", e.getMessage());
+            }
+
+        }
 
     }
 
@@ -266,7 +370,7 @@ public class PersonCassandraTest extends BaseTest
         q = entityManager.createNamedQuery("q");
         noOfRows = q.getResultList();
         Assert.assertEquals(3, noOfRows.size());
-        
+
         tc.setCqlVersion(CassandraConstants.CQL_VERSION_2_0);
     }
 
@@ -279,8 +383,6 @@ public class PersonCassandraTest extends BaseTest
     @Test
     public void onMergeCassandra() throws Exception
     {
-        // CassandraCli.cassandraSetUp();
-        // loadData();
         Object p1 = prepareData("1", 10);
         Object p2 = prepareData("2", 20);
         Object p3 = prepareData("3", 15);
@@ -306,9 +408,6 @@ public class PersonCassandraTest extends BaseTest
     @Test
     public void onDeleteThenInsertCassandra() throws Exception
     {
-        // CassandraCli.cassandraSetUp();
-        // CassandraCli.initClient();
-        // loadData();
         Object p1 = prepareData("1", 10);
         Object p2 = prepareData("2", 20);
         Object p3 = prepareData("3", 15);
@@ -350,10 +449,6 @@ public class PersonCassandraTest extends BaseTest
     @Test
     public void onRefreshCassandra() throws Exception
     {
-        // cassandraSetUp();
-        // CassandraCli.cassandraSetUp();
-        // CassandraCli.createKeySpace("KunderaExamples");
-        // loadData();
         CassandraCli.client.set_keyspace("KunderaExamples");
         Object p1 = prepareData("1", 10);
         Object p2 = prepareData("2", 20);
@@ -407,8 +502,7 @@ public class PersonCassandraTest extends BaseTest
         }
         else
         {
-            CQLTranslator translator = new CQLTranslator();
-            String query = "insert into \"PERSONCASSANDRA\" (key,\"PERSON_NAME\",\"AGE\") values ('1','Amry',10 )";
+            String query = "insert into \"PERSONCASSANDRA\" (\"personId\",\"PERSON_NAME\",\"AGE\") values ('1','Amry',10 )";
             CassandraCli.client.execute_cql3_query(ByteBuffer.wrap(query.getBytes()), Compression.NONE,
                     ConsistencyLevel.ONE);
         }
@@ -431,9 +525,6 @@ public class PersonCassandraTest extends BaseTest
     public void onTypedQuery() throws TException, InvalidRequestException, UnavailableException, TimedOutException,
             SchemaDisagreementException
     {
-        // CassandraCli.createKeySpace("KunderaExamples");
-        // loadData();
-
         Object p1 = prepareData("1", 10);
         Object p2 = prepareData("2", 20);
         Object p3 = prepareData("3", 15);
@@ -463,9 +554,6 @@ public class PersonCassandraTest extends BaseTest
     public void onGenericTypedQuery() throws TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException
     {
-        // CassandraCli.createKeySpace("KunderaExamples");
-        // loadData();
-
         Object p1 = prepareData("1", 10);
         Object p2 = prepareData("2", 20);
         Object p3 = prepareData("3", 15);
@@ -494,9 +582,6 @@ public class PersonCassandraTest extends BaseTest
     public void onInvalidTypedQuery() throws TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException
     {
-        // CassandraCli.createKeySpace("KunderaExamples");
-        // loadData();
-
         Object p1 = prepareData("1", 10);
         Object p2 = prepareData("2", 20);
         Object p3 = prepareData("3", 15);
@@ -520,8 +605,6 @@ public class PersonCassandraTest extends BaseTest
     public void onGhostRows() throws TException, InvalidRequestException, UnavailableException, TimedOutException,
             SchemaDisagreementException
     {
-        // CassandraCli.createKeySpace("KunderaExamples");
-        // loadData();
         Object p1 = prepareData("1", 10);
         Object p2 = prepareData("2", 20);
         Object p3 = prepareData("3", 15);
@@ -546,10 +629,6 @@ public class PersonCassandraTest extends BaseTest
     public void testWithMultipleThread() throws TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException
     {
-        // CassandraCli.createKeySpace("KunderaExamples");
-        // loadData();
-
-        // EM
         ExecutorService executor = Executors.newFixedThreadPool(10);
 
         List<Future> futureList = new ArrayList<Future>();

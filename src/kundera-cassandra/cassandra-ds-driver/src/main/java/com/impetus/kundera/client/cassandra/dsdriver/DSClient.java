@@ -69,7 +69,9 @@ import com.impetus.kundera.generator.AutoGenerator;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.model.annotation.DefaultEntityAnnotationProcessor;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.api.Batcher;
@@ -109,8 +111,6 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
     {
 
         // Insert, update, delete is fine
-        // find by id, find all, find and execute batch
-
         try
         {
             cqlClient.persist(entityMetadata, entity, null, rlHolders, getTtlValues()
@@ -156,20 +156,25 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
     public Object find(Class entityClass, Object rowId)
     {
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClass);
+        StringBuilder builder = createSelectQuery(rowId, metadata, metadata.getTableName());
+        ResultSet rSet = this.execute(builder.toString(), null);
+        List results = iterateAndReturn(rSet, entityClass, metadata);
+        return results.isEmpty() ? null : results.get(0);
+    }
+
+    private StringBuilder createSelectQuery(Object rowId, EntityMetadata metadata, String tableName)
+    {
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 metadata.getPersistenceUnit());
 
         CQLTranslator translator = new CQLTranslator();
 
-        String tableName = metadata.getTableName();
         String select_Query = translator.SELECTALL_QUERY;
         select_Query = StringUtils.replace(select_Query, CQLTranslator.COLUMN_FAMILY,
                 translator.ensureCase(new StringBuilder(), tableName, false).toString());
         StringBuilder builder = new StringBuilder(select_Query);
         onWhereClause(metadata, rowId, translator, builder, metaModel);
-        ResultSet rSet = this.execute(builder.toString(), null);
-        List results = iterateAndReturn(rSet, entityClass, metadata);
-        return results.isEmpty() ? null : results.get(0);
+        return builder;
     }
 
     @Override
@@ -476,7 +481,17 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
 
-        this.execute(onDeleteQuery(m, m.getTableName(), metaModel, pKey), null);
+        AbstractManagedType managedType = (AbstractManagedType) metaModel.entity(m.getEntityClazz());
+
+        // For secondary tables.
+        List<String> secondaryTables = ((DefaultEntityAnnotationProcessor) managedType.getEntityAnnotation())
+                .getSecondaryTablesName();
+        secondaryTables.add(m.getTableName());
+
+        for (String tableName : secondaryTables)
+        {
+            this.execute(onDeleteQuery(m, tableName, metaModel, pKey), null);
+        }
     }
 
     @Override
@@ -510,7 +525,7 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         }
         catch (Exception e)
         {
-            log.error("Error while executing query {}", query);
+            log.error("Error while executing query {}.", query);
             throw new KunderaException(e);
         }
         finally
@@ -552,7 +567,6 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         List results = new ArrayList();
 
         Map<String, Object> relationalValues = new HashMap<String, Object>();
-        Map<String, Object> compositeValues = new HashMap<String, Object>();
         Map<String, Field> compositeColumns = new HashMap<String, Field>();
 
         Object compositeKeyInstance = null;
@@ -584,9 +598,14 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
                 entity = CassandraUtilities.initialize(metadata, entity, compositeKeyInstance);
             }
 
+            Object rowKey = PropertyAccessorHelper.getId(entity, metadata);
+            
+            // populate secondary tables data if there is any.
+            populateSecondaryTableData(rowKey, entity, metaModel, metadata);
+
             if (!relationalValues.isEmpty())
             {
-                results.add(new EnhanceEntity(entity, PropertyAccessorHelper.getId(entity, metadata), relationalValues));
+                results.add(new EnhanceEntity(entity, rowKey, relationalValues));
             }
             else
             {
@@ -595,6 +614,42 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         }
 
         return results;
+    }
+
+    /**
+     * 
+     * Populates data form secondary tables of entity for given row key.
+     * 
+     * @param rowId
+     * @param entity
+     * @param metaModel
+     * @param metadata
+     * @return
+     */
+    private void populateSecondaryTableData(Object rowId, Object entity, MetamodelImpl metaModel,
+            EntityMetadata metadata)
+    {
+        AbstractManagedType managedType = (AbstractManagedType) metaModel.entity(metadata.getEntityClazz());
+        List<String> secondaryTables = ((DefaultEntityAnnotationProcessor) managedType.getEntityAnnotation())
+                .getSecondaryTablesName();
+
+        for (String tableName : secondaryTables)
+        {
+            StringBuilder builder = createSelectQuery(rowId, metadata, tableName);
+            ResultSet rSet = this.execute(builder.toString(), null);
+
+            Iterator<Row> rowIter = rSet.iterator();
+
+//            while (rowIter.hasNext())
+//            {
+                Row row = rowIter.next();
+                ColumnDefinitions columnDefs = row.getColumnDefinitions();
+                Iterator<Definition> columnDefIter = columnDefs.iterator();
+
+                entity = iteratorColumns(metadata, metaModel.entity(metadata.getEntityClazz()), new HashMap<String, Object>(), new HashMap<String, Field>(),
+                        null, entity, row, columnDefIter);
+//            }
+        }
     }
 
     private Object iteratorColumns(EntityMetadata metadata, EntityType entityType,

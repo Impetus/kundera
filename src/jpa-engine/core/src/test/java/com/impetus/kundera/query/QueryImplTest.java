@@ -22,6 +22,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.FlushModeType;
 import javax.persistence.LockModeType;
+import javax.persistence.NoResultException;
 import javax.persistence.Persistence;
 import javax.persistence.TemporalType;
 
@@ -127,11 +128,11 @@ public class QueryImplTest
         {
             query.getSingleResult();
         }
-        catch (UnsupportedOperationException usex)
+        catch (NoResultException e)
         {
-            Assert.assertEquals("getSingleResult is unsupported by Kundera", usex.getMessage());
+            Assert.assertEquals("No result found!", e.getMessage());
         }
-
+        
         try
         {
             query.getFirstResult();

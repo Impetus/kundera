@@ -30,7 +30,10 @@ import junit.framework.Assert;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.ColumnParent;
+import org.apache.cassandra.thrift.Compression;
 import org.apache.cassandra.thrift.ConsistencyLevel;
+import org.apache.cassandra.thrift.CqlResult;
+import org.apache.cassandra.thrift.CqlRow;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SliceRange;
 import org.apache.cassandra.utils.ByteBufferUtil;
@@ -76,7 +79,7 @@ public class PersonCassandraTTLTest extends BaseTest
     @Before
     public void setUp() throws Exception
     {
-        
+
         CassandraCli.cassandraSetUp();
         CassandraCli.createKeySpace("KunderaExamples");
     }
@@ -120,7 +123,8 @@ public class PersonCassandraTTLTest extends BaseTest
         PersonCassandra p = findById(PersonCassandra.class, "1", em);
 
         SlicePredicate predicate = new SlicePredicate();
-        predicate.setSlice_range(new SliceRange(ByteBufferUtil.EMPTY_BYTE_BUFFER, ByteBufferUtil.EMPTY_BYTE_BUFFER, true, 10000));
+        predicate.setSlice_range(new SliceRange(ByteBufferUtil.EMPTY_BYTE_BUFFER, ByteBufferUtil.EMPTY_BYTE_BUFFER,
+                true, 10000));
         ByteBuffer key = ByteBuffer.wrap("1".getBytes());
 
         CassandraCli.client.set_keyspace("KunderaExamples");
@@ -204,7 +208,8 @@ public class PersonCassandraTTLTest extends BaseTest
         PersonCassandra p = findById(PersonCassandra.class, "1", em);
 
         SlicePredicate predicate = new SlicePredicate();
-        predicate.setSlice_range(new SliceRange(ByteBufferUtil.EMPTY_BYTE_BUFFER, ByteBufferUtil.EMPTY_BYTE_BUFFER, true, 10000));
+        predicate.setSlice_range(new SliceRange(ByteBufferUtil.EMPTY_BYTE_BUFFER, ByteBufferUtil.EMPTY_BYTE_BUFFER,
+                true, 10000));
         ByteBuffer key = ByteBuffer.wrap("1".getBytes());
 
         CassandraCli.client.set_keyspace("KunderaExamples");
@@ -266,12 +271,9 @@ public class PersonCassandraTTLTest extends BaseTest
     @Test
     public void testTTLonCQL3_0() throws Exception
     {
-        if (propertyMap == null)
-        {
-            propertyMap = new HashMap();
-            propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create");
-            propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
-        }
+        propertyMap = new HashMap();
+        propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create");
+        propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
         emf = Persistence.createEntityManagerFactory(SEC_IDX_CASSANDRA_TEST, propertyMap);
         em = emf.createEntityManager();
 
@@ -283,32 +285,29 @@ public class PersonCassandraTTLTest extends BaseTest
         Object p1 = prepareData("1", 10);
         em.persist(p1);
         em.clear();
-        PersonCassandra p = findById(PersonCassandra.class, "1", em);
-
-        SlicePredicate predicate = new SlicePredicate();
-        predicate.setSlice_range(new SliceRange(ByteBufferUtil.EMPTY_BYTE_BUFFER, ByteBufferUtil.EMPTY_BYTE_BUFFER, true, 10000));
-        ByteBuffer key = ByteBuffer.wrap("1".getBytes());
 
         CassandraCli.client.set_keyspace("KunderaExamples");
-        List<ColumnOrSuperColumn> columnOrSuperColumns = CassandraCli.client.get_slice(key, new ColumnParent(
-                "PERSONCASSANDRA"), predicate, ConsistencyLevel.ONE);
+        CqlResult cqlResult = CassandraCli.client.execute_cql3_query(ByteBuffer
+                .wrap("Select ttl(\"PERSON_NAME\"), ttl(\"AGE\") from \"PERSONCASSANDRA\" where \"personId\" = '1'"
+                        .getBytes()), Compression.NONE, ConsistencyLevel.ONE);
+
+        List<CqlRow> cqlRows = cqlResult.getRows();
+        CqlRow cqlRow = cqlRows.get(0);
 
         boolean personNameFound = false;
         boolean ageFound = false;
 
-        for (ColumnOrSuperColumn cosc : columnOrSuperColumns)
+        for (Column column : cqlRow.getColumns())
         {
-            Column column = cosc.column;
-
             String columnName = new String(column.getName(), Constants.ENCODING);
-            if (columnName.equals("PERSON_NAME"))
+            if (columnName.equals("ttl(PERSON_NAME)"))
             {
-                Assert.assertEquals(5, column.getTtl());
+                Assert.assertEquals(5, ByteBufferUtil.toInt(ByteBuffer.wrap(column.getValue())));
                 personNameFound = true;
             }
-            else if (columnName.equals("AGE"))
+            else if (columnName.equals("ttl(AGE)"))
             {
-                Assert.assertEquals(5, column.getTtl());
+                Assert.assertEquals(5, ByteBufferUtil.toInt(ByteBuffer.wrap(column.getValue())));
                 ageFound = true;
             }
         }
@@ -316,23 +315,21 @@ public class PersonCassandraTTLTest extends BaseTest
         Assert.assertTrue(personNameFound && ageFound);
         Thread.sleep(5000);
 
-        columnOrSuperColumns = CassandraCli.client.get_slice(key, new ColumnParent("PERSONCASSANDRA"), predicate,
-                ConsistencyLevel.ONE);
-        for (ColumnOrSuperColumn cosc : columnOrSuperColumns)
+        cqlResult = CassandraCli.client.execute_cql3_query(ByteBuffer
+                .wrap("Select ttl(\"PERSON_NAME\"), ttl(\"AGE\") from \"PERSONCASSANDRA\" where \"personId\" = '1'"
+                        .getBytes()), Compression.NONE, ConsistencyLevel.ONE);
+
+        cqlRows = cqlResult.getRows();
+
+        try
         {
-            Column column = cosc.column;
-
-            String columnName = new String(column.getName(), Constants.ENCODING);
-            if (columnName.equals("PERSON_NAME"))
-            {
-                Assert.fail("PERSON_NAME column not deleted even though a TTL of 5 seconds was specified while writing to cassandra.");
-            }
-            else if (columnName.equals("AGE"))
-            {
-                Assert.fail("Age column not deleted even though a TTL of 5 seconds was specified while writing to cassandra.");
-            }
+            cqlRow = cqlRows.get(0);
+            Assert.fail("PERSON_NAME and AGE column not deleted even though a TTL of 5 seconds was specified while writing to cassandra.");
         }
-
+        catch (IndexOutOfBoundsException ioobe)
+        {
+            Assert.assertTrue(cqlRows.isEmpty());
+        }
         // checking for update query.
 
         Object p2 = prepareData("2", 10);
@@ -347,56 +344,61 @@ public class PersonCassandraTTLTest extends BaseTest
         Query q = em.createQuery("update PersonCassandra p set p.personName=''KK MISHRA'' where p.personId=2");
         q.executeUpdate();
 
-        predicate = new SlicePredicate();
-        predicate.setSlice_range(new SliceRange(ByteBufferUtil.EMPTY_BYTE_BUFFER, ByteBufferUtil.EMPTY_BYTE_BUFFER, true, 10000));
-        key = ByteBuffer.wrap("2".getBytes());
+        cqlResult = CassandraCli.client.execute_cql3_query(ByteBuffer
+                .wrap("Select ttl(\"PERSON_NAME\"), ttl(\"AGE\") from \"PERSONCASSANDRA\" where \"personId\" = '2'"
+                        .getBytes()), Compression.NONE, ConsistencyLevel.ONE);
 
-        CassandraCli.client.set_keyspace("KunderaExamples");
-        columnOrSuperColumns = CassandraCli.client.get_slice(key, new ColumnParent("PERSONCASSANDRA"), predicate,
-                ConsistencyLevel.ONE);
+        cqlRows = cqlResult.getRows();
+        cqlRow = cqlRows.get(0);
 
         personNameFound = false;
         ageFound = false;
 
-        for (ColumnOrSuperColumn cosc : columnOrSuperColumns)
+        for (Column column : cqlRow.getColumns())
         {
-            Column column = cosc.column;
-
             String columnName = new String(column.getName(), Constants.ENCODING);
-            if (columnName.equals("PERSON_NAME"))
+            if (columnName.equals("ttl(PERSON_NAME)"))
             {
-                Assert.assertEquals(10, column.getTtl());
+                Assert.assertEquals(10, ByteBufferUtil.toInt(ByteBuffer.wrap(column.getValue())));
                 personNameFound = true;
             }
-            else if (columnName.equals("AGE"))
-            {                
-                Assert.assertEquals(0, column.getTtl());   //TTL for AGE would be reset to zero due to above UPDATE query
+            else if (columnName.equals("ttl(AGE)"))
+            {
+                Assert.assertEquals(null, column.getValue());
                 ageFound = true;
-            }
+            }            
         }
 
         Assert.assertTrue(personNameFound && ageFound);
         Thread.sleep(10000);
 
-        columnOrSuperColumns = CassandraCli.client.get_slice(key, new ColumnParent("PERSONCASSANDRA"), predicate,
-                ConsistencyLevel.ONE);
-        for (ColumnOrSuperColumn cosc : columnOrSuperColumns)
-        {
-            Column column = cosc.column;
+        cqlResult = CassandraCli.client.execute_cql3_query(ByteBuffer
+                .wrap("Select ttl(\"PERSON_NAME\"), ttl(\"AGE\") from \"PERSONCASSANDRA\" where \"personId\" = '2'"
+                        .getBytes()), Compression.NONE, ConsistencyLevel.ONE);
 
+        cqlRows = cqlResult.getRows();
+        cqlRow = cqlRows.get(0);
+        for (Column column : cqlRow.getColumns())
+        {
             String columnName = new String(column.getName(), Constants.ENCODING);
+            if (columnName.equals("ttl(PERSON_NAME)"))
+            {
+                Assert.assertEquals(null, null);
+                personNameFound = true;
+            }
+            else if (columnName.equals("ttl(AGE)"))
+            {
+                Assert.assertEquals(null, column.getValue());
+                ageFound = true;
+            }
             if (columnName.equals("PERSON_NAME"))
             {
                 Assert.fail("PERSON_NAME column not deleted even though a TTL of 10 seconds was specified while writing to cassandra.");
             }
-            /*else if (columnName.equals("AGE"))
-            {
-                Assert.fail("Age column not deleted even though a TTL of 10 seconds was specified while writing to cassandra.");
-            }*/
         }
 
         // TTL per session.
-        
+
         ttlValues = new HashMap<String, Integer>();
         ttlValues.put("PERSONCASSANDRA", new Integer(10));
         em.setProperty("ttl.per.session", true);
@@ -406,30 +408,27 @@ public class PersonCassandraTTLTest extends BaseTest
         em.persist(p3);
         em.clear();
 
-        predicate = new SlicePredicate();
-        predicate.setSlice_range(new SliceRange(ByteBufferUtil.EMPTY_BYTE_BUFFER, ByteBufferUtil.EMPTY_BYTE_BUFFER, true, 10000));
-        key = ByteBuffer.wrap("3".getBytes());
+        cqlResult = CassandraCli.client.execute_cql3_query(ByteBuffer
+                .wrap("Select ttl(\"PERSON_NAME\"), ttl(\"AGE\") from \"PERSONCASSANDRA\" where \"personId\" = '3'"
+                        .getBytes()), Compression.NONE, ConsistencyLevel.ONE);
 
-        CassandraCli.client.set_keyspace("KunderaExamples");
-        columnOrSuperColumns = CassandraCli.client.get_slice(key, new ColumnParent("PERSONCASSANDRA"), predicate,
-                ConsistencyLevel.ONE);
+        cqlRows = cqlResult.getRows();
+        cqlRow = cqlRows.get(0);
 
         personNameFound = false;
         ageFound = false;
 
-        for (ColumnOrSuperColumn cosc : columnOrSuperColumns)
+        for (Column column : cqlRow.getColumns())
         {
-            Column column = cosc.column;
-
             String columnName = new String(column.getName(), Constants.ENCODING);
-            if (columnName.equals("PERSON_NAME"))
+            if (columnName.equals("ttl(PERSON_NAME)"))
             {
-                Assert.assertEquals(10, column.getTtl());
+                Assert.assertEquals(10, ByteBufferUtil.toInt(ByteBuffer.wrap(column.getValue())));
                 personNameFound = true;
             }
-            else if (columnName.equals("AGE"))
+            else if (columnName.equals("ttl(AGE)"))
             {
-                Assert.assertEquals(10, column.getTtl());
+                Assert.assertEquals(10, ByteBufferUtil.toInt(ByteBuffer.wrap(column.getValue())));
                 ageFound = true;
             }
         }
@@ -437,51 +436,45 @@ public class PersonCassandraTTLTest extends BaseTest
         Assert.assertTrue(personNameFound && ageFound);
         Thread.sleep(10000);
 
-        columnOrSuperColumns = CassandraCli.client.get_slice(key, new ColumnParent("PERSONCASSANDRA"), predicate,
-                ConsistencyLevel.ONE);
-        for (ColumnOrSuperColumn cosc : columnOrSuperColumns)
-        {
-            Column column = cosc.column;
+        cqlResult = CassandraCli.client.execute_cql3_query(ByteBuffer
+                .wrap("Select ttl(\"PERSON_NAME\"), ttl(\"AGE\") from \"PERSONCASSANDRA\" where \"personId\" = '3'"
+                        .getBytes()), Compression.NONE, ConsistencyLevel.ONE);
 
-            String columnName = new String(column.getName(), Constants.ENCODING);
-            if (columnName.equals("PERSON_NAME"))
-            {
-                Assert.fail("PERSON_NAME column not deleted even though a TTL of 10 seconds was specified while writing to cassandra.");
-            }
-            else if (columnName.equals("AGE"))
-            {
-                Assert.fail("Age column not deleted even though a TTL of 10 seconds was specified while writing to cassandra.");
-            }
+        cqlRows = cqlResult.getRows();
+        try
+        {
+            cqlRow = cqlRows.get(0);
+            Assert.fail("PERSON_NAME and AGE column not deleted even though a TTL of 5 seconds was specified while writing to cassandra.");
+        }
+        catch (IndexOutOfBoundsException ioobe)
+        {
+            Assert.assertTrue(cqlRows.isEmpty());
         }
 
         Object p4 = prepareData("4", 10);
         em.persist(p4);
         em.clear();
 
-        predicate = new SlicePredicate();
-        predicate.setSlice_range(new SliceRange(ByteBufferUtil.EMPTY_BYTE_BUFFER, ByteBufferUtil.EMPTY_BYTE_BUFFER, true, 10000));
-        key = ByteBuffer.wrap("4".getBytes());
+        cqlResult = CassandraCli.client.execute_cql3_query(ByteBuffer
+                .wrap("Select ttl(\"PERSON_NAME\"), ttl(\"AGE\") from \"PERSONCASSANDRA\" where \"personId\" = '4'"
+                        .getBytes()), Compression.NONE, ConsistencyLevel.ONE);
 
-        CassandraCli.client.set_keyspace("KunderaExamples");
-        columnOrSuperColumns = CassandraCli.client.get_slice(key, new ColumnParent("PERSONCASSANDRA"), predicate,
-                ConsistencyLevel.ONE);
-
+        cqlRows = cqlResult.getRows();
+        cqlRow = cqlRows.get(0);
         personNameFound = false;
         ageFound = false;
 
-        for (ColumnOrSuperColumn cosc : columnOrSuperColumns)
+        for (Column column : cqlRow.getColumns())
         {
-            Column column = cosc.column;
-
             String columnName = new String(column.getName(), Constants.ENCODING);
-            if (columnName.equals("PERSON_NAME"))
+            if (columnName.equals("ttl(PERSON_NAME)"))
             {
-                Assert.assertEquals(10, column.getTtl());
+                Assert.assertEquals(10, ByteBufferUtil.toInt(ByteBuffer.wrap(column.getValue())));
                 personNameFound = true;
             }
-            else if (columnName.equals("AGE"))
+            else if (columnName.equals("ttl(AGE)"))
             {
-                Assert.assertEquals(10, column.getTtl());
+                Assert.assertEquals(10, ByteBufferUtil.toInt(ByteBuffer.wrap(column.getValue())));
                 ageFound = true;
             }
         }
@@ -489,21 +482,19 @@ public class PersonCassandraTTLTest extends BaseTest
         Assert.assertTrue(personNameFound && ageFound);
         Thread.sleep(10000);
 
-        columnOrSuperColumns = CassandraCli.client.get_slice(key, new ColumnParent("PERSONCASSANDRA"), predicate,
-                ConsistencyLevel.ONE);
-        for (ColumnOrSuperColumn cosc : columnOrSuperColumns)
-        {
-            Column column = cosc.column;
+        cqlResult = CassandraCli.client.execute_cql3_query(ByteBuffer
+                .wrap("Select ttl(\"PERSON_NAME\"), ttl(\"AGE\") from \"PERSONCASSANDRA\" where \"personId\" = '4'"
+                        .getBytes()), Compression.NONE, ConsistencyLevel.ONE);
 
-            String columnName = new String(column.getName(), Constants.ENCODING);
-            if (columnName.equals("PERSON_NAME"))
-            {
-                Assert.fail("PERSON_NAME column not deleted even though a TTL of 10 seconds was specified while writing to cassandra.");
-            }
-            else if (columnName.equals("AGE"))
-            {
-                Assert.fail("Age column not deleted even though a TTL of 10 seconds was specified while writing to cassandra.");
-            }
+        cqlRows = cqlResult.getRows();
+        try
+        {
+            cqlRow = cqlRows.get(0);
+            Assert.fail("PERSON_NAME and AGE column not deleted even though a TTL of 5 seconds was specified while writing to cassandra.");
+        }
+        catch (IndexOutOfBoundsException ioobe)
+        {
+            Assert.assertTrue(cqlRows.isEmpty());
         }
 
         String deleteQuery = "DELETE from PersonCassandra";

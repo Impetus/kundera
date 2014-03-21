@@ -83,8 +83,6 @@ class ResultIterator<E> implements IResultIterator<E>
 
     private static final String MAX_ = "max";
 
-    // private boolean isValidated;
-
     private int fetchSize;
 
     private int count;
@@ -416,7 +414,7 @@ class ResultIterator<E> implements IResultIterator<E>
                     entityMetadata.getPersistenceUnit());
 
             EmbeddableType keyObj = null;
-//            Bytes bytes = null;
+            // Bytes bytes = null;
             String columnName;
             if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
             {
@@ -446,6 +444,11 @@ class ResultIterator<E> implements IResultIterator<E>
         return null;
     }
 
+    /**
+     * 
+     * @param idColumn
+     * @return
+     */
     private Map<Boolean, String> getConditionOnIdColumn(String idColumn)
     {
 
@@ -460,7 +463,6 @@ class ResultIterator<E> implements IResultIterator<E>
             keyObj = metaModel.embeddable(entityMetadata.getIdAttribute().getBindableJavaType());
         }
 
-        boolean isPresent = false;
         for (Object o : query.getKunderaQuery().getFilterClauseQueue())
         {
             if (o instanceof FilterClause)
@@ -468,7 +470,6 @@ class ResultIterator<E> implements IResultIterator<E>
                 FilterClause clause = ((FilterClause) o);
                 String fieldName = clause.getProperty();
                 String condition = clause.getCondition();
-                Object value = clause.getValue();
 
                 if (keyObj != null && fieldName.equals(idColumn)
                         || (keyObj != null && StringUtils.contains(fieldName, '.')) || (idColumn.equals(fieldName)))

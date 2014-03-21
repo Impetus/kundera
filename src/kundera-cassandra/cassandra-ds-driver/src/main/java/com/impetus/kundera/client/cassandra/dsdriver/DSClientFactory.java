@@ -121,7 +121,6 @@ public class DSClientFactory extends GenericClientFactory implements CassandraCl
     @Override
     public boolean addCassandraHost(CassandraHost host)
     {
-        // TODO Auto-generated method stub
         // No need to setup this, as it is part of Kundera powered retry
         // service.
 
@@ -252,9 +251,6 @@ public class DSClientFactory extends GenericClientFactory implements CassandraCl
             keyspace = (String) props.get(PersistenceProperties.KUNDERA_KEYSPACE);
         }
 
-        // Session session = cluster.connect("\""+keyspace+"\"");
-
-        // cluster.s
         return cluster;
     }
 
@@ -568,9 +564,7 @@ public class DSClientFactory extends GenericClientFactory implements CassandraCl
                 options.setMaxSimultaneousRequestsPerConnectionThreshold(hostDist, new Integer(maxSimultaneousRequests));
             }
         }
-
         return options;
-
     }
 
 }

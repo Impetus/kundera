@@ -37,7 +37,7 @@ import javax.persistence.Table;
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Table(name = "social_profile")
-@DiscriminatorColumn(name = "type", length = 64, discriminatorType = DiscriminatorType.STRING)
+@DiscriminatorColumn(name = "profile_type", length = 64, discriminatorType = DiscriminatorType.STRING)
 public abstract class SocialProfile extends GuidDomainObject implements Serializable
 {
     @Column(name = "userType")

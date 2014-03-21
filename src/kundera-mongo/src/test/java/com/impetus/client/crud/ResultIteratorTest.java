@@ -27,6 +27,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.client.crud.entities.MongoToken;
+import com.impetus.client.crud.entities.MongoTokenClient;
+import com.impetus.client.crud.entities.PersonMongo;
 import com.impetus.kundera.query.IResultIterator;
 import com.impetus.kundera.query.Query;
 

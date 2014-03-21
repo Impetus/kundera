@@ -21,11 +21,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import javax.persistence.Column;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +61,11 @@ public class IndexProcessor extends AbstractEntityFieldProcessor
             metadata.setIndexName(clazz.getSimpleName());
         }
         Index idx = clazz.getAnnotation(Index.class);
+
         IndexCollection indexes = clazz.getAnnotation(IndexCollection.class);
+
+        EntityType entityType = (EntityType) kunderaMetadata.getApplicationMetadata()
+                .getMetaModelBuilder(metadata.getPersistenceUnit()).getManagedTypes().get(clazz);
 
         List<String> columnsNameToBeIndexed = new ArrayList<String>();
 
@@ -70,10 +76,20 @@ public class IndexProcessor extends AbstractEntityFieldProcessor
             if (indexes.columns() != null && indexes.columns().length != 0)
             {
                 metadata.setIndexable(true);
-
                 for (com.impetus.kundera.index.Index indexedColumn : indexes.columns())
                 {
-                    indexedColumnsMap.put(indexedColumn.name(), indexedColumn);
+                    if (indexedColumn.type().equals("composite"))
+                    {
+                        // means comma seperated list of columns
+                        metadata.addIndexProperty(
+                                prepareCompositeIndexName(indexedColumn.name(), entityType),
+                                populatePropertyIndex(indexedColumn.indexName(), indexedColumn.type(), null, null, null));
+
+                    }
+                    else
+                    {
+                        indexedColumnsMap.put(indexedColumn.name(), indexedColumn);
+                    }
                 }
             }
         }
@@ -110,49 +126,33 @@ public class IndexProcessor extends AbstractEntityFieldProcessor
         log.debug("Processing @Entity " + clazz.getName() + " for Indexes.");
 
         // scan for fields
-
-        EntityType entityType = (EntityType) kunderaMetadata.getApplicationMetadata()
-                .getMetaModelBuilder(metadata.getPersistenceUnit()).getManagedTypes().get(clazz);
-
         Set<Attribute> attributes = entityType.getAttributes();
         for (Attribute attrib : attributes)
         {
             if (!attrib.isAssociation())
             {
                 String colName = attrib.getName();
+                String columnName = ((AbstractAttribute) attrib).getJPAColumnName();
                 if (indexedColumnsMap != null && !indexedColumnsMap.isEmpty() && indexedColumnsMap.containsKey(colName))
                 {
                     com.impetus.kundera.index.Index indexedColumn = indexedColumnsMap.get(colName);
-                    metadata.addIndexProperty(populatePropertyIndex(((AbstractAttribute) attrib).getJPAColumnName(),
-                            indexedColumn.type(), indexedColumn.max(), indexedColumn.min(),
-                            (Field) attrib.getJavaMember()));
+                    String indexName = StringUtils.isBlank(indexedColumn.indexName()) ? columnName : indexedColumn
+                            .indexName();
+                    metadata.addIndexProperty(
+                            columnName,
+                            populatePropertyIndex(indexName, indexedColumn.type(), indexedColumn.max(),
+                                    indexedColumn.min(), (Field) attrib.getJavaMember()));
 
                 }
                 else if (columnsNameToBeIndexed != null && !columnsNameToBeIndexed.isEmpty()
                         && columnsNameToBeIndexed.contains(colName))
                 {
-                    metadata.addIndexProperty(populatePropertyIndex(((AbstractAttribute) attrib).getJPAColumnName(),
-                            null, null, null, (Field) attrib.getJavaMember()));
+                    metadata.addIndexProperty(columnName,
+                            populatePropertyIndex(columnName, null, null, null, (Field) attrib.getJavaMember()));
                 }
             }
 
         }
-        /*
-         * for (Field f : clazz.getDeclaredFields()) { if
-         * (f.isAnnotationPresent(Column.class)) { String fieldName =
-         * f.getName(); String colName = getIndexName(f, fieldName); if
-         * (indexedColumnsMap != null && !indexedColumnsMap.isEmpty() &&
-         * indexedColumnsMap.containsKey(fieldName)) {
-         * com.impetus.kundera.index.Index indexedColumn =
-         * indexedColumnsMap.get(fieldName);
-         * metadata.addIndexProperty(populatePropertyIndex(indexedColumn.name(),
-         * indexedColumn.type(), indexedColumn.max(), indexedColumn.min(), f));
-         * } else if (columnsNameToBeIndexed != null &&
-         * !columnsNameToBeIndexed.isEmpty() &&
-         * columnsNameToBeIndexed.contains(colName)) {
-         * metadata.addIndexProperty(populatePropertyIndex(fieldName, null,
-         * null, null, f)); } } }
-         */
     }
 
     /**
@@ -160,14 +160,11 @@ public class IndexProcessor extends AbstractEntityFieldProcessor
      * @param f
      * @return TODO: Make this method accept n number of parameters elegantly
      */
-    private static PropertyIndex populatePropertyIndex(String columnName, String indexType, Integer max, Integer min,
+    private static PropertyIndex populatePropertyIndex(String indexName, String indexType, Integer max, Integer min,
             Field f)
     {
-        PropertyIndex pi = new PropertyIndex();
+        PropertyIndex pi = new PropertyIndex(f, indexName, indexType);
 
-        pi.setProperty(f);
-        pi.setName(columnName);
-        pi.setIndexType(indexType);
         pi.setMax(max);
         pi.setMin(min);
 
@@ -246,25 +243,25 @@ public class IndexProcessor extends AbstractEntityFieldProcessor
     }
 
     /**
-     * Gets the index name.
+     * prepare composite index.
      * 
-     * @param f
-     *            the f
-     * @param alias
-     *            the alias
-     * @return the index name
+     * @param indexedColumns
+     * @param entityType
+     * @return
      */
-    private String getIndexName(Field f, String alias)
+    private String prepareCompositeIndexName(String indexedColumns, final EntityType entityType)
     {
-        if (f.isAnnotationPresent(Column.class))
+        StringTokenizer tokenizer = new StringTokenizer(indexedColumns, ",");
+        StringBuilder builder = new StringBuilder();
+        while (tokenizer.hasMoreTokens())
         {
-            Column c = f.getAnnotation(Column.class);
-            alias = c.name().trim();
-            if (alias.isEmpty())
-            {
-                alias = f.getName();
-            }
+            String fieldName = (String) tokenizer.nextElement();
+            builder.append(((AbstractAttribute) entityType.getAttribute(fieldName)).getJPAColumnName());
+            builder.append(",");
         }
-        return alias;
+
+        builder.deleteCharAt(builder.length() - 1);
+
+        return builder.toString();
     }
 }

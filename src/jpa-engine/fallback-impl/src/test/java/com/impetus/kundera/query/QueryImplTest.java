@@ -25,6 +25,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.FlushModeType;
 import javax.persistence.LockModeType;
+import javax.persistence.NoResultException;
 import javax.persistence.Persistence;
 import javax.persistence.TemporalType;
 
@@ -269,7 +270,7 @@ public class QueryImplTest
             queryObj.getParameterValue("invalidParameter");
         } catch(IllegalArgumentException usex)
         {
-            Assert.assertEquals("parameter is not a parameter of the query", usex.getMessage());
+            Assert.assertEquals("Parameter is not a parameter of the query.", usex.getMessage());
         }
         
         
@@ -431,6 +432,15 @@ public class QueryImplTest
         associationResults = queryObj.getResultList();
 
         Assert.assertTrue(associationResults.isEmpty());
+        
+        try
+        {
+            queryObj.getSingleResult();
+        }
+        catch (NoResultException e)
+        {
+            Assert.assertEquals("No result found!", e.getMessage());
+        }
 
     }
 
@@ -486,15 +496,7 @@ public class QueryImplTest
         {
             Assert.assertEquals("setFirstResult is unsupported by Kundera", usex.getMessage());
         }
-        
-        try
-        {
-            query.getSingleResult();
-        } catch(UnsupportedOperationException usex)
-        {
-            Assert.assertEquals("getSingleResult is unsupported by Kundera", usex.getMessage());
-        }
-        
+                       
         try
         {
             query.getFirstResult();

@@ -580,7 +580,6 @@ public class StudentCassandraBytePrimitiveTest extends CassandraBase
 
     public void stopCluster()
     {
-        // TODO Auto-generated method stub
 
     }
 

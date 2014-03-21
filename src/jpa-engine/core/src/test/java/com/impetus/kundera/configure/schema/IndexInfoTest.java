@@ -46,7 +46,7 @@ public class IndexInfoTest
     @Test
     public void testWithMultiValueConstructor()
     {
-        IndexInfo indexInfo = new IndexInfo("personName",12,1,"KEYS");
+        IndexInfo indexInfo = new IndexInfo("personName",12,1,"KEYS", "personName");
         indexInfo.setIndexType("KEYS");
         indexInfo.setMaxValue(12);
         indexInfo.setMinValue(1);

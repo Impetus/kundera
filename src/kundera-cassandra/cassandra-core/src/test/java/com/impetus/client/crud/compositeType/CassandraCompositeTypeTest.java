@@ -15,7 +15,9 @@
  ******************************************************************************/
 package com.impetus.client.crud.compositeType;
 
+import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +43,7 @@ import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.crud.compositeType.CassandraPrimeUser.NickName;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
+import com.impetus.kundera.query.KunderaQuery;
 
 /**
  * Junit test case for Compound/Composite key.
@@ -51,10 +54,6 @@ import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
 
 public class CassandraCompositeTypeTest
 {
-
-    /**
-     * 
-     */
     private static final String PERSISTENCE_UNIT = "composite_pu";
 
     private EntityManagerFactory emf;
@@ -381,7 +380,7 @@ public class CassandraCompositeTypeTest
         // em = emf.createEntityManager();
         em.clear();
 
-        String orderClause = "Select u from CassandraPrimeUser u where u.key.userId = :userId ORDER BY tweetId ASC";
+        String orderClause = "Select u from CassandraPrimeUser u where u.key.userId = :userId ORDER BY u.key.tweetId ASC";
         Query q = em.createQuery(orderClause);
         q.setParameter("userId", "mevivs");
         List<CassandraPrimeUser> results = q.getResultList();
@@ -391,7 +390,7 @@ public class CassandraCompositeTypeTest
         Assert.assertEquals("my third tweet", results.get(2).getTweetBody());
         Assert.assertEquals(3, results.size());
 
-        orderClause = "Select u from CassandraPrimeUser u where u.key.userId = :userId ORDER BY tweetId DESC";
+        orderClause = "Select u from CassandraPrimeUser u where u.key.userId = :userId ORDER BY u.key.tweetId DESC";
         q = em.createQuery(orderClause);
         q.setParameter("userId", "mevivs");
         results = q.getResultList();
@@ -412,7 +411,7 @@ public class CassandraCompositeTypeTest
 
         try
         {
-            orderClause = "Select u from CassandraPrimeUser u where u.key.userId = :userId ORDER BY userId DESC";
+            orderClause = "Select u from CassandraPrimeUser u where u.key.userId = :userId ORDER BY u.key.userId DESC";
             q = em.createQuery(orderClause);
             q.setParameter("userId", "mevivs");
             results = q.getResultList();
@@ -445,7 +444,7 @@ public class CassandraCompositeTypeTest
         user1.setTweetDate(currentDate);
         em.persist(user1);
 
-        key = new CassandraCompoundKey("cgangwal's", 2, timeLineId);
+        key = new CassandraCompoundKey("cgangwals", 2, timeLineId);
         CassandraPrimeUser user2 = new CassandraPrimeUser(key);
         user2.setTweetBody("my second tweet");
         user2.setTweetDate(currentDate);
@@ -461,38 +460,33 @@ public class CassandraCompositeTypeTest
 
         em.clear();
 
-        String inClause = "Select u from CassandraPrimeUser u where u.key.userId IN (mevivs,cgangwal's,kmishra) ORDER BY tweetId ASC";
+        String inClause = "Select u from CassandraPrimeUser u where u.key.userId IN ('mevivs','kmishra') ORDER BY u.key.tweetId ASC";
         Query q = em.createQuery(inClause);
 
         List<CassandraPrimeUser> results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals("my first tweet", results.get(0).getTweetBody());
-        Assert.assertEquals("my second tweet", results.get(1).getTweetBody());
-        Assert.assertEquals("my third tweet", results.get(2).getTweetBody());
-        Assert.assertEquals(3, results.size());
-
-        inClause = "Select u from CassandraPrimeUser u where u.key.userId IN (\"mevivs\",\"cgangwal's\",\"kmishra\") ORDER BY tweetId ASC";
-        q = em.createQuery(inClause);
-
-        results = q.getResultList();
-        Assert.assertNotNull(results);
-        Assert.assertEquals("my first tweet", results.get(0).getTweetBody());
-        Assert.assertEquals("my second tweet", results.get(1).getTweetBody());
-        Assert.assertEquals("my third tweet", results.get(2).getTweetBody());
-        Assert.assertEquals(3, results.size());
-
-        inClause = "Select u from CassandraPrimeUser u where u.key.userId IN ('mevivs','cgangwal's') ORDER BY tweetId ASC";
-        q = em.createQuery(inClause);
-
-        results = q.getResultList();
-        Assert.assertNotNull(results);
-        Assert.assertEquals("my first tweet", results.get(0).getTweetBody());
-        Assert.assertEquals("my second tweet", results.get(1).getTweetBody());
+        Assert.assertEquals("my third tweet", results.get(1).getTweetBody());
         Assert.assertEquals(2, results.size());
+
+        inClause = "Select u from CassandraPrimeUser u where u.key.userId IN ('\"mevivs\"','\"kmishra\"') ORDER BY u.key.tweetId ASC";
+        q = em.createQuery(inClause);
+
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertTrue(results.isEmpty());
+
+        inClause = "Select u from CassandraPrimeUser u where u.key.userId IN ('mevivs') ORDER BY u.key.tweetId ASC";
+        q = em.createQuery(inClause);
+
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals("my first tweet", results.get(0).getTweetBody());
+        Assert.assertEquals(1, results.size());
 
         try
         {
-            inClause = "Select u from CassandraPrimeUser u where u.key.tweetId IN (1,2,3) ORDER BY tweetId DESC";
+            inClause = "Select u from CassandraPrimeUser u where u.key.tweetId IN (1,2,3) ORDER BY u.key.tweetId DESC";
             q = em.createQuery(inClause);
             results = q.getResultList();
 
@@ -505,6 +499,72 @@ public class CassandraCompositeTypeTest
                     e.getMessage());
         }
 
+        // In Query.
+        inClause = "Select u from CassandraPrimeUser u where u.key.userId IN ('mevivs','kmishra') ORDER BY u.key.tweetId ASC";
+        q = em.createQuery(inClause);
+
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertTrue(!results.isEmpty());
+        Assert.assertEquals(2, results.size());
+
+        // In Query set Paramater.
+        inClause = "Select u from CassandraPrimeUser u where u.key.userId IN :userIdList ORDER BY u.key.tweetId ASC";
+        q = em.createQuery(inClause);
+
+        List<String> userIdList = new ArrayList<String>();
+        userIdList.add("mevivs");
+        userIdList.add("kmishra");
+        userIdList.add("cgangwals");
+        q = em.createQuery(inClause);
+        q.setParameter("userIdList", userIdList);
+
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertTrue(!results.isEmpty());
+        Assert.assertEquals(3, results.size());
+
+        // In Query set Paramater with and clause.
+        inClause = "Select u from CassandraPrimeUser u where u.key.userId IN :userIdList and u.name = 'kuldeep' ORDER BY u.key.tweetId ASC";
+        q = em.createQuery(inClause);
+
+        q.setParameter("userIdList", userIdList);
+
+        try
+        {
+            results = q.getResultList();
+            Assert.fail();
+        }
+        catch (Exception e)
+        {
+            Assert.assertEquals(
+                    "javax.persistence.PersistenceException: com.impetus.kundera.KunderaException: InvalidRequestException(why:Select on indexed columns and with IN clause for the PRIMARY KEY are not supported)",
+                    e.getMessage());
+        }
+
+        // In Query set Paramater with gt clause.
+        inClause = "Select u from CassandraPrimeUser u where u.key IN :keyList";
+        q = em.createQuery(inClause);
+
+        List<CassandraCompoundKey> keyList = new ArrayList<CassandraCompoundKey>();
+        UUID timeLineId1 = UUID.randomUUID();
+        keyList.add(new CassandraCompoundKey("mevivs", 1, timeLineId1));
+        keyList.add(new CassandraCompoundKey("kmishra", 3, timeLineId1));
+        keyList.add(new CassandraCompoundKey("cgangwals", 2, timeLineId1));
+
+        q.setParameter("keyList", keyList);
+
+        try
+        {
+            results = q.getResultList();
+            Assert.fail();
+        }
+        catch (Exception e)
+        {
+            Assert.assertEquals(
+                    "javax.persistence.PersistenceException: com.impetus.kundera.KunderaException: InvalidRequestException(why:PRIMARY KEY part tweetId cannot be restricted by IN relation)",
+                    e.getMessage());
+        }
     }
 
     @Test

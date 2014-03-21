@@ -61,4 +61,22 @@ public @interface Index
      */
     public abstract int min() default Integer.MIN_VALUE;
 
+    /**
+     * Name of index, if it is different that column name.
+     * 
+     * @return index name.
+     */
+    public abstract String indexName() default "";
+
+    /**
+     * Type of index.
+     * 
+     * @author Kuldeep.Mishra
+     * 
+     */
+    public enum IndexType
+    {
+        normal, composite
+    }
+
 }

@@ -59,7 +59,7 @@ public class CoreQuery<E> extends QueryImpl<E>
             {
                 String property = ((FilterClause)clause).getProperty();
                 String condition = ((FilterClause)clause).getCondition();
-                value = ((FilterClause)clause).getValue();
+                value = ((FilterClause)clause).getValue().get(0);
             }
             
             

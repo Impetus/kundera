@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 
+import javax.persistence.Embeddable;
 import javax.persistence.PersistenceException;
 
 import net.dataforte.cassandra.pool.HostFailoverPolicy;
@@ -136,9 +137,9 @@ public class CassandraUtilities
         }
         else if (clazz.isAssignableFrom(Date.class))
         {
-        	
+
             DateAccessor dateAccessor = new DateAccessor();
-            return DateType.instance.decompose((Date)value);
+            return DateType.instance.decompose((Date) value);
         }
         else
         {
@@ -146,8 +147,9 @@ public class CassandraUtilities
             {
                 value = PropertyAccessorFactory.getPropertyAccessor(clazz).fromString(clazz, value.toString());
             }
-            
-            return BytesType.instance.decompose(ByteBuffer.wrap(PropertyAccessorFactory.getPropertyAccessor(clazz).toBytes(value)));
+
+            return BytesType.instance.decompose(ByteBuffer.wrap(PropertyAccessorFactory.getPropertyAccessor(clazz)
+                    .toBytes(value)));
         }
     }
 
@@ -195,8 +197,10 @@ public class CassandraUtilities
      * 
      * 
      * 
+     * 
      * } if user opted for
      * {@PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE
+     * 
      * 
      * 
      * 
@@ -211,7 +215,8 @@ public class CassandraUtilities
      * @param externalProperties
      * @return
      */
-    public static String getIdColumnName(final KunderaMetadata kunderaMetadata, final EntityMetadata m, final Map<String, Object> externalProperties)
+    public static String getIdColumnName(final KunderaMetadata kunderaMetadata, final EntityMetadata m,
+            final Map<String, Object> externalProperties)
     {
         // key for auto schema generation.
         String persistenceUnit = m.getPersistenceUnit();
@@ -225,10 +230,13 @@ public class CassandraUtilities
                     .getProperty(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE) : null;
         }
 
+        String cql_version = externalProperties != null ? (String) externalProperties.get(CassandraConstants.CQL_VERSION):null;
+        boolean isCql3Enabled = (cql_version != null && cql_version.equals(CassandraConstants.CQL_VERSION_3_0))
+                || m.getIdAttribute().getBindableJavaType().isAnnotationPresent(Embeddable.class);
         // check if id attribute is embeddable
         boolean containsBasicCollectionField = MetadataUtils.containsBasicElementCollectionField(m, kunderaMetadata);
-        return autoDdlOption == null || containsBasicCollectionField ? ((AbstractAttribute) m.getIdAttribute())
-                .getJPAColumnName() : CassandraConstants.CQL_KEY;
+        return  isCql3Enabled || containsBasicCollectionField ? ((AbstractAttribute) m
+                .getIdAttribute()).getJPAColumnName() : CassandraConstants.CQL_KEY;
     }
 
     public static Object getEntity(Object e)
@@ -319,7 +327,6 @@ public class CassandraUtilities
         }
     }
 
-
     /**
      * Gets the pool config policy.
      * 
@@ -328,7 +335,8 @@ public class CassandraUtilities
      * @param puProperties
      * @return the pool config policy
      */
-    public static PoolConfiguration setPoolConfigPolicy(com.impetus.client.cassandra.service.CassandraHost cassandraHost, PoolConfiguration prop)
+    public static PoolConfiguration setPoolConfigPolicy(
+            com.impetus.client.cassandra.service.CassandraHost cassandraHost, PoolConfiguration prop)
     {
         int maxActivePerNode = cassandraHost.getMaxActive();
         int maxIdlePerNode = cassandraHost.getMaxIdle();

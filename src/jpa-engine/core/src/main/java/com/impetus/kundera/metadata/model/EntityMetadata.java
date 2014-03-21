@@ -230,15 +230,13 @@ public final class EntityMetadata
 
     private EntityType getEntityType()
     {
-        /*if (this.entityType == null)
-        {
-            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
-                    getPersistenceUnit());
-            if (metaModel != null)
-            {
-                this.entityType = metaModel.entity(this.entityClazz);
-            }
-        }*/
+        /*
+         * if (this.entityType == null) { MetamodelImpl metaModel =
+         * (MetamodelImpl)
+         * kunderaMetadata.getApplicationMetadata().getMetamodel(
+         * getPersistenceUnit()); if (metaModel != null) { this.entityType =
+         * metaModel.entity(this.entityClazz); } }
+         */
         return this.entityType;
     }
 
@@ -346,9 +344,10 @@ public final class EntityMetadata
      * @param index
      *            the index
      */
-    public void addIndexProperty(PropertyIndex index)
+    public void addIndexProperty(String columnName, PropertyIndex index)
     {
-        indexPrperties.put(index.getName(), index);
+        indexPrperties.put(columnName, index);
+
     }
 
     /**
@@ -658,7 +657,7 @@ public final class EntityMetadata
             columnName = ann.name();
 
         }
-        return columnName != null ? columnName : relation.getName();
+        return StringUtils.isBlank(columnName) ? relation.getName() : columnName;
     }
 
     /**

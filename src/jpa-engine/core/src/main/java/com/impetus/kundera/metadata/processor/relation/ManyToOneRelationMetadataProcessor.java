@@ -22,6 +22,8 @@ import javax.persistence.AssociationOverride;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.impetus.kundera.loader.MetamodelLoaderException;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
@@ -61,7 +63,6 @@ public class ManyToOneRelationMetadataProcessor extends AbstractEntityFieldProce
         // taking field's type as foreign entity, ignoring "targetEntity"
         Class<?> targetEntity = relationField.getType();
 
-     
         ManyToOne ann = relationField.getAnnotation(ManyToOne.class);
         Relation relation = new Relation(relationField, targetEntity, null, ann.fetch(), Arrays.asList(ann.cascade()),
                 ann.optional(), null, // mappedBy is null
@@ -69,31 +70,29 @@ public class ManyToOneRelationMetadataProcessor extends AbstractEntityFieldProce
 
         boolean isJoinedByFK = relationField.isAnnotationPresent(JoinColumn.class);
 
-
         if (relationField.isAnnotationPresent(AssociationOverride.class))
         {
             AssociationOverride annotation = relationField.getAnnotation(AssociationOverride.class);
             JoinColumn[] joinColumns = annotation.joinColumns();
 
-         
-
             relation.setJoinColumnName(joinColumns[0].name());
 
-       
         }
         else if (isJoinedByFK)
         {
             JoinColumn joinColumnAnn = relationField.getAnnotation(JoinColumn.class);
-            relation.setJoinColumnName(joinColumnAnn.name());
+            relation.setJoinColumnName(StringUtils.isBlank(joinColumnAnn.name()) ? relationField.getName()
+                    : joinColumnAnn.name());
         }
-
+        else
+        {
+            relation.setJoinColumnName(relationField.getName());
+        }
 
         relation.setBiDirectionalField(metadata.getEntityClazz());
         metadata.addRelation(relationField.getName(), relation);
 
     }
-
-
 
     @Override
     public void process(Class<?> clazz, EntityMetadata metadata)

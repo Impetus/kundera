@@ -63,37 +63,52 @@ public class CassandraGeneratedIdTest
     {
         EntityManager em = emf.createEntityManager();
 
-        CassandraGeneratedIdDefault idDefault = new CassandraGeneratedIdDefault();
-        idDefault.setName("kuldeep");
         try
         {
+            CassandraGeneratedIdDefault idDefault = new CassandraGeneratedIdDefault();
+            idDefault.setName("kuldeep");
             em.persist(idDefault);
-            Assert.fail();
+            List<CassandraGeneratedIdDefault> list = em.createQuery(
+                    "Select c from CassandraGeneratedIdDefault c").getResultList();
+            Assert.assertNotNull(list);
+            Assert.assertEquals(1, list.size());
+            Assert.assertEquals("kuldeep", list.get(0).getName());
+            Object id = list.get(0).getId();
+            em.clear();
+            idDefault = em.find(CassandraGeneratedIdDefault.class, id);
+            Assert.assertNotNull(idDefault);
+            Assert.assertEquals("kuldeep", idDefault.getName());
         }
         catch (KunderaException e)
         {
-            Assert.assertEquals("java.lang.IllegalArgumentException: " + GenerationType.class.getSimpleName() + "."
-                    + GenerationType.AUTO + " Strategy not supported by this client :" + ThriftClient.class.getName(),
-                    e.getMessage());
+            Assert.fail();
         }
-        CassandraGeneratedIdStrategyAuto strategyAuto = new CassandraGeneratedIdStrategyAuto();
-        strategyAuto.setName("kuldeep");
+        
         try
         {
+            CassandraGeneratedIdStrategyAuto strategyAuto = new CassandraGeneratedIdStrategyAuto();
+            strategyAuto.setName("kuldeep");
             em.persist(strategyAuto);
-            Assert.fail();
+            List<CassandraGeneratedIdStrategyAuto> list = em.createQuery(
+                    "Select c from CassandraGeneratedIdStrategyAuto c").getResultList();
+            Assert.assertNotNull(list);
+            Assert.assertEquals(1, list.size());
+            Assert.assertEquals("kuldeep", list.get(0).getName());
+            Object id = list.get(0).getId();
+            em.clear();
+            strategyAuto = em.find(CassandraGeneratedIdStrategyAuto.class, id);
+            Assert.assertNotNull(strategyAuto);
+            Assert.assertEquals("kuldeep", strategyAuto.getName());
         }
         catch (KunderaException e)
         {
-            Assert.assertEquals("java.lang.IllegalArgumentException: " + GenerationType.class.getSimpleName() + "."
-                    + GenerationType.AUTO + " Strategy not supported by this client :" + ThriftClient.class.getName(),
-                    e.getMessage());
+            Assert.fail();
         }
 
-        CassandraGeneratedIdStrategyIdentity strategyIdentity = new CassandraGeneratedIdStrategyIdentity();
-        strategyIdentity.setName("kuldeep");
         try
         {
+            CassandraGeneratedIdStrategyIdentity strategyIdentity = new CassandraGeneratedIdStrategyIdentity();
+            strategyIdentity.setName("kuldeep");
             em.persist(strategyIdentity);
             Assert.fail();
         }
@@ -105,10 +120,10 @@ public class CassandraGeneratedIdTest
                             + ThriftClient.class.getName(), e.getMessage());
         }
 
-        CassandraGeneratedIdStrategySequence strategySequence = new CassandraGeneratedIdStrategySequence();
-        strategySequence.setName("Kuldeep");
         try
         {
+            CassandraGeneratedIdStrategySequence strategySequence = new CassandraGeneratedIdStrategySequence();
+            strategySequence.setName("Kuldeep");
             em.persist(strategySequence);
             Assert.fail();
         }
@@ -120,10 +135,10 @@ public class CassandraGeneratedIdTest
                             + ThriftClient.class.getName(), e.getMessage());
         }
 
-        CassandraGeneratedIdStrategyTable strategyTable = new CassandraGeneratedIdStrategyTable();
-        strategyTable.setName("KK");
         try
         {
+            CassandraGeneratedIdStrategyTable strategyTable = new CassandraGeneratedIdStrategyTable();
+            strategyTable.setName("KK");
             em.persist(strategyTable);
             List<CassandraGeneratedIdStrategyTable> list = em.createQuery(
                     "Select c from CassandraGeneratedIdStrategyTable c").getResultList();
@@ -142,10 +157,10 @@ public class CassandraGeneratedIdTest
             Assert.fail();
         }
 
-        CassandraGeneratedIdWithOutSequenceGenerator withOutSequenceGenerator = new CassandraGeneratedIdWithOutSequenceGenerator();
-        withOutSequenceGenerator.setName("Kuldeep Kumar");
         try
         {
+            CassandraGeneratedIdWithOutSequenceGenerator withOutSequenceGenerator = new CassandraGeneratedIdWithOutSequenceGenerator();
+            withOutSequenceGenerator.setName("Kuldeep Kumar");
             em.persist(withOutSequenceGenerator);
             Assert.fail();
         }
@@ -157,10 +172,10 @@ public class CassandraGeneratedIdTest
                             + ThriftClient.class.getName(), e.getMessage());
         }
 
-        CassandraGeneratedIdWithOutTableGenerator withOutTableGenerator = new CassandraGeneratedIdWithOutTableGenerator();
-        withOutTableGenerator.setName("Kuldeep Mishra");
         try
         {
+            CassandraGeneratedIdWithOutTableGenerator withOutTableGenerator = new CassandraGeneratedIdWithOutTableGenerator();
+            withOutTableGenerator.setName("Kuldeep Mishra");
             em.persist(withOutTableGenerator);
             List<CassandraGeneratedIdWithOutTableGenerator> list = em.createQuery(
                     "Select c from CassandraGeneratedIdWithOutTableGenerator c").getResultList();
@@ -170,17 +185,17 @@ public class CassandraGeneratedIdTest
             Object id = list.get(0).getId();
             em.clear();
             withOutTableGenerator = em.find(CassandraGeneratedIdWithOutTableGenerator.class, id);
-            Assert.assertNotNull(strategyTable);
+            Assert.assertNotNull(withOutTableGenerator);
             Assert.assertEquals("Kuldeep Mishra", withOutTableGenerator.getName());
         }
         catch (KunderaException e)
         {
             Assert.fail();
         }
-        CassandraGeneratedIdWithSequenceGenerator withSequenceGenerator = new CassandraGeneratedIdWithSequenceGenerator();
-        withSequenceGenerator.setName("Kuldeep Kumar Mishra");
         try
         {
+            CassandraGeneratedIdWithSequenceGenerator withSequenceGenerator = new CassandraGeneratedIdWithSequenceGenerator();
+            withSequenceGenerator.setName("Kuldeep Kumar Mishra");
             em.persist(withSequenceGenerator);
             Assert.fail();
         }
@@ -191,10 +206,10 @@ public class CassandraGeneratedIdTest
                             + GenerationType.SEQUENCE + " Strategy not supported by this client :"
                             + ThriftClient.class.getName(), e.getMessage());
         }
-        CassandraGeneratedIdWithTableGenerator withTableGenerator = new CassandraGeneratedIdWithTableGenerator();
-        withTableGenerator.setName("Kumar Mishra");
         try
         {
+            CassandraGeneratedIdWithTableGenerator withTableGenerator = new CassandraGeneratedIdWithTableGenerator();
+            withTableGenerator.setName("Kumar Mishra");
             em.persist(withTableGenerator);
             List<CassandraGeneratedIdWithTableGenerator> list = em.createQuery(
                     "Select c from CassandraGeneratedIdWithTableGenerator c").getResultList();
@@ -204,7 +219,7 @@ public class CassandraGeneratedIdTest
             Object id = list.get(0).getId();
             em.clear();
             withTableGenerator = em.find(CassandraGeneratedIdWithTableGenerator.class, id);
-            Assert.assertNotNull(strategyTable);
+            Assert.assertNotNull(withTableGenerator);
             Assert.assertEquals("Kumar Mishra", withTableGenerator.getName());
         }
         catch (KunderaException e)

@@ -15,13 +15,15 @@
  ******************************************************************************/
 package com.impetus.client.crud;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
+import org.apache.cassandra.thrift.Cassandra.Client;
 import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KsDef;
@@ -29,19 +31,22 @@ import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
+import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.thrift.TException;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
 
 /**
  * 
  * @author Kuldeep.Mishra
- *
+ * 
  */
-public class CassandraThriftSecondaryTableTest extends SecondaryTableTestBase
+public class DSClientSecondaryTableTest
 {
 
     private EntityManagerFactory emf;
@@ -52,7 +57,9 @@ public class CassandraThriftSecondaryTableTest extends SecondaryTableTestBase
         CassandraCli.cassandraSetUp();
         CassandraCli.createKeySpace("KunderaExamples");
         loadData();
-        emf = Persistence.createEntityManagerFactory("secIdxCassandraTest");
+        Map<String, String> props = new HashMap<String, String>();
+        props.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
+        emf = Persistence.createEntityManagerFactory("ds_pu", props);
     }
 
     @After
@@ -65,9 +72,40 @@ public class CassandraThriftSecondaryTableTest extends SecondaryTableTestBase
     @Test
     public void test()
     {
-        testCRUD(emf);
+        EntityManager em = emf.createEntityManager();
+
+        SecondaryTableEntity entity = new SecondaryTableEntity();
+        entity.setAge(24);
+        entity.setObjectId("123");
+        entity.setName("Kuldeep");
+
+        em.persist(entity);
+
+        em.clear();
+
+        SecondaryTableEntity foundEntity = em.find(SecondaryTableEntity.class, "123");
+        Assert.assertNotNull(foundEntity);
+        Assert.assertEquals("Kuldeep", foundEntity.getName());
+        // Assert.assertEquals(24, foundEntity.getAge());
+
+        foundEntity.setAge(25);
+        foundEntity.setName("kk");
+
+        em.merge(foundEntity);
+
+        em.clear();
+
+        foundEntity = em.find(SecondaryTableEntity.class, "123");
+        Assert.assertNotNull(foundEntity);
+        Assert.assertEquals("kk", foundEntity.getName());
+        // Assert.assertEquals(25, foundEntity.getAge());
+
+        em.remove(foundEntity);
+
+        foundEntity = em.find(SecondaryTableEntity.class, "123");
+        Assert.assertNull(foundEntity);
     }
-    
+
     /**
      * Load cassandra specific data.
      * 
@@ -85,60 +123,31 @@ public class CassandraThriftSecondaryTableTest extends SecondaryTableTestBase
     private void loadData() throws TException, InvalidRequestException, UnavailableException, TimedOutException,
             SchemaDisagreementException
     {
-        String table1 = "PRIMARY_TABLE";
         String table2 = "SECONDARY_TABLE";
         String keyspace = "KunderaExamples";
-        KsDef ksDef = null;
-        CfDef user_Def1 = new CfDef();
-        user_Def1.name = table1;
-        user_Def1.keyspace = keyspace;
-        user_Def1.column_type = "Super";
-
-
-        CfDef user_Def2 = new CfDef();
-        user_Def2.name = table2;
-        user_Def2.keyspace = keyspace;
-        user_Def2.column_type = "Super";
-
-        List<CfDef> cfDefs = new ArrayList<CfDef>();
-        cfDefs.add(user_Def1);
-        cfDefs.add(user_Def2);
 
         try
         {
-            ksDef = CassandraCli.client.describe_keyspace(keyspace);
-            CassandraCli.client.set_keyspace(keyspace);
+            Client client = CassandraCli.getClient();
+            KsDef ksDef = client.describe_keyspace(keyspace);
+            client.set_keyspace(keyspace);
 
             List<CfDef> cfDefn = ksDef.getCf_defs();
 
             for (CfDef cfDef1 : cfDefn)
             {
-
-                if (cfDef1.getName().equalsIgnoreCase(table1))
-                {
-                    CassandraCli.client.system_drop_column_family(table1);
-                }
                 if (cfDef1.getName().equalsIgnoreCase(table2))
                 {
-                    CassandraCli.client.system_drop_column_family(table2);
+                    client.system_drop_column_family(table2);
                 }
             }
-            CassandraCli.client.system_add_column_family(user_Def1);
-            CassandraCli.client.system_add_column_family(user_Def2);
-
+            client.execute_cql3_query(ByteBufferUtil
+                    .bytes("create table \"SECONDARY_TABLE\"(\"OBJECT_ID\" text PRIMARY KEY, \"AGE\" int)"),
+                    org.apache.cassandra.thrift.Compression.NONE, org.apache.cassandra.thrift.ConsistencyLevel.ANY);
         }
         catch (NotFoundException e)
         {
 
-            ksDef = new KsDef(keyspace, "org.apache.cassandra.locator.SimpleStrategy", cfDefs);
-            // Set replication factor
-            if (ksDef.strategy_options == null)
-            {
-                ksDef.strategy_options = new LinkedHashMap<String, String>();
-            }
-            // Set replication factor, the value MUST be an integer
-            ksDef.strategy_options.put("replication_factor", "1");
-            CassandraCli.client.system_add_keyspace(ksDef);
         }
     }
 }

@@ -29,6 +29,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.client.crud.entities.PersonalDetailEmbedded;
+import com.impetus.client.crud.entities.PersonnelEmbedded;
+import com.impetus.client.crud.entities.PhoneDirectory;
 import com.impetus.client.utils.MongoUtils;
 
 /**

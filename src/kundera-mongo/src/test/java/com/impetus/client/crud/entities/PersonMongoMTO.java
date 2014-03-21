@@ -1,5 +1,5 @@
 /*******************************************************************************
- * * Copyright 2012 Impetus Infotech.
+ * * Copyright 2013 Impetus Infotech.
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -13,115 +13,65 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.client.crud;
+package com.impetus.client.crud.entities;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.impetus.client.crud.AddressMongoMTO;
 import com.impetus.kundera.index.Index;
 import com.impetus.kundera.index.IndexCollection;
 
-/**
- * The Class Person.
- */
 @Entity
-@Table(name = "PERSON_BATCH", schema = "KunderaMongoDataType@MongoBatchTest")
-@IndexCollection(columns = { @Index(name = "personName"), @Index(name = "age") })
-public class PersonBatchMongoEntity
+@Table(name = "PersonMongoMTO", schema = "KunderaExamples@mongoTest")
+@IndexCollection(columns = { @Index(name = "personName") })
+public class PersonMongoMTO
 {
-
-    /** The person id. */
     @Id
     @Column(name = "PERSON_ID")
     private String personId;
 
-    /** The person name. */
     @Column(name = "PERSON_NAME")
     private String personName;
 
-    /** The age. */
-    @Column(name = "AGE")
-    private Integer age;
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
+    private AddressMongoMTO address;
 
-    @Column(name = "AGEss")
-    private byte[] a;
-
-    /**
-     * @return the a
-     */
-    public byte[] getA()
-    {
-        return a;
-    }
-
-    /**
-     * @param a
-     *            the a to set
-     */
-    public void setA(byte[] a)
-    {
-        this.a = a;
-    }
-
-    /**
-     * Gets the person id.
-     * 
-     * @return the person id
-     */
     public String getPersonId()
     {
         return personId;
     }
 
-    /**
-     * Gets the person name.
-     * 
-     * @return the person name
-     */
     public String getPersonName()
     {
         return personName;
     }
 
-    /**
-     * Sets the person name.
-     * 
-     * @param personName
-     *            the new person name
-     */
     public void setPersonName(String personName)
     {
         this.personName = personName;
     }
 
-    /**
-     * Sets the person id.
-     * 
-     * @param personId
-     *            the new person id
-     */
     public void setPersonId(String personId)
     {
         this.personId = personId;
     }
 
-    /**
-     * @return the age
-     */
-    public int getAge()
+    public AddressMongoMTO getAddress()
     {
-        return age;
+        return address;
     }
 
-    /**
-     * @param age
-     *            the age to set
-     */
-    public void setAge(int age)
+    public void setAddress(AddressMongoMTO address)
     {
-        this.age = age;
+        this.address = address;
     }
 
 }

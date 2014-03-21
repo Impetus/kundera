@@ -150,7 +150,7 @@ public class Neo4JQuery extends QueryImpl
                     {
                         // TODO: Amresh need to look for "String.class"
                         // parameter.
-                        sb.append(appendRange(filter.getValue().toString(), false, true, String.class));
+                        sb.append(appendRange(filter.getValue().get(0).toString(), false, true, String.class));
                         appended = true;
                     }
                     else if (condition.equalsIgnoreCase(">="))

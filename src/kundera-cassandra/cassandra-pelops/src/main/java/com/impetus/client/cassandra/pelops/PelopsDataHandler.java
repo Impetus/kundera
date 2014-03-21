@@ -76,7 +76,6 @@ final class PelopsDataHandler extends CassandraDataHandlerBase implements Cassan
                 .getSecondaryTablesName();
         secondaryTables.add(m.getTableName());
         Object e = null;
-        // e = PelopsUtils.initialize(m, e, null);
 
         for (String tableName : secondaryTables)
         {
@@ -100,17 +99,7 @@ final class PelopsDataHandler extends CassandraDataHandlerBase implements Cassan
             }
         }
 
-        return e;
-        // if (e != null && PropertyAccessorHelper.getId(e, m) != null )
-        // {
-        // return isWrapReq && !relations.isEmpty() ? new EnhanceEntity(e,
-        // PropertyAccessorHelper.getId(e, m),
-        // relations) : e;
-        // }
-        // else
-        // {
-        // return null;
-        // }
+        return e;        
     }
 
     /** Translation Methods */
