@@ -25,7 +25,7 @@ import javax.persistence.Persistence;
 
 import junit.framework.Assert;
 
-import org.apache.cassandra.db.marshal.IntegerType;
+import org.apache.cassandra.db.marshal.Int32Type;
 import org.apache.cassandra.db.marshal.UTF8Type;
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.ColumnDef;
@@ -102,7 +102,8 @@ public class CassandraSchemaOperationTest
                         Assert.assertTrue(columnDef.isSetIndex_type());
                         Assert.assertTrue(columns.contains(new String(columnDef.getName(), Constants.ENCODING)));
                         Assert.assertEquals(IndexType.KEYS, columnDef.index_type);
-                        Assert.assertEquals("age_index", columnDef.index_name);
+                        // Assert.assertEquals("age_index",
+                        // columnDef.index_name);
                     }
                     else
                     {
@@ -110,7 +111,8 @@ public class CassandraSchemaOperationTest
                         Assert.assertTrue(columnDef.isSetIndex_type());
                         Assert.assertTrue(columns.contains(new String(columnDef.getName(), Constants.ENCODING)));
                         Assert.assertEquals(IndexType.KEYS, columnDef.index_type);
-                        Assert.assertEquals("name_index", columnDef.index_name);
+                        // Assert.assertEquals("name_index",
+                        // columnDef.index_name);
                     }
                 }
             }
@@ -146,14 +148,16 @@ public class CassandraSchemaOperationTest
                         Assert.assertTrue(columnDef.isSetIndex_type());
                         Assert.assertTrue(columns.contains(new String(columnDef.getName(), Constants.ENCODING)));
                         Assert.assertEquals(IndexType.KEYS, columnDef.index_type);
-                        Assert.assertEquals("age_index", columnDef.index_name);
+                        // Assert.assertEquals("age_index",
+                        // columnDef.index_name);
                     }
                     else
                     {
                         Assert.assertTrue(columnDef.isSetIndex_type());
                         Assert.assertTrue(columns.contains(new String(columnDef.getName(), Constants.ENCODING)));
                         Assert.assertEquals(IndexType.KEYS, columnDef.index_type);
-                        Assert.assertEquals("name_index", columnDef.index_name);
+                        // Assert.assertEquals("name_index",
+                        // columnDef.index_name);
                     }
                 }
             }
@@ -200,8 +204,9 @@ public class CassandraSchemaOperationTest
                     {
                         Assert.assertTrue(columnDef.isSetIndex_type());
                         Assert.assertNotNull(columnDef.index_name);
-                        Assert.assertEquals(IntegerType.class.getName(), columnDef.getValidation_class());
-                        Assert.assertEquals("age_index", columnDef.index_name);
+                        Assert.assertEquals(Int32Type.class.getName(), columnDef.getValidation_class());
+                        // Assert.assertEquals("age_index",
+                        // columnDef.index_name);
                         counter++;
                     }
                     else
@@ -210,7 +215,8 @@ public class CassandraSchemaOperationTest
                         Assert.assertEquals("PERSON_NAME", new String(columnDef.getName(), Constants.ENCODING));
                         Assert.assertNotNull(columnDef.index_name);
                         Assert.assertEquals(UTF8Type.class.getName(), columnDef.getValidation_class());
-                        Assert.assertEquals("name_index", columnDef.index_name);
+                        // Assert.assertEquals("name_index",
+                        // columnDef.index_name);
                         counter++;
                     }
                 }
@@ -231,7 +237,7 @@ public class CassandraSchemaOperationTest
         List<ColumnDef> column_metadata = new ArrayList<ColumnDef>();
         ColumnDef def = new ColumnDef();
         def.setName("AGE".getBytes());
-        def.setValidation_class("UTF8Type");
+        def.setValidation_class("Int32Type");
         def.setIndex_type(IndexType.KEYS);
 
         ColumnDef def1 = new ColumnDef();
@@ -251,54 +257,44 @@ public class CassandraSchemaOperationTest
         Assert.assertEquals(1, ksDef.getCf_defs().size());
         Assert.assertEquals(2, ksDef.getCf_defs().get(0).getColumn_metadata().size());
 
-        try
-        {
-            getEntityManagerFactory("update");
-            Assert.fail("Should have gone to catch block.");
-        }
-        catch (SchemaGenerationException e)
-        {
-            Assert.assertEquals(
-                    "com.impetus.kundera.configure.schema.SchemaGenerationException: Error occurred while creating table CassandraEntitySimple",
-                    e.getMessage());
-        }
-        
+        getEntityManagerFactory("update");
+
         // TODO: Do not delete it.
-//        Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCoreExmples"));
-//        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntitySimple", "KunderaCoreExmples"));
-//        ksDef = client.describe_keyspace("KunderaCoreExmples");
-//        for (org.apache.cassandra.thrift.CfDef cfDef : ksDef.getCf_defs())
-//        {
-//            if ("CassandraEntitySimple".equals(cfDef.getName()))
-//            {
-//                Assert.assertEquals("CassandraEntitySimple", cfDef.getName());
-//
-//                Assert.assertEquals("Standard", cfDef.getColumn_type());
-//
-//                int counter = 0;
-//                for (ColumnDef columnDef : cfDef.getColumn_metadata())
-//                {
-//                    if (new String(columnDef.getName(), Constants.ENCODING).equals("AGE"))
-//                    {
-//                        Assert.assertTrue(columnDef.isSetIndex_type());
-//                        Assert.assertNotNull(columnDef.index_name);
-//                        Assert.assertEquals(IntegerType.class.getName(), columnDef.getValidation_class());
+        Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCoreExmples"));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntitySimple", "KunderaCoreExmples"));
+        ksDef = client.describe_keyspace("KunderaCoreExmples");
+        for (org.apache.cassandra.thrift.CfDef cfDef : ksDef.getCf_defs())
+        {
+            if ("CassandraEntitySimple".equals(cfDef.getName()))
+            {
+                Assert.assertEquals("CassandraEntitySimple", cfDef.getName());
+
+                Assert.assertEquals("Standard", cfDef.getColumn_type());
+
+                int counter = 0;
+                for (ColumnDef columnDef : cfDef.getColumn_metadata())
+                {
+                    if (new String(columnDef.getName(), Constants.ENCODING).equals("AGE"))
+                    {
+                        Assert.assertTrue(columnDef.isSetIndex_type());
+                        Assert.assertNotNull(columnDef.index_name);
+                        Assert.assertEquals(Int32Type.class.getName(), columnDef.getValidation_class());
 //                        Assert.assertEquals("age_index", columnDef.index_name);
-//                        counter++;
-//                    }
-//                    else
-//                    {
-//                        Assert.assertTrue(columnDef.isSetIndex_type());
-//                        Assert.assertEquals("PERSON_NAME", new String(columnDef.getName(), Constants.ENCODING));
-//                        Assert.assertNotNull(columnDef.index_name);
-//                        Assert.assertEquals(UTF8Type.class.getName(), columnDef.getValidation_class());
+                        counter++;
+                    }
+                    else
+                    {
+                        Assert.assertTrue(columnDef.isSetIndex_type());
+                        Assert.assertEquals("PERSON_NAME", new String(columnDef.getName(), Constants.ENCODING));
+                        Assert.assertNotNull(columnDef.index_name);
+                        Assert.assertEquals(UTF8Type.class.getName(), columnDef.getValidation_class());
 //                        Assert.assertEquals("name_index", columnDef.index_name);
-//                        counter++;
-//                    }
-//                }
-//                Assert.assertEquals(2, counter);
-//            }
-//        }
+                        counter++;
+                    }
+                }
+                Assert.assertEquals(2, counter);
+            }
+        }
     }
 
     @Test

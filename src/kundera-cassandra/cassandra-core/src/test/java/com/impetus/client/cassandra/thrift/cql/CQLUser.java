@@ -10,7 +10,7 @@ import com.impetus.kundera.index.IndexCollection;
 
 @Entity
 @Table(name = "CQLUSER", schema = "CqlKeyspace@cassandra_cql")
-@IndexCollection(columns = { @Index(name = "name", indexName = "name_index"), @Index(name = "age") })
+@IndexCollection(columns = { @Index(name = "name"), @Index(name = "age") })
 public class CQLUser
 {
     @Id

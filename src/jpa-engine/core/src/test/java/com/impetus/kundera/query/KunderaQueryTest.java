@@ -260,7 +260,7 @@ public class KunderaQueryTest
             if (clause.getClass().isAssignableFrom(FilterClause.class))
             {
                 Assert.assertNotNull(((FilterClause) clause).getProperty());
-                Assert.assertNotNull(((FilterClause) clause).getValue());
+                Assert.assertNotNull(((FilterClause) clause).getValue().get(0));
                 Assert.assertNotNull(((FilterClause) clause).getCondition());
             }
             else

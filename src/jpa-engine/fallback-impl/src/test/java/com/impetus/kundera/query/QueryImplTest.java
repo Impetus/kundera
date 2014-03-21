@@ -270,7 +270,7 @@ public class QueryImplTest
             queryObj.getParameterValue("invalidParameter");
         } catch(IllegalArgumentException usex)
         {
-            Assert.assertEquals("parameter is not a parameter of the query", usex.getMessage());
+            Assert.assertEquals("Parameter is not a parameter of the query.", usex.getMessage());
         }
         
         
