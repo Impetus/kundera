@@ -91,7 +91,6 @@ import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
-import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.utils.ReflectUtils;
 
 /**
@@ -120,6 +119,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
 
     /** The tables. */
     private List<Table> tables;
+
+    private List<String> createdKeyspaces = new ArrayList<String>();
 
     /**
      * Instantiates a new cassandra schema manager.
@@ -155,11 +156,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         {
             try
             {
-                cassandra_client.set_keyspace(databaseName);
-                for (TableInfo tableInfo : tableInfos)
-                {
-                    dropColumnFamily(tableInfo);
-                }
+                dropKeyspaceOrCFs();
             }
             catch (Exception ex)
             {
@@ -168,6 +165,23 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             }
         }
         cassandra_client = null;
+    }
+
+    private void dropKeyspaceOrCFs() throws InvalidRequestException, SchemaDisagreementException, TException, Exception
+    {
+        if (createdKeyspaces.contains(databaseName))// drop if created during
+                                                    // create-drop call.
+        {
+            cassandra_client.system_drop_keyspace(databaseName);
+        }
+        else
+        {
+            cassandra_client.set_keyspace(databaseName);
+            for (TableInfo tableInfo : tableInfos)
+            {
+                dropColumnFamily(tableInfo);
+            }
+        }
     }
 
     /**
@@ -215,7 +229,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
         catch (Exception ex)
         {
-            throw new PropertyAccessException(ex);
+            throw new SchemaGenerationException(ex);
         }
     }
 
@@ -237,12 +251,15 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     {
         try
         {
+            createdKeyspaces.add(databaseName);
             createKeyspace();
         }
         catch (InvalidRequestException irex)
         {
             // Ignore and add a log.debug
             // keyspace already exists.
+            // remove from list if already created.
+            createdKeyspaces.remove(databaseName);
         }
         cassandra_client.set_keyspace(databaseName);
         return cassandra_client.describe_keyspace(databaseName);
@@ -389,7 +406,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
         else
         {
-            log.error("Error occurred while creating table{}, Caused by: .", tableInfo.getTableName(), irex);
+            log.error("Error occurred while creating table{}, Caused by: {}.", tableInfo.getTableName(), irex);
             throw new SchemaGenerationException("Error occurred while creating table " + tableInfo.getTableName(),
                     irex, "Cassandra", databaseName);
         }
@@ -558,11 +575,10 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         // append primary key clause
         queryBuilder.append(translator.ADD_PRIMARYKEY_CLAUSE);
 
-        Field[] fields = tableInfo.getTableIdType().getDeclaredFields();
-
         // To ensure field ordering
         if (compoEmbeddableType != null)
         {
+            Field[] fields = tableInfo.getTableIdType().getDeclaredFields();
             StringBuilder primaryKeyBuilder = new StringBuilder();
             appendPrimaryKey(translator, compoEmbeddableType, fields, primaryKeyBuilder);
             // should not be null.
@@ -676,6 +692,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 if (new String(columnDef.getName(), Constants.ENCODING).equals(indexInfo.getColumnName()))
                 {
                     columnDef.setIndex_type(CassandraIndexHelper.getIndexType(indexInfo.getIndexType()));
+                    columnDef.setIndex_name(indexInfo.getIndexName());
                 }
             }
         }
@@ -689,9 +706,9 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      */
     private void createIndexUsingCql(TableInfo tableInfo) throws Exception
     {
+        StringBuilder indexQueryBuilder = new StringBuilder("create index $INDEX_NAME on \"");
         // StringBuilder indexQueryBuilder = new
-        // StringBuilder("create index $COLUMN_NAME on \"");
-        StringBuilder indexQueryBuilder = new StringBuilder("create index on \"");
+        // StringBuilder("create index on \"");
         indexQueryBuilder.append(tableInfo.getTableName());
         indexQueryBuilder.append("\"(\"$COLUMN_NAME\")");
         for (IndexInfo indexInfo : tableInfo.getColumnsToBeIndexed())
@@ -706,7 +723,9 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                     return;
                 }
             }
-            String replacedWithindexName = StringUtils.replace(indexQueryBuilder.toString(), "$COLUMN_NAME",
+            String replacedWithindexName = StringUtils.replace(indexQueryBuilder.toString(), "$INDEX_NAME", indexInfo
+                    .getIndexName().equals(indexInfo.getColumnName()) ? "" : indexInfo.getIndexName());
+            replacedWithindexName = StringUtils.replace(replacedWithindexName, "$COLUMN_NAME",
                     indexInfo.getColumnName());
             try
             {
@@ -1005,26 +1024,53 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 Map<ByteBuffer, String> name_types = new HashMap<ByteBuffer, String>();
                 Map<ByteBuffer, String> value_types = new HashMap<ByteBuffer, String>();
                 List<ColumnInfo> columnInfos = tableInfo.getColumnMetadatas();
-                name_types.put(ByteBufferUtil.bytes(tableInfo.getIdColumnName()), "UTF8Type");
-                value_types.put(ByteBufferUtil.bytes(tableInfo.getIdColumnName()), CassandraValidationClassMapper
-                        .getValidationClassInstance(tableInfo.getTableIdType(), true).getName());
+
+                List<EmbeddedColumnInfo> compositeColumns = tableInfo.getEmbeddedColumnMetadatas();
+                if (compositeColumns != null && !compositeColumns.isEmpty())
+                {
+                    EmbeddableType embeddableType = compositeColumns.get(0).getEmbeddable();
+                    for (ColumnInfo columnInfo : compositeColumns.get(0).getColumns())
+                    {
+                        name_types
+                                .put(ByteBufferUtil.bytes(columnInfo.getColumnName()), UTF8Type.class.getSimpleName());
+                        value_types.put(ByteBufferUtil.bytes(columnInfo.getColumnName()),
+                                CassandraValidationClassMapper.getValidationClassInstance(columnInfo.getType(), true)
+                                        .getName());
+                    }
+
+                }
+                else
+                {
+                    name_types.put(ByteBufferUtil.bytes(tableInfo.getIdColumnName()), UTF8Type.class.getSimpleName());
+                    value_types.put(ByteBufferUtil.bytes(tableInfo.getIdColumnName()), CassandraValidationClassMapper
+                            .getValidationClassInstance(tableInfo.getTableIdType(), true).getName());
+                }
 
                 for (ColumnInfo info : columnInfos)
                 {
-                    name_types.put(ByteBufferUtil.bytes(info.getColumnName()), "UTF8Type");
+                    name_types.put(ByteBufferUtil.bytes(info.getColumnName()), UTF8Type.class.getSimpleName());
                     value_types.put(ByteBufferUtil.bytes(info.getColumnName()), CassandraValidationClassMapper
                             .getValidationClassInstance(info.getType(), true).getName());
                 }
 
-                metadata.setDefault_name_type("UTF8Type");
-                metadata.setDefault_value_type("UTF8Type");
+                for (CollectionColumnInfo info : tableInfo.getCollectionColumnMetadatas())
+                {
+                    name_types
+                            .put(ByteBufferUtil.bytes(info.getCollectionColumnName()), UTF8Type.class.getSimpleName());
+                    value_types.put(ByteBufferUtil.bytes(info.getCollectionColumnName()),
+                            CassandraValidationClassMapper.getValueTypeName(info.getType(), info.getGenericClasses(),
+                                    true));
+                }
+
+                metadata.setDefault_name_type(UTF8Type.class.getSimpleName());
+                metadata.setDefault_value_type(UTF8Type.class.getSimpleName());
                 metadata.setName_types(name_types);
                 metadata.setValue_types(value_types);
                 CQLTranslator translator = new CQLTranslator();
-                final String describeTable = "select now() from ";
+                final String describeTable = "select * from ";
                 StringBuilder builder = new StringBuilder(describeTable);
                 translator.ensureCase(builder, tableInfo.getTableName(), false);
-                // builder.append("LIMIT 1");
+                builder.append("LIMIT 1");
                 cassandra_client.set_cql_version(CassandraConstants.CQL_VERSION_3_0);
                 CqlResult cqlResult = cassandra_client.execute_cql3_query(ByteBufferUtil.bytes(builder.toString()),
                         Compression.NONE, ConsistencyLevel.ONE);
@@ -1145,7 +1191,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 if (toUpdate)
                 {
                     cassandra_client.system_update_column_family(cfDef);
-                    createIndexUsingThrift(tableInfo, cfDef);
+                    // createIndexUsingThrift(tableInfo, cfDef);
                 }
                 break;
             }
@@ -1251,6 +1297,10 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         {
             IndexInfo indexInfo = tableInfo.getColumnToBeIndexed(columnInfo.getColumnName());
             columnDef.setIndex_type(CassandraIndexHelper.getIndexType(indexInfo.getIndexType()));
+            if (!indexInfo.getIndexName().equals(indexInfo.getColumnName()))
+            {
+                columnDef.setIndex_name(indexInfo.getIndexName());
+            }
         }
         return columnDef;
     }
@@ -1884,6 +1934,10 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                         {
                             IndexInfo indexInfo = tableInfo.getColumnToBeIndexed(columnInfo.getColumnName());
                             columnDef.setIndex_type(CassandraIndexHelper.getIndexType(indexInfo.getIndexType()));
+                            if (!indexInfo.getIndexName().equals(indexInfo.getColumnName()))
+                            {
+                                columnDef.setIndex_name(indexInfo.getIndexName());
+                            }
                         }
                         columnDef.setName(columnInfo.getColumnName().getBytes());
                         columnDef.setValidation_class(CassandraValidationClassMapper.getValidationClass(
@@ -1914,6 +1968,10 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                     {
                         IndexInfo indexInfo = tableInfo.getColumnToBeIndexed(columnInfo.getColumnName());
                         columnDef.setIndex_type(CassandraIndexHelper.getIndexType(indexInfo.getIndexType()));
+                        if (!indexInfo.getIndexName().equals(indexInfo.getColumnName()))
+                        {
+                            columnDef.setIndex_name(indexInfo.getIndexName());
+                        }
                     }
                     columnDef.setName(columnInfo.getColumnName().getBytes());
                     columnDef.setValidation_class(CounterColumnType.class.getName());

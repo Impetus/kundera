@@ -35,12 +35,15 @@ import org.apache.cassandra.db.marshal.Int32Type;
 import org.apache.cassandra.db.marshal.IntegerType;
 import org.apache.cassandra.db.marshal.ListType;
 import org.apache.cassandra.db.marshal.LongType;
+import org.apache.cassandra.db.marshal.MapType;
 import org.apache.cassandra.db.marshal.SetType;
+import org.apache.cassandra.db.marshal.TypeParser;
 import org.apache.cassandra.db.marshal.UTF8Type;
 import org.apache.cassandra.db.marshal.UUIDType;
+import org.apache.cassandra.exceptions.ConfigurationException;
+import org.apache.cassandra.exceptions.SyntaxException;
 import org.apache.cassandra.locator.NetworkTopologyStrategy;
 import org.apache.cassandra.locator.SimpleStrategy;
-import org.codehaus.jackson.map.type.MapType;
 
 /**
  * The Class CassandraValidationClassMapper holds the map of validation
@@ -112,7 +115,7 @@ public final class CassandraValidationClassMapper
         validationClassMapper.put(UUID.class, UUIDType.class);
 
         validationClassMapper.put(Calendar.class, DateType.class);
-        
+
         validationClassMapper.put(List.class, ListType.class);
         validationClassMapper.put(Set.class, SetType.class);
         validationClassMapper.put(Map.class, MapType.class);
@@ -127,17 +130,9 @@ public final class CassandraValidationClassMapper
      */
     public static String getValidationClass(Class<?> dataType, boolean isCql3Enabled)
     {
-        resetMapperForCQL3(isCql3Enabled);
-        Class<?> validation_class;
-        validation_class = validationClassMapper.get(dataType);
-        if (!(validation_class != null))
-        {
-            validation_class = BytesType.class;
-        }
-        resetMapperForThrift(isCql3Enabled);
-        return validation_class.getSimpleName();
+        return getValidationClassInstance(dataType, isCql3Enabled).getSimpleName();
     }
-    
+
     public static Class<?> getValidationClassInstance(Class<?> dataType, boolean isCql3Enabled)
     {
         resetMapperForCQL3(isCql3Enabled);
@@ -149,6 +144,32 @@ public final class CassandraValidationClassMapper
         }
         resetMapperForThrift(isCql3Enabled);
         return validation_class;
+    }
+
+    public static String getValueTypeName(Class<?> dataType, List<Class<?>> genericClasses, boolean isCql3Enabled) throws SyntaxException, ConfigurationException
+    {
+        String valueType;
+
+        Class<?> validation_class = getValidationClassInstance(dataType, isCql3Enabled);
+
+        valueType = validation_class.toString();
+        if (validation_class.equals(ListType.class))
+        {
+            TypeParser parser = new TypeParser(getValidationClass(genericClasses.get(0), isCql3Enabled));
+            valueType = ListType.getInstance(parser.parse()).toString();
+        }
+        else if (validation_class.equals(SetType.class))
+        {
+            TypeParser parser = new TypeParser(getValidationClass(genericClasses.get(0), isCql3Enabled));
+            valueType = SetType.getInstance(parser.parse()).toString();
+        }
+        else if (validation_class.equals(MapType.class))
+        {
+            TypeParser keyParser = new TypeParser(getValidationClass(genericClasses.get(0), isCql3Enabled));
+            TypeParser valueParser = new TypeParser(getValidationClass(genericClasses.get(1), isCql3Enabled));
+            valueType = MapType.getInstance(keyParser.parse(), valueParser.parse()).toString();
+        }
+        return valueType;
     }
 
     public static List<String> getReplicationStrategies()
@@ -168,12 +189,10 @@ public final class CassandraValidationClassMapper
     {
         if (isCql3Enabled)
         {
-            validationClassMapper.put(java.lang.Integer.class, Int32Type.class);
+            validationClassMapper.put(Integer.class, Int32Type.class);
             validationClassMapper.put(int.class, Int32Type.class);
             validationClassMapper.put(short.class, Int32Type.class);
             validationClassMapper.put(Short.class, Int32Type.class);
-            validationClassMapper.put(Byte.class, Int32Type.class);
-            validationClassMapper.put(byte.class, Int32Type.class);
         }
     }
 
@@ -181,12 +200,10 @@ public final class CassandraValidationClassMapper
     {
         if (isCql3Enabled)
         {
-            validationClassMapper.put(java.lang.Integer.class, Int32Type.class);
+            validationClassMapper.put(Integer.class, IntegerType.class);
             validationClassMapper.put(int.class, IntegerType.class);
             validationClassMapper.put(short.class, IntegerType.class);
             validationClassMapper.put(Short.class, IntegerType.class);
-            validationClassMapper.put(Byte.class, BytesType.class);
-            validationClassMapper.put(byte.class, BytesType.class);
         }
     }
 }
