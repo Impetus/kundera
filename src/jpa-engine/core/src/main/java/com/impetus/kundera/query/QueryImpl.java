@@ -89,6 +89,8 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
 
     private Integer fetchSize;
 
+    protected boolean isSingleResult = false;
+
     /**
      * Instantiates a new query impl.
      * 
@@ -266,6 +268,7 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
         if (kunderaQuery.isDeleteUpdate())
         {
             List result = fetch();
+                       
             onDeleteOrUpdate(result);
             return result != null ? result.size() : 0;
         }
@@ -292,7 +295,7 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
                 {
                     PersistenceCacheManager.addEntityToPersistenceCache(result, persistenceDelegeator,
                             PropertyAccessorHelper.getId(result, this.getEntityMetadata()));
-                    
+
                     persistenceDelegeator.remove(result);
                 }
             }
@@ -354,7 +357,11 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
     @Override
     public Object getSingleResult()
     {
-        throw new UnsupportedOperationException("getSingleResult is unsupported by Kundera");
+        // to fetch a single result form database.
+        isSingleResult = true;
+        List results = getResultList();
+        isSingleResult = false;
+        return onReturnResults(results);
     }
 
     /* @see javax.persistence.Query#setFirstResult(int) */
@@ -847,9 +854,9 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
      * 
      * @return value of parameter.
      */
-    private Object onParameterValue(String paramString)
+    private List<Object> onParameterValue(String paramString)
     {
-        Object value = kunderaQuery.getClauseValue(paramString);
+        List<Object> value = kunderaQuery.getClauseValue(paramString);
         if (value == null)
         {
             throw new IllegalStateException("parameter has not been bound" + paramString);

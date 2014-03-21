@@ -141,17 +141,6 @@ public class MongoDBQuery extends QueryImpl
     }
 
     @Override
-    public Object getSingleResult()
-    {
-        // to fetch a single result form database.
-        isSingleResult = true;
-        List results = getResultList();
-        isSingleResult = false;
-        return onReturnResults(results);
-
-    }
-
-    @Override
     protected List<Object> recursivelyPopulateEntities(EntityMetadata m, Client client)
     {
         // TODO : required to modify client return relation.
