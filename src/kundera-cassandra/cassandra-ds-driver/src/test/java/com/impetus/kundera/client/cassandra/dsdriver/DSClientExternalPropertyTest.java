@@ -222,11 +222,11 @@ public class DSClientExternalPropertyTest
         Assert.assertEquals(configuration.getPolicies().getReconnectionPolicy().getClass().getName(), CRP);
         Assert.assertEquals(configuration.getPolicies().getRetryPolicy().getClass().getName(), DCRP);
 
-        Assert.assertEquals(connectionProperties.getProperty("constantDelayMs"), 110000);
+        Assert.assertEquals(connectionProperties.getProperty("constantDelayMs"), "110000");
         Assert.assertEquals(connectionProperties.getProperty("localdc"), "dc1");
-        Assert.assertEquals(connectionProperties.getProperty("usedHostsPerRemoteDc"), 2);
-        Assert.assertEquals(connectionProperties.getProperty("isTokenAware"), true);
-        Assert.assertEquals(connectionProperties.getProperty("isLoggingRetry"), true);
+        Assert.assertEquals(connectionProperties.getProperty("usedHostsPerRemoteDc"), "2");
+        Assert.assertEquals(connectionProperties.getProperty("isTokenAware"), "true");
+        Assert.assertEquals(connectionProperties.getProperty("isLoggingRetry"), "true");
 
         emf.close();
 
