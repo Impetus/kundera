@@ -21,6 +21,8 @@ import java.util.Arrays;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.impetus.kundera.loader.MetamodelLoaderException;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
@@ -78,7 +80,7 @@ public class OneToManyRelationMetadataProcessor extends AbstractEntityFieldProce
         if (isJoinedByFK)
         {
             JoinColumn joinColumnAnn = relationField.getAnnotation(JoinColumn.class);
-            relation.setJoinColumnName(joinColumnAnn.name());
+            relation.setJoinColumnName(StringUtils.isBlank(joinColumnAnn.name()) ? relationField.getName() : joinColumnAnn.name());
         }
 
         else
