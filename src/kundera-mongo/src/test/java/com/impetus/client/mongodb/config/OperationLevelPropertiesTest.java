@@ -27,7 +27,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.crud.PersonMongo;
+import com.impetus.client.crud.entities.PersonMongo;
 import com.impetus.client.mongodb.MongoDBClient;
 import com.impetus.client.mongodb.MongoDBClientProperties;
 import com.impetus.kundera.client.Client;
