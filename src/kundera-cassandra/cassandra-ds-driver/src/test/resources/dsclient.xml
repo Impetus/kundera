@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<clientProperties>
+	<datastores>
+		<dataStore>
+			<name>cassandra</name>
+			<connection>
+				<properties>
+					<property name="loadbalancing.policy" value="RoundRobinPolicy"></property>
+					<!-- <property name="compression" value="true"></property> -->
+					<property name="reconnection.policy" value="ExponentialReconnectionPolicy"></property>
+					<property name="retry.policy" value="FallthroughRetryPolicy"></property>
+					
+					
+					<property name="socket.timeout" value="110000"></property>
+					<property name="readTimeoutMillis" value="110000"></property>
+					<property name="keepAlive" value="false"></property>
+					<property name="reuseAddress" value="true"></property>
+					<property name="soLinger" value="10"></property>
+					<property name="tcpNoDelay" value="true"></property>
+					<property name="receiveBufferSize" value="12"></property>
+					<property name="sendBufferSize" value="11"></property>
+					
+					
+					<property name="hostDistance" value="LOCAL"></property>
+					<property name="minSimultaneousRequests" value="65"></property>
+					<property name="maxSimultaneousRequests" value="200"></property>
+					<property name="coreConnections" value="5"></property>
+					<property name="maxConnections" value="12"></property>
+ 					<property name="baseDelayMs" value="11000"></property>
+					<property name="maxDelayMs" value="13000"></property>
+ 					
+					
+				</properties>
+			</connection>
+		</dataStore>
+	</datastores>
+</clientProperties>

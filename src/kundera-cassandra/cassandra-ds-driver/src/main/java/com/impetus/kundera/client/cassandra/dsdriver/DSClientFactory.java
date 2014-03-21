@@ -1,5 +1,5 @@
 /**
- * Copyright 2013 Impetus Infotech.
+ * Copyright 2014 Impetus Infotech.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -395,8 +395,9 @@ public class DSClientFactory extends GenericClientFactory implements CassandraCl
 
         case DCAwareRoundRobinPolicy:
 
+            String usedHostsPerRemoteDc = (String) conProperties.get("usedHostsPerRemoteDc");
             loadBalancingPolicy = new DCAwareRoundRobinPolicy((String) conProperties.get("localdc"),
-                    Integer.parseInt((String) conProperties.get("usedHostsPerRemoteDc")));
+                    usedHostsPerRemoteDc != null ? Integer.parseInt(usedHostsPerRemoteDc):0);
             break;
 
         case RoundRobinPolicy:
@@ -422,14 +423,20 @@ public class DSClientFactory extends GenericClientFactory implements CassandraCl
         switch (policy)
         {
         case ConstantReonnectionPolicy:
-            Long constantDelayMs = new Long(props.getProperty("constantDelayMs"));
+            String property = props.getProperty("constantDelayMs");
+            long constantDelayMs = property != null ? new Long(property): 0l;
             reconnectionPolicy = new ConstantReconnectionPolicy(constantDelayMs);
             break;
 
         case ExponentialReconnectionPolicy:
-            Long baseDelayMs = new Long(props.getProperty("baseDelayMs"));
-            Long maxDelayMs = new Long(props.getProperty("maxDelayMs"));
-            reconnectionPolicy = new ExponentialReconnectionPolicy(baseDelayMs, maxDelayMs);
+            String baseDelayMsAsStr= props.getProperty("baseDelayMs") ;
+            String maxDelayMsAsStr = props.getProperty("maxDelayMs"); 
+            if (!StringUtils.isBlank(baseDelayMsAsStr) && !StringUtils.isBlank(maxDelayMsAsStr))
+            {
+                long baseDelayMs = new Long(baseDelayMsAsStr);
+                long maxDelayMs = new Long(maxDelayMsAsStr);
+                reconnectionPolicy = new ExponentialReconnectionPolicy(baseDelayMs, maxDelayMs);
+            }
             break;
 
         default:
@@ -550,9 +557,9 @@ public class DSClientFactory extends GenericClientFactory implements CassandraCl
                 options.setMaxConnectionsPerHost(hostDist, new Integer(maxConnections));
             }
 
-            if (!StringUtils.isBlank(maxSimultaneousRequests))
+            if (!StringUtils.isBlank(minSimultaneousRequests))
             {
-                options.setMaxSimultaneousRequestsPerConnectionThreshold(hostDist, new Integer(maxSimultaneousRequests));
+                options.setMinSimultaneousRequestsPerConnectionThreshold(hostDist, new Integer(minSimultaneousRequests));
             }
 
             if (!StringUtils.isBlank(maxSimultaneousRequests))
