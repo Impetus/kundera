@@ -692,7 +692,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 if (new String(columnDef.getName(), Constants.ENCODING).equals(indexInfo.getColumnName()))
                 {
                     columnDef.setIndex_type(CassandraIndexHelper.getIndexType(indexInfo.getIndexType()));
-                    columnDef.setIndex_name(indexInfo.getIndexName());
+                    // columnDef.setIndex_name(indexInfo.getIndexName());
                 }
             }
         }
@@ -706,9 +706,9 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      */
     private void createIndexUsingCql(TableInfo tableInfo) throws Exception
     {
-        StringBuilder indexQueryBuilder = new StringBuilder("create index $INDEX_NAME on \"");
         // StringBuilder indexQueryBuilder = new
-        // StringBuilder("create index on \"");
+        // StringBuilder("create index $INDEX_NAME on \"");
+        StringBuilder indexQueryBuilder = new StringBuilder("create index on \"");
         indexQueryBuilder.append(tableInfo.getTableName());
         indexQueryBuilder.append("\"(\"$COLUMN_NAME\")");
         for (IndexInfo indexInfo : tableInfo.getColumnsToBeIndexed())
@@ -723,9 +723,12 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                     return;
                 }
             }
-            String replacedWithindexName = StringUtils.replace(indexQueryBuilder.toString(), "$INDEX_NAME", indexInfo
-                    .getIndexName().equals(indexInfo.getColumnName()) ? "" : indexInfo.getIndexName());
-            replacedWithindexName = StringUtils.replace(replacedWithindexName, "$COLUMN_NAME",
+            // String replacedWithindexName =
+            // StringUtils.replace(indexQueryBuilder.toString(), "$INDEX_NAME",
+            // indexInfo
+            // .getIndexName().equals(indexInfo.getColumnName()) ? "" :
+            // indexInfo.getIndexName());
+            String replacedWithindexName = StringUtils.replace(indexQueryBuilder.toString(), "$COLUMN_NAME",
                     indexInfo.getColumnName());
             try
             {
@@ -1211,8 +1214,19 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 {
                     columnDef.setValidation_class(CassandraValidationClassMapper.getValidationClass(
                             columnInfo.getType(), isCql3Enabled));
-                    columnDef.setIndex_typeIsSet(false);
-                    columnDef.setIndex_nameIsSet(false);
+//                    if (columnInfo.isIndexable() && !columnDef.isSetIndex_type())
+//                    {
+//                        IndexInfo indexInfo = tableInfo.getColumnToBeIndexed(columnInfo.getColumnName());
+//                        columnDef.setIndex_type(CassandraIndexHelper.getIndexType(indexInfo.getIndexType()));
+//                        columnDef.isSetIndex_type();
+//                        columnDef.setIndex_typeIsSet(true);
+//                        columnDef.setIndex_nameIsSet(true);
+//                    }
+//                    else
+//                    {
+//                        columnDef.setIndex_nameIsSet(false);
+//                        columnDef.setIndex_typeIsSet(false);
+//                    }
                     isUpdated = true;
                 }
                 columnPresent = true;
@@ -1297,10 +1311,10 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         {
             IndexInfo indexInfo = tableInfo.getColumnToBeIndexed(columnInfo.getColumnName());
             columnDef.setIndex_type(CassandraIndexHelper.getIndexType(indexInfo.getIndexType()));
-            if (!indexInfo.getIndexName().equals(indexInfo.getColumnName()))
-            {
-                columnDef.setIndex_name(indexInfo.getIndexName());
-            }
+            // if (!indexInfo.getIndexName().equals(indexInfo.getColumnName()))
+            // {
+            // columnDef.setIndex_name(indexInfo.getIndexName());
+            // }
         }
         return columnDef;
     }
@@ -1934,10 +1948,11 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                         {
                             IndexInfo indexInfo = tableInfo.getColumnToBeIndexed(columnInfo.getColumnName());
                             columnDef.setIndex_type(CassandraIndexHelper.getIndexType(indexInfo.getIndexType()));
-                            if (!indexInfo.getIndexName().equals(indexInfo.getColumnName()))
-                            {
-                                columnDef.setIndex_name(indexInfo.getIndexName());
-                            }
+                            // if
+                            // (!indexInfo.getIndexName().equals(indexInfo.getColumnName()))
+                            // {
+                            // columnDef.setIndex_name(indexInfo.getIndexName());
+                            // }
                         }
                         columnDef.setName(columnInfo.getColumnName().getBytes());
                         columnDef.setValidation_class(CassandraValidationClassMapper.getValidationClass(
@@ -1968,10 +1983,11 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                     {
                         IndexInfo indexInfo = tableInfo.getColumnToBeIndexed(columnInfo.getColumnName());
                         columnDef.setIndex_type(CassandraIndexHelper.getIndexType(indexInfo.getIndexType()));
-                        if (!indexInfo.getIndexName().equals(indexInfo.getColumnName()))
-                        {
-                            columnDef.setIndex_name(indexInfo.getIndexName());
-                        }
+                        // if
+                        // (!indexInfo.getIndexName().equals(indexInfo.getColumnName()))
+                        // {
+                        // columnDef.setIndex_name(indexInfo.getIndexName());
+                        // }
                     }
                     columnDef.setName(columnInfo.getColumnName().getBytes());
                     columnDef.setValidation_class(CounterColumnType.class.getName());
