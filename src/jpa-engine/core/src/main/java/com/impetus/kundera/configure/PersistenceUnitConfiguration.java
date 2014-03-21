@@ -49,6 +49,8 @@ import com.impetus.kundera.utils.InvalidConfigurationException;
 public class PersistenceUnitConfiguration extends AbstractSchemaConfiguration implements Configuration
 {
 
+    private ClassLoader classLoader = this.getClass().getClassLoader();
+    
     /** The log instance. */
     private static Logger log = LoggerFactory.getLogger(PersistenceUnitConfiguration.class);
 
@@ -105,6 +107,8 @@ public class PersistenceUnitConfiguration extends AbstractSchemaConfiguration im
     {
         log.info("Loading Metadata from persistence.xml ...");
 
+	this.classLoader = puInfo.getClassLoader();
+	
         ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
         Map<String, PersistenceUnitMetadata> metadatas = new HashMap<String, PersistenceUnitMetadata>();
 
@@ -132,7 +136,7 @@ public class PersistenceUnitConfiguration extends AbstractSchemaConfiguration im
         Enumeration<URL> xmls = null;
         try
         {
-            xmls = this.getClass().getClassLoader().getResources(puLocation);
+            xmls = classLoader.getResources(puLocation);
         }
         catch (IOException ioex)
         {
@@ -219,6 +223,8 @@ public class PersistenceUnitConfiguration extends AbstractSchemaConfiguration im
         {
             metadata.addJarFile(url.getPath());
         }
+
+	metadata.getProperties().put("com.vtrack.kundera.classloader", classLoader);
     }
 
 }

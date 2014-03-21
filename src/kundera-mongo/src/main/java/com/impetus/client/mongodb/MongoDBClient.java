@@ -453,8 +453,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             BasicDBObject keys, String documentName)
     {
         DBCollection dbCollection = mongoDb.getCollection(documentName);
-        DBCursor cursor = orderBy != null ? dbCollection.find(mongoQuery, keys).sort(orderBy) : dbCollection.find(
-                mongoQuery, keys).limit(maxResult);
+        DBCursor cursor = orderBy != null ? dbCollection.find(mongoQuery, keys).sort(orderBy).limit(maxResult) :
+                dbCollection.find(mongoQuery, keys).limit(maxResult);
         return cursor;
     }
 
