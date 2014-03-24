@@ -45,7 +45,7 @@ public class TableInfo
 
     /** The embedded column metadatas. */
     private List<EmbeddedColumnInfo> embeddedColumnMetadatas;
-    
+
     /** The collection column metadatas. */
     private List<CollectionColumnInfo> collectionColumnMetadatas;
 
@@ -187,7 +187,7 @@ public class TableInfo
         {
             this.columnMetadatas = new ArrayList<ColumnInfo>();
         }
-        if (!columnMetadatas.contains(columnInfo))
+        if (!columnMetadatas.contains(columnInfo) && !this.getIdColumnName().equals(columnInfo.getColumnName()))
         {
             columnMetadatas.add(columnInfo);
         }
@@ -223,14 +223,14 @@ public class TableInfo
             this.embeddedColumnMetadatas = new ArrayList<EmbeddedColumnInfo>();
         }
         return embeddedColumnMetadatas;
-    }   
+    }
 
     /**
      * @return the collectionColumnMetadatas
      */
     public List<CollectionColumnInfo> getCollectionColumnMetadatas()
     {
-        if(this.collectionColumnMetadatas == null)
+        if (this.collectionColumnMetadatas == null)
         {
             this.collectionColumnMetadatas = new ArrayList<CollectionColumnInfo>();
         }
@@ -238,19 +238,20 @@ public class TableInfo
     }
 
     /**
-     * @param collectionColumnMetadatas the collectionColumnMetadatas to set
+     * @param collectionColumnMetadatas
+     *            the collectionColumnMetadatas to set
      */
     public void addCollectionColumnMetadata(CollectionColumnInfo collectionColumnMetadata)
     {
-        if(this.collectionColumnMetadatas == null)
+        if (this.collectionColumnMetadatas == null)
         {
             this.collectionColumnMetadatas = new ArrayList<CollectionColumnInfo>();
         }
-        
-        if(! collectionColumnMetadatas.contains(collectionColumnMetadata))
+
+        if (!collectionColumnMetadatas.contains(collectionColumnMetadata))
         {
             collectionColumnMetadatas.add(collectionColumnMetadata);
-        }         
+        }
     }
 
     /**

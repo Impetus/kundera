@@ -355,26 +355,30 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
     private void addJoinColumnToInfo(String joinColumn, TableInfo targetTableInfo, List<TableInfo> targetTableInfos,
             EntityMetadata m)
     {
-        if (!targetTableInfos.isEmpty() && targetTableInfos.contains(targetTableInfo))
+        if (!joinColumn.equals(targetTableInfo.getIdColumnName()))
         {
-            int idx = targetTableInfos.indexOf(targetTableInfo);
-            targetTableInfo = targetTableInfos.get(idx);
-            ColumnInfo columnInfoOfJoinColumn = getJoinColumn(targetTableInfo, joinColumn, m.getIdAttribute()
-                    .getBindableJavaType());
-            if (!targetTableInfo.getColumnMetadatas().contains(columnInfoOfJoinColumn))
+
+            if (!targetTableInfos.isEmpty() && targetTableInfos.contains(targetTableInfo))
             {
-                targetTableInfo.addColumnInfo(columnInfoOfJoinColumn);
+                int idx = targetTableInfos.indexOf(targetTableInfo);
+                targetTableInfo = targetTableInfos.get(idx);
+                ColumnInfo columnInfoOfJoinColumn = getJoinColumn(targetTableInfo, joinColumn, m.getIdAttribute()
+                        .getBindableJavaType());
+                if (!targetTableInfo.getColumnMetadatas().contains(columnInfoOfJoinColumn))
+                {
+                    targetTableInfo.addColumnInfo(columnInfoOfJoinColumn);
+                }
             }
-        }
-        else
-        {
-            ColumnInfo columnInfoOfJoinColumn = getJoinColumn(targetTableInfo, joinColumn, m.getIdAttribute()
-                    .getBindableJavaType());
-            if (!targetTableInfo.getColumnMetadatas().contains(columnInfoOfJoinColumn))
+            else
             {
-                targetTableInfo.addColumnInfo(columnInfoOfJoinColumn);
+                ColumnInfo columnInfoOfJoinColumn = getJoinColumn(targetTableInfo, joinColumn, m.getIdAttribute()
+                        .getBindableJavaType());
+                if (!targetTableInfo.getColumnMetadatas().contains(columnInfoOfJoinColumn))
+                {
+                    targetTableInfo.addColumnInfo(columnInfoOfJoinColumn);
+                }
+                targetTableInfos.add(targetTableInfo);
             }
-            targetTableInfos.add(targetTableInfo);
         }
     }
 
