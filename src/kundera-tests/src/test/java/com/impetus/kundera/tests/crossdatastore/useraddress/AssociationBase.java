@@ -243,13 +243,11 @@ public abstract class AssociationBase
 
                     if (AUTO_MANAGE_SCHEMA)
                     {
-                        if (mAdd.getTableName().equalsIgnoreCase("ADDRESS")
-                                || mAdd.getTableName().equalsIgnoreCase("ADDRESS_INT"))
+                        if (mAdd.getTableName().equalsIgnoreCase(colFamilies[0]))
                         {
                             loadDataForHABITAT();
                         }
-                        else if (mAdd.getTableName().equalsIgnoreCase("PERSONNEL")
-                                || mAdd.getTableName().equalsIgnoreCase("PERSONNEL_INT"))
+                        else if (mAdd.getTableName().equalsIgnoreCase(colFamilies[1]))
                         {
                             loadDataForPERSONNEL();
                         }
@@ -295,17 +293,22 @@ public abstract class AssociationBase
                     try
                     {
                         CouchDBTestUtils.createDatabase("KunderaTests".toLowerCase(), httpClient, httpHost);
-                        CouchDBTestUtils.createViews(new String[] { "STREET", "ADDRESS_ID", "PERSON_ID" }, "ADDRESS",
-                                httpHost, "KunderaTests".toLowerCase(), httpClient);
-                        CouchDBTestUtils.createViews(new String[] { "PERSON_NAME", "PERSON_ID", "ADDRESS_ID" },
-                                "PERSONNEL", httpHost, "KunderaTests".toLowerCase(), httpClient);
-                        CouchDBTestUtils.createViews(new String[] { "PERSON_ID", "ADDRESS_ID" }, "PERSONNEL_ADDRESS",
-                                httpHost, "KunderaTests".toLowerCase(), httpClient);
+                        // CouchDBTestUtils.createViews(new String[] { "STREET",
+                        // "ADDRESS_ID", "PERSON_ID" }, "ADDRESS",
+                        // httpHost, "KunderaTests".toLowerCase(), httpClient);
+                        // CouchDBTestUtils.createViews(new String[] {
+                        // "PERSON_NAME", "PERSON_ID", "ADDRESS_ID" },
+                        // "PERSONNEL", httpHost, "KunderaTests".toLowerCase(),
+                        // httpClient);
+                        // CouchDBTestUtils.createViews(new String[] {
+                        // "PERSON_ID", "ADDRESS_ID" }, "PERSONNEL_ADDRESS",
+                        // httpHost, "KunderaTests".toLowerCase(), httpClient);
 
                         CouchDBTestUtils.createViews(new String[] { "STREET", "ADDRESS_ID", "PERSON_ID" },
                                 colFamilies[0], httpHost, "KunderaTests".toLowerCase(), httpClient);
                         CouchDBTestUtils.createViews(new String[] { "PERSON_NAME", "PERSON_ID", "ADDRESS_ID" },
                                 colFamilies[1], httpHost, "KunderaTests".toLowerCase(), httpClient);
+
                         if (colFamilies.length == 3)
                         {
                             CouchDBTestUtils.createViews(new String[] { "PERSON_ID", "ADDRESS_ID" }, colFamilies[2],
@@ -375,12 +378,8 @@ public abstract class AssociationBase
      */
     private void truncateColumnFamily()
     {
-        String[] columnFamily = new String[] { "ADDRESS", "PERSONNEL", "PERSONNEL_ADDRESS"/*
-                                                                                           * ,
-                                                                                           * "PERSONNEL_INT"
-                                                                                           * ,
-                                                                                           * "ADDRESS_INT"
-                                                                                           */};
+        String[] columnFamily = new String[] { colFamilies[0], colFamilies[1],
+                colFamilies.length == 3 ? colFamilies[2] : null };
         CassandraCli.truncateColumnFamily(KEYSPACE, columnFamily);
     }
 
@@ -401,27 +400,18 @@ public abstract class AssociationBase
                     db.setAccessible(true);
                 }
                 DB mongoDB = (DB) db.get(client);
-                if (mongoDB.collectionExists("PERSONNEL"))
+                if (mongoDB.collectionExists(colFamilies[0]))
                 {
-                    mongoDB.getCollection("PERSONNEL").drop();
+                    mongoDB.getCollection(colFamilies[0]).drop();
                 }
-                if (mongoDB.collectionExists("ADDRESS"))
+                if (mongoDB.collectionExists(colFamilies[1]))
                 {
-                    mongoDB.getCollection("ADDRESS").drop();
+                    mongoDB.getCollection(colFamilies[1]).drop();
                 }
-                if (mongoDB.collectionExists("PERSONNEL_ADDRESS"))
+                if (colFamilies.length == 3 && mongoDB.collectionExists(colFamilies[2]))
                 {
-                    mongoDB.getCollection("PERSONNEL_ADDRESS").drop();
+                    mongoDB.getCollection(colFamilies[2]).drop();
                 }
-                if (mongoDB.collectionExists("PERSONNEL_INT"))
-                {
-                    mongoDB.getCollection("PERSONNEL_INT").drop();
-                }
-                if (mongoDB.collectionExists("ADDRESS_INT"))
-                {
-                    mongoDB.getCollection("ADDRESS_INT").drop();
-                }
-
             }
             catch (SecurityException e)
             {
@@ -471,11 +461,14 @@ public abstract class AssociationBase
     {
         try
         {
-            cli.update("DELETE FROM KUNDERATESTS.PERSONNEL");
+            cli.update("DELETE FROM KUNDERATESTS." + colFamilies[0]);
             // cli.update("DROP TABLE KUNDERATESTS.PERSONNEL");
-            cli.update("DELETE FROM KUNDERATESTS.ADDRESS");
+            cli.update("DELETE FROM KUNDERATESTS." + colFamilies[1]);
             // cli.update("DROP TABLE KUNDERATESTS.ADDRESS");
-            cli.update("DELETE FROM KUNDERATESTS.PERSONNEL_ADDRESS");
+            if (colFamilies.length == 3)
+            {
+                cli.update("DELETE FROM KUNDERATESTS." + colFamilies[2]);
+            }
             // cli.update("DROP TABLE KUNDERATESTS.PERSONNEL_ADDRESS");
 
         }
@@ -512,12 +505,13 @@ public abstract class AssociationBase
     {
         log.warn("Truncating....");
 
-        CassandraCli.dropColumnFamily("PERSONNEL", KEYSPACE);
-        CassandraCli.dropColumnFamily("ADDRESS", KEYSPACE);
-        CassandraCli.dropColumnFamily("PERSONNEL_ADDRESS", KEYSPACE);
+        CassandraCli.dropColumnFamily(colFamilies[0], KEYSPACE);
+        CassandraCli.dropColumnFamily(colFamilies[1], KEYSPACE);
+        if (colFamilies.length == 3)
+        {
+            CassandraCli.dropColumnFamily(colFamilies[2], KEYSPACE);
+        }
         CassandraCli.dropKeySpace(KEYSPACE);
-        // CassandraCli.truncateColumnFamily(KEYSPACE, "PERSONNEL",
-        // "ADDRESS","PERSONNEL_ADDRESS");
     }
 
     protected abstract void loadDataForPERSONNEL() throws TException, InvalidRequestException, UnavailableException,

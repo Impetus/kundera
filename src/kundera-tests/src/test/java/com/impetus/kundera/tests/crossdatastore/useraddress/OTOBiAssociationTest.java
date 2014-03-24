@@ -65,7 +65,7 @@ public class OTOBiAssociationTest extends TwinAssociation
     public void setUp() throws Exception
     {
 
-        setUpInternal();
+        setUpInternal("ADDRESS", "PERSONNEL");
     }
 
     /**

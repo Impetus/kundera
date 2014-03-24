@@ -71,7 +71,7 @@ public class MTMUniAssociationTest extends TwinAssociation
     @Before
     public void setUp() throws Exception
     {
-        setUpInternal("ADDRESS", "PERSONNEL");
+        setUpInternal("ADDRESS", "PERSONNEL", "PERSONNEL_ADDRESS");
     }
 
     /**
@@ -252,7 +252,7 @@ public class MTMUniAssociationTest extends TwinAssociation
     @After
     public void tearDown() throws Exception
     {
-       // shutDownRdbmsServer();
+        // shutDownRdbmsServer();
         // tearDownInternal(ALL_PUs_UNDER_TEST);
     }
 
@@ -349,14 +349,14 @@ public class MTMUniAssociationTest extends TwinAssociation
         {
             ksDef = CassandraCli.client.describe_keyspace("KunderaTests");
             CassandraCli.client.set_keyspace("KunderaTests");
-            if (!CassandraCli.columnFamilyExist("PERSONNEL", "KunderaTests")) {
+            if (!CassandraCli.columnFamilyExist("PERSONNEL", "KunderaTests"))
+            {
                 CassandraCli.client.system_add_column_family(cfDef);
-            } else {
+            }
+            else
+            {
                 CassandraCli.truncateColumnFamily("KunderaTests", "PERSONNEL");
             }
-
-
-
 
         }
         catch (NotFoundException e)
@@ -391,9 +391,12 @@ public class MTMUniAssociationTest extends TwinAssociation
         {
             ksDef = CassandraCli.client.describe_keyspace("KunderaTests");
             CassandraCli.client.set_keyspace("KunderaTests");
-            if (!CassandraCli.columnFamilyExist("ADDRESS", "KunderaTests")) {
+            if (!CassandraCli.columnFamilyExist("ADDRESS", "KunderaTests"))
+            {
                 CassandraCli.client.system_add_column_family(cfDef2);
-            } else {
+            }
+            else
+            {
                 CassandraCli.truncateColumnFamily("KunderaTests", "ADDRESS");
             }
 
@@ -424,31 +427,34 @@ public class MTMUniAssociationTest extends TwinAssociation
             columnDef2.index_type = IndexType.KEYS;
             cfDef2.addToColumn_metadata(columnDef2);
 
-           // List<CfDef> cfDefss = ksDef.getCf_defs();
+            // List<CfDef> cfDefss = ksDef.getCf_defs();
             CassandraCli.client.set_keyspace("KunderaTests");
 
-            if (!CassandraCli.columnFamilyExist("PERSONNEL_ADDRESS", "KunderaTests")) {
+            if (!CassandraCli.columnFamilyExist("PERSONNEL_ADDRESS", "KunderaTests"))
+            {
                 CassandraCli.client.system_add_column_family(cfDef2);
-            } else {
+            }
+            else
+            {
                 CassandraCli.truncateColumnFamily("KunderaTests", "PERSONNEL_ADDRESS");
             }
-            
+
         }
         catch (NotFoundException e)
         {
-            
+
         }
         catch (InvalidRequestException e)
         {
-            
+
         }
         catch (TException e)
         {
-            
+
         }
         catch (SchemaDisagreementException e)
         {
-            
+
         }
 
     }
@@ -465,14 +471,14 @@ public class MTMUniAssociationTest extends TwinAssociation
     {
         try
         {
-           // cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL (PERSON_ID VARCHAR(150) PRIMARY KEY, PERSON_NAME VARCHAR(256))");
+            // cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL (PERSON_ID VARCHAR(150) PRIMARY KEY, PERSON_NAME VARCHAR(256))");
             cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL (PERSON_ID VARCHAR(150) PRIMARY KEY, PERSON_NAME VARCHAR(150), ADDRESS_ID VARCHAR(150))");
         }
         catch (Exception e)
         {
             cli.update("DELETE FROM KUNDERATESTS.PERSONNEL");
-//            cli.update("DROP TABLE KUNDERATESTS.PERSONNEL");
-//            cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL (PERSON_ID VARCHAR(150) PRIMARY KEY, PERSON_NAME VARCHAR(256))");
+            // cli.update("DROP TABLE KUNDERATESTS.PERSONNEL");
+            // cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL (PERSON_ID VARCHAR(150) PRIMARY KEY, PERSON_NAME VARCHAR(256))");
         }
         try
         {
@@ -481,8 +487,8 @@ public class MTMUniAssociationTest extends TwinAssociation
         catch (Exception e)
         {
             cli.update("DELETE FROM KUNDERATESTS.PERSONNEL_ADDRESS");
-//            cli.update("DROP TABLE KUNDERATESTS.PERSONNEL_ADDRESS");
-//            cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL_ADDRESS (PERSON_ID VARCHAR(150) , ADDRESS_ID VARCHAR(150))");
+            // cli.update("DROP TABLE KUNDERATESTS.PERSONNEL_ADDRESS");
+            // cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL_ADDRESS (PERSON_ID VARCHAR(150) , ADDRESS_ID VARCHAR(150))");
         }
     }
 
@@ -498,14 +504,14 @@ public class MTMUniAssociationTest extends TwinAssociation
     {
         try
         {
-            //cli.update("CREATE TABLE KUNDERATESTS.ADDRESS (ADDRESS_ID VARCHAR(150) PRIMARY KEY, STREET VARCHAR(256))");
+            // cli.update("CREATE TABLE KUNDERATESTS.ADDRESS (ADDRESS_ID VARCHAR(150) PRIMARY KEY, STREET VARCHAR(256))");
             cli.update("CREATE TABLE KUNDERATESTS.ADDRESS (ADDRESS_ID VARCHAR(150) PRIMARY KEY, STREET VARCHAR(256),PERSON_ID VARCHAR(150))");
         }
         catch (Exception e)
         {
             cli.update("DELETE FROM KUNDERATESTS.ADDRESS");
-//            cli.update("DROP TABLE KUNDERATESTS.ADDRESS");
-//            cli.update("CREATE TABLE KUNDERATESTS.ADDRESS (ADDRESS_ID VARCHAR(150) PRIMARY KEY, STREET VARCHAR(256))");
+            // cli.update("DROP TABLE KUNDERATESTS.ADDRESS");
+            // cli.update("CREATE TABLE KUNDERATESTS.ADDRESS (ADDRESS_ID VARCHAR(150) PRIMARY KEY, STREET VARCHAR(256))");
         }
     }
 

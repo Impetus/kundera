@@ -68,7 +68,7 @@ public class MTMBiAssociationTest extends TwinAssociation
     @Before
     public void setUp() throws Exception
     {
-        setUpInternal();
+        setUpInternal("ADDRESS", "PERSONNEL", "PERSONNEL_ADDRESS");
     }
 
     @Test

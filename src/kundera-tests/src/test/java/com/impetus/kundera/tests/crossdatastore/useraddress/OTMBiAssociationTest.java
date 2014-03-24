@@ -66,7 +66,7 @@ public class OTMBiAssociationTest extends TwinAssociation
     @Before
     public void setUp() throws Exception
     {
-        setUpInternal();
+        setUpInternal("ADDRESS", "PERSONNEL");
     }
 
     /**

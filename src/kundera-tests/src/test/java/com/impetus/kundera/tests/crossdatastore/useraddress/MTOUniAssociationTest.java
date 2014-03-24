@@ -71,7 +71,7 @@ public class MTOUniAssociationTest extends TwinAssociation
     @Before
     public void setUp() throws Exception
     {
-        setUpInternal();
+        setUpInternal("ADDRESS", "PERSONNEL");
     }
 
     /**
