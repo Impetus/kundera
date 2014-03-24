@@ -96,7 +96,7 @@ public class MTMUniAssociationIntTest extends TwinAssociation
     {
         // propertyMap.put(CassandraConstants.CQL_VERSION,
         // CassandraConstants.CQL_VERSION_2_0);
-        setUpInternal("ADDRESS_INT", "PERSONNEL_INT");
+        setUpInternal("HabitatUniMToMBigInteger", "PersonnelUniMToMInt");
     }
 
     /**
@@ -348,7 +348,7 @@ public class MTMUniAssociationIntTest extends TwinAssociation
         KsDef ksDef = null;
 
         CfDef cfDef = new CfDef();
-        cfDef.name = "PERSONNEL_INT";
+        cfDef.name = "PersonnelUniMToMInt";
         cfDef.keyspace = "KunderaTests";
         // cfDef.column_type = "Super";
 
@@ -389,13 +389,13 @@ public class MTMUniAssociationIntTest extends TwinAssociation
 //                }
 //            }
 //            CassandraCli.client.system_add_column_family(cfDef);
-//            if (!CassandraCli.columnFamilyExist("PERSONNEL_INT", "KunderaTests")) {
+//            if (!CassandraCli.columnFamilyExist("PersonnelUniMToMInt", "KunderaTests")) {
 //                CassandraCli.client.system_add_column_family(cfDef);
 //            } else {
-//                CassandraCli.truncateColumnFamily("KunderaTests", "PERSONNEL_INT");
+//                CassandraCli.truncateColumnFamily("KunderaTests", "PersonnelUniMToMInt");
 //            }
-            if (CassandraCli.columnFamilyExist("PERSONNEL_INT", "KunderaTests")) {
-                CassandraCli.client.system_drop_column_family("PERSONNEL_INT");
+            if (CassandraCli.columnFamilyExist("PersonnelUniMToMInt", "KunderaTests")) {
+                CassandraCli.client.system_drop_column_family("PersonnelUniMToMInt");
                 
             } 
             CassandraCli.client.system_add_column_family(cfDef);
@@ -418,7 +418,7 @@ public class MTMUniAssociationIntTest extends TwinAssociation
     {
         KsDef ksDef = null;
         CfDef cfDef2 = new CfDef();
-        cfDef2.name = "ADDRESS_INT";
+        cfDef2.name = "HabitatUniMToMBigInteger";
         cfDef2.keyspace = "KunderaTests";
         cfDef2.setKey_validation_class("Int32Type");
         cfDef2.setComparator_type("UTF8Type");
@@ -452,8 +452,8 @@ public class MTMUniAssociationIntTest extends TwinAssociation
 //                }
 //            }
 //            CassandraCli.client.system_add_column_family(cfDef2);
-            if (CassandraCli.columnFamilyExist("ADDRESS_INT", "KunderaTests")) {
-                CassandraCli.client.system_drop_column_family("ADDRESS_INT");
+            if (CassandraCli.columnFamilyExist("HabitatUniMToMBigInteger", "KunderaTests")) {
+                CassandraCli.client.system_drop_column_family("HabitatUniMToMBigInteger");
                 
             } 
             CassandraCli.client.system_add_column_family(cfDef2);
@@ -541,13 +541,13 @@ public class MTMUniAssociationIntTest extends TwinAssociation
     {
         try
         {
-            cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL_INT (PERSON_ID INTEGER PRIMARY KEY, PERSON_NAME VARCHAR(256))");
+            cli.update("CREATE TABLE KUNDERATESTS.PersonnelUniMToMInt (PERSON_ID INTEGER PRIMARY KEY, PERSON_NAME VARCHAR(256))");
         }
         catch (Exception e)
         {
-            cli.update("DELETE FROM KUNDERATESTS.PERSONNEL_INT");
-            cli.update("DROP TABLE KUNDERATESTS.PERSONNEL_INT");
-            cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL_INT (PERSON_ID INTEGER PRIMARY KEY, PERSON_NAME VARCHAR(256))");
+            cli.update("DELETE FROM KUNDERATESTS.PersonnelUniMToMInt");
+            cli.update("DROP TABLE KUNDERATESTS.PersonnelUniMToMInt");
+            cli.update("CREATE TABLE KUNDERATESTS.PersonnelUniMToMInt (PERSON_ID INTEGER PRIMARY KEY, PERSON_NAME VARCHAR(256))");
         }
         try
         {
@@ -573,13 +573,13 @@ public class MTMUniAssociationIntTest extends TwinAssociation
     {
         try
         {
-            cli.update("CREATE TABLE KUNDERATESTS.ADDRESS_INT (ADDRESS_ID BIGINT PRIMARY KEY, STREET VARCHAR(256))");
+            cli.update("CREATE TABLE KUNDERATESTS.HabitatUniMToMBigInteger (ADDRESS_ID BIGINT PRIMARY KEY, STREET VARCHAR(256))");
         }
         catch (Exception e)
         {
-            cli.update("DELETE FROM KUNDERATESTS.ADDRESS_INT");
-            cli.update("DROP TABLE KUNDERATESTS.ADDRESS_INT");
-            cli.update("CREATE TABLE KUNDERATESTS.ADDRESS_INT (ADDRESS_ID BIGINT PRIMARY KEY, STREET VARCHAR(256))");
+            cli.update("DELETE FROM KUNDERATESTS.HabitatUniMToMBigInteger");
+            cli.update("DROP TABLE KUNDERATESTS.HabitatUniMToMBigInteger");
+            cli.update("CREATE TABLE KUNDERATESTS.HabitatUniMToMBigInteger (ADDRESS_ID BIGINT PRIMARY KEY, STREET VARCHAR(256))");
         }
     }
 

@@ -256,7 +256,7 @@ public class OTOBiAssociationIntTest extends TwinAssociation
         KsDef ksDef = null;
 
         CfDef cfDef = new CfDef();
-        cfDef.name = "PERSONNEL_INT";
+        cfDef.name = "PersonnelBi1To1FKInt";
         cfDef.keyspace = "KunderaTests";
         // cfDef.column_type = "Super";
         cfDef.setComparator_type("UTF8Type");
@@ -293,13 +293,13 @@ public class OTOBiAssociationIntTest extends TwinAssociation
 //                }
 //            }
 //            CassandraCli.client.system_add_column_family(cfDef);
-//            if (!CassandraCli.columnFamilyExist("PERSONNEL_INT", "KunderaTests")) {
+//            if (!CassandraCli.columnFamilyExist("PersonnelBi1To1FKInt", "KunderaTests")) {
 //                CassandraCli.client.system_add_column_family(cfDef);
 //            } else {
-//                CassandraCli.truncateColumnFamily("KunderaTests", "PERSONNEL_INT");
+//                CassandraCli.truncateColumnFamily("KunderaTests", "PersonnelBi1To1FKInt");
 //            }
-            if (CassandraCli.columnFamilyExist("PERSONNEL_INT", "KunderaTests")) {
-                CassandraCli.client.system_drop_column_family("PERSONNEL_INT");
+            if (CassandraCli.columnFamilyExist("PersonnelBi1To1FKInt", "KunderaTests")) {
+                CassandraCli.client.system_drop_column_family("PersonnelBi1To1FKInt");
                 
             } 
             CassandraCli.client.system_add_column_family(cfDef);
@@ -321,7 +321,7 @@ public class OTOBiAssociationIntTest extends TwinAssociation
 
         KsDef ksDef = null;
         CfDef cfDef2 = new CfDef();
-        cfDef2.name = "ADDRESS_INT";
+        cfDef2.name = "HabitatBi1To1FKBigDecimal";
         cfDef2.keyspace = "KunderaTests";
         cfDef2.setDefault_validation_class("DecimalType");
         cfDef2.setComparator_type("UTF8Type");
@@ -351,8 +351,8 @@ public class OTOBiAssociationIntTest extends TwinAssociation
 //                }
 //            }
 //            CassandraCli.client.system_add_column_family(cfDef2);
-            if (CassandraCli.columnFamilyExist("ADDRESS_INT", "KunderaTests")) {
-                CassandraCli.client.system_drop_column_family("ADDRESS_INT");
+            if (CassandraCli.columnFamilyExist("HabitatBi1To1FKBigDecimal", "KunderaTests")) {
+                CassandraCli.client.system_drop_column_family("HabitatBi1To1FKBigDecimal");
             } 
             CassandraCli.client.system_add_column_family(cfDef2);
             

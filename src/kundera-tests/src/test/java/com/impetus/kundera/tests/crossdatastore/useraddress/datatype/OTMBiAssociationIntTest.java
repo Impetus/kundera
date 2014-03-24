@@ -257,7 +257,7 @@ public class OTMBiAssociationIntTest extends TwinAssociation
         KsDef ksDef = null;
 
         CfDef cfDef = new CfDef();
-        cfDef.name = "PERSONNEL_INT";
+        cfDef.name = "PersonnelBi1ToMInt";
         cfDef.keyspace = "KunderaTests";
         // cfDef.column_type = "Super";
         cfDef.setComparator_type("UTF8Type");
@@ -288,13 +288,13 @@ public class OTMBiAssociationIntTest extends TwinAssociation
 //                }
 //            }
 //            CassandraCli.client.system_add_column_family(cfDef);
-//            if (!CassandraCli.columnFamilyExist("PERSONNEL_INT", "KunderaTests")) {
+//            if (!CassandraCli.columnFamilyExist("PersonnelBi1ToMInt", "KunderaTests")) {
 //                CassandraCli.client.system_add_column_family(cfDef);
 //            } else {
-//                CassandraCli.truncateColumnFamily("KunderaTests", "PERSONNEL_INT");
+//                CassandraCli.truncateColumnFamily("KunderaTests", "PersonnelBi1ToMInt");
 //            }
-            if (CassandraCli.columnFamilyExist("PERSONNEL_INT", "KunderaTests")) {
-                CassandraCli.client.system_drop_column_family("PERSONNEL_INT");
+            if (CassandraCli.columnFamilyExist("PersonnelBi1ToMInt", "KunderaTests")) {
+                CassandraCli.client.system_drop_column_family("PersonnelBi1ToMInt");
                 
             } 
             CassandraCli.client.system_add_column_family(cfDef);
@@ -315,7 +315,7 @@ public class OTMBiAssociationIntTest extends TwinAssociation
     {
         KsDef ksDef = null;
         CfDef cfDef2 = new CfDef();
-        cfDef2.name = "ADDRESS_INT";
+        cfDef2.name = "HabitatBi1ToMDouble";
         cfDef2.keyspace = "KunderaTests";
         cfDef2.setKey_validation_class("DoubleType");
         cfDef2.setComparator_type("UTF8Type");
@@ -347,8 +347,8 @@ public class OTMBiAssociationIntTest extends TwinAssociation
 //                }
 //            }
 //            CassandraCli.client.system_add_column_family(cfDef2);
-            if (CassandraCli.columnFamilyExist("ADDRESS_INT", "KunderaTests")) {
-                CassandraCli.client.system_drop_column_family("ADDRESS_INT");
+            if (CassandraCli.columnFamilyExist("HabitatBi1ToMDouble", "KunderaTests")) {
+                CassandraCli.client.system_drop_column_family("HabitatBi1ToMDouble");
             } 
             CassandraCli.client.system_add_column_family(cfDef2);
 //            else {
@@ -375,13 +375,13 @@ public class OTMBiAssociationIntTest extends TwinAssociation
     {
         try
         {
-            cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL_INT (PERSON_ID INTEGER PRIMARY KEY, PERSON_NAME VARCHAR(256))");
+            cli.update("CREATE TABLE KUNDERATESTS.PersonnelBi1ToMInt (PERSON_ID INTEGER PRIMARY KEY, PERSON_NAME VARCHAR(256))");
         }
         catch (Exception e)
         {
-            cli.update("DELETE FROM KUNDERATESTS.PERSONNEL_INT");
-            cli.update("DROP TABLE KUNDERATESTS.PERSONNEL_INT");
-            cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL_INT(PERSON_ID INTEGER PRIMARY KEY, PERSON_NAME VARCHAR(256))");
+            cli.update("DELETE FROM KUNDERATESTS.PersonnelBi1ToMInt");
+            cli.update("DROP TABLE KUNDERATESTS.PersonnelBi1ToMInt");
+            cli.update("CREATE TABLE KUNDERATESTS.PersonnelBi1ToMInt(PERSON_ID INTEGER PRIMARY KEY, PERSON_NAME VARCHAR(256))");
         }
     }
 
@@ -397,13 +397,13 @@ public class OTMBiAssociationIntTest extends TwinAssociation
     {
         try
         {
-            cli.update("CREATE TABLE KUNDERATESTS.ADDRESS_INT (ADDRESS_ID DECIMAL(10,4) PRIMARY KEY, STREET VARCHAR(256),PERSON_ID INTEGER)");
+            cli.update("CREATE TABLE KUNDERATESTS.HabitatBi1ToMDouble (ADDRESS_ID DECIMAL(10,4) PRIMARY KEY, STREET VARCHAR(256),PERSON_ID INTEGER)");
         }
         catch (Exception e)
         {
-            cli.update("DELETE FROM KUNDERATESTS.ADDRESS_INT");
-            cli.update("DROP TABLE KUNDERATESTS.ADDRESS_INT");
-            cli.update("CREATE TABLE KUNDERATESTS.ADDRESS_INT (ADDRESS_ID DECIMAL(10,4) PRIMARY KEY, STREET VARCHAR(256),PERSON_ID INTEGER)");
+            cli.update("DELETE FROM KUNDERATESTS.HabitatBi1ToMDouble");
+            cli.update("DROP TABLE KUNDERATESTS.HabitatBi1ToMDouble");
+            cli.update("CREATE TABLE KUNDERATESTS.HabitatBi1ToMDouble (ADDRESS_ID DECIMAL(10,4) PRIMARY KEY, STREET VARCHAR(256),PERSON_ID INTEGER)");
         }
     }
 }

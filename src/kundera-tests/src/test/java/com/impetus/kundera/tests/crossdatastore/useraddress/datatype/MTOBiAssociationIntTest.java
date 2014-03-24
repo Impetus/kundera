@@ -216,7 +216,7 @@ public class MTOBiAssociationIntTest extends TwinAssociation
         KsDef ksDef = null;
 
         CfDef cfDef = new CfDef();
-        cfDef.name = "PERSONNEL_INT";
+        cfDef.name = "PersonnelBiMTo1Int";
         cfDef.keyspace = "KunderaTests";
         // cfDef.column_type = "Super";
         cfDef.setComparator_type("UTF8Type");
@@ -251,13 +251,13 @@ public class MTOBiAssociationIntTest extends TwinAssociation
 //                }
 //            }
 //            CassandraCli.client.system_add_column_family(cfDef);
-//            if (!CassandraCli.columnFamilyExist("PERSONNEL_INT", "KunderaTests")) {
+//            if (!CassandraCli.columnFamilyExist("PersonnelBiMTo1Int", "KunderaTests")) {
 //                CassandraCli.client.system_add_column_family(cfDef);
 //            } else {
-//                CassandraCli.truncateColumnFamily("KunderaTests", "PERSONNEL_INT");
+//                CassandraCli.truncateColumnFamily("KunderaTests", "PersonnelBiMTo1Int");
 //            }
-            if (CassandraCli.columnFamilyExist("PERSONNEL_INT", "KunderaTests")) {
-                CassandraCli.client.system_drop_column_family("PERSONNEL_INT");
+            if (CassandraCli.columnFamilyExist("PersonnelBiMTo1Int", "KunderaTests")) {
+                CassandraCli.client.system_drop_column_family("PersonnelBiMTo1Int");
                 
             } 
             CassandraCli.client.system_add_column_family(cfDef);
@@ -279,7 +279,7 @@ public class MTOBiAssociationIntTest extends TwinAssociation
     {
         KsDef ksDef = null;
         CfDef cfDef2 = new CfDef();
-        cfDef2.name = "ADDRESS_INT";
+        cfDef2.name = "HabitatBiMTo1Char";
         cfDef2.keyspace = "KunderaTests";
         cfDef2.setKey_validation_class("UTF8Type");
         cfDef2.setComparator_type("UTF8Type");
@@ -307,8 +307,8 @@ public class MTOBiAssociationIntTest extends TwinAssociation
 //                }
 //            }
 //            CassandraCli.client.system_add_column_family(cfDef2);
-            if (CassandraCli.columnFamilyExist("ADDRESS_INT", "KunderaTests")) {
-                CassandraCli.client.system_drop_column_family("ADDRESS_INT");
+            if (CassandraCli.columnFamilyExist("HabitatBiMTo1Char", "KunderaTests")) {
+                CassandraCli.client.system_drop_column_family("HabitatBiMTo1Char");
             } 
             CassandraCli.client.system_add_column_family(cfDef2);
         }
@@ -332,13 +332,13 @@ public class MTOBiAssociationIntTest extends TwinAssociation
     {
         try
         {
-            cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL_INT (PERSON_ID INTEGER PRIMARY KEY, PERSON_NAME VARCHAR(256), ADDRESS_ID VARCHAR(6))");
+            cli.update("CREATE TABLE KUNDERATESTS.PersonnelBiMTo1Int (PERSON_ID INTEGER PRIMARY KEY, PERSON_NAME VARCHAR(256), ADDRESS_ID VARCHAR(6))");
         }
         catch (Exception e)
         {
-            cli.update("DELETE FROM KUNDERATESTS.PERSONNEL_INT");
-            cli.update("DROP TABLE KUNDERATESTS.PERSONNEL_INT");
-            cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL_INT (PERSON_ID INTEGER PRIMARY KEY, PERSON_NAME VARCHAR(256), ADDRESS_ID VARCHAR(6))");
+            cli.update("DELETE FROM KUNDERATESTS.PersonnelBiMTo1Int");
+            cli.update("DROP TABLE KUNDERATESTS.PersonnelBiMTo1Int");
+            cli.update("CREATE TABLE KUNDERATESTS.PersonnelBiMTo1Int (PERSON_ID INTEGER PRIMARY KEY, PERSON_NAME VARCHAR(256), ADDRESS_ID VARCHAR(6))");
         }
     }
 
@@ -358,9 +358,9 @@ public class MTOBiAssociationIntTest extends TwinAssociation
         }
         catch (Exception e)
         {
-            cli.update("DELETE FROM KUNDERATESTS.ADDRESS_INT");
-            cli.update("DROP TABLE KUNDERATESTS.ADDRESS_INT");
-            cli.update("CREATE TABLE KUNDERATESTS.ADDRESS_INT (ADDRESS_ID VARCHAR(6) PRIMARY KEY, STREET VARCHAR(256))");
+            cli.update("DELETE FROM KUNDERATESTS.HabitatBiMTo1Char");
+            cli.update("DROP TABLE KUNDERATESTS.HabitatBiMTo1Char");
+            cli.update("CREATE TABLE KUNDERATESTS.HabitatBiMTo1Char (ADDRESS_ID VARCHAR(6) PRIMARY KEY, STREET VARCHAR(256))");
         }
     }
 }

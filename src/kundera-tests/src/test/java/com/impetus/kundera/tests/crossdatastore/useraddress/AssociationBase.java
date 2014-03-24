@@ -74,7 +74,7 @@ public abstract class AssociationBase
 
     public static final boolean RUN_IN_EMBEDDED_MODE = true;
 
-    public static final boolean AUTO_MANAGE_SCHEMA = true;
+    public static final boolean AUTO_MANAGE_SCHEMA = false;
 
     protected Map propertyMap = new HashMap();
 
@@ -341,15 +341,15 @@ public abstract class AssociationBase
             em = dao.getEntityManager(persistenceUnits, propertyMap);
         }
 
-        if (AUTO_MANAGE_SCHEMA)
-        {
-//            truncateColumnFamily();
-//            truncateRdbms();
+//        if (/*AUTO_MANAGE_SCHEMA*/true)
+//        {
+            truncateColumnFamily();
+            truncateRdbms();
 
             truncateMongo();
 
             truncateRedis();
-        }
+//        }
 
         for (String pu : ALL_PUs_UNDER_TEST)
         {
@@ -367,7 +367,7 @@ public abstract class AssociationBase
      */
     private void truncateColumnFamily()
     {
-        String[] columnFamily = new String[] { "ADDRESS", "PERSONNEL", "PERSONNEL_ADDRESS", "PERSONNEL_INT", "ADDRESS_INT"};
+        String[] columnFamily = new String[] { "ADDRESS", "PERSONNEL", "PERSONNEL_ADDRESS"/*, "PERSONNEL_INT", "ADDRESS_INT"*/};
         CassandraCli.truncateColumnFamily(KEYSPACE, columnFamily);
     }
 

@@ -271,7 +271,7 @@ public class MTOUniAssociationIntTest extends TwinAssociation
         KsDef ksDef = null;
 
         CfDef cfDef = new CfDef();
-        cfDef.name = "PERSONNEL_INT";
+        cfDef.name = "PersonnelUniMTo1Int";
         cfDef.keyspace = "KunderaTests";
         // cfDef.column_type = "Super";
         cfDef.setComparator_type("UTF8Type");
@@ -306,13 +306,13 @@ public class MTOUniAssociationIntTest extends TwinAssociation
 //                }
 //            }
 //            CassandraCli.client.system_add_column_family(cfDef);
-//            if (!CassandraCli.columnFamilyExist("PERSONNEL_INT", "KunderaTests")) {
+//            if (!CassandraCli.columnFamilyExist("PersonnelUniMTo1Int", "KunderaTests")) {
 //                CassandraCli.client.system_add_column_family(cfDef);
 //            } else {
-//                CassandraCli.truncateColumnFamily("KunderaTests", "PERSONNEL_INT");
+//                CassandraCli.truncateColumnFamily("KunderaTests", "PersonnelUniMTo1Int");
 //            }
-            if (CassandraCli.columnFamilyExist("PERSONNEL_INT", "KunderaTests")) {
-                CassandraCli.client.system_drop_column_family("PERSONNEL_INT");
+            if (CassandraCli.columnFamilyExist("PersonnelUniMTo1Int", "KunderaTests")) {
+                CassandraCli.client.system_drop_column_family("PersonnelUniMTo1Int");
                 
             } 
             CassandraCli.client.system_add_column_family(cfDef);
@@ -333,7 +333,7 @@ public class MTOUniAssociationIntTest extends TwinAssociation
     {
         KsDef ksDef = null;
         CfDef cfDef2 = new CfDef();
-        cfDef2.name = "ADDRESS_INT";
+        cfDef2.name = "HabitatUniMTo1Long";
         cfDef2.keyspace = "KunderaTests";
         cfDef2.setKey_validation_class("LongType");
         cfDef2.setComparator_type("UTF8Type");
@@ -361,8 +361,8 @@ public class MTOUniAssociationIntTest extends TwinAssociation
 //                }
 //            }
 //            CassandraCli.client.system_add_column_family(cfDef2);
-            if (CassandraCli.columnFamilyExist("ADDRESS_INT", "KunderaTests")) {
-                CassandraCli.client.system_drop_column_family("ADDRESS_INT");
+            if (CassandraCli.columnFamilyExist("HabitatUniMTo1Long", "KunderaTests")) {
+                CassandraCli.client.system_drop_column_family("HabitatUniMTo1Long");
             } 
             CassandraCli.client.system_add_column_family(cfDef2);
         }
@@ -386,13 +386,13 @@ public class MTOUniAssociationIntTest extends TwinAssociation
     {
         try
         {
-            cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL_INT (PERSON_ID INTEGER PRIMARY KEY, PERSON_NAME VARCHAR(256), ADDRESS_ID BIGINT)");
+            cli.update("CREATE TABLE KUNDERATESTS.PersonnelUniMTo1Int (PERSON_ID INTEGER PRIMARY KEY, PERSON_NAME VARCHAR(256), ADDRESS_ID BIGINT)");
         }
         catch (Exception e)
         {
-            cli.update("DELETE FROM KUNDERATESTS.PERSONNEL_INT");
-            cli.update("DROP TABLE KUNDERATESTS.PERSONNEL_INT");
-            cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL_INT (PERSON_ID INTEGER PRIMARY KEY, PERSON_NAME VARCHAR(256), ADDRESS_ID BIGINT)");
+            cli.update("DELETE FROM KUNDERATESTS.PersonnelUniMTo1Int");
+            cli.update("DROP TABLE KUNDERATESTS.PersonnelUniMTo1Int");
+            cli.update("CREATE TABLE KUNDERATESTS.PersonnelUniMTo1Int (PERSON_ID INTEGER PRIMARY KEY, PERSON_NAME VARCHAR(256), ADDRESS_ID BIGINT)");
         }
     }
 
@@ -408,13 +408,13 @@ public class MTOUniAssociationIntTest extends TwinAssociation
     {
         try
         {
-            cli.update("CREATE TABLE KUNDERATESTS.ADDRESS_INT (ADDRESS_ID BIGINT PRIMARY KEY, STREET VARCHAR(256))");
+            cli.update("CREATE TABLE KUNDERATESTS.HabitatUniMTo1Long (ADDRESS_ID BIGINT PRIMARY KEY, STREET VARCHAR(256))");
         }
         catch (Exception e)
         {
-            cli.update("DELETE FROM KUNDERATESTS.ADDRESS_INT");
-            cli.update("DROP TABLE KUNDERATESTS.ADDRESS_INT");
-            cli.update("CREATE TABLE KUNDERATESTS.ADDRESS_INT(ADDRESS_ID BIGINT PRIMARY KEY, STREET VARCHAR(256))");
+            cli.update("DELETE FROM KUNDERATESTS.HabitatUniMTo1Long");
+            cli.update("DROP TABLE KUNDERATESTS.HabitatUniMTo1Long");
+            cli.update("CREATE TABLE KUNDERATESTS.HabitatUniMTo1Long(ADDRESS_ID BIGINT PRIMARY KEY, STREET VARCHAR(256))");
         }
     }
 

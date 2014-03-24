@@ -260,7 +260,7 @@ public class MTMBiAssociationIntTest extends TwinAssociation
         KsDef ksDef = null;
 
         CfDef cfDef = new CfDef();
-        cfDef.name = "PERSONNEL_INT";
+        cfDef.name = "PersonnelBiMToMInt";
         cfDef.keyspace = "KunderaTests";
         cfDef.setComparator_type("UTF8Type");
         cfDef.setKey_validation_class("Int32Type");
@@ -294,13 +294,13 @@ public class MTMBiAssociationIntTest extends TwinAssociation
 //                }
 //            }
 //            CassandraCli.client.system_add_column_family(cfDef);
-//            if (!CassandraCli.columnFamilyExist("PERSONNEL_INT", "KunderaTests")) {
+//            if (!CassandraCli.columnFamilyExist("PersonnelBiMToMInt", "KunderaTests")) {
 //                CassandraCli.client.system_add_column_family(cfDef);
 //            } else {
-//                CassandraCli.truncateColumnFamily("KunderaTests", "PERSONNEL_INT");
+//                CassandraCli.truncateColumnFamily("KunderaTests", "PersonnelBiMToMInt");
 //            }
-            if (CassandraCli.columnFamilyExist("PERSONNEL_INT", "KunderaTests")) {
-                CassandraCli.client.system_drop_column_family("PERSONNEL_INT");
+            if (CassandraCli.columnFamilyExist("PersonnelBiMToMInt", "KunderaTests")) {
+                CassandraCli.client.system_drop_column_family("PersonnelBiMToMInt");
                 
             } 
             CassandraCli.client.system_add_column_family(cfDef);
@@ -324,7 +324,7 @@ public class MTMBiAssociationIntTest extends TwinAssociation
     {
         KsDef ksDef = null;
         CfDef cfDef2 = new CfDef();
-        cfDef2.name = "ADDRESS_INT";
+        cfDef2.name = "HabitatBiMToMShort";
         cfDef2.keyspace = "KunderaTests";
         cfDef2.setKey_validation_class("Int32Type");
         cfDef2.setComparator_type("UTF8Type");
@@ -358,8 +358,8 @@ public class MTMBiAssociationIntTest extends TwinAssociation
 //            }
             
 //            CassandraCli.client.system_add_column_family(cfDef2);
-            if (CassandraCli.columnFamilyExist("ADDRESS_INT", "KunderaTests")) {
-                CassandraCli.client.system_drop_column_family("ADDRESS_INT");
+            if (CassandraCli.columnFamilyExist("HabitatBiMToMShort", "KunderaTests")) {
+                CassandraCli.client.system_drop_column_family("HabitatBiMToMShort");
                 
             } 
             CassandraCli.client.system_add_column_family(cfDef2);
@@ -426,13 +426,13 @@ public class MTMBiAssociationIntTest extends TwinAssociation
     {
         try
         {
-            cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL_INT (PERSON_ID INTEGER PRIMARY KEY, PERSON_NAME VARCHAR(256))");
+            cli.update("CREATE TABLE KUNDERATESTS.PersonnelBiMToMInt (PERSON_ID INTEGER PRIMARY KEY, PERSON_NAME VARCHAR(256))");
         }
         catch (Exception e)
         {
-            cli.update("DELETE FROM KUNDERATESTS.PERSONNEL_INT");
-            cli.update("DROP TABLE KUNDERATESTS.PERSONNEL_INT");
-            cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL_INT (PERSON_ID INTEGER PRIMARY KEY, PERSON_NAME VARCHAR(256))");
+            cli.update("DELETE FROM KUNDERATESTS.PersonnelBiMToMInt");
+            cli.update("DROP TABLE KUNDERATESTS.PersonnelBiMToMInt");
+            cli.update("CREATE TABLE KUNDERATESTS.PersonnelBiMToMInt (PERSON_ID INTEGER PRIMARY KEY, PERSON_NAME VARCHAR(256))");
         }
         try
         {
@@ -459,13 +459,13 @@ public class MTMBiAssociationIntTest extends TwinAssociation
     {
         try
         {
-            cli.update("CREATE TABLE KUNDERATESTS.ADDRESS_INT (ADDRESS_ID SMALLINT PRIMARY KEY, STREET VARCHAR(256))");
+            cli.update("CREATE TABLE KUNDERATESTS.HabitatBiMToMShort (ADDRESS_ID SMALLINT PRIMARY KEY, STREET VARCHAR(256))");
         }
         catch (Exception e)
         {
-            cli.update("DELETE FROM KUNDERATESTS.ADDRESS_INT");
-            cli.update("DROP TABLE KUNDERATESTS.ADDRESS_INT");
-            cli.update("CREATE TABLE KUNDERATESTS.ADDRESS_INT (ADDRESS_ID SMALLINT PRIMARY KEY, STREET VARCHAR(256))");
+            cli.update("DELETE FROM KUNDERATESTS.HabitatBiMToMShort");
+            cli.update("DROP TABLE KUNDERATESTS.HabitatBiMToMShort");
+            cli.update("CREATE TABLE KUNDERATESTS.HabitatBiMToMShort (ADDRESS_ID SMALLINT PRIMARY KEY, STREET VARCHAR(256))");
         }
 
     }
