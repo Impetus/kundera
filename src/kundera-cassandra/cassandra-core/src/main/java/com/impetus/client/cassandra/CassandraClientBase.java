@@ -2406,7 +2406,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         selectQueryBuilder
                 .delete(selectQueryBuilder.lastIndexOf(CQLTranslator.AND_CLAUSE), selectQueryBuilder.length());
 
-        CqlResult cqlResult = execute(selectQueryBuilder.toString(), null);
+        CqlResult cqlResult = execute(selectQueryBuilder.toString(), getRawClient(schemaName));
 
         Iterator<CqlRow> rowIter = cqlResult.getRows().iterator();
         while (rowIter.hasNext())
