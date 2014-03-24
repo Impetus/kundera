@@ -1,14 +1,13 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>com.impetus</groupId>
 		<artifactId>kundera</artifactId>
-		<version>2.11-SNAPSHOT</version>
+		<version>2.11</version>
 	</parent>
 	<groupId>com.impetus.kundera</groupId>
 	<artifactId>kundera-tests</artifactId>
-	<version>2.11-SNAPSHOT</version>
+	<version>2.11</version>
 	<packaging>jar</packaging>
 
 	<name>kundera-tests</name>
@@ -273,7 +272,7 @@
 		<dependency>
 			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-cassandra</artifactId>
-			<version>2.11-SNAPSHOT</version>
+			<version>2.11</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>httpclient</artifactId>
@@ -284,12 +283,12 @@
 		<dependency>
 			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-mongo</artifactId>
-			<version>2.11-SNAPSHOT</version>
+			<version>2.11</version>
 		</dependency>
 		<dependency>
 			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-hbase</artifactId>
-			<version>2.11-SNAPSHOT</version>
+			<version>2.11</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.apache.thrift</groupId>
@@ -304,40 +303,40 @@
 		<dependency>
 			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-rdbms</artifactId>
-			<version>2.11-SNAPSHOT</version>
+			<version>2.11</version>
 		</dependency>
 		<dependency>
 			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-rest</artifactId>
-			<version>2.11-SNAPSHOT</version>
+			<version>2.11</version>
 		</dependency>
 		<dependency>
 			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-oracle-nosql</artifactId>
-			<version>2.11-SNAPSHOT</version>
+			<version>2.11</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-redis</artifactId>
-			<version>2.11-SNAPSHOT</version>
+			<version>2.11</version>
 		</dependency>
 		<dependency>
 			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-neo4j</artifactId>
-			<version>2.11-SNAPSHOT</version>
+			<version>2.11</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-couchdb</artifactId>
-			<version>2.11-SNAPSHOT</version>
+			<version>2.11</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-elastic-search</artifactId>
-			<version>2.11-SNAPSHOT</version>
+			<version>2.11</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.apache.lucene</groupId>
