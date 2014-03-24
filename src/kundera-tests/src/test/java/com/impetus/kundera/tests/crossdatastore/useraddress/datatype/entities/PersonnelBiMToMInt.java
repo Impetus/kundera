@@ -43,7 +43,7 @@ public class PersonnelBiMToMInt
     private String personName;
 
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinTable(name = "PERSONNEL_ADDRESS", schema = "KunderaTests", joinColumns = { @JoinColumn(name = "PERSON_ID") }, inverseJoinColumns = { @JoinColumn(name = "ADDRESS_ID") })
+    @JoinTable(name = "PersonnelBiMToMInt_HabitatBiMToMShort", schema = "KunderaTests", joinColumns = { @JoinColumn(name = "PERSON_ID") }, inverseJoinColumns = { @JoinColumn(name = "ADDRESS_ID") })
     private Set<HabitatBiMToMShort> addresses;
 
     public int getPersonId()

@@ -76,7 +76,7 @@ public class OTOBiAssociationIntTest extends TwinAssociation
     public void setUp() throws Exception
     {
         propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_2_0);
-        setUpInternal();
+        setUpInternal("HabitatBi1To1FKBigDecimal", "PersonnelBi1To1FKInt");
     }
 
     /**

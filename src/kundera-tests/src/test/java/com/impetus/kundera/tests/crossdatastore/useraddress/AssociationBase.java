@@ -90,6 +90,7 @@ public abstract class AssociationBase
     protected UserAddressDaoImpl dao;
 
     protected KunderaMetadata kunderaMetadata;
+
     /** the log used by this class. */
     private static Logger log = LoggerFactory.getLogger(AssociationBase.class);
 
@@ -243,12 +244,12 @@ public abstract class AssociationBase
                     if (AUTO_MANAGE_SCHEMA)
                     {
                         if (mAdd.getTableName().equalsIgnoreCase("ADDRESS")
-                              || mAdd.getTableName().equalsIgnoreCase("ADDRESS_INT"))
+                                || mAdd.getTableName().equalsIgnoreCase("ADDRESS_INT"))
                         {
                             loadDataForHABITAT();
                         }
-                        else if (mAdd.getTableName().equalsIgnoreCase("PERSONNEL") 
-                    || mAdd.getTableName().equalsIgnoreCase("PERSONNEL_INT"))
+                        else if (mAdd.getTableName().equalsIgnoreCase("PERSONNEL")
+                                || mAdd.getTableName().equalsIgnoreCase("PERSONNEL_INT"))
                         {
                             loadDataForPERSONNEL();
                         }
@@ -298,19 +299,25 @@ public abstract class AssociationBase
                                 httpHost, "KunderaTests".toLowerCase(), httpClient);
                         CouchDBTestUtils.createViews(new String[] { "PERSON_NAME", "PERSON_ID", "ADDRESS_ID" },
                                 "PERSONNEL", httpHost, "KunderaTests".toLowerCase(), httpClient);
-                        CouchDBTestUtils.createViews(new String[] { "STREET", "ADDRESS_ID", "PERSON_ID" }, "ADDRESS_INT",
-                                httpHost, "KunderaTests".toLowerCase(), httpClient);
-                        CouchDBTestUtils.createViews(new String[] { "PERSON_NAME", "PERSON_ID", "ADDRESS_ID" },
-                                "PERSONNEL_INT", httpHost, "KunderaTests".toLowerCase(), httpClient);
                         CouchDBTestUtils.createViews(new String[] { "PERSON_ID", "ADDRESS_ID" }, "PERSONNEL_ADDRESS",
                                 httpHost, "KunderaTests".toLowerCase(), httpClient);
+
+                        CouchDBTestUtils.createViews(new String[] { "STREET", "ADDRESS_ID", "PERSON_ID" },
+                                colFamilies[0], httpHost, "KunderaTests".toLowerCase(), httpClient);
+                        CouchDBTestUtils.createViews(new String[] { "PERSON_NAME", "PERSON_ID", "ADDRESS_ID" },
+                                colFamilies[1], httpHost, "KunderaTests".toLowerCase(), httpClient);
+                        if (colFamilies.length == 3)
+                        {
+                            CouchDBTestUtils.createViews(new String[] { "PERSON_ID", "ADDRESS_ID" }, colFamilies[2],
+                                    httpHost, "KunderaTests".toLowerCase(), httpClient);
+                        }
                     }
                     catch (Exception e)
                     {
                         log.error("error during creating design document in couchDB", e);
                     }
                 }
-                
+
                 String schema = puMetadata.getProperty(PersistenceProperties.KUNDERA_KEYSPACE);
                 mAdd.setSchema(schema != null ? schema : KEYSPACE);
                 // mAdd.setSchema(schema)
@@ -341,19 +348,20 @@ public abstract class AssociationBase
             em = dao.getEntityManager(persistenceUnits, propertyMap);
         }
 
-//        if (/*AUTO_MANAGE_SCHEMA*/true)
-//        {
-            truncateColumnFamily();
-            truncateRdbms();
+        // if (/*AUTO_MANAGE_SCHEMA*/true)
+        // {
+        truncateColumnFamily();
+        truncateRdbms();
 
-            truncateMongo();
+        truncateMongo();
 
-            truncateRedis();
-//        }
+        truncateRedis();
+        // }
 
         for (String pu : ALL_PUs_UNDER_TEST)
         {
-            CleanupUtilities.cleanLuceneDirectory(kunderaMetadata.getApplicationMetadata().getPersistenceUnitMetadata(pu));
+            CleanupUtilities.cleanLuceneDirectory(kunderaMetadata.getApplicationMetadata().getPersistenceUnitMetadata(
+                    pu));
         }
 
         CouchDBTestUtils.dropDatabase("KunderaTests".toLowerCase(), httpClient, httpHost);
@@ -367,7 +375,12 @@ public abstract class AssociationBase
      */
     private void truncateColumnFamily()
     {
-        String[] columnFamily = new String[] { "ADDRESS", "PERSONNEL", "PERSONNEL_ADDRESS"/*, "PERSONNEL_INT", "ADDRESS_INT"*/};
+        String[] columnFamily = new String[] { "ADDRESS", "PERSONNEL", "PERSONNEL_ADDRESS"/*
+                                                                                           * ,
+                                                                                           * "PERSONNEL_INT"
+                                                                                           * ,
+                                                                                           * "ADDRESS_INT"
+                                                                                           */};
         CassandraCli.truncateColumnFamily(KEYSPACE, columnFamily);
     }
 
@@ -388,27 +401,27 @@ public abstract class AssociationBase
                     db.setAccessible(true);
                 }
                 DB mongoDB = (DB) db.get(client);
-                if(mongoDB.collectionExists("PERSONNEL"))
+                if (mongoDB.collectionExists("PERSONNEL"))
                 {
-                   mongoDB.getCollection("PERSONNEL").drop();
+                    mongoDB.getCollection("PERSONNEL").drop();
                 }
-                if(mongoDB.collectionExists("ADDRESS"))
+                if (mongoDB.collectionExists("ADDRESS"))
                 {
-                  mongoDB.getCollection("ADDRESS").drop();
+                    mongoDB.getCollection("ADDRESS").drop();
                 }
-                if(mongoDB.collectionExists("PERSONNEL_ADDRESS"))
+                if (mongoDB.collectionExists("PERSONNEL_ADDRESS"))
                 {
-                  mongoDB.getCollection("PERSONNEL_ADDRESS").drop();
+                    mongoDB.getCollection("PERSONNEL_ADDRESS").drop();
                 }
-                if(mongoDB.collectionExists("PERSONNEL_INT"))
+                if (mongoDB.collectionExists("PERSONNEL_INT"))
                 {
-                 mongoDB.getCollection("PERSONNEL_INT").drop();
+                    mongoDB.getCollection("PERSONNEL_INT").drop();
                 }
-                if(mongoDB.collectionExists("ADDRESS_INT"))
+                if (mongoDB.collectionExists("ADDRESS_INT"))
                 {
-                  mongoDB.getCollection("ADDRESS_INT").drop();
+                    mongoDB.getCollection("ADDRESS_INT").drop();
                 }
-                
+
             }
             catch (SecurityException e)
             {
@@ -435,8 +448,8 @@ public abstract class AssociationBase
     {
         if (RedisPropertyReader.rsmd != null)
         {
-            PersistenceUnitMetadata puMetadata = kunderaMetadata.getApplicationMetadata()
-                    .getPersistenceUnitMetadata("redis");
+            PersistenceUnitMetadata puMetadata = kunderaMetadata.getApplicationMetadata().getPersistenceUnitMetadata(
+                    "redis");
             Properties props = puMetadata.getProperties();
             String contactNode = RedisPropertyReader.rsmd.getHost() != null ? RedisPropertyReader.rsmd.getHost()
                     : (String) props.get(PersistenceProperties.KUNDERA_NODES);
@@ -459,11 +472,11 @@ public abstract class AssociationBase
         try
         {
             cli.update("DELETE FROM KUNDERATESTS.PERSONNEL");
-           // cli.update("DROP TABLE KUNDERATESTS.PERSONNEL");
+            // cli.update("DROP TABLE KUNDERATESTS.PERSONNEL");
             cli.update("DELETE FROM KUNDERATESTS.ADDRESS");
-          //  cli.update("DROP TABLE KUNDERATESTS.ADDRESS");
+            // cli.update("DROP TABLE KUNDERATESTS.ADDRESS");
             cli.update("DELETE FROM KUNDERATESTS.PERSONNEL_ADDRESS");
-          //  cli.update("DROP TABLE KUNDERATESTS.PERSONNEL_ADDRESS");
+            // cli.update("DROP TABLE KUNDERATESTS.PERSONNEL_ADDRESS");
 
         }
         catch (Exception e)
@@ -503,7 +516,8 @@ public abstract class AssociationBase
         CassandraCli.dropColumnFamily("ADDRESS", KEYSPACE);
         CassandraCli.dropColumnFamily("PERSONNEL_ADDRESS", KEYSPACE);
         CassandraCli.dropKeySpace(KEYSPACE);
-      //  CassandraCli.truncateColumnFamily(KEYSPACE, "PERSONNEL", "ADDRESS","PERSONNEL_ADDRESS");
+        // CassandraCli.truncateColumnFamily(KEYSPACE, "PERSONNEL",
+        // "ADDRESS","PERSONNEL_ADDRESS");
     }
 
     protected abstract void loadDataForPERSONNEL() throws TException, InvalidRequestException, UnavailableException,

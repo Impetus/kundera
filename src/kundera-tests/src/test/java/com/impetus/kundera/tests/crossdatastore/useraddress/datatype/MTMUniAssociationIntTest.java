@@ -57,7 +57,8 @@ public class MTMUniAssociationIntTest extends TwinAssociation
 
     private BigInteger addressID3 = new BigInteger("1234567");
 
-    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "addCassandra", "addMongo", "oracle_kvstore","addCouchdb" };
+    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "addCassandra", "addMongo", "oracle_kvstore",
+            "addCouchdb" };
 
     /**
      * Inits the.
@@ -96,7 +97,7 @@ public class MTMUniAssociationIntTest extends TwinAssociation
     {
         // propertyMap.put(CassandraConstants.CQL_VERSION,
         // CassandraConstants.CQL_VERSION_2_0);
-        setUpInternal("HabitatUniMToMBigInteger", "PersonnelUniMToMInt");
+        setUpInternal("HabitatUniMToMBigInteger", "PersonnelUniMToMInt", "PersonnelUniMToMInt_HabitatUniMToMBigInteger");
     }
 
     /**
@@ -274,7 +275,7 @@ public class MTMUniAssociationIntTest extends TwinAssociation
     @After
     public void tearDown() throws Exception
     {
-        //shutDownRdbmsServer();
+        // shutDownRdbmsServer();
         // tearDownInternal(ALL_PUs_UNDER_TEST);
     }
 
@@ -375,29 +376,32 @@ public class MTMUniAssociationIntTest extends TwinAssociation
             ksDef = CassandraCli.client.describe_keyspace("KunderaTests");
             CassandraCli.client.set_keyspace("KunderaTests");
 
-//            List<CfDef> cfDefn = ksDef.getCf_defs();
-//
-//            // CassandraCli.client.set_keyspace("KunderaTests");
-//            for (CfDef cfDef1 : cfDefn)
-//            {
-//
-//                if (cfDef1.getName().equalsIgnoreCase("PERSONNEL"))
-//                {
-//
-//                    CassandraCli.client.system_drop_column_family("PERSONNEL");
-//
-//                }
-//            }
-//            CassandraCli.client.system_add_column_family(cfDef);
-//            if (!CassandraCli.columnFamilyExist("PersonnelUniMToMInt", "KunderaTests")) {
-//                CassandraCli.client.system_add_column_family(cfDef);
-//            } else {
-//                CassandraCli.truncateColumnFamily("KunderaTests", "PersonnelUniMToMInt");
-//            }
-            if (CassandraCli.columnFamilyExist("PersonnelUniMToMInt", "KunderaTests")) {
+            // List<CfDef> cfDefn = ksDef.getCf_defs();
+            //
+            // // CassandraCli.client.set_keyspace("KunderaTests");
+            // for (CfDef cfDef1 : cfDefn)
+            // {
+            //
+            // if (cfDef1.getName().equalsIgnoreCase("PERSONNEL"))
+            // {
+            //
+            // CassandraCli.client.system_drop_column_family("PERSONNEL");
+            //
+            // }
+            // }
+            // CassandraCli.client.system_add_column_family(cfDef);
+            // if (!CassandraCli.columnFamilyExist("PersonnelUniMToMInt",
+            // "KunderaTests")) {
+            // CassandraCli.client.system_add_column_family(cfDef);
+            // } else {
+            // CassandraCli.truncateColumnFamily("KunderaTests",
+            // "PersonnelUniMToMInt");
+            // }
+            if (CassandraCli.columnFamilyExist("PersonnelUniMToMInt", "KunderaTests"))
+            {
                 CassandraCli.client.system_drop_column_family("PersonnelUniMToMInt");
-                
-            } 
+
+            }
             CassandraCli.client.system_add_column_family(cfDef);
 
         }
@@ -439,23 +443,24 @@ public class MTMUniAssociationIntTest extends TwinAssociation
         {
             ksDef = CassandraCli.client.describe_keyspace("KunderaTests");
             CassandraCli.client.set_keyspace("KunderaTests");
-//            List<CfDef> cfDefss = ksDef.getCf_defs();
-//            // CassandraCli.client.set_keyspace("KunderaTests");
-//            for (CfDef cfDef : cfDefss)
-//            {
-//
-//                if (cfDef.getName().equalsIgnoreCase("ADDRESS"))
-//                {
-//
-//                    CassandraCli.client.system_drop_column_family("ADDRESS");
-//
-//                }
-//            }
-//            CassandraCli.client.system_add_column_family(cfDef2);
-            if (CassandraCli.columnFamilyExist("HabitatUniMToMBigInteger", "KunderaTests")) {
+            // List<CfDef> cfDefss = ksDef.getCf_defs();
+            // // CassandraCli.client.set_keyspace("KunderaTests");
+            // for (CfDef cfDef : cfDefss)
+            // {
+            //
+            // if (cfDef.getName().equalsIgnoreCase("ADDRESS"))
+            // {
+            //
+            // CassandraCli.client.system_drop_column_family("ADDRESS");
+            //
+            // }
+            // }
+            // CassandraCli.client.system_add_column_family(cfDef2);
+            if (CassandraCli.columnFamilyExist("HabitatUniMToMBigInteger", "KunderaTests"))
+            {
                 CassandraCli.client.system_drop_column_family("HabitatUniMToMBigInteger");
-                
-            } 
+
+            }
             CassandraCli.client.system_add_column_family(cfDef2);
         }
         catch (NotFoundException e)
@@ -488,43 +493,45 @@ public class MTMUniAssociationIntTest extends TwinAssociation
             // columnDef2.index_type = IndexType.KEYS;
             // cfDef2.addToColumn_metadata(columnDef2);
 
-           // List<CfDef> cfDefss = ksDef.getCf_defs();
+            // List<CfDef> cfDefss = ksDef.getCf_defs();
             CassandraCli.client.set_keyspace("KunderaTests");
-//            for (CfDef cfDef : cfDefss)
-//            {
-//
-//                if (cfDef.getName().equalsIgnoreCase("PERSONNEL_ADDRESS"))
-//                {
-//
-//                    CassandraCli.client.system_drop_column_family("PERSONNEL_ADDRESS");
-//
-//                }
-//            }
-//            CassandraCli.client.system_add_column_family(cfDef2);
-            if (CassandraCli.columnFamilyExist("PERSONNEL_ADDRESS", "KunderaTests")) {
+            // for (CfDef cfDef : cfDefss)
+            // {
+            //
+            // if (cfDef.getName().equalsIgnoreCase("PERSONNEL_ADDRESS"))
+            // {
+            //
+            // CassandraCli.client.system_drop_column_family("PERSONNEL_ADDRESS");
+            //
+            // }
+            // }
+            // CassandraCli.client.system_add_column_family(cfDef2);
+            if (CassandraCli.columnFamilyExist("PERSONNEL_ADDRESS", "KunderaTests"))
+            {
                 CassandraCli.client.system_drop_column_family("PERSONNEL_ADDRESS");
-               
-            } 
-//            else {
-//                CassandraCli.truncateColumnFamily("KunderaTests", "PERSONNEL_ADDRESS");
-//            }
+
+            }
+            // else {
+            // CassandraCli.truncateColumnFamily("KunderaTests",
+            // "PERSONNEL_ADDRESS");
+            // }
             CassandraCli.client.system_add_column_family(cfDef2);
         }
         catch (NotFoundException e)
         {
-            
+
         }
         catch (InvalidRequestException e)
         {
-            
+
         }
         catch (TException e)
         {
-            
+
         }
         catch (SchemaDisagreementException e)
         {
-            
+
         }
 
     }
@@ -551,13 +558,13 @@ public class MTMUniAssociationIntTest extends TwinAssociation
         }
         try
         {
-            cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL_ADDRESS (PERSON_ID INTEGER , ADDRESS_ID BIGINT)");
+            cli.update("CREATE TABLE KUNDERATESTS.PersonnelUniMToMInt_HabitatUniMToMBigInteger (PERSON_ID INTEGER , ADDRESS_ID BIGINT)");
         }
         catch (Exception e)
         {
-            cli.update("DELETE FROM KUNDERATESTS.PERSONNEL_ADDRESS");
-            cli.update("DROP TABLE KUNDERATESTS.PERSONNEL_ADDRESS");
-            cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL_ADDRESS (PERSON_ID INTEGER , ADDRESS_ID BIGINT)");
+            cli.update("DELETE FROM KUNDERATESTS.PersonnelUniMToMInt_HabitatUniMToMBigInteger");
+            cli.update("DROP TABLE KUNDERATESTS.PersonnelUniMToMInt_HabitatUniMToMBigInteger");
+            cli.update("CREATE TABLE KUNDERATESTS.PersonnelUniMToMInt_HabitatUniMToMBigInteger (PERSON_ID INTEGER , ADDRESS_ID BIGINT)");
         }
     }
 
