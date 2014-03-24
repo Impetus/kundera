@@ -41,6 +41,8 @@ public class BaseDao
             }
             Map mapOfExternalProperties = new HashMap<String, Map>();
             mapOfExternalProperties.put("addCassandra", propertyMap);
+            mapOfExternalProperties.put("piccandra", propertyMap);
+            mapOfExternalProperties.put("secIdxAddCassandra", propertyMap);
             emf = Persistence.createEntityManagerFactory(pu, mapOfExternalProperties);
             em = emf.createEntityManager();
         }
