@@ -71,6 +71,7 @@ import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.config.CassandraPropertyReader;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
+import com.impetus.client.cassandra.schemamanager.CassandraDataTranslator;
 import com.impetus.client.cassandra.schemamanager.CassandraValidationClassMapper;
 import com.impetus.client.cassandra.thrift.CQLTranslator;
 import com.impetus.client.cassandra.thrift.CQLTranslator.TranslationType;
@@ -2416,7 +2417,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             if (!row.getColumns().isEmpty())
             {
                 Column column = row.getColumns().get(0);
-                Object columnValue = PropertyAccessorHelper.getObject(columnJavaType, column.getValue());
+                Object columnValue = CassandraDataTranslator.decompose(columnJavaType, column.getValue(), true);
+//                Object columnValue = PropertyAccessorHelper.getObject(columnJavaType, column.getValue());
                 results.add(columnValue);
             }
         }
