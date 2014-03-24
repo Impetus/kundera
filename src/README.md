@@ -59,10 +59,10 @@ Recent Releases
 ================================
 ####Please Note: trunk is current development branch. kundera-2.9 is released tag.
 
-#### 31-January-2014 - Kundera 2.10 released
+#### 24-March-2014 - Kundera 2.11 released
 This release includes [bug fixes] (https://github.com/impetus-opensource/Kundera/wiki/Bug-Fixes), performance improvements and the following new features compared to version 2.10:
 
-* Support added for Cassandra datastax java driver.
+* Support added for Cassandra datastax java driver
 * Support added for in clause with setParameter for collection object
 
 #### 31-January-2014 - Kundera 2.10 released
