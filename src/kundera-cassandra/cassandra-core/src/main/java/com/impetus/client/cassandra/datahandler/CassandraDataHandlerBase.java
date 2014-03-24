@@ -613,7 +613,8 @@ public abstract class CassandraDataHandlerBase
                 if (column != null)
                 {
                     String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
-                    if (CassandraConstants.CQL_KEY.equalsIgnoreCase(thriftColumnName) && tr.getId() == null)
+                    if ((CassandraConstants.CQL_KEY.equalsIgnoreCase(thriftColumnName) || ((AbstractAttribute) m
+                            .getIdAttribute()).getJPAColumnName().equals(thriftColumnName)) && tr.getId() == null)
                     {
                         entity = CassandraUtilities.initialize(m, entity, null);
                         setId(m, entity, column.getValue(), isCql3Enabled);
@@ -1146,20 +1147,22 @@ public abstract class CassandraDataHandlerBase
                 else if (CassandraDataTranslator.isCassandraDataTypeClass(((AbstractAttribute) attribute)
                         .getBindableJavaType()))
                 {
-            		Object decomposed = null;
-            		try {
-            			Class<?> clazz = ((AbstractAttribute) attribute).getBindableJavaType();
-            			decomposed = CassandraDataTranslator.decompose(clazz, thriftColumnValue, false);
-            		} catch (Exception e) {
-            			String tableName = entity.getClass().getSimpleName();
-            			String fieldName = attribute.getName();
-            			String msg = "Decomposing failed for `" + tableName + "`.`"
-            					+ fieldName
-            					+ "`, did you set the correct type in your entity class?";
-            			log.error(msg, e);
-            			throw new KunderaException(msg, e);
-            		}
-            		PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), decomposed);
+                    Object decomposed = null;
+                    try
+                    {
+                        Class<?> clazz = ((AbstractAttribute) attribute).getBindableJavaType();
+                        decomposed = CassandraDataTranslator.decompose(clazz, thriftColumnValue, false);
+                    }
+                    catch (Exception e)
+                    {
+                        String tableName = entity.getClass().getSimpleName();
+                        String fieldName = attribute.getName();
+                        String msg = "Decomposing failed for `" + tableName + "`.`" + fieldName
+                                + "`, did you set the correct type in your entity class?";
+                        log.error(msg, e);
+                        throw new KunderaException(msg, e);
+                    }
+                    PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), decomposed);
                 }
                 else
                 {
