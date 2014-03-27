@@ -71,6 +71,57 @@ public class DSCompositeTypeTest
     }
 
     @Test
+    public void onMultipleRecords()
+    {
+        String cql_Query = "create columnfamily \"CompositeUser\" (\"userId\" text, \"tweetId\" int, \"timeLineId\" uuid, "
+                + " \"tweetDate\" timestamp, PRIMARY KEY(\"userId\",\"tweetId\",\"timeLineId\"))";
+        executeScript(cql_Query);
+        emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT);
+
+        EntityManager em = emf.createEntityManager();
+
+        UUID timeLineId = UUID.randomUUID();
+        UserTimeLine key1 = new UserTimeLine("mevivs", 1, timeLineId);
+        PrimeUser user1 = new PrimeUser(key1);
+        user1.setTweetBody("my first tweet");
+        user1.setTweetDate(currentDate);
+        user1.setNickName(NickName.KK);
+
+        timeLineId = UUID.randomUUID();
+        UserTimeLine key2 = new UserTimeLine("mevivs", 1, timeLineId);
+        PrimeUser user2 = new PrimeUser(key2);
+        user2.setTweetBody("my first tweet");
+        user2.setTweetDate(currentDate);
+        user2.setNickName(NickName.KK);
+
+        em.persist(user1);
+        em.persist(user2);
+
+        em.clear();
+
+        final String noClause = "Select u from PrimeUser u";
+        Query query = em.createQuery(noClause);
+
+        List<PrimeUser> results = query.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(2, results.size());
+        Assert.assertNotSame(results.get(0).getKey(), results.get(1).getKey());
+        Assert.assertEquals(results.get(0).getKey().getUserId(), results.get(1).getKey().getUserId());
+        Assert.assertNotSame(results.get(0).getKey().getTimeLineId(), results.get(1).getKey().getTimeLineId());
+        Assert.assertEquals(results.get(0).getTweetBody(), results.get(1).getTweetBody());
+        
+        final String deleteQuery="Delete from PrimeUser p";
+        em.createQuery(deleteQuery).executeUpdate();
+        query = em.createQuery(noClause);
+        results = query.getResultList();
+        
+        Assert.assertTrue(results.isEmpty());
+        
+        em.close();
+        // emf.close();
+    }
+
+    @Test
     public void onAddColumn() throws Exception
     {
         // cql script is not adding "tweetBody", kundera.ddl.auto.update will
@@ -409,7 +460,9 @@ public class DSCompositeTypeTest
         }
         catch (Exception e)
         {
-            Assert.assertEquals("com.datastax.driver.core.exceptions.InvalidQueryException: Order by is currently only supported on the clustered columns of the PRIMARY KEY, got userId", e.getMessage());
+            Assert.assertEquals(
+                    "com.datastax.driver.core.exceptions.InvalidQueryException: Order by is currently only supported on the clustered columns of the PRIMARY KEY, got userId",
+                    e.getMessage());
         }
 
     }
@@ -529,12 +582,18 @@ public class DSCompositeTypeTest
     @After
     public void tearDown() throws Exception
     {
-        emf.close();
-        CassandraCli.client.execute_cql3_query(ByteBuffer.wrap("use \"KunderaExamples\"".getBytes()),
-                Compression.NONE, ConsistencyLevel.ONE);
-        CassandraCli.client.execute_cql3_query(ByteBuffer.wrap("truncate \"CompositeUser\"".getBytes()),
-                Compression.NONE, ConsistencyLevel.ONE);
-        CassandraCli.dropKeySpace("KunderaExamples");
+        try
+        {
+            emf.close();
+            CassandraCli.client.execute_cql3_query(ByteBuffer.wrap("use \"KunderaExamples\"".getBytes()),
+                    Compression.NONE, ConsistencyLevel.ONE);
+            CassandraCli.client.execute_cql3_query(ByteBuffer.wrap("truncate \"CompositeUser\"".getBytes()),
+                    Compression.NONE, ConsistencyLevel.ONE);
+        }
+        finally
+        {
+            CassandraCli.dropKeySpace("KunderaExamples");
+        }
     }
 
     // DO NOT DELETE IT!! though it is automated with schema creation option.

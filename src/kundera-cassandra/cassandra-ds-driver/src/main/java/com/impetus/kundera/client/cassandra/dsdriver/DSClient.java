@@ -568,9 +568,10 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         Map<String, Field> compositeColumns = new HashMap<String, Field>();
 
         Object compositeKeyInstance = null;
+        boolean isCompositeKey=false;
         if (metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
         {
-            compositeKeyInstance = getCompositeKeyInstance(metadata);
+            isCompositeKey=true;
             EmbeddableType compositeKey = metaModel.embeddable(metadata.getIdAttribute().getBindableJavaType());
             Iterator<Attribute> attributes = compositeKey.getAttributes().iterator();
             while (attributes.hasNext())
@@ -588,11 +589,16 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
             ColumnDefinitions columnDefs = row.getColumnDefinitions();
             Iterator<Definition> columnDefIter = columnDefs.iterator();
 
+            if (isCompositeKey)
+            {
+                compositeKeyInstance = getCompositeKeyInstance(metadata);
+            }
             entity = iteratorColumns(metadata, entityType, relationalValues, compositeColumns, compositeKeyInstance,
                     entity, row, columnDefIter);
 
             if (compositeKeyInstance != null)
             {
+//                compositeKeyInstance = getCompositeKeyInstance(metadata);
                 entity = CassandraUtilities.initialize(metadata, entity, compositeKeyInstance);
             }
 
