@@ -459,6 +459,48 @@ public final class CassandraDataTranslator
         return null;
     }
 
+
+    /**
+     * In case, key or value class is of type blob. Iterate and populate
+     * corresponding byte[]
+     * 
+     * @param mapGenericClasses
+     * @param keyClass
+     * @param valueClass
+     * @param rawMap
+     * @return
+     */
+    public static Map marshalMap(List<Class<?>> mapGenericClasses, Class keyClass, Class valueClass, Map rawMap)
+    {
+        Map dataCollection = new HashMap();
+
+        if (keyClass.isAssignableFrom(BytesType.class) || valueClass.isAssignableFrom(BytesType.class))
+        {
+            Iterator iter = rawMap.keySet().iterator();
+
+            while (iter.hasNext())
+            {
+
+                Object key = iter.next();
+                Object value = rawMap.get(key);
+
+                if (keyClass.isAssignableFrom(BytesType.class))
+                {
+                    key = PropertyAccessorHelper.getObject(mapGenericClasses.get(0), ((ByteBuffer) key).array());
+                }
+
+                if (valueClass.isAssignableFrom(BytesType.class))
+                {
+                    value = PropertyAccessorHelper
+                            .getObject(mapGenericClasses.get(1), ((ByteBuffer) value).array());
+                }
+
+                dataCollection.put(key, value);
+            }
+        }
+        return dataCollection;
+    }
+
     /**
      * marshal collection objects if its value is of type byte
      * 
@@ -467,13 +509,14 @@ public final class CassandraDataTranslator
      * @param clazz
      * @return
      */
-    private static Collection marshalCollection(Class cassandraTypeClazz, Collection result, Class clazz)
+    public static Collection marshalCollection(Class cassandraTypeClazz, Collection result, Class clazz, Class collectionTypeClazz)
     {
         Collection mappedCollection = result;
 
         if (cassandraTypeClazz.isAssignableFrom(BytesType.class))
         {
-            mappedCollection = (Collection) PropertyAccessorHelper.getObject(result.getClass());
+            mappedCollection = (Collection) PropertyAccessorHelper.getObject(collectionTypeClazz);
+            
             for (Object value : result)
             {
                 mappedCollection.add(PropertyAccessorHelper.getObject(clazz, ((ByteBuffer) value).array()));
@@ -852,7 +895,7 @@ public final class CassandraDataTranslator
                 SetType setType = SetType.getInstance((AbstractType) valueClassInstance);
                 Collection outputCollection = new HashSet();
                 outputCollection.addAll(setType.compose(buf));
-                return marshalCollection(valueValidationClass, outputCollection, mapGenericClassses);
+                return marshalCollection(valueValidationClass, outputCollection, mapGenericClassses,outputCollection.getClass());
             }
             catch (NoSuchFieldException e)
             {
@@ -924,47 +967,6 @@ public final class CassandraDataTranslator
                 log.error("Error while retrieving field{} value via CQL, Caused by: .", keyClass.getSimpleName(), e);
                 throw new PersistenceException(e);
             }
-        }
-
-        /**
-         * In case, key or value class is of type blob. Iterate and populate
-         * corresponding byte[]
-         * 
-         * @param mapGenericClasses
-         * @param keyClass
-         * @param valueClass
-         * @param rawMap
-         * @return
-         */
-        private static Map marshalMap(List<Class<?>> mapGenericClasses, Class keyClass, Class valueClass, Map rawMap)
-        {
-            Map dataCollection = new HashMap();
-
-            if (keyClass.isAssignableFrom(BytesType.class) || valueClass.isAssignableFrom(BytesType.class))
-            {
-                Iterator iter = rawMap.keySet().iterator();
-
-                while (iter.hasNext())
-                {
-
-                    Object key = iter.next();
-                    Object value = rawMap.get(key);
-
-                    if (keyClass.isAssignableFrom(BytesType.class))
-                    {
-                        key = PropertyAccessorHelper.getObject(mapGenericClasses.get(0), ((ByteBuffer) key).array());
-                    }
-
-                    if (valueClass.isAssignableFrom(BytesType.class))
-                    {
-                        value = PropertyAccessorHelper
-                                .getObject(mapGenericClasses.get(1), ((ByteBuffer) value).array());
-                    }
-
-                    dataCollection.put(key, value);
-                }
-            }
-            return dataCollection;
         }
 
         /**
@@ -1080,7 +1082,7 @@ public final class CassandraDataTranslator
                 ListType listType = ListType.getInstance((AbstractType) valueClassInstance);
                 Collection outputCollection = new ArrayList();
                 outputCollection.addAll(listType.compose(buf));
-                return marshalCollection(valueValidationClass, outputCollection, mapGenericClassses);
+                return marshalCollection(valueValidationClass, outputCollection, mapGenericClassses,outputCollection.getClass());
             }
             catch (NoSuchFieldException e)
             {

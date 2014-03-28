@@ -17,11 +17,17 @@ package com.impetus.kundera.client.cassandra.dsdriver;
 
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.metamodel.EntityType;
 
+import org.apache.cassandra.db.marshal.BytesType;
 import org.apache.cassandra.utils.ByteBufferUtil;
 
 import com.datastax.driver.core.Row;
@@ -194,13 +200,29 @@ public final class DSClientUtilities
             break;
 
         case LIST:
-            retVal = row.getList(columnName, PropertyAccessorHelper.getGenericClass(member));
-            PropertyAccessorHelper.set(entity, member, retVal);
+            Class listAttributeTypeClass = PropertyAccessorHelper.getGenericClass(member);
+            retVal = row.getList(columnName, listAttributeTypeClass.isAssignableFrom(byte[].class)? ByteBuffer.class:listAttributeTypeClass);
+
+            if(retVal != null && !((List)retVal).isEmpty())
+            PropertyAccessorHelper.set(
+                    entity,
+                    member,
+                    listAttributeTypeClass.isAssignableFrom(byte[].class) ? CassandraDataTranslator.marshalCollection(
+                            BytesType.class, (Collection) retVal, listAttributeTypeClass, ArrayList.class) : retVal);
             break;
 
         case SET:
-            retVal = row.getSet(columnName, PropertyAccessorHelper.getGenericClass(member));
-            PropertyAccessorHelper.set(entity, member, retVal);
+            Class setAttributeTypeClass = PropertyAccessorHelper.getGenericClass(member);
+//            retVal = row.getList(columnName, setAttributeTypeClass.isAssignableFrom(byte[].class)? ByteBuffer.class:setAttributeTypeClass);
+            
+            retVal = row.getSet(columnName, setAttributeTypeClass.isAssignableFrom(byte[].class)? ByteBuffer.class:setAttributeTypeClass);
+            if(retVal != null && !((Set)retVal).isEmpty())
+            PropertyAccessorHelper.set(
+                    entity,
+                    member,
+                    setAttributeTypeClass.isAssignableFrom(byte[].class) ? CassandraDataTranslator.marshalCollection(
+                            BytesType.class, (Collection) retVal, setAttributeTypeClass, HashSet.class) : retVal);
+//            PropertyAccessorHelper.set(entity, member, retVal);
             break;
         /*
          * ASCII, BIGINT, BLOB, BOOLEAN, COUNTER, DECIMAL, DOUBLE, FLOAT, INET,
@@ -213,9 +235,26 @@ public final class DSClientUtilities
             Class keyClass = CassandraValidationClassMapper.getValidationClassInstance(mapGenericClasses.get(0), true);
             Class valueClass = CassandraValidationClassMapper
                     .getValidationClassInstance(mapGenericClasses.get(1), true);
-            retVal = row.getMap(columnName, keyClass, valueClass);
+//            retVal = row.getMap(columnName, keyClass, valueClass);
+            retVal = row.getMap(columnName,
+                    mapGenericClasses.get(0).isAssignableFrom(byte[].class) ? ByteBuffer.class
+                            : mapGenericClasses.get(0), /*
+                                                         * mapGenericClasses.get(
+                                                         * 0),
+                                                         */
+                    mapGenericClasses.get(1).isAssignableFrom(byte[].class) ? ByteBuffer.class
+                            : mapGenericClasses.get(1));
+            
+            boolean isByteBuffer = mapGenericClasses.get(0).isAssignableFrom(byte[].class)
+                    || mapGenericClasses.get(1).isAssignableFrom(byte[].class);  
 
-            PropertyAccessorHelper.set(entity, member, retVal);
+            // set the values.
+            if(retVal != null && !((Map)retVal).isEmpty())
+            PropertyAccessorHelper.set(
+                    entity,
+                    member,
+                    isByteBuffer ? CassandraDataTranslator.marshalMap(mapGenericClasses, keyClass, valueClass,
+                            (Map) retVal) : retVal);
             break;
         }
 
