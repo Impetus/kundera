@@ -128,6 +128,7 @@ public class CassandraHostConfiguration extends HostConfiguration
             userName = (String) connectionProperties.get(PersistenceProperties.KUNDERA_USERNAME);
             password = (String) connectionProperties.get(PersistenceProperties.KUNDERA_PASSWORD);
             maxWaitInMilli = (String) connectionProperties.get(CassandraConstants.MAX_WAIT);
+            hostRetry = Boolean.parseBoolean((String)connectionProperties.get(Constants.RETRY));
         }
 
         if (props != null)
