@@ -337,7 +337,6 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                         break;
                     }
                 }
-
             }
             else
             {
@@ -2060,7 +2059,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             }
             catch (Exception e)
             {
-                log.error("Error while executing native CQL query Caused by: .", e);
+                log.error("Error while executing native CQL query Caused by {}.", e);
                 throw new PersistenceException(e);
             }
             return returnedEntities;
