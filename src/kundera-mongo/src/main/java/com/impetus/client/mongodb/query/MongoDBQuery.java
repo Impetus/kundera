@@ -18,9 +18,12 @@ package com.impetus.client.mongodb.query;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.StringTokenizer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.persistence.Query;
 import javax.persistence.metamodel.Attribute;
@@ -52,6 +55,7 @@ import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.KunderaQuery.SortOrder;
 import com.impetus.kundera.query.KunderaQuery.SortOrdering;
+import com.impetus.kundera.query.KunderaQuery.UpdateClause;
 import com.impetus.kundera.query.QueryHandlerException;
 import com.impetus.kundera.query.QueryImpl;
 import com.mongodb.BasicDBObject;
@@ -99,6 +103,17 @@ public class MongoDBQuery extends QueryImpl
     /*
      * (non-Javadoc)
      * 
+     * @see com.impetus.kundera.query.QueryImpl#setFirstResult(int)
+     */
+    @Override
+    public Query setFirstResult(int firstResult)
+    {
+        return super.setFirstResult(firstResult);
+    }
+    
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.query.QueryImpl#setMaxResults(int)
      */
     @Override
@@ -130,7 +145,7 @@ public class MongoDBQuery extends QueryImpl
             }
             BasicDBObject orderByClause = getOrderByClause();
             return ((MongoDBClient) client).loadData(m, createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()),
-                    null, orderByClause, isSingleResult ? 1 : maxResult, getKeys(m, getKunderaQuery().getResult()),
+                    null, orderByClause, isSingleResult ? 1 : maxResult, firstResult, getKeys(m, getKunderaQuery().getResult()),
                     getKunderaQuery().getResult());
         }
         catch (Exception e)
@@ -160,7 +175,7 @@ public class MongoDBQuery extends QueryImpl
 
             BasicDBObject orderByClause = getOrderByClause();
             ls = ((MongoDBClient) client).loadData(m, createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()),
-                    m.getRelationNames(), orderByClause, isSingleResult ? 1 : maxResult,
+                    m.getRelationNames(), orderByClause, isSingleResult ? 1 : maxResult, firstResult,
                     getKeys(m, getKunderaQuery().getResult()), getKunderaQuery().getResult());
         }
         catch (Exception e)
@@ -183,6 +198,175 @@ public class MongoDBQuery extends QueryImpl
         return new MongoEntityReader(kunderaQuery, kunderaMetadata);
     }
 
+    static class QueryComponent {
+    	boolean isAnd;
+    	Queue clauses = new LinkedList();
+    	List<QueryComponent> children = new ArrayList<MongoDBQuery.QueryComponent>();
+    	QueryComponent parent;
+    	BasicDBObject actualQuery;
+    }
+    
+    private static List<String> tokenize(String where, Pattern pattern)
+    {
+        List<String> split = new ArrayList<String>();
+        Matcher matcher = pattern.matcher(where);
+        int lastIndex = 0;
+        String s;
+        // int count = 0;
+        while (matcher.find())
+        {
+            s = where.substring(lastIndex, matcher.start()).trim();
+            split.add(s);
+            s = matcher.group();
+            split.add(s.toUpperCase());
+            lastIndex = matcher.end();
+            // count++;
+        }
+        s = where.substring(lastIndex).trim();
+        split.add(s);
+        return split;
+    }
+    
+    public static void main(String[] args) {
+    	
+    	Pattern INTRA_CLAUSE_PATTERN = Pattern.compile("\\s\\band\\b\\s|\\s\\bor\\b\\s|\\s\\bbetween\\b\\s|\\(|\\)",
+                Pattern.CASE_INSENSITIVE);
+    	System.out.println(tokenize("(sdfsdf and dsfds)", INTRA_CLAUSE_PATTERN));
+    	
+    	Queue q = new LinkedList();
+    	KunderaQuery kq = new KunderaQuery("", null);
+    	q.add(kq.new FilterClause("a", "=", ":b"));
+    	q.add(kq.new FilterClause("b", "=", ":c"));
+    	q.add("AND");
+    	q.add("(");
+    	q.add("(");
+    	q.add(kq.new FilterClause("c", "=", ":d"));
+    	q.add("OR");
+    	q.add(kq.new FilterClause("e", "=", ":f"));
+    	q.add(")");
+    	q.add("AND");
+    	q.add("(");
+    	q.add(kq.new FilterClause("g", "=", ":h"));
+    	q.add("OR");
+    	q.add(kq.new FilterClause("i", "=", ":j"));
+    	q.add(")");
+    	q.add(")");
+    	
+    	QueryComponent sq = getQueryComponent(q);
+    	testPopulateQueries(sq);
+    	System.out.println(sq);
+    }
+    
+    private static void testPopulateQueries(QueryComponent sq)
+    {
+    	boolean hasChildren = false;
+    	if(sq.children!=null && sq.children.size()>0)
+    	{
+    		hasChildren = true;
+	    	for (QueryComponent subQ : sq.children) {
+	    		testPopulateQueries(subQ);
+			}
+    	}
+    	if(sq.clauses.size()>0 || hasChildren)
+    	{
+    		//TODO change to using createMongoQuery
+    		sq.actualQuery = new BasicDBObject();
+    		if(hasChildren)
+        	{
+    			List<BasicDBObject> childQs = new ArrayList<BasicDBObject>();
+    	    	for (QueryComponent subQ : sq.children) {
+    	    		childQs.add(subQ.actualQuery);
+    			}
+    	    	if(sq.isAnd)
+    			{
+    				sq.actualQuery.append("$and", childQs);
+    			}
+    			else
+    			{
+    				sq.actualQuery.append("$or", childQs);
+    			}
+        	}
+    	}
+		return;
+    }
+    
+    private void populateQueryComponents(EntityMetadata m, QueryComponent sq)
+    {
+    	boolean hasChildren = false;
+    	if(sq.children!=null && sq.children.size()>0)
+    	{
+    		hasChildren = true;
+	    	for (QueryComponent subQ : sq.children) {
+	    		populateQueryComponents(m, subQ);
+			}
+    	}
+    	if(sq.clauses.size()>0 || hasChildren)
+    	{
+    		sq.actualQuery = createSubMongoQuery(m, sq.clauses);
+    		if(hasChildren)
+        	{
+    			List<BasicDBObject> childQs = new ArrayList<BasicDBObject>();
+    			childQs.add(sq.actualQuery);
+    	    	for (QueryComponent subQ : sq.children) {
+    	    		childQs.add(subQ.actualQuery);
+    			}
+    	    	if(sq.isAnd)
+    			{
+    	    		BasicDBObject dbo = new BasicDBObject("$and", childQs);
+    				sq.actualQuery = dbo;
+    			}
+    			else
+    			{
+    	    		BasicDBObject dbo = new BasicDBObject("$or", childQs);
+    				sq.actualQuery = dbo;
+    			}
+        	}
+    	}
+		return;
+    }
+    
+    private static QueryComponent getQueryComponent(Queue filterClauseQueue)
+    {
+    	QueryComponent subQuery = new QueryComponent();
+    	QueryComponent currentSubQuery = subQuery;
+    	
+    	for (Object object : filterClauseQueue)
+        {
+            if (object instanceof FilterClause)
+            {
+            	currentSubQuery.clauses.add(object);
+            }
+            else if(object instanceof String)
+            {
+            	String interClauseConstruct = (String)object;
+            	if(interClauseConstruct.equals("(")) {
+            		QueryComponent temp = new QueryComponent();
+            		currentSubQuery.children.add(temp);
+            		temp.parent = currentSubQuery;
+            		currentSubQuery = temp;
+            	}
+            	else if(interClauseConstruct.equals(")")) {
+            		currentSubQuery = currentSubQuery.parent;
+            	}
+            	else if(interClauseConstruct.equalsIgnoreCase("AND")) {
+            		currentSubQuery.isAnd = true;
+            	}
+            	else if(interClauseConstruct.equalsIgnoreCase("OR")) {
+            		currentSubQuery.isAnd = false;
+            	}
+            }
+        }
+    	
+    	return subQuery;
+    }
+    
+    public BasicDBObject createMongoQuery(EntityMetadata m, Queue filterClauseQueue)
+    {
+    	QueryComponent sq = getQueryComponent(filterClauseQueue);
+    	populateQueryComponents(m, sq);
+    	return sq.actualQuery;
+    }
+    
     /**
      * Creates MongoDB Query object from filterClauseQueue.
      * 
@@ -193,7 +377,7 @@ public class MongoDBQuery extends QueryImpl
      * @param columns
      * @return the basic db object
      */
-    private BasicDBObject createMongoQuery(EntityMetadata m, Queue filterClauseQueue)
+    public BasicDBObject createSubMongoQuery(EntityMetadata m, Queue filterClauseQueue)
     {
         BasicDBObject query = new BasicDBObject();
         BasicDBObject compositeColumns = new BasicDBObject();
@@ -205,6 +389,8 @@ public class MongoDBQuery extends QueryImpl
         {
             boolean isCompositeColumn = false;
 
+            boolean isSubCondition = false;
+            
             if (object instanceof FilterClause)
             {
                 FilterClause filter = (FilterClause) object;
@@ -297,7 +483,6 @@ public class MongoDBQuery extends QueryImpl
                         {
                             query.append(property, value);
                         }
-
                     }
                     else if (condition.equalsIgnoreCase("like"))
                     {
@@ -315,7 +500,6 @@ public class MongoDBQuery extends QueryImpl
                         if (isCompositeColumn)
                         {
                             compositeColumns.put(property, new BasicDBObject("$gt", value));
-
                         }
                         else
                         {
@@ -329,14 +513,12 @@ public class MongoDBQuery extends QueryImpl
                                 query.append(property, new BasicDBObject("$gt", value));
                             }
                         }
-
                     }
                     else if (condition.equalsIgnoreCase(">="))
                     {
                         if (isCompositeColumn)
                         {
                             compositeColumns.put(property, new BasicDBObject("$gte", value));
-
                         }
                         else
                         {
@@ -357,7 +539,6 @@ public class MongoDBQuery extends QueryImpl
                         if (isCompositeColumn)
                         {
                             compositeColumns.put(property, new BasicDBObject("$lt", value));
-
                         }
                         else
                         {
@@ -377,7 +558,6 @@ public class MongoDBQuery extends QueryImpl
                         if (isCompositeColumn)
                         {
                             compositeColumns.put(property, new BasicDBObject("$lte", value));
-
                         }
                         else
                         {
@@ -389,6 +569,63 @@ public class MongoDBQuery extends QueryImpl
                             else
                             {
                                 query.append(property, new BasicDBObject("$lte", value));
+                            }
+                        }
+                    }
+                    else if (condition.equalsIgnoreCase("in"))
+                    {
+                        if (isCompositeColumn)
+                        {
+                            compositeColumns.put(property, new BasicDBObject("$in", filter.getValue()));
+                        }
+                        else
+                        {
+                            if (query.containsField(property))
+                            {
+                                query.get(property);
+                                query.put(property, ((BasicDBObject) query.get(property)).append("$in", filter.getValue()));
+                            }
+                            else
+                            {
+                                query.append(property, new BasicDBObject("$in", filter.getValue()));
+                            }
+                        }
+                    }
+                    else if (condition.equalsIgnoreCase("not in"))
+                    {
+                        if (isCompositeColumn)
+                        {
+                            compositeColumns.put(property, new BasicDBObject("$nin", filter.getValue()));
+                        }
+                        else
+                        {
+                            if (query.containsField(property))
+                            {
+                                query.get(property);
+                                query.put(property, ((BasicDBObject) query.get(property)).append("$nin", filter.getValue()));
+                            }
+                            else
+                            {
+                                query.append(property, new BasicDBObject("$nin", filter.getValue()));
+                            }
+                        }
+                    }
+                    else if (condition.equalsIgnoreCase("<>"))
+                    {
+                        if (isCompositeColumn)
+                        {
+                            compositeColumns.put(property, new BasicDBObject("$ne", value));
+                        }
+                        else
+                        {
+                            if (query.containsField(property))
+                            {
+                                query.get(property);
+                                query.put(property, ((BasicDBObject) query.get(property)).append("$ne", value));
+                            }
+                            else
+                            {
+                                query.append(property, new BasicDBObject("$ne", value));
                             }
                         }
                     }
@@ -460,10 +697,76 @@ public class MongoDBQuery extends QueryImpl
     @Override
     protected int onExecuteUpdate()
     {
-        return onUpdateDeleteEvent();
+    	int ret = handleSpecialFunctions();
+    	if(ret==-1)
+        {
+    		return onUpdateDeleteEvent();
+        }
+    	return ret;
     }
 
-    @Override
+    /** The Constant SINGLE_STRING_KEYWORDS. */
+    public static final String[] FUNCTION_KEYWORDS = { "INCREMENT()", "DECREMENT()" };
+    
+    private int handleSpecialFunctions() {
+
+    	boolean needsSpecialAttention = false;
+    	outer: for (UpdateClause c : kunderaQuery.getUpdateClauseQueue())
+        {
+    		for (int i = 0; i < FUNCTION_KEYWORDS.length; i++)
+            {
+                if (c.getValue() instanceof String) 
+                {
+                	String func = c.getValue().toString();
+                	func = func.replaceAll(" ", "");
+                	if(func.equalsIgnoreCase(FUNCTION_KEYWORDS[i])) {
+                		needsSpecialAttention = true;
+                		c.setValue(func);
+                		break outer;
+                	}
+                }
+            }
+        }
+    	
+    	if(!needsSpecialAttention)
+    		return -1;
+    	
+    	EntityMetadata m = getEntityMetadata();
+    	
+    	Queue filterClauseQueue = kunderaQuery.getFilterClauseQueue();
+    	BasicDBObject query = createMongoQuery(m, filterClauseQueue);
+    	
+    	BasicDBObject update = new BasicDBObject();
+    	for (UpdateClause c : kunderaQuery.getUpdateClauseQueue())
+        {
+    		boolean isSpecialFunction = false;
+    		for (int i = 0; i < FUNCTION_KEYWORDS.length; i++)
+            {
+                if (c.getValue() instanceof String 
+                		&& c.getValue().toString().equalsIgnoreCase(FUNCTION_KEYWORDS[i]))
+                {
+                	isSpecialFunction = true;
+                	if(c.getValue().toString().equals("INCREMENT()"))
+                	{
+                		update.put("$inc", new BasicDBObject(c.getProperty(), 1));
+                	}
+                	else if(c.getValue().toString().equals("DECREMENT()"))
+                	{
+                		update.put("$inc", new BasicDBObject(c.getProperty(), -1));
+                	}
+                }
+            }
+			if (!isSpecialFunction)
+            {
+            	update.put(c.getProperty(), c.getValue());
+            }
+        }
+    	
+    	Client client = persistenceDelegeator.getClient(m);
+    	return ((MongoDBClient)client).handleUpdateFunctions(query, update, m.getTableName());
+	}
+
+	@Override
     public void close()
     {
         // TODO Auto-generated method stub

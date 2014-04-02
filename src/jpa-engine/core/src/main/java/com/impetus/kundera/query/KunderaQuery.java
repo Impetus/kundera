@@ -59,17 +59,17 @@ public class KunderaQuery
             "WHERE", "GROUP BY", "HAVING", "ORDER BY" };
 
     /** The Constant INTER_CLAUSE_OPERATORS. */
-    public static final String[] INTER_CLAUSE_OPERATORS = { "AND", "OR", "BETWEEN" };
+    public static final String[] INTER_CLAUSE_OPERATORS = { "AND", "OR", "BETWEEN", "(", ")" };
 
     /** The Constant INTRA_CLAUSE_OPERATORS. */
-    public static final String[] INTRA_CLAUSE_OPERATORS = { "=", "LIKE", "IN", ">", ">=", "<", "<=" };
+    public static final String[] INTRA_CLAUSE_OPERATORS = { "=", "LIKE", "IN", ">", ">=", "<", "<=", "<>", "NOT IN" };
 
     /** The INTER pattern. */
     private static final Pattern INTER_CLAUSE_PATTERN = Pattern.compile(
-            "\\s\\band\\b\\s|\\s\\bor\\b\\s|\\s\\bbetween\\b\\s", Pattern.CASE_INSENSITIVE);
+            "\\s\\band\\b\\s|\\s\\bor\\b\\s|\\s\\bbetween\\b\\s|\\(|\\)", Pattern.CASE_INSENSITIVE);
 
     /** The INTRA pattern. */
-    private static final Pattern INTRA_CLAUSE_PATTERN = Pattern.compile("=|\\s\\blike\\b|\\bin\\b|>=|>|<=|<|\\s\\bset",
+    private static final Pattern INTRA_CLAUSE_PATTERN = Pattern.compile("=|\\s\\blike\\b|\\bin\\b|\\bnot in\\b|>=|>|<=|<|<>|\\s\\bset",
             Pattern.CASE_INSENSITIVE);
 
     /** The logger. */
@@ -270,10 +270,10 @@ public class KunderaQuery
     {
         if (typedParameter != null && typedParameter.getParameters() != null)
         {
-            FilterClause clause = typedParameter.getParameters().get(paramString);
-            if (clause != null)
+            List<FilterClause> clauses = typedParameter.getParameters().get(paramString);
+            if (clauses != null)
             {
-                return clause.getValue();
+                return clauses.get(0).getValue();
             }
             else
             {
@@ -305,18 +305,18 @@ public class KunderaQuery
                     match = p;
                     if (typedParameter.getType().equals(Type.NAMED))
                     {
-                        FilterClause clause = typedParameter.getParameters().get(":" + p.getName());
-                        if (clause != null)
+                        List<FilterClause> clauses = typedParameter.getParameters().get(":" + p.getName());
+                        if (clauses != null)
                         {
-                            return clause.getValue();
+                            return clauses.get(0).getValue();
                         }
                     }
                     else
                     {
-                        FilterClause clause = typedParameter.getParameters().get("?" + p.getPosition());
-                        if (clause != null)
+                    	List<FilterClause> clauses = typedParameter.getParameters().get("?" + p.getPosition());
+                        if (clauses != null)
                         {
-                            return clause.getValue();
+                            return clauses.get(0).getValue();
                         }
                         else
                         {
@@ -460,7 +460,12 @@ public class KunderaQuery
 
         for (String clause : clauses)
         {
-            if (newClause)
+        	if(clause.trim().equals("(") || clause.trim().equals(")"))
+        	{
+                filtersQueue.add(clause.trim());
+                newClause = true;
+            }
+        	else if (newClause)
             {
                 List<String> tokens = tokenize(clause, INTRA_CLAUSE_PATTERN);
 
@@ -520,7 +525,7 @@ public class KunderaQuery
             {
                 if (Arrays.asList(INTER_CLAUSE_OPERATORS).contains(clause.toUpperCase().trim()))
                 {
-                    filtersQueue.add(clause.toUpperCase());
+                    filtersQueue.add(clause.toUpperCase().trim());
                     newClause = true;
                 }
                 else
@@ -715,11 +720,13 @@ public class KunderaQuery
     {
         if (typedParameter != null)
         {
-            FilterClause clause = typedParameter.getParameters() != null ? typedParameter.getParameters().get(name)
+            List<FilterClause> clauses = typedParameter.getParameters() != null ? typedParameter.getParameters().get(name)
                     : null;
-            if (clause != null)
+            if (clauses != null)
             {
-                clause.setValue(value);
+            	for (FilterClause clause : clauses) {
+            		clause.setValue(value);
+				}
             }
             else
             {
@@ -990,14 +997,16 @@ public class KunderaQuery
         while (matcher.find())
         {
             s = where.substring(lastIndex, matcher.start()).trim();
-            split.add(s);
+            if(!s.equals(""))
+            	split.add(s);
             s = matcher.group();
             split.add(s.toUpperCase());
             lastIndex = matcher.end();
             // count++;
         }
         s = where.substring(lastIndex).trim();
-        split.add(s);
+        if(!s.equals(""))
+        	split.add(s);
         return split;
     }
 
@@ -1205,7 +1214,7 @@ public class KunderaQuery
 
         private Set<Parameter<?>> jpaParameters = new HashSet<Parameter<?>>();
 
-        private Map<String, FilterClause> parameters;
+        private Map<String, List<FilterClause>> parameters;
 
         private Map<String, UpdateClause> updateParameters;
 
@@ -1228,7 +1237,7 @@ public class KunderaQuery
         /**
          * @return the parameters
          */
-        Map<String, FilterClause> getParameters()
+        Map<String, List<FilterClause>> getParameters()
         {
             return parameters;
         }
@@ -1245,10 +1254,12 @@ public class KunderaQuery
         {
             if (parameters == null)
             {
-                parameters = new HashMap<String, FilterClause>();
+                parameters = new HashMap<String, List<FilterClause>>();
             }
-
-            parameters.put(key, clause);
+            if(!parameters.containsKey(key)) {
+            	parameters.put(key, new ArrayList<KunderaQuery.FilterClause>());
+            }
+            parameters.get(key).add(clause);
         }
 
         void addParameters(String key, UpdateClause clause)
