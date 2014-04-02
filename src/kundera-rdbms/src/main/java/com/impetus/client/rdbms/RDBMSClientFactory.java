@@ -93,8 +93,8 @@ public class RDBMSClientFactory extends GenericClientFactory
         for (String pu : pus)
         {
             classes.put(pu,
-            /* Collection<Class<?>> classes = */((MetamodelImpl) kunderaMetadata.getApplicationMetadata()
-                    .getMetamodel(pu)).getEntityNameToClassMap().values());
+                    /* Collection<Class<?>> classes = */((MetamodelImpl) kunderaMetadata.getApplicationMetadata()
+                            .getMetamodel(pu)).getEntityNameToClassMap().values());
         }
         // to keep hibernate happy! As in our case all scanned classes are not
         // meant for rdbms, so initally i have set depth to zero!
@@ -124,29 +124,33 @@ public class RDBMSClientFactory extends GenericClientFactory
             }
         }
         sf = conf.buildSessionFactory(serviceRegistry);
-        
-        synchronized (sf)
+
+        String schemaProperty = conf.getProperty("hibernate.hbm2ddl.auto");
+        if (schemaProperty != null && (schemaProperty.equals("create") || schemaProperty.equals("create-drop")))
         {
-            for (String pu : pus)
+            synchronized (sf)
             {
-                StatelessSession session = sf.openStatelessSession();
-                if (!pu.equals(getPersistenceUnit()))
+                for (String pu : pus)
                 {
-                    Collection<Class<?>> collection = classes.get(pu);
-                    for (Class clazz : collection)
+                    StatelessSession session = sf.openStatelessSession();
+                    if (!pu.equals(getPersistenceUnit()))
                     {
-                        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, clazz);
-                        try
+                        Collection<Class<?>> collection = classes.get(pu);
+                        for (Class clazz : collection)
                         {
-                            session.createSQLQuery("Drop table " + metadata.getTableName()).executeUpdate();
-                        }
-                        catch (Exception e)
-                        {
-                            // ignore such drops.
+                            EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, clazz);
+                            try
+                            {
+                                session.createSQLQuery("Drop table " + metadata.getTableName()).executeUpdate();
+                            }
+                            catch (Exception e)
+                            {
+                                // ignore such drops.
+                            }
                         }
                     }
-                }
 
+                }
             }
         }
 
@@ -156,7 +160,8 @@ public class RDBMSClientFactory extends GenericClientFactory
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
-        return new HibernateClient(getPersistenceUnit(), indexManager, reader, this, externalProperties, clientMetadata, kunderaMetadata);
+        return new HibernateClient(getPersistenceUnit(), indexManager, reader, this, externalProperties,
+                clientMetadata, kunderaMetadata);
     }
 
     @Override
@@ -183,8 +188,8 @@ public class RDBMSClientFactory extends GenericClientFactory
      */
     private void getConfigurationObject()
     {
-        RDBMSPropertyReader reader = new RDBMSPropertyReader(externalProperties, kunderaMetadata.getApplicationMetadata()
-                .getPersistenceUnitMetadata(getPersistenceUnit()));
+        RDBMSPropertyReader reader = new RDBMSPropertyReader(externalProperties, kunderaMetadata
+                .getApplicationMetadata().getPersistenceUnitMetadata(getPersistenceUnit()));
         this.conf = reader.load(getPersistenceUnit());
     }
 
