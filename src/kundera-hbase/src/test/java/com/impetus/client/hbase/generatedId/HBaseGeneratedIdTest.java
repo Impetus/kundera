@@ -35,6 +35,7 @@ public class HBaseGeneratedIdTest
     private HBaseCli cli;
 
     private static final String table = "kundera";
+
     @BeforeClass
     public static void setUpBeforeClass() throws Exception
     {
@@ -58,7 +59,7 @@ public class HBaseGeneratedIdTest
     {
         emf.close();
         cli.dropTable("kundera");
-        
+
     }
 
     @Test
@@ -66,10 +67,10 @@ public class HBaseGeneratedIdTest
     {
         EntityManager em = emf.createEntityManager();
 
-        HBaseGeneratedIdDefault idDefault = new HBaseGeneratedIdDefault();
-        idDefault.setName("kuldeep");
         try
         {
+            HBaseGeneratedIdDefault idDefault = new HBaseGeneratedIdDefault();
+            idDefault.setName("kuldeep");
             em.persist(idDefault);
             Assert.fail();
         }
@@ -79,10 +80,10 @@ public class HBaseGeneratedIdTest
                     + GenerationType.AUTO + " Strategy not supported by this client :" + HBaseClient.class.getName(),
                     e.getMessage());
         }
-        HBaseGeneratedIdStrategyAuto strategyAuto = new HBaseGeneratedIdStrategyAuto();
-        strategyAuto.setName("kuldeep");
         try
         {
+            HBaseGeneratedIdStrategyAuto strategyAuto = new HBaseGeneratedIdStrategyAuto();
+            strategyAuto.setName("kuldeep");
             em.persist(strategyAuto);
             Assert.fail();
         }
@@ -93,10 +94,10 @@ public class HBaseGeneratedIdTest
                     e.getMessage());
         }
 
-        HBaseGeneratedIdStrategyIdentity strategyIdentity = new HBaseGeneratedIdStrategyIdentity();
-        strategyIdentity.setName("kuldeep");
         try
         {
+            HBaseGeneratedIdStrategyIdentity strategyIdentity = new HBaseGeneratedIdStrategyIdentity();
+            strategyIdentity.setName("kuldeep");
             em.persist(strategyIdentity);
             Assert.fail();
         }
@@ -123,31 +124,42 @@ public class HBaseGeneratedIdTest
                             + HBaseClient.class.getName(), e.getMessage());
         }
 
-        HBaseGeneratedIdStrategyTable strategyTable = new HBaseGeneratedIdStrategyTable();
-        strategyTable.setName("KK");
         try
         {
+            HBaseGeneratedIdStrategyTable strategyTable1 = new HBaseGeneratedIdStrategyTable();
+            strategyTable1.setName("KK");
+            em.persist(strategyTable1);
+
+            HBaseGeneratedIdStrategyTable strategyTable2 = new HBaseGeneratedIdStrategyTable();
+            strategyTable2.setName("vm");
+            em.persist(strategyTable2);
+
+            HBaseGeneratedIdStrategyTable strategyTable3 = new HBaseGeneratedIdStrategyTable();
+            strategyTable3.setName("vs");
+            em.persist(strategyTable3);
+
+            HBaseGeneratedIdStrategyTable strategyTable = new HBaseGeneratedIdStrategyTable();
+            strategyTable.setName("sh");
             em.persist(strategyTable);
+
             List<HBaseGeneratedIdStrategyTable> list = em.createQuery("Select c from HBaseGeneratedIdStrategyTable c")
                     .getResultList();
             Assert.assertNotNull(list);
-            Assert.assertEquals(1, list.size());
-            Assert.assertEquals("KK", list.get(0).getName());
-            Object id = list.get(0).getId();
+            Assert.assertEquals(4, list.size());
             em.clear();
-            strategyTable = em.find(HBaseGeneratedIdStrategyTable.class, id);
+            strategyTable = em.find(HBaseGeneratedIdStrategyTable.class, strategyTable.getId());
             Assert.assertNotNull(strategyTable);
-            Assert.assertEquals("KK", strategyTable.getName());
+            Assert.assertEquals("sh", strategyTable.getName());
         }
         catch (KunderaException e)
         {
             Assert.fail();
         }
 
-        HBaseGeneratedIdWithOutSequenceGenerator withOutSequenceGenerator = new HBaseGeneratedIdWithOutSequenceGenerator();
-        withOutSequenceGenerator.setName("Kuldeep Kumar");
         try
         {
+            HBaseGeneratedIdWithOutSequenceGenerator withOutSequenceGenerator = new HBaseGeneratedIdWithOutSequenceGenerator();
+            withOutSequenceGenerator.setName("Kuldeep Kumar");
             em.persist(withOutSequenceGenerator);
             Assert.fail();
         }
@@ -159,10 +171,10 @@ public class HBaseGeneratedIdTest
                             + HBaseClient.class.getName(), e.getMessage());
         }
 
-        HBaseGeneratedIdWithOutTableGenerator withOutTableGenerator = new HBaseGeneratedIdWithOutTableGenerator();
-        withOutTableGenerator.setName("Kuldeep Mishra");
         try
         {
+            HBaseGeneratedIdWithOutTableGenerator withOutTableGenerator = new HBaseGeneratedIdWithOutTableGenerator();
+            withOutTableGenerator.setName("Kuldeep Mishra");
             em.persist(withOutTableGenerator);
             List<HBaseGeneratedIdWithOutTableGenerator> list = em.createQuery(
                     "Select c from HBaseGeneratedIdWithOutTableGenerator c").getResultList();
@@ -172,17 +184,17 @@ public class HBaseGeneratedIdTest
             Object id = list.get(0).getId();
             em.clear();
             withOutTableGenerator = em.find(HBaseGeneratedIdWithOutTableGenerator.class, id);
-            Assert.assertNotNull(strategyTable);
+            Assert.assertNotNull(withOutTableGenerator);
             Assert.assertEquals("Kuldeep Mishra", withOutTableGenerator.getName());
         }
         catch (KunderaException e)
         {
             Assert.fail();
         }
-        HBaseGeneratedIdWithSequenceGenerator withSequenceGenerator = new HBaseGeneratedIdWithSequenceGenerator();
-        withSequenceGenerator.setName("Kuldeep Kumar Mishra");
         try
         {
+            HBaseGeneratedIdWithSequenceGenerator withSequenceGenerator = new HBaseGeneratedIdWithSequenceGenerator();
+            withSequenceGenerator.setName("Kuldeep Kumar Mishra");
             em.persist(withSequenceGenerator);
             Assert.fail();
         }
@@ -193,10 +205,10 @@ public class HBaseGeneratedIdTest
                             + GenerationType.SEQUENCE + " Strategy not supported by this client :"
                             + HBaseClient.class.getName(), e.getMessage());
         }
-        HBaseGeneratedIdWithTableGenerator withTableGenerator = new HBaseGeneratedIdWithTableGenerator();
-        withTableGenerator.setName("Kumar Mishra");
         try
         {
+            HBaseGeneratedIdWithTableGenerator withTableGenerator = new HBaseGeneratedIdWithTableGenerator();
+            withTableGenerator.setName("Kumar Mishra");
             em.persist(withTableGenerator);
             List<HBaseGeneratedIdWithTableGenerator> list = em.createQuery(
                     "Select c from HBaseGeneratedIdWithTableGenerator c").getResultList();
@@ -206,7 +218,7 @@ public class HBaseGeneratedIdTest
             Object id = list.get(0).getId();
             em.clear();
             withTableGenerator = em.find(HBaseGeneratedIdWithTableGenerator.class, id);
-            Assert.assertNotNull(strategyTable);
+            Assert.assertNotNull(withTableGenerator);
             Assert.assertEquals("Kumar Mishra", withTableGenerator.getName());
         }
         catch (KunderaException e)
