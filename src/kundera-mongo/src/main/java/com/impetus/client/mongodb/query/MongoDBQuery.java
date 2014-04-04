@@ -206,90 +206,6 @@ public class MongoDBQuery extends QueryImpl
     	BasicDBObject actualQuery;
     }
     
-    private static List<String> tokenize(String where, Pattern pattern)
-    {
-        List<String> split = new ArrayList<String>();
-        Matcher matcher = pattern.matcher(where);
-        int lastIndex = 0;
-        String s;
-        // int count = 0;
-        while (matcher.find())
-        {
-            s = where.substring(lastIndex, matcher.start()).trim();
-            split.add(s);
-            s = matcher.group();
-            split.add(s.toUpperCase());
-            lastIndex = matcher.end();
-            // count++;
-        }
-        s = where.substring(lastIndex).trim();
-        split.add(s);
-        return split;
-    }
-    
-    public static void main(String[] args) {
-    	
-    	Pattern INTRA_CLAUSE_PATTERN = Pattern.compile("\\s\\band\\b\\s|\\s\\bor\\b\\s|\\s\\bbetween\\b\\s|\\(|\\)",
-                Pattern.CASE_INSENSITIVE);
-    	System.out.println(tokenize("(sdfsdf and dsfds)", INTRA_CLAUSE_PATTERN));
-    	
-    	Queue q = new LinkedList();
-    	KunderaQuery kq = new KunderaQuery("", null);
-    	q.add(kq.new FilterClause("a", "=", ":b"));
-    	q.add(kq.new FilterClause("b", "=", ":c"));
-    	q.add("AND");
-    	q.add("(");
-    	q.add("(");
-    	q.add(kq.new FilterClause("c", "=", ":d"));
-    	q.add("OR");
-    	q.add(kq.new FilterClause("e", "=", ":f"));
-    	q.add(")");
-    	q.add("AND");
-    	q.add("(");
-    	q.add(kq.new FilterClause("g", "=", ":h"));
-    	q.add("OR");
-    	q.add(kq.new FilterClause("i", "=", ":j"));
-    	q.add(")");
-    	q.add(")");
-    	
-    	QueryComponent sq = getQueryComponent(q);
-    	testPopulateQueries(sq);
-    	System.out.println(sq);
-    }
-    
-    private static void testPopulateQueries(QueryComponent sq)
-    {
-    	boolean hasChildren = false;
-    	if(sq.children!=null && sq.children.size()>0)
-    	{
-    		hasChildren = true;
-	    	for (QueryComponent subQ : sq.children) {
-	    		testPopulateQueries(subQ);
-			}
-    	}
-    	if(sq.clauses.size()>0 || hasChildren)
-    	{
-    		//TODO change to using createMongoQuery
-    		sq.actualQuery = new BasicDBObject();
-    		if(hasChildren)
-        	{
-    			List<BasicDBObject> childQs = new ArrayList<BasicDBObject>();
-    	    	for (QueryComponent subQ : sq.children) {
-    	    		childQs.add(subQ.actualQuery);
-    			}
-    	    	if(sq.isAnd)
-    			{
-    				sq.actualQuery.append("$and", childQs);
-    			}
-    			else
-    			{
-    				sq.actualQuery.append("$or", childQs);
-    			}
-        	}
-    	}
-		return;
-    }
-    
     private void populateQueryComponents(EntityMetadata m, QueryComponent sq)
     {
     	boolean hasChildren = false;
@@ -302,11 +218,13 @@ public class MongoDBQuery extends QueryImpl
     	}
     	if(sq.clauses.size()>0 || hasChildren)
     	{
-    		sq.actualQuery = createSubMongoQuery(m, sq.clauses);
+    		if(sq.clauses.size()>0)
+    			sq.actualQuery = createSubMongoQuery(m, sq.clauses);
     		if(hasChildren)
         	{
     			List<BasicDBObject> childQs = new ArrayList<BasicDBObject>();
-    			childQs.add(sq.actualQuery);
+    			if(sq.clauses.size()>0)
+    				childQs.add(sq.actualQuery);
     	    	for (QueryComponent subQ : sq.children) {
     	    		childQs.add(subQ.actualQuery);
     			}
@@ -364,7 +282,7 @@ public class MongoDBQuery extends QueryImpl
     {
     	QueryComponent sq = getQueryComponent(filterClauseQueue);
     	populateQueryComponents(m, sq);
-    	return sq.actualQuery;
+    	return sq.actualQuery==null?new BasicDBObject():sq.actualQuery;
     }
     
     /**
@@ -706,7 +624,7 @@ public class MongoDBQuery extends QueryImpl
     }
 
     /** The Constant SINGLE_STRING_KEYWORDS. */
-    public static final String[] FUNCTION_KEYWORDS = { "INCREMENT()", "DECREMENT()" };
+    public static final String[] FUNCTION_KEYWORDS = { "INCREMENT\\(\\d+\\)", "DECREMENT\\(\\d+\\)" };
     
     private int handleSpecialFunctions() {
 
@@ -719,7 +637,7 @@ public class MongoDBQuery extends QueryImpl
                 {
                 	String func = c.getValue().toString();
                 	func = func.replaceAll(" ", "");
-                	if(func.equalsIgnoreCase(FUNCTION_KEYWORDS[i])) {
+                	if(func.toUpperCase().matches(FUNCTION_KEYWORDS[i])) {
                 		needsSpecialAttention = true;
                 		c.setValue(func);
                 		break outer;
@@ -743,16 +661,20 @@ public class MongoDBQuery extends QueryImpl
     		for (int i = 0; i < FUNCTION_KEYWORDS.length; i++)
             {
                 if (c.getValue() instanceof String 
-                		&& c.getValue().toString().equalsIgnoreCase(FUNCTION_KEYWORDS[i]))
+                		&& c.getValue().toString().toUpperCase().matches(FUNCTION_KEYWORDS[i]))
                 {
                 	isSpecialFunction = true;
-                	if(c.getValue().toString().equals("INCREMENT()"))
+                	if(c.getValue().toString().toUpperCase().startsWith("INCREMENT("))
                 	{
-                		update.put("$inc", new BasicDBObject(c.getProperty(), 1));
+                		String val = c.getValue().toString().toUpperCase();
+                		val = val.substring(10, val.indexOf(")"));
+                		update.put("$inc", new BasicDBObject(c.getProperty(), Integer.valueOf(val)));
                 	}
-                	else if(c.getValue().toString().equals("DECREMENT()"))
+                	else if(c.getValue().toString().toUpperCase().startsWith("DECREMENT("))
                 	{
-                		update.put("$inc", new BasicDBObject(c.getProperty(), -1));
+                		String val = c.getValue().toString().toUpperCase();
+                		val = val.substring(10, val.indexOf(")"));
+                		update.put("$inc", new BasicDBObject(c.getProperty(), -Integer.valueOf(val)));
                 	}
                 }
             }

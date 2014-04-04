@@ -69,7 +69,7 @@ public class KunderaQuery
             "\\s\\band\\b\\s|\\s\\bor\\b\\s|\\s\\bbetween\\b\\s|\\(|\\)", Pattern.CASE_INSENSITIVE);
 
     /** The INTRA pattern. */
-    private static final Pattern INTRA_CLAUSE_PATTERN = Pattern.compile("=|\\s\\blike\\b|\\bin\\b|\\bnot in\\b|>=|>|<=|<|<>|\\s\\bset",
+    private static final Pattern INTRA_CLAUSE_PATTERN = Pattern.compile("=|\\s\\blike\\b|\\bnot in\\b|\\bin\\b|<>|>=|>|<=|<|\\s\\bset",
             Pattern.CASE_INSENSITIVE);
 
     /** The logger. */
@@ -460,9 +460,9 @@ public class KunderaQuery
 
         for (String clause : clauses)
         {
-        	if(clause.trim().equals("(") || clause.trim().equals(")"))
+        	if(Arrays.asList(INTER_CLAUSE_OPERATORS).contains(clause.toUpperCase().trim()))
         	{
-                filtersQueue.add(clause.trim());
+                filtersQueue.add(clause.toUpperCase().trim());
                 newClause = true;
             }
         	else if (newClause)
@@ -523,15 +523,7 @@ public class KunderaQuery
             }
             else
             {
-                if (Arrays.asList(INTER_CLAUSE_OPERATORS).contains(clause.toUpperCase().trim()))
-                {
-                    filtersQueue.add(clause.toUpperCase().trim());
-                    newClause = true;
-                }
-                else
-                {
-                    throw new JPQLParseException("bad jpa query: " + clause);
-                }
+                throw new JPQLParseException("bad jpa query: " + clause);
             }
         }
 
