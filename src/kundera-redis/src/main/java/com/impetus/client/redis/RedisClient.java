@@ -135,7 +135,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         Pipeline pipeLine = null;
         try
         {
-            if (resource == null)
+            if (isBoundTransaction())
             {
                 pipeLine = ((Jedis) connection).pipelined();
                 onPersist(entityMetadata, entity, id, rlHolders, pipeLine);
@@ -387,7 +387,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         Pipeline pipeLine = null;
         try
         {
-            if (resource == null)
+            if (isBoundTransaction())
             {
                 pipeLine = ((Jedis) connection).pipelined();
                 onDelete(entity, pKey, pipeLine);
@@ -474,7 +474,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         try
         {
             connection = getConnection();
-            if (resource == null)
+            if (isBoundTransaction())
             {
                 pipeline = ((Jedis) connection).pipelined();
             }
@@ -686,7 +686,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
             connection = getConnection();
 
-            if (resource == null)
+            if (isBoundTransaction())
             {
                 pipeLine = ((Jedis) connection).pipelined();
             }
@@ -831,7 +831,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         Object connection = getConnection();
         // Create a hashset and populate data into it
         Pipeline pipeLine = null;
-        if (resource == null)
+        if (isBoundTransaction())
         {
             pipeLine = ((Jedis) connection).pipelined();
         }
@@ -1119,14 +1119,17 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
      */
     private void onCleanup(Object connection)
     {
-        if (resource == null && connection != null)
+        // if not running within transaction boundary
+        if (this.connection != null)
         {
             if (settings != null)
             {
                 ((Jedis) connection).configResetStat();
             }
-            factory.releaseConnection((Jedis) connection);
+            factory.releaseConnection((Jedis) this.connection);
         }
+
+        this.connection = null;
     }
 
     /*    *//**
@@ -1700,15 +1703,43 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
          * 
          * if (resource != null && resource.isActive()) { return
          * ((RedisTransaction) resource).bindResource(connection); } else {
-         * return connection; }
+         * return connection; } if (resource == null || (resource != null &&
+         * !resource.isActive()))
          */
-        if (resource == null && this.connection != null)
+        // means either transaction resource is not bound or it is not active,
+        // but connection has already by initialized
+        if (isBoundTransaction() && this.connection != null)
         {
             return this.connection;
         }
 
-        Jedis conn = factory.getConnection();
+        // if running within transaction boundary.
+        if (resource != null && resource.isActive())
+        {
+            // no need to get a connection from pool, as nested MULTI is not yet
+            // supported.
+            if (((RedisTransaction) resource).isResourceBound())
+            {
+                return ((RedisTransaction) resource).getResource();
+            }
+            else
+            {
+                Jedis conn = getAndSetConnection();
+                return ((RedisTransaction) resource).bindResource(conn);
+            }
 
+        }
+        else
+        {
+            Jedis conn = getAndSetConnection();
+            return conn;
+        }
+    }
+
+    private Jedis getAndSetConnection()
+    {
+        Jedis conn = factory.getConnection();
+        this.connection = conn;
         // If resource is not null means a transaction in progress.
 
         if (settings != null)
@@ -1718,16 +1749,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                 conn.configSet(key, settings.get(key).toString());
             }
         }
-
-        if (resource != null && resource.isActive())
-        {
-            return ((RedisTransaction) resource).bindResource(conn);
-        }
-        else
-        {
-            this.connection = conn;
-            return conn;
-        }
+        return conn;
     }
 
     /**
@@ -1941,6 +1963,11 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         {
             ((RedisIndexer) this.indexManager.getIndexer()).assignConnection(getConnection());
         }
+    }
+
+    private boolean isBoundTransaction()
+    {
+        return resource == null || (resource != null && !resource.isActive());
     }
 
 }

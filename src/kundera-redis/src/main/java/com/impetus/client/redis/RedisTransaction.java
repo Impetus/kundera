@@ -129,18 +129,30 @@ public class RedisTransaction implements TransactionResource
     Transaction bindResource(Jedis resource)
     {
         Transaction tx = null;
-/*        if (resources.isEmpty())
-        {
-*/            tx = resource.multi();
+        // Multi not supported.
+        
+      /*if (resources.isEmpty())
+        {*/
+            tx = resource.multi();
             resources.add(tx);
 /*        }
         else
         {
-            tx = resource.multi();
-            resources.add(tx);
-//            tx = resources.get(0);
+//            tx = resource.multi();
+//            resources.add(tx);
+            tx = resources.get(0);
         }
 */        return tx;
+    }
+    
+    Transaction getResource()
+    {
+        return resources.get(0);
+    }
+    
+    boolean isResourceBound()
+    {
+        return !resources.isEmpty();
     }
     
     synchronized void onExecute(Transaction tx)
