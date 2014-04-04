@@ -111,7 +111,8 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
      * @param puProperties
      */
     public HBaseClient(IndexManager indexManager, HBaseConfiguration conf, HTablePool hTablePool, EntityReader reader,
-            String persistenceUnit, Map<String, Object> puProperties, ClientMetadata clientMetadata, final KunderaMetadata kunderaMetadata)
+            String persistenceUnit, Map<String, Object> puProperties, ClientMetadata clientMetadata,
+            final KunderaMetadata kunderaMetadata)
     {
         super(kunderaMetadata);
         this.indexManager = indexManager;
@@ -191,7 +192,8 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
             {
                 for (AbstractManagedType subEntity : subManagedType)
                 {
-                    EntityMetadata subEntityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, subEntity.getJavaType());
+                    EntityMetadata subEntityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
+                            subEntity.getJavaType());
                     results = handler.readAll(subEntityMetadata.getSchema(), subEntityMetadata.getEntityClazz(),
                             subEntityMetadata, Arrays.asList(rowIds), subEntityMetadata.getRelationNames());
                     // Result will not be empty for match sub entity.
@@ -226,9 +228,11 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
     @Override
     public <E> List<E> find(Class<E> entityClass, Map<String, String> col)
     {
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, getPersistenceUnit(), entityClass);
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, getPersistenceUnit(),
+                entityClass);
         List<E> entities = new ArrayList<E>();
-        Map<String, Field> columnFamilyNameToFieldMap = MetadataUtils.createSuperColumnsFieldMap(entityMetadata, kunderaMetadata);
+        Map<String, Field> columnFamilyNameToFieldMap = MetadataUtils.createSuperColumnsFieldMap(entityMetadata,
+                kunderaMetadata);
         for (String columnFamilyName : col.keySet())
         {
             String entityId = col.get(columnFamilyName);
@@ -367,7 +371,8 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
             {
                 for (AbstractManagedType subEntity : subManagedType)
                 {
-                    EntityMetadata subEntityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, subEntity.getJavaType());
+                    EntityMetadata subEntityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
+                            subEntity.getJavaType());
                     List found = handler.readDataByRange(tableName, subEntityMetadata.getEntityClazz(),
                             subEntityMetadata, startRow, endRow, columns, filter);
                     results.addAll(found);
@@ -569,7 +574,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
     @Override
     public void delete(Object entity, Object pKey)
     {
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,  entity.getClass());
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entity.getClass());
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 metadata.getPersistenceUnit());
         AbstractManagedType managedType = (AbstractManagedType) metaModel.entity(metadata.getEntityClazz());
@@ -594,7 +599,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
     @Override
     public List<Object> findByRelation(String colName, Object colValue, Class entityClazz)
     {
-        CompareOp operator = HBaseUtils.getOperator("=", false,false);
+        CompareOp operator = HBaseUtils.getOperator("=", false, false);
 
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClazz);
 
@@ -614,7 +619,8 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
             {
                 for (AbstractManagedType subEntity : subManagedType)
                 {
-                    EntityMetadata subEntityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, subEntity.getJavaType());
+                    EntityMetadata subEntityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
+                            subEntity.getJavaType());
                     List results = ((HBaseDataHandler) handler).scanData(f, subEntityMetadata.getSchema(),
                             subEntityMetadata.getEntityClazz(), subEntityMetadata, columnFamilyName, colName);
                     if (!results.isEmpty())
@@ -681,7 +687,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
     public Object[] findIdsByColumn(String schemaName, String tableName, String pKeyName, String columnName,
             Object columnValue, Class entityClazz)
     {
-        CompareOp operator = HBaseUtils.getOperator("=", false,false);
+        CompareOp operator = HBaseUtils.getOperator("=", false, false);
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClazz);
 
         byte[] valueInBytes = HBaseUtils.getBytes(columnValue);
@@ -769,7 +775,8 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
                     }
                     else
                     {
-                        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, node.getDataClass());
+                        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
+                                node.getDataClass());
 
                         HBaseDataWrapper columnWrapper = new HBaseDataHandler.HBaseDataWrapper(rowKey,
                                 new java.util.HashMap<String, Attribute>(), entity, metadata.getTableName());
@@ -864,7 +871,8 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         }
         else
         {
-            PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata, persistenceUnit);
+            PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata,
+                    persistenceUnit);
             setBatchSize(puMetadata.getBatchSize());
         }
     }
@@ -891,6 +899,10 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
             if (latestCount == 1)
             {
                 return (long) discriptor.getInitialValue();
+            }
+            else if (discriptor.getAllocationSize() == 1)
+            {
+                return latestCount;
             }
             else
             {
@@ -934,7 +946,8 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         {
             for (AbstractManagedType subEntity : subManagedType)
             {
-                EntityMetadata subEntityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, subEntity.getJavaType());
+                EntityMetadata subEntityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
+                        subEntity.getJavaType());
                 results = handler.readData(tableName, subEntityMetadata.getEntityClazz(), subEntityMetadata, rowId,
                         subEntityMetadata.getRelationNames(), filter, columns);
                 // Result will not be empty for match sub entity.

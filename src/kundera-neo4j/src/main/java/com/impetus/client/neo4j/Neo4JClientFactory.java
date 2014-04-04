@@ -71,8 +71,18 @@ public class Neo4JClientFactory extends GenericClientFactory
                 getPersistenceUnit());
 
         Properties props = puMetadata.getProperties();
-        String datastoreFilePath = (String) props.get(PersistenceProperties.KUNDERA_DATASTORE_FILE_PATH);
-        if (StringUtils.isEmpty(datastoreFilePath))
+        
+        String datastoreFilePath = null;
+        if (externalProperties != null)
+        {
+            datastoreFilePath = (String) externalProperties.get(PersistenceProperties.KUNDERA_DATASTORE_FILE_PATH);
+        }
+        if (StringUtils.isBlank(datastoreFilePath))
+        {
+            datastoreFilePath = (String) props.get(PersistenceProperties.KUNDERA_DATASTORE_FILE_PATH);
+        }
+        
+        if (StringUtils.isBlank(datastoreFilePath))
         {
             throw new PersistenceUnitConfigurationException(
                     "For Neo4J, it's mandatory to specify kundera.datastore.file.path property in persistence.xml");

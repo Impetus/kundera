@@ -33,27 +33,18 @@ import org.junit.Test;
 /**
  * @author vivek.mishra
  * 
- * junit to demonstrate composite key implementation.
- *
+ *         junit to demonstrate composite key implementation.
+ * 
  */
 public class WebTrafficTest
 {
-
+    private static Node node = null;
 
     /** The emf. */
     private EntityManagerFactory emf;
 
     /** The em. */
     private EntityManager em;
-
-    @Before
-    public void setup()
-    {
-        emf = Persistence.createEntityManagerFactory("es-pu");
-        em = emf.createEntityManager();
-    }
-
-    private static Node node = null;
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception
@@ -63,6 +54,13 @@ public class WebTrafficTest
         node = new NodeBuilder().settings(builder).node();
     }
 
+    @Before
+    public void setup()
+    {
+        emf = Persistence.createEntityManagerFactory("es-pu");
+        em = emf.createEntityManager();
+    }
+
     @Test
     public void test() throws InterruptedException
     {
@@ -70,22 +68,24 @@ public class WebTrafficTest
         compositeKey.setIpAddress("192.168.112.176");
         compositeKey.setLogtime("2013-01-23");
         compositeKey.setUrl("www.google.com");
-        
+
         WebTraffic traffic = new WebTraffic();
         traffic.setKey(compositeKey);
         traffic.setCountry("India");
         em.persist(traffic);
-     
+
         waitThread();
+        
         em.clear();
+        
         WebTraffic result = em.find(WebTraffic.class, compositeKey);
-        
+
         Assert.assertNotNull(result);
-        
+
         Assert.assertNotNull(result.getKey());
-        
+
         em.remove(result);
-        
+
         em.clear();
         result = em.find(WebTraffic.class, compositeKey);
         Assert.assertNull(result);
@@ -99,17 +99,15 @@ public class WebTrafficTest
     @After
     public void tearDown()
     {
-        if(em != null)
+        if (em != null)
         {
             em.close();
         }
-        
-        if(emf != null)
+
+        if (emf != null)
         {
             emf.close();
         }
-        
-
     }
 
     @AfterClass

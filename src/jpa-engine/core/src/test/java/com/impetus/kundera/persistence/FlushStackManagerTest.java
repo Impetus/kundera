@@ -98,7 +98,7 @@ public class FlushStackManagerTest
     @After
     public void tearDown() throws Exception
     {
-
+        emfImpl.close();
     }
 
     @Test
@@ -120,7 +120,7 @@ public class FlushStackManagerTest
         Assert.assertEquals(1, pc.getMainCache().getHeadNodes().size());
 
         PersistenceDelegator pd = new PersistenceDelegator(emfImpl.getKunderaMetadataInstance(), pc);
-        
+
         Node headNode = pc.getMainCache().getNodeFromCache(ObjectGraphUtils.getNodeId("1", Store.class), pd);
 
         Assert.assertNotNull(headNode);
@@ -151,10 +151,11 @@ public class FlushStackManagerTest
 
         ObjectGraph graph = graphBuilder.getObjectGraph(a, null);
         pc.getMainCache().addGraphToCache(graph, pc);
-        
+
         PersistenceDelegator pd = new PersistenceDelegator(emfImpl.getKunderaMetadataInstance(), pc);
-        
-        Node headNode = pc.getMainCache().getNodeFromCache(ObjectGraphUtils.getNodeId("c1", PhotoUni_1_1_1_1.class), pd);
+
+        Node headNode = pc.getMainCache()
+                .getNodeFromCache(ObjectGraphUtils.getNodeId("c1", PhotoUni_1_1_1_1.class), pd);
 
         markAllNodeAsDirty();
         flushManager.buildFlushStack(graph.getHeadNode(), EventType.INSERT);

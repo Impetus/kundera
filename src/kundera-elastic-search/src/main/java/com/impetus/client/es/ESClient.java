@@ -97,11 +97,11 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
     private int batchSize;
 
     private Map clientProperties;
-    
+
     private static final String KEY_SEPERATOR = "\001";
 
-
-    ESClient(final ESClientFactory factory, final TransportClient client, final Map<String, Object> externalProperties,final KunderaMetadata kunderaMetadata)
+    ESClient(final ESClientFactory factory, final TransportClient client, final Map<String, Object> externalProperties,
+            final KunderaMetadata kunderaMetadata)
     {
         super(kunderaMetadata);
         this.factory = factory;
@@ -116,7 +116,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
     {
         try
         {
-             
+
             Map<String, Object> values = new HashMap<String, Object>();
 
             MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
@@ -130,11 +130,10 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
 
             addRelations(rlHolders, values);
             addDiscriminator(values, entityType);
-            
+
             IndexResponse response = txClient
-                    .prepareIndex(entityMetadata.getSchema().toLowerCase(),
-                            entityMetadata.getTableName(), keyAsString).setSource(values).execute()
-                    .actionGet();
+                    .prepareIndex(entityMetadata.getSchema().toLowerCase(), entityMetadata.getTableName(), keyAsString)
+                    .setSource(values).execute().actionGet();
 
             // IndexRequest request = new
             // IndexRequest(entityMetadata.getSchema().toLowerCase(),
@@ -151,11 +150,12 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
 
     private void addDiscriminator(Map<String, Object> values, EntityType entityType)
     {
-        String discrColumn = ((AbstractManagedType)entityType).getDiscriminatorColumn();
-        String discrValue = ((AbstractManagedType)entityType).getDiscriminatorValue();
-        
-        // No need to check for empty or blank, as considering it as valid name for nosql!
-        if(discrColumn != null && discrValue != null)
+        String discrColumn = ((AbstractManagedType) entityType).getDiscriminatorColumn();
+        String discrValue = ((AbstractManagedType) entityType).getDiscriminatorValue();
+
+        // No need to check for empty or blank, as considering it as valid name
+        // for nosql!
+        if (discrColumn != null && discrValue != null)
         {
             values.put(discrColumn, discrValue);
         }
@@ -199,9 +199,8 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
         String keyAsString = getKeyAsString(key, metadata, metaModel);
         try
         {
-            get = txClient
-                    .prepareGet(metadata.getSchema().toLowerCase(), metadata.getTableName(),
-                            keyAsString).setOperationThreaded(false).execute().get();
+            get = txClient.prepareGet(metadata.getSchema().toLowerCase(), metadata.getTableName(), keyAsString)
+                    .setOperationThreaded(false).execute().get();
         }
         catch (InterruptedException iex)
         {
@@ -250,7 +249,6 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
     List executeQuery(FilterBuilder filter, final EntityMetadata entityMetadata)
     {
 
-        
         Class clazz = entityMetadata.getEntityClazz();
 
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
@@ -270,13 +268,14 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
         {
             entity = getInstance(clazz, entity);
             Map<String, Object> hitResult = hit.sourceAsMap();
-            results.add(wrap(hitResult, entityType, entity,entityMetadata, false));
+            results.add(wrap(hitResult, entityType, entity, entityMetadata, false));
         }
 
         return results;
     }
 
-    private Object wrap(Map<String, Object> results, EntityType entityType, Object result, EntityMetadata metadata, boolean isIdSet)
+    private Object wrap(Map<String, Object> results, EntityType entityType, Object result, EntityMetadata metadata,
+            boolean isIdSet)
     {
 
         Map<String, Object> relations = new HashMap<String, Object>();
@@ -292,8 +291,8 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
                 Object fieldValue = results.get(fieldName);
 
                 key = onId(key, attribute, fieldValue);
-                
-                if(!isIdSet)
+
+                if (!isIdSet)
                 {
                     PropertyAccessorHelper.setId(result, metadata, key);
                 }
@@ -340,7 +339,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
     {
         if (entity != null)
         {
-            EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,  entity.getClass());
+            EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entity.getClass());
 
             MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                     metadata.getPersistenceUnit());
@@ -372,13 +371,13 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
     public void persistJoinTable(JoinTableData joinTableData)
     {
         String tableName = joinTableData.getJoinTableName();
-        
+
         String inverseJoinColumn = joinTableData.getInverseJoinColumnName();
-        
+
         String joinColumn = joinTableData.getJoinColumnName();
 
         String schemaName = joinTableData.getSchemaName();
-        
+
         Map<Object, Set<Object>> joinTableRecords = joinTableData.getJoinTableRecords();
 
         Set<Object> joinKeys = joinTableRecords.keySet();
@@ -386,50 +385,45 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
         BulkRequestBuilder bulkRequest = txClient.prepareBulk();
 
         /**
-         * 1_p => 1_a1,1_a2
-         * 1_a1=> 1_p,1_p1
+         * 1_p => 1_a1,1_a2 1_a1=> 1_p,1_p1
          * 
-         * Example: join table : PERSON_ADDRESS 
-         * join column : PERSON_ID (1_p)
-         * inverse join column : ADDRESS_ID (1_a)
-         * store in ES:
-         * schema name: PERSON_ADDRESS
-         * type: PERSON
-         * id: 1_p\0011_a
+         * Example: join table : PERSON_ADDRESS join column : PERSON_ID (1_p)
+         * inverse join column : ADDRESS_ID (1_a) store in ES: schema name:
+         * PERSON_ADDRESS type: PERSON id: 1_p\0011_a
          * 
          * PERSON_ADDRESS:1_p_1_a PERSON_ID 1_p ADDRESS_ID 1_a
          * 
-         * source: 
-         * (PERSON_ID, 1_p)
-         * (ADDRESS_ID, 1_a)
+         * source: (PERSON_ID, 1_p) (ADDRESS_ID, 1_a)
          * 
          * embeddable keys over many to many does not work.
-        */
-        
-        boolean found=false;
-        for(Object key : joinKeys)
+         */
+
+        boolean found = false;
+        for (Object key : joinKeys)
         {
             Set<Object> inversejoinTableRecords = joinTableRecords.get(key);
-            Map<String,Object> source = new HashMap<String, Object>();
-            
-            for(Object inverseObj : inversejoinTableRecords)
+            Map<String, Object> source = new HashMap<String, Object>();
+
+            for (Object inverseObj : inversejoinTableRecords)
             {
                 source = new HashMap<String, Object>();
                 source.put(joinTableData.getJoinColumnName(), key);
                 source.put(joinTableData.getInverseJoinColumnName(), inverseObj);
-                
+
                 String joinKeyAsStr = PropertyAccessorHelper.getString(key);
                 String inverseKeyAsStr = PropertyAccessorHelper.getString(inverseObj);
-                
-                String keyAsString = joinKeyAsStr+KEY_SEPERATOR+inverseKeyAsStr;
-                IndexRequest request = new IndexRequest(schemaName.toLowerCase(), tableName, keyAsString).source(source);
-                found=true;
+
+                String keyAsString = joinKeyAsStr + KEY_SEPERATOR + inverseKeyAsStr;
+                IndexRequest request = new IndexRequest(schemaName.toLowerCase(), tableName, keyAsString)
+                        .source(source);
+                found = true;
                 bulkRequest.add(request);
             }
         }
 
-        // check made, as bulk request throws an error, in case no request is present.
-        if(found)
+        // check made, as bulk request throws an error, in case no request is
+        // present.
+        if (found)
         {
             bulkRequest.execute().actionGet();
         }
@@ -441,20 +435,20 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
             Object pKeyColumnValue, Class columnJavaType)
     {
         // fetch list ADDRESS_ID for given PERSON_ID
-        FilterBuilder filterBuilder = new TermFilterBuilder(pKeyColumnName,pKeyColumnValue);
+        FilterBuilder filterBuilder = new TermFilterBuilder(pKeyColumnName, pKeyColumnValue);
 
-        SearchResponse response = txClient.prepareSearch(schemaName.toLowerCase()).setTypes(tableName).setFilter(filterBuilder).addField(columnName)
-                .execute().actionGet();
-        
+        SearchResponse response = txClient.prepareSearch(schemaName.toLowerCase()).setTypes(tableName)
+                .setFilter(filterBuilder).addField(columnName).execute().actionGet();
+
         SearchHits hits = response.getHits();
-        
+
         List columns = new ArrayList();
         for (SearchHit hit : hits.getHits())
         {
-            Map<String,SearchHitField> fields = hit.getFields();
+            Map<String, SearchHitField> fields = hit.getFields();
             columns.add(fields.get(columnName).getValue());
         }
-        
+
         return columns;
     }
 
@@ -462,23 +456,23 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
     public Object[] findIdsByColumn(String schemaName, String tableName, String pKeyName, String columnName,
             Object columnValue, Class entityClazz)
     {
-        
+
         TermFilterBuilder filter = FilterBuilders.termFilter(columnName, columnValue);
-        
-        SearchResponse response = txClient.prepareSearch(schemaName.toLowerCase())
-                .setTypes(tableName).addField(pKeyName).setFilter(filter).execute().actionGet();
-        
+
+        SearchResponse response = txClient.prepareSearch(schemaName.toLowerCase()).setTypes(tableName)
+                .addField(pKeyName).setFilter(filter).execute().actionGet();
+
         SearchHits hits = response.getHits();
 
         Long length = hits.getTotalHits();
         int absoluteLength = length.intValue();
         Object[] ids = new Object[absoluteLength];
-        
-        int counter=0;
+
+        int counter = 0;
         for (SearchHit hit : hits.getHits())
         {
-            Map<String,SearchHitField> fields = hit.getFields();
-            ids[counter++]= fields.get(pKeyName).getValue();
+            Map<String, SearchHitField> fields = hit.getFields();
+            ids[counter++] = fields.get(pKeyName).getValue();
         }
 
         return ids;
@@ -487,11 +481,12 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
     @Override
     public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
     {
-        Map<String,Object> querySource = new HashMap<String, Object>();
+        Map<String, Object> querySource = new HashMap<String, Object>();
         querySource.put(columnName, columnValue);
-        
-        DeleteByQueryRequestBuilder deleteQueryBuilder = txClient.prepareDeleteByQuery(schemaName.toLowerCase()).setQuery(querySource).setTypes(tableName);
-        
+
+        DeleteByQueryRequestBuilder deleteQueryBuilder = txClient.prepareDeleteByQuery(schemaName.toLowerCase())
+                .setQuery(querySource).setTypes(tableName);
+
         deleteQueryBuilder.execute().actionGet();
     }
 
@@ -518,15 +513,15 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
             SearchHits hits = response.getHits();
             for (SearchHit hit : hits)
             {
-                MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
-                        .getMetamodel(metadata.getPersistenceUnit());
+                MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                        metadata.getPersistenceUnit());
 
                 EntityType entityType = metaModel.entity(entityClazz);
                 Map<String, Object> searchResults = hit.getSource();
                 // hit
                 Object result = null;
                 result = getInstance(entityClazz, result);
-                result = wrap(searchResults, entityType, result,metadata,false);
+                result = wrap(searchResults, entityType, result, metadata, false);
                 if (result != null)
                 {
                     results.add(result);
@@ -598,10 +593,11 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
                     node.handlePreEvent();
                     Object entity = node.getData();
                     Object id = node.getEntityId();
-                    EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, node.getDataClass());
+                    EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
+                            node.getDataClass());
 
-                    MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
-                            .getMetamodel(metadata.getPersistenceUnit());
+                    MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                            metadata.getPersistenceUnit());
 
                     EntityType entityType = metaModel.entity(metadata.getEntityClazz());
 
@@ -611,7 +607,8 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
                     {
                         // create a delete request.
 
-                        DeleteRequest request = new DeleteRequest(metadata.getSchema().toLowerCase(), metadata.getTableName(), key);
+                        DeleteRequest request = new DeleteRequest(metadata.getSchema().toLowerCase(),
+                                metadata.getTableName(), key);
                         bulkRequest.add(request);
 
                     }
@@ -624,7 +621,8 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
 
                         addRelations(relationHolders, values);
 
-                        UpdateRequest request = new UpdateRequest(metadata.getSchema().toLowerCase(), metadata.getTableName(), key).doc(values);
+                        UpdateRequest request = new UpdateRequest(metadata.getSchema().toLowerCase(),
+                                metadata.getTableName(), key).doc(values);
                         bulkRequest.add(request);
                     }
                     else
@@ -637,7 +635,8 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
 
                         addRelations(relationHolders, values);
 
-                        IndexRequest request = new IndexRequest(metadata.getSchema().toLowerCase(), metadata.getTableName(), key).source(values);
+                        IndexRequest request = new IndexRequest(metadata.getSchema().toLowerCase(),
+                                metadata.getTableName(), key).source(values);
                         bulkRequest.add(request);
 
                     }
@@ -680,12 +679,9 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
     {
         if (metaModel.isEmbeddable(((AbstractAttribute) metadata.getIdAttribute()).getBindableJavaType()))
         {
-            Object key = KunderaCoreUtils.prepareCompositeKey(metadata, metaModel, id);
-            return key.toString();
+            return KunderaCoreUtils.prepareCompositeKey(metadata, metaModel, id);
         }
-
         return id.toString();
-
     }
 
     /**
@@ -711,7 +707,8 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
         }
         else if (batch_Size == null)
         {
-            PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata, persistenceUnit);
+            PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata,
+                    persistenceUnit);
             batchSize = puMetadata != null ? puMetadata.getBatchSize() : 0;
         }
     }

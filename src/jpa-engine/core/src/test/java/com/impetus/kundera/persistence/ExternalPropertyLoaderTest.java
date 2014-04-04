@@ -30,9 +30,9 @@ import org.junit.Test;
 
 /**
  * Junit to test load persistence unit specfic properties via external map.
- *  
+ * 
  * @author shaheed.hussain
- *
+ * 
  */
 public class ExternalPropertyLoaderTest
 {
@@ -48,7 +48,6 @@ public class ExternalPropertyLoaderTest
         propertyMap.put("kundera.keyspace", "sprint");
         propertyMap.put("kundera.client.lookup.class", "com.impetus.kundera.client.CoreTestClientFactory");
         emf = Persistence.createEntityManagerFactory("extConfig", propertyMap);
-
     }
 
     @After
@@ -58,7 +57,8 @@ public class ExternalPropertyLoaderTest
     }
 
     /**
-     *  junit to verify, if emf has been successfully loaded and user object has been persisted.
+     * Junit to verify, if emf has been successfully loaded and user object has
+     * been persisted.
      */
     @Test
     public void test()
@@ -72,7 +72,7 @@ public class ExternalPropertyLoaderTest
 
         em.clear();
 
-        User found = em.find(User.class, 1l); // it is auto generated in-memory
+        User found = em.find(User.class, user.getUserId()); // it is auto generated in-memory
                                               // id
         Assert.assertNotNull(found);
         Assert.assertEquals(user.getCity(), found.getCity());

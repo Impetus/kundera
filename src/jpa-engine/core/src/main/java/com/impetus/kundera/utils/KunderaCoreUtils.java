@@ -157,7 +157,7 @@ public class KunderaCoreUtils
                 }
                 catch (IllegalArgumentException e)
                 {
-                    logger.error("Error during persist, Caused by:", e);
+                    logger.error("Error during prepare composite key, Caused by {}.", e);
                     throw new PersistenceException(e);
                 }
             }
