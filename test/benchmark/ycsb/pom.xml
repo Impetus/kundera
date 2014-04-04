@@ -93,6 +93,7 @@
                 <dependency>
     	               <groupId>com.impetus.kundera.client</groupId>
 	               <artifactId>kundera-cassandra-pelops</artifactId>
+			<version>${kundera.version}</version>
                 </dependency>
 		<dependency>
 			<groupId>com.impetus.kundera.client</groupId>
