@@ -63,7 +63,7 @@ class ResultIterator<E> implements IResultIterator<E>
         this.fetchSize = fetchSize;
         this.persistenceDelegator = pd;
         this.handler = new MongoDBDataHandler();
-        this.cursor = client.getDBCursorInstance(basicDBObject, orderByClause, fetchSize, keys, m.getTableName());
+        this.cursor = (DBCursor)client.getDBCursorInstance(basicDBObject, orderByClause, fetchSize, 0, keys, m.getTableName(), false);
     }
 
     @Override

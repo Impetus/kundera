@@ -298,7 +298,7 @@ public final class MongoDBDataHandler
      * @throws InstantiationException
      */
     List getEmbeddedObjectList(DBCollection dbCollection, EntityMetadata m, String documentName,
-            BasicDBObject mongoQuery, String result, BasicDBObject orderBy, int maxResult, BasicDBObject keys, final KunderaMetadata kunderaMetadata)
+            BasicDBObject mongoQuery, String result, BasicDBObject orderBy, int maxResult, int firstResult, BasicDBObject keys, final KunderaMetadata kunderaMetadata)
             throws PropertyAccessException, InstantiationException, IllegalAccessException
     {
         List list = new ArrayList();// List of embedded object to be returned
@@ -347,7 +347,7 @@ public final class MongoDBDataHandler
 
         // Query for fetching entities based on user specified criteria
         DBCursor cursor = orderBy != null ? dbCollection.find(mongoQuery, keys).sort(orderBy) : dbCollection.find(
-                mongoQuery, keys).limit(maxResult);
+                mongoQuery, keys).limit(maxResult).skip(firstResult);;
 
         if (superColumn != null)
         {
