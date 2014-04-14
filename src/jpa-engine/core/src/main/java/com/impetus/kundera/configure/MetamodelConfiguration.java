@@ -322,15 +322,18 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
                     (AnnotationsAttribute) cf.getAttribute(AnnotationsAttribute.visibleTag));
             reader.accumulateAnnotations(annotations,
                     (AnnotationsAttribute) cf.getAttribute(AnnotationsAttribute.invisibleTag));
-            Class<?> clazz = this.getClass().getClassLoader().loadClass(className);
+            
 
             // iterate through all valid annotations
             for (String validAnn : reader.getValidAnnotations())
             {
+            	
 
                 // check if the current class has one?
                 if (annotations.contains(validAnn))
                 {
+                	
+                	Class<?> clazz = this.getClass().getClassLoader().loadClass(className);
                     this.factory.validate(clazz);
 
                     // get the name of entity to be used for entity to class map
