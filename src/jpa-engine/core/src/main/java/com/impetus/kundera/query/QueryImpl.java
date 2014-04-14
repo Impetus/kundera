@@ -86,6 +86,8 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
      * Default maximum result to fetch.
      */
     protected int maxResult = 100;
+    
+    protected int firstResult = 0;
 
     private Integer fetchSize;
 
@@ -373,7 +375,8 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
     @Override
     public Query setFirstResult(int startPosition)
     {
-        throw new UnsupportedOperationException("setFirstResult is unsupported by Kundera");
+    	this.firstResult = startPosition;
+    	return this;
     }
 
     /*

@@ -438,6 +438,52 @@ public class KunderaQueryTest
         }
 
     }
+    
+    @Test
+    public void testInNotInNotEquals()
+    {
+        String query = "Select p from Person p where p.personName <> :name and p.age IN :ageList" +
+        		" and salary NOT IN :salaryList and (personId = :personId)";
+        KunderaQuery kunderaQuery = new KunderaQuery(query, kunderaMetadata);
+        KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery);
+        queryParser.parse();
+        kunderaQuery.postParsingInit();
+        kunderaQuery.setParameter("name", "pname");
+        kunderaQuery.setParameter("ageList", new ArrayList<Integer>(){{add(20);add(21);}});
+        kunderaQuery.setParameter("salaryList", new ArrayList<Double>(){{add(2000D);add(3000D);}});
+        kunderaQuery.setParameter("personId", "personId");
+
+        Assert.assertEquals(4, kunderaQuery.getParameters().size());
+
+        Iterator<Parameter<?>> parameters = kunderaQuery.getParameters().iterator();
+
+        while (parameters.hasNext())
+        {
+            Assert.assertTrue(kunderaQuery.isBound(parameters.next()));
+        }
+        
+        List<String> nameList = new ArrayList<String>();
+        nameList.add("pname");
+        List<Integer> ageList = new ArrayList<Integer>(){{add(20);add(21);}};
+        List<Double> salaryList = new ArrayList<Double>(){{add(2000D);add(3000D);}};
+        List<String> personIdList = new ArrayList<String>();
+        personIdList.add("personId");
+
+        Object value = kunderaQuery.getClauseValue(":name");
+        Assert.assertNotNull(value);
+        Assert.assertEquals(nameList, value);
+        value = kunderaQuery.getClauseValue(":ageList");
+        Assert.assertNotNull(value);
+        Assert.assertEquals(ageList, value);
+        value = kunderaQuery.getClauseValue(":salaryList");
+        Assert.assertNotNull(value);
+        Assert.assertEquals(salaryList, value);
+        value = kunderaQuery.getClauseValue(":personId");
+        Assert.assertNotNull(value);
+        Assert.assertEquals(personIdList, value);
+        Assert.assertEquals(4, kunderaQuery.getParameters().size());
+
+    }
 
     private class JPAParameter implements Parameter<String>
     {
