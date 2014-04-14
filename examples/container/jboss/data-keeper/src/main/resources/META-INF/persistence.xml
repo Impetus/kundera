@@ -11,7 +11,7 @@
 		<class>com.impetus.kundera.datakeeper.entities.SubordinatesCounter</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
-			<property name="jboss.as.jpa.managed" value="false" />
+		<!-- 	<property name="jboss.as.jpa.managed" value="false" /> -->
 			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="9160" />
 			<property name="kundera.keyspace" value="datakeeper" />
@@ -32,7 +32,7 @@
 		<class>com.impetus.kundera.datakeeper.entities.DocumentInfo</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
-			<property name="jboss.as.jpa.managed" value="false" />
+			<!-- <property name="jboss.as.jpa.managed" value="false" /> -->
 			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="27017" />
 			<property name="kundera.keyspace" value="datakeeper" />
@@ -47,7 +47,7 @@
 	<persistence-unit name="cassandra-pu,mongo-pu">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>
-			<property name="jboss.as.jpa.managed" value="false" />
+			<!-- <property name="jboss.as.jpa.managed" value="false" /> -->
 		</properties>
 	</persistence-unit>
 
