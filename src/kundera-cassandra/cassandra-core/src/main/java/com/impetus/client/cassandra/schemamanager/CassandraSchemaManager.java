@@ -548,7 +548,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         StringBuilder queryBuilder = new StringBuilder();
 
         // For normal columns
-        boolean isCounterColumnType = handler.isCounterColumnType(tableInfo, defaultValidationClass);
+        boolean isCounterColumnType = isCounterColumnType(tableInfo, defaultValidationClass);
         onCompositeColumns(translator, columns, queryBuilder, null, isCounterColumnType);
         onCollectionColumns(translator, tableInfo.getCollectionColumnMetadatas(), queryBuilder);
 
@@ -594,9 +594,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 // append cluster key order clause
                 queryBuilder.append(translator.CREATE_COLUMNFAMILY_CLUSTER_ORDER.replace(CQLTranslator.COLUMNS,
                         clusterKeyOrderingBuilder.toString()));
-
             }
-
         }
         else
         {
@@ -1104,8 +1102,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         boolean tablefound = false;
         for (CfDef cfDef : ksDef.getCf_defs())
         {
-            if (cfDef.getName().equals(tableInfo.getTableName())
-                    && (cfDef.getColumn_type().equals(ColumnFamilyType.getInstanceOf(tableInfo.getType()).name())))
+            if (cfDef.getName().equals(tableInfo.getTableName())/*
+                    && (cfDef.getColumn_type().equals(ColumnFamilyType.getInstanceOf(tableInfo.getType()).name()))*/)
             {
                 if (cfDef.getColumn_type().equals(ColumnFamilyType.Standard.name()))
                 {
@@ -1133,9 +1131,12 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     private void onValidateColumn(TableInfo tableInfo, CfDef cfDef, ColumnInfo columnInfo) throws Exception
     {
         boolean columnfound = false;
+
+        boolean isCounterColumnType = isCounterColumnType(tableInfo, null);
+
         for (ColumnDef columnDef : cfDef.getColumn_metadata())
         {
-            if (isMetadataSame(columnDef, columnInfo, isCql3Enabled(tableInfo)))
+            if (isMetadataSame(columnDef, columnInfo, isCql3Enabled(tableInfo), isCounterColumnType))
             {
                 columnfound = true;
                 break;
@@ -1161,9 +1162,10 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      * @throws UnsupportedEncodingException
      *             the unsupported encoding exception
      */
-    private boolean isMetadataSame(ColumnDef columnDef, ColumnInfo columnInfo, boolean isCql3Enabled) throws Exception
+    private boolean isMetadataSame(ColumnDef columnDef, ColumnInfo columnInfo, boolean isCql3Enabled,
+            boolean isCounterColumnType) throws Exception
     {
-        return isIndexPresent(columnInfo, columnDef, isCql3Enabled);
+        return isIndexPresent(columnInfo, columnDef, isCql3Enabled, isCounterColumnType);
     }
 
     /**
@@ -1187,8 +1189,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 {
                     for (ColumnInfo columnInfo : tableInfo.getColumnMetadatas())
                     {
-                        toUpdate = isCfDefUpdated(columnInfo, cfDef, isCql3Enabled(tableInfo), tableInfo) ? true
-                                : toUpdate;
+                        toUpdate = isCfDefUpdated(columnInfo, cfDef, isCql3Enabled(tableInfo),
+                                isCounterColumnType(tableInfo, null), tableInfo) ? true : toUpdate;
                     }
                 }
                 if (toUpdate)
@@ -1201,8 +1203,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
     }
 
-    private boolean isCfDefUpdated(ColumnInfo columnInfo, CfDef cfDef, boolean isCql3Enabled, TableInfo tableInfo)
-            throws Exception
+    private boolean isCfDefUpdated(ColumnInfo columnInfo, CfDef cfDef, boolean isCql3Enabled,
+            boolean isCounterColumnType, TableInfo tableInfo) throws Exception
     {
         boolean columnPresent = false;
         boolean isUpdated = false;
@@ -1210,23 +1212,25 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         {
             if (isColumnPresent(columnInfo, columnDef, isCql3Enabled))
             {
-                if (!isValidationClassSame(columnInfo, columnDef, isCql3Enabled))
+                if (!isValidationClassSame(columnInfo, columnDef, isCql3Enabled, isCounterColumnType))
                 {
                     columnDef.setValidation_class(CassandraValidationClassMapper.getValidationClass(
                             columnInfo.getType(), isCql3Enabled));
-//                    if (columnInfo.isIndexable() && !columnDef.isSetIndex_type())
-//                    {
-//                        IndexInfo indexInfo = tableInfo.getColumnToBeIndexed(columnInfo.getColumnName());
-//                        columnDef.setIndex_type(CassandraIndexHelper.getIndexType(indexInfo.getIndexType()));
-//                        columnDef.isSetIndex_type();
-//                        columnDef.setIndex_typeIsSet(true);
-//                        columnDef.setIndex_nameIsSet(true);
-//                    }
-//                    else
-//                    {
-                        columnDef.setIndex_nameIsSet(false);
-                        columnDef.setIndex_typeIsSet(false);
-//                    }
+                    // if (columnInfo.isIndexable() &&
+                    // !columnDef.isSetIndex_type())
+                    // {
+                    // IndexInfo indexInfo =
+                    // tableInfo.getColumnToBeIndexed(columnInfo.getColumnName());
+                    // columnDef.setIndex_type(CassandraIndexHelper.getIndexType(indexInfo.getIndexType()));
+                    // columnDef.isSetIndex_type();
+                    // columnDef.setIndex_typeIsSet(true);
+                    // columnDef.setIndex_nameIsSet(true);
+                    // }
+                    // else
+                    // {
+                    columnDef.setIndex_nameIsSet(false);
+                    columnDef.setIndex_typeIsSet(false);
+                    // }
                     isUpdated = true;
                 }
                 columnPresent = true;
@@ -1268,11 +1272,12 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      * @return true, if is indexes present
      * @throws UnsupportedEncodingException
      */
-    private boolean isValidationClassSame(ColumnInfo columnInfo, ColumnDef columnDef, boolean isCql3Enabled)
-            throws Exception
+    private boolean isValidationClassSame(ColumnInfo columnInfo, ColumnDef columnDef, boolean isCql3Enabled,
+            boolean isCounterColumnType) throws Exception
     {
         return (isColumnPresent(columnInfo, columnDef, isCql3Enabled) && columnDef.getValidation_class().endsWith(
-                CassandraValidationClassMapper.getValidationClass(columnInfo.getType(), isCql3Enabled)));
+                isCounterColumnType ? CounterColumnType.class.getSimpleName() : CassandraValidationClassMapper
+                        .getValidationClass(columnInfo.getType(), isCql3Enabled)));
     }
 
     /**
@@ -1286,10 +1291,11 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      * @return true, if is indexes present
      * @throws UnsupportedEncodingException
      */
-    private boolean isIndexPresent(ColumnInfo columnInfo, ColumnDef columnDef, boolean isCql3Enabled) throws Exception
+    private boolean isIndexPresent(ColumnInfo columnInfo, ColumnDef columnDef, boolean isCql3Enabled,
+            boolean isCounterColumnType) throws Exception
     {
-        return (isValidationClassSame(columnInfo, columnDef, isCql3Enabled) && (columnDef.isSetIndex_type() == columnInfo
-                .isIndexable() || (columnDef.isSetIndex_type())));
+        return (isValidationClassSame(columnInfo, columnDef, isCql3Enabled, isCounterColumnType) && (columnDef
+                .isSetIndex_type() == columnInfo.isIndexable() || (columnDef.isSetIndex_type())));
     }
 
     /**
@@ -1996,24 +2002,6 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             }
             cfDef.setColumn_metadata(counterColumnDefs);
         }
-
-        /**
-         * Checks if is counter column type.
-         * 
-         * @param tableInfo
-         *            the table info
-         * @param defaultValidationClass
-         *            the default validation class
-         * @return true, if is counter column type
-         */
-        private boolean isCounterColumnType(TableInfo tableInfo, String defaultValidationClass)
-        {
-            return (csmd != null && csmd.isCounterColumn(databaseName, tableInfo.getTableName()))
-                    || (defaultValidationClass != null
-                            && (defaultValidationClass.equalsIgnoreCase(CounterColumnType.class.getSimpleName()) || defaultValidationClass
-                                    .equalsIgnoreCase(CounterColumnType.class.getName())) || (tableInfo.getType()
-                            .equals(CounterColumnType.class.getSimpleName())));
-        }
     }
 
     /**
@@ -2221,4 +2209,21 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         System.out.format("\n");
     }
 
+    /**
+     * Checks if is counter column type.
+     * 
+     * @param tableInfo
+     *            the table info
+     * @param defaultValidationClass
+     *            the default validation class
+     * @return true, if is counter column type
+     */
+    private boolean isCounterColumnType(TableInfo tableInfo, String defaultValidationClass)
+    {
+        return (csmd != null && csmd.isCounterColumn(databaseName, tableInfo.getTableName()))
+                || (defaultValidationClass != null
+                        && (defaultValidationClass.equalsIgnoreCase(CounterColumnType.class.getSimpleName()) || defaultValidationClass
+                                .equalsIgnoreCase(CounterColumnType.class.getName())) || (tableInfo.getType()
+                        .equals(CounterColumnType.class.getSimpleName())));
+    }
 }
