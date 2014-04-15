@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.client.crud;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -341,6 +342,58 @@ public class PersonMongoTest extends BaseTest
                     "java.lang.UnsupportedOperationException: Native query support is not enabled in mongoDB",
                     e.getMessage());
         }
+
+    }
+    
+    @Test
+    public void incrementFunctionTest()
+    {
+    	Object p1 = prepareMongoInstance("1", 10);
+        em.persist(p1);
+        
+        String updateFunc = "UPDATE PersonMongo set age = INCREMENT(1) where personId = :personId";
+        Query q = em.createQuery(updateFunc);
+        q.setParameter("personId", "1");
+        Assert.assertEquals(1, q.executeUpdate());
+        
+        updateFunc = "UPDATE PersonMongo set age = DECREMENT(1) where personId = :personId";
+        q = em.createQuery(updateFunc);
+        q.setParameter("personId", "1");
+        Assert.assertEquals(1, q.executeUpdate());
+    }
+    
+    @Test
+    public void subQueryTest()
+    {
+    	Object p1 = prepareMongoInstance("1", 10);
+        Object p2 = prepareMongoInstance("2", 20);
+        Object p3 = prepareMongoInstance("3", 15);
+        em.persist(p1);
+        em.persist(p2);
+        em.persist(p3);
+    	
+    	String query = "Select p from PersonMongo p where p.personName <> :name and p.age NOT IN :ageList" +
+        		" and (personId = :personId)";
+        Query q = em.createQuery(query);
+        q.setParameter("name", "vivek");
+        q.setParameter("ageList", new ArrayList<Integer>(){{add(20);add(21);}});
+        q.setParameter("personId", "1");
+        List<PersonMongo> results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(0, results.size());
+        
+        query = "Select p from PersonMongo p where (p.personName = :name and p.age NOT IN :ageList)" +
+        		" and (personId = :personId)";
+        q = em.createQuery(query);
+        q.setParameter("name", "vivek");
+        q.setParameter("ageList", new ArrayList<Integer>(){{add(20);add(21);}});
+        q.setParameter("personId", "1");
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(1, results.size());
+        Assert.assertNotNull(results.get(0).getPersonId());
+        Assert.assertNotNull(results.get(0).getPersonName());
+        Assert.assertNotNull(results.get(0).getAge());
 
     }
 }

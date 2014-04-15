@@ -239,7 +239,7 @@ public class RedisClientFactory extends GenericClientFactory
         {
 
             Jedis connection = ((JedisPool) getConnectionPoolOrConnection()).getResource();
-
+            connection.getClient().setTimeoutInfinite();
             Map props = RedisPropertyReader.rsmd.getProperties();
 
             // set external xml properties.

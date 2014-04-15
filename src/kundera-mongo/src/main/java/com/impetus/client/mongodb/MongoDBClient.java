@@ -61,6 +61,7 @@ import com.mongodb.DBEncoder;
 import com.mongodb.DBObject;
 import com.mongodb.DefaultDBEncoder;
 import com.mongodb.WriteConcern;
+import com.mongodb.WriteResult;
 
 /**
  * Client class for MongoDB database.
@@ -394,14 +395,31 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      *             the exception
      */
     public <E> List<E> loadData(EntityMetadata entityMetadata, BasicDBObject mongoQuery, List<String> relationNames,
-            BasicDBObject orderBy, int maxResult, BasicDBObject keys, String... results) throws Exception
+            BasicDBObject orderBy, int maxResult, int firstResult, BasicDBObject keys, String... results) throws Exception
     {
         String documentName = entityMetadata.getTableName();
         Class clazz = entityMetadata.getEntityClazz();
 
         List entities = new ArrayList<E>();
 
-        DBCursor cursor = getDBCursorInstance(mongoQuery, orderBy, maxResult, keys, documentName);
+        boolean isCountQuery = false;
+        if(results!=null && results.length>1) {
+        	if(results[0].toLowerCase().indexOf("count(")==0) {
+        		isCountQuery = true;
+        	}
+        }
+        
+        Object object = getDBCursorInstance(mongoQuery, orderBy, maxResult, firstResult, keys, documentName, isCountQuery);
+        
+        DBCursor cursor = null;
+        
+        if(object instanceof Long) {
+        	List<Long> lst = new ArrayList<Long>();
+        	lst.add((Long)object);
+        	return (List<E>)lst;
+        } else {
+        	cursor = (DBCursor)object;
+        }
 
         if (results != null && results.length > 0)
         {
@@ -419,7 +437,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
                 {
                     // TODO i need to discuss with Amresh before modifying it.
                     entities.addAll(handler.getEmbeddedObjectList(dbCollection, entityMetadata, documentName,
-                            mongoQuery, result, orderBy, maxResult, keys, kunderaMetadata));
+                    		mongoQuery, result, orderBy, maxResult, firstResult, keys, kunderaMetadata));
                     return entities;
                 }
             }
@@ -451,12 +469,16 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         return entities;
     }
 
-    public DBCursor getDBCursorInstance(BasicDBObject mongoQuery, BasicDBObject orderBy, int maxResult,
-            BasicDBObject keys, String documentName)
+    public Object getDBCursorInstance(BasicDBObject mongoQuery, BasicDBObject orderBy, int maxResult, int firstResult,
+            BasicDBObject keys, String documentName, boolean isCountQuery)
     {
         DBCollection dbCollection = mongoDb.getCollection(documentName);
-        DBCursor cursor = orderBy != null ? dbCollection.find(mongoQuery, keys).sort(orderBy).limit(maxResult)
-                : dbCollection.find(mongoQuery, keys).limit(maxResult);
+        DBCursor cursor = null;
+        if(isCountQuery)
+        	return dbCollection.count(mongoQuery);
+        else
+        	cursor = orderBy != null ? dbCollection.find(mongoQuery, keys).sort(orderBy).limit(maxResult).skip(firstResult) 
+        				: dbCollection.find(mongoQuery, keys).limit(maxResult).skip(firstResult);
         return cursor;
     }
 
@@ -1005,6 +1027,14 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
                 entities.add(enhancedEntity);
             }
         }
+    }
+    
+    public int handleUpdateFunctions(BasicDBObject query, BasicDBObject update, String collName) {
+    	DBCollection collection = mongoDb.getCollection(collName);
+    	WriteResult result = collection.update(query, update);
+    	if(result.getError()!=null || result.getN()<=0)
+    		return -1;
+    	return result.getN();
     }
 
 }
