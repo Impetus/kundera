@@ -215,7 +215,7 @@ public class ApplicationMetadata
                 {
                     onError(clazzName);
                 }
-                else if (clazz.endsWith("." + clazzName) ||  clazz.endsWith("$" + clazzName))
+                else if (clazz.endsWith("." + clazzName) || clazz.endsWith("$" + clazzName))
                 {
                     pu = clazzToPuMap.get(clazz).get(_first);
                     found = true;
@@ -240,7 +240,6 @@ public class ApplicationMetadata
      */
     public void addQueryToCollection(String queryName, String query, boolean isNativeQuery, Class clazz)
     {
-        
         if (namedNativeQueries == null)
         {
             namedNativeQueries = new ConcurrentHashMap<String, QueryWrapper>();
@@ -250,7 +249,7 @@ public class ApplicationMetadata
             namedNativeQueries.put(queryName, new QueryWrapper(queryName, query, isNativeQuery, clazz));
         }
         // No null check made as it will never hold null value
-        else if (!getQuery(queryName).equals(query))
+        else if (queryName != null && !getQuery(queryName).equals(query))
         {
             logger.error("Duplicate named/native query with name:" + queryName
                     + "found! Already there is a query with same name:" + namedNativeQueries.get(queryName));
@@ -268,7 +267,7 @@ public class ApplicationMetadata
      */
     public String getQuery(String name)
     {
-        QueryWrapper wrapper = namedNativeQueries != null ? namedNativeQueries.get(name) : null;
+        QueryWrapper wrapper = namedNativeQueries != null && name != null ? namedNativeQueries.get(name) : null;
         return wrapper != null ? wrapper.getQuery() : null;
     }
 
@@ -281,17 +280,16 @@ public class ApplicationMetadata
      */
     public boolean isNative(String name)
     {
-        QueryWrapper wrapper = namedNativeQueries != null ? namedNativeQueries.get(name) : null;
+        QueryWrapper wrapper = namedNativeQueries != null && name != null ? namedNativeQueries.get(name) : null;
         return wrapper != null ? wrapper.isNativeQuery() : false;
     }
 
     public Class getMappedClass(String name)
     {
-        QueryWrapper wrapper = namedNativeQueries != null ? namedNativeQueries.get(name) : null;
+        QueryWrapper wrapper = namedNativeQueries != null && name != null ? namedNativeQueries.get(name) : null;
         return wrapper != null ? wrapper.getMappedClazz() : null;
     }
 
-    
     /**
      * Handler error and log statements.
      * 
