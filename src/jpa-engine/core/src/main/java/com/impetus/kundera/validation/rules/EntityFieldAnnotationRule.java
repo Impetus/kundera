@@ -96,7 +96,6 @@ public class EntityFieldAnnotationRule extends AbstractEntityRule implements Ent
                     && (superClass.isAnnotationPresent(MappedSuperclass.class) || superClass
                             .isAnnotationPresent(Entity.class)))
             {
-                keys = new ArrayList<Field>();
                 for (Field field : superClass.getDeclaredFields())
                 {
 
