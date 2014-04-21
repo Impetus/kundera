@@ -90,7 +90,7 @@ public final class GraphEntityMapper
      * attributes populated
      * 
      * @param id
-     *            TODO
+     * 
      */
     public Node getNodeFromEntity(Object entity, Object key, GraphDatabaseService graphDb, EntityMetadata m,
             boolean isUpdate)
@@ -168,20 +168,19 @@ public final class GraphEntityMapper
                 }
                 else if (!attribute.isCollection() && !attribute.isAssociation())
                 {
-
-                    PropertyAccessorHelper.set(entity, field, fromNeo4JObject(node.getProperty(columnName), field));
-
+                    PropertyAccessorHelper.set(entity, field,
+                            fromNeo4JObject(node.getProperty(columnName, null), field));
                 }
             }
         }
         catch (InstantiationException e)
         {
-            log.error("Error while converting Neo4j object to entity, Caused by: ", e);
+            log.error("Error while converting Neo4j object to entity, Caused by {}.", e);
             throw new EntityReaderException("Error while converting Neo4j object to entity", e);
         }
         catch (IllegalAccessException e)
         {
-            log.error("Error while converting Neo4j object to entity, Caused by: ", e);
+            log.error("Error while converting Neo4j object to entity, Caused by {}.", e);
             throw new EntityReaderException("Error while converting Neo4j object to entity", e);
         }
         catch (NotFoundException e)
@@ -241,12 +240,12 @@ public final class GraphEntityMapper
         }
         catch (InstantiationException e)
         {
-            log.error("Error while converting Neo4j object to entity, Caused by: ", e);
+            log.error("Error while converting Neo4j object to entity, Caused by {}.", e);
             throw new EntityReaderException("Error while converting Neo4j object to entity");
         }
         catch (IllegalAccessException e)
         {
-            log.error("Error while converting Neo4j object to entity, Caused by: ", e);
+            log.error("Error while converting Neo4j object to entity, Caused by {}.", e);
             throw new EntityReaderException("Error while converting Neo4j object to entity");
         }
 
@@ -527,13 +526,13 @@ public final class GraphEntityMapper
         catch (InstantiationException e)
         {
             log.error("Error while instantiating " + embeddableClass
-                    + ". Did you define no argument constructor? Details:" + e.getMessage());
+                    + ". Did you define no argument constructor? Details {}.", e);
             throw new IllegalArgumentException("Error while instantiating " + embeddableClass
                     + ". Did you define no argument constructor?", e);
         }
         catch (IllegalAccessException e)
         {
-            log.error("Error while instantiating " + embeddableClass + ".? Details:" + e.getMessage());
+            log.error("Error while instantiating " + embeddableClass + ".? Details {}.", e);
             throw new IllegalArgumentException("Error while instantiating " + embeddableClass, e);
         }
 
