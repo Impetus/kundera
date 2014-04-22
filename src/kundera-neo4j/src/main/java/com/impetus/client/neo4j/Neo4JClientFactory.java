@@ -181,7 +181,7 @@ public class Neo4JClientFactory extends GenericClientFactory
      */
     protected void setExternalProperties(Map<String, Object> puProperties)
     {
-        if (this.externalProperties == null)
+        if (puProperties != null)
         {
             this.externalProperties = puProperties;
         }

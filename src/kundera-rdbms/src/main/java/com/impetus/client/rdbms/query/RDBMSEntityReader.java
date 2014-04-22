@@ -221,12 +221,15 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
         ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
         Metamodel metaModel = appMetadata.getMetamodel(entityMetadata.getPersistenceUnit());
 
-        String query = appMetadata.getQuery(jpaQuery);
-        boolean isNative = kunderaQuery != null ? kunderaQuery.isNative() : false;
-
-        if (isNative)
+        if (jpaQuery != null)
         {
-            return query != null ? query : jpaQuery;
+            String query = appMetadata.getQuery(jpaQuery);
+            boolean isNative = kunderaQuery != null ? kunderaQuery.isNative() : false;
+
+            if (isNative)
+            {
+                return query != null ? query : jpaQuery;
+            }
         }
 
         // Suffixing the UNDERSCORE instead of prefix as Oracle 11g complains

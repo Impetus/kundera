@@ -57,7 +57,7 @@ public class RDBMSQuery extends QueryImpl
     private static Logger log = LoggerFactory.getLogger(RDBMSQuery.class);
 
     /** The reader. */
-    private EntityReader reader;
+    private RDBMSEntityReader reader;
 
     /**
      * Instantiates a new RDBMS query.
@@ -89,7 +89,7 @@ public class RDBMSQuery extends QueryImpl
         initializeReader();
 
         List<EnhanceEntity> ls = getReader().populateRelation(m, client, this.maxResult);
-        
+
         return setRelationEntities(ls, client, m);
     }
 
@@ -144,7 +144,7 @@ public class RDBMSQuery extends QueryImpl
      * @see com.impetus.kundera.query.QueryImpl#getReader()
      */
     @Override
-    protected EntityReader getReader()
+    protected RDBMSEntityReader getReader()
     {
         if (reader == null)
         {
@@ -178,9 +178,9 @@ public class RDBMSQuery extends QueryImpl
 
         if (!isNative)
         {
-            ((RDBMSEntityReader) getReader()).setConditions(getKunderaQuery().getFilterClauseQueue());
+            getReader().setConditions(getKunderaQuery().getFilterClauseQueue());
 
-            ((RDBMSEntityReader) getReader()).setFilter(getKunderaQuery().getFilter());
+            getReader().setFilter(getKunderaQuery().getFilter());
         }
     }
 
