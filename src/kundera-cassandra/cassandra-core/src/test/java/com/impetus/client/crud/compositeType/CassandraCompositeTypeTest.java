@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.client.crud.compositeType;
 
-import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Date;
@@ -43,7 +42,6 @@ import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.crud.compositeType.CassandraPrimeUser.NickName;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
-import com.impetus.kundera.query.KunderaQuery;
 
 /**
  * Junit test case for Compound/Composite key.
@@ -60,11 +58,6 @@ public class CassandraCompositeTypeTest
 
     /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(CassandraCompositeTypeTest.class);
-
-    // @Rule
-    // public ContiPerfRule i = new ContiPerfRule(new ReportModule[] { new
-    // CSVSummaryReportModule(),
-    // new HtmlReportModule() });
 
     private Date currentDate = new Date();
 
@@ -101,6 +94,7 @@ public class CassandraCompositeTypeTest
         ((CassandraClientBase) client).setCqlVersion("3.0.0");
         CassandraPrimeUser result = em.find(CassandraPrimeUser.class, key);
         Assert.assertNotNull(result);
+        Assert.assertNull(result.getKey().getFullName());
         Assert.assertEquals("After merge", result.getTweetBody()); // assertion
                                                                    // of newly
                                                                    // added
@@ -139,6 +133,7 @@ public class CassandraCompositeTypeTest
         ((CassandraClientBase) client).setCqlVersion("3.0.0");
         CassandraPrimeUser result = em.find(CassandraPrimeUser.class, key);
         Assert.assertNotNull(result);
+        Assert.assertNull(result.getKey().getFullName());
         Assert.assertEquals(currentDate.getTime(), result.getTweetDate().getTime()); // assertion
                                                                                      // of
                                                                                      // changed
@@ -210,19 +205,22 @@ public class CassandraCompositeTypeTest
         q.setParameter("userId", "mevivs");
         results = q.getResultList();
         Assert.assertEquals(1, results.size());
+        Assert.assertNull(results.get(0).getKey().getFullName());
 
         // Query with composite key clause.
         q = em.createQuery(withSecondCompositeColClause);
         q.setParameter("tweetId", 1);
         results = q.getResultList();
         Assert.assertEquals(1, results.size());
-
+        Assert.assertNull(results.get(0).getKey().getFullName());
+        
         // Query with composite key clause.
         q = em.createQuery(withBothCompositeColClause);
         q.setParameter("userId", "mevivs");
         q.setParameter("tweetId", 1);
         results = q.getResultList();
         Assert.assertEquals(1, results.size());
+        Assert.assertNull(results.get(0).getKey().getFullName());
 
         // Query with composite key clause.
         q = em.createQuery(withAllCompositeColClause);
@@ -232,6 +230,7 @@ public class CassandraCompositeTypeTest
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(1, results.size());
+        Assert.assertNull(results.get(0).getKey().getFullName());
 
         // Query with composite key clause.
         q = em.createQuery(withLastCompositeColGTClause);
@@ -239,7 +238,7 @@ public class CassandraCompositeTypeTest
         q.setParameter("tweetId", 1);
         q.setParameter("timeLineId", timeLineId);
         results = q.getResultList();
-
+        Assert.assertNull(results.get(0).getKey().getFullName());
         Assert.assertEquals(1, results.size());
 
         // Query with composite key with selective clause.
@@ -250,6 +249,7 @@ public class CassandraCompositeTypeTest
         results = q.getResultList();
         Assert.assertEquals(1, results.size());
         Assert.assertNull(results.get(0).getTweetBody());
+        Assert.assertNull(results.get(0).getKey().getFullName());
 
         final String selectiveColumnTweetBodyWithAllCompositeColClause = "Select u.tweetBody from CassandraPrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId = :timeLineId";
         // Query for selective column tweetBody with composite key clause.
@@ -261,7 +261,7 @@ public class CassandraCompositeTypeTest
         Assert.assertEquals(1, results.size());
         Assert.assertEquals("my first tweet", results.get(0).getTweetBody());
         Assert.assertNull(results.get(0).getTweetDate());
-
+        
         final String selectiveColumnTweetDateWithAllCompositeColClause = "Select u.tweetDate from CassandraPrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId = :timeLineId";
         // Query for selective column tweetDate with composite key clause.
         q = em.createQuery(selectiveColumnTweetDateWithAllCompositeColClause);
@@ -280,6 +280,8 @@ public class CassandraCompositeTypeTest
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(1, results.size());
+        Assert.assertNull(results.get(0).getKey().getFullName());
+        Assert.assertNull(results.get(0).getKey().getFullName());
 
         em.remove(user);
 
@@ -335,6 +337,7 @@ public class CassandraCompositeTypeTest
         List<CassandraPrimeUser> results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(3, results.size());
+        Assert.assertNull(results.get(0).getKey().getFullName());
 
         // With limit
         q = em.createQuery(noClause);
@@ -342,6 +345,7 @@ public class CassandraCompositeTypeTest
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(2, results.size());
+        Assert.assertNull(results.get(0).getKey().getFullName());
     }
 
     @Test
@@ -389,6 +393,7 @@ public class CassandraCompositeTypeTest
         Assert.assertEquals("my second tweet", results.get(1).getTweetBody());
         Assert.assertEquals("my third tweet", results.get(2).getTweetBody());
         Assert.assertEquals(3, results.size());
+        Assert.assertNull(results.get(0).getKey().getFullName());
 
         orderClause = "Select u from CassandraPrimeUser u where u.key.userId = :userId ORDER BY u.key.tweetId DESC";
         q = em.createQuery(orderClause);
@@ -399,6 +404,7 @@ public class CassandraCompositeTypeTest
         Assert.assertEquals("my second tweet", results.get(1).getTweetBody());
         Assert.assertEquals("my third tweet", results.get(0).getTweetBody());
         Assert.assertEquals(3, results.size());
+        Assert.assertNull(results.get(0).getKey().getFullName());
 
         // With limit
         q = em.createQuery(orderClause);
@@ -408,6 +414,7 @@ public class CassandraCompositeTypeTest
 
         Assert.assertNotNull(results);
         Assert.assertEquals(2, results.size());
+        Assert.assertNull(results.get(0).getKey().getFullName());
 
         try
         {
@@ -468,6 +475,7 @@ public class CassandraCompositeTypeTest
         Assert.assertEquals("my first tweet", results.get(0).getTweetBody());
         Assert.assertEquals("my third tweet", results.get(1).getTweetBody());
         Assert.assertEquals(2, results.size());
+        Assert.assertNull(results.get(0).getKey().getFullName());
 
         inClause = "Select u from CassandraPrimeUser u where u.key.userId IN ('\"mevivs\"','\"kmishra\"') ORDER BY u.key.tweetId ASC";
         q = em.createQuery(inClause);
@@ -483,6 +491,7 @@ public class CassandraCompositeTypeTest
         Assert.assertNotNull(results);
         Assert.assertEquals("my first tweet", results.get(0).getTweetBody());
         Assert.assertEquals(1, results.size());
+        Assert.assertNull(results.get(0).getKey().getFullName());
 
         try
         {
@@ -507,6 +516,7 @@ public class CassandraCompositeTypeTest
         Assert.assertNotNull(results);
         Assert.assertTrue(!results.isEmpty());
         Assert.assertEquals(2, results.size());
+        Assert.assertNull(results.get(0).getKey().getFullName());
 
         // In Query set Paramater.
         inClause = "Select u from CassandraPrimeUser u where u.key.userId IN :userIdList ORDER BY u.key.tweetId ASC";
@@ -523,6 +533,7 @@ public class CassandraCompositeTypeTest
         Assert.assertNotNull(results);
         Assert.assertTrue(!results.isEmpty());
         Assert.assertEquals(3, results.size());
+        Assert.assertNull(results.get(0).getKey().getFullName());
 
         // In Query set Paramater with and clause.
         inClause = "Select u from CassandraPrimeUser u where u.key.userId IN :userIdList and u.name = 'kuldeep' ORDER BY u.key.tweetId ASC";
