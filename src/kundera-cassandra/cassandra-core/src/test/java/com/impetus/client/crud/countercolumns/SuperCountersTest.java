@@ -99,6 +99,7 @@ public class SuperCountersTest
         cfDef.column_type = "Super";
         cfDef.default_validation_class = "CounterColumnType";
         cfDef.comparator_type = "UTF8Type";
+        cfDef.subcomparator_type = "UTF8Type";
         client.system_add_column_family(cfDef);
     }
 
@@ -342,6 +343,7 @@ public class SuperCountersTest
         Assert.assertEquals(12, superCounter.getCounter());
         Assert.assertEquals(12223, superCounter.getlCounter());
         Assert.assertEquals(23, superCounter.getSubCounter().getSubCounter());
+        Assert.assertNull(superCounter.getSubCounter().getSubCounter_name());
 
         SuperCounters superCounter1 = new SuperCounters();
         superCounter1 = em.find(SuperCounters.class, id2);
@@ -351,6 +353,7 @@ public class SuperCountersTest
         Assert.assertEquals(15, superCounter1.getCounter());
         Assert.assertEquals(12224, superCounter1.getlCounter());
         Assert.assertEquals(23, superCounter1.getSubCounter().getSubCounter());
+        Assert.assertNull(superCounter1.getSubCounter().getSubCounter_name());
 
         SuperCounters superCounter2 = new SuperCounters();
         superCounter2 = em.find(SuperCounters.class, id3);
@@ -360,6 +363,7 @@ public class SuperCountersTest
         Assert.assertEquals(18, superCounter2.getCounter());
         Assert.assertEquals(12225, superCounter2.getlCounter());
         Assert.assertEquals(23, superCounter2.getSubCounter().getSubCounter());
+        Assert.assertNull(superCounter2.getSubCounter().getSubCounter_name());
 
         em.close();
     }
@@ -374,6 +378,7 @@ public class SuperCountersTest
         superCounter.setlCounter(12223);
         SubCounter subCounter = new SubCounter();
         subCounter.setSubCounter(23);
+        subCounter.setSubCounter_name("First Sub Counter");
         superCounter.setSubCounter(subCounter);
         em.persist(superCounter);
 
@@ -383,6 +388,7 @@ public class SuperCountersTest
         superCounter1.setlCounter(12224);
         SubCounter subCounter1 = new SubCounter();
         subCounter1.setSubCounter(23);
+        subCounter1.setSubCounter_name("Second Sub Counter");
         superCounter1.setSubCounter(subCounter1);
         em.persist(superCounter1);
 
@@ -392,6 +398,7 @@ public class SuperCountersTest
         superCounter2.setlCounter(12225);
         SubCounter subCounter2 = new SubCounter();
         subCounter2.setSubCounter(23);
+        subCounter2.setSubCounter_name("Third Sub Counter");
         superCounter2.setSubCounter(subCounter2);
         em.persist(superCounter2);
 

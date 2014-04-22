@@ -25,6 +25,9 @@ public class SubCounter
     @Column(name = "SUB_COUNTER")
     private long subCounter;
 
+    @Column(name = "SUB_COUNTER_NAME")
+    private transient String subCounter_name;
+
     /**
      * @return the subCounter
      */
@@ -41,4 +44,22 @@ public class SubCounter
     {
         this.subCounter = subCounter;
     }
+
+    /**
+     * @return the subCounter_name
+     */
+    public String getSubCounter_name()
+    {
+        return subCounter_name;
+    }
+
+    /**
+     * @param subCounter_name
+     *            the subCounter_name to set
+     */
+    public void setSubCounter_name(String subCounter_name)
+    {
+        this.subCounter_name = subCounter_name;
+    }
+
 }

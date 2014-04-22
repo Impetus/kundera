@@ -44,17 +44,21 @@ public class PersonalDetailCassandra
     @Column(name = "rel_status")
     private String relationshipStatus;
 
+    @Column(name = "age")
+    private transient int age;
+
     public PersonalDetailCassandra()
     {
 
     }
 
-    public PersonalDetailCassandra(String name, String password, String relationshipStatus)
+    public PersonalDetailCassandra(String name, String password, String relationshipStatus, int age)
     {
         setPersonalDetailId(ExampleUtilsCassandra.getUniqueId());
         setName(name);
         setPassword(password);
         setRelationshipStatus(relationshipStatus);
+        setAge(age);
     }
 
     /**
@@ -123,6 +127,23 @@ public class PersonalDetailCassandra
     public void setRelationshipStatus(String relationshipStatus)
     {
         this.relationshipStatus = relationshipStatus;
+    }
+
+    /**
+     * @return the age
+     */
+    public int getAge()
+    {
+        return age;
+    }
+
+    /**
+     * @param age
+     *            the age to set
+     */
+    public void setAge(int age)
+    {
+        this.age = age;
     }
 
 }

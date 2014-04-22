@@ -182,7 +182,7 @@ public abstract class TwitterTestBaseCassandra
         UserCassandra user1 = twitter.findUserById(userId1);
         assertUser1(user1);
 
-        user1.setPersonalDetail(new PersonalDetailCassandra("Vivek", "unknown", "Married"));
+        user1.setPersonalDetail(new PersonalDetailCassandra("Vivek", "unknown", "Married", 24));
         user1.addTweet(new TweetCassandra("My Third Tweet", "iPhone"));
         twitter.mergeUser(user1);
 
@@ -245,11 +245,11 @@ public abstract class TwitterTestBaseCassandra
     protected void addUsers()
     {
         twitter.createEntityManager();
-        twitter.addUser(userId1, "Amresh", "password1", "married");
+        twitter.addUser(userId1, "Amresh", "password1", "married", 25);
         twitter.closeEntityManager();
 
         twitter.createEntityManager();
-        twitter.addUser(userId2, "Saurabh", "password2", "single");
+        twitter.addUser(userId2, "Saurabh", "password2", "single", 25);
         twitter.closeEntityManager();
     }
 
@@ -488,7 +488,7 @@ public abstract class TwitterTestBaseCassandra
      */
     private UserCassandra buildUser1()
     {
-        UserCassandra user1 = new UserCassandra(userId1, "Amresh", "password1", "married");
+        UserCassandra user1 = new UserCassandra(userId1, "Amresh", "password1", "married", 25);
 
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Date(1344079067777l));
@@ -516,7 +516,7 @@ public abstract class TwitterTestBaseCassandra
      */
     private UserCassandra buildUser2()
     {
-        UserCassandra user2 = new UserCassandra(userId2, "Saurabh", "password2", "single");
+        UserCassandra user2 = new UserCassandra(userId2, "Saurabh", "password2", "single", 25);
 
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Date(1344079068888l));
@@ -553,6 +553,7 @@ public abstract class TwitterTestBaseCassandra
         Assert.assertNotNull(user1.getExternalLinks());
         Assert.assertFalse(user1.getExternalLinks().isEmpty());        
         Assert.assertEquals(2, user1.getExternalLinks().size());
+        Assert.assertEquals(0, user1.getPersonalDetail().getAge());
     }
 
     private void assertUser2(UserCassandra user2)
@@ -568,7 +569,8 @@ public abstract class TwitterTestBaseCassandra
         Assert.assertEquals(2, user2.getTweets().size());
         Assert.assertNotNull(user2.getExternalLinks());
         Assert.assertFalse(user2.getExternalLinks().isEmpty());
-        Assert.assertEquals(2, user2.getExternalLinks().size());        
+        Assert.assertEquals(2, user2.getExternalLinks().size());    
+        Assert.assertEquals(0, user2.getPersonalDetail().getAge());
     }
 
     private void assertUpdatedUser1(UserCassandra user1)
@@ -586,6 +588,7 @@ public abstract class TwitterTestBaseCassandra
         Assert.assertNotNull(user1.getExternalLinks());
         Assert.assertFalse(user1.getExternalLinks().isEmpty());
         Assert.assertEquals(2, user1.getExternalLinks().size());
+        Assert.assertEquals(0, user1.getPersonalDetail().getAge());
     }
 
     abstract void startServer();
