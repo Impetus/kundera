@@ -439,6 +439,17 @@ public class KunderaQueryTest
 
     }
     
+    
+    @Test
+    public void testWithInClause()
+    {
+        final String query = "Select p from Person p where p.personName <> :name and p.age in('kk', 'dk', 'sk' ) ";
+        KunderaQuery kunderaQuery = new KunderaQuery(query, kunderaMetadata);
+        KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery);
+        queryParser.parse();
+        kunderaQuery.postParsingInit();
+    }
+
     @Test
     public void testInNotInNotEquals()
     {
@@ -453,6 +464,30 @@ public class KunderaQueryTest
         kunderaQuery.setParameter("salaryList", new ArrayList<Double>(){{add(2000D);add(3000D);}});
         kunderaQuery.setParameter("personId", "personId");
 
+        assertSubQuery(kunderaQuery);
+
+    }
+
+    @Test
+    public void testWithSubQueryInMid()
+    {
+        String query = "Select p from Person p where p.personName <> :name and p.age IN :ageList" +
+        " and (personId = :personId) and salary NOT IN :salaryList";
+        KunderaQuery kunderaQuery = new KunderaQuery(query, kunderaMetadata);
+        KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery);
+        queryParser.parse();
+        kunderaQuery.postParsingInit();
+        kunderaQuery.setParameter("name", "pname");
+        kunderaQuery.setParameter("ageList", new ArrayList<Integer>(){{add(20);add(21);}});
+        kunderaQuery.setParameter("salaryList", new ArrayList<Double>(){{add(2000D);add(3000D);}});
+        kunderaQuery.setParameter("personId", "personId");
+
+        assertSubQuery(kunderaQuery);
+
+    }
+
+    private void assertSubQuery(KunderaQuery kunderaQuery)
+    {
         Assert.assertEquals(4, kunderaQuery.getParameters().size());
 
         Iterator<Parameter<?>> parameters = kunderaQuery.getParameters().iterator();
@@ -482,7 +517,6 @@ public class KunderaQueryTest
         Assert.assertNotNull(value);
         Assert.assertEquals(personIdList, value);
         Assert.assertEquals(4, kunderaQuery.getParameters().size());
-
     }
 
     private class JPAParameter implements Parameter<String>

@@ -66,7 +66,7 @@ public class KunderaQuery
 
     /** The INTER pattern. */
     private static final Pattern INTER_CLAUSE_PATTERN = Pattern.compile(
-            "\\s\\band\\b\\s|\\s\\bor\\b\\s|\\s\\bbetween\\b\\s|\\(|\\)", Pattern.CASE_INSENSITIVE);
+            "\\s\\band\\b\\s|\\s\\bor\\b\\s|\\s\\bbetween\\b\\s|\\s\\b^[!?IN]\\s\\b(\\s\\b)|\\s\\b^[!?NOT IN]\\s\\b(\\s\\b|\\s\\b(\\s\\b))", Pattern.CASE_INSENSITIVE);
 
     /** The INTRA pattern. */
     private static final Pattern INTRA_CLAUSE_PATTERN = Pattern.compile("=|\\s\\blike\\b|\\bnot in\\b|\\bin\\b|<>|>=|>|<=|<|\\s\\bset",
@@ -449,7 +449,7 @@ public class KunderaQuery
             return;
         }
 
-        List<String> clauses = tokenize(filter, INTER_CLAUSE_PATTERN);
+        List<String> clauses = tokenize(filter, INTER_CLAUSE_PATTERN,true);
 
         // parse and structure for "between" clause , if present, else it will
         // return original clause
@@ -467,7 +467,7 @@ public class KunderaQuery
             }
         	else if (newClause)
             {
-                List<String> tokens = tokenize(clause, INTRA_CLAUSE_PATTERN);
+                List<String> tokens = tokenize(clause, INTRA_CLAUSE_PATTERN,false);
 
                 if (tokens.size() != 3)
                 {
@@ -979,7 +979,7 @@ public class KunderaQuery
      *            the pattern
      * @return the list
      */
-    private static List<String> tokenize(String where, Pattern pattern)
+    private static List<String> tokenize(String where, Pattern pattern, boolean isInterClause)
     {
         List<String> split = new ArrayList<String>();
         Matcher matcher = pattern.matcher(where);
@@ -989,18 +989,32 @@ public class KunderaQuery
         while (matcher.find())
         {
             s = where.substring(lastIndex, matcher.start()).trim();
-            if(!s.equals(""))
-            	split.add(s);
+            addSplit(isInterClause, split, s);
+//
+//            if(!s.equals(""))
+//            	split.add(s);
+            /*if(s.startsWith("("))
+            {
+                split.add("(");
+                split.add(s.substring(s.indexOf("(")+1));
+            }
+            else if (s.endsWith(")"))
+            {
+                split.add(s.substring(0,s.lastIndexOf(")")));
+            }*/
             s = matcher.group();
+            // if next group starts with "(" and last record in split ends with IN on NOT IN, append in previous split only.
             split.add(s.toUpperCase());
             lastIndex = matcher.end();
             // count++;
         }
         s = where.substring(lastIndex).trim();
-        if(!s.equals(""))
-        	split.add(s);
+        addSplit(isInterClause, split, s);
+        
         return split;
     }
+
+
 
     /**
      * Gets the metamodel.
@@ -1397,4 +1411,36 @@ public class KunderaQuery
         return value;
     }
 
+    private static void addSplit(boolean isInterClause, List<String> split, String s)
+    {
+        if (!s.equals(""))
+        {
+
+            if (isInterClause)
+            {
+                if (s.startsWith("(") && s.endsWith(")"))
+                {
+                    split.add("(");
+                    split.add(s.substring(s.indexOf("(") + 1, s.lastIndexOf(")")));
+                    split.add(")");
+                }
+                else if (s.startsWith("("))
+                {
+                    split.add("(");
+                    split.add(s.substring(s.indexOf("(") + 1));
+                }
+                else if (s.endsWith(")"))
+                {
+                    split.add(s.substring(0, s.lastIndexOf(")")));
+                }else
+                {
+                    split.add(s);
+                }
+            }
+            else
+            {
+                split.add(s);
+            }
+        }
+    }
 }
