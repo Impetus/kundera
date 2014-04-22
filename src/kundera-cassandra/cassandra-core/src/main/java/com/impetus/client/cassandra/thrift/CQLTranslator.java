@@ -591,10 +591,8 @@ public final class CQLTranslator
         builder.append("[");
         for (Object o : collection)
         {
-            if (o != null)
-            {
-                appendValue(builder, o.getClass(), o, false);
-            }
+            // Allowing null values.
+            appendValue(builder, o != null ? o.getClass() : null, o, false);
             builder.append(",");
         }
         if (!collection.isEmpty())
@@ -620,10 +618,8 @@ public final class CQLTranslator
         builder.append("{");
         for (Object o : collection)
         {
-            if (o != null)
-            {
-                appendValue(builder, o.getClass(), o, false);
-            }
+            // Allowing null values.
+            appendValue(builder, o != null ? o.getClass() : null, o, false);
             builder.append(",");
         }
         if (!collection.isEmpty())
@@ -650,12 +646,11 @@ public final class CQLTranslator
         for (Object mapKey : map.keySet())
         {
             Object mapValue = map.get(mapKey);
-            if (mapKey != null && mapValue != null)
-            {
-                appendValue(builder, mapKey.getClass(), mapKey, false);
-                builder.append(":");
-                appendValue(builder, mapValue.getClass(), mapValue, false);
-            }
+            // Allowing null keys.
+            appendValue(builder, mapKey != null ? mapKey.getClass() : null, mapKey, false);
+            builder.append(":");
+            // Allowing null values.
+            appendValue(builder, mapValue != null ? mapValue.getClass() : null, mapValue, false);
             builder.append(",");
         }
         if (!map.isEmpty())
@@ -674,7 +669,7 @@ public final class CQLTranslator
     private void appendValue(StringBuilder builder, Class fieldClazz, Object value, boolean useToken)
     {
         // To allow handle byte array class object by converting it to string
-        if (fieldClazz.isAssignableFrom(byte[].class))
+        if (value != null && fieldClazz.isAssignableFrom(byte[].class))
         {
             StringBuilder hexstr = new StringBuilder("0x");
             builder.append(hexstr.append((Hex.encodeHex((byte[]) value))));
@@ -686,9 +681,9 @@ public final class CQLTranslator
                 builder.append(TOKEN);
             }
 
-            if (fieldClazz.isAssignableFrom(String.class) || isDate(fieldClazz)
-                    || fieldClazz.isAssignableFrom(char.class) || fieldClazz.isAssignableFrom(Character.class)
-                    || value instanceof Enum)
+            if (value != null
+                    && (fieldClazz.isAssignableFrom(String.class) || isDate(fieldClazz)
+                            || fieldClazz.isAssignableFrom(char.class) || fieldClazz.isAssignableFrom(Character.class) || value instanceof Enum))
             {
 
                 if (fieldClazz.isAssignableFrom(String.class))

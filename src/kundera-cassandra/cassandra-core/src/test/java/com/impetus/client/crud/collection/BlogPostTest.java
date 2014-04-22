@@ -280,6 +280,65 @@ public class BlogPostTest
         Assert.assertTrue(allPosts == null || allPosts.isEmpty());
     }
 
+    @Test
+    public void testCollectionWithNullValues()
+    {
+        // Insert records
+        BlogPost p1 = prepareBlogPost1();
+        BlogPost p2 = prepareBlogPost2();
+
+        try
+        {
+            // Testing map containing null as value.
+            p1.addComment(444, null);
+            em.persist(p1);
+            Assert.fail("Should have gone into catch block.");
+        }
+        catch (Exception e)
+        {
+            Assert.assertEquals("com.impetus.kundera.KunderaException: InvalidRequestException(why:null is not supported inside collections)", e.getMessage());
+        }
+        try
+        {
+            // Testing map containing null as key and value.
+            p2.addComment(null, null);
+            em.persist(p2);
+            Assert.fail("Should have gone into catch block.");
+        }
+        catch (Exception e)
+        {
+            Assert.assertEquals("com.impetus.kundera.KunderaException: InvalidRequestException(why:null is not supported inside collections)", e.getMessage());
+        }
+
+        p1 = prepareBlogPost1();
+        p2 = prepareBlogPost2();
+
+        try
+        {
+            // Testing list containing null as value.
+            p1.addLikedBy(null);
+            em.persist(p1);
+            Assert.fail("Should have gone into catch block.");
+        }
+        catch (Exception e)
+        {
+            Assert.assertEquals("com.impetus.kundera.KunderaException: InvalidRequestException(why:null is not supported inside collections)", e.getMessage());
+        }
+
+        try
+        {
+            // Testing set containing null as value.
+            p2.addTag(null);
+            em.persist(p2);
+            Assert.fail("Should have gone into catch block.");
+        }
+        catch (Exception e)
+        {
+            Assert.assertEquals("com.impetus.kundera.KunderaException: InvalidRequestException(why:null is not supported inside collections)", e.getMessage());
+        }
+
+    }
+
     private BlogPost prepareBlogPost1()
     {
         BlogPost p1 = new BlogPost();
