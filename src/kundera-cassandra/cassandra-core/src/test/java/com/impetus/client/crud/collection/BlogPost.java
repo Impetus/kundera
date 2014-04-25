@@ -156,7 +156,7 @@ public class BlogPost
         tags.add(tag);
     }
     
-    public void addLikedBy(int likedByUserId)
+    public void addLikedBy(Integer likedByUserId)
     {
         if(likedBy == null)
         {
@@ -165,7 +165,7 @@ public class BlogPost
         likedBy.add(likedByUserId);
     }
     
-    public void addComment(int userId, String comment)
+    public void addComment(Integer userId, String comment)
     {
         if(comments == null)
         {

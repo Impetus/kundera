@@ -46,7 +46,7 @@ public interface TwitterCassandra
      * @param relationshipStatus
      *            the relationship status
      */
-    void addUser(String userId, String name, String password, String relationshipStatus);
+    void addUser(String userId, String name, String password, String relationshipStatus, int age);
 
     /**
      * Save preference for a given user

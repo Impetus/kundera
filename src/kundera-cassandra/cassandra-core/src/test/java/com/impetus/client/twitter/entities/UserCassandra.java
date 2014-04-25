@@ -84,9 +84,9 @@ public class UserCassandra
 
     }
 
-    public UserCassandra(String userId, String name, String password, String relationshipStatus)
+    public UserCassandra(String userId, String name, String password, String relationshipStatus, int age)
     {
-        PersonalDetailCassandra pd = new PersonalDetailCassandra(name, password, relationshipStatus);
+        PersonalDetailCassandra pd = new PersonalDetailCassandra(name, password, relationshipStatus, age);
         setUserId(userId);
         setPersonalDetail(pd);
     }

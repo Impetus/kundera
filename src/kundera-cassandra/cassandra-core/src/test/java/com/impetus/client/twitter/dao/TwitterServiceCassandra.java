@@ -101,9 +101,9 @@ public class TwitterServiceCassandra extends SuperDaoCassandra implements Twitte
     }
 
     @Override
-    public void addUser(String userId, String name, String password, String relationshipStatus)
+    public void addUser(String userId, String name, String password, String relationshipStatus, int age)
     {
-        UserCassandra user = new UserCassandra(userId, name, password, relationshipStatus);
+        UserCassandra user = new UserCassandra(userId, name, password, relationshipStatus, age);
         em.persist(user);
 
     }

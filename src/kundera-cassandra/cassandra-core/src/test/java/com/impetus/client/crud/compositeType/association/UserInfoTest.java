@@ -42,10 +42,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.cassandra.CassandraClientBase;
 import com.impetus.client.crud.compositeType.CassandraCompoundKey;
 import com.impetus.client.crud.compositeType.CassandraEmbeddedAssociation;
-import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
 
 /**
@@ -54,6 +52,8 @@ import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
  */
 public class UserInfoTest
 {
+    private static final String _CQL_VERSION = "2.0.0";
+
     private EntityManagerFactory emf;
 
     /**
@@ -74,7 +74,35 @@ public class UserInfoTest
     @Test
     public void onCRUD()
     {
-        EntityManager em = createEM();
+        EntityManager em = createEM(_CQL_VERSION);
+
+        // persist userinfo object only.
+        UserInfo userInfo = new UserInfo("mevivs_info", "Vivek", "Mishra", 31, 168);
+        em.persist(userInfo);
+
+        em.clear();
+        em.close();
+        em = createEM(_CQL_VERSION);
+
+        UserInfo foundUser = em.find(UserInfo.class, userInfo.getUserInfoId());
+        Assert.assertNotNull(foundUser);
+        Assert.assertEquals("Mishra", foundUser.getLastName());
+        Assert.assertEquals("Vivek", foundUser.getFirstName());
+        Assert.assertEquals(31, foundUser.getAge());
+        Assert.assertEquals(0, foundUser.getHeight());
+
+        em.remove(foundUser);
+
+        em.clear();
+        em.close();
+        em = createEM(_CQL_VERSION);
+
+        UserInfo deletedUser = em.find(UserInfo.class, userInfo.getUserInfoId());
+        Assert.assertNull(deletedUser);
+
+        em.clear();
+        em.close();
+        em = createEM(_CQL_VERSION);
 
         // Persist
         UUID timeLineId = UUID.randomUUID();
@@ -84,13 +112,12 @@ public class UserInfoTest
         timeLine.setTweetBody("my first tweet");
         timeLine.setTweetDate(currentDate);
 
-        UserInfo userInfo = new UserInfo("mevivs_info", "Vivek", "Mishra", 31);
         timeLine.setUserInfo(userInfo);
         em.persist(timeLine);
         em.clear();
         em.close();
 
-        em = createEM();
+        em = createEM(_CQL_VERSION);
 
         // Find
         CassandraEmbeddedAssociation result = em.find(CassandraEmbeddedAssociation.class, key);
@@ -99,6 +126,7 @@ public class UserInfoTest
         Assert.assertEquals(timeLineId, result.getKey().getTimeLineId());
         Assert.assertEquals("Vivek", result.getUserInfo().getFirstName());
         Assert.assertEquals(31, result.getUserInfo().getAge());
+        Assert.assertEquals(0, result.getUserInfo().getHeight());
 
         result.getUserInfo().setFirstName("Kuldeep");
         result.getUserInfo().setAge(23);
@@ -107,7 +135,7 @@ public class UserInfoTest
 
         em.clear();
         em.close();
-        em = createEM();
+        em = createEM(_CQL_VERSION);
         // Find
         result = null;
         result = em.find(CassandraEmbeddedAssociation.class, key);
@@ -116,31 +144,32 @@ public class UserInfoTest
         Assert.assertEquals(timeLineId, result.getKey().getTimeLineId());
         Assert.assertEquals("Kuldeep", result.getUserInfo().getFirstName());
         Assert.assertEquals(23, result.getUserInfo().getAge());
+        Assert.assertEquals(0, result.getUserInfo().getHeight());
 
         em.remove(result);
 
         em.clear();
         em.close();
+        em = createEM(_CQL_VERSION);
 
-        em = createEM();
         result = em.find(CassandraEmbeddedAssociation.class, key);
         Assert.assertNull(result);
 
     }
 
-    private EntityManager createEM()
+    private EntityManager createEM(String cqlVersion)
     {
         EntityManager em = emf.createEntityManager();
-        Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
-        Client client = clients.get("composite_pu");
-        ((CassandraClientBase) client).setCqlVersion("3.0.0");
+        // Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
+        // Client client = clients.get("composite_pu");
+        // ((CassandraClientBase) client).setCqlVersion(cqlVersion);
         return em;
     }
 
     @Test
     public void onQuery()
     {
-        EntityManager em = createEM();
+        EntityManager em = createEM(_CQL_VERSION);
 
         // Persist
         UUID timeLineId = UUID.randomUUID();
@@ -150,7 +179,7 @@ public class UserInfoTest
         timeLine.setTweetBody("my first tweet");
         timeLine.setTweetDate(currentDate);
 
-        UserInfo userInfo = new UserInfo("mevivs_info", "Vivek", "Mishra", 31);
+        UserInfo userInfo = new UserInfo("mevivs_info", "Vivek", "Mishra", 31, 170);
         timeLine.setUserInfo(userInfo);
         em.persist(timeLine);
 
@@ -165,13 +194,14 @@ public class UserInfoTest
         Assert.assertEquals(1, results.size());
         Assert.assertEquals("Vivek", results.get(0).getUserInfo().getFirstName());
         Assert.assertEquals(31, results.get(0).getUserInfo().getAge());
+        Assert.assertEquals(0, results.get(0).getUserInfo().getHeight());
 
         em.remove(timeLine);
 
         em.clear();// optional,just to clear persistence cache.
         em.close();
 
-        em = createEM();
+        em = createEM(_CQL_VERSION);
         UserInfo user_Info = em.find(UserInfo.class, "mevivs_info");
         Assert.assertNull(user_Info);
     }
@@ -210,6 +240,10 @@ public class UserInfoTest
         ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("age".getBytes()), "Int32Type");
         columnDef2.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef2);
+        // ColumnDef columnDef3 = new
+        // ColumnDef(ByteBuffer.wrap("height".getBytes()), "Int32Type");
+        // columnDef3.index_type = IndexType.KEYS;
+        // cfDef.addToColumn_metadata(columnDef3);
         cfDefs.add(cfDef);
         KsDef ksDef = new KsDef("CompositeCassandra", "org.apache.cassandra.locator.SimpleStrategy", cfDefs);
 
@@ -223,9 +257,10 @@ public class UserInfoTest
 
         CassandraCli.executeCqlQuery("USE \"CompositeCassandra\"", ksDef.getName());
 
+        // \"first_name\" varchar,\"last_name\" varchar, \"age\" int,
         CassandraCli
                 .executeCqlQuery(
-                        "CREATE TABLE \"CompositeUserAssociation\" (\"userId\" varchar,\"tweetId\" int,\"timeLineId\" uuid, \"tweetBody\" varchar, \"tweetDate\" timestamp, \"userInfo_id\" varchar,\"first_name\" varchar,\"last_name\" varchar, \"age\" int, PRIMARY KEY (\"userId\", \"tweetId\",\"timeLineId\"))",
+                        "CREATE TABLE \"CompositeUserAssociation\" (\"userId\" varchar,\"tweetId\" int,\"timeLineId\" uuid, \"tweetBody\" varchar, \"tweetDate\" timestamp, \"userInfo_id\" varchar, PRIMARY KEY (\"userId\", \"tweetId\",\"timeLineId\"))",
                         ksDef.getName());
 
     }

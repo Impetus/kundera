@@ -45,6 +45,10 @@ public class UserInfo
     @Column(name = "age")
     private int age;
 
+    // height in inches.
+    @Column(name = "height")
+    private transient int height;
+
     /**
      * 
      */
@@ -59,18 +63,14 @@ public class UserInfo
      * @param age
      * @param timeLine
      */
-    public UserInfo(String userInfoId, String firstName, String lastName, int age/*
-                                                                                  * ,
-                                                                                  * CassandraPrimeUser
-                                                                                  * timeLine
-                                                                                  */)
+    public UserInfo(String userInfoId, String firstName, String lastName, int age, int height)
     {
         super();
         this.userInfoId = userInfoId;
         this.firstName = firstName;
         this.lastName = lastName;
         this.age = age;
-        // this.timeLine = timeLine;
+        this.height = height;
     }
 
     /**
@@ -105,14 +105,6 @@ public class UserInfo
         return age;
     }
 
-    // /**
-    // * @return the timeLine
-    // */
-    // public CassandraPrimeUser getTimeLine()
-    // {
-    // return timeLine;
-    // }
-
     /**
      * @param firstName
      *            the firstName to set
@@ -130,4 +122,13 @@ public class UserInfo
     {
         this.age = age;
     }
+
+    /**
+     * @return the height
+     */
+    public int getHeight()
+    {
+        return height;
+    }
+
 }

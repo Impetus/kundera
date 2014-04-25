@@ -55,9 +55,7 @@ public class UserInfoTest
         CassandraCli.cassandraSetUp();
         CassandraCli.initClient();
         CassandraCli.dropKeySpace("KunderaExamples");
-//        loadData();
         Map<String, String> props = new HashMap<String, String>(1);
-//        props.put("kundera.ddl.auto.prepare", "");
         emf = Persistence.createEntityManagerFactory("ds_pu", props);
     }
 
@@ -65,6 +63,29 @@ public class UserInfoTest
     public void onCRUD()
     {
         EntityManager em = createEM();
+
+        // persist userinfo object only.
+        UserInfo userInfo = new UserInfo("mevivs_info", "Vivek", "Mishra", 31, 68);
+        em.persist(userInfo);
+
+        em.clear();
+        em.close();
+        em = createEM();
+
+        UserInfo foundUser = em.find(UserInfo.class, userInfo.getUserInfoId());
+        Assert.assertNotNull(foundUser);
+        Assert.assertEquals("Mishra", foundUser.getLastName());
+        Assert.assertEquals("Vivek", foundUser.getFirstName());
+        Assert.assertEquals(31, foundUser.getAge());
+        Assert.assertEquals(0, foundUser.getHeight());
+
+        em.remove(foundUser);
+        UserInfo deletedUser = em.find(UserInfo.class, userInfo.getUserInfoId());
+        Assert.assertNull(deletedUser);
+
+        em.clear();
+        em.close();
+        em = createEM();
 
         // Persist
         UUID timeLineId = UUID.randomUUID();
@@ -74,12 +95,11 @@ public class UserInfoTest
         timeLine.setTweetBody("my first tweet");
         timeLine.setTweetDate(currentDate);
 
-        UserInfo userInfo = new UserInfo("mevivs_info", "Vivek", "Mishra", 31);
         timeLine.setUserInfo(userInfo);
         em.persist(timeLine);
+
         em.clear();
         em.close();
-
         em = createEM();
 
         // Find
@@ -89,6 +109,7 @@ public class UserInfoTest
         Assert.assertEquals(timeLineId, result.getKey().getTimeLineId());
         Assert.assertEquals("Vivek", result.getUserInfo().getFirstName());
         Assert.assertEquals(31, result.getUserInfo().getAge());
+        Assert.assertEquals(0, result.getUserInfo().getHeight());
 
         result.getUserInfo().setFirstName("Kuldeep");
         result.getUserInfo().setAge(23);
@@ -106,6 +127,7 @@ public class UserInfoTest
         Assert.assertEquals(timeLineId, result.getKey().getTimeLineId());
         Assert.assertEquals("Kuldeep", result.getUserInfo().getFirstName());
         Assert.assertEquals(23, result.getUserInfo().getAge());
+        Assert.assertEquals(0, result.getUserInfo().getHeight());
 
         em.remove(result);
 
@@ -140,7 +162,7 @@ public class UserInfoTest
         timeLine.setTweetBody("my first tweet");
         timeLine.setTweetDate(currentDate);
 
-        UserInfo userInfo = new UserInfo("mevivs_info", "Vivek", "Mishra", 31);
+        UserInfo userInfo = new UserInfo("mevivs_info", "Vivek", "Mishra", 31, 72);
         timeLine.setUserInfo(userInfo);
         em.persist(timeLine);
 
@@ -155,6 +177,7 @@ public class UserInfoTest
         Assert.assertEquals(1, results.size());
         Assert.assertEquals("Vivek", results.get(0).getUserInfo().getFirstName());
         Assert.assertEquals(31, results.get(0).getUserInfo().getAge());
+        Assert.assertEquals(0, results.get(0).getUserInfo().getHeight());
 
         em.remove(timeLine);
 

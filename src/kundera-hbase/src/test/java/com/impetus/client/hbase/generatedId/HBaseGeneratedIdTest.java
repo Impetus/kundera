@@ -146,6 +146,13 @@ public class HBaseGeneratedIdTest
                     .getResultList();
             Assert.assertNotNull(list);
             Assert.assertEquals(4, list.size());
+
+            for (HBaseGeneratedIdStrategyTable entity : list)
+            {
+                Assert.assertTrue(entity.getId() == 1 || entity.getId() == 50 || entity.getId() == 100
+                        || entity.getId() == 150);
+            }
+
             em.clear();
             strategyTable = em.find(HBaseGeneratedIdStrategyTable.class, strategyTable.getId());
             Assert.assertNotNull(strategyTable);
