@@ -750,6 +750,10 @@ public class KunderaQuery
         return entityClass;
     }
 
+    public final String getEntityAlias()
+    {
+        return this.entityAlias;
+    }
     public boolean isNative()
     {
         return isNativeQuery;
