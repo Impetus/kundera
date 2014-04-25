@@ -894,7 +894,7 @@ public final class CassandraDataTranslator
                 valueClassInstance = valueValidationClass.getDeclaredField("instance").get(null);
                 SetType setType = SetType.getInstance((AbstractType) valueClassInstance);
                 Collection outputCollection = new HashSet();
-                outputCollection.addAll(setType.compose(buf));
+                outputCollection.addAll((Collection) setType.compose(buf));
                 return marshalCollection(valueValidationClass, outputCollection, mapGenericClassses,outputCollection.getClass());
             }
             catch (NoSuchFieldException e)
@@ -990,7 +990,7 @@ public final class CassandraDataTranslator
                 MapType mapType = MapType.getInstance((AbstractType) keyClassInstance,
                         (AbstractType) valueClassInstance);
                 Map rawMap = new HashMap();
-                rawMap.putAll(mapType.compose(valueByteBuffer));
+                rawMap.putAll((Map) mapType.compose(valueByteBuffer));
 
                 Map dataCollection = marshalMap(mapGenericClasses, keyClass, valueClass, rawMap);
                 return dataCollection.isEmpty() ? rawMap : dataCollection;
@@ -1081,7 +1081,7 @@ public final class CassandraDataTranslator
                 valueClassInstance = valueValidationClass.getDeclaredField("instance").get(null);
                 ListType listType = ListType.getInstance((AbstractType) valueClassInstance);
                 Collection outputCollection = new ArrayList();
-                outputCollection.addAll(listType.compose(buf));
+                outputCollection.addAll((Collection) listType.compose(buf));
                 return marshalCollection(valueValidationClass, outputCollection, mapGenericClassses,outputCollection.getClass());
             }
             catch (NoSuchFieldException e)

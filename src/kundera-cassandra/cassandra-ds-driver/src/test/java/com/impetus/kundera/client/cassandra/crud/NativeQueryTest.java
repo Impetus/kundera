@@ -127,7 +127,7 @@ public class NativeQueryTest
         q = em.createNativeQuery(colFamilySql);
         // q.getResultList();
         q.executeUpdate();
-        Assert.assertTrue(CassandraCli.columnFamilyExist("users", "test"));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("users", "KunderaExamples"));
 
         // Add indexes
         String idxSql = "CREATE INDEX ON users (birth_date)";

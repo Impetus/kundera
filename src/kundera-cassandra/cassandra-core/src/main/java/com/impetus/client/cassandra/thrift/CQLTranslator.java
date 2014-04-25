@@ -50,6 +50,7 @@ import org.apache.cassandra.db.marshal.ListType;
 import org.apache.cassandra.db.marshal.LongType;
 import org.apache.cassandra.db.marshal.MapType;
 import org.apache.cassandra.db.marshal.SetType;
+import org.apache.cassandra.db.marshal.TimestampType;
 import org.apache.cassandra.db.marshal.UTF8Type;
 import org.apache.cassandra.db.marshal.UUIDType;
 import org.apache.commons.codec.binary.Hex;
@@ -143,6 +144,14 @@ public final class CQLTranslator
     public static final String CREATE_COLUMNFAMILY_CLUSTER_ORDER = " WITH CLUSTERING ORDER BY ($COLUMNS";
 
     public static final String DEFAULT_KEY_NAME = "key";
+    
+    public static final String CREATE_KEYSPACE = "CREATE KEYSPACE IF NOT EXISTS $KEYSPACE WITH REPLICATION = { 'class':'$CLASS',$REPLICATION} and durable_writes = '$DURABLE_WRITES'";
+    
+    public static final String SIMPLE_REPLICATION = "'replication_factor':$REPLICATION_FACTOR";
+    
+    public static final String DURABLE_WRITES = "durable_writes=$DURABLE_WRITES";
+    
+    
 
     public CQLTranslator()
     {
@@ -812,6 +821,7 @@ public final class CQLTranslator
             validationClassMapper.put(UUIDType.class.getSimpleName(), "uuid");
 
             validationClassMapper.put(DateType.class.getSimpleName(), "timestamp");
+            validationClassMapper.put(TimestampType.class.getSimpleName(), "timestamp");
 
             // collection types
             validationClassMapper.put(ListType.class.getSimpleName(), "list");

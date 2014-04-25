@@ -872,22 +872,6 @@ public class StudentCassandraTest extends StudentCassandraBase<StudentCassandra>
         {
 
         }
-        catch (InvalidRequestException e)
-        {
-
-        }
-        catch (UnavailableException e)
-        {
-
-        }
-        catch (TimedOutException e)
-        {
-
-        }
-        catch (SchemaDisagreementException e)
-        {
-
-        }
     }
 
     @Override
@@ -903,22 +887,6 @@ public class StudentCassandraTest extends StudentCassandraBase<StudentCassandra>
             loadData(cql_enabled);
         }
         catch (TException e)
-        {
-
-        }
-        catch (InvalidRequestException e)
-        {
-
-        }
-        catch (UnavailableException e)
-        {
-
-        }
-        catch (TimedOutException e)
-        {
-
-        }
-        catch (SchemaDisagreementException e)
         {
 
         }

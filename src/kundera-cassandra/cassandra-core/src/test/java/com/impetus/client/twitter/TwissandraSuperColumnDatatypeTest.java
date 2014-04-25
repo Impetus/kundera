@@ -121,22 +121,6 @@ public class TwissandraSuperColumnDatatypeTest extends TwitterTestBaseCassandra
         {
             log.error(e.getMessage(),e);
         }
-        catch (InvalidRequestException e)
-        {
-            log.error(e.getMessage(),e);
-        }
-        catch (UnavailableException e)
-        {
-            log.error(e.getMessage(),e);
-        }
-        catch (TimedOutException e)
-        {
-            log.error(e.getMessage(),e);
-        }
-        catch (SchemaDisagreementException e)
-        {
-            log.error(e.getMessage(),e);
-        }
     }
 
     /************** Queries on Professional Data ****************/

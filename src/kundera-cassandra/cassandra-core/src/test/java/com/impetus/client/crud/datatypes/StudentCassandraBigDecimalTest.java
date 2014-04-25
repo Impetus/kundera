@@ -611,14 +611,6 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
         {
             
         }
-        catch (InvalidRequestException e)
-        {
-            
-        }
-        catch (SchemaDisagreementException e)
-        {
-            
-        }
 
     }
 

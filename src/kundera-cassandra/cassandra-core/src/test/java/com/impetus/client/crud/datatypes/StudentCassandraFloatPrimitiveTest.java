@@ -563,22 +563,6 @@ public class StudentCassandraFloatPrimitiveTest extends CassandraBase
         {
             
         }
-        catch (InvalidRequestException e)
-        {
-            
-        }
-        catch (UnavailableException e)
-        {
-            
-        }
-        catch (TimedOutException e)
-        {
-            
-        }
-        catch (SchemaDisagreementException e)
-        {
-            
-        }
     }
 
     public void stopCluster()
@@ -647,15 +631,6 @@ public class StudentCassandraFloatPrimitiveTest extends CassandraBase
         {
             
         }
-        catch (InvalidRequestException e)
-        {
-            
-        }
-        catch (SchemaDisagreementException e)
-        {
-            
-        }
-
     }
 
     public void dropSchema()

@@ -561,23 +561,7 @@ public class StudentCassandraDateTest extends CassandraBase
         {
             
         }
-        catch (InvalidRequestException e)
-        {
-            
-        }
-        catch (UnavailableException e)
-        {
-            
-        }
-        catch (TimedOutException e)
-        {
-            
-        }
-        catch (SchemaDisagreementException e)
-        {
-            
-        }
-    }
+   }
 
     public void stopCluster()
     {
@@ -642,14 +626,6 @@ public class StudentCassandraDateTest extends CassandraBase
             CassandraCli.client.set_keyspace(keyspace);
         }
         catch (TException e)
-        {
-            
-        }
-        catch (InvalidRequestException e)
-        {
-            
-        }
-        catch (SchemaDisagreementException e)
         {
             
         }

@@ -263,10 +263,10 @@ public class IMDBPolyglotTest extends TwinAssociation
 
         //    List<CfDef> cfDefn = ksDef.getCf_defs();
             
-            if (!CassandraCli.columnFamilyExist(KEYSPACE, ACTOR )) {
+            if (!CassandraCli.columnFamilyExist(ACTOR,KEYSPACE )) {
                 CassandraCli.client.system_add_column_family(cfDef);
             } else {
-                CassandraCli.truncateColumnFamily(KEYSPACE, ACTOR);
+                CassandraCli.truncateColumnFamily(KEYSPACE,ACTOR);
             }
 
 
@@ -310,7 +310,7 @@ public class IMDBPolyglotTest extends TwinAssociation
             ksDef = CassandraCli.client.describe_keyspace(KEYSPACE);
             CassandraCli.client.set_keyspace(KEYSPACE);
         //    List<CfDef> cfDefss = ksDef.getCf_defs();
-            if (!CassandraCli.columnFamilyExist(KEYSPACE , MOVIE )) {
+            if (!CassandraCli.columnFamilyExist(MOVIE,KEYSPACE)) {
                 CassandraCli.client.system_add_column_family(cfDef2);
             } else {
                 CassandraCli.truncateColumnFamily(KEYSPACE, MOVIE);

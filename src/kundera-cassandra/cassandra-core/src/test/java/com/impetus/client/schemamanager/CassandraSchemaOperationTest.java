@@ -360,14 +360,6 @@ public class CassandraSchemaOperationTest
         {
             Assert.fail("failed caused by:" + e1.getMessage());
         }
-        catch (SchemaDisagreementException e)
-        {
-            Assert.fail("failed caused by:" + e.getMessage());
-        }
-        catch (NotFoundException e)
-        {
-            Assert.fail("failed caused by:" + e.getMessage());
-        }
         catch (UnsupportedEncodingException e)
         {
             Assert.fail("failed caused by:" + e.getMessage());
