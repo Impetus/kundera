@@ -108,7 +108,7 @@ public class DSClientFactory extends GenericClientFactory implements CassandraCl
         schemaManager = null;
         externalProperties = null;
 
-        ((Cluster) getConnectionPoolOrConnection()).shutdown();
+        ((Cluster) getConnectionPoolOrConnection()).closeAsync();
     }
 
     /*
@@ -277,7 +277,7 @@ public class DSClientFactory extends GenericClientFactory implements CassandraCl
     {
         if (session != null)
         {
-            session.shutdown();
+            session.closeAsync();
         }
     }
 

@@ -67,22 +67,6 @@ public class LazyTestSetup
             {
                 
             }
-            catch (InvalidRequestException e)
-            {
-                
-            }
-            catch (UnavailableException e)
-            {
-                
-            }
-            catch (TimedOutException e)
-            {
-                
-            }
-            catch (SchemaDisagreementException e)
-            {
-                
-            }
         }
 
     }
@@ -180,14 +164,7 @@ public class LazyTestSetup
             {
                 
             }
-            catch (InvalidRequestException e)
-            {
-                
-            }
-            catch (SchemaDisagreementException e)
-            {
-                
-            }
+           
 
         }
 
