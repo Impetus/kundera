@@ -1096,7 +1096,8 @@ public abstract class CassandraDataHandlerBase
                 }
                 else
                 {
-                    entity = populateCompositeId(m, entity, thriftColumnName, thriftColumnValue, metaModel);
+                    entity = populateCompositeId(m, entity, thriftColumnName, thriftColumnValue, metaModel,
+                            m.getIdAttribute(), m.getEntityClazz());
                 }
             }
         }
@@ -1816,36 +1817,43 @@ public abstract class CassandraDataHandlerBase
     }
 
     private Object populateCompositeId(EntityMetadata m, Object entity, String thriftColumnName,
-            Object thriftColumnValue, MetamodelImpl metaModel) throws InstantiationException, IllegalAccessException
+            Object thriftColumnValue, MetamodelImpl metaModel, Attribute attribute, Class entityClazz)
+            throws InstantiationException, IllegalAccessException
     {
-        if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
+        Class javaType = ((AbstractAttribute) attribute).getBindableJavaType();
+
+        if (metaModel.isEmbeddable(javaType))
         {
-            EmbeddableType compoundKey = metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
+            EmbeddableType compoundKey = metaModel.embeddable(javaType);
             Object compoundKeyObject = null;
             try
             {
                 Set<Attribute> attributes = compoundKey.getAttributes();
+                entity = CassandraUtilities.initialize(entityClazz, entity);
 
                 for (Attribute compoundAttribute : attributes)
                 {
-                    if (((AbstractAttribute) compoundAttribute).getJPAColumnName().equals(thriftColumnName))
+                    compoundKeyObject = compoundKeyObject == null ? getCompoundKey(attribute, entity)
+                            : compoundKeyObject;
+
+                    if (metaModel.isEmbeddable(((AbstractAttribute) compoundAttribute).getBindableJavaType()))
                     {
-                        entity = CassandraUtilities.initialize(m, entity, null);
-
-                        compoundKeyObject = compoundKeyObject == null ? getCompoundKey(m, entity) : compoundKeyObject;
-
+                        Object compoundObject = populateCompositeId(m, compoundKeyObject, thriftColumnName,
+                                thriftColumnValue, metaModel, compoundAttribute, javaType);
+                        PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), compoundObject);
+                    }
+                    else if (((AbstractAttribute) compoundAttribute).getJPAColumnName().equals(thriftColumnName))
+                    {
                         setFieldValueViaCQL(compoundKeyObject, thriftColumnValue, compoundAttribute);
-                        PropertyAccessorHelper.set(entity, (Field) m.getIdAttribute().getJavaMember(),
-                                compoundKeyObject);
+                        PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), compoundKeyObject);
                         break;
                     }
                 }
             }
             catch (IllegalArgumentException iaex)
             {
-                // ignore as it might not repesented within entity.
-                // No
-                // need for any logger message
+                // ignore as it might not represented within entity.
+                // No need for any logger message
             }
             catch (Exception e)
             {
@@ -1856,16 +1864,16 @@ public abstract class CassandraDataHandlerBase
         return entity;
     }
 
-    private Object getCompoundKey(EntityMetadata m, Object entity) throws InstantiationException,
+    private Object getCompoundKey(Attribute attribute, Object entity) throws InstantiationException,
             IllegalAccessException
     {
         Object compoundKeyObject = null;
         if (entity != null)
         {
-            compoundKeyObject = PropertyAccessorHelper.getObject(entity, (Field) m.getIdAttribute().getJavaMember());
+            compoundKeyObject = PropertyAccessorHelper.getObject(entity, (Field) attribute.getJavaMember());
             if (compoundKeyObject == null)
             {
-                compoundKeyObject = m.getIdAttribute().getBindableJavaType().newInstance();
+                compoundKeyObject = ((AbstractAttribute) attribute).getBindableJavaType().newInstance();
             }
         }
 

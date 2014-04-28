@@ -171,7 +171,7 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         select_Query = StringUtils.replace(select_Query, CQLTranslator.COLUMN_FAMILY,
                 translator.ensureCase(new StringBuilder(), tableName, false).toString());
         StringBuilder builder = new StringBuilder(select_Query);
-        onWhereClause(metadata, rowId, translator, builder, metaModel);
+        onWhereClause(metadata, rowId, translator, builder, metaModel, metadata.getIdAttribute());
         return builder;
     }
 

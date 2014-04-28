@@ -198,8 +198,12 @@ public class CassandraUtilities
      * 
      * 
      * 
+     * 
+     * 
      * } if user opted for
      * {@PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE
+     * 
+     * 
      * 
      * 
      * 
@@ -230,13 +234,14 @@ public class CassandraUtilities
                     .getProperty(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE) : null;
         }
 
-        String cql_version = externalProperties != null ? (String) externalProperties.get(CassandraConstants.CQL_VERSION):null;
+        String cql_version = externalProperties != null ? (String) externalProperties
+                .get(CassandraConstants.CQL_VERSION) : null;
         boolean isCql3Enabled = (cql_version != null && cql_version.equals(CassandraConstants.CQL_VERSION_3_0))
                 || m.getIdAttribute().getBindableJavaType().isAnnotationPresent(Embeddable.class);
         // check if id attribute is embeddable
         boolean containsBasicCollectionField = MetadataUtils.containsBasicElementCollectionField(m, kunderaMetadata);
-        return  isCql3Enabled || containsBasicCollectionField ? ((AbstractAttribute) m
-                .getIdAttribute()).getJPAColumnName() : CassandraConstants.CQL_KEY;
+        return isCql3Enabled || containsBasicCollectionField ? ((AbstractAttribute) m.getIdAttribute())
+                .getJPAColumnName() : CassandraConstants.CQL_KEY;
     }
 
     public static Object getEntity(Object e)
@@ -277,6 +282,38 @@ public class CassandraUtilities
                 PropertyAccessorHelper.setId(entity, m, id);
             }
             return entity;
+        }
+        catch (Exception e)
+        {
+            throw new PersistenceException("Error occured while instantiating entity.", e);
+        }
+    }
+
+    /**
+     * Initialize.
+     * 
+     * @param tr
+     *            the tr
+     * @param m
+     *            the m
+     * @param entity
+     *            the entity
+     * @param tr
+     * @return the object
+     * @throws InstantiationException
+     *             the instantiation exception
+     * @throws IllegalAccessException
+     *             the illegal access exception
+     */
+    public static Object initialize(Class clazz, Object record)
+    {
+        try
+        {
+            if (record == null)
+            {
+                record = clazz.newInstance();
+            }
+            return record;
         }
         catch (Exception e)
         {
