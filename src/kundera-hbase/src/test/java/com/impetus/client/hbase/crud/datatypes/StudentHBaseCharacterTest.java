@@ -216,8 +216,6 @@ public class StudentHBaseCharacterTest extends Base
         q.setParameter(2, getMaxValue(Character.class));
         students = q.getResultList();
 
-        q = em.createQuery(query);
-        students = q.getResultList();
         Assert.assertNotNull(students);
         Assert.assertEquals(2, students.size());
         int count = 0;
