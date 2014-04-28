@@ -526,7 +526,7 @@ public class PersonEntityTest extends BaseTest
         List<PersonCassandra> persons = q.getResultList();
         Assert.assertNotNull(persons);
         Assert.assertFalse(persons.isEmpty());
-        Assert.assertEquals(10000, persons.size());
+        Assert.assertEquals(100, persons.size());
     }
 
     // }
@@ -557,7 +557,7 @@ public class PersonEntityTest extends BaseTest
         @Override
         public void run()
         {
-            for (int j = i * 1000; j < (i + 1) * 1000; j++)
+            for (int j = i * 10; j < (i + 1) * 10; j++)
             {
                 entityManager.persist(prepareData("" + j, j + 10));
             }
