@@ -399,7 +399,7 @@ public final class CassandraCli
         {
             return false;
         }
-        return false;
+        return true;
 
     }
 }
