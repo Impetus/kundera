@@ -443,7 +443,7 @@ public class KunderaQueryTest
     @Test
     public void testWithInClause()
     {
-        final String query = "Select p from Person p where p.personName <> :name and p.age in('kk', 'dk', 'sk' ) ";
+        final String query = "Select p from Person p where p.personName <> :name and p.age in('kk', 'dk', 'sk') ";
         KunderaQuery kunderaQuery = new KunderaQuery(query, kunderaMetadata);
         KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery);
         queryParser.parse();

@@ -140,14 +140,6 @@ public final class CassandraCli
             {
                 log.error("Error while adding keyspace, Caused by: .", e1);
             }
-            catch (InvalidRequestException ess)
-            {
-                log.error("Error while adding keyspace, Caused by: .", ess);
-            }
-            catch (SchemaDisagreementException sde)
-            {
-                log.error("Error while adding keyspace, Caused by: .", sde);
-            }
 
         }
 
@@ -277,9 +269,16 @@ public final class CassandraCli
             client.set_keyspace(keyspaceName);
             client.system_add_column_family(new CfDef(keyspaceName, columnfamilyName));
         }
-        catch (InvalidRequestException e)
+        catch (InvalidRequestException irex)
         {
-            return true;
+         
+            StringBuilder builder = new StringBuilder("Cannot add already existing column family ");
+
+            if (irex.getWhy() != null && irex.getWhy().contains(builder.toString()))
+            {
+                return true;
+            }
+            return false;
         }
         catch (SchemaDisagreementException e)
         {
@@ -400,7 +399,7 @@ public final class CassandraCli
         {
             return false;
         }
-        return false;
+        return true;
 
     }
 }

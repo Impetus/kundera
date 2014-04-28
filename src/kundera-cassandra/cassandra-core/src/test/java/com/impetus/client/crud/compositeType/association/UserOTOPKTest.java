@@ -186,13 +186,5 @@ public class UserOTOPKTest
         {
             
         }
-        catch (InvalidRequestException e)
-        {
-            
-        }
-        catch (SchemaDisagreementException e)
-        {
-            
-        }
     }
 }

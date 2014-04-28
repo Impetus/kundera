@@ -25,7 +25,7 @@
 	</repositories>
 
 	<properties>
-		<cassandra.version>1.2.9</cassandra.version>
+		<cassandra.version>2.0.4</cassandra.version>
 	</properties>
 
 	<!-- Dependencies -->

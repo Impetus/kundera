@@ -29,6 +29,7 @@ import javax.persistence.Query;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.Metamodel;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -42,6 +43,8 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.gis.geometry.Point;
 import com.impetus.kundera.gis.query.GeospatialQuery;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -56,6 +59,7 @@ import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.KunderaQuery.SortOrder;
 import com.impetus.kundera.query.KunderaQuery.SortOrdering;
 import com.impetus.kundera.query.KunderaQuery.UpdateClause;
+import com.impetus.kundera.query.JPQLParseException;
 import com.impetus.kundera.query.QueryHandlerException;
 import com.impetus.kundera.query.QueryImpl;
 import com.mongodb.BasicDBObject;
@@ -143,7 +147,7 @@ public class MongoDBQuery extends QueryImpl
             {
                 throw new UnsupportedOperationException("Native query support is not enabled in mongoDB");
             }
-            BasicDBObject orderByClause = getOrderByClause();
+            BasicDBObject orderByClause = getOrderByClause(m);
             return ((MongoDBClient) client).loadData(m, createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()),
                     null, orderByClause, isSingleResult ? 1 : maxResult, firstResult, getKeys(m, getKunderaQuery().getResult()),
                     getKunderaQuery().getResult());
@@ -173,7 +177,7 @@ public class MongoDBQuery extends QueryImpl
                 throw new UnsupportedOperationException("Native query support is not enabled in mongoDB");
             }
 
-            BasicDBObject orderByClause = getOrderByClause();
+            BasicDBObject orderByClause = getOrderByClause(m);
             ls = ((MongoDBClient) client).loadData(m, createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()),
                     m.getRelationNames(), orderByClause, isSingleResult ? 1 : maxResult, firstResult,
                     getKeys(m, getKunderaQuery().getResult()), getKunderaQuery().getResult());
@@ -590,9 +594,11 @@ public class MongoDBQuery extends QueryImpl
      * 
      * @return order by clause.
      */
-    private BasicDBObject getOrderByClause()
+    private BasicDBObject getOrderByClause(final EntityMetadata metadata)
     {
         BasicDBObject orderByClause = null;
+        Metamodel metaModel = kunderaMetadata.getApplicationMetadata().getMetamodel(metadata.getPersistenceUnit());
+        EntityType entityType = metaModel.entity(metadata.getEntityClazz());
 
         List<SortOrdering> orders = kunderaQuery.getOrdering();
         if (orders != null)
@@ -600,7 +606,7 @@ public class MongoDBQuery extends QueryImpl
             orderByClause = new BasicDBObject();
             for (SortOrdering order : orders)
             {
-                orderByClause.append(order.getColumnName(), order.getOrder().equals(SortOrder.ASC) ? 1 : -1);
+                orderByClause.append(getColumnName(metadata,entityType,order.getColumnName()) , order.getOrder().equals(SortOrder.ASC) ? 1 : -1);
             }
         }
 
@@ -701,7 +707,43 @@ public class MongoDBQuery extends QueryImpl
         EntityMetadata m = getEntityMetadata();
         Client client = persistenceDelegeator.getClient(m);
         return new ResultIterator((MongoDBClient) client, m, createMongoQuery(m, getKunderaQuery()
-                .getFilterClauseQueue()), getOrderByClause(), getKeys(m, getKunderaQuery().getResult()),
+                .getFilterClauseQueue()), getOrderByClause(m), getKeys(m, getKunderaQuery().getResult()),
                 persistenceDelegeator, getFetchSize() != null ? getFetchSize() : this.maxResult);
     }
+
+    private String getColumnName(EntityMetadata metadata, EntityType entityType, String property)
+    {
+        String columnName = null;
+        
+        if (property.indexOf(".") > 0)
+        {
+            property = property.substring((kunderaQuery.getEntityAlias()+ ".").length());
+        }
+        try
+        {
+            columnName = ((AbstractAttribute) entityType.getAttribute(property)).getJPAColumnName();
+        }
+        catch (IllegalArgumentException iaex)
+        {
+            log.warn("No column found by this name : " + property + " checking for embeddedfield");
+        }
+        // where condition may be for search within embedded object
+        if (columnName == null && property.indexOf(".") > 0)
+        {
+            String enclosingEmbeddedField = MetadataUtils.getEnclosingEmbeddedFieldName(metadata, property,
+                    true, kunderaMetadata);
+            if (enclosingEmbeddedField != null)
+            {
+                columnName = property;
+            }
+        }
+
+        if (columnName == null)
+        {
+            log.error("No column found by this name : " + property);
+            throw new JPQLParseException("No column found by this name : " + property + ". Check your query.");
+        }
+        return columnName;
+    }
+
 }

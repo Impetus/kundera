@@ -110,22 +110,6 @@ public abstract class CassandraBase
         {
 
         }
-        catch (InvalidRequestException e)
-        {
-
-        }
-        catch (UnavailableException e)
-        {
-
-        }
-        catch (TimedOutException e)
-        {
-
-        }
-        catch (SchemaDisagreementException e)
-        {
-
-        }
     }
 
     public void stopCluster()

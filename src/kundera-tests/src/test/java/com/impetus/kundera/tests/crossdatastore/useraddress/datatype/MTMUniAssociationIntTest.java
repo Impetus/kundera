@@ -529,10 +529,6 @@ public class MTMUniAssociationIntTest extends TwinAssociation
         {
 
         }
-        catch (SchemaDisagreementException e)
-        {
-
-        }
 
     }
 

@@ -119,6 +119,28 @@ public class CassandraSchemaManagerTest
 
     }
 
+
+    @Test
+    public void schemaOperationViaCQL3() throws IOException, TException, InvalidRequestException, UnavailableException,
+            TimedOutException, SchemaDisagreementException
+    {
+        final String pu = "CassandraSchemaOperationTest";
+        Map propertyMap = new HashMap();
+        propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create");
+        propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
+        EntityManagerFactory emf = getEntityManagerFactory(propertyMap, pu);
+
+        String keyspaceName = "KunderaCoreExmples";
+        Assert.assertTrue(CassandraCli.keyspaceExist(keyspaceName));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntitySimple", keyspaceName));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("Actor", keyspaceName));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("TwitterUser", keyspaceName));
+        emf.close();
+        CassandraCli.dropKeySpace(keyspaceName);
+
+
+    }
+
     @Test
     public void testValidate()
     {
@@ -133,7 +155,11 @@ public class CassandraSchemaManagerTest
             String keyspaceName = "KunderaCoreExmples";
             CassandraCli.dropColumnFamily("CassandraEntitySimple", keyspaceName);
             String colFamilySql = "CREATE table \"CassandraEntitySimple\" (\"PERSON_ID\" varchar PRIMARY KEY,\"PERSON_NAME\" varchar, \"AGE\" int)";
+            
             CassandraCli.executeCqlQuery(colFamilySql, keyspaceName);
+            
+//            colFamilySql = "CREATE TABLE \"TwitterUser\" (user_id text,\"tweetDate\" timestamp,\"firstName\" text,body text,followers set<text>,PRIMARY KEY (user_id, \"tweetDate\", \"firstName\"))";
+//            CassandraCli.executeCqlQuery(colFamilySql, keyspaceName);
             propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "validate");
             propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
             EntityManagerFactory emf1 = getEntityManagerFactory(propertyMap, pu);

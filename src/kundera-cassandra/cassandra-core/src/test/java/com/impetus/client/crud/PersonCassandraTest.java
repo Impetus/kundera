@@ -297,7 +297,7 @@ public class PersonCassandraTest extends BaseTest
             catch (Exception e)
             {
                 Assert.assertEquals(
-                        "javax.persistence.PersistenceException: com.impetus.kundera.KunderaException: InvalidRequestException(why:Cannot use IN operator on column not part of the partition key)",
+                        "javax.persistence.PersistenceException: com.impetus.kundera.KunderaException: InvalidRequestException(why:IN predicates on non-primary-key columns (AGE) is not yet supported)",
                         e.getMessage());
             }
 

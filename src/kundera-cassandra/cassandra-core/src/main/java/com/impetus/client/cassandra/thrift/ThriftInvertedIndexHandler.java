@@ -142,7 +142,7 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
                 log.error("Unable to insert records into inverted index, Caused by: .", e);
                 throw new IndexingException(e);
             }
-            catch (UnavailableException e)
+            /*catch (UnavailableException e)
             {
                 log.error("Unable to insert records into inverted index, Caused by: .", e);
                 throw new IndexingException(e);
@@ -151,7 +151,7 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
             {
                 log.error("Unable to insert records into inverted index, Caused by: .", e);
                 throw new IndexingException(e);
-            }
+            }*/
             finally
             {
                 thriftClient.releaseConnection(conn);

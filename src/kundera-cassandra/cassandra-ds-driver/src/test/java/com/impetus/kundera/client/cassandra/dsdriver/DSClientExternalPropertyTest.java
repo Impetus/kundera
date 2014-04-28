@@ -66,7 +66,8 @@ public class DSClientExternalPropertyTest
     public void setUp() throws Exception
     {
         CassandraCli.cassandraSetUp();
-        CassandraCli.createKeySpace(keyspaceName);
+//        CassandraCli.initClient();
+//        CassandraCli.createKeySpace(keyspaceName);
         propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
         // emf = Persistence.createEntityManagerFactory(_PU, propertyMap);
     }
@@ -133,6 +134,8 @@ public class DSClientExternalPropertyTest
 
         Assert.assertEquals(connectionProperties.getProperty("baseDelayMs"), "11000");
         Assert.assertEquals(connectionProperties.getProperty("maxDelayMs"), "13000");
+        
+        emf.close();
 
     }
 

@@ -91,7 +91,7 @@ public class NativeQueryCQLV3Test
         String colFamilySql = "CREATE COLUMNFAMILY users (key varchar PRIMARY KEY,full_name varchar, birth_date int,state varchar)";
         q = em.createNativeQuery(colFamilySql);
         q.executeUpdate();
-        Assert.assertTrue(CassandraCli.columnFamilyExist("users", "test"));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("users", schema));
 
         // Add indexes
         String idxSql = "CREATE INDEX ON users (birth_date)";

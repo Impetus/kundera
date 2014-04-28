@@ -460,7 +460,7 @@ public class KunderaQuery
 
         for (String clause : clauses)
         {
-        	if(Arrays.asList(INTER_CLAUSE_OPERATORS).contains(clause.toUpperCase().trim()))
+        	if(Arrays.asList(INTER_CLAUSE_OPERATORS).contains(clause.toUpperCase().trim()) || (clause.startsWith("(") && clause.endsWith(")")))
         	{
                 filtersQueue.add(clause.toUpperCase().trim());
                 newClause = true;
@@ -750,6 +750,10 @@ public class KunderaQuery
         return entityClass;
     }
 
+    public final String getEntityAlias()
+    {
+        return this.entityAlias;
+    }
     public boolean isNative()
     {
         return isNativeQuery;
@@ -1009,7 +1013,29 @@ public class KunderaQuery
             // count++;
         }
         s = where.substring(lastIndex).trim();
-        addSplit(isInterClause, split, s);
+        if (!s.equals(""))
+        {
+            // split.add(s);
+
+            if (isInterClause)
+            {
+                if (s.startsWith("(") && s.endsWith(")"))
+                {
+                    split.add("(");
+                    split.add(s.substring(s.indexOf("(") + 1, s.lastIndexOf(")")));
+                    split.add(")");
+                } else
+                {
+                    split.add(s);
+                }
+            }
+            else
+            {
+                split.add(s);
+
+            }
+        }
+//        addSplit(isInterClause, split, s);
         
         return split;
     }

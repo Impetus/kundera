@@ -37,6 +37,7 @@ import org.apache.cassandra.db.marshal.ListType;
 import org.apache.cassandra.db.marshal.LongType;
 import org.apache.cassandra.db.marshal.MapType;
 import org.apache.cassandra.db.marshal.SetType;
+import org.apache.cassandra.db.marshal.TimestampType;
 import org.apache.cassandra.db.marshal.TypeParser;
 import org.apache.cassandra.db.marshal.UTF8Type;
 import org.apache.cassandra.db.marshal.UUIDType;
@@ -194,6 +195,11 @@ public final class CassandraValidationClassMapper
             validationClassMapper.put(byte.class, Int32Type.class);
             validationClassMapper.put(Short.class, Int32Type.class);
             validationClassMapper.put(short.class, Int32Type.class);
+            validationClassMapper.put(java.sql.Time.class, TimestampType.class);
+            validationClassMapper.put(java.sql.Date.class, TimestampType.class);
+            validationClassMapper.put(java.util.Date.class, TimestampType.class);
+            validationClassMapper.put(java.sql.Timestamp.class, TimestampType.class);
+
         }
     }
 
@@ -205,6 +211,10 @@ public final class CassandraValidationClassMapper
             validationClassMapper.put(byte.class, BytesType.class);
             validationClassMapper.put(Short.class, IntegerType.class);
             validationClassMapper.put(short.class, IntegerType.class);
+            validationClassMapper.put(java.sql.Time.class, DateType.class);
+            validationClassMapper.put(java.sql.Date.class, DateType.class);
+            validationClassMapper.put(java.util.Date.class, DateType.class);
+            validationClassMapper.put(java.sql.Timestamp.class, DateType.class);
         }
     }
 }

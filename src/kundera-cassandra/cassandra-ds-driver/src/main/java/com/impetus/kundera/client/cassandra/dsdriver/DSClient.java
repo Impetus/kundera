@@ -1,4 +1,5 @@
 /**
+
  * Copyright 2013 Impetus Infotech.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,10 +34,7 @@ import javax.persistence.metamodel.EntityType;
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.IndexExpression;
 import org.apache.cassandra.thrift.InvalidRequestException;
-import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.SuperColumn;
-import org.apache.cassandra.thrift.TimedOutException;
-import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
@@ -47,11 +45,11 @@ import com.datastax.driver.core.ColumnDefinitions.Definition;
 import com.datastax.driver.core.ColumnMetadata;
 import com.datastax.driver.core.ConsistencyLevel;
 import com.datastax.driver.core.DataType;
-import com.datastax.driver.core.Query;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.SimpleStatement;
+import com.datastax.driver.core.Statement;
 import com.impetus.client.cassandra.CassandraClientBase;
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.common.CassandraUtilities;
@@ -94,6 +92,8 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
 
     private EntityReader reader;
 
+    private Session session;
+
     public DSClient(DSClientFactory factory, String persistenceUnit, Map<String, Object> externalProperties,
             KunderaMetadata kunderaMetadata, EntityReader reader)
     {
@@ -124,7 +124,7 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
             log.error("Error while persisting record, Caused by: .", e);
             throw new KunderaException(e);
         }
-        catch (UnavailableException e)
+/*        catch (UnavailableException e)
         {
             log.error("Error while persisting record, Caused by: .", e);
             throw new KunderaException(e);
@@ -139,7 +139,7 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
             log.error("Error while persisting record, Caused by: .", e);
             throw new KunderaException(e);
         }
-        catch (UnsupportedEncodingException e)
+*/        catch (UnsupportedEncodingException e)
         {
             log.error("Error while persisting record, Caused by: .", e);
             throw new KunderaException(e);
@@ -346,18 +346,18 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
     public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
     {
 
-        Session session = factory.getConnection();
+        session = session == null ? factory.getConnection():this.session;
         String rowKeyName = null;
         CQLTranslator translator = new CQLTranslator();
         try
         {
-            List<ColumnMetadata> primaryKeys = session.getCluster().getMetadata().getKeyspace(schemaName)
-                    .getTable(tableName).getPrimaryKey();
+            List<ColumnMetadata> primaryKeys = session.getCluster().getMetadata().getKeyspace("\""+schemaName+"\"")
+                    .getTable("\""+tableName+"\"").getPrimaryKey();
             rowKeyName = primaryKeys.get(0).getName();
         }
         finally
         {
-            factory.releaseConnection(session);
+//            factory.releaseConnection(session);
         }
 
         List rowKeys = getColumnsById(schemaName, tableName, columnName, rowKeyName, columnValue,
@@ -514,10 +514,11 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
     @Override
     protected <T> T execute(final String query, Object connection)
     {
-        Session session = factory.getConnection();
+        
+        session = session == null ? factory.getConnection():this.session;
         try
         {
-            Query queryStmt = new SimpleStatement(query);
+            Statement queryStmt = new SimpleStatement(query);
             queryStmt.setConsistencyLevel(ConsistencyLevel.valueOf(this.consistencyLevel.name()));
             return (T) session.execute(queryStmt);
         }
@@ -528,7 +529,7 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         }
         finally
         {
-            factory.releaseConnection(session);
+//            factory.releaseConnection(session);
         }
     }
 
@@ -541,12 +542,12 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
             {
                 log.info("Executing cql query {}.", cqlQuery);
             }
-            session = factory.getConnection();
+            session = session == null ? factory.getConnection():this.session;
             session.execute(cqlQuery);
         }
         finally
         {
-            factory.releaseConnection(session);
+//            factory.releaseConnection(session);
         }
         // TODO: can't find a way to return number of updated records.
         return 0;
@@ -698,6 +699,15 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         return entity;
     }
 
+    @Override 
+    public void close()
+    {
+        super.close();
+        if(this.session != null)
+        {
+            factory.releaseConnection(this.session);
+        }
+    }
     @Override
     public String getPersistenceUnit()
     {

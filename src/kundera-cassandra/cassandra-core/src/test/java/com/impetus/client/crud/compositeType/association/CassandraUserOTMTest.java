@@ -191,13 +191,5 @@ public class CassandraUserOTMTest
         {
             
         }
-        catch (InvalidRequestException e)
-        {
-            
-        }
-        catch (SchemaDisagreementException e)
-        {
-            
-        }
     }
 }

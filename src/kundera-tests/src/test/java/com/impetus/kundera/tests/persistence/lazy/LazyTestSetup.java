@@ -67,22 +67,6 @@ public class LazyTestSetup
             {
                 
             }
-            catch (InvalidRequestException e)
-            {
-                
-            }
-            catch (UnavailableException e)
-            {
-                
-            }
-            catch (TimedOutException e)
-            {
-                
-            }
-            catch (SchemaDisagreementException e)
-            {
-                
-            }
         }
 
     }
@@ -147,13 +131,13 @@ public class LazyTestSetup
 //                        CassandraCli.truncateColumnFamily(KEYSPACE, COLUMN_FAMILY_ALBUM);
 //                    }
                     
-                    if (!CassandraCli.columnFamilyExist(KEYSPACE, COLUMN_FAMILY_PHOTOGRAPHER)) {
+                    if (!CassandraCli.columnFamilyExist(COLUMN_FAMILY_PHOTOGRAPHER,KEYSPACE)) {
                         CassandraCli.client.system_add_column_family(cfDefPhotographer);
                     } else {
                         CassandraCli.truncateColumnFamily(KEYSPACE, COLUMN_FAMILY_PHOTOGRAPHER);
                     }
                     
-                    if (!CassandraCli.columnFamilyExist(KEYSPACE, COLUMN_FAMILY_ALBUM)) {
+                    if (!CassandraCli.columnFamilyExist(COLUMN_FAMILY_ALBUM,KEYSPACE)) {
                         CassandraCli.client.system_add_column_family(cfDefAlbum);
                     } else {
                         CassandraCli.truncateColumnFamily(KEYSPACE, COLUMN_FAMILY_ALBUM);
@@ -180,14 +164,7 @@ public class LazyTestSetup
             {
                 
             }
-            catch (InvalidRequestException e)
-            {
-                
-            }
-            catch (SchemaDisagreementException e)
-            {
-                
-            }
+           
 
         }
 

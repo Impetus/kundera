@@ -205,10 +205,17 @@ public class StudentHBaseCharacterTest extends Base
         Query q;
         List<StudentHBaseCharacter> students;
         em = emf.createEntityManager();
-        query = "Select s From StudentHBaseCharacter s where s.id between " + getMinValue(Character.class) + " and "
-                + getMaxValue(Character.class);
+//        query = "Select s From StudentHBaseCharacter s where s.id between " + getMinValue(Character.class) + " and "
+//                + getMaxValue(Character.class);
+//        
+        query = "Select s From StudentHBaseCharacter s where s.id between ?1 and ?2";
+        /*+ getMinValue(char.class) + " and "
+                + getMaxValue(char.class);*/
         q = em.createQuery(query);
+        q.setParameter(1, getMinValue(Character.class));
+        q.setParameter(2, getMaxValue(Character.class));
         students = q.getResultList();
+
         Assert.assertNotNull(students);
         Assert.assertEquals(2, students.size());
         int count = 0;

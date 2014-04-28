@@ -1905,14 +1905,14 @@ public abstract class CassandraDataHandlerBase
                 {
                     ListType listType = ListType.getInstance((AbstractType) valueClassInstance);
                     outputCollection = new ArrayList();
-                    outputCollection.addAll(listType.compose(valueByteBuffer));
+                    outputCollection.addAll((Collection) listType.compose(valueByteBuffer));
                 }
 
                 else if (((Field) attribute.getJavaMember()).getType().isAssignableFrom(Set.class))
                 {
                     SetType setType = SetType.getInstance((AbstractType) valueClassInstance);
                     outputCollection = new HashSet();
-                    outputCollection.addAll(setType.compose(valueByteBuffer));
+                    outputCollection.addAll((Collection) setType.compose(valueByteBuffer));
                 }
 
                 PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(),
@@ -1937,7 +1937,7 @@ public abstract class CassandraDataHandlerBase
                         (AbstractType) valueClassInstance);
 
                 Map rawMap = new HashMap();
-                rawMap.putAll(mapType.compose(valueByteBuffer));
+                rawMap.putAll((Map) mapType.compose(valueByteBuffer));
 
                 Map dataCollection = marshalMap(mapGenericClasses, keyClass, valueClass, rawMap);
                 PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), dataCollection.isEmpty() ? rawMap

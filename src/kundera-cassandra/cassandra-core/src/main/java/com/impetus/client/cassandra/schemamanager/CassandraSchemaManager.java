@@ -52,12 +52,12 @@ import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.SchemaDisagreementException;
-import org.apache.cassandra.thrift.TBinaryProtocol;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.thrift.TException;
+import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TSocket;
@@ -275,13 +275,87 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      */
     private void createKeyspace() throws Exception
     {
-        Map<String, String> strategy_options = new HashMap<String, String>();
-        List<CfDef> cfDefs = new ArrayList<CfDef>();
-        KsDef ksDef = new KsDef(databaseName, csmd.getPlacement_strategy(databaseName), cfDefs);
-        setProperties(ksDef, strategy_options);
-        ksDef.setStrategy_options(strategy_options);
-        cassandra_client.system_add_keyspace(ksDef);
-        // return ksDef;
+        if (cql_version != null && cql_version.equals(CassandraConstants.CQL_VERSION_3_0))
+        {
+            onCql3CreateKeyspace();
+        }
+        else
+        {
+            Map<String, String> strategy_options = new HashMap<String, String>();
+            List<CfDef> cfDefs = new ArrayList<CfDef>();
+            KsDef ksDef = new KsDef(databaseName, csmd.getPlacement_strategy(databaseName), cfDefs);
+            setProperties(ksDef, strategy_options);
+            ksDef.setStrategy_options(strategy_options);
+            cassandra_client.system_add_keyspace(ksDef);
+        }
+    }
+
+    private void onCql3CreateKeyspace() throws InvalidRequestException, UnavailableException, TimedOutException,
+            SchemaDisagreementException, TException, UnsupportedEncodingException
+    {
+        String createKeyspace = CQLTranslator.CREATE_KEYSPACE;
+        String placement_strategy = csmd.getPlacement_strategy(databaseName);
+        String replication_conf = CQLTranslator.SIMPLE_REPLICATION;
+        createKeyspace = createKeyspace.replace("$KEYSPACE", "\"" + databaseName + "\"");
+        
+        // String placement_strategy = SimpleStrategy.class.getSimpleName();
+
+        Schema schema = CassandraPropertyReader.csmd.getSchema(databaseName);
+
+        if (schema != null && schema.getName() != null && schema.getName().equalsIgnoreCase(databaseName)
+                && schema.getSchemaProperties() != null)
+        {
+            Properties schemaProperties = schema.getSchemaProperties();
+            if (placement_strategy.equalsIgnoreCase(SimpleStrategy.class.getSimpleName())
+                    || placement_strategy.equalsIgnoreCase(SimpleStrategy.class.getName()))
+            {
+                String replicationFactor = schemaProperties.getProperty(CassandraConstants.REPLICATION_FACTOR,
+                        CassandraConstants.DEFAULT_REPLICATION_FACTOR);
+
+                // String replication_conf =
+                // CQLTranslator.SIMPLE_REPLICATION;
+                replication_conf = replication_conf.replace("$REPLICATION_FACTOR", replicationFactor);
+                createKeyspace = createKeyspace.replace("$CLASS", placement_strategy);
+            }
+            else if (placement_strategy.equalsIgnoreCase(NetworkTopologyStrategy.class.getSimpleName())
+                    || placement_strategy.equalsIgnoreCase(NetworkTopologyStrategy.class.getName()))
+            {
+
+                if (schema.getDataCenters() != null && !schema.getDataCenters().isEmpty())
+                {
+                    StringBuilder builder = new StringBuilder();
+
+                    for (DataCenter dc : schema.getDataCenters())
+                    {
+                        builder.append(CQLTranslator.QUOTE_STR);
+                        builder.append(dc.getName());
+                        builder.append(":");
+                        builder.append(dc.getValue());
+                        builder.append(CQLTranslator.QUOTE_STR);
+                        builder.append(CQLTranslator.COMMA_STR);
+                    }
+
+                    builder.deleteCharAt(builder.length() - 1);
+
+                    replication_conf = builder.toString();
+                }
+            }
+
+            createKeyspace = createKeyspace.replace("$CLASS", placement_strategy);
+            createKeyspace = createKeyspace.replace("$REPLICATION", replication_conf);
+
+            boolean isDurableWrites = Boolean.parseBoolean(schemaProperties.getProperty(
+                    CassandraConstants.DURABLE_WRITES, "true"));
+            createKeyspace = createKeyspace.replace("$DURABLE_WRITES", isDurableWrites + "");
+        } else
+        {
+            createKeyspace = createKeyspace.replace("$CLASS", placement_strategy);
+            replication_conf = replication_conf.replace("$REPLICATION_FACTOR", CassandraConstants.DEFAULT_REPLICATION_FACTOR);            
+            createKeyspace = createKeyspace.replace("$REPLICATION", replication_conf);
+            createKeyspace = createKeyspace.replace("$DURABLE_WRITES", "true");
+        }
+        cassandra_client.execute_cql3_query(ByteBuffer.wrap(createKeyspace.getBytes(Constants.CHARSET_UTF8)),
+                Compression.NONE, ConsistencyLevel.ONE);
     }
 
     /**
@@ -716,10 +790,10 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             if (!tableInfo.getEmbeddedColumnMetadatas().isEmpty())
             {
                 List<ColumnInfo> columnInfos = tableInfo.getEmbeddedColumnMetadatas().get(0).getColumns();
-                if (columnInfos.contains(columnInfo))
+                /*if (columnInfos.contains(columnInfo))
                 {
                     return;
-                }
+                }*/
             }
             // String replacedWithindexName =
             // StringUtils.replace(indexQueryBuilder.toString(), "$INDEX_NAME",
@@ -1103,7 +1177,16 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         for (CfDef cfDef : ksDef.getCf_defs())
         {
             if (cfDef.getName().equals(tableInfo.getTableName())/*
-                    && (cfDef.getColumn_type().equals(ColumnFamilyType.getInstanceOf(tableInfo.getType()).name()))*/)
+                                                                 * && (cfDef.
+                                                                 * getColumn_type
+                                                                 * ().equals(
+                                                                 * ColumnFamilyType
+                                                                 * .
+                                                                 * getInstanceOf
+                                                                 * (
+                                                                 * tableInfo.getType
+                                                                 * ()).name()))
+                                                                 */)
             {
                 if (cfDef.getColumn_type().equals(ColumnFamilyType.Standard.name()))
                 {
