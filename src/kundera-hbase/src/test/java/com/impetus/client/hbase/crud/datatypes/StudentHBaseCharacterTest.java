@@ -208,7 +208,7 @@ public class StudentHBaseCharacterTest extends Base
 //        query = "Select s From StudentHBaseCharacter s where s.id between " + getMinValue(Character.class) + " and "
 //                + getMaxValue(Character.class);
 //        
-        query = "Select s From StudentHBaseChar s where s.id between ?1 and ?2";
+        query = "Select s From StudentHBaseCharacter s where s.id between ?1 and ?2";
         /*+ getMinValue(char.class) + " and "
                 + getMaxValue(char.class);*/
         q = em.createQuery(query);
