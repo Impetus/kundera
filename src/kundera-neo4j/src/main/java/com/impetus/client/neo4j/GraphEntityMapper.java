@@ -169,7 +169,7 @@ public final class GraphEntityMapper
                 else if (!attribute.isCollection() && !attribute.isAssociation())
                 {
                     PropertyAccessorHelper.set(entity, field,
-                            fromNeo4JObject(node.getProperty(columnName, null), field));
+                            fromNeo4JObject(node.getProperty(columnName), field));
                 }
             }
         }
