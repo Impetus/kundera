@@ -66,7 +66,9 @@ public class KunderaQuery
 
     /** The INTER pattern. */
     private static final Pattern INTER_CLAUSE_PATTERN = Pattern.compile(
-            "\\s\\band\\b\\s|\\s\\bor\\b\\s|\\s\\bbetween\\b\\s|\\s\\b^[!?IN]\\s\\b(\\s\\b)|\\s\\b^[!?NOT IN]\\s\\b(\\s\\b|\\s\\b(\\s\\b))", Pattern.CASE_INSENSITIVE);
+            "(\\s\\band\\b\\s|\\s\\bor\\b\\s|\\s\\bbetween\\b\\s|\\s\\b^[!?IN]\\s\\b(\\s\\b)|\\s\\b^[!?NOT IN]\\s\\b(\\s\\b|\\s\\b(\\s\\b)))(?=(?:(?:[^']*[^'\"]'){2})*[^']*$)", Pattern.CASE_INSENSITIVE);
+   /* private static final Pattern INTER_CLAUSE_PATTERN = Pattern.compile(
+            "\\s\\band\\b\\s|\\s\\bor\\b\\s|\\s\\bbetween\\b\\s|\\s\\b^[!?IN]\\s\\b(\\s\\b)|\\s\\b^[!?NOT IN]\\s\\b(\\s\\b|\\s\\b(\\s\\b))", Pattern.CASE_INSENSITIVE);*/
 
     /** The INTRA pattern. */
     private static final Pattern INTRA_CLAUSE_PATTERN = Pattern.compile("=|\\s\\blike\\b|\\bnot in\\b|\\bin\\b|<>|>=|>|<=|<|\\s\\bset",
@@ -1010,6 +1012,8 @@ public class KunderaQuery
             // if next group starts with "(" and last record in split ends with IN on NOT IN, append in previous split only.
             split.add(s.toUpperCase());
             lastIndex = matcher.end();
+            if(!isInterClause)
+            	break;
             // count++;
         }
         s = where.substring(lastIndex).trim();
