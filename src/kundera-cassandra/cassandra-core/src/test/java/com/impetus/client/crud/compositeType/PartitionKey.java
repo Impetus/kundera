@@ -18,6 +18,11 @@ package com.impetus.client.crud.compositeType;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
+/**
+ * 
+ * @author Kuldeep.Mishra
+ * 
+ */
 @Embeddable
 public class PartitionKey
 {
