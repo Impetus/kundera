@@ -55,7 +55,7 @@ public class SimpleCRUDTest
         em = emf.createEntityManager();
     }
 
-    @Test
+//    @Test
     public void should_save_entity() throws Exception
     {
         Actor actor = new Actor();

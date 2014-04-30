@@ -485,6 +485,67 @@ public class KunderaQueryTest
         assertSubQuery(kunderaQuery);
 
     }
+    
+    @Test
+    public void testWithSubQueryInMidWithoutSetParam()
+    {
+        String query = "Select p from Person p where p.personName <> pname and p.age IN (20,21,32)" +
+        " and (personId = :personId) and salary NOT IN :salaryList";
+        KunderaQuery kunderaQuery = new KunderaQuery(query, kunderaMetadata);
+        KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery);
+        queryParser.parse();
+        kunderaQuery.postParsingInit();
+        kunderaQuery.setParameter("salaryList", new ArrayList<Double>(){{add(2000D);add(3000D);}});
+        kunderaQuery.setParameter("personId", "personId");
+
+        assertMixSubQuery(kunderaQuery, 2);
+        
+        query = "Select p from Person p where p.personName <> in and p.age IN (20,21,32)" +
+                " and (personId = :personId) and salary NOT IN :salaryList";
+        kunderaQuery = new KunderaQuery(query, kunderaMetadata);
+        queryParser = new KunderaQueryParser(kunderaQuery);
+        queryParser.parse();
+        kunderaQuery.postParsingInit();
+        kunderaQuery.setParameter("salaryList", new ArrayList<Double>(){{add(2000D);add(3000D);}});
+        kunderaQuery.setParameter("personId", "personId");
+        assertMixSubQuery(kunderaQuery, 2);
+
+    }
+    
+    
+    private void assertMixSubQuery(KunderaQuery kunderaQuery , int paramSize)
+    {
+        Assert.assertEquals(paramSize, kunderaQuery.getParameters().size());
+
+        Iterator<Parameter<?>> parameters = kunderaQuery.getParameters().iterator();
+
+        while (parameters.hasNext())
+        {
+            Assert.assertTrue(kunderaQuery.isBound(parameters.next()));
+        }
+        
+        List<String> nameList = new ArrayList<String>();
+        nameList.add("pname");
+        List<Integer> ageList = new ArrayList<Integer>(){{add(20);add(21);}};
+        List<Double> salaryList = new ArrayList<Double>(){{add(2000D);add(3000D);}};
+        List<String> personIdList = new ArrayList<String>();
+        personIdList.add("personId");
+
+//        Object value = kunderaQuery.getClauseValue(":name");
+//        Assert.assertNotNull(value);
+//        Assert.assertEquals(nameList, value);
+//        value = kunderaQuery.getClauseValue(":ageList");
+//        Assert.assertNotNull(value);
+//        Assert.assertEquals(ageList, value);
+        Object value = kunderaQuery.getClauseValue(":salaryList");
+        Assert.assertNotNull(value);
+        Assert.assertEquals(salaryList, value);
+        value = kunderaQuery.getClauseValue(":personId");
+        Assert.assertNotNull(value);
+        Assert.assertEquals(personIdList, value);
+        Assert.assertEquals(paramSize, kunderaQuery.getParameters().size());
+    }
+
 
     private void assertSubQuery(KunderaQuery kunderaQuery)
     {
