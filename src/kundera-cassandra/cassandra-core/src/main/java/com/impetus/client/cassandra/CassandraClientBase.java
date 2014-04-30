@@ -2048,8 +2048,6 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
                         CqlRow row = iter.next();
                         Object rowKey = null;
-
-                        System.out.println(ByteBufferUtil.string(row.key));
                         
                         ThriftRow thriftRow = null;
                         thriftRow = new ThriftRow(rowKey, entityMetadata.getTableName(), row.getColumns(),

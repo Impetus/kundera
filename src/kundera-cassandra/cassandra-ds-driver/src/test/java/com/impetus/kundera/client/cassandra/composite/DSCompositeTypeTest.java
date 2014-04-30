@@ -553,7 +553,7 @@ public class DSCompositeTypeTest
         EntityManager em = emf.createEntityManager();
 
         UUID timeLineId = UUID.randomUUID();
-        long t1 = System.currentTimeMillis();
+        
         for (int i = 0; i < 500; i++)
         {
             UserTimeLine key = new UserTimeLine("mevivs", i, timeLineId);
@@ -565,8 +565,6 @@ public class DSCompositeTypeTest
             user.setTweetDate(currentDate);
             em.persist(user);
         }
-        long t2 = System.currentTimeMillis();
-        System.out.println("Total time taken = " + (t2 - t1));
 
         em.clear();
 

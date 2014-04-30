@@ -98,7 +98,6 @@ public class CassQueryTest
         cqlQuery = parseAndCreateCqlQuery(getQueryObject(queryString, emf), emf, em, pu, PersonCassandra.class, 400);
 
         Assert.assertNotNull(cqlQuery);
-        System.out.println(cqlQuery);
 
 //        "SELECT * FROM "PERSONCASSANDRA" WHERE "key" IN ('(''kk''', 'sk', '''pk') LIMIT 400";
         Assert.assertEquals("SELECT * FROM \"PERSONCASSANDRA\" WHERE \"key\" IN ('kk', 'sk', 'pk') LIMIT 400", cqlQuery);
@@ -208,7 +207,6 @@ public class CassQueryTest
 
         Assert.assertNotNull(cqlQuery);
 
-        System.out.println(cqlQuery);
         Assert.assertEquals(
                 "SELECT * FROM \"CompositeUser\" WHERE \"userId\" IN ('kk', 'dk', 'sk')  ORDER BY \"tweetId\" ASC  LIMIT 400  ALLOW FILTERING",
                 cqlQuery);
@@ -329,7 +327,6 @@ public class CassQueryTest
         cqlQuery = parseAndCreateUpdateQuery(getQueryObject(queryString, emf), emf, em, pu, PersonCassandra.class, 400);
 
         Assert.assertNotNull(cqlQuery);
-        System.out.println(cqlQuery);
 
         Assert.assertEquals(
                 "UPDATE \"PERSONCASSANDRA\" SET \"PERSON_NAME\"='Kuldeep' WHERE \"key\" IN ('1', '2', '3')", cqlQuery);
@@ -450,7 +447,6 @@ public class CassQueryTest
                 400);
 
         Assert.assertNotNull(cqlQuery);
-        System.out.println(cqlQuery);
 
         Assert.assertEquals("UPDATE \"CompositeUser\" SET \"name\"='Kuldeep' WHERE \"userId\" IN ('kk', 'dk', 'sk')",
                 cqlQuery);
