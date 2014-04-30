@@ -124,22 +124,15 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
             log.error("Error while persisting record, Caused by: .", e);
             throw new KunderaException(e);
         }
-/*        catch (UnavailableException e)
-        {
-            log.error("Error while persisting record, Caused by: .", e);
-            throw new KunderaException(e);
-        }
-        catch (TimedOutException e)
-        {
-            log.error("Error while persisting record, Caused by: .", e);
-            throw new KunderaException(e);
-        }
-        catch (SchemaDisagreementException e)
-        {
-            log.error("Error while persisting record, Caused by: .", e);
-            throw new KunderaException(e);
-        }
-*/        catch (UnsupportedEncodingException e)
+        /*
+         * catch (UnavailableException e) {
+         * log.error("Error while persisting record, Caused by: .", e); throw
+         * new KunderaException(e); } catch (TimedOutException e) {
+         * log.error("Error while persisting record, Caused by: .", e); throw
+         * new KunderaException(e); } catch (SchemaDisagreementException e) {
+         * log.error("Error while persisting record, Caused by: .", e); throw
+         * new KunderaException(e); }
+         */catch (UnsupportedEncodingException e)
         {
             log.error("Error while persisting record, Caused by: .", e);
             throw new KunderaException(e);
@@ -171,7 +164,10 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         select_Query = StringUtils.replace(select_Query, CQLTranslator.COLUMN_FAMILY,
                 translator.ensureCase(new StringBuilder(), tableName, false).toString());
         StringBuilder builder = new StringBuilder(select_Query);
+
+        builder.append(CQLTranslator.ADD_WHERE_CLAUSE);
         onWhereClause(metadata, rowId, translator, builder, metaModel, metadata.getIdAttribute());
+        builder.delete(builder.lastIndexOf(CQLTranslator.AND_CLAUSE), builder.length());
         return builder;
     }
 
@@ -346,18 +342,18 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
     public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
     {
 
-        session = session == null ? factory.getConnection():this.session;
+        session = session == null ? factory.getConnection() : this.session;
         String rowKeyName = null;
         CQLTranslator translator = new CQLTranslator();
         try
         {
-            List<ColumnMetadata> primaryKeys = session.getCluster().getMetadata().getKeyspace("\""+schemaName+"\"")
-                    .getTable("\""+tableName+"\"").getPrimaryKey();
+            List<ColumnMetadata> primaryKeys = session.getCluster().getMetadata().getKeyspace("\"" + schemaName + "\"")
+                    .getTable("\"" + tableName + "\"").getPrimaryKey();
             rowKeyName = primaryKeys.get(0).getName();
         }
         finally
         {
-//            factory.releaseConnection(session);
+            // factory.releaseConnection(session);
         }
 
         List rowKeys = getColumnsById(schemaName, tableName, columnName, rowKeyName, columnValue,
@@ -514,8 +510,8 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
     @Override
     protected <T> T execute(final String query, Object connection)
     {
-        
-        session = session == null ? factory.getConnection():this.session;
+
+        session = session == null ? factory.getConnection() : this.session;
         try
         {
             Statement queryStmt = new SimpleStatement(query);
@@ -529,7 +525,7 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         }
         finally
         {
-//            factory.releaseConnection(session);
+            // factory.releaseConnection(session);
         }
     }
 
@@ -542,12 +538,12 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
             {
                 log.info("Executing cql query {}.", cqlQuery);
             }
-            session = session == null ? factory.getConnection():this.session;
+            session = session == null ? factory.getConnection() : this.session;
             session.execute(cqlQuery);
         }
         finally
         {
-//            factory.releaseConnection(session);
+            // factory.releaseConnection(session);
         }
         // TODO: can't find a way to return number of updated records.
         return 0;
@@ -569,10 +565,10 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         Map<String, Field> compositeColumns = new HashMap<String, Field>();
 
         Object compositeKeyInstance = null;
-        boolean isCompositeKey=false;
+        boolean isCompositeKey = false;
         if (metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
         {
-            isCompositeKey=true;
+            isCompositeKey = true;
             EmbeddableType compositeKey = metaModel.embeddable(metadata.getIdAttribute().getBindableJavaType());
             Iterator<Attribute> attributes = compositeKey.getAttributes().iterator();
             while (attributes.hasNext())
@@ -599,7 +595,7 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
 
             if (compositeKeyInstance != null)
             {
-//                compositeKeyInstance = getCompositeKeyInstance(metadata);
+                // compositeKeyInstance = getCompositeKeyInstance(metadata);
                 entity = CassandraUtilities.initialize(metadata, entity, compositeKeyInstance);
             }
 
@@ -619,7 +615,7 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
                     results.add(entity);
                 }
             }
-            else if(entity != null)
+            else if (entity != null)
             {
                 results.add(entity);
             }
@@ -699,15 +695,16 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         return entity;
     }
 
-    @Override 
+    @Override
     public void close()
     {
         super.close();
-        if(this.session != null)
+        if (this.session != null)
         {
             factory.releaseConnection(this.session);
         }
     }
+
     @Override
     public String getPersistenceUnit()
     {

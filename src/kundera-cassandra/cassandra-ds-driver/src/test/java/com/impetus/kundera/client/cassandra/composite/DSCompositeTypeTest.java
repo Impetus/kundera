@@ -602,6 +602,7 @@ public class DSCompositeTypeTest
      */
     private void executeScript(final String cql)
     {
+        CassandraCli.dropKeySpace("KunderaExamples");
         CassandraCli.createKeySpace("KunderaExamples");
         CassandraCli.executeCqlQuery(cql, "KunderaExamples");
     }
