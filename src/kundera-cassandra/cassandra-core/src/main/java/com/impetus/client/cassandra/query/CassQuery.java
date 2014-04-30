@@ -851,7 +851,7 @@ public class CassQuery extends QueryImpl
             }
             else
             {
-                // TODO handle in clause over composite partition key.
+                throw new IllegalArgumentException("In clause is not supported on first part of partition key.");
             }
             isPresent = true;
         }
@@ -946,15 +946,41 @@ public class CassQuery extends QueryImpl
         {
             for (Object embeddedObject : value)
             {
-                List<Object> valueList = columnValues.get(compositeColumn);
 
-                if (valueList == null)
-                {
-                    valueList = new ArrayList<Object>();
-                }
                 Object valueObject = PropertyAccessorHelper.getObject(embeddedObject, field);
-                valueList.add(valueObject);
-                columnValues.put(compositeColumn, valueList);
+                // Checking for composite partition key.
+                if (metaModel.isEmbeddable(((AbstractAttribute) compositeColumn).getBindableJavaType()))
+                {
+                    Set<Attribute> attributes = metaModel.embeddable(
+                            ((AbstractAttribute) compositeColumn).getBindableJavaType()).getAttributes();
+
+                    // Iterating over composite partition key columns.
+                    for (Attribute nestedAttribute : attributes)
+                    {
+                        List<Object> valueList = columnValues.get(compositeColumn);
+
+                        if (valueList == null)
+                        {
+                            valueList = new ArrayList<Object>();
+                        }
+
+                        Object obj = PropertyAccessorHelper.getObject(valueObject,
+                                (Field) nestedAttribute.getJavaMember());
+                        valueList.add(obj);
+                        columnValues.put(nestedAttribute, valueList);
+                    }
+                }
+                else
+                {
+                    List<Object> valueList = columnValues.get(compositeColumn);
+
+                    if (valueList == null)
+                    {
+                        valueList = new ArrayList<Object>();
+                    }
+                    valueList.add(valueObject);
+                    columnValues.put(compositeColumn, valueList);
+                }
             }
         }
         else
