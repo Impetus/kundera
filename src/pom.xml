@@ -5,12 +5,12 @@
   <parent>
     <groupId>com.impetus</groupId>
 	<artifactId>kundera-parent</artifactId>
-	<version>2.11.1</version>
+	<version>kundera-2.12-SNAPSHOT</version>
   </parent>
 
   <groupId>com.impetus</groupId>
   <artifactId>kundera</artifactId>
-  <version>2.11.1</version>
+  <version>kundera-2.12-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>kundera-trunk</name>
   <url>https://github.com/impetus-opensource/Kundera</url>
