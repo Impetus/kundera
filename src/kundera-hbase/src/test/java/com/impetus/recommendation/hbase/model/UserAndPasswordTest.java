@@ -25,6 +25,9 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 import com.impetus.client.hbase.junits.HBaseCli;
 
@@ -34,6 +37,9 @@ import com.impetus.client.hbase.junits.HBaseCli;
  */
 public class UserAndPasswordTest
 {
+	
+	/** The Constant logger. */
+    private static final Logger logger = LoggerFactory.getLogger(UserAndPasswordTest.class);
 
     private EntityManagerFactory emf;
 
@@ -113,7 +119,7 @@ public class UserAndPasswordTest
         }
         catch (Exception ex)
         {
-            ex.printStackTrace();
+        	logger.warn(ex.getMessage());
             Assert.fail(ex.getMessage());
         }
     }
@@ -183,7 +189,7 @@ public class UserAndPasswordTest
         }
         catch (Exception ex)
         {
-            ex.printStackTrace();
+        	logger.warn(ex.getMessage());
             Assert.fail(ex.getMessage());
         }
     }

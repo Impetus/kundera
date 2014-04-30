@@ -79,6 +79,14 @@ public class PersonTest
         em.persist(p1);
         em.persist(p2);
         em.persist(p3);
+        
+        findQuery = em.createQuery("Select p from Person p where p.personName = vivek ORDER BY p.age ASC");
+        findQuery.setFirstResult(2);
+        findQuery.setMaxResults(2);
+        allPersons = findQuery.getResultList();
+        Assert.assertEquals(2, allPersons.size());
+        Assert.assertEquals(new Integer(20), allPersons.get(0).getAge());
+        Assert.assertEquals(new Integer(10), allPersons.get(1).getAge());
 
         Person personWithKey = new Person();
         personWithKey.setPersonId("111");

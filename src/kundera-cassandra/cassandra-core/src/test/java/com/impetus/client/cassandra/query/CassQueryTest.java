@@ -672,11 +672,11 @@ public class CassQueryTest
         }
         catch (SecurityException e)
         {
-            e.printStackTrace();
+        	log.warn(e.getMessage());
         }
         catch (NoSuchMethodException e)
         {
-            e.printStackTrace();
+        	log.warn(e.getMessage());
         }
         getpd.setAccessible(true);
 //        PersistenceDelegator pd = null;
@@ -709,11 +709,11 @@ public class CassQueryTest
         }
         catch (SecurityException e)
         {
-            e.printStackTrace();
+        	log.warn(e.getMessage());
         }
         catch (NoSuchMethodException e)
         {
-            e.printStackTrace();
+        	log.warn(e.getMessage());
         }
         getpd.setAccessible(true);
         PersistenceDelegator pd = null;
@@ -723,15 +723,15 @@ public class CassQueryTest
         }
         catch (IllegalArgumentException e)
         {
-            e.printStackTrace();
+        	log.warn(e.getMessage());
         }
         catch (IllegalAccessException e)
         {
-            e.printStackTrace();
+        	log.warn(e.getMessage());
         }
         catch (InvocationTargetException e)
         {
-            e.printStackTrace();
+        	log.warn(e.getMessage());
         }
 
         KunderaMetadata kunderaMetadata = ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance();
@@ -757,11 +757,11 @@ public class CassQueryTest
         }
         catch (SecurityException e)
         {
-            e.printStackTrace();
+        	log.warn(e.getMessage());
         }
         catch (NoSuchMethodException e)
         {
-            e.printStackTrace();
+        	log.warn(e.getMessage());
         }
         getpostParsingInit.setAccessible(true);
 
@@ -775,15 +775,15 @@ public class CassQueryTest
         }
         catch (IllegalArgumentException e)
         {
-            e.printStackTrace();
+        	log.warn(e.getMessage());
         }
         catch (IllegalAccessException e)
         {
-            e.printStackTrace();
+        	log.warn(e.getMessage());
         }
         catch (InvocationTargetException e)
         {
-            e.printStackTrace();
+        	log.warn(e.getMessage());
         }
 
         return kunderaQuery;

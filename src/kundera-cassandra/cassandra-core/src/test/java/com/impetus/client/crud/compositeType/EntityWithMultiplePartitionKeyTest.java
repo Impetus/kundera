@@ -28,6 +28,9 @@ import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
@@ -42,6 +45,9 @@ public class EntityWithMultiplePartitionKeyTest
     private EntityManagerFactory emf;
 
     private static final String _keyspace = "CompositeCassandra";
+    
+    /** The Constant logger. */
+    private static final Logger log = LoggerFactory.getLogger(EntityWithMultiplePartitionKeyTest.class);
 
     /**
      * @throws java.lang.Exception
@@ -61,7 +67,7 @@ public class EntityWithMultiplePartitionKeyTest
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+        	log.warn(e.getMessage());
         }
         Map<String, String> propertymap = new HashMap<String, String>();
         propertymap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "");
@@ -353,7 +359,7 @@ public class EntityWithMultiplePartitionKeyTest
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+        	log.warn(e.getMessage());
         }
 
         // Select by composite id object query.
