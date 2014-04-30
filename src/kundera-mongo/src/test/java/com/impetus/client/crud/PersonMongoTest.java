@@ -360,6 +360,30 @@ public class PersonMongoTest extends BaseTest
         q = em.createQuery(updateFunc);
         q.setParameter("personId", "1");
         Assert.assertEquals(1, q.executeUpdate());
+        
+        updateFunc = "UPDATE PersonMongo set age = DECREMENT(2)";
+        q = em.createQuery(updateFunc);
+        Assert.assertEquals(1, q.executeUpdate());
+        
+        em.clear();
+        
+        String query = "Select p from PersonMongo p ";
+        q = em.createQuery(query);
+        List<PersonMongo> results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(new Integer(8), results.get(0).getAge());
+        
+        updateFunc = "UPDATE PersonMongo set age = INCREMENT(5)";
+        q = em.createQuery(updateFunc);
+        Assert.assertEquals(1, q.executeUpdate());
+        
+        em.clear();
+        
+        query = "Select p from PersonMongo p ";
+        q = em.createQuery(query);
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(new Integer(13), results.get(0).getAge());
     }
     
     @Test
@@ -394,6 +418,94 @@ public class PersonMongoTest extends BaseTest
         Assert.assertNotNull(results.get(0).getPersonId());
         Assert.assertNotNull(results.get(0).getPersonName());
         Assert.assertNotNull(results.get(0).getAge());
+        
+ 
 
     }
+    
+    @Test
+    public void interClauseOperatorTest()
+    {
+    	Object p1 = prepareMongoInstance("1", 10);
+        Object p2 = prepareMongoInstance("2", 20);
+        Object p3 = prepareMongoInstance("3", 15);
+        em.persist(p1);
+        em.persist(p2);
+        em.persist(p3);
+    	        
+        String query = "Select p from PersonMongo p where (p.personName = :name OR p.age NOT IN :ageList)" +
+        		" AND (personId = :personId)";
+        Query q = em.createQuery(query);
+        q.setParameter("name", "vivek");
+        q.setParameter("ageList", new ArrayList<Integer>(){{add(10);add(20);}});
+        q.setParameter("personId", "1");
+        List<PersonMongo> results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(0, results.size());
+        
+        query = "Select p from PersonMongo p where (p.personName = :name AND p.age NOT IN :ageList)" +
+        		" OR (personId = :personId)";
+        q = em.createQuery(query);
+        q.setParameter("name", "vivek");
+        q.setParameter("ageList", new ArrayList<Integer>(){{add(10);add(21);}});
+        q.setParameter("personId", "1");
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(3, results.size());
+        
+        
+        query = "Select p from PersonMongo p where (p.personName = :name OR p.age NOT IN :ageList)" +
+        		" OR (personId = :personId) ORDER BY p.age";
+        q = em.createQuery(query);
+        q.setParameter("name", "vivek");
+        q.setParameter("ageList", new ArrayList<Integer>(){{add(10);add(21);}});
+        q.setParameter("personId", "1");
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(3, results.size());
+        Assert.assertNotNull(results.get(0).getPersonId());
+        Assert.assertNotNull(results.get(0).getPersonName());
+        Assert.assertNotNull(results.get(0).getAge());
+        
+        Assert.assertEquals("1", results.get(0).getPersonId());
+        Assert.assertEquals("2", results.get(2).getPersonId());
+
+    }
+    
+    @Test
+    public void paginationQueryTest()
+    {
+    	Object p1 = prepareMongoInstance("1", 10);
+        Object p2 = prepareMongoInstance("2", 20);
+        Object p3 = prepareMongoInstance("3", 15);
+        em.persist(p1);
+        em.persist(p2);
+        em.persist(p3);
+    	
+    	String query = "Select p from PersonMongo p ";
+        Query q = em.createQuery(query);
+        q.setFirstResult(1);
+        q.setMaxResults(3);
+        List<PersonMongo> results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(2, results.size());
+        
+        query = "Select p from PersonMongo p where (p.personName = :name and p.age NOT IN :ageList)" +
+        		" and (personId = :personId)";
+        q = em.createQuery(query);
+        q.setFirstResult(0);
+        q.setMaxResults(3);
+        q.setParameter("name", "vivek");
+        q.setParameter("ageList", new ArrayList<Integer>(){{add(20);add(21);}});
+        q.setParameter("personId", "1");
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(1, results.size());
+        Assert.assertNotNull(results.get(0).getPersonId());
+        Assert.assertNotNull(results.get(0).getPersonName());
+        Assert.assertNotNull(results.get(0).getAge());
+
+    }
+    
+    
 }

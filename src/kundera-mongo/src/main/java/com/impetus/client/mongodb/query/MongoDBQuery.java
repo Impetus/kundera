@@ -656,7 +656,7 @@ public class MongoDBQuery extends QueryImpl
     		return -1;
     	
     	EntityMetadata m = getEntityMetadata();
-    	
+    	Metamodel metaModel = kunderaMetadata.getApplicationMetadata().getMetamodel(m.getPersistenceUnit());
     	Queue filterClauseQueue = kunderaQuery.getFilterClauseQueue();
     	BasicDBObject query = createMongoQuery(m, filterClauseQueue);
     	
@@ -670,17 +670,18 @@ public class MongoDBQuery extends QueryImpl
                 		&& c.getValue().toString().toUpperCase().matches(FUNCTION_KEYWORDS[i]))
                 {
                 	isSpecialFunction = true;
+                	String columName = getColumnName(m,metaModel.entity(m.getEntityClazz()),c.getProperty());
                 	if(c.getValue().toString().toUpperCase().startsWith("INCREMENT("))
                 	{
                 		String val = c.getValue().toString().toUpperCase();
                 		val = val.substring(10, val.indexOf(")"));
-                		update.put("$inc", new BasicDBObject(c.getProperty(), Integer.valueOf(val)));
+                		update.put("$inc", new BasicDBObject(columName, Integer.valueOf(val)));
                 	}
                 	else if(c.getValue().toString().toUpperCase().startsWith("DECREMENT("))
                 	{
                 		String val = c.getValue().toString().toUpperCase();
                 		val = val.substring(10, val.indexOf(")"));
-                		update.put("$inc", new BasicDBObject(c.getProperty(), -Integer.valueOf(val)));
+                		update.put("$inc", new BasicDBObject(columName, -Integer.valueOf(val)));
                 	}
                 }
             }
