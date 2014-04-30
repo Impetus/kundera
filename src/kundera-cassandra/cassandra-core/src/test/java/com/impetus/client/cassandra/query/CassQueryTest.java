@@ -30,7 +30,10 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.impetus.client.cassandra.CassandraClientBase;
 import com.impetus.client.crud.PersonCassandra;
 import com.impetus.client.crud.compositeType.CassandraCompoundKey;
 import com.impetus.client.crud.compositeType.CassandraPrimeUser;
@@ -52,6 +55,9 @@ import com.impetus.kundera.query.KunderaQueryParser;
  */
 public class CassQueryTest
 {
+    /** log for this class. */
+    private static Logger log = LoggerFactory.getLogger(CassQueryTest.class);
+
     @Before
     public void setUp() throws Exception
     {
@@ -98,7 +104,6 @@ public class CassQueryTest
         cqlQuery = parseAndCreateCqlQuery(getQueryObject(queryString, emf), emf, em, pu, PersonCassandra.class, 400);
 
         Assert.assertNotNull(cqlQuery);
-        System.out.println(cqlQuery);
 
 //        "SELECT * FROM "PERSONCASSANDRA" WHERE "key" IN ('(''kk''', 'sk', '''pk') LIMIT 400";
         Assert.assertEquals("SELECT * FROM \"PERSONCASSANDRA\" WHERE \"key\" IN ('kk', 'sk', 'pk') LIMIT 400", cqlQuery);
@@ -208,7 +213,6 @@ public class CassQueryTest
 
         Assert.assertNotNull(cqlQuery);
 
-        System.out.println(cqlQuery);
         Assert.assertEquals(
                 "SELECT * FROM \"CompositeUser\" WHERE \"userId\" IN ('kk', 'dk', 'sk')  ORDER BY \"tweetId\" ASC  LIMIT 400  ALLOW FILTERING",
                 cqlQuery);
@@ -329,7 +333,6 @@ public class CassQueryTest
         cqlQuery = parseAndCreateUpdateQuery(getQueryObject(queryString, emf), emf, em, pu, PersonCassandra.class, 400);
 
         Assert.assertNotNull(cqlQuery);
-        System.out.println(cqlQuery);
 
         Assert.assertEquals(
                 "UPDATE \"PERSONCASSANDRA\" SET \"PERSON_NAME\"='Kuldeep' WHERE \"key\" IN ('1', '2', '3')", cqlQuery);
@@ -415,6 +418,83 @@ public class CassQueryTest
         CassandraCli.dropKeySpace("KunderaExamples");
     }
 
+
+    /**
+     * Test method for
+     * {@link com.impetus.client.cassandra.query.CassQuery#onQueryOverCQL3(com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.client.Client, com.impetus.kundera.metadata.model.MetamodelImpl, java.util.List)}
+     * .
+     * 
+     * @throws InvocationTargetException
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     */
+    @Test
+    public void testUpdateQueryWithTTLSimpleEntity() throws IllegalArgumentException, IllegalAccessException,
+            InvocationTargetException
+    {
+        CassandraCli.createKeySpace("KunderaExamples");
+        String pu = "secIdxCassandraTest";
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory(pu);
+        EntityManager em = emf.createEntityManager();
+
+        // Simple Query.
+        String queryString = "Update PersonCassandra p SET p.personName = 'Kuldeep' WHERE p.personId = '1'";
+
+        String cqlQuery = parseAndCreateUpdateQuery(getQueryObject(queryString, emf), emf, em, pu,
+                PersonCassandra.class, 200,100);
+
+        Assert.assertNotNull(cqlQuery);
+
+        Assert.assertEquals("UPDATE \"PERSONCASSANDRA\"  USING TTL 100 SET \"PERSON_NAME\"='Kuldeep' WHERE \"key\" = '1'", cqlQuery);
+
+        // In Query.
+        queryString = "Update PersonCassandra p SET p.personName = 'Kuldeep' WHERE p.personId IN ('1', '2', '3')";
+
+        cqlQuery = parseAndCreateUpdateQuery(getQueryObject(queryString, emf), emf, em, pu, PersonCassandra.class, 400, 200);
+
+        Assert.assertNotNull(cqlQuery);
+
+        Assert.assertEquals(
+                "UPDATE \"PERSONCASSANDRA\"  USING TTL 200 SET \"PERSON_NAME\"='Kuldeep' WHERE \"key\" IN ('1', '2', '3')", cqlQuery);
+
+        // In Query set Paramater.
+        queryString = "Update PersonCassandra p SET p.personName = 'Kuldeep' WHERE p.personId IN :idList";
+
+        List<String> id = new ArrayList<String>();
+        id.add("1");
+        id.add("2");
+        id.add("3");
+
+        KunderaQuery kunderaQuery = getQueryObject(queryString, emf);
+        kunderaQuery.setParameter("idList", id);
+
+        cqlQuery = parseAndCreateUpdateQuery(kunderaQuery, emf, em, pu, PersonCassandra.class, Integer.MAX_VALUE, 1000);
+
+        Assert.assertNotNull(cqlQuery);
+
+        Assert.assertEquals(
+                "UPDATE \"PERSONCASSANDRA\"  USING TTL 1000 SET \"PERSON_NAME\"='Kuldeep' WHERE \"key\" IN ('1', '2', '3' ) ", cqlQuery);
+
+        // In Query set Paramater with and clause.
+        queryString = "Update PersonCassandra p SET p.personName = 'Kuldeep' WHERE p.personId in :nameList and p.age = 10";
+
+        kunderaQuery = getQueryObject(queryString, emf);
+        kunderaQuery.setParameter("nameList", id);
+
+        cqlQuery = parseAndCreateUpdateQuery(kunderaQuery, emf, em, pu, PersonCassandra.class, Integer.MAX_VALUE);
+
+        Assert.assertNotNull(cqlQuery);
+
+        Assert.assertEquals(
+                "UPDATE \"PERSONCASSANDRA\" SET \"PERSON_NAME\"='Kuldeep' WHERE \"key\" IN ('1', '2', '3' )  AND \"AGE\" = 10",
+                cqlQuery);
+
+        em.close();
+        emf.close();
+
+        CassandraCli.dropKeySpace("KunderaExamples");
+    }
+
     /**
      * Test method for
      * {@link com.impetus.client.cassandra.query.CassQuery#onQueryOverCQL3(com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.client.Client, com.impetus.kundera.metadata.model.MetamodelImpl, java.util.List)}
@@ -450,7 +530,6 @@ public class CassQueryTest
                 400);
 
         Assert.assertNotNull(cqlQuery);
-        System.out.println(cqlQuery);
 
         Assert.assertEquals("UPDATE \"CompositeUser\" SET \"name\"='Kuldeep' WHERE \"userId\" IN ('kk', 'dk', 'sk')",
                 cqlQuery);
@@ -524,32 +603,13 @@ public class CassQueryTest
         {
             getpd = EntityManagerImpl.class.getDeclaredMethod("getPersistenceDelegator");
         }
-        catch (SecurityException e)
+        catch (Exception e)
         {
-            e.printStackTrace();
+            log.error("Error during execution, Caused by : ",e.getMessage());
         }
-        catch (NoSuchMethodException e)
-        {
-            e.printStackTrace();
-        }
+        
         getpd.setAccessible(true);
-        PersistenceDelegator pd = null;
-        try
-        {
-            pd = (PersistenceDelegator) getpd.invoke(em);
-        }
-        catch (IllegalArgumentException e)
-        {
-            e.printStackTrace();
-        }
-        catch (IllegalAccessException e)
-        {
-            e.printStackTrace();
-        }
-        catch (InvocationTargetException e)
-        {
-            e.printStackTrace();
-        }
+        PersistenceDelegator pd = getPersistenceDelegator(em, getpd);
 
         KunderaMetadata kunderaMetadata = ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance();
 
@@ -566,13 +626,44 @@ public class CassQueryTest
         return cqlQuery;
     }
 
+    private PersistenceDelegator getPersistenceDelegator(EntityManager em, Method getpd)
+    {
+        PersistenceDelegator pd = null;
+        try
+        {
+            pd = (PersistenceDelegator) getpd.invoke(em);
+        }
+        catch (Exception e)
+        {
+            log.error("Error during execution, Caused by : ",e.getMessage());
+        }
+        return pd;
+    }
+
+    /**
+     * Parse and create update query.
+     * 
+     * @param kunderaQuery  kundera query.
+     * @param emf  entity manager factory.
+     * @param em   entity manager
+     * @param puName     persistence unit name.
+     * @param entityClass  entity class. 
+     * @param maxResult max result.
+     * 
+     * @return parsed query.
+     */
+    private String parseAndCreateUpdateQuery(KunderaQuery kunderaQuery, EntityManagerFactory emf, EntityManager em,
+            String puName, Class entityClass, Integer maxResult)
+    {
+        return parseAndCreateUpdateQuery(kunderaQuery, emf, em, puName, entityClass, maxResult, null);
+    }
     /**
      * 
      * @param kunderaQuery
      * @return
      */
     private String parseAndCreateUpdateQuery(KunderaQuery kunderaQuery, EntityManagerFactory emf, EntityManager em,
-            String puName, Class entityClass, Integer maxResult)
+            String puName, Class entityClass, Integer maxResult, Integer ttl)
     {
         Method getpd = null;
         try
@@ -588,29 +679,17 @@ public class CassQueryTest
             e.printStackTrace();
         }
         getpd.setAccessible(true);
-        PersistenceDelegator pd = null;
-        try
-        {
-            pd = (PersistenceDelegator) getpd.invoke(em);
-        }
-        catch (IllegalArgumentException e)
-        {
-            e.printStackTrace();
-        }
-        catch (IllegalAccessException e)
-        {
-            e.printStackTrace();
-        }
-        catch (InvocationTargetException e)
-        {
-            e.printStackTrace();
-        }
-
+//        PersistenceDelegator pd = null;
+        PersistenceDelegator pd = getPersistenceDelegator(em, getpd);
         KunderaMetadata kunderaMetadata = ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance();
 
         CassQuery query = new CassQuery(kunderaQuery, pd, kunderaMetadata);
         query.setMaxResults(maxResult);
-
+        if(ttl != null)
+        {
+            query.applyTTL(ttl);
+        }
+        
         String cqlQuery = query.createUpdateQuery(kunderaQuery);
         return cqlQuery;
     }

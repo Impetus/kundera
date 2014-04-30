@@ -42,6 +42,11 @@ public interface Query
     void close();
 
     /**
+     * add support to enable TTL for UPDATE/INSERT/DELETE queries.
+     */
+    void applyTTL(int ttlInSeconds);
+
+    /**
      * Iterates over result.
      * 
      * @return

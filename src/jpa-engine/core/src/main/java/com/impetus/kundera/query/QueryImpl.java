@@ -93,6 +93,8 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
 
     protected boolean isSingleResult = false;
 
+    protected Integer ttl;
+
     /**
      * Instantiates a new query impl.
      * 
@@ -901,6 +903,11 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
         return this.fetchSize;
     }
 
+    public void applyTTL(int ttlInSeconds)
+    {
+        this.ttl = ttlInSeconds;
+    }
+    
     public abstract void close();
 
     public abstract <E> Iterator<E> iterate();
