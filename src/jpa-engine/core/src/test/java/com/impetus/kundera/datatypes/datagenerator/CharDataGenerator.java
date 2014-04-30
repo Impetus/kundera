@@ -1,6 +1,5 @@
 package com.impetus.kundera.datatypes.datagenerator;
 
-import java.nio.charset.Charset;
 
 
 public class CharDataGenerator implements DataGenerator<Character> {
@@ -35,13 +34,7 @@ public class CharDataGenerator implements DataGenerator<Character> {
     {
         CharDataGenerator generator = new CharDataGenerator();
         String query = "Select s From StudentHBaseChar s where s.id between " + generator.minValue() + " and "
-                + generator.maxValue();
-
-        System.out.println(query);
-        
-        System.out.println(String.valueOf(Character.MIN_VALUE) + "" + 2);
-        System.out.println(Character.MAX_VALUE);
-        
+                + generator.maxValue();       
     }
 
 }

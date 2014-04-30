@@ -493,7 +493,7 @@ public class KunderaQuery
                     logger.warn("No column found by this name : " + property + " checking for embeddedfield");
                 }
                 // where condition may be for search within embedded object
-                if (columnName == null && property.indexOf(".") > 0)
+                if (columnName == null && property.indexOf(".") >= 0)
                 {
                     String enclosingEmbeddedField = MetadataUtils.getEnclosingEmbeddedFieldName(metadata, property,
                             true, kunderaMetadata);

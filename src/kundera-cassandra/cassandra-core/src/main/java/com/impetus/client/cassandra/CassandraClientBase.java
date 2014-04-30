@@ -35,6 +35,7 @@ import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.ManagedType;
+import javax.persistence.metamodel.SingularAttribute;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.CfDef;
@@ -1080,7 +1081,12 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
             // strip last "," clause.
             builder.delete(builder.lastIndexOf(CQLTranslator.COMMA_STR), builder.length());
-            onWhereClause(entityMetadata, rowId, translator, builder, metaModel);
+            
+            builder.append(CQLTranslator.ADD_WHERE_CLAUSE);            
+            onWhereClause(entityMetadata, rowId, translator, builder, metaModel, entityMetadata.getIdAttribute());
+
+            // strip last "AND" clause.
+            builder.delete(builder.lastIndexOf(CQLTranslator.AND_CLAUSE), builder.length());
 
             StringBuilder queryBuilder = new StringBuilder(update_Query);
             queryBuilder.append(CQLTranslator.ADD_SET_CLAUSE);
@@ -1189,7 +1195,13 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 translator.ensureCase(new StringBuilder(), tableName, false).toString());
 
         StringBuilder deleteQueryBuilder = new StringBuilder(deleteQuery);
-        onWhereClause(metadata, keyObject, translator, deleteQueryBuilder, metaModel);
+        
+        deleteQueryBuilder.append(CQLTranslator.ADD_WHERE_CLAUSE);  
+        onWhereClause(metadata, keyObject, translator, deleteQueryBuilder, metaModel, metadata.getIdAttribute());
+
+        // strip last "AND" clause.
+        deleteQueryBuilder
+                .delete(deleteQueryBuilder.lastIndexOf(CQLTranslator.AND_CLAUSE), deleteQueryBuilder.length());
 
         if (log.isInfoEnabled())
         {
@@ -1213,39 +1225,40 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      *            the compound key
      */
     protected void onWhereClause(EntityMetadata metadata, Object key, CQLTranslator translator,
-            StringBuilder queryBuilder, MetamodelImpl metaModel)
+            StringBuilder queryBuilder, MetamodelImpl metaModel, SingularAttribute attribute)
     {
-        queryBuilder.append(CQLTranslator.ADD_WHERE_CLAUSE);
-
-        if (metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
+        // SingularAttribute idAttribute = metadata.getIdAttribute();
+        if (metaModel.isEmbeddable(attribute.getBindableJavaType()))
         {
-            Field[] fields = metadata.getIdAttribute().getBindableJavaType().getDeclaredFields();
-            EmbeddableType compoundKey = metaModel.embeddable(metadata.getIdAttribute().getBindableJavaType());
+            Field[] fields = attribute.getBindableJavaType().getDeclaredFields();
+            EmbeddableType compoundKey = metaModel.embeddable(attribute.getBindableJavaType());
 
             for (Field field : fields)
             {
                 if (field != null && !Modifier.isStatic(field.getModifiers())
                         && !Modifier.isTransient(field.getModifiers()) && !field.isAnnotationPresent(Transient.class))
                 {
-                    Attribute attribute = compoundKey.getAttribute(field.getName());
-                    String columnName = ((AbstractAttribute) attribute).getJPAColumnName();
+                    attribute = (SingularAttribute) compoundKey.getAttribute(field.getName());
                     Object valueObject = PropertyAccessorHelper.getObject(key, field);
-                    translator.buildWhereClause(queryBuilder, field.getType(), columnName, valueObject,
-                            CQLTranslator.EQ_CLAUSE, false);
+                    if (metaModel.isEmbeddable(((AbstractAttribute) attribute).getBindableJavaType()))
+                    {
+                        onWhereClause(metadata, valueObject, translator, queryBuilder, metaModel, attribute);
+                    }
+                    else
+                    {
+                        String columnName = ((AbstractAttribute) attribute).getJPAColumnName();
+                        translator.buildWhereClause(queryBuilder, field.getType(), columnName, valueObject,
+                                CQLTranslator.EQ_CLAUSE, false);
+                    }
                 }
             }
         }
         else
         {
-            Attribute attribute = metadata.getIdAttribute();
-            translator.buildWhereClause(queryBuilder,
-                    ((AbstractAttribute) metadata.getIdAttribute()).getBindableJavaType(),
+            translator.buildWhereClause(queryBuilder, ((AbstractAttribute) attribute).getBindableJavaType(),
                     CassandraUtilities.getIdColumnName(kunderaMetadata, metadata, getExternalProperties()), key,
                     translator.EQ_CLAUSE, false);
         }
-
-        // strip last "AND" clause.
-        queryBuilder.delete(queryBuilder.lastIndexOf(CQLTranslator.AND_CLAUSE), queryBuilder.length());
     }
 
     /**
@@ -2035,7 +2048,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
                         CqlRow row = iter.next();
                         Object rowKey = null;
-
+                        
                         ThriftRow thriftRow = null;
                         thriftRow = new ThriftRow(rowKey, entityMetadata.getTableName(), row.getColumns(),
                                 new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0),
@@ -2148,7 +2161,11 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             select_Query = StringUtils.replace(select_Query, CQLTranslator.COLUMN_FAMILY,
                     translator.ensureCase(new StringBuilder(), tableName, false).toString());
             StringBuilder builder = new StringBuilder(select_Query);
-            onWhereClause(metadata, rowId, translator, builder, metaModel);
+            builder.append(CQLTranslator.ADD_WHERE_CLAUSE);  
+            onWhereClause(metadata, rowId, translator, builder, metaModel, metadata.getIdAttribute());
+
+            // strip last "AND" clause.
+            builder.delete(builder.lastIndexOf(CQLTranslator.AND_CLAUSE), builder.length());
             return CassandraClientBase.this.executeQuery(metadata.getEntityClazz(), relationNames, false,
                     builder.toString());
         }
@@ -2417,7 +2434,9 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             {
                 Column column = row.getColumns().get(0);
                 Object columnValue = CassandraDataTranslator.decompose(columnJavaType, column.getValue(), true);
-//                Object columnValue = PropertyAccessorHelper.getObject(columnJavaType, column.getValue());
+                // Object columnValue =
+                // PropertyAccessorHelper.getObject(columnJavaType,
+                // column.getValue());
                 results.add(columnValue);
             }
         }

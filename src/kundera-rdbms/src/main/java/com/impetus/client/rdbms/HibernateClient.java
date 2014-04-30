@@ -594,7 +594,6 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         Query q = s.createQuery(query);
         setParameters(parameterMap, q);
 
-        System.out.println(query);
         Transaction tx = onBegin();
         
         int i = q.executeUpdate();

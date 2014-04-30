@@ -72,11 +72,14 @@ public class CassanrdaGeneratedIdSchemaTest
                     Assert.assertTrue(cfDef.getDefault_validation_class().equals(CounterColumnType.class.getName()));
                     count++;
                 }
-                // Mapped super class test classes are created with 4 columns and without @Table annotation. Hence eligible for this pu as well.
-                else if(!cfDef.getName().equals("user_account") && !cfDef.getName().equals("social_profile") && !cfDef.getName().equals("TRNX_CREDIT") && !cfDef.getName().equals("DebitTransaction") && !cfDef.getName().equals("PRIMARY_TABLE"))
+                // Mapped super class test classes are created with 4 columns
+                // and without @Table annotation. Hence eligible for this pu as
+                // well.
+                else if (!cfDef.getName().equals("user_account") && !cfDef.getName().equals("social_profile")
+                        && !cfDef.getName().equals("TRNX_CREDIT") && !cfDef.getName().equals("DebitTransaction")
+                        && !cfDef.getName().equals("PRIMARY_TABLE"))
                 {
-//                    System.out.println(cfDef.getName());
-                     Assert.assertTrue(cfDef.getColumn_type().equals("Standard"));
+                    Assert.assertTrue(cfDef.getColumn_type().equals("Standard"));
                     List<ColumnDef> columnDefs = cfDef.getColumn_metadata();
                     Assert.assertEquals(1, columnDefs.size());
                     count++;
@@ -88,17 +91,17 @@ public class CassanrdaGeneratedIdSchemaTest
         catch (NotFoundException e)
         {
             // TODO Auto-generated catch block
-            
+
         }
         catch (InvalidRequestException e)
         {
             // TODO Auto-generated catch block
-            
+
         }
         catch (TException e)
         {
             // TODO Auto-generated catch block
-            
+
         }
     }
 

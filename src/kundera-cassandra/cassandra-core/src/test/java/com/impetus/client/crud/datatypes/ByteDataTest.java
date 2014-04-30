@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.client.crud.datatypes;
 
-
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -47,7 +46,6 @@ import com.impetus.client.crud.BaseTest;
 import com.impetus.client.crud.PersonCassandra;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
-
 
 /**
  * Test case to perform simple CRUD operation.(insert, delete, merge, and
@@ -90,7 +88,7 @@ public class ByteDataTest extends BaseTest
     @Before
     public void setUp() throws Exception
     {
-        
+
         CassandraCli.cassandraSetUp();
         CassandraCli.createKeySpace("KunderaExamples");
 
@@ -100,7 +98,7 @@ public class ByteDataTest extends BaseTest
             propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create");
         }
         propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
-        
+
         emf = Persistence.createEntityManagerFactory(SEC_IDX_CASSANDRA_TEST, propertyMap);
         em = emf.createEntityManager();
         col = new java.util.HashMap<Object, Object>();
@@ -145,7 +143,8 @@ public class ByteDataTest extends BaseTest
         Assert.assertNotNull(person.getA());
         Assert.assertEquals(new File("src/test/resources/nature.jpg").getTotalSpace(), new File(
                 "src/test/resources/nature-test.jpg").getTotalSpace());
-        Assert.assertEquals(String.valueOf(Hex.encodeHex((byte []) imageInByte)),String.valueOf(Hex.encodeHex((byte []) person.getA())));
+        Assert.assertEquals(String.valueOf(Hex.encodeHex((byte[]) imageInByte)),
+                String.valueOf(Hex.encodeHex((byte[]) person.getA())));
 
     }
 
@@ -194,12 +193,13 @@ public class ByteDataTest extends BaseTest
                     "src/test/resources/persistence-test.pdf").getTotalSpace());
             Assert.assertTrue(isFileBinaryEqual(new File("src/test/resources/persistence.pdf"), new File(
                     "src/test/resources/persistence-test.pdf")));
-            Assert.assertEquals(String.valueOf(Hex.encodeHex((byte []) bFile)),String.valueOf(Hex.encodeHex((byte []) person.getA())));
+            Assert.assertEquals(String.valueOf(Hex.encodeHex((byte[]) bFile)),
+                    String.valueOf(Hex.encodeHex((byte[]) person.getA())));
 
         }
         catch (Exception e)
         {
-          
+
         }
 
     }
@@ -222,18 +222,6 @@ public class ByteDataTest extends BaseTest
         em.close();
         emf.close();
         CassandraCli.dropKeySpace("KunderaExamples");
-        File file = new File("src/test/resources/nature-test.jpg");
-        if (file.delete())
-        {
-            System.out.println(file.getName() + " is deleted!");
-        }
-        
-        file = new File("src/test/resources/persistence-test.pdf");
-        if (file.delete())
-        {
-            System.out.println(file.getName() + " is deleted!");
-        }
-        
     }
 
     /**
@@ -310,5 +298,4 @@ public class ByteDataTest extends BaseTest
         return retval;
     }
 
-   
 }

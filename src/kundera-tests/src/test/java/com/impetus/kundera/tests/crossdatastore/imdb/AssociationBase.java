@@ -219,12 +219,10 @@ public abstract class AssociationBase
                     {
                         if (mAdd.getTableName().equalsIgnoreCase(MOVIE))
                         {
-                            System.out.println("in movie here");
                             loadDataForMovie();
                         }
                         else if (mAdd.getTableName().equalsIgnoreCase(ACTOR))
                         {
-                            System.out.println("in actor here");
                             loadDataForActor();
                         }
                     }

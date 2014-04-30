@@ -32,13 +32,15 @@ import com.impetus.kundera.query.Person;
 
 /**
  * Test case for Testing {@link EntityTransaction}
+ * 
  * @author amresh.singh
- *
+ * 
  */
 public class EntityTransactionTest
 {
 
     private EntityManagerFactory emf;
+
     private EntityManager em;
 
     @Before
@@ -48,11 +50,6 @@ public class EntityTransactionTest
         em = emf.createEntityManager();
     }
 
-    @Test
-    public void tests()
-    {
-        System.out.println("document indexer"+ IndexingConstants.class.getSimpleName());
-    }
     @Test
     public void testRollback()
     {
@@ -116,9 +113,8 @@ public class EntityTransactionTest
         Assert.assertNotSame("rollback", p.getPersonName());
     }
 
-
     @Test
-    public void testRollbackOnError() 
+    public void testRollbackOnError()
     {
         Person p = null;
         try
@@ -239,11 +235,11 @@ public class EntityTransactionTest
     @After
     public void tearDown() throws Exception
     {
-    	em.close();
-    	emf.close();    
-        DummyDatabase.INSTANCE.dropDatabase();       
-    }  
-    
+        em.close();
+        emf.close();
+        DummyDatabase.INSTANCE.dropDatabase();
+    }
+
     private Person prepareData(String rowKey, int age)
     {
         Person o = new Person();
@@ -252,11 +248,10 @@ public class EntityTransactionTest
         o.setAge(age);
         return o;
     }
-    
+
     private <E extends Object> E findById(Class<E> clazz, Object rowKey, EntityManager em)
     {
         return em.find(clazz, rowKey);
     }
-
 
 }

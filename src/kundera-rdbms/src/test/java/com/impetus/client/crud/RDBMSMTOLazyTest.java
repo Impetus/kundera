@@ -16,6 +16,7 @@
 package com.impetus.client.crud;
 
 import java.sql.SQLException;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -38,6 +39,7 @@ public class RDBMSMTOLazyTest
     private RDBMSCli cli;
 
     private static final String SCHEMA = "testdb";
+
     /**
      * @throws java.lang.Exception
      */
@@ -124,12 +126,48 @@ public class RDBMSMTOLazyTest
         Assert.assertEquals("a", foundPerson2.getAddress().getAddressId());
         Assert.assertEquals("sector 11", foundPerson2.getAddress().getStreet());
 
+        List<PersonLazyRDBMSMTO> results = em.createQuery("select p from PersonLazyRDBMSMTO p").getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertFalse(results.isEmpty());
+        Assert.assertEquals(2, results.size());
+
+        for (PersonLazyRDBMSMTO personLazyRDBMSMTO : results)
+        {
+            Assert.assertNotNull(personLazyRDBMSMTO);
+
+            if (personLazyRDBMSMTO.getPersonId().equals("1"))
+            {
+                Assert.assertEquals("KK", personLazyRDBMSMTO.getPersonName());
+            }
+            else
+            {
+                Assert.assertEquals("2", personLazyRDBMSMTO.getPersonId());
+                Assert.assertEquals("vives", personLazyRDBMSMTO.getPersonName());
+            }
+            Assert.assertNotNull(personLazyRDBMSMTO.getAddress());
+            Assert.assertEquals("a", personLazyRDBMSMTO.getAddress().getAddressId());
+            Assert.assertEquals("sector 11", personLazyRDBMSMTO.getAddress().getStreet());
+        }
+
+        results = em.createQuery("select p from PersonLazyRDBMSMTO p where p.personId = '1'").getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertFalse(results.isEmpty());
+        Assert.assertEquals(1, results.size());
+        
+        PersonLazyRDBMSMTO personLazyRDBMSMTO = results.get(0);
+
+        Assert.assertNotNull(personLazyRDBMSMTO);
+        Assert.assertEquals("KK", personLazyRDBMSMTO.getPersonName());
+        Assert.assertNotNull(personLazyRDBMSMTO.getAddress());
+        Assert.assertEquals("a", personLazyRDBMSMTO.getAddress().getAddressId());
+        Assert.assertEquals("sector 11", personLazyRDBMSMTO.getAddress().getStreet());
+
         em.remove(foundPerson1);
         em.remove(foundPerson2);
 
         foundPerson1 = em.find(PersonLazyRDBMSMTO.class, "1");
         foundPerson2 = em.find(PersonLazyRDBMSMTO.class, "2");
-        
+
         Assert.assertNull(foundPerson1);
         Assert.assertNull(foundPerson2);
     }
@@ -142,6 +180,7 @@ public class RDBMSMTOLazyTest
         }
         return em = emf.createEntityManager();
     }
+
     private void createSchema() throws SQLException
     {
         try
@@ -153,7 +192,7 @@ public class RDBMSMTOLazyTest
         }
         catch (Exception e)
         {
-            
+
             cli.update("DELETE FROM TESTDB.PERSONNEL");
             cli.update("DELETE FROM TESTDB.ADDRESS");
             cli.update("DROP TABLE TESTDB.PERSONNEL");
