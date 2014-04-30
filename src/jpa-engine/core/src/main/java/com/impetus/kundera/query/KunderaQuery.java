@@ -64,12 +64,14 @@ public class KunderaQuery
     /** The Constant INTRA_CLAUSE_OPERATORS. */
     public static final String[] INTRA_CLAUSE_OPERATORS = { "=", "LIKE", "IN", ">", ">=", "<", "<=", "<>", "NOT IN" };
 
-    /** The INTER pattern. */
+    /** The INTER pattern. *//*
     private static final Pattern INTER_CLAUSE_PATTERN = Pattern.compile(
-            "(\\s\\band\\b\\s|\\s\\bor\\b\\s|\\s\\bbetween\\b\\s|\\s\\b^[!?IN]\\s\\b(\\s\\b)|\\s\\b^[!?NOT IN]\\s\\b(\\s\\b|\\s\\b(\\s\\b)))(?=(?:(?:[^']*[^'\"]'){2})*[^']*$)", Pattern.CASE_INSENSITIVE);
-   /* private static final Pattern INTER_CLAUSE_PATTERN = Pattern.compile(
             "\\s\\band\\b\\s|\\s\\bor\\b\\s|\\s\\bbetween\\b\\s|\\s\\b^[!?IN]\\s\\b(\\s\\b)|\\s\\b^[!?NOT IN]\\s\\b(\\s\\b|\\s\\b(\\s\\b))", Pattern.CASE_INSENSITIVE);*/
 
+    /** The INTER pattern. */
+    private static final Pattern INTER_CLAUSE_PATTERN = Pattern.compile(
+            "(\\band\\b|\\bor\\b|\\bbetween\\b|\\s\\b^[!?IN]\\s\\b(\\s\\b)|\\s\\b^[!?NOT IN]\\s\\b(\\s\\b|\\s\\b(\\s\\b)))(?=(?:(?:[^']*[^'\"]'){2})*[^']*$)", Pattern.CASE_INSENSITIVE);
+    
     /** The INTRA pattern. */
     private static final Pattern INTRA_CLAUSE_PATTERN = Pattern.compile("=|\\s\\blike\\b|\\bnot in\\b|\\bin\\b|<>|>=|>|<=|<|\\s\\bset",
             Pattern.CASE_INSENSITIVE);
@@ -315,7 +317,7 @@ public class KunderaQuery
                     }
                     else
                     {
-                    	List<FilterClause> clauses = typedParameter.getParameters().get("?" + p.getPosition());
+                    List<FilterClause> clauses = typedParameter.getParameters().get("?" + p.getPosition());
                         if (clauses != null)
                         {
                             return clauses.get(0).getValue();
@@ -455,6 +457,18 @@ public class KunderaQuery
 
         // parse and structure for "between" clause , if present, else it will
         // return original clause
+        /*int i=0;
+        String temp=null;
+        while(clauses.iterator().hasNext())
+        {
+        
+        if(clauses.get(i).equals("AND") || clauses.get(i).equals("OR") || clauses.get(i).equals("BETWEEN"))
+        temp=" "+clauses.get(i)+" ";
+        clauses.set(i, temp);
+        
+        i++;
+        }*/
+        
         clauses = parseFilterForBetweenClause(clauses);
         // clauses must be alternate Inter and Intra combination, starting with
         // Intra.
@@ -462,12 +476,12 @@ public class KunderaQuery
 
         for (String clause : clauses)
         {
-        	if(Arrays.asList(INTER_CLAUSE_OPERATORS).contains(clause.toUpperCase().trim()) || (clause.startsWith("(") && clause.endsWith(")")))
-        	{
+        if(Arrays.asList(INTER_CLAUSE_OPERATORS).contains(clause.toUpperCase().trim()) || (clause.startsWith("(") && clause.endsWith(")")))
+        {
                 filtersQueue.add(clause.toUpperCase().trim());
                 newClause = true;
             }
-        	else if (newClause)
+        else if (newClause)
             {
                 List<String> tokens = tokenize(clause, INTRA_CLAUSE_PATTERN,false);
 
@@ -718,9 +732,9 @@ public class KunderaQuery
                     : null;
             if (clauses != null)
             {
-            	for (FilterClause clause : clauses) {
-            		clause.setValue(value);
-				}
+            for (FilterClause clause : clauses) {
+            clause.setValue(value);
+}
             }
             else
             {
@@ -998,7 +1012,7 @@ public class KunderaQuery
             addSplit(isInterClause, split, s);
 //
 //            if(!s.equals(""))
-//            	split.add(s);
+//            split.add(s);
             /*if(s.startsWith("("))
             {
                 split.add("(");
@@ -1009,11 +1023,13 @@ public class KunderaQuery
                 split.add(s.substring(0,s.lastIndexOf(")")));
             }*/
             s = matcher.group();
+            if(s.equalsIgnoreCase("AND") || s.equalsIgnoreCase("OR") || s.equalsIgnoreCase("BETWEEN"))
+            s=" "+s+" ";
             // if next group starts with "(" and last record in split ends with IN on NOT IN, append in previous split only.
             split.add(s.toUpperCase());
             lastIndex = matcher.end();
             if(!isInterClause)
-            	break;
+            break;
             // count++;
         }
         s = where.substring(lastIndex).trim();
@@ -1293,7 +1309,7 @@ public class KunderaQuery
                 parameters = new HashMap<String, List<FilterClause>>();
             }
             if(!parameters.containsKey(key)) {
-            	parameters.put(key, new ArrayList<KunderaQuery.FilterClause>());
+            parameters.put(key, new ArrayList<KunderaQuery.FilterClause>());
             }
             parameters.get(key).add(clause);
         }
