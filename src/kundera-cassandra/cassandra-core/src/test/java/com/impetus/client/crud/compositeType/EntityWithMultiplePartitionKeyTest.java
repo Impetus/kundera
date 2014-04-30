@@ -52,10 +52,17 @@ public class EntityWithMultiplePartitionKeyTest
         CassandraCli.cassandraSetUp();
         CassandraCli.initClient();
         CassandraCli.createKeySpace(_keyspace);
-        CassandraCli
-                .executeCqlQuery(
-                        "create table \"EntityWithMultiplePartitionKey\"(\"partitionKey1\" text, \"partitionKey2\" int, \"clusterkey1\" text, \"clusterkey2\" int, \"entityDiscription\" text, action text, PRIMARY KEY((\"partitionKey1\", \"partitionKey2\"), \"clusterkey1\", \"clusterkey2\"))",
-                        _keyspace);
+        try
+        {
+            CassandraCli
+                    .executeCqlQuery(
+                            "create table \"EntityWithMultiplePartitionKey\"(\"partitionKey1\" text, \"partitionKey2\" int, \"clusterkey1\" text, \"clusterkey2\" int, \"entityDiscription\" text, action text, PRIMARY KEY((\"partitionKey1\", \"partitionKey2\"), \"clusterkey1\", \"clusterkey2\"))",
+                            _keyspace);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
         Map<String, String> propertymap = new HashMap<String, String>();
         propertymap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "");
         emf = Persistence.createEntityManagerFactory("compositedatatype", propertymap);
@@ -135,7 +142,7 @@ public class EntityWithMultiplePartitionKeyTest
 
     }
 
-    // @Test
+    @Test
     public void testQuery()
     {
         EntityManager em = emf.createEntityManager();
@@ -189,7 +196,7 @@ public class EntityWithMultiplePartitionKeyTest
 
         em.clear();
 
-        // Retrieve.
+        // Select All query.
         List<EntityWithMultiplePartitionKey> foundEntitys = em.createQuery(
                 "select e from EntityWithMultiplePartitionKey e").getResultList();
 
@@ -197,23 +204,207 @@ public class EntityWithMultiplePartitionKeyTest
         Assert.assertFalse(foundEntitys.isEmpty());
         Assert.assertEquals(3, foundEntitys.size());
 
+        int count = 0;
         for (EntityWithMultiplePartitionKey foundEntity : foundEntitys)
         {
             Assert.assertNotNull(foundEntity);
             Assert.assertNotNull(foundEntity.getId());
             Assert.assertNotNull(foundEntity.getId().getPartitionKey());
-            Assert.assertEquals("persisting", foundEntity.getAction());
+            Assert.assertEquals("Persisting", foundEntity.getAction());
+            Assert.assertEquals("Entity to test composite key with multiple partition key.",
+                    foundEntity.getEntityDiscription());
+
+            if (foundEntity.getId().getClusterkey1().equals("clusterkey1"))
+            {
+                Assert.assertEquals("clusterkey1", foundEntity.getId().getClusterkey1());
+                Assert.assertEquals(11, foundEntity.getId().getClusterkey2());
+                Assert.assertEquals("partitionKey1", foundEntity.getId().getPartitionKey().getPartitionKey1());
+                Assert.assertEquals(1, foundEntity.getId().getPartitionKey().getPartitionKey2());
+                count++;
+            }
+            else if (foundEntity.getId().getClusterkey1().equals("clusterkey2"))
+            {
+                Assert.assertEquals(111, foundEntity.getId().getClusterkey2());
+                Assert.assertEquals("partitionKey2", foundEntity.getId().getPartitionKey().getPartitionKey1());
+                Assert.assertEquals(2, foundEntity.getId().getPartitionKey().getPartitionKey2());
+                count++;
+            }
+            else
+            {
+                Assert.assertEquals("clusterkey3", foundEntity.getId().getClusterkey1());
+                Assert.assertEquals(1111, foundEntity.getId().getClusterkey2());
+                Assert.assertEquals("partitionKey3", foundEntity.getId().getPartitionKey().getPartitionKey1());
+                Assert.assertEquals(3, foundEntity.getId().getPartitionKey().getPartitionKey2());
+                count++;
+            }
+        }
+        Assert.assertEquals(3, count);
+        em.clear();
+
+        // Select by both partition key query.
+        foundEntitys = em
+                .createQuery(
+                        "select e from EntityWithMultiplePartitionKey e where e.id.partitionKey.partitionKey1=partitionKey1 and e.id.partitionKey.partitionKey2=1")
+                .getResultList();
+
+        Assert.assertNotNull(foundEntitys);
+        Assert.assertFalse(foundEntitys.isEmpty());
+        Assert.assertEquals(1, foundEntitys.size());
+
+        count = 0;
+        for (EntityWithMultiplePartitionKey foundEntity : foundEntitys)
+        {
+            Assert.assertNotNull(foundEntity);
+            Assert.assertNotNull(foundEntity.getId());
+            Assert.assertNotNull(foundEntity.getId().getPartitionKey());
+            Assert.assertEquals("Persisting", foundEntity.getAction());
             Assert.assertEquals("Entity to test composite key with multiple partition key.",
                     foundEntity.getEntityDiscription());
             Assert.assertEquals("clusterkey1", foundEntity.getId().getClusterkey1());
             Assert.assertEquals(11, foundEntity.getId().getClusterkey2());
             Assert.assertEquals("partitionKey1", foundEntity.getId().getPartitionKey().getPartitionKey1());
             Assert.assertEquals(1, foundEntity.getId().getPartitionKey().getPartitionKey2());
+            count++;
+        }
+        Assert.assertEquals(1, count);
 
+        // Select by both partition key query and one cluster key.
+        foundEntitys = em
+                .createQuery(
+                        "select e from EntityWithMultiplePartitionKey e where e.id.partitionKey.partitionKey1=partitionKey1 and e.id.partitionKey.partitionKey2=1 and e.id.clusterkey1=clusterkey1")
+                .getResultList();
+
+        Assert.assertNotNull(foundEntitys);
+        Assert.assertFalse(foundEntitys.isEmpty());
+        Assert.assertEquals(1, foundEntitys.size());
+
+        count = 0;
+        for (EntityWithMultiplePartitionKey foundEntity : foundEntitys)
+        {
+            Assert.assertNotNull(foundEntity);
+            Assert.assertNotNull(foundEntity.getId());
+            Assert.assertNotNull(foundEntity.getId().getPartitionKey());
+            Assert.assertEquals("Persisting", foundEntity.getAction());
+            Assert.assertEquals("Entity to test composite key with multiple partition key.",
+                    foundEntity.getEntityDiscription());
+            Assert.assertEquals("clusterkey1", foundEntity.getId().getClusterkey1());
+            Assert.assertEquals(11, foundEntity.getId().getClusterkey2());
+            Assert.assertEquals("partitionKey1", foundEntity.getId().getPartitionKey().getPartitionKey1());
+            Assert.assertEquals(1, foundEntity.getId().getPartitionKey().getPartitionKey2());
+            count++;
+        }
+        Assert.assertEquals(1, count);
+
+        // Select by both partition key query.
+        foundEntitys = em
+                .createQuery("select e from EntityWithMultiplePartitionKey e where e.id.partitionKey = :partitionKey")
+                .setParameter("partitionKey", partitionKey1).getResultList();
+
+        Assert.assertNotNull(foundEntitys);
+        Assert.assertFalse(foundEntitys.isEmpty());
+        Assert.assertEquals(1, foundEntitys.size());
+
+        count = 0;
+        for (EntityWithMultiplePartitionKey foundEntity : foundEntitys)
+        {
+            Assert.assertNotNull(foundEntity);
+            Assert.assertNotNull(foundEntity.getId());
+            Assert.assertNotNull(foundEntity.getId().getPartitionKey());
+            Assert.assertEquals("Persisting", foundEntity.getAction());
+            Assert.assertEquals("Entity to test composite key with multiple partition key.",
+                    foundEntity.getEntityDiscription());
+            Assert.assertEquals("clusterkey1", foundEntity.getId().getClusterkey1());
+            Assert.assertEquals(11, foundEntity.getId().getClusterkey2());
+            Assert.assertEquals("partitionKey1", foundEntity.getId().getPartitionKey().getPartitionKey1());
+            Assert.assertEquals(1, foundEntity.getId().getPartitionKey().getPartitionKey2());
+            count++;
+        }
+        Assert.assertEquals(1, count);
+
+        // Select by first partition key with equal clause and second partition
+        // key with IN clause.
+        try
+        {
+            foundEntitys = em
+                    .createQuery(
+                            "select e from EntityWithMultiplePartitionKey e where e.id.partitionKey.partitionKey1=partitionKey1 and e.id.partitionKey.partitionKey2 IN (1, 2, 3)")
+                    .getResultList();
+
+            Assert.assertNotNull(foundEntitys);
+            Assert.assertFalse(foundEntitys.isEmpty());
+            Assert.assertEquals(1, foundEntitys.size());
+
+            count = 0;
+            for (EntityWithMultiplePartitionKey foundEntity : foundEntitys)
+            {
+                Assert.assertNotNull(foundEntity);
+                Assert.assertNotNull(foundEntity.getId());
+                Assert.assertNotNull(foundEntity.getId().getPartitionKey());
+                Assert.assertEquals("Persisting", foundEntity.getAction());
+                Assert.assertEquals("Entity to test composite key with multiple partition key.",
+                        foundEntity.getEntityDiscription());
+                Assert.assertEquals("clusterkey1", foundEntity.getId().getClusterkey1());
+                Assert.assertEquals(11, foundEntity.getId().getClusterkey2());
+                Assert.assertEquals("partitionKey1", foundEntity.getId().getPartitionKey().getPartitionKey1());
+                Assert.assertEquals(1, foundEntity.getId().getPartitionKey().getPartitionKey2());
+                count++;
+            }
+            Assert.assertEquals(1, count);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
         }
 
-        em.clear();
+        // Select by composite id object query.
+        try
+        {
+            foundEntitys = em.createQuery("select e from EntityWithMultiplePartitionKey e where e.id = :id")
+                    .setParameter("id", id1).getResultList();
 
+            Assert.assertNotNull(foundEntitys);
+            Assert.assertFalse(foundEntitys.isEmpty());
+            Assert.assertEquals(1, foundEntitys.size());
+
+            count = 0;
+            for (EntityWithMultiplePartitionKey foundEntity : foundEntitys)
+            {
+                Assert.assertNotNull(foundEntity);
+                Assert.assertNotNull(foundEntity.getId());
+                Assert.assertNotNull(foundEntity.getId().getPartitionKey());
+                Assert.assertEquals("Persisting", foundEntity.getAction());
+                Assert.assertEquals("Entity to test composite key with multiple partition key.",
+                        foundEntity.getEntityDiscription());
+                Assert.assertEquals("clusterkey1", foundEntity.getId().getClusterkey1());
+                Assert.assertEquals(11, foundEntity.getId().getClusterkey2());
+                Assert.assertEquals("partitionKey1", foundEntity.getId().getPartitionKey().getPartitionKey1());
+                Assert.assertEquals(1, foundEntity.getId().getPartitionKey().getPartitionKey2());
+                count++;
+            }
+            Assert.assertEquals(1, count);
+        }
+        catch (Exception e)
+        {
+            Assert.fail();
+        }
+
+        // Select by first partition key query.
+        try
+        {
+            foundEntitys = em
+                    .createQuery(
+                            "select e from EntityWithMultiplePartitionKey e where e.id.partitionKey.partitionKey1=partitionKey1")
+                    .getResultList();
+
+            Assert.fail();
+        }
+        catch (Exception e)
+        {
+            Assert.assertEquals(
+                    "All part of partition key must be in where clause, but provided only first part. ",
+                    "javax.persistence.PersistenceException: com.impetus.kundera.KunderaException: InvalidRequestException(why:Partition key part partitionKey2 must be restricted since preceding part is)",
+                    e.getMessage());
+        }
     }
 
 }
