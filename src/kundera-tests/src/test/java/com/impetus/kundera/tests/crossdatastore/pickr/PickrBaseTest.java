@@ -223,8 +223,7 @@ public abstract class PickrBaseTest
                 }
                 catch (SQLException e1)
                 {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
+                	log.warn(e1.getMessage());
                 }
             }
         }
