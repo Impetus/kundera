@@ -54,6 +54,12 @@ public class SimpleCRUDTest
         emf = Persistence.createEntityManagerFactory(IMDB_PU, propertyMap);
         em = emf.createEntityManager();
     }
+    
+    @Test
+    public void testDummy()
+    {
+        
+    }
 
 //    @Test
     public void should_save_entity() throws Exception
