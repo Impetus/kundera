@@ -210,7 +210,7 @@ public class CassandraSchemaGenerationUsingXmlTest
             Assert.fail();
             logger.error("Error in test, caused by: .", te.getMessage());
         }
-/*        catch (UnavailableException e)
+        catch (UnavailableException e)
         {
             Assert.fail();
             logger.error("Error in test, caused by: .", e.getMessage());
@@ -224,7 +224,7 @@ public class CassandraSchemaGenerationUsingXmlTest
         {
             Assert.fail();
             logger.error("Error in test, caused by: .", e.getMessage());
-        }*/
+        }
         catch (CharacterCodingException e)
         {
             Assert.fail();

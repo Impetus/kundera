@@ -514,6 +514,21 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
                 log.error("Error during persist while executing query {}, Caused by: .", insert_Query, e);
                 throw new KunderaException(e);
             }
+            catch (UnavailableException e)
+            {
+                log.error("Error during persist while executing query {}, Caused by: .", insert_Query, e);
+                throw new KunderaException(e);
+            }
+            catch (TimedOutException e)
+            {
+                log.error("Error during persist while executing query {}, Caused by: .", insert_Query, e);
+                throw new KunderaException(e);
+            }
+            catch (SchemaDisagreementException e)
+            {
+                log.error("Error during persist while executing query {}, Caused by: .", insert_Query, e);
+                throw new KunderaException(e);
+            }
         }
         else
         {

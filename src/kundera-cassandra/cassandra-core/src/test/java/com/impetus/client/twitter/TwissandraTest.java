@@ -96,6 +96,19 @@ public class TwissandraTest extends TwitterTestBaseCassandra
         {
             
         }
+        catch (InvalidRequestException e)
+        {
+        }
+        catch (UnavailableException e)
+        {
+        }
+        catch (TimedOutException e)
+        {
+        }
+        catch (SchemaDisagreementException e)
+        {
+
+        }
     }
 
     @Override

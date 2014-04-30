@@ -24,7 +24,7 @@ import com.impetus.kundera.index.Index;
 import com.impetus.kundera.index.IndexCollection;
 
 @Embeddable
-@IndexCollection(columns = { @Index(name = "tweetDate"), @Index(name = "firstName") })
+//@IndexCollection(columns = { @Index(name = "tweetDate"), @Index(name = "firstName") })
 public class CompositeUser
 {
 

@@ -34,7 +34,10 @@ import javax.persistence.metamodel.EntityType;
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.IndexExpression;
 import org.apache.cassandra.thrift.InvalidRequestException;
+import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.SuperColumn;
+import org.apache.cassandra.thrift.TimedOutException;
+import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
@@ -124,15 +127,23 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
             log.error("Error while persisting record, Caused by: .", e);
             throw new KunderaException(e);
         }
-        /*
-         * catch (UnavailableException e) {
-         * log.error("Error while persisting record, Caused by: .", e); throw
-         * new KunderaException(e); } catch (TimedOutException e) {
-         * log.error("Error while persisting record, Caused by: .", e); throw
-         * new KunderaException(e); } catch (SchemaDisagreementException e) {
-         * log.error("Error while persisting record, Caused by: .", e); throw
-         * new KunderaException(e); }
-         */catch (UnsupportedEncodingException e)
+
+        catch (UnavailableException e)
+        {
+            log.error("Error while persisting record, Caused by: .", e);
+            throw new KunderaException(e);
+        }
+        catch (TimedOutException e)
+        {
+            log.error("Error while persisting record, Caused by: .", e);
+            throw new KunderaException(e);
+        }
+        catch (SchemaDisagreementException e)
+        {
+            log.error("Error while persisting record, Caused by: .", e);
+            throw new KunderaException(e);
+        }
+        catch (UnsupportedEncodingException e)
         {
             log.error("Error while persisting record, Caused by: .", e);
             throw new KunderaException(e);

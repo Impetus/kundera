@@ -872,6 +872,26 @@ public class StudentCassandraTest extends StudentCassandraBase<StudentCassandra>
         {
 
         }
+        catch (InvalidRequestException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (UnavailableException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (TimedOutException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (SchemaDisagreementException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -889,6 +909,26 @@ public class StudentCassandraTest extends StudentCassandraBase<StudentCassandra>
         catch (TException e)
         {
 
+        }
+        catch (InvalidRequestException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (UnavailableException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (TimedOutException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (SchemaDisagreementException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
     }
 

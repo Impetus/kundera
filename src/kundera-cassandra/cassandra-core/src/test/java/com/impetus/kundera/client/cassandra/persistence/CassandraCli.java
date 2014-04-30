@@ -140,6 +140,14 @@ public final class CassandraCli
             {
                 log.error("Error while adding keyspace, Caused by: .", e1);
             }
+            catch (InvalidRequestException e2)
+            {
+                log.error("Error while adding keyspace, Caused by: .", e2);
+            }
+            catch (SchemaDisagreementException e3)
+            {
+                log.error("Error while adding keyspace, Caused by: .", e3);
+            }
 
         }
 

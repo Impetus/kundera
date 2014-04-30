@@ -364,6 +364,15 @@ public class CassandraSchemaOperationTest
         {
             Assert.fail("failed caused by:" + e.getMessage());
         }
+        catch (SchemaDisagreementException e)
+        {
+            Assert.fail("failed caused by:" + e.getMessage());
+        }
+        catch (NotFoundException e)
+        {
+            // TODO Auto-generated catch block
+            Assert.fail("failed caused by:" + e.getMessage());
+        }
     }
 
     @Test

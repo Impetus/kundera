@@ -50,7 +50,7 @@ import org.apache.cassandra.db.marshal.ListType;
 import org.apache.cassandra.db.marshal.LongType;
 import org.apache.cassandra.db.marshal.MapType;
 import org.apache.cassandra.db.marshal.SetType;
-import org.apache.cassandra.db.marshal.TimestampType;
+//import org.apache.cassandra.db.marshal.TimestampType;
 import org.apache.cassandra.db.marshal.UTF8Type;
 import org.apache.cassandra.db.marshal.UUIDType;
 import org.apache.commons.codec.binary.Hex;
@@ -833,7 +833,7 @@ public final class CQLTranslator
             validationClassMapper.put(UUIDType.class.getSimpleName(), "uuid");
 
             validationClassMapper.put(DateType.class.getSimpleName(), "timestamp");
-            validationClassMapper.put(TimestampType.class.getSimpleName(), "timestamp");
+//            validationClassMapper.put(TimestampType.class.getSimpleName(), "timestamp");
 
             // collection types
             validationClassMapper.put(ListType.class.getSimpleName(), "list");

@@ -275,19 +275,19 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      */
     private void createKeyspace() throws Exception
     {
-        if (cql_version != null && cql_version.equals(CassandraConstants.CQL_VERSION_3_0))
+       /* if (cql_version != null && cql_version.equals(CassandraConstants.CQL_VERSION_3_0))
         {
             onCql3CreateKeyspace();
         }
         else
-        {
+        {*/
             Map<String, String> strategy_options = new HashMap<String, String>();
             List<CfDef> cfDefs = new ArrayList<CfDef>();
             KsDef ksDef = new KsDef(databaseName, csmd.getPlacement_strategy(databaseName), cfDefs);
             setProperties(ksDef, strategy_options);
             ksDef.setStrategy_options(strategy_options);
             cassandra_client.system_add_keyspace(ksDef);
-        }
+//        }
     }
 
     private void onCql3CreateKeyspace() throws InvalidRequestException, UnavailableException, TimedOutException,

@@ -602,7 +602,30 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
                 }
                 // Set replication factor, the value MUST be an int
                 ksDef.strategy_options.put("replication_factor", "1");
-                CassandraCli.client.system_add_keyspace(ksDef);
+                try
+                {
+                    CassandraCli.client.system_add_keyspace(ksDef);
+                }
+                catch (InvalidRequestException e1)
+                {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
+                catch (SchemaDisagreementException e1)
+                {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
+            }
+            catch (InvalidRequestException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            catch (SchemaDisagreementException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
             }
 
             CassandraCli.client.set_keyspace(keyspace);
@@ -610,6 +633,11 @@ public class StudentCassandraBigDecimalTest extends CassandraBase
         catch (TException e)
         {
             
+        }
+        catch (InvalidRequestException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
 
     }
