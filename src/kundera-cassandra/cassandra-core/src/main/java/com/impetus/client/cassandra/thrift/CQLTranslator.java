@@ -276,21 +276,41 @@ public final class CQLTranslator
 
         for (String tableName : columnBuilders.keySet())
         {
-            StringBuilder builder = builders.get(tableName);
-            StringBuilder columnBuilder = columnBuilders.get(tableName);
-            SingularAttribute idAttribute = m.getIdAttribute();
-            Field field = (Field) idAttribute.getJavaMember();
-            if (metaModel.isEmbeddable(((AbstractAttribute) idAttribute).getBindableJavaType()))
+            translateCompositeId(record, m, type, metaModel, builders, columnBuilders, externalProperties,
+                    kunderaMetadata, tableName, m.getIdAttribute());
+        }
+
+        // on inherited columns.
+        onDiscriminatorColumn(builders.get(m.getTableName()), columnBuilders.get(m.getTableName()), entityType);
+    }
+
+    private void translateCompositeId(final Object record, final EntityMetadata m, TranslationType type,
+            MetamodelImpl metaModel, Map<String, StringBuilder> builders, Map<String, StringBuilder> columnBuilders,
+            Map<String, Object> externalProperties, final KunderaMetadata kunderaMetadata, String tableName,
+            SingularAttribute attribute)
+    {
+        StringBuilder builder = builders.get(tableName);
+        StringBuilder columnBuilder = columnBuilders.get(tableName);
+        Field field = (Field) attribute.getJavaMember();
+        if (metaModel.isEmbeddable(((AbstractAttribute) attribute).getBindableJavaType()))
+        {
+            // builder.
+            // Means it is a compound key! As other
+            // iterate for it's fields to populate it's values in
+            // order!
+            EmbeddableType compoundKey = metaModel.embeddable(field.getType());
+            Object compoundKeyObj = PropertyAccessorHelper.getObject(record, field);
+            for (Field compositeColumn : field.getType().getDeclaredFields())
             {
-                // builder.
-                // Means it is a compound key! As other
-                // iterate for it's fields to populate it's values in
-                // order!
-                EmbeddableType compoundKey = metaModel.embeddable(field.getType());
-                Object compoundKeyObj = PropertyAccessorHelper.getObject(record, field);
-                for (Field compositeColumn : field.getType().getDeclaredFields())
+                if (!ReflectUtils.isTransientOrStatic(compositeColumn))
                 {
-                    if (!ReflectUtils.isTransientOrStatic(compositeColumn))
+                    attribute = (SingularAttribute) compoundKey.getAttribute(compositeColumn.getName());
+                    if (metaModel.isEmbeddable(((AbstractAttribute) attribute).getBindableJavaType()))
+                    {
+                        translateCompositeId(compoundKeyObj, m, type, metaModel, builders, columnBuilders,
+                                externalProperties, kunderaMetadata, tableName, attribute);
+                    }
+                    else
                     {
                         onTranslation(type, builder, columnBuilder,
                                 ((AbstractAttribute) (compoundKey.getAttribute(compositeColumn.getName())))
@@ -298,15 +318,12 @@ public final class CQLTranslator
                     }
                 }
             }
-            else if (!ReflectUtils.isTransientOrStatic(field))
-            {
-                onTranslation(type, builder, columnBuilder,
-                        CassandraUtilities.getIdColumnName(kunderaMetadata, m, externalProperties), record, field);
-            }
         }
-
-        // on inherited columns.
-        onDiscriminatorColumn(builders.get(m.getTableName()), columnBuilders.get(m.getTableName()), entityType);
+        else if (!ReflectUtils.isTransientOrStatic(field))
+        {
+            onTranslation(type, builder, columnBuilder,
+                    CassandraUtilities.getIdColumnName(kunderaMetadata, m, externalProperties), record, field);
+        }
     }
 
     private void onDiscriminatorColumn(StringBuilder builder, StringBuilder columnBuilder, EntityType entityType)

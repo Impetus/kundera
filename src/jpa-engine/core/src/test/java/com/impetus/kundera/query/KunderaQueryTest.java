@@ -531,12 +531,6 @@ public class KunderaQueryTest
         List<String> personIdList = new ArrayList<String>();
         personIdList.add("personId");
 
-//        Object value = kunderaQuery.getClauseValue(":name");
-//        Assert.assertNotNull(value);
-//        Assert.assertEquals(nameList, value);
-//        value = kunderaQuery.getClauseValue(":ageList");
-//        Assert.assertNotNull(value);
-//        Assert.assertEquals(ageList, value);
         Object value = kunderaQuery.getClauseValue(":salaryList");
         Assert.assertNotNull(value);
         Assert.assertEquals(salaryList, value);

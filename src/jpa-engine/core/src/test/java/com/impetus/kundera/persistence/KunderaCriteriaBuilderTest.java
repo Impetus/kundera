@@ -236,7 +236,6 @@ public class KunderaCriteriaBuilderTest
         embedQuery.where(criteriaBuilder.equal(from.get("personalDetail").get("phoneNo"), "91234567"));
         
         String actual = CriteriaQueryTranslator.translate(embedQuery);
-        System.out.println(actual);
         Assert.assertEquals(expected.trim(), actual.trim());
     }
 

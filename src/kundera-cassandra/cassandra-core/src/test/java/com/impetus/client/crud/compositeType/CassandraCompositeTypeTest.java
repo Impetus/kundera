@@ -179,13 +179,6 @@ public class CassandraCompositeTypeTest
 
         final String withFirstCompositeColClause = "Select u from CassandraPrimeUser u where u.key.userId = :userId";
 
-        // secondary index support over compound key is not enabled in cassandra
-        // composite keys yet. DO NOT DELETE/UNCOMMENT.
-
-        // final String withClauseOnNoncomposite =
-        // "Select u from CassandraPrimeUser u where u.tweetDate = ?1";
-        //
-
         final String withSecondCompositeColClause = "Select u from CassandraPrimeUser u where u.key.tweetId = :tweetId";
         final String withBothCompositeColClause = "Select u from CassandraPrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId";
         final String withAllCompositeColClause = "Select u from CassandraPrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId = :timeLineId";
@@ -213,7 +206,7 @@ public class CassandraCompositeTypeTest
         results = q.getResultList();
         Assert.assertEquals(1, results.size());
         Assert.assertNull(results.get(0).getKey().getFullName());
-        
+
         // Query with composite key clause.
         q = em.createQuery(withBothCompositeColClause);
         q.setParameter("userId", "mevivs");
@@ -261,7 +254,7 @@ public class CassandraCompositeTypeTest
         Assert.assertEquals(1, results.size());
         Assert.assertEquals("my first tweet", results.get(0).getTweetBody());
         Assert.assertNull(results.get(0).getTweetDate());
-        
+
         final String selectiveColumnTweetDateWithAllCompositeColClause = "Select u.tweetDate from CassandraPrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId = :timeLineId";
         // Query for selective column tweetDate with composite key clause.
         q = em.createQuery(selectiveColumnTweetDateWithAllCompositeColClause);
@@ -472,9 +465,11 @@ public class CassandraCompositeTypeTest
 
         List<CassandraPrimeUser> results = q.getResultList();
         Assert.assertNotNull(results);
+        Assert.assertEquals(2, results.size());
+        Assert.assertNotNull(results.get(0));
+        Assert.assertNotNull(results.get(1));
         Assert.assertEquals("my first tweet", results.get(0).getTweetBody());
         Assert.assertEquals("my third tweet", results.get(1).getTweetBody());
-        Assert.assertEquals(2, results.size());
         Assert.assertNull(results.get(0).getKey().getFullName());
 
         inClause = "Select u from CassandraPrimeUser u where u.key.userId IN ('\"mevivs\"','\"kmishra\"') ORDER BY u.key.tweetId ASC";
@@ -585,7 +580,6 @@ public class CassandraCompositeTypeTest
         EntityManager em = emf.createEntityManager();
 
         UUID timeLineId = UUID.randomUUID();
-        long t1 = System.currentTimeMillis();
         for (int i = 0; i < 500; i++)
         {
             CassandraCompoundKey key = new CassandraCompoundKey("mevivs", i, timeLineId);
@@ -597,8 +591,6 @@ public class CassandraCompositeTypeTest
             user.setTweetDate(currentDate);
             em.persist(user);
         }
-        long t2 = System.currentTimeMillis();
-        System.out.println("Total time taken = " + (t2 - t1));
 
         em.clear();
 

@@ -76,10 +76,6 @@ public class MetadataBuilder
 
     public MetadataBuilder(String puName, String client, Map puProperties, KunderaMetadata kunderaMetadata)
     {
-        if(kunderaMetadata == null)
-        {
-            System.out.println();
-        }
         this.persistenceUnit = puName;
         this.client = client;
         this.puProperties = puProperties;
@@ -254,10 +250,6 @@ public class MetadataBuilder
      */
     private void addNamedNativeQueryMetadata(Class clazz)
     {
-        if(kunderaMetadata == null)
-        {
-            System.out.println();
-        }
         ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
         String name, query = null;
         if (clazz.isAnnotationPresent(NamedQuery.class))

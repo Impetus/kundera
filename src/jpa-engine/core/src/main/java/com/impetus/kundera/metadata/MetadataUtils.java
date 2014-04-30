@@ -117,7 +117,8 @@ public class MetadataUtils
      *            the m
      * @return the map
      */
-    public static Map<String, Field> createSuperColumnsFieldMap(final EntityMetadata m, final KunderaMetadata kunderaMetadata)
+    public static Map<String, Field> createSuperColumnsFieldMap(final EntityMetadata m,
+            final KunderaMetadata kunderaMetadata)
     {
         Map<String, Field> superColumnNameToFieldMap = new HashMap<String, Field>();
         getEmbeddableType(m, null, superColumnNameToFieldMap, kunderaMetadata);
@@ -299,10 +300,9 @@ public class MetadataUtils
         }
         else
         {
-            m.setSchema(StringUtils.isBlank(schemaStr)?null:schemaStr);
+            m.setSchema(StringUtils.isBlank(schemaStr) ? null : schemaStr);
         }
     }
-
 
     /**
      * Returns true, if use of secondry index is available, else false.
@@ -316,24 +316,21 @@ public class MetadataUtils
         return clientMetadata != null ? clientMetadata.isUseSecondryIndex() : false;
     }
 
-    
-   /* *//**
+    /* *//**
      * Returns lucene indexing directory.
      * 
      * @param persistenceUnit
      *            persistence unit name
      * @return lucene directory
-     *//*
-    public static String getLuceneDirectory(String persistenceUnit)
-    {
-        if (!useSecondryIndex(persistenceUnit))
-        {
-            ClientMetadata clientMetadata = kunderaMetadata.getClientMetadata(persistenceUnit);
-            return clientMetadata.getLuceneIndexDir();
-        }
-
-        return null;
-    }*/
+     */
+    /*
+     * public static String getLuceneDirectory(String persistenceUnit) { if
+     * (!useSecondryIndex(persistenceUnit)) { ClientMetadata clientMetadata =
+     * kunderaMetadata.getClientMetadata(persistenceUnit); return
+     * clientMetadata.getLuceneIndexDir(); }
+     * 
+     * return null; }
+     */
 
     /**
      * Returns mapped relational name, in case of bi directional mapping, it
@@ -343,7 +340,8 @@ public class MetadataUtils
      *            holding relation.
      * @return mapped/join column name.
      */
-    public static String getMappedName(EntityMetadata parentMetadata, Relation relation, final KunderaMetadata kunderaMetadata)
+    public static String getMappedName(EntityMetadata parentMetadata, Relation relation,
+            final KunderaMetadata kunderaMetadata)
     {
         if (relation != null)
         {
@@ -374,22 +372,27 @@ public class MetadataUtils
      *            <code>criteria</code> is column field name
      * @return the enclosing document name
      */
-    public static String getEnclosingEmbeddedFieldName(EntityMetadata m, String criteria, boolean viaColumnName, final KunderaMetadata kunderaMetadata)
+    public static String getEnclosingEmbeddedFieldName(EntityMetadata m, String criteria, boolean viaColumnName,
+            final KunderaMetadata kunderaMetadata)
     {
         String enclosingEmbeddedFieldName = null;
 
         StringTokenizer strToken = new StringTokenizer(criteria, ".");
-        String embeddedFieldName = null;
         String embeddableAttributeName = null;
+        String embeddedFieldName = null;
+        String nestedEmbeddedFieldName = null;
 
-        while (strToken.hasMoreElements())
+        if (strToken.countTokens() > 0)
         {
             embeddableAttributeName = strToken.nextToken();
-
-            if (strToken.countTokens() > 0)
-            {
-                embeddedFieldName = strToken.nextToken();
-            }
+        }
+        if (strToken.countTokens() > 0)
+        {
+            embeddedFieldName = strToken.nextToken();
+        }
+        if (strToken.countTokens() > 0)
+        {
+            nestedEmbeddedFieldName = strToken.nextToken();
         }
 
         Metamodel metaModel = kunderaMetadata.getApplicationMetadata().getMetamodel(m.getPersistenceUnit());
@@ -402,21 +405,50 @@ public class MetadataUtils
             if (((MetamodelImpl) metaModel).isEmbeddable(((AbstractAttribute) attribute).getBindableJavaType()))
             {
                 EmbeddableType embeddable = metaModel.embeddable(((AbstractAttribute) attribute).getBindableJavaType());
-                Iterator<Attribute> iter = embeddable.getAttributes().iterator();
-                while (iter.hasNext())
+                Iterator<Attribute> attributeIter = embeddable.getAttributes().iterator();
+                while (attributeIter.hasNext())
                 {
-                    AbstractAttribute attrib = (AbstractAttribute) iter.next();
+                    AbstractAttribute attrib = (AbstractAttribute) attributeIter.next();
 
                     if (viaColumnName && attrib.getName().equals(embeddedFieldName))
                     {
-                        enclosingEmbeddedFieldName = attribute.getName();
-                        break;
+                        if (nestedEmbeddedFieldName != null
+                                && ((MetamodelImpl) metaModel).isEmbeddable(((AbstractAttribute) attrib)
+                                        .getBindableJavaType()))
+                        {
+                            EmbeddableType nestedEmbeddable = metaModel.embeddable(((AbstractAttribute) attrib)
+                                    .getBindableJavaType());
+                            Iterator<Attribute> iter = embeddable.getAttributes().iterator();
+                            while (iter.hasNext())
+                            {
+                                AbstractAttribute nestedAttribute = (AbstractAttribute) iter.next();
+
+                                if (viaColumnName && nestedAttribute.getName().equals(embeddedFieldName))
+                                {
+                                    return nestedAttribute.getName();
+                                }
+
+                                if (!viaColumnName && nestedAttribute.getJPAColumnName().equals(embeddedFieldName))
+                                {
+                                    return nestedAttribute.getName();
+                                }
+                            }
+                        }
+                        else if (nestedEmbeddedFieldName != null
+                                && !((MetamodelImpl) metaModel).isEmbeddable(((AbstractAttribute) attrib)
+                                        .getBindableJavaType()))
+                        {
+                            return null;
+                        }
+                        else
+                        {
+                            return attribute.getName();
+                        }
                     }
 
                     if (!viaColumnName && attrib.getJPAColumnName().equals(embeddedFieldName))
                     {
-                        enclosingEmbeddedFieldName = attribute.getName();
-                        break;
+                        return attribute.getName();
                     }
                 }
             }
@@ -453,7 +485,7 @@ public class MetadataUtils
             }
             else
             {
-                if(columnNameToFieldMap != null)
+                if (columnNameToFieldMap != null)
                 {
                     columnNameToFieldMap.put(((AbstractAttribute) attribute).getJPAColumnName(),
                             (Field) attribute.getJavaMember());
@@ -539,9 +571,11 @@ public class MetadataUtils
      * @param persistenceUnit
      * @return
      */
-    public static boolean defaultTransactionSupported(final String persistenceUnit, final KunderaMetadata kunderaMetadata)
+    public static boolean defaultTransactionSupported(final String persistenceUnit,
+            final KunderaMetadata kunderaMetadata)
     {
-        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata, persistenceUnit);
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata,
+                persistenceUnit);
 
         String txResource = puMetadata.getProperty(PersistenceProperties.KUNDERA_TRANSACTION_RESOURCE);
 
@@ -562,68 +596,76 @@ public class MetadataUtils
 
     public static boolean isSchemaAttributeRequired(final String persistenceUnit, final KunderaMetadata kunderaMetadata)
     {
-        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata, persistenceUnit);
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata,
+                persistenceUnit);
         String clientFactoryName = puMetadata != null ? puMetadata
                 .getProperty(PersistenceProperties.KUNDERA_CLIENT_FACTORY) : null;
         return !(Constants.NEO4J_CLIENT_FACTORY.equalsIgnoreCase(clientFactoryName) || Constants.RDBMS_CLIENT_FACTORY
                 .equalsIgnoreCase(clientFactoryName));
     }
-    
+
     /**
-     * Index based search has to be optional, ideally need to register a callback in case index persistence/search etc is optional.
+     * Index based search has to be optional, ideally need to register a
+     * callback in case index persistence/search etc is optional.
      * 
-     * @param persistenceUnit persistence unit
+     * @param persistenceUnit
+     *            persistence unit
      * 
      * @return true, if index based search is enabled.
      */
     public static boolean indexSearchEnabled(final String persistenceUnit, final KunderaMetadata kunderaMetadata)
     {
-        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata, persistenceUnit);
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata,
+                persistenceUnit);
         String clientFactoryName = puMetadata != null ? puMetadata
                 .getProperty(PersistenceProperties.KUNDERA_CLIENT_FACTORY) : null;
         return !(Constants.REDIS_CLIENT_FACTORY.equalsIgnoreCase(clientFactoryName));
-        
+
     }
-    
+
     /**
      * Checks whether a given field is Element collection field of BASIC type
+     * 
      * @param collectionField
      * @return
      */
     public static boolean isBasicElementCollectionField(Field collectionField)
     {
-        if(! Collection.class.isAssignableFrom(collectionField.getType()) && ! Map.class.isAssignableFrom(collectionField.getType()))
+        if (!Collection.class.isAssignableFrom(collectionField.getType())
+                && !Map.class.isAssignableFrom(collectionField.getType()))
         {
             return false;
         }
-        
+
         List<Class<?>> genericClasses = PropertyAccessorHelper.getGenericClasses(collectionField);
-        for(Class genericClass : genericClasses)
+        for (Class genericClass : genericClasses)
         {
-            if(genericClass.getAnnotation(Embeddable.class) != null)
+            if (genericClass.getAnnotation(Embeddable.class) != null)
             {
                 return false;
             }
         }
         return true;
     }
-    
+
     /**
      * Checks whether an entity with given metadata contains a collection field
+     * 
      * @param m
      * @return
      */
-    public static boolean containsBasicElementCollectionField(final EntityMetadata m, final KunderaMetadata kunderaMetadata)
+    public static boolean containsBasicElementCollectionField(final EntityMetadata m,
+            final KunderaMetadata kunderaMetadata)
     {
-        Metamodel metaModel = kunderaMetadata.getApplicationMetadata().getMetamodel(
-                m.getPersistenceUnit());
-        EntityType entityType = metaModel.entity(m.getEntityClazz());        
-        Iterator<Attribute> iter = entityType.getAttributes().iterator();        
+        Metamodel metaModel = kunderaMetadata.getApplicationMetadata().getMetamodel(m.getPersistenceUnit());
+        EntityType entityType = metaModel.entity(m.getEntityClazz());
+        Iterator<Attribute> iter = entityType.getAttributes().iterator();
         while (iter.hasNext())
         {
             Attribute attr = iter.next();
-            
-            if (attr.isCollection() && ! attr.isAssociation() && isBasicElementCollectionField((Field) attr.getJavaMember()))
+
+            if (attr.isCollection() && !attr.isAssociation()
+                    && isBasicElementCollectionField((Field) attr.getJavaMember()))
             {
                 return true;
             }
@@ -631,27 +673,27 @@ public class MetadataUtils
         return false;
     }
 
-
     public static void onJPAColumnMapping(final EntityType entityType, EntityMetadata entityMetadata)
-    {       
+    {
         Set<Attribute> attributes = entityType.getAttributes();
-        
+
         Iterator<Attribute> iter = attributes.iterator();
-        
-        while(iter.hasNext())
+
+        while (iter.hasNext())
         {
             Attribute attribute = iter.next();
-            
-            //jpa column mapping is for non id columns only.
-            if(!entityMetadata.getIdAttribute().equals(attribute))
+
+            // jpa column mapping is for non id columns only.
+            if (!entityMetadata.getIdAttribute().equals(attribute))
             {
-                entityMetadata.addJPAColumnMapping(((AbstractAttribute)attribute).getJPAColumnName(), attribute.getName());
+                entityMetadata.addJPAColumnMapping(((AbstractAttribute) attribute).getJPAColumnName(),
+                        attribute.getName());
             }
-        }    
-        
+        }
+
         entityMetadata.setEntityType(entityType);
     }
-    
+
     /**
      * Returns true if an entity contains attributes with validation constraints
      * enabled

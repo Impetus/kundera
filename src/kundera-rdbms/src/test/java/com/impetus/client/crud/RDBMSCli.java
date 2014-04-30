@@ -36,6 +36,9 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Title: Testdb Description: simple hello world db example of a standalone
  * persistent db application
@@ -50,6 +53,8 @@ public class RDBMSCli
 {
     static Connection conn; // our connnection to the db - presist for life of
                             // program
+    /** The Constant logger. */
+    private static final Logger logger = LoggerFactory.getLogger(RDBMSCli.class);
 
     // we dont want this garbage collected until we are done
     public RDBMSCli(String db_file_name_prefix) throws Exception
@@ -199,7 +204,7 @@ public class RDBMSCli
         }
         catch (Exception ex1)
         {
-            ex1.printStackTrace(); // could not start db
+        	logger.warn(ex1.getMessage());
             return;
         }
         // bye bye }
@@ -217,7 +222,7 @@ public class RDBMSCli
         }
         catch (SQLException ex2)
         {
-            ex2.printStackTrace();
+        	logger.warn(ex2.getMessage());
 
             // ignore //ex2.printStackTrace(); // second time we run program //
             // should
@@ -244,7 +249,7 @@ public class RDBMSCli
         }
         catch (SQLException ex3)
         {
-            // ex3.printStackTrace();
+        	logger.warn(ex3.getMessage());
         }
     } // main()
 } // class Testdb
