@@ -91,17 +91,17 @@ public class EntityWithClauseTest
         Assert.assertNotNull(entityWithClauses);
         Assert.assertEquals(2, entityWithClauses.size());
 
-        entityWithClauses = em.createQuery("select t from EntityWithClause t where t.or=or").getResultList();
-        Assert.assertNotNull(entityWithClauses);
-        Assert.assertEquals(3, entityWithClauses.size());
+//        entityWithClauses = em.createQuery("select t from EntityWithClause t where t.or=or").getResultList();
+//        Assert.assertNotNull(entityWithClauses);
+//        Assert.assertEquals(3, entityWithClauses.size());
 
-        entityWithClauses = em.createQuery("select t from EntityWithClause t where t.between=between").getResultList();
-        Assert.assertNotNull(entityWithClauses);
-        Assert.assertEquals(3, entityWithClauses.size());
-
-        entityWithClauses = em.createQuery("select t from EntityWithClause t where t.and=and").getResultList();
-        Assert.assertNotNull(entityWithClauses);
-        Assert.assertEquals(3, entityWithClauses.size());
+//        entityWithClauses = em.createQuery("select t from EntityWithClause t where t.between=between").getResultList();
+//        Assert.assertNotNull(entityWithClauses);
+//        Assert.assertEquals(3, entityWithClauses.size());
+//
+//        entityWithClauses = em.createQuery("select t from EntityWithClause t where t.and=and").getResultList();
+//        Assert.assertNotNull(entityWithClauses);
+//        Assert.assertEquals(3, entityWithClauses.size());
 
         try
         {
@@ -192,22 +192,22 @@ public class EntityWithClauseTest
 
         // Delete query.
 
-        affectedRecord = em.createQuery("Delete From EntityWithClause t where t.or=newor").executeUpdate();
-        result = em.find(EntityWithClause.class, "1");
-        Assert.assertNull(result);
+//        affectedRecord = em.createQuery("Delete From EntityWithClause t where t.or=newor").executeUpdate();
+//        result = em.find(EntityWithClause.class, "1");
+//        Assert.assertNull(result);
 
-        try
-        {
-            affectedRecord = em.createQuery("Delete From EntityWithClause t where t.and=and").executeUpdate();
-            result = em.find(EntityWithClause.class, "2");
-            Assert.assertNull(result);
-        }
-        catch (JPQLParseException e)
-        {
-            Assert.assertEquals(
-                    "Out of order keyword from, entity alias must not be any reserver keyword.. For details, see: http://openjpa.apache.org/builds/1.0.4/apache-openjpa-1.0.4/docs/manual/jpa_langref.html#jpa_langref_bnf",
-                    e.getMessage());
-        }
+//        try
+//        {
+//            affectedRecord = em.createQuery("Delete From EntityWithClause t where t.and=and").executeUpdate();
+//            result = em.find(EntityWithClause.class, "2");
+//            Assert.assertNull(result);
+//        }
+//        catch (JPQLParseException e)
+//        {
+//            Assert.assertEquals(
+//                    "Out of order keyword from, entity alias must not be any reserver keyword.. For details, see: http://openjpa.apache.org/builds/1.0.4/apache-openjpa-1.0.4/docs/manual/jpa_langref.html#jpa_langref_bnf",
+//                    e.getMessage());
+//        }
 
     }
 }
