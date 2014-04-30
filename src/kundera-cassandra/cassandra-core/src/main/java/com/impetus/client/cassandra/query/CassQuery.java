@@ -1166,9 +1166,11 @@ public class CassQuery extends QueryImpl
 
         Object ttlColumns = ((CassandraClientBase) persistenceDelegeator.getClient(metadata)).getTtlValues().get(
                 metadata.getTableName());
-        if (ttlColumns != null && ttlColumns instanceof Integer)
+        
+        
+        if ((ttlColumns != null && ttlColumns instanceof Integer) || this.ttl != null )
         {
-            int ttl = ((Integer) ttlColumns).intValue();
+            int ttl = this.ttl != null? this.ttl : ((Integer) ttlColumns).intValue();
             if (ttl != 0)
             {
                 builder.append(" USING TTL ");

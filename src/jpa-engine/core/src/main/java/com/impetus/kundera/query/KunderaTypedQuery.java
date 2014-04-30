@@ -471,4 +471,10 @@ public class KunderaTypedQuery<X> implements TypedQuery<X>, com.impetus.kundera.
         return ((com.impetus.kundera.query.Query)query).iterate();
     }
 
+    @Override
+    public void applyTTL(int ttlInSeconds)
+    {
+        ((com.impetus.kundera.query.Query)query).applyTTL(ttlInSeconds);
+    }
+
 }
