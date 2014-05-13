@@ -34,6 +34,7 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
+import javax.xml.XMLConstants;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -52,7 +53,7 @@ import com.impetus.kundera.utils.InvalidConfigurationException;
 
 /**
  * The Class PersistenceXMLLoader.
- * 
+ *
  * @author amresh.singh
  */
 public class PersistenceXMLLoader
@@ -68,116 +69,120 @@ public class PersistenceXMLLoader
     }
 
     /**
-     * Gets the document.
-     * 
-     * @param configURL
-     *            the config url
-     * @return the document
-     * @throws Exception
-     *             the exception
+     * Reads the persistence xml content into an object graph and validates it against the related xsd schema.
+     *
+     * @param pathToPersistenceXml
+     *            path to the persistence.xml file
+     * @return parsed persistence xml as object graph
+     * @throws InvalidConfigurationException if the file could not be parsed or is not valid against the schema
      */
-    private static Document getDocument(URL configURL) throws InvalidConfigurationException
-    {
+    private static Document getDocument(URL pathToPersistenceXml) throws InvalidConfigurationException {
         InputStream is = null;
-        Document doc;
-        try
-        {
-            is = null;
-            if (configURL != null)
-            {
-                URLConnection conn = configURL.openConnection();
-                conn.setUseCaches(false); // avoid JAR locking on Windows and
-                                          // Tomcat.
+        Document xmlRootNode = null;
+
+        try {
+            if (pathToPersistenceXml != null) {
+                URLConnection conn = pathToPersistenceXml.openConnection();
+                conn.setUseCaches(false); // avoid JAR locking on Windows and Tomcat.
                 is = conn.getInputStream();
             }
-            if (is == null)
-            {
-                throw new IOException("Failed to obtain InputStream from url: " + configURL);
+
+            if (is == null) {
+                throw new IOException("Failed to obtain InputStream from url: " + pathToPersistenceXml);
             }
 
-            DocumentBuilderFactory docBuilderFactory = null;
-            docBuilderFactory = DocumentBuilderFactory.newInstance();
-            docBuilderFactory.setNamespaceAware(true);
-
-            final Schema v2Schema = SchemaFactory.newInstance(javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI).newSchema(
-                    new StreamSource(getStreamFromClasspath("persistence_2_0.xsd")));
-            final Validator v2Validator = v2Schema.newValidator();
-            final Schema v1Schema = SchemaFactory.newInstance(javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI).newSchema(
-                    new StreamSource(getStreamFromClasspath("persistence_1_0.xsd")));
-            final Validator v1Validator = v1Schema.newValidator();
-
-            InputSource source = new InputSource(is);
-            DocumentBuilder docBuilder = null;
-            try
-            {
-                docBuilder = docBuilderFactory.newDocumentBuilder();
-            }
-            catch (ParserConfigurationException e)
-            {
-                log.error("Error during parsing, Caused by: {}.", e);
-                throw new PersistenceLoaderException(e);
-            }
-
-            List errors = new ArrayList();
-            docBuilder.setErrorHandler(new ErrorLogger("XML InputStream", errors));
-            doc = docBuilder.parse(source);
-
-            if (errors.size() == 0)
-            {
-                v2Validator.setErrorHandler(new ErrorLogger("XML InputStream", errors));
-                v2Validator.validate(new DOMSource(doc));
-                boolean isV1Schema = false;
-                if (errors.size() != 0)
-                {
-                    // v2 fails, it could be because the file is v1.
-                    Exception exception = (Exception) errors.get(0);
-                    final String errorMessage = exception.getMessage();
-                    // is it a validation error due to a v1 schema validated by
-                    // a v2
-                    isV1Schema = errorMessage.contains("1.0") && errorMessage.contains("2.0")
-                            && errorMessage.contains("version");
-                }
-                if (isV1Schema)
-                {
-                    errors.clear();
-                    v1Validator.setErrorHandler(new ErrorLogger("XML InputStream", errors));
-                    v1Validator.validate(new DOMSource(doc));
-                }
-            }
-            else
-            {
-                throw new InvalidConfigurationException("Invalid persistence.xml", (Throwable) errors.get(0));
-            }
-        }
-        catch (IOException e)
-        {
+            xmlRootNode = parseDocument(is);
+            validateDocumentAgainstSchema(xmlRootNode);
+        } catch (IOException e) {
             throw new InvalidConfigurationException(e);
-        }
-        catch (SAXException e)
-        {
-            throw new InvalidConfigurationException(e);
-        }
-        finally
-        {
-            try
-            {
-                if (is != null)
-                {
+        } finally {
+            if(is != null) {
+                try {
                     is.close();
+                } catch (IOException ex) {
+                    log.warn("Input stream could not be closed after parsing persistence.xml, caused by: {}", ex);
                 }
             }
-            catch (IOException e)
-            {
-                throw new InvalidConfigurationException(e);
-            }
+        }
+        
+        return xmlRootNode;
+    }
+
+    /**
+     * Reads the content of the persistence.xml file into an object model, with the root node of type {@link Document}.
+     *
+     * @param is {@link InputStream} of the persistence.xml content
+     * @return root node of the parsed xml content
+     * @throws InvalidConfigurationException if the content could not be read due to an I/O error or could not be
+     * parsedÏ
+     */
+    private static Document parseDocument(final InputStream is) throws InvalidConfigurationException {
+        Document persistenceXmlDoc;
+        final List parsingErrors = new ArrayList();
+        final InputSource source = new InputSource(is);
+        final DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
+        docBuilderFactory.setNamespaceAware(true);
+
+        try {
+            DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
+            docBuilder.setErrorHandler(new ErrorLogger("XML InputStream", parsingErrors));
+            persistenceXmlDoc = docBuilder.parse(source);
+        } catch (ParserConfigurationException e) {
+            log.error("Error during parsing, Caused by: {}.", e);
+            throw new PersistenceLoaderException("Error during parsing persistence.xml, caused by: ", e);
+        } catch (IOException e) {
+            throw new InvalidConfigurationException("Error reading persistence.xml, caused by: ", e);
+        } catch (SAXException e) {
+            throw new InvalidConfigurationException("Error parsing persistence.xml, caused by: ", e);
         }
 
-        return doc;
+        if (!parsingErrors.isEmpty()) {
+            throw new InvalidConfigurationException("Invalid persistence.xml", (Throwable) parsingErrors.get(0));
+        }
+
+        return persistenceXmlDoc;
+    }
+
+    /**
+     * Validates an xml object graph against its schema. Therefore it reads the version from the root tag
+     * and tries to load the related xsd file from the classpath.
+     * 
+     * @param xmlRootNode root xml node of the document to validate
+     * @throws InvalidConfigurationException if the validation could not be performed or the xml graph is invalid
+     * against the schema
+     */
+    private static void validateDocumentAgainstSchema(final Document xmlRootNode) throws InvalidConfigurationException {
+        final Element rootElement = xmlRootNode.getDocumentElement();
+        final String version = rootElement.getAttribute("version");
+        String schemaFileName = "persistence_" + version.replace(".", "_") + ".xsd";
+        
+        try {
+        final List validationErrors = new ArrayList();
+        final String schemaLanguage = XMLConstants.W3C_XML_SCHEMA_NS_URI;
+        final StreamSource streamSource = new StreamSource(getStreamFromClasspath(schemaFileName));
+        final Schema schemaDefinition = SchemaFactory.newInstance(schemaLanguage).newSchema(streamSource);
+
+        final Validator schemaValidator = schemaDefinition.newValidator();
+        schemaValidator.setErrorHandler(new ErrorLogger("XML InputStream", validationErrors));
+        schemaValidator.validate(new DOMSource(xmlRootNode));
+        
+        if(!validationErrors.isEmpty()) {
+            final String exceptionText = "persistence.xml is not conform against the supported schema definitions.";
+            throw new InvalidConfigurationException(exceptionText);
+        }
+        } catch(SAXException e) {
+            final String exceptionText = "Error validating persistence.xml against schema defintion, caused by: ";
+            throw new InvalidConfigurationException(exceptionText , e);
+        } catch(IOException e) {
+            final String exceptionText = "Error opening xsd schema file. The given persistence.xml descriptor version "
+                    + version + " might not be supported yet.";
+            throw new InvalidConfigurationException(exceptionText, e);
+        }
     }
 
     /**
      * Get stream from classpath.
-     * 
+     *
      * @param fileName
      *            the file name
      * @return the stream
@@ -193,7 +198,7 @@ public class PersistenceXMLLoader
 
     /**
      * Find persistence units.
-     * 
+     *
      * @param url
      *            the url
      * @return the list
@@ -207,7 +212,7 @@ public class PersistenceXMLLoader
 
     /**
      * Find persistence units.
-     * 
+     *
      * @param url
      *            the url
      * @param defaultTransactionType
@@ -256,7 +261,7 @@ public class PersistenceXMLLoader
 
     /**
      * Parses the persistence unit.
-     * 
+     *
      * @param top
      *            the top
      * @return the persistence metadata
@@ -345,7 +350,7 @@ public class PersistenceXMLLoader
 
     /**
      * Gets the transaction type.
-     * 
+     *
      * @param elementContent
      *            the element content
      * @return the transaction type
@@ -385,7 +390,7 @@ public class PersistenceXMLLoader
 
         /**
          * Instantiates a new error logger.
-         * 
+         *
          * @param file
          *            the file
          * @param errors
@@ -439,7 +444,7 @@ public class PersistenceXMLLoader
 
     /**
      * Checks if is empty.
-     * 
+     *
      * @param str
      *            the str
      * @return true, if is empty
@@ -451,7 +456,7 @@ public class PersistenceXMLLoader
 
     /**
      * Gets the element content.
-     * 
+     *
      * @param element
      *            the element
      * @return the element content
@@ -465,7 +470,7 @@ public class PersistenceXMLLoader
 
     /**
      * Get the content of the given element.
-     * 
+     *
      * @param element
      *            The element to get the content for.
      * @param defaultStr
@@ -496,7 +501,7 @@ public class PersistenceXMLLoader
 
     /**
      * Returns persistence unit root url
-     * 
+     *
      * @param url
      *            raw url
      * @return rootUrl rootUrl
@@ -542,7 +547,7 @@ public class PersistenceXMLLoader
 
     /**
      * Parse and exclude path till META-INF
-     * 
+     *
      * @param file
      *            raw file path.
      * @return extracted/parsed file path.
@@ -567,7 +572,7 @@ public class PersistenceXMLLoader
 
         /**
          * In case it is jar protocol
-         * 
+         *
          * @param protocol
          * @return
          */
@@ -579,7 +584,7 @@ public class PersistenceXMLLoader
 
         /**
          * If provided protocol is within allowed protocol.
-         * 
+         *
          * @param protocol
          *            protocol
          * @return true, if it is in allowed protocol.
