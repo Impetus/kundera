@@ -334,7 +334,7 @@ public class CassQuery extends QueryImpl
                     m.getPersistenceUnit());
             EntityType entity = metaModel.entity(m.getEntityClazz());
 
-            String keyFieldName = CassandraUtilities.getIdColumnName(kunderaMetadata, m, externalProperties);
+            String keyFieldName = CassandraUtilities.getIdColumnName(kunderaMetadata, m, externalProperties, ((CassandraClientBase) persistenceDelegeator.getClient(m)).isCql3Enabled(m));
             for (int i = 1; i < results.length; i++)
             {
                 if (results[i] != null)
@@ -753,7 +753,7 @@ public class CassQuery extends QueryImpl
                 {
                     isPresent = buildWhereClause(builder, isPresent, translator, condition, value, useInClause,
                             ((AbstractAttribute) m.getIdAttribute()),
-                            CassandraUtilities.getIdColumnName(kunderaMetadata, m, externalProperties), use);
+                            CassandraUtilities.getIdColumnName(kunderaMetadata, m, externalProperties, ((CassandraClientBase) persistenceDelegeator.getClient(m)).isCql3Enabled(m)), use);
                 }
                 else
                 {
@@ -1324,7 +1324,7 @@ public class CassQuery extends QueryImpl
         if (property.equals(((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName()))
         {
             jpaColumnName = CassandraUtilities.getIdColumnName(kunderaMetadata, metadata,
-                    ((CassandraClientBase) persistenceDelegeator.getClient(metadata)).getExternalProperties());
+                    ((CassandraClientBase) persistenceDelegeator.getClient(metadata)).getExternalProperties(), ((CassandraClientBase) persistenceDelegeator.getClient(metadata)).isCql3Enabled(metadata));
         }
         else
         {

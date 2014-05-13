@@ -1256,7 +1256,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         else
         {
             translator.buildWhereClause(queryBuilder, ((AbstractAttribute) attribute).getBindableJavaType(),
-                    CassandraUtilities.getIdColumnName(kunderaMetadata, metadata, getExternalProperties()), key,
+                    CassandraUtilities.getIdColumnName(kunderaMetadata, metadata, getExternalProperties(), isCql3Enabled(metadata)), key,
                     translator.EQ_CLAUSE, false);
         }
     }
@@ -2112,7 +2112,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                     Attribute attribute = entityMetadata.getIdAttribute();
                     translator.buildWhereClause(queryBuilder, ((AbstractAttribute) entityMetadata.getIdAttribute())
                             .getBindableJavaType(), CassandraUtilities.getIdColumnName(kunderaMetadata, entityMetadata,
-                            getExternalProperties()), PropertyAccessorHelper.getId(e, entityMetadata),
+                            getExternalProperties(), isCql3Enabled(entityMetadata)), PropertyAccessorHelper.getId(e, entityMetadata),
                             translator.EQ_CLAUSE, false);
                     // strip last "AND" clause.
                     queryBuilder.delete(queryBuilder.lastIndexOf(CQLTranslator.AND_CLAUSE), queryBuilder.length());
@@ -2305,7 +2305,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             org.apache.cassandra.thrift.Cassandra.Client conn = (org.apache.cassandra.thrift.Cassandra.Client) connection;
             conn.set_cql_version(CassandraConstants.CQL_VERSION_3_0);
             return (T) conn.execute_cql3_query(ByteBuffer.wrap(query.getBytes(Constants.CHARSET_UTF8)),
-                    Compression.NONE, consistencyLevel);
+                    Compression.NONE, getConsistencyLevel());
         }
         catch (Exception e)
         {

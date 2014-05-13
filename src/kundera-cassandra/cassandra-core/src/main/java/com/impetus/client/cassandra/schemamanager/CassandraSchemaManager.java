@@ -297,7 +297,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         String placement_strategy = csmd.getPlacement_strategy(databaseName);
         String replication_conf = CQLTranslator.SIMPLE_REPLICATION;
         createKeyspace = createKeyspace.replace("$KEYSPACE", "\"" + databaseName + "\"");
-        
+
         // String placement_strategy = SimpleStrategy.class.getSimpleName();
 
         Schema schema = CassandraPropertyReader.csmd.getSchema(databaseName);
@@ -347,10 +347,12 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             boolean isDurableWrites = Boolean.parseBoolean(schemaProperties.getProperty(
                     CassandraConstants.DURABLE_WRITES, "true"));
             createKeyspace = createKeyspace.replace("$DURABLE_WRITES", isDurableWrites + "");
-        } else
+        }
+        else
         {
             createKeyspace = createKeyspace.replace("$CLASS", placement_strategy);
-            replication_conf = replication_conf.replace("$REPLICATION_FACTOR", CassandraConstants.DEFAULT_REPLICATION_FACTOR);            
+            replication_conf = replication_conf.replace("$REPLICATION_FACTOR",
+                    CassandraConstants.DEFAULT_REPLICATION_FACTOR);
             createKeyspace = createKeyspace.replace("$REPLICATION", replication_conf);
             createKeyspace = createKeyspace.replace("$DURABLE_WRITES", "true");
         }
@@ -790,10 +792,9 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             if (!tableInfo.getEmbeddedColumnMetadatas().isEmpty())
             {
                 List<ColumnInfo> columnInfos = tableInfo.getEmbeddedColumnMetadatas().get(0).getColumns();
-                /*if (columnInfos.contains(columnInfo))
-                {
-                    return;
-                }*/
+                /*
+                 * if (columnInfos.contains(columnInfo)) { return; }
+                 */
             }
             // String replacedWithindexName =
             // StringUtils.replace(indexQueryBuilder.toString(), "$INDEX_NAME",
@@ -1279,8 +1280,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 if (toUpdate)
                 {
                     cassandra_client.system_update_column_family(cfDef);
-                    // createIndexUsingThrift(tableInfo, cfDef);
                 }
+                createIndexUsingThrift(tableInfo, cfDef);
                 break;
             }
         }

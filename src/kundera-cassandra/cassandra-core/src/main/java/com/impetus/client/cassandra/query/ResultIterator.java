@@ -429,7 +429,7 @@ class ResultIterator<E> implements IResultIterator<E>
             }
             else
             {
-                columnName = CassandraUtilities.getIdColumnName(kunderaMetadata, entityMetadata, externalProperties);
+                columnName = CassandraUtilities.getIdColumnName(kunderaMetadata, entityMetadata, externalProperties, ((CassandraClientBase)client).isCql3Enabled(entityMetadata));
             }
 
             translator.appendColumnName(builder, columnName);

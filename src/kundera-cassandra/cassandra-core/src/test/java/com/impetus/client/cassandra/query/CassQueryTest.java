@@ -96,7 +96,7 @@ public class CassQueryTest
 
         Assert.assertNotNull(cqlQuery);
 
-        Assert.assertEquals("SELECT * FROM \"PERSONCASSANDRA\" WHERE token(\"key\") = token('kk') LIMIT 200", cqlQuery);
+        Assert.assertEquals("SELECT * FROM \"PERSONCASSANDRA\" WHERE token(\"personId\") = token('kk') LIMIT 200", cqlQuery);
 
         // In Query.
         queryString = "Select p from PersonCassandra p WHERE p.personId in ('kk', 'sk','pk')";
@@ -105,8 +105,8 @@ public class CassQueryTest
 
         Assert.assertNotNull(cqlQuery);
 
-//        "SELECT * FROM "PERSONCASSANDRA" WHERE "key" IN ('(''kk''', 'sk', '''pk') LIMIT 400";
-        Assert.assertEquals("SELECT * FROM \"PERSONCASSANDRA\" WHERE \"key\" IN ('kk', 'sk', 'pk') LIMIT 400", cqlQuery);
+//        "SELECT * FROM "PERSONCASSANDRA" WHERE "personId" IN ('(''kk''', 'sk', '''pk') LIMIT 400";
+        Assert.assertEquals("SELECT * FROM \"PERSONCASSANDRA\" WHERE \"personId\" IN ('kk', 'sk', 'pk') LIMIT 400", cqlQuery);
 
         // In Query set Paramater.
         queryString = "Select p from PersonCassandra p WHERE p.personId in :nameList";
@@ -123,7 +123,7 @@ public class CassQueryTest
 
         Assert.assertNotNull(cqlQuery);
 
-        Assert.assertEquals("SELECT * FROM \"PERSONCASSANDRA\" WHERE \"key\" IN ('kk', 'dk', 'sk' ) ", cqlQuery);
+        Assert.assertEquals("SELECT * FROM \"PERSONCASSANDRA\" WHERE \"personId\" IN ('kk', 'dk', 'sk' ) ", cqlQuery);
 
         // In Query set Paramater with and clause.
         queryString = "Select p from PersonCassandra p WHERE p.personId in :nameList and p.age = 10";
@@ -136,7 +136,7 @@ public class CassQueryTest
         Assert.assertNotNull(cqlQuery);
 
         Assert.assertEquals(
-                "SELECT * FROM \"PERSONCASSANDRA\" WHERE \"key\" IN ('kk', 'dk', 'sk' )  AND \"AGE\" = 10  ALLOW FILTERING",
+                "SELECT * FROM \"PERSONCASSANDRA\" WHERE \"personId\" IN ('kk', 'dk', 'sk' )  AND \"AGE\" = 10  ALLOW FILTERING",
                 cqlQuery);
 
         // In Query set Paramater with gt clause.
@@ -150,7 +150,7 @@ public class CassQueryTest
         Assert.assertNotNull(cqlQuery);
 
         Assert.assertEquals(
-                "SELECT * FROM \"PERSONCASSANDRA\" WHERE \"key\" IN ('kk', 'dk', 'sk' )  AND \"AGE\" > 10 LIMIT 5  ALLOW FILTERING",
+                "SELECT * FROM \"PERSONCASSANDRA\" WHERE \"personId\" IN ('kk', 'dk', 'sk' )  AND \"AGE\" > 10 LIMIT 5  ALLOW FILTERING",
                 cqlQuery);
 
         // In Query over non pk field set Paramater with gt clause.
@@ -253,14 +253,14 @@ public class CassQueryTest
         // In Query set Paramater with gt clause.
         queryString = "Select u from CassandraPrimeUser u WHERE u.key IN :keyList";
 
-        List<CassandraCompoundKey> keyList = new ArrayList<CassandraCompoundKey>();
+        List<CassandraCompoundKey> personIdList = new ArrayList<CassandraCompoundKey>();
         UUID timeLineId1 = UUID.randomUUID();
-        keyList.add(new CassandraCompoundKey("kk", 1, timeLineId1));
-        keyList.add(new CassandraCompoundKey("vm", 2, timeLineId1));
-        keyList.add(new CassandraCompoundKey("vs", 3, timeLineId1));
+        personIdList.add(new CassandraCompoundKey("kk", 1, timeLineId1));
+        personIdList.add(new CassandraCompoundKey("vm", 2, timeLineId1));
+        personIdList.add(new CassandraCompoundKey("vs", 3, timeLineId1));
 
         kunderaQuery = getQueryObject(queryString, emf);
-        kunderaQuery.setParameter("keyList", keyList);
+        kunderaQuery.setParameter("keyList", personIdList);
 
         cqlQuery = parseAndCreateCqlQuery(kunderaQuery, emf, em, pu, CassandraPrimeUser.class, 100);
 
@@ -278,7 +278,7 @@ public class CassQueryTest
         queryString = "Select u from CassandraPrimeUser u WHERE u.key IN :keyList and u.name = 'vivek'";
 
         kunderaQuery = getQueryObject(queryString, emf);
-        kunderaQuery.setParameter("keyList", keyList);
+        kunderaQuery.setParameter("keyList", personIdList);
 
         cqlQuery = parseAndCreateCqlQuery(kunderaQuery, emf, em, pu, CassandraPrimeUser.class, 100);
 
@@ -325,7 +325,7 @@ public class CassQueryTest
 
         Assert.assertNotNull(cqlQuery);
 
-        Assert.assertEquals("UPDATE \"PERSONCASSANDRA\" SET \"PERSON_NAME\"='Kuldeep' WHERE \"key\" = '1'", cqlQuery);
+        Assert.assertEquals("UPDATE \"PERSONCASSANDRA\" SET \"PERSON_NAME\"='Kuldeep' WHERE \"personId\" = '1'", cqlQuery);
 
         // In Query.
         queryString = "Update PersonCassandra p SET p.personName = 'Kuldeep' WHERE p.personId IN ('1', '2', '3')";
@@ -335,7 +335,7 @@ public class CassQueryTest
         Assert.assertNotNull(cqlQuery);
 
         Assert.assertEquals(
-                "UPDATE \"PERSONCASSANDRA\" SET \"PERSON_NAME\"='Kuldeep' WHERE \"key\" IN ('1', '2', '3')", cqlQuery);
+                "UPDATE \"PERSONCASSANDRA\" SET \"PERSON_NAME\"='Kuldeep' WHERE \"personId\" IN ('1', '2', '3')", cqlQuery);
 
         // In Query set Paramater.
         queryString = "Update PersonCassandra p SET p.personName = 'Kuldeep' WHERE p.personId IN :idList";
@@ -353,7 +353,7 @@ public class CassQueryTest
         Assert.assertNotNull(cqlQuery);
 
         Assert.assertEquals(
-                "UPDATE \"PERSONCASSANDRA\" SET \"PERSON_NAME\"='Kuldeep' WHERE \"key\" IN ('1', '2', '3' ) ", cqlQuery);
+                "UPDATE \"PERSONCASSANDRA\" SET \"PERSON_NAME\"='Kuldeep' WHERE \"personId\" IN ('1', '2', '3' ) ", cqlQuery);
 
         // In Query set Paramater with and clause.
         queryString = "Update PersonCassandra p SET p.personName = 'Kuldeep' WHERE p.personId in :nameList and p.age = 10";
@@ -366,7 +366,7 @@ public class CassQueryTest
         Assert.assertNotNull(cqlQuery);
 
         Assert.assertEquals(
-                "UPDATE \"PERSONCASSANDRA\" SET \"PERSON_NAME\"='Kuldeep' WHERE \"key\" IN ('1', '2', '3' )  AND \"AGE\" = 10",
+                "UPDATE \"PERSONCASSANDRA\" SET \"PERSON_NAME\"='Kuldeep' WHERE \"personId\" IN ('1', '2', '3' )  AND \"AGE\" = 10",
                 cqlQuery);
 
         // In Query.
@@ -376,7 +376,7 @@ public class CassQueryTest
 
         Assert.assertNotNull(cqlQuery);
 
-        Assert.assertEquals("DELETE FROM \"PERSONCASSANDRA\" WHERE \"key\" = '1'", cqlQuery);
+        Assert.assertEquals("DELETE FROM \"PERSONCASSANDRA\" WHERE \"personId\" = '1'", cqlQuery);
 
         // In Query.
         queryString = "Delete from PersonCassandra p WHERE p.personId IN ('1', '2', '3')";
@@ -385,7 +385,7 @@ public class CassQueryTest
 
         Assert.assertNotNull(cqlQuery);
 
-        Assert.assertEquals("DELETE FROM \"PERSONCASSANDRA\" WHERE \"key\" IN ('1', '2', '3')", cqlQuery);
+        Assert.assertEquals("DELETE FROM \"PERSONCASSANDRA\" WHERE \"personId\" IN ('1', '2', '3')", cqlQuery);
 
         // In Query set Paramater.
         queryString = "Delete from PersonCassandra p WHERE p.personId IN :idList";
@@ -397,7 +397,7 @@ public class CassQueryTest
 
         Assert.assertNotNull(cqlQuery);
 
-        Assert.assertEquals("DELETE FROM \"PERSONCASSANDRA\" WHERE \"key\" IN ('1', '2', '3' ) ", cqlQuery);
+        Assert.assertEquals("DELETE FROM \"PERSONCASSANDRA\" WHERE \"personId\" IN ('1', '2', '3' ) ", cqlQuery);
 
         // In Query over non pk field set Paramater with gt clause.
         queryString = "Delete from PersonCassandra p WHERE p.personId in :idList and p.age = 25";
@@ -409,7 +409,7 @@ public class CassQueryTest
 
         Assert.assertNotNull(cqlQuery);
 
-        Assert.assertEquals("DELETE FROM \"PERSONCASSANDRA\" WHERE \"key\" IN ('1', '2', '3' )  AND \"AGE\" = 25",
+        Assert.assertEquals("DELETE FROM \"PERSONCASSANDRA\" WHERE \"personId\" IN ('1', '2', '3' )  AND \"AGE\" = 25",
                 cqlQuery);
 
         em.close();
@@ -445,7 +445,7 @@ public class CassQueryTest
 
         Assert.assertNotNull(cqlQuery);
 
-        Assert.assertEquals("UPDATE \"PERSONCASSANDRA\"  USING TTL 100 SET \"PERSON_NAME\"='Kuldeep' WHERE \"key\" = '1'", cqlQuery);
+        Assert.assertEquals("UPDATE \"PERSONCASSANDRA\"  USING TTL 100 SET \"PERSON_NAME\"='Kuldeep' WHERE \"personId\" = '1'", cqlQuery);
 
         // In Query.
         queryString = "Update PersonCassandra p SET p.personName = 'Kuldeep' WHERE p.personId IN ('1', '2', '3')";
@@ -455,7 +455,7 @@ public class CassQueryTest
         Assert.assertNotNull(cqlQuery);
 
         Assert.assertEquals(
-                "UPDATE \"PERSONCASSANDRA\"  USING TTL 200 SET \"PERSON_NAME\"='Kuldeep' WHERE \"key\" IN ('1', '2', '3')", cqlQuery);
+                "UPDATE \"PERSONCASSANDRA\"  USING TTL 200 SET \"PERSON_NAME\"='Kuldeep' WHERE \"personId\" IN ('1', '2', '3')", cqlQuery);
 
         // In Query set Paramater.
         queryString = "Update PersonCassandra p SET p.personName = 'Kuldeep' WHERE p.personId IN :idList";
@@ -473,7 +473,7 @@ public class CassQueryTest
         Assert.assertNotNull(cqlQuery);
 
         Assert.assertEquals(
-                "UPDATE \"PERSONCASSANDRA\"  USING TTL 1000 SET \"PERSON_NAME\"='Kuldeep' WHERE \"key\" IN ('1', '2', '3' ) ", cqlQuery);
+                "UPDATE \"PERSONCASSANDRA\"  USING TTL 1000 SET \"PERSON_NAME\"='Kuldeep' WHERE \"personId\" IN ('1', '2', '3' ) ", cqlQuery);
 
         // In Query set Paramater with and clause.
         queryString = "Update PersonCassandra p SET p.personName = 'Kuldeep' WHERE p.personId in :nameList and p.age = 10";
@@ -486,7 +486,7 @@ public class CassQueryTest
         Assert.assertNotNull(cqlQuery);
 
         Assert.assertEquals(
-                "UPDATE \"PERSONCASSANDRA\" SET \"PERSON_NAME\"='Kuldeep' WHERE \"key\" IN ('1', '2', '3' )  AND \"AGE\" = 10",
+                "UPDATE \"PERSONCASSANDRA\" SET \"PERSON_NAME\"='Kuldeep' WHERE \"personId\" IN ('1', '2', '3' )  AND \"AGE\" = 10",
                 cqlQuery);
 
         em.close();
