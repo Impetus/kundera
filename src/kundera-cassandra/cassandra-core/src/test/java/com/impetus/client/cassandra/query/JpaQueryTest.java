@@ -44,19 +44,26 @@ import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.KunderaQueryParser;
 import com.vividsolutions.jts.util.Assert;
 
-public class BadJpaQueryIssueTest {
-	
-	 /** The Constant logger. */
-    private static final Logger logger = LoggerFactory.getLogger(BadJpaQueryIssueTest.class);
+/*
+ * @author shaheed hussain
+ * testcase to test the exception which is thrown if user uses any of the interclause or intraclause value in his data
+ */
+public class JpaQueryTest {
+
+	/** The Constant logger. */
+	private static final Logger logger = LoggerFactory
+			.getLogger(JpaQueryTest.class);
 
 	@Before
 	public void setUp() throws Exception {
 		CassandraCli.cassandraSetUp();
+		CassandraCli.createKeySpace("KunderaExamples");
 	}
 
 	@After
 	public void tearDown() throws Exception {
-
+		CassandraCli.dropKeySpace("KunderaExamples");
+		
 	}
 
 	/**
@@ -65,48 +72,63 @@ public class BadJpaQueryIssueTest {
 	@Test
 	public void test() throws Exception {
 
-		
-		
-		CassandraCli.createKeySpace("KunderaExamples");
 		String pu = "secIdxCassandraTest";
 		EntityManagerFactory emf = Persistence.createEntityManagerFactory(pu);
 		EntityManager em = emf.createEntityManager();
 
-		
-		  String queryString=
-		  " select p from PersonCassandra p where p.age in ('in vivek','inkk','AND shaheed') OR p.personName in ('vivek','kk')"; 
-		  String cqlQuery =parseAndCreateCqlQuery(getQueryObject(queryString, emf), emf, em, pu,PersonCassandra.class, 200); 
-		  String expectedQuery="SELECT * FROM \"PERSONCASSANDRA\" WHERE \"AGE\" IN (in vivek, inkk, AND shaheed) AND \"PERSON_NAME\" IN ('vivek', 'kk') LIMIT 200  ALLOW FILTERING"; 
-		  //Assert.equals(cqlQuery,expectedQuery); //vivek is fixing for extra quotes in 'in' clause
-		 
-		  queryString ="Select p from PersonCassandra p where p.personName='sam''s and joseph''s' and p.age=80 "; 
-		  cqlQuery = parseAndCreateCqlQuery(getQueryObject(queryString, emf),emf, em, pu, PersonCassandra.class, 200);
-		  
-		  expectedQuery="SELECT * FROM \"PERSONCASSANDRA\" WHERE \"PERSON_NAME\" = 'sam''s and joseph''s' AND \"AGE\" = 80 LIMIT 200  ALLOW FILTERING"; 
-		  Assert.equals(cqlQuery,expectedQuery);
-		
-		  
-		  
-		  queryString ="Select p from PersonCassandra p where p.personName = 'ram and wwe' and p.age='10'"; 
-		  cqlQuery = parseAndCreateCqlQuery(getQueryObject(queryString, emf),emf, em, pu, PersonCassandra.class, 200);
-		  expectedQuery="SELECT * FROM \"PERSONCASSANDRA\" WHERE \"PERSON_NAME\" = 'ram and wwe' AND \"AGE\" = 10 LIMIT 200  ALLOW FILTERING"; 
-		  Assert.equals(cqlQuery,expectedQuery);
-		  
-		  queryString="Select p from PersonCassandra p where p.personName = 'Like-==' ";
-		  cqlQuery = parseAndCreateCqlQuery(getQueryObject(queryString, emf),emf, em, pu, PersonCassandra.class, 200); 
-		  expectedQuery="SELECT * FROM \"PERSONCASSANDRA\" WHERE \"PERSON_NAME\" = 'Like-==' LIMIT 200  ALLOW FILTERING"; 
-		  Assert.equals(cqlQuery,expectedQuery);
-		 
+		String queryString = " select p from PersonCassandra p where p.age in ('in vivek','in kk','AND shaheed') OR p.personName in ('vivek','kk')";
+		String cqlQuery = parseAndCreateCqlQuery(
+				getQueryObject(queryString, emf), emf, em, pu,
+				PersonCassandra.class, 200);
+		String expectedQuery = "SELECT * FROM \"PERSONCASSANDRA\" WHERE \"AGE\" IN (in vivek, inkk, AND shaheed) AND \"PERSON_NAME\" IN ('vivek', 'kk') LIMIT 200  ALLOW FILTERING";
+		// Assert.equals(cqlQuery,expectedQuery); //vivek is fixing for extra
+		// quotes in 'in' clause
+
+		queryString = "Select p from PersonCassandra p where p.personName='sam''s and joseph''s' and p.age=80 ";
+		cqlQuery = parseAndCreateCqlQuery(getQueryObject(queryString, emf),
+				emf, em, pu, PersonCassandra.class, 200);
+
+		expectedQuery = "SELECT * FROM \"PERSONCASSANDRA\" WHERE \"PERSON_NAME\" = 'sam''s and joseph''s' AND \"AGE\" = 80 LIMIT 200  ALLOW FILTERING";
+		Assert.equals(cqlQuery, expectedQuery);
+
+		queryString = "Select p from PersonCassandra p where p.personName = 'ram and wwe' and p.age='10'";
+		cqlQuery = parseAndCreateCqlQuery(getQueryObject(queryString, emf),
+				emf, em, pu, PersonCassandra.class, 200);
+		expectedQuery = "SELECT * FROM \"PERSONCASSANDRA\" WHERE \"PERSON_NAME\" = 'ram and wwe' AND \"AGE\" = 10 LIMIT 200  ALLOW FILTERING";
+		Assert.equals(cqlQuery, expectedQuery);
+
+		queryString = "Select p from PersonCassandra p where p.personName = 'Like-==' ";
+		cqlQuery = parseAndCreateCqlQuery(getQueryObject(queryString, emf),
+				emf, em, pu, PersonCassandra.class, 200);
+		expectedQuery = "SELECT * FROM \"PERSONCASSANDRA\" WHERE \"PERSON_NAME\" = 'Like-==' LIMIT 200  ALLOW FILTERING";
+		Assert.equals(cqlQuery, expectedQuery);
+
 		queryString = "Select p from PersonCassandra p where p.personName = '==1'";
 		cqlQuery = parseAndCreateCqlQuery(getQueryObject(queryString, emf),
 				emf, em, pu, PersonCassandra.class, 200);
 		expectedQuery = "SELECT * FROM \"PERSONCASSANDRA\" WHERE \"PERSON_NAME\" = '==1' LIMIT 200  ALLOW FILTERING";
 		Assert.equals(cqlQuery, expectedQuery);
-		
+
+		queryString = "Select p from PersonCassandra p where p.personName = 'Like >= NOT IN'";
+		cqlQuery = parseAndCreateCqlQuery(getQueryObject(queryString, emf),
+				emf, em, pu, PersonCassandra.class, 200);
+		expectedQuery = "SELECT * FROM \"PERSONCASSANDRA\" WHERE \"PERSON_NAME\" = 'Like >= NOT IN' LIMIT 200  ALLOW FILTERING";
+
+		queryString = "Select p from PersonCassandra p where p.personName = 'in= NOT IN >=set >< <>'";
+		cqlQuery = parseAndCreateCqlQuery(getQueryObject(queryString, emf),
+				emf, em, pu, PersonCassandra.class, 200);
+		expectedQuery = "SELECT * FROM \"PERSONCASSANDRA\" WHERE \"PERSON_NAME\" = 'in= NOT IN >=set >< <>' LIMIT 200  ALLOW FILTERING";
+		Assert.equals(cqlQuery, expectedQuery);
+
+		queryString = "Select p from PersonCassandra p where p.personName = 'in= between. >=set anand >< or <>'";
+		cqlQuery = parseAndCreateCqlQuery(getQueryObject(queryString, emf),
+				emf, em, pu, PersonCassandra.class, 200);
+		expectedQuery = "SELECT * FROM \"PERSONCASSANDRA\" WHERE \"PERSON_NAME\" = 'in= between. >=set anand >< or <>' LIMIT 200  ALLOW FILTERING";
+		Assert.equals(cqlQuery, expectedQuery);
+
 		em.close();
 		emf.close();
 
-		
 	}
 
 	/**
@@ -121,9 +143,9 @@ public class BadJpaQueryIssueTest {
 			getpostParsingInit = KunderaQuery.class
 					.getDeclaredMethod("postParsingInit");
 		} catch (SecurityException e) {
-			e.printStackTrace();
+			logger.warn(e.getMessage());
 		} catch (NoSuchMethodException e) {
-			e.printStackTrace();
+			logger.warn(e.getMessage());
 		}
 		getpostParsingInit.setAccessible(true);
 
@@ -163,20 +185,20 @@ public class BadJpaQueryIssueTest {
 			getpd = EntityManagerImpl.class
 					.getDeclaredMethod("getPersistenceDelegator");
 		} catch (SecurityException e) {
-			e.printStackTrace();
+			logger.warn(e.getMessage());
 		} catch (NoSuchMethodException e) {
-			e.printStackTrace();
+			logger.warn(e.getMessage());
 		}
 		getpd.setAccessible(true);
 		PersistenceDelegator pd = null;
 		try {
 			pd = (PersistenceDelegator) getpd.invoke(em);
 		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
+			logger.warn(e.getMessage());
 		} catch (IllegalAccessException e) {
-			e.printStackTrace();
+			logger.warn(e.getMessage());
 		} catch (InvocationTargetException e) {
-			e.printStackTrace();
+			logger.warn(e.getMessage());
 		}
 
 		KunderaMetadata kunderaMetadata = ((EntityManagerFactoryImpl) emf)
