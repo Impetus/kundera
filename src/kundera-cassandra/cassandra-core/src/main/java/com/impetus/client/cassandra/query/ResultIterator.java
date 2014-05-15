@@ -276,7 +276,7 @@ class ResultIterator<E> implements IResultIterator<E>
 
                 results = ((CassandraClientBase) client).findByRange(minValue, maxVal, m, m.getRelationNames() != null
                         && !m.getRelationNames().isEmpty(), m.getRelationNames(),
-                        query.getColumnList(m, ((QueryImpl) query).getKunderaQuery().getResult(), null), expressions,
+                        query.getColumnList(m, metaModel, ((QueryImpl) query).getKunderaQuery().getResult(), null), expressions,
                         maxResult);
 
                 if (maxResult == 1)
