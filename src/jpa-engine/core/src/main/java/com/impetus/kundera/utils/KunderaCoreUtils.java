@@ -85,7 +85,7 @@ public class KunderaCoreUtils
      */
     private static Map<String, Object> fetchPropertyMap(Map<String, Object> puProperty)
     {
-        if (puProperty.getClass().isAssignableFrom(Map.class) || puProperty.getClass().isAssignableFrom(HashMap.class))
+        if (puProperty.getClass().isAssignableFrom(Map.class) || puProperty instanceof Map)
         {
             return puProperty;
         }
