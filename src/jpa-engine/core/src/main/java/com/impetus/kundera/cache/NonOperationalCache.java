@@ -82,6 +82,8 @@ public class NonOperationalCache implements Cache, javax.persistence.Cache
     @Override
     public void evict(Class paramClass, Object paramObject)
     {
+        //TODO: See https://github.com/impetus-opensource/Kundera/issues/457
+        // do nothing.
     }
 
     /*
@@ -92,6 +94,8 @@ public class NonOperationalCache implements Cache, javax.persistence.Cache
     @Override
     public void evict(Class paramClass)
     {
+        //TODO: See https://github.com/impetus-opensource/Kundera/issues/457
+        // do nothing.
     }
 
     /*
@@ -102,6 +106,18 @@ public class NonOperationalCache implements Cache, javax.persistence.Cache
     @Override
     public void evictAll()
     {
+        //TODO: See https://github.com/impetus-opensource/Kundera/issues/457
+        // do nothing.
+
     }
 
+    @Override
+    public <T> T unwrap(Class<T> arg0)
+    {
+        //TODO: See https://github.com/impetus-opensource/Kundera/issues/457
+        // do nothing.
+        return null;
+    }
+
+    
 }

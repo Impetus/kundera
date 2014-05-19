@@ -55,7 +55,6 @@ public class OracleNoSQLEmbeddableTest extends OracleNoSQLTestBase
     public void tearDown()
     {
         super.tearDown();
-        
     }
 
     @Test
@@ -234,7 +233,7 @@ public class OracleNoSQLEmbeddableTest extends OracleNoSQLTestBase
             // Select query with where clause on ID column and non-ID column
             // with OR
             // operator
-            findByIdAndAge = "Select p from PersonEmbeddedKVStore p where p.personId=:personId OR p.age=:age";
+/*            findByIdAndAge = "Select p from PersonEmbeddedKVStore p where p.personId=:personId OR p.age=:age";
             params = new HashMap<Object, Object>();
             params.put("personId", "1");
             params.put("age", 30);
@@ -300,7 +299,7 @@ public class OracleNoSQLEmbeddableTest extends OracleNoSQLTestBase
             params.put("max", "4");
             results = executeSelectQuery(findPersonIdBetween, params);
             Assert.assertEquals(3, results.size());
-        }
+*/        }
 
         clearEm();
         // Search over selective column

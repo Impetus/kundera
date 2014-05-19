@@ -15,19 +15,15 @@
  */
 package com.impetus.client.oraclenosql;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.concurrent.TimeUnit;
 
 import javax.persistence.PersistenceException;
@@ -36,24 +32,32 @@ import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 
 import oracle.kv.Consistency;
-import oracle.kv.Direction;
 import oracle.kv.Durability;
 import oracle.kv.DurabilityException;
 import oracle.kv.FaultException;
 import oracle.kv.KVStore;
 import oracle.kv.Key;
-import oracle.kv.KeyRange;
-import oracle.kv.KeyValueVersion;
 import oracle.kv.Operation;
 import oracle.kv.OperationExecutionException;
-import oracle.kv.Value;
+import oracle.kv.impl.api.table.TableImpl;
+import oracle.kv.table.FieldDef;
+import oracle.kv.table.FieldValue;
+import oracle.kv.table.Index;
+import oracle.kv.table.IndexKey;
+import oracle.kv.table.PrimaryKey;
+import oracle.kv.table.RecordValue;
+import oracle.kv.table.ReturnRow.Choice;
+import oracle.kv.table.Row;
+import oracle.kv.table.Table;
+import oracle.kv.table.TableAPI;
+import oracle.kv.table.TableOperation;
+import oracle.kv.table.WriteOptions;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.client.oraclenosql.config.OracleNoSQLClientProperties;
-import com.impetus.client.oraclenosql.index.OracleNoSQLInvertedIndexer;
 import com.impetus.client.oraclenosql.query.OracleNoSQLQuery;
 import com.impetus.client.oraclenosql.query.OracleNoSQLQueryInterpreter;
 import com.impetus.kundera.PersistenceProperties;
@@ -70,6 +74,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.Relation;
+import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
@@ -78,14 +83,18 @@ import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.query.KunderaQuery.FilterClause;
+import com.impetus.kundera.query.QueryHandlerException;
 
 /**
  * Implementation of {@link Client} interface for Oracle NoSQL database
  * 
- * @author amresh.singh
+ * @author vivek.mishra
  */
 public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQuery>, Batcher, ClientPropertiesSetter
 {
+    private static final String SEPERATOR = "_";
+
     /** The kvstore db. */
     private KVStore kvStore;
 
@@ -111,6 +120,8 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
 
     private Consistency consistency = OracleNOSQLConstants.DEFAULT_CONSISTENCY;
 
+    private TableAPI tableAPI;
+
     /** The log. */
     private static Logger log = LoggerFactory.getLogger(OracleNoSQLClient.class);
 
@@ -132,12 +143,21 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         this.persistenceUnit = persistenceUnit;
         this.factory = factory;
         this.kvStore = kvStore;
-        this.handler = new OracleNoSQLDataHandler(this, kvStore, persistenceUnit);
+        // this.handler = new OracleNoSQLDataHandler(this, kvStore,
+        // persistenceUnit);
         this.reader = reader;
         this.indexManager = indexManager;
         this.clientMetadata = factory.getClientMetadata();
+        this.tableAPI = kvStore.getTableAPI();
         setBatchSize(persistenceUnit, puProperties);
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#find(java.lang.Class,
+     * java.lang.Object)
+     */
 
     @Override
     public Object find(Class entityClass, Object key)
@@ -145,118 +165,56 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         return find(entityClass, key, null);
     }
 
+    /**
+     * Find by id.
+     * 
+     * @param entityClass
+     *            entity class
+     * @param key
+     *            primary key
+     * @param columnsToSelect
+     *            columns to select
+     * @return
+     */
+    @SuppressWarnings("unchecked")
     private Object find(Class entityClass, Object key, List<String> columnsToSelect)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClass);
         MetamodelImpl metamodel = (MetamodelImpl) KunderaMetadataManager.getMetamodel(kunderaMetadata,
                 entityMetadata.getPersistenceUnit());
 
-        EntityType entityType = metamodel.entity(entityMetadata.getEntityClazz());
+        String idColumnName = ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName();
+        Table schemaTable = tableAPI.getTable(entityMetadata.getTableName());
+
+        PrimaryKey rowKey = schemaTable.createPrimaryKey();
+        if (metamodel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
+        {
+            readEmbeddable(key, columnsToSelect, entityMetadata, metamodel, schemaTable, rowKey,
+                    entityMetadata.getIdAttribute());
+        }
+        else
+        {
+            if (eligibleToFetch(columnsToSelect, idColumnName))
+            {
+                NoSqlDBUtils.add(schemaTable.getField(idColumnName), rowKey, key, idColumnName);
+            }
+        }
 
         if (log.isDebugEnabled())
         {
             log.debug("Fetching data from " + entityMetadata.getTableName() + " for PK " + key);
         }
 
-        // Major Key components
-        List<String> majorComponents = new ArrayList<String>();
-        majorComponents.add(entityMetadata.getTableName());
-        majorComponents.add(PropertyAccessorHelper.getString(key));
-
-        Key majorKeyToFind = Key.createKey(majorComponents);
-
-        Object entity = null;
-
-        Map<String, Object> relationMap = null;
-        if (entityMetadata.getRelationNames() != null && !entityMetadata.getRelationNames().isEmpty())
-        {
-            relationMap = new HashMap<String, Object>();
-        }
+        // Object entity = null;
+        List entities = new ArrayList();
+        Map<String, Object> relationMap = initialize(entityMetadata);
 
         try
         {
-            Iterator<KeyValueVersion> iterator = kvStore.multiGetIterator(Direction.FORWARD, 0, majorKeyToFind, null,
-                    null);
-
-            // Populate non-ID attributes
-            while (iterator.hasNext())
-            {
-                entity = initializeEntity(entity, key, entityMetadata);
-
-                KeyValueVersion keyValueVersion = iterator.next();
-
-                String minorKeyFirstPart = keyValueVersion.getKey().getMinorPath().get(0);
-                minorKeyFirstPart = handler.removeLOBSuffix(minorKeyFirstPart);
-                String discriminatorColumn = ((AbstractManagedType) entityType).getDiscriminatorColumn();
-                if (minorKeyFirstPart != null && !minorKeyFirstPart.equals(discriminatorColumn))
-                {
-                    String fieldName = entityMetadata.getFieldName(minorKeyFirstPart);
-                    if (fieldName != null)
-                    {
-                        Field f = (Field) entityType.getAttribute(fieldName).getJavaMember();
-
-                        if (metamodel.isEmbeddable(f.getType()))
-                        {
-                            // Populate embedded attribute
-                            Class<?> embeddableClass = f.getType();
-                            if (metamodel.isEmbeddable(embeddableClass))
-                            {
-                                String minorKeySecondPart = keyValueVersion.getKey().getMinorPath().get(1);
-                                minorKeySecondPart = handler.removeLOBSuffix(minorKeySecondPart);
-
-                                Object embeddedObject = PropertyAccessorHelper.getObject(entity, f);
-                                if (embeddedObject == null)
-                                {
-                                    embeddedObject = embeddableClass.newInstance();
-                                    PropertyAccessorHelper.set(entity, f, embeddedObject);
-                                }
-
-                                EmbeddableType embeddableType = metamodel.embeddable(embeddableClass);
-
-                                Attribute columnAttribute = embeddableType.getAttribute(minorKeySecondPart);
-                                Field columnField = (Field) columnAttribute.getJavaMember();
-
-                                if (columnField != null)
-                                {
-                                    if (columnsToSelect == null
-                                            || columnsToSelect.isEmpty()
-                                            || columnsToSelect.contains(((AbstractAttribute) columnAttribute)
-                                                    .getJPAColumnName()))
-                                    {
-                                        populateField(embeddedObject, columnField, keyValueVersion, minorKeySecondPart);
-                                    }
-                                }
-                            }
-
-                        }
-                        else if (entityType.getAttribute(fieldName) != null)
-                        {
-                            Value v = keyValueVersion.getValue();
-                            if (f != null && entityMetadata.getRelation(f.getName()) == null)
-                            {
-                                if (columnsToSelect == null
-                                        || columnsToSelect.isEmpty()
-                                        || columnsToSelect.contains(((AbstractAttribute) entityType
-                                                .getAttribute(fieldName)).getJPAColumnName()))
-                                {
-                                    populateField(entity, f, keyValueVersion, minorKeyFirstPart);
-
-                                }
-                            }
-
-                            else if (entityMetadata.getRelationNames() != null
-                                    && entityMetadata.getRelationNames().contains(minorKeyFirstPart))
-                            {
-                                Relation relation = entityMetadata.getRelation(f.getName());
-                                EntityMetadata associationMetadata = KunderaMetadataManager.getEntityMetadata(
-                                        kunderaMetadata, relation.getTargetEntity());
-                                relationMap.put(minorKeyFirstPart, PropertyAccessorHelper.getObject(associationMetadata
-                                        .getIdAttribute().getBindableJavaType(), v.getValue()));
-                            }
-                        }
-                    }
-                }
-            }
+            Iterator<Row> rowsIter = tableAPI.tableIterator(rowKey, null, null);
+            // iterator and build entity
+            entities = scrollAndPopulate(key, entityMetadata, metamodel, schemaTable, rowsIter, relationMap,
+                    columnsToSelect);
         }
         catch (Exception e)
         {
@@ -264,58 +222,26 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
             throw new PersistenceException(e);
         }
 
-        if (relationMap != null && !relationMap.isEmpty())
-        {
-            EnhanceEntity e = new EnhanceEntity(entity, key, relationMap);
-            return e;
-        }
-        else
-        {
-            return entity;
-        }
+        return entities.isEmpty() ? null : entities.get(0);
     }
 
-    /**
-     * Populates a field in enclosing class instance from data retrieved from
-     * Oracle NoSQL
-     * 
-     * @param object
-     * @param field
-     * @param keyValueVersion
-     * @param minorKey
-     * @throws FileNotFoundException
-     * @throws IOException
-     */
-    private void populateField(Object object, Field field, KeyValueVersion keyValueVersion, String minorKey)
-            throws FileNotFoundException, IOException
+    private void readEmbeddable(Object key, List<String> columnsToSelect, EntityMetadata entityMetadata,
+            MetamodelImpl metamodel, Table schemaTable, RecordValue value, Attribute attribute)
     {
-        if (field.getType().isAssignableFrom(File.class))
-        {
-            File lobFile = handler.getLOBFile(keyValueVersion, minorKey);
-            PropertyAccessorHelper.set(object, field, lobFile);
-        }
-        else
-        {
-            PropertyAccessorHelper.set(object, field, keyValueVersion.getValue().getValue());
-        }
-    }
+        EmbeddableType embeddableId = metamodel.embeddable(((AbstractAttribute) attribute).getBindableJavaType());
+        Set<Attribute> embeddedAttributes = embeddableId.getAttributes();
 
-    /**
-     * @param key
-     * @param entityMetadata
-     * @return
-     * @throws InstantiationException
-     * @throws IllegalAccessException
-     */
-    private Object initializeEntity(Object entity, Object key, EntityMetadata entityMetadata)
-            throws InstantiationException, IllegalAccessException
-    {
-        if (entity == null)
+        for (Attribute embeddedAttrib : embeddedAttributes)
         {
-            entity = entityMetadata.getEntityClazz().newInstance();
-            PropertyAccessorHelper.setId(entity, entityMetadata, key);
+            String columnName = ((AbstractAttribute) embeddedAttrib).getJPAColumnName();
+            Object embeddedColumn = PropertyAccessorHelper.getObject(key, (Field) embeddedAttrib.getJavaMember());
+
+            // either null or empty or contains that column
+            if (eligibleToFetch(columnsToSelect, columnName))
+            {
+                NoSqlDBUtils.add(schemaTable.getField(columnName), value, embeddedColumn, columnName);
+            }
         }
-        return entity;
     }
 
     @Override
@@ -327,43 +253,42 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         nodes.clear();
     }
 
+    /**
+     * Delete by primary key.
+     */
     @Override
     public void delete(Object entity, Object pKey)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entity.getClass());
-        String idString = PropertyAccessorHelper.getString(pKey);
+        MetamodelImpl metamodel = (MetamodelImpl) KunderaMetadataManager.getMetamodel(kunderaMetadata,
+                entityMetadata.getPersistenceUnit());
 
-        Key key = Key.createKey(entityMetadata.getTableName());
-        // String idString2 = getNextString(idString);
-        KeyRange keyRange = new KeyRange(idString, true, idString, true);
+        String idColumnName = ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName();
 
-        Iterator<KeyValueVersion> iterator = kvStore.storeIterator(Direction.UNORDERED, 0, key, keyRange, null);
+        Table schemaTable = tableAPI.getTable(entityMetadata.getTableName());
 
-        List<Operation> deleteOperations = new ArrayList<Operation>();
+        PrimaryKey key = schemaTable.createPrimaryKey();
 
-        while (iterator.hasNext())
+        if (metamodel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
         {
-            KeyValueVersion keyValueVersion = iterator.next();
-            Key foundKey = keyValueVersion.getKey();
-            String foundIdString = foundKey.getMajorPath().get(1);
-            List<String> minorKeysComponents = keyValueVersion.getKey().getMinorPath();
-            if (minorKeysComponents.size() > 0
-                    && minorKeysComponents.get(minorKeysComponents.size() - 1)
-                            .endsWith(OracleNOSQLConstants.LOB_SUFFIX))
+            EmbeddableType embeddableId = metamodel.embeddable(entityMetadata.getIdAttribute().getBindableJavaType());
+            Set<Attribute> embeddedAttributes = embeddableId.getAttributes();
+
+            for (Attribute embeddedAttrib : embeddedAttributes)
             {
-                kvStore.deleteLOB(keyValueVersion.getKey(), durability, timeout, timeUnit);
-            }
-            else
-            {
-                if (idString.equals(foundIdString))
-                {
-                    Operation op = kvStore.getOperationFactory().createDelete(foundKey);
-                    deleteOperations.add(op);
-                }
+                String columnName = ((AbstractAttribute) embeddedAttrib).getJPAColumnName();
+                Object embeddedColumn = PropertyAccessorHelper.getObject(pKey, (Field) embeddedAttrib.getJavaMember());
+
+                NoSqlDBUtils.add(schemaTable.getField(columnName), key, embeddedColumn, columnName);
             }
         }
-        handler.execute(deleteOperations);
-        // kvStore.multiDelete(Key.createKey(majorKeyComponent), null, null);
+        else
+        {
+            NoSqlDBUtils.add(schemaTable.getField(idColumnName), key, pKey, idColumnName);
+        }
+
+        tableAPI.delete(key, null, null);
+
         getIndexManager().remove(entityMetadata, entity, pKey.toString());
     }
 
@@ -386,195 +311,9 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     @Override
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
     {
-        String schema = entityMetadata.getSchema(); // Irrelevant for this
-                                                    // datastore
-        String table = entityMetadata.getTableName();
-
-        MetamodelImpl metamodel = (MetamodelImpl) KunderaMetadataManager.getMetamodel(kunderaMetadata,
-                entityMetadata.getPersistenceUnit());
-
-        if (log.isDebugEnabled())
-        {
-            log.debug("Persisting data into " + schema + "." + table + " for " + id);
-        }
-        EntityType entityType = metamodel.entity(entityMetadata.getEntityClazz());
-        List<Operation> persistOperations = new ArrayList<Operation>();
-
-        // Major Key component
-        List<String> majorKeyComponent = new ArrayList<String>();
-        majorKeyComponent.add(table);
-        majorKeyComponent.add(PropertyAccessorHelper.getString(id)); // Major
-                                                                     // Keys are
-                                                                     // always
-                                                                     // String
-
-        // Iterate over all Non-ID attributes of this entity (ID is already part
-        // of major key)
-        Set<Attribute> attributes = entityType.getAttributes();
-
-        for (Attribute attribute : attributes)
-        {
-            Field currentField = (Field) attribute.getJavaMember();
-            Field idField = (Field) entityMetadata.getIdAttribute().getJavaMember();
-            if (!currentField.equals(idField))
-            {
-                Class fieldJavaType = ((AbstractAttribute) attribute).getBindableJavaType();
-
-                // If attribute is Embeddable, create minor keys for each
-                // attribute it contains
-                if (metamodel.isEmbeddable(fieldJavaType))
-                {
-                    Object embeddedObject = PropertyAccessorHelper.getObject(entity, (Field) attribute.getJavaMember());
-                    if (embeddedObject != null)
-                    {
-                        if (attribute.isCollection())
-                        {
-                            // ElementCollection is not supported for
-                            // OracleNoSQL as of now, ignore for now
-                            log.warn("Attribute "
-                                    + attribute.getName()
-                                    + " will not be persistence because ElementCollection is not supported for OracleNoSQL as of now.");
-                        }
-                        else
-                        {
-                            String embeddedColumnName = ((AbstractAttribute) attribute).getJPAColumnName();
-                            EmbeddableType embeddableType = metamodel.embeddable(fieldJavaType);
-                            Set<Attribute> embeddableAttributes = embeddableType.getAttributes();
-
-                            for (Attribute embeddableAttribute : embeddableAttributes)
-                            {
-                                Field f = (Field) embeddableAttribute.getJavaMember();
-
-                                // Value
-                                Object valueObj = PropertyAccessorHelper.getObject(embeddedObject, f);
-                                if (valueObj != null)
-                                {
-                                    if (valueObj instanceof File)
-                                    {
-                                        List<String> minorKeyComponents = new ArrayList<String>();
-                                        minorKeyComponents.add(embeddedColumnName);
-                                        /*
-                                         * minorKeyComponents.add(((
-                                         * AbstractAttribute)
-                                         * embeddableAttribute)
-                                         * .getJPAColumnName() +
-                                         * OracleNOSQLConstants.LOB_SUFFIX);
-                                         */
-                                        minorKeyComponents.add(embeddableAttribute.getName()
-                                                + OracleNOSQLConstants.LOB_SUFFIX);
-
-                                        // Key
-                                        Key key = Key.createKey(majorKeyComponent, minorKeyComponents);
-                                        File lobFile = (File) valueObj;
-                                        handler.saveLOBFile(key, lobFile);
-                                    }
-                                    else
-                                    {
-
-                                        List<String> minorKeyComponents = new ArrayList<String>();
-                                        minorKeyComponents.add(embeddedColumnName);
-                                        /*
-                                         * minorKeyComponents.add(((
-                                         * AbstractAttribute)
-                                         * embeddableAttribute)
-                                         * .getJPAColumnName());
-                                         */
-                                        minorKeyComponents.add(embeddableAttribute.getName());
-
-                                        // Key
-                                        Key key = Key.createKey(majorKeyComponent, minorKeyComponents);
-
-                                        byte[] valueByteArray = PropertyAccessorHelper.getBytes(valueObj);
-                                        Value value = Value.createValue(valueByteArray);
-
-                                        Operation op = kvStore.getOperationFactory().createPut(key, value);
-                                        persistOperations.add(op);
-
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // All other non-embeddable agttributes (ignore associations, as
-                // they will be store by separate call)
-                else if (!attribute.isAssociation())
-                {
-                    Field field = (Field) attribute.getJavaMember();
-
-                    // Value
-                    Object valueObj = PropertyAccessorHelper.getObject(entity, field);
-                    if (valueObj != null)
-                    {
-                        String columnName = ((AbstractAttribute) attribute).getJPAColumnName();
-
-                        if (valueObj instanceof File)
-                        {
-                            // Key
-                            Key key = Key.createKey(majorKeyComponent, columnName + OracleNOSQLConstants.LOB_SUFFIX);
-                            File lobFile = (File) valueObj;
-                            handler.saveLOBFile(key, lobFile);
-                        }
-                        else
-                        {
-                            // Key
-                            Key key = Key.createKey(majorKeyComponent, columnName);
-
-                            byte[] valueByteArray = PropertyAccessorHelper.getBytes(valueObj);
-                            Value value = Value.createValue(valueByteArray);
-
-                            Operation op = kvStore.getOperationFactory().createPut(key, value);
-                            persistOperations.add(op);
-                        }
-                    }
-                }
-            }
-        }
-
-        // Iterate over relations
-        if (rlHolders != null && !rlHolders.isEmpty())
-        {
-            for (RelationHolder rh : rlHolders)
-            {
-                String relationName = rh.getRelationName();
-                Object valueObj = rh.getRelationValue();
-
-                if (!StringUtils.isEmpty(relationName) && valueObj != null)
-                {
-                    // Key
-                    Key key = Key.createKey(majorKeyComponent, relationName);
-
-                    // Value
-                    if (valueObj != null)
-                    {
-                        byte[] valueInBytes = PropertyAccessorHelper.getBytes(valueObj);
-                        Value value = Value.createValue(valueInBytes);
-
-                        Operation op = kvStore.getOperationFactory().createPut(key, value);
-                        persistOperations.add(op);
-                    }
-                }
-            }
-        }
-
-        String discrColumn = ((AbstractManagedType) entityType).getDiscriminatorColumn();
-        String discrValue = ((AbstractManagedType) entityType).getDiscriminatorValue();
-
-        // No need to check for empty or blank, as considering it as valid name
-        // for nosql!
-        if (discrColumn != null && discrValue != null)
-        {
-            // Key
-            Key key = Key.createKey(majorKeyComponent, discrColumn);
-
-            byte[] valueInBytes = PropertyAccessorHelper.getBytes(discrValue);
-            Value value = Value.createValue(valueInBytes);
-
-            Operation op = kvStore.getOperationFactory().createPut(key, value);
-            persistOperations.add(op);
-        }
-        handler.execute(persistOperations);
+        Row row = createRow(entityMetadata, entity, id, rlHolders);
+        // TODO:: handle case for putDate??????
+        tableAPI.put(row, null, null);
     }
 
     @Override
@@ -583,54 +322,80 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         String joinTableName = joinTableData.getJoinTableName();
         String joinColumnName = joinTableData.getJoinColumnName();
         String invJoinColumnName = joinTableData.getInverseJoinColumnName();
+        Map<Key, List<TableOperation>> operations = new HashMap<Key, List<TableOperation>>();
+
+        // String schema = joinTableData.getSchemaName();
+        Table schemaTable = tableAPI.getTable(joinTableName);
+        Row row = schemaTable.createRow();
+        String primaryKey = joinColumnName + SEPERATOR + invJoinColumnName;
+
         Map<Object, Set<Object>> joinTableRecords = joinTableData.getJoinTableRecords();
 
-        /**
-         * There will be two kinds of major keys 1.
-         * /Join_Table_Name/Join_Column_Name/Primary_Key_On_Owning_Side 2.
-         * /Join_Table_Name/Inverse_Join_Column_Name/Primary_Key_On_Other_Side
-         * 
-         * Minor keys for both will be list of Primary keys at the opposite
-         * side, value will always be null
-         */
-
-        for (Object pk : joinTableRecords.keySet())
+        try
         {
-            // Save Join Column ---> inverse Join Column mapping
-            List<String> majorKeysForJoinColumn = new ArrayList<String>();
-
-            majorKeysForJoinColumn.add(joinTableName);
-            // majorKeysForJoinColumn.add(joinColumnName);
-            majorKeysForJoinColumn.add(PropertyAccessorHelper.getString(pk));
-
-            Set<Object> values = joinTableRecords.get(pk);
-            List<String> minorKeysForJoinColumn = new ArrayList<String>();
-
-            for (Object childId : values)
+            for (Object pk : joinTableRecords.keySet())
             {
-                minorKeysForJoinColumn.add(PropertyAccessorHelper.getString(childId));
+                // here pk is join column name and it's values would become
+                // inverse join columns
+                //
 
-                // Save Invese join Column ---> Join Column mapping
-                List<String> majorKeysForInvJoinColumn = new ArrayList<String>();
-                majorKeysForInvJoinColumn.add(joinTableName);
-                // majorKeysForInvJoinColumn.add(invJoinColumnName);
-                majorKeysForInvJoinColumn.add(PropertyAccessorHelper.getString(childId));
+                NoSqlDBUtils.add(schemaTable.getField(joinColumnName), row, pk, joinColumnName);
+                Set<Object> values = joinTableRecords.get(pk);
+                for (Object childId : values)
+                {
+                    // what if join or inverse join column is null? Not handling
+                    // as ideally it should be handled in core itself!
 
-                Key key = Key.createKey(majorKeysForInvJoinColumn, PropertyAccessorHelper.getString(pk));
-                kvStore.put(key, Value.createValue(invJoinColumnName.getBytes()));
+                    NoSqlDBUtils.add(schemaTable.getField(invJoinColumnName), row, childId, invJoinColumnName);
+
+                    NoSqlDBUtils.add(schemaTable.getField(primaryKey), row,
+                            pk.toString() + SEPERATOR + childId.toString(), primaryKey);
+
+                    addOps(operations, schemaTable, row);
+                    // operations.put(((TableImpl)schemaTable).createKey(row,false),
+                    // tableAPI.getTableOperationFactory().createPut(row,
+                    // Choice.NONE, true));
+                }
             }
-            Key key = Key.createKey(majorKeysForJoinColumn, minorKeysForJoinColumn);
-            kvStore.put(key, Value.createValue(joinColumnName.getBytes()));
+
+            execute(operations);
+        }
+        finally
+        {
+            operations.clear();
+            operations = null;
         }
     }
 
-    private void execute(List<Operation> batch)
+    private void addOps(Map<Key, List<TableOperation>> operations, Table schemaTable, Row row)
     {
-        if (batch != null && !batch.isEmpty())
+        Key key = ((TableImpl) schemaTable).createKey(row, false);
+
+        TableOperation ops = tableAPI.getTableOperationFactory().createPut(row, Choice.NONE, true);
+
+        if (operations.containsKey(key))
+        {
+            operations.get(key).add(ops);
+
+        }
+        else
+        {
+            List<TableOperation> operation = new ArrayList<TableOperation>();
+            operation.add(ops);
+            operations.put(key, operation);
+        }
+    }
+
+    private void execute(Map<Key, List<TableOperation>> batches)
+    {
+        if (batches != null && !batches.isEmpty())
         {
             try
             {
-                kvStore.execute(batch);
+                for (List<TableOperation> batch : batches.values())
+                {
+                    tableAPI.execute(batch, null);
+                }
             }
             catch (DurabilityException e)
             {
@@ -649,11 +414,17 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
             }
             finally
             {
-                batch.clear();
+                batches.clear();
             }
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#findAll(java.lang.Class,
+     * java.lang.String[], java.lang.Object[])
+     */
     @Override
     public <E> List<E> findAll(Class<E> entityClass, String[] columnsToSelect, Object... keys)
     {
@@ -664,58 +435,111 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
             columnsToSelect = new String[0];
         }
 
-        for (Object key : keys)
+        if (keys == null)
         {
-            results.add((E) find(entityClass, key, Arrays.asList(columnsToSelect)));
+            EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClass);
+            MetamodelImpl metamodel = (MetamodelImpl) KunderaMetadataManager.getMetamodel(kunderaMetadata,
+                    entityMetadata.getPersistenceUnit());
+
+            EntityType entityType = metamodel.entity(entityMetadata.getEntityClazz());
+
+            Table schemaTable = tableAPI.getTable(entityMetadata.getTableName());
+
+            Iterator<Row> rowsIter = tableAPI.tableIterator(schemaTable.createPrimaryKey(), null, null);
+
+            Map<String, Object> relationMap = initialize(entityMetadata);
+
+            try
+            {
+                results = scrollAndPopulate(null, entityMetadata, metamodel, schemaTable, rowsIter, relationMap,
+                        Arrays.asList(columnsToSelect));
+            }
+            catch (Exception e)
+            {
+                log.error("Error while finding records , Caused By :" + e + ".");
+                throw new PersistenceException(e);
+            }
+        }
+        else
+        {
+
+            for (Object key : keys)
+            {
+                results.add((E) find(entityClass, key, Arrays.asList(columnsToSelect)));
+            }
         }
 
         return results;
     }
 
+    /**
+     * On JPQL query execution.
+     * 
+     * @param entityClass
+     *            entity class.
+     * @param interpreter
+     *            query interpreter
+     * @param primaryKeys
+     *            set of primary keys. Empty if
+     * @return
+     */
     public <E> List<E> executeQuery(Class<E> entityClass, OracleNoSQLQueryInterpreter interpreter,
             Set<Object> primaryKeys)
     {
-        List<E> results = new ArrayList<E>();
-        if (primaryKeys == null)
-        {
-            primaryKeys = new HashSet<Object>();
-        }
 
-        if (!interpreter.getClauseQueue().isEmpty()) // Select all query
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClass);
+        MetamodelImpl metamodel = (MetamodelImpl) KunderaMetadataManager.getMetamodel(kunderaMetadata,
+                entityMetadata.getPersistenceUnit());
+
+        EntityType entityType = metamodel.entity(entityMetadata.getEntityClazz());
+
+        List<E> results = new ArrayList<E>();
+
+        if (interpreter.getClauseQueue().isEmpty()) // Select all query
         {
             // Select Query with where clause (requires search within inverted
             // index)
-            primaryKeys.addAll(((OracleNoSQLInvertedIndexer) getIndexManager().getIndexer()).executeQuery(interpreter,
-                    entityClass, KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClass)));
-
+            return findAll(entityClass, interpreter.getSelectColumns(), null);
         }
-        else
+        else if (interpreter.isFindById() && interpreter.getClauseQueue().size() == 1)
         {
-            EntityMetadata m = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClass);
 
-            ArrayList<String> majorComponents = new ArrayList<String>();
-            majorComponents.add(m.getTableName());
-
-            Key key = Key.createKey(majorComponents);
-
-            Iterator<KeyValueVersion> iterator = kvStore.storeIterator(Direction.UNORDERED, 0, key, null, null);
-
-            Set<Object> keySet = new HashSet<Object>();
-
-            while (iterator.hasNext())
+            // finally, find by id.
+            Object value = null;
+            for (Object clause : interpreter.getClauseQueue())
             {
-                KeyValueVersion keyValueVersion = iterator.next();
 
-                String majorKeySecondPart = keyValueVersion.getKey().getMajorPath().get(1);
-                keySet.add(majorKeySecondPart);
+                if (clause.getClass().isAssignableFrom(FilterClause.class))
+                {
+                    value = ((FilterClause) clause).getValue();
+
+                }
+                else
+                {
+                    throw new QueryHandlerException(
+                            "Query with id in where clause and multiple AND/OR clause is not supported with oracle nosql db");
+                }
             }
 
-            primaryKeys.addAll(keySet);
+            if (value != null)
+            {
+                Object output = find(entityClass, value);
+                if (output != null)
+                {
+                    results.add((E) output);
+                }
+            }
         }
-
-        results = findAll(entityClass, interpreter.getSelectColumns(), primaryKeys.toArray());
-
+        else if (interpreter.getClauseQueue().size() >= 1) // query over index
+                                                           // keys.
+        {
+            return onIndexSearch(interpreter, entityMetadata, metamodel, results,
+                    Arrays.asList(interpreter.getSelectColumns()));
+        }
         return results;
+
+        // throw new
+        // UnsupportedOperationException("Query with where clause is not yet supported");
     }
 
     @Override
@@ -728,158 +552,106 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     public <E> List<E> getColumnsById(String schemaName, String tableName, String pKeyColumnName, String columnName,
             Object pKeyColumnValue, Class columnJavaType)
     {
+        // search using index on pkey column
         List<E> foreignKeys = new ArrayList<E>();
 
-        // Major Key components
-        List<String> majorComponents = new ArrayList<String>();
-        majorComponents.add(tableName);
-        // majorComponents.add(pKeyColumnName);
-        majorComponents.add(PropertyAccessorHelper.getString(pKeyColumnValue));
-        Key majorKeyToFind = Key.createKey(majorComponents);
+        Table schemaTable = tableAPI.getTable(tableName);
+        Index index = schemaTable.getIndex(pKeyColumnName);
+        IndexKey indexKey = index.createIndexKey();
 
-        Iterator<KeyValueVersion> iterator = kvStore.multiGetIterator(Direction.FORWARD, 0, majorKeyToFind, null, null);
+        // StringBuilder indexNamebuilder = new StringBuilder();
+        NoSqlDBUtils.add(schemaTable.getField(pKeyColumnName), indexKey, pKeyColumnValue, pKeyColumnName);
 
-        try
+        Iterator<Row> rowsIter = tableAPI.tableIterator(indexKey, null, null);
+
+        while (rowsIter.hasNext())
         {
-            while (iterator.hasNext())
-            {
-                KeyValueVersion keyValueVersion = iterator.next();
-
-                String value = new String(keyValueVersion.getValue().getValue(), "UTF-8");
-                if (value != null && value.equals(pKeyColumnName))
-                {
-                    Iterator<String> minorKeyIterator = keyValueVersion.getKey().getMinorPath().iterator();
-
-                    while (minorKeyIterator.hasNext())
-                    {
-                        String minorKey = minorKeyIterator.next();
-                        Object foreignKey = PropertyAccessorHelper.fromSourceToTargetClass(columnJavaType,
-                                String.class, minorKey);
-                        foreignKeys.add((E) foreignKey);
-                    }
-                }
-            }
+            Row row = rowsIter.next();
+            FieldDef fieldMetadata = schemaTable.getField(columnName);
+            FieldValue value = row.get(columnName);
+            foreignKeys.add((E) NoSqlDBUtils.get(fieldMetadata, value, null));
         }
-        catch (UnsupportedEncodingException e)
-        {
-            log.error("Error while finding columns for ID " + pKeyColumnValue + ", Caused by:" + e + ".");
-            throw new PersistenceException(e);
-        }
+
         return foreignKeys;
+
     }
 
     @Override
     public Object[] findIdsByColumn(String schemaName, String tableName, String pKeyName, String columnName,
             Object columnValue, Class entityClazz)
     {
-        String valueAsStr = PropertyAccessorHelper.getString(columnValue);
-        Set<Object> results = new HashSet<Object>();
-
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClazz);
-        // Major Key components
-        List<String> majorComponents = new ArrayList<String>();
-        majorComponents.add(tableName);
-        // majorComponents.add(columnName);
-        majorComponents.add(PropertyAccessorHelper.getString(valueAsStr));
-        Key majorKeyToFind = Key.createKey(majorComponents);
-
-        Iterator<KeyValueVersion> iterator = kvStore.multiGetIterator(Direction.FORWARD, 0, majorKeyToFind, null, null);
-        try
-        {
-            while (iterator.hasNext())
-            {
-                KeyValueVersion keyValueVersion = iterator.next();
-                String value = new String(keyValueVersion.getValue().getValue(), "UTF-8");
-
-                if (value != null && value.equals(columnName))
-                {
-                    Iterator<String> minorKeyIterator = keyValueVersion.getKey().getMinorPath().iterator();
-
-                    while (minorKeyIterator.hasNext())
-                    {
-                        String minorKey = minorKeyIterator.next();
-                        Object primaryKey = PropertyAccessorHelper.fromSourceToTargetClass(metadata.getIdAttribute()
-                                .getJavaType(), String.class, minorKey);
-                        results.add(primaryKey);
-                    }
-                }
-            }
-        }
-        catch (UnsupportedEncodingException e)
-        {
-            log.error("Error while executing operations in OracleNOSQL, Caused by:" + e + ".");
-            throw new PersistenceException(e);
-        }
-
-        if (results != null && !results.isEmpty())
-        {
-            return results.toArray(new Object[0]);
-        }
-        return null;
+        return getColumnsById(schemaName, tableName, columnName, pKeyName, columnValue, entityClazz).toArray();
     }
 
     @Override
     public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
     {
-        List<String> majorKeyComponent = new ArrayList<String>();
-        majorKeyComponent.add(tableName);
-        majorKeyComponent.add(PropertyAccessorHelper.getString(columnValue));
-        Key majorKey = Key.createKey(majorKeyComponent);
-        boolean deleteApplicableOnMajorKey = false;
+        Table schemaTable = tableAPI.getTable(tableName);
+        List<String> primaryKeys = schemaTable.getPrimaryKey();
 
-        // Store minor keys in an array before deleting
-        List<String> minorKeys = new ArrayList<String>();
-        Iterator<KeyValueVersion> iterator = kvStore.multiGetIterator(Direction.FORWARD, 0, majorKey, null, null);
-        try
+        Object[] foundRecords = findIdsByColumn(schemaName, tableName, primaryKeys.get(0), columnName, columnValue,
+                null);
+
+        if (foundRecords != null)
         {
-            while (iterator.hasNext())
+            for (Object key : foundRecords)
             {
-                KeyValueVersion keyValueVersion = iterator.next();
-
-                String value = new String(keyValueVersion.getValue().getValue(), "UTF-8");
-                if (value != null && value.equals(columnName))
-                {
-                    deleteApplicableOnMajorKey = true;
-
-                    Iterator<String> minorKeyIterator = keyValueVersion.getKey().getMinorPath().iterator();
-
-                    while (minorKeyIterator.hasNext())
-                    {
-                        String minorKey = minorKeyIterator.next();
-                        minorKeys.add(minorKey);
-                    }
-                }
-
-            }
-        }
-        catch (UnsupportedEncodingException e)
-        {
-            log.error("Error while deleting records for column " + columnName + ", Caused By :" + e + ".");
-            throw new PersistenceException(e);
-        }
-
-        if (deleteApplicableOnMajorKey)
-        {
-            // Delete This columnValue as major key
-            kvStore.multiDelete(majorKey, null, null);
-
-            // Delete all minor keys that contain this columnValue
-            for (String key : minorKeys)
-            {
-                List<String> majorKeys = new ArrayList<String>();
-                majorKeys.add(tableName);
-                majorKeys.add(PropertyAccessorHelper.getString(key));
-                Key majorAndMinorKeys = Key.createKey(majorKeys, PropertyAccessorHelper.getString(columnValue));
-                kvStore.multiDelete(majorAndMinorKeys, null, null);
+                PrimaryKey primaryKey = schemaTable.createPrimaryKey();
+                NoSqlDBUtils.add(schemaTable.getField(primaryKeys.get(0)), primaryKey, key, primaryKeys.get(0));
+                tableAPI.delete(primaryKey, null, null);
             }
         }
 
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#findByRelation(java.lang.String,
+     * java.lang.Object, java.lang.Class)
+     */
+    /**
+     * Find by relational column name and value.
+     */
     @Override
     public List<Object> findByRelation(String colName, Object colValue, Class entityClazz)
     {
-        throw new UnsupportedOperationException("This operation is not supported for OracleNoSQL.");
+        // find by relational value !
+
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClazz);
+        MetamodelImpl metamodel = (MetamodelImpl) KunderaMetadataManager.getMetamodel(kunderaMetadata,
+                entityMetadata.getPersistenceUnit());
+
+        EntityType entityType = metamodel.entity(entityMetadata.getEntityClazz());
+
+        Table schemaTable = tableAPI.getTable(entityMetadata.getTableName());
+
+        Iterator<Row> rowsIter = null;
+        if (schemaTable.getPrimaryKey().contains(colName))
+        {
+            PrimaryKey rowKey = schemaTable.createPrimaryKey();
+            NoSqlDBUtils.add(schemaTable.getField(colName), rowKey, colValue, colName);
+            rowsIter = tableAPI.tableIterator(rowKey, null, null);
+        }
+        else
+        {
+            Index index = schemaTable.getIndex(colName);
+            IndexKey indexKey = index.createIndexKey();
+            rowsIter = tableAPI.tableIterator(indexKey, null, null);
+        }
+
+        try
+        {
+            Map<String, Object> relationMap = initialize(entityMetadata);
+
+            return scrollAndPopulate(null, entityMetadata, metamodel, schemaTable, rowsIter, relationMap, null);
+        }
+        catch (Exception e)
+        {
+            log.error("Error while finding data for Key " + colName + ", Caused By :" + e + ".");
+            throw new PersistenceException(e);
+        }
+
     }
 
     @Override
@@ -915,6 +687,8 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     @Override
     public int executeBatch()
     {
+
+        Map<Key, List<TableOperation>> operations = new HashMap<Key, List<TableOperation>>();
         for (Node node : nodes)
         {
             if (node.isDirty())
@@ -930,11 +704,18 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
                     EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
                             node.getDataClass());
                     List<RelationHolder> relationHolders = getRelationHolders(node);
-                    onPersist(metadata, node.getData(), node.getEntityId(), relationHolders);
+
+                    Row row = createRow(metadata, node.getData(), node.getEntityId(), relationHolders);
+
+                    Table schemaTable = tableAPI.getTable(metadata.getTableName());
+
+                    addOps(operations, schemaTable, row);
                 }
                 node.handlePostEvent();
             }
         }
+
+        execute(operations);
         return nodes.size();
     }
 
@@ -998,6 +779,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     @Override
     public void populateClientProperties(Client client, Map<String, Object> properties)
     {
+
         new OracleNoSQLClientProperties().populateClientProperties(client, properties);
     }
 
@@ -1067,6 +849,410 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     public Consistency getConsistency()
     {
         return consistency;
+    }
+
+    /**
+     * Iterate and store attributes.
+     * 
+     * @param entity
+     *            JPA entity.
+     * @param metamodel
+     *            JPA meta model.
+     * @param row
+     *            kv row.
+     * @param attributes
+     *            JPA attributes.
+     * @param fieldDefs
+     *            kv fields meta data
+     */
+    private void process(Object entity, MetamodelImpl metamodel, Row row, Set<Attribute> attributes, Table schemaTable,
+            EntityMetadata metadata)
+    {
+
+        for (Attribute attribute : attributes)
+        {
+            // by pass association.
+            if (!attribute.isAssociation())
+            {
+                // in case of embeddable id.
+                if (attribute.equals(metadata.getIdAttribute())
+                        && metamodel.isEmbeddable(((AbstractAttribute) attribute).getBindableJavaType()))
+                {
+                    processEmbeddableAttribute(entity, metamodel, row, schemaTable, metadata, attribute);
+                }
+                else
+                {
+                    if (metamodel.isEmbeddable(((AbstractAttribute) attribute).getBindableJavaType()))
+                    {
+                        processEmbeddableAttribute(entity, metamodel, row, schemaTable, metadata, attribute);
+                    }
+                    else
+                    {
+                        setField(row, schemaTable, entity, attribute);
+                    }
+                }
+            }
+        }
+    }
+
+    private void processEmbeddableAttribute(Object entity, MetamodelImpl metamodel, Row row, Table schemaTable,
+            EntityMetadata metadata, Attribute attribute)
+    {
+        // process on embeddables.
+        EmbeddableType embeddable = metamodel.embeddable(((AbstractAttribute) attribute).getBindableJavaType());
+        Set<Attribute> embeddedAttributes = embeddable.getAttributes();
+        Object embeddedObject = PropertyAccessorHelper.getObject(entity, (Field) attribute.getJavaMember());
+
+        for (Attribute embeddedAttrib : embeddedAttributes)
+        {
+            setField(row, schemaTable, embeddedObject, embeddedAttrib);
+        }
+    }
+
+    /**
+     * Process relational attributes.
+     * 
+     * @param rlHolders
+     *            relation holders
+     * 
+     * @param row
+     *            kv row object
+     * 
+     * @param fieldDefs
+     *            fields metadata
+     */
+    private void onRelationalAttributes(List<RelationHolder> rlHolders, Row row, Table schemaTable)
+    {
+        // Iterate over relations
+        if (rlHolders != null && !rlHolders.isEmpty())
+        {
+            for (RelationHolder rh : rlHolders)
+            {
+                String relationName = rh.getRelationName();
+                Object valueObj = rh.getRelationValue();
+
+                if (!StringUtils.isEmpty(relationName) && valueObj != null)
+                {
+                    if (valueObj != null)
+                    {
+                        NoSqlDBUtils.add(schemaTable.getField(relationName), row, valueObj, relationName);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Process discriminator columns
+     * 
+     * @param row
+     *            kv row object.
+     * 
+     * @param entityType
+     *            metamodel attribute.
+     * 
+     * @param fieldDefs
+     *            field definition.
+     * 
+     */
+    private void addDiscriminatorColumn(Row row, EntityType entityType, Table schemaTable)
+    {
+        String discrColumn = ((AbstractManagedType) entityType).getDiscriminatorColumn();
+        String discrValue = ((AbstractManagedType) entityType).getDiscriminatorValue();
+
+        // No need to check for empty or blank, as considering it as valid name
+        // for nosql!
+        if (discrColumn != null && discrValue != null)
+        {
+            // Key
+            // Key key = Key.createKey(majorKeyComponent, discrColumn);
+
+            byte[] valueInBytes = PropertyAccessorHelper.getBytes(discrValue);
+            NoSqlDBUtils.add(schemaTable.getField(discrColumn), row, discrValue, discrColumn);
+        }
+    }
+
+    /**
+     * setter field
+     * 
+     * @param row
+     * @param fieldDefs
+     * @param embeddedObject
+     * @param embeddedAttrib
+     */
+    private void setField(Row row, Table schemaTable, Object embeddedObject, Attribute embeddedAttrib)
+    {
+        Field field = (Field) embeddedAttrib.getJavaMember();
+        FieldDef fieldDef = schemaTable.getField(((AbstractAttribute) embeddedAttrib).getJPAColumnName());
+
+        Object valueObj = PropertyAccessorHelper.getObject(embeddedObject, field);
+
+        if (valueObj != null)
+            NoSqlDBUtils.add(fieldDef, row, valueObj, ((AbstractAttribute) embeddedAttrib).getJPAColumnName());
+    }
+
+    private void populateId(EntityMetadata entityMetadata, Table schemaTable, Object entity, Row row)
+    {
+        FieldDef fieldMetadata;
+        FieldValue value;
+        String idColumnName = ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName();
+
+        fieldMetadata = schemaTable.getField(idColumnName);
+
+        value = row.get(idColumnName);
+
+        NoSqlDBUtils.get(fieldMetadata, value, entity, (Field) entityMetadata.getIdAttribute().getJavaMember());
+    }
+
+    private void onEmbeddableId(EntityMetadata entityMetadata, MetamodelImpl metaModel, Table schemaTable,
+            Object entity, Row row) throws InstantiationException, IllegalAccessException
+    {
+        FieldDef fieldMetadata;
+        FieldValue value;
+        EmbeddableType embeddableType = metaModel.embeddable(entityMetadata.getIdAttribute().getBindableJavaType());
+        Set<Attribute> embeddedAttributes = embeddableType.getAttributes();
+
+        Object embeddedObject = entityMetadata.getIdAttribute().getBindableJavaType().newInstance();
+        for (Attribute attrib : embeddedAttributes)
+        {
+
+            String columnName = ((AbstractAttribute) attrib).getJPAColumnName();
+
+            fieldMetadata = schemaTable.getField(columnName);
+            value = row.get(columnName);
+            NoSqlDBUtils.get(fieldMetadata, value, embeddedObject, (Field) attrib.getJavaMember());
+        }
+
+        PropertyAccessorHelper.set(entity, (Field) entityMetadata.getIdAttribute().getJavaMember(), embeddedObject);
+    }
+
+    private Map<String, Object> initialize(EntityMetadata entityMetadata)
+    {
+        Map<String, Object> relationMap = null;
+        if (entityMetadata.getRelationNames() != null && !entityMetadata.getRelationNames().isEmpty())
+        {
+            relationMap = new HashMap<String, Object>();
+        }
+        return relationMap;
+    }
+
+    private List scrollAndPopulate(Object key, EntityMetadata entityMetadata, MetamodelImpl metaModel,
+            Table schemaTable, Iterator<Row> rowsIter, Map<String, Object> relationMap, List<String> columnsToSelect)
+            throws InstantiationException, IllegalAccessException
+    {
+        List results = new ArrayList();
+        Object entity = null;
+        EntityType entityType = metaModel.entity(entityMetadata.getEntityClazz());
+        // here
+        while (rowsIter.hasNext())
+        {
+            relationMap = new HashMap<String, Object>();
+            entity = initializeEntity(key, entityMetadata);
+
+            Row row = rowsIter.next();
+
+            List<String> fields = row.getTable().getFields();
+            FieldDef fieldMetadata = null;
+            FieldValue value = null;
+            String idColumnName = ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName();
+            if (/* eligibleToFetch(columnsToSelect, idColumnName) && */!metaModel.isEmbeddable(entityMetadata
+                    .getIdAttribute().getBindableJavaType()))
+            {
+                populateId(entityMetadata, schemaTable, entity, row);
+            }
+            else
+            {
+                onEmbeddableId(entityMetadata, metaModel, schemaTable, entity, row);
+            }
+
+            Iterator<String> fieldIter = fields.iterator();
+
+            Set<Attribute> attributes = entityType.getAttributes();
+            for (Attribute attribute : attributes)
+            {
+                String jpaColumnName = ((AbstractAttribute) attribute).getJPAColumnName();
+                if (eligibleToFetch(columnsToSelect, jpaColumnName)
+                        && !attribute.getName().equals(entityMetadata.getIdAttribute().getName()))
+                {
+                    if (metaModel.isEmbeddable(((AbstractAttribute) attribute).getBindableJavaType()))
+                    {
+                        // readEmbeddable(value, columnsToSelect,
+                        // entityMetadata, metaModel, schemaTable, value,
+                        // attribute);
+                        EmbeddableType embeddableId = metaModel.embeddable(((AbstractAttribute) attribute)
+                                .getBindableJavaType());
+                        Set<Attribute> embeddedAttributes = embeddableId.getAttributes();
+                        Object embeddedObject = ((AbstractAttribute) attribute).getBindableJavaType().newInstance();
+                        for (Attribute embeddedAttrib : embeddedAttributes)
+                        {
+                            String embeddedColumnName = ((AbstractAttribute) embeddedAttrib).getJPAColumnName();
+
+                            fieldMetadata = schemaTable.getField(embeddedColumnName);
+                            value = row.get(embeddedColumnName);
+                            NoSqlDBUtils.get(fieldMetadata, value, embeddedObject,
+                                    (Field) embeddedAttrib.getJavaMember());
+                        }
+                        PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), embeddedObject);
+
+                    }
+                    else
+                    {
+
+                        fieldMetadata = schemaTable.getField(jpaColumnName);
+                        value = row.get(jpaColumnName);
+
+                        if (!attribute.isAssociation())
+                        {
+                            NoSqlDBUtils.get(fieldMetadata, value, entity, (Field) attribute.getJavaMember());
+                        }
+                        else if (attribute.isAssociation())
+                        {
+                            Relation relation = entityMetadata.getRelation(attribute.getName());
+
+                            EntityMetadata associationMetadata = KunderaMetadataManager.getEntityMetadata(
+                                    kunderaMetadata, relation.getTargetEntity());
+                            if (!relation.getType().equals(ForeignKey.MANY_TO_MANY))
+                            {
+                                relationMap.put(jpaColumnName, NoSqlDBUtils.get(fieldMetadata, value,
+                                        (Field) associationMetadata.getIdAttribute().getJavaMember()));
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (entity != null)
+            {
+                results.add(relationMap.isEmpty() ? entity : new EnhanceEntity(entity, key != null ? key
+                        : PropertyAccessorHelper.getId(entity, entityMetadata), relationMap));
+            }
+        }
+        return results;
+    }
+
+    /**
+     * @param key
+     * @param entityMetadata
+     * @return
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     */
+    private Object initializeEntity(Object key, EntityMetadata entityMetadata) throws InstantiationException,
+            IllegalAccessException
+    {
+        Object entity = null;
+        entity = entityMetadata.getEntityClazz().newInstance();
+        if (key != null)
+        {
+            PropertyAccessorHelper.setId(entity, entityMetadata, key);
+        }
+        return entity;
+    }
+
+    private <E> List<E> onIndexSearch(OracleNoSQLQueryInterpreter interpreter, EntityMetadata entityMetadata,
+            MetamodelImpl metamodel, List<E> results, List<String> columnsToSelect)
+    {
+        Map<String, List> indexes = new HashMap<String, List>();
+        StringBuilder indexNamebuilder = new StringBuilder();
+
+        for (Object clause : interpreter.getClauseQueue())
+        {
+
+            if (clause.getClass().isAssignableFrom(FilterClause.class))
+            {
+                String fieldName = null;
+
+                String clauseName = ((FilterClause) clause).getProperty();
+                StringTokenizer stringTokenizer = new StringTokenizer(clauseName, ".");
+                // if need to select embedded columns
+                if (stringTokenizer.countTokens() > 1)
+                {
+                    fieldName = stringTokenizer.nextToken();
+                }
+                
+                fieldName = stringTokenizer.nextToken();
+                Object value = ((FilterClause) clause).getValue();
+                if (!indexes.containsKey(fieldName))
+                {
+                    indexNamebuilder.append(fieldName);
+                    indexNamebuilder.append(",");
+                }
+                indexes.put(fieldName, (List) value);
+            }
+            else
+            {
+                if (clause.toString().equalsIgnoreCase("OR"))
+                {
+                    throw new QueryHandlerException("OR clause is not supported with oracle nosql db");
+                }
+            }
+        }
+
+        // prepare index name and value.
+        Table schemaTable = tableAPI.getTable(entityMetadata.getTableName());
+        String indexKeyName = indexNamebuilder.deleteCharAt(indexNamebuilder.length() - 1).toString();
+        Index index = schemaTable.getIndex(entityMetadata.getIndexProperties().get(indexKeyName).getName());
+        IndexKey indexKey = index.createIndexKey();
+
+        // StringBuilder indexNamebuilder = new StringBuilder();
+        for (String indexName : indexes.keySet())
+        {
+            NoSqlDBUtils.add(schemaTable.getField(indexName), indexKey, indexes.get(indexName).get(0), indexName);
+        }
+
+        Iterator<Row> rowsIter = tableAPI.tableIterator(indexKey, null, null);
+
+        Map<String, Object> relationMap = initialize(entityMetadata);
+
+        try
+        {
+            results = scrollAndPopulate(null, entityMetadata, metamodel, schemaTable, rowsIter, relationMap,
+                    columnsToSelect);
+        }
+        catch (Exception e)
+        {
+            log.error("Error while finding records , Caused By :" + e + ".");
+            throw new PersistenceException(e);
+        }
+
+        return results;
+    }
+
+    private Row createRow(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
+    {
+        String schema = entityMetadata.getSchema(); // Irrelevant for this
+                                                    // datastore
+        String table = entityMetadata.getTableName();
+
+        MetamodelImpl metamodel = (MetamodelImpl) KunderaMetadataManager.getMetamodel(kunderaMetadata,
+                entityMetadata.getPersistenceUnit());
+
+        Table schemaTable = tableAPI.getTable(table);
+
+        Row row = schemaTable.createRow();
+
+        if (log.isDebugEnabled())
+        {
+            log.debug("Persisting data into " + schema + "." + table + " for " + id);
+        }
+
+        EntityType entityType = metamodel.entity(entityMetadata.getEntityClazz());
+
+        Set<Attribute> attributes = entityType.getAttributes();
+
+        // process entity attributes.
+        process(entity, metamodel, row, attributes, schemaTable, entityMetadata);
+        // on relational attributes.
+        onRelationalAttributes(rlHolders, row, schemaTable);
+        // add discriminator column(if present)
+        addDiscriminatorColumn(row, entityType, schemaTable);
+        return row;
+    }
+
+    private boolean eligibleToFetch(List<String> columnsToSelect, String columnName)
+    {
+        return (columnsToSelect != null && !columnsToSelect.isEmpty() && columnsToSelect.contains(columnName))
+                || (columnsToSelect == null || columnsToSelect.isEmpty());
     }
 
 }

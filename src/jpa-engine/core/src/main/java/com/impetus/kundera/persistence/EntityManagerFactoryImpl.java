@@ -15,18 +15,26 @@
  ******************************************************************************/
 package com.impetus.kundera.persistence;
 
+
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.persistence.Cache;
+import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.PersistenceUnitUtil;
+import javax.persistence.Query;
+import javax.persistence.StoredProcedureQuery;
+import javax.persistence.SynchronizationType;
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaDelete;
+import javax.persistence.criteria.CriteriaUpdate;
 import javax.persistence.metamodel.Metamodel;
 import javax.persistence.spi.LoadState;
 import javax.persistence.spi.PersistenceUnitInfo;
@@ -608,6 +616,30 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
 
     }
 
+
+    @Override
+    public void addNamedQuery(String paramString, Query paramQuery)
+    {
+        //TODO: See https://github.com/impetus-opensource/Kundera/issues/457
+        // Do nothing. Not yet implemented.
+    }
+
+    @Override
+    public <T> T unwrap(Class<T> paramClass)
+    {
+        //TODO: See https://github.com/impetus-opensource/Kundera/issues/457
+        // Do nothing. Not yet implemented.
+        return null;
+    }
+
+    @Override
+    public <T> void addNamedEntityGraph(String paramString, EntityGraph<T> paramEntityGraph)
+    {
+        //TODO: See https://github.com/impetus-opensource/Kundera/issues/457
+        // Do nothing. Not yet implemented.
+        
+    }
+    
     /**
      * One time initialization for persistence unit metadata.
      * 
@@ -653,6 +685,18 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         String[] persistenceUnits = puInfo.getPersistenceUnitName().split(Constants.PERSISTENCE_UNIT_SEPARATOR);
 
         new PersistenceUnitConfiguration(props, kunderaMetadata, persistenceUnits).configure(puInfo);
+    }
+
+    @Override
+    public EntityManager createEntityManager(SynchronizationType paramSynchronizationType)
+    {
+        return createEntityManager();
+    }
+
+    @Override
+    public EntityManager createEntityManager(SynchronizationType paramSynchronizationType, Map paramMap)
+    {
+        return createEntityManager(paramMap);
     }
 
 }

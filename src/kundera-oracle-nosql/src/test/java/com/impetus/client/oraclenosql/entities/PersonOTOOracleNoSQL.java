@@ -29,6 +29,7 @@ import com.impetus.kundera.index.IndexCollection;
 
 /**
  * The Class Person.
+ * @author vivek.mishra
  */
 @Entity
 @Table(name = "PERSON_OTO", schema = "OracleNoSqlTests@twikvstore")

@@ -60,7 +60,6 @@ public class OracleNoSQLAssociationTest
     {
         em.close();
         emf.close();
-        
     }
 
     @Test

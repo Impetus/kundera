@@ -58,7 +58,6 @@ public class OracleNoSQLSingleEntityTest extends OracleNoSQLTestBase
     public void tearDown()
     {
         super.tearDown();
-        
     }
 
     @Test
@@ -208,9 +207,12 @@ public class OracleNoSQLSingleEntityTest extends OracleNoSQLTestBase
         if (!isLuceneIndexingEnabled())
         {
             clearEm();
+            
+            // OR, AND WITH LT,GT,LTE AND GTE ARE NOT SUPPORTED.
+            
             // Select query with where clause on ID column and non-ID column
             // with OR operator
-            findByIdAndAge = "Select p from PersonKVStore p where p.personId=:personId OR p.age=:age";
+/*            findByIdAndAge = "Select p from PersonKVStore p where p.personId=:personId OR p.age=:age";
             params = new HashMap<Object, Object>();
             params.put("personId", "1");
             params.put("age", 30);
@@ -238,9 +240,9 @@ public class OracleNoSQLSingleEntityTest extends OracleNoSQLTestBase
             Assert.assertEquals(3, results.size());
 
             clearEm();
-            // Select query with where clause on non-ID column (with comparison)
+*/            // Select query with where clause on non-ID column (with comparison)
             // with AND operator
-            String findByAge = "Select p from PersonKVStore p where p.age>=:min AND p.age<=:max";
+/*            String findByAge = "Select p from PersonKVStore p where p.age>=:min AND p.age<=:max";
             params = new HashMap<Object, Object>();
             params.put("min", 20);
             params.put("max", 30);
@@ -276,7 +278,7 @@ public class OracleNoSQLSingleEntityTest extends OracleNoSQLTestBase
             params.put("max", "4");
             results = executeSelectQuery(findPersonIdBetween, params);
             Assert.assertEquals(3, results.size());
-
+*/
         }
 
         clearEm();

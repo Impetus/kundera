@@ -27,14 +27,23 @@ import java.util.Set;
 
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Tuple;
+import javax.persistence.criteria.CollectionJoin;
 import javax.persistence.criteria.CompoundSelection;
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.CriteriaUpdate;
 import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.ListJoin;
+import javax.persistence.criteria.MapJoin;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.ParameterExpression;
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Selection;
+import javax.persistence.criteria.SetJoin;
 import javax.persistence.criteria.Subquery;
 import javax.persistence.metamodel.Metamodel;
 
@@ -1962,6 +1971,78 @@ public class KunderaCriteriaBuilder implements CriteriaBuilder
     Metamodel getMetaModel()
     {
         return this.entityManagerFactory.getMetamodel();
+    }
+
+    @Override
+    public <T> CriteriaUpdate<T> createCriteriaUpdate(Class<T> paramClass)
+    {
+        //TODO: See https://github.com/impetus-opensource/Kundera/issues/457
+        // Do nothing. Not yet implemented.
+        return null;
+    }
+
+    @Override
+    public <T> CriteriaDelete<T> createCriteriaDelete(Class<T> paramClass)
+    {
+        //TODO: See https://github.com/impetus-opensource/Kundera/issues/457
+        // Do nothing. Not yet implemented.
+        return null;
+    }
+
+    @Override
+    public <X, T, V extends T> Join<X, V> treat(Join<X, T> paramJoin, Class<V> paramClass)
+    {
+        //TODO: See https://github.com/impetus-opensource/Kundera/issues/457
+        // Do nothing. Not yet implemented.
+        return null;
+    }
+
+    @Override
+    public <X, T, E extends T> CollectionJoin<X, E> treat(CollectionJoin<X, T> paramCollectionJoin, Class<E> paramClass)
+    {
+        //TODO: See https://github.com/impetus-opensource/Kundera/issues/457
+        // Do nothing. Not yet implemented.
+        return null;
+    }
+
+    @Override
+    public <X, T, E extends T> SetJoin<X, E> treat(SetJoin<X, T> paramSetJoin, Class<E> paramClass)
+    {
+        //TODO: See https://github.com/impetus-opensource/Kundera/issues/457
+        // Do nothing. Not yet implemented.
+        return null;
+    }
+
+    @Override
+    public <X, T, E extends T> ListJoin<X, E> treat(ListJoin<X, T> paramListJoin, Class<E> paramClass)
+    {
+        //TODO: See https://github.com/impetus-opensource/Kundera/issues/457
+        // Do nothing. Not yet implemented.
+        return null;
+    }
+
+    @Override
+    public <X, K, T, V extends T> MapJoin<X, K, V> treat(MapJoin<X, K, T> paramMapJoin, Class<V> paramClass)
+    {
+        //TODO: See https://github.com/impetus-opensource/Kundera/issues/457
+        // Do nothing. Not yet implemented.
+        return null;
+    }
+
+    @Override
+    public <X, T extends X> Path<T> treat(Path<X> paramPath, Class<T> paramClass)
+    {
+        //TODO: See https://github.com/impetus-opensource/Kundera/issues/457
+        // Do nothing. Not yet implemented.
+        return null;
+    }
+
+    @Override
+    public <X, T extends X> Root<T> treat(Root<X> paramRoot, Class<T> paramClass)
+    {
+        //TODO: See https://github.com/impetus-opensource/Kundera/issues/457
+        // Do nothing. Not yet implemented.
+        return null;
     }
 
 }

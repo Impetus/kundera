@@ -50,7 +50,6 @@ public class OracleNoSQLLOBTest extends OracleNoSQLTestBase
     public void tearDown()
     {
         super.tearDown();
-        
     }
 
     @Test
@@ -71,7 +70,7 @@ public class OracleNoSQLLOBTest extends OracleNoSQLTestBase
         Assert.assertEquals(fileSize, up.getProfilePicture().getTotalSpace());
 
         // Delete Record
-//        clearEm();
+        clearEm();
         delete(up);
         Assert.assertNull(find(UserProfile.class, 1));
 

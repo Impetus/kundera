@@ -37,7 +37,7 @@ import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 
 /**
- * Test case for {@link OracleNoSQLClient}
+ * Test case for {@link OracleNoSQLClient_Leagacy}
  * 
  * @author Chhavi Gangwal
  */
@@ -74,8 +74,7 @@ public class OracleNoSQLPropertySetterTest
     {
         em.close();
         emf.close();
-        
-    }
+   }
 
     @Test
     public void testProperties()

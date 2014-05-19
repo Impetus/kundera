@@ -54,7 +54,8 @@ public class OracleNoSQLQuery extends QueryImpl
 {
     private static Logger log = LoggerFactory.getLogger(OracleNoSQLQuery.class);
 
-    public OracleNoSQLQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator, final KunderaMetadata kunderaMetadata)
+    public OracleNoSQLQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator,
+            final KunderaMetadata kunderaMetadata)
     {
         super(kunderaQuery, persistenceDelegator, kunderaMetadata);
     }
@@ -147,10 +148,13 @@ public class OracleNoSQLQuery extends QueryImpl
                 {
                     interpreter.setFindById(true);
                     // To convert rowkey string to object.
-                    Object keyObj = PropertyAccessorHelper.fromSourceToTargetClass(
-                            ((AbstractAttribute) idAttribute).getBindableJavaType(), String.class,
-                            ((FilterClause) clause).getValue().get(0));
-                    interpreter.setRowKey(keyObj/*
+                 // With 2.11 onwards Filter clause values has been changed to collection of values. other than IN or sub query
+                    // doing get(0) here.
+//                    Object keyObj = PropertyAccessorHelper.fromSourceToTargetClass(
+//                            ((AbstractAttribute) idAttribute).getBindableJavaType(), String.class,
+//                            ((FilterClause) clause).getValue().get(0));
+                    
+                    interpreter.setRowKey((((FilterClause) clause).getValue().get(0))/*
                                                  * ((FilterClause)
                                                  * clause).getValue()
                                                  */);

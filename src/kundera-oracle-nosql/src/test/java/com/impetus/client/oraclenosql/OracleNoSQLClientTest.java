@@ -38,7 +38,7 @@ import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData.OPERATION;
 
 /**
- * Test case for {@link OracleNoSQLClient}
+ * Test case for {@link OracleNoSQLClient_Leagacy}
  * 
  * @author amresh.singh
  */
@@ -70,7 +70,6 @@ public class OracleNoSQLClientTest
     public void tearDown() throws Exception
     {
         emf.close();
-        
     }
 
     @Test
