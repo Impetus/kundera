@@ -32,7 +32,10 @@ import com.impetus.kundera.index.IndexCollection;
 @Entity
 @Table(name = "PERSON_EMBEDDED", schema = "OracleNoSqlTests@twikvstore")
 @IndexCollection(columns = { @Index(indexName = "compositeIdx", name = "personId,age", type = "composite"),
-        @Index(indexName = "personName", name = "personName"), @Index(indexName = "age", name = "age") })
+        @Index(indexName = "personName", name = "personName"), @Index(indexName = "age", name = "age"),
+        @Index(indexName = "officeId", name = "office.officeId",type = "composite"),
+        @Index(indexName = "companyName", name = "office.companyName",type = "composite"),
+        @Index(indexName = "location", name = "office.location",type = "composite") })
 public class PersonEmbeddedKVStore
 {
     /** The person id. */

@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.concurrent.TimeUnit;
 
 import javax.persistence.PersistenceException;
@@ -276,7 +277,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
             for (Attribute embeddedAttrib : embeddedAttributes)
             {
                 String columnName = ((AbstractAttribute) embeddedAttrib).getJPAColumnName();
-                Object embeddedColumn = PropertyAccessorHelper.getObject(key, (Field) embeddedAttrib.getJavaMember());
+                Object embeddedColumn = PropertyAccessorHelper.getObject(pKey, (Field) embeddedAttrib.getJavaMember());
 
                 NoSqlDBUtils.add(schemaTable.getField(columnName), key, embeddedColumn, columnName);
             }
@@ -1159,7 +1160,17 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
 
             if (clause.getClass().isAssignableFrom(FilterClause.class))
             {
-                String fieldName = ((FilterClause) clause).getProperty();
+                String fieldName = null;
+
+                String clauseName = ((FilterClause) clause).getProperty();
+                StringTokenizer stringTokenizer = new StringTokenizer(clauseName, ".");
+                // if need to select embedded columns
+                if (stringTokenizer.countTokens() > 1)
+                {
+                    fieldName = stringTokenizer.nextToken();
+                }
+                
+                fieldName = stringTokenizer.nextToken();
                 Object value = ((FilterClause) clause).getValue();
                 if (!indexes.containsKey(fieldName))
                 {

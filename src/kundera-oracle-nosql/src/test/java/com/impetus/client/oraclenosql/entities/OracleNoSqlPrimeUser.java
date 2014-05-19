@@ -22,13 +22,19 @@ import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
+
 /**
  * @author vivek.mishra
- * 
  */
 
 @Entity
 @Table(name = "User")
+
+@IndexCollection(columns = {
+        @Index(indexName = "user_tweet_timeline", name = "key.user_Id,key.tweetId,key.timeLineId", type = "composite"),
+        @Index(indexName = "user_tweet", name = "key.user_Id,key.tweetId", type = "composite") })
 public class OracleNoSqlPrimeUser
 {
 

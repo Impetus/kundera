@@ -25,9 +25,6 @@ import com.impetus.kundera.index.IndexCollection;
  * @author vivek.mishra
  */
 @Embeddable
-@IndexCollection(columns = {
-        /*@Index(indexName = "user|tweet|timeline", name = "user_Id,tweetId,timeLineId", type = "composite"),*/
-        @Index(indexName = "user_tweet", name = "user_Id,tweetId", type = "composite") })
 public class OracleNoSqlCompoundKey
 {
     @Column

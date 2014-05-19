@@ -24,7 +24,9 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 import javax.persistence.Column;
+import javax.persistence.Embeddable;
 import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 
 import org.apache.commons.lang.StringUtils;
@@ -82,7 +84,7 @@ public class IndexProcessor extends AbstractEntityFieldProcessor
                     {
                         // means comma seperated list of columns
                         metadata.addIndexProperty(
-                                prepareCompositeIndexName(indexedColumn.name(), entityType),
+                                prepareCompositeIndexName(indexedColumn.name(), entityType, metadata),
                                 populatePropertyIndex(indexedColumn.indexName(), indexedColumn.type(), null, null, null));
 
                     }
@@ -249,16 +251,39 @@ public class IndexProcessor extends AbstractEntityFieldProcessor
      * @param entityType
      * @return
      */
-    private String prepareCompositeIndexName(String indexedColumns, final EntityType entityType)
+    private String prepareCompositeIndexName(String indexedColumns, final EntityType entityType, EntityMetadata metadata)
     {
         StringTokenizer tokenizer = new StringTokenizer(indexedColumns, ",");
         StringBuilder builder = new StringBuilder();
         while (tokenizer.hasMoreTokens())
         {
             String fieldName = (String) tokenizer.nextElement();
-            builder.append(((AbstractAttribute) entityType.getAttribute(fieldName)).getJPAColumnName());
+
+            StringTokenizer stringTokenizer = new StringTokenizer(fieldName, ".");
+            // if need to select embedded columns
+            if (stringTokenizer.countTokens() > 1)
+            {
+                fieldName = stringTokenizer.nextToken();
+                String embeddedFieldName = stringTokenizer.nextToken();
+                Attribute embeddable = entityType.getAttribute(fieldName);
+
+                EmbeddableType embeddedEntity = (EmbeddableType) kunderaMetadata.getApplicationMetadata()
+                        .getMetaModelBuilder(metadata.getPersistenceUnit()).getEmbeddables()
+                        .get(((AbstractAttribute) embeddable).getBindableJavaType());
+
+                Attribute embeddedAttribute = embeddedEntity.getAttribute(embeddedFieldName);
+
+                builder.append(((AbstractAttribute) embeddedAttribute).getJPAColumnName());
+            }
+            else
+            {
+                builder.append(((AbstractAttribute) entityType.getAttribute(fieldName)).getJPAColumnName());
+            }
             builder.append(",");
+
         }
+
+        // scan embeddable as well for
 
         builder.deleteCharAt(builder.length() - 1);
 

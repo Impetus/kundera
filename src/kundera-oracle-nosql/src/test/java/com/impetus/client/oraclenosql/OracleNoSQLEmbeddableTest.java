@@ -311,7 +311,7 @@ public class OracleNoSQLEmbeddableTest extends OracleNoSQLTestBase
 
         clearEm();
         // Search over column within embeddable
-/*        String findByCompanyName = "Select p from PersonEmbeddedKVStore p where p.office.companyName=:companyName";
+        String findByCompanyName = "Select p from PersonEmbeddedKVStore p where p.office.companyName=:companyName";
         params = new HashMap<Object, Object>();
         params.put("companyName", "Company3");
         results = executeSelectQuery(findByCompanyName, params);
@@ -322,7 +322,7 @@ public class OracleNoSQLEmbeddableTest extends OracleNoSQLTestBase
         Assert.assertEquals(3, results.get(0).getOffice().getOfficeId());
         Assert.assertEquals("Company3", results.get(0).getOffice().getCompanyName());
         Assert.assertEquals("Location 3", results.get(0).getOffice().getLocation());
-*/
+
         // Delete by query.
         String deleteQuery = "Delete from PersonEmbeddedKVStore p";
         int updateCount = executeDMLQuery(deleteQuery);
