@@ -60,7 +60,7 @@ import com.impetus.kundera.utils.InvalidConfigurationException;
  * @author vivek.mishra
  * 
  */
-public class DSClientFactory extends GenericClientFactory implements CassandraClientFactory
+public class DSClientFactory extends CassandraClientFactory
 {
 
     /** The logger. */
@@ -143,6 +143,8 @@ public class DSClientFactory extends GenericClientFactory implements CassandraCl
         configuration = new CassandraHostConfiguration(externalProperties, CassandraPropertyReader.csmd,
                 getPersistenceUnit(), kunderaMetadata);
 
+        // initialize timestamp generator.
+        initializeTimestampGenerator(externalProperty);
     }
 
     /*
@@ -264,7 +266,7 @@ public class DSClientFactory extends GenericClientFactory implements CassandraCl
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
-        return new DSClient(this, persistenceUnit, externalProperties, kunderaMetadata, reader);
+        return new DSClient(this, persistenceUnit, externalProperties, kunderaMetadata, reader, timestampGenerator);
     }
 
     Session getConnection()

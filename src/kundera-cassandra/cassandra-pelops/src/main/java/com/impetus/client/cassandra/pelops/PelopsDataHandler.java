@@ -37,6 +37,7 @@ import com.impetus.kundera.metadata.model.annotation.DefaultEntityAnnotationProc
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.utils.TimestampGenerator;
 
 /**
  * Provides Pelops utility methods for data held in Column family based stores.
@@ -51,9 +52,10 @@ final class PelopsDataHandler extends CassandraDataHandlerBase implements Cassan
     /**
      * @param externalProperties
      */
-    public PelopsDataHandler(final PelopsClient pelopsClient, final KunderaMetadata kunderaMetadata)
+    public PelopsDataHandler(final PelopsClient pelopsClient, final KunderaMetadata kunderaMetadata,
+            final TimestampGenerator generator)
     {
-        super(pelopsClient, kunderaMetadata);
+        super(pelopsClient, kunderaMetadata, generator);
         this.pelopsClient = pelopsClient;
     }
 

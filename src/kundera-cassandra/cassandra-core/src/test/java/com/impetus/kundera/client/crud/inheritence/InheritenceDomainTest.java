@@ -16,6 +16,7 @@
 package com.impetus.kundera.client.crud.inheritence;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,8 +33,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
-import com.impetus.client.cassandra.thrift.ThriftClient;
-import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
 
 /**
@@ -56,12 +55,8 @@ public class InheritenceDomainTest
     @BeforeClass
     public static void setUpBeforeClass() throws Exception
     {
-        
-
         CassandraCli.cassandraSetUp();
         CassandraCli.createKeySpace("KunderaExamples");
-        emfThrift = Persistence.createEntityManagerFactory(_PU);
-        emThrift = emfThrift.createEntityManager();
     }
 
     /**
@@ -70,6 +65,7 @@ public class InheritenceDomainTest
     @Test
     public void testRelationViaThrift()
     {
+        createEmf(null);
         assertRelation(emThrift);
     }
 
@@ -79,6 +75,7 @@ public class InheritenceDomainTest
     @Test
     public void testAbstractEntityViaThrift()
     {
+        createEmf(null);
         assertAbstractEntity(emThrift);
     }
 
@@ -88,12 +85,14 @@ public class InheritenceDomainTest
     @Test
     public void testRelationViaCQL()
     {
-        Map<String, Client> clientMap = (Map<String, Client>) emThrift.getDelegate();
-        ThriftClient tc = (ThriftClient) clientMap.get(_PU);
-        tc.setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
+        // Map<String, Client> clientMap = (Map<String, Client>)
+        // emThrift.getDelegate();
+        // ThriftClient tc = (ThriftClient) clientMap.get(_PU);
+        // tc.setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
+        createEmf(CassandraConstants.CQL_VERSION_3_0);
         assertRelation(emThrift);
-        tc.setCqlVersion(CassandraConstants.CQL_VERSION_2_0); // reset CQL
-                                                              // version to 2.0
+        // tc.setCqlVersion(CassandraConstants.CQL_VERSION_2_0); // reset CQL
+        // version to 2.0
     }
 
     /**
@@ -102,12 +101,14 @@ public class InheritenceDomainTest
     @Test
     public void testAbstractEntityViaCQL()
     {
-        Map<String, Client> clientMap = (Map<String, Client>) emThrift.getDelegate();
-        ThriftClient tc = (ThriftClient) clientMap.get(_PU);
-        tc.setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
+        // Map<String, Client> clientMap = (Map<String, Client>)
+        // emThrift.getDelegate();
+        // ThriftClient tc = (ThriftClient) clientMap.get(_PU);
+        // tc.setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
+        createEmf(CassandraConstants.CQL_VERSION_3_0);
         assertAbstractEntity(emThrift);
-        tc.setCqlVersion(CassandraConstants.CQL_VERSION_2_0); // reset CQL
-                                                              // version to 2.0
+        // tc.setCqlVersion(CassandraConstants.CQL_VERSION_2_0); // reset CQL
+        // version to 2.0
     }
 
     /**
@@ -119,7 +120,8 @@ public class InheritenceDomainTest
     @After
     public void tearDown() throws Exception
     {
-        CassandraCli.truncateColumnFamily("KunderaExamples", "user_account", "social_profile");
+        CassandraCli.dropColumnFamily("user_account", "KunderaExamples");
+        CassandraCli.dropColumnFamily("social_profile", "KunderaExamples");
     }
 
     @AfterClass
@@ -135,6 +137,22 @@ public class InheritenceDomainTest
             emfThrift.close();
             emfThrift = null;
         }
+    }
+
+    private void createEmf(String auto_ddl_proeprty)
+    {
+        if (auto_ddl_proeprty != null)
+        {
+            Map<String, String> propertyMap = new HashMap<String, String>();
+            propertyMap.put(CassandraConstants.CQL_VERSION, auto_ddl_proeprty);
+
+            emfThrift = Persistence.createEntityManagerFactory(_PU, propertyMap);
+        }
+        else
+        {
+            emfThrift = Persistence.createEntityManagerFactory(_PU);
+        }
+        emThrift = emfThrift.createEntityManager();
     }
 
     private void assertRelation(EntityManager em)

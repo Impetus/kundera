@@ -63,7 +63,7 @@ import com.impetus.kundera.service.policy.RoundRobinBalancingPolicy;
 /**
  * A factory for creating PelopsCliobjects.
  */
-public class PelopsClientFactory extends GenericClientFactory implements CassandraClientFactory
+public class PelopsClientFactory extends CassandraClientFactory
 {
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(PelopsClientFactory.class);
@@ -82,6 +82,9 @@ public class PelopsClientFactory extends GenericClientFactory implements Cassand
         configuration = new CassandraHostConfiguration(externalProperties, CassandraPropertyReader.csmd,
                 getPersistenceUnit(), kunderaMetadata);
         hostRetryService = new CassandraRetryService(configuration, this);
+
+        // initialize timestamp generator.
+        initializeTimestampGenerator(externalProperty);
     }
 
     @Override
@@ -148,7 +151,8 @@ public class PelopsClientFactory extends GenericClientFactory implements Cassand
             // persistenceUnit);
         }
         IThriftPool pool = getPoolUsingPolicy();
-        return new PelopsClient(indexManager, reader, this, persistenceUnit, externalProperties, pool, kunderaMetadata);
+        return new PelopsClient(indexManager, reader, this, persistenceUnit, externalProperties, pool, kunderaMetadata,
+                timestampGenerator);
     }
 
     @Override

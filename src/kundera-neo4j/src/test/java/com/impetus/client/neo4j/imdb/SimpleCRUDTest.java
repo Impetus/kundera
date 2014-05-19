@@ -54,18 +54,19 @@ public class SimpleCRUDTest
         emf = Persistence.createEntityManagerFactory(IMDB_PU, propertyMap);
         em = emf.createEntityManager();
     }
-    
-    @Test
+
+    // @Test
     public void testDummy()
     {
-        
+
     }
 
-//    @Test
+    @Test
     public void should_save_entity() throws Exception
     {
         Actor actor = new Actor();
         actor.setId(1);
+        actor.setName("Tom cruise");
 
         em.getTransaction().begin();
 
@@ -77,7 +78,7 @@ public class SimpleCRUDTest
 
         Actor foundActor = em.find(Actor.class, 1);
         Assert.assertNotNull(foundActor);
-        Assert.assertNull(foundActor.getName());
+        Assert.assertEquals("Tom cruise", foundActor.getName());
         Assert.assertEquals(1, foundActor.getId());
 
     }

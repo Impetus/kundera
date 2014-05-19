@@ -53,6 +53,8 @@ import com.impetus.kundera.service.Host;
 import com.impetus.kundera.service.HostConfiguration;
 import com.impetus.kundera.service.policy.LeastActiveBalancingPolicy;
 import com.impetus.kundera.service.policy.RoundRobinBalancingPolicy;
+import com.impetus.kundera.utils.DefaultTimestampGenerator;
+import com.impetus.kundera.utils.TimestampGenerator;
 
 /**
  * A factory of {@link ThriftClient} Currently it uses Pelops for Connection
@@ -61,7 +63,7 @@ import com.impetus.kundera.service.policy.RoundRobinBalancingPolicy;
  * 
  * @author amresh.singh
  */
-public class ThriftClientFactory extends GenericClientFactory implements CassandraClientFactory
+public class ThriftClientFactory extends CassandraClientFactory
 {
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(ThriftClientFactory.class);
@@ -129,6 +131,9 @@ public class ThriftClientFactory extends GenericClientFactory implements Cassand
         configuration = new CassandraHostConfiguration(externalProperties, CassandraPropertyReader.csmd,
                 getPersistenceUnit(), kunderaMetadata);
         hostRetryService = new CassandraRetryService(configuration, this);
+
+        // initialize timestamp generator.
+        initializeTimestampGenerator(externalProperty);
     }
 
     @Override
@@ -180,7 +185,7 @@ public class ThriftClientFactory extends GenericClientFactory implements Cassand
     protected Client instantiateClient(String persistenceUnit)
     {
         ConnectionPool pool = getPoolUsingPolicy();
-        return new ThriftClient(this, indexManager, reader, persistenceUnit, pool, externalProperties, kunderaMetadata);
+        return new ThriftClient(this, indexManager, reader, persistenceUnit, pool, externalProperties, kunderaMetadata, timestampGenerator);
     }
 
     /**

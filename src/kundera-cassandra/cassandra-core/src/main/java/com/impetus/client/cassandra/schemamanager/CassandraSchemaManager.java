@@ -1281,6 +1281,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                     cassandra_client.system_update_column_family(cfDef);
                     // createIndexUsingThrift(tableInfo, cfDef);
                 }
+                createIndexUsingThrift(tableInfo, cfDef);
                 break;
             }
         }

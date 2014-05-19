@@ -1030,7 +1030,7 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
         if (attribute == null)
         {
             throw new IllegalArgumentException(
-                    "attribute of the given name and type is not present in the managed type, for name:" + paramName);
+                    "attribute of the given name and type is not present in the managed type, for name: " + paramName);
 
         }
     }

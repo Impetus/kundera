@@ -40,6 +40,7 @@ import com.impetus.kundera.metadata.model.annotation.DefaultEntityAnnotationProc
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.utils.TimestampGenerator;
 
 /**
  * Data handler for Thrift Clients
@@ -54,9 +55,10 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
 {
     private final ThriftClient thriftClient;
 
-    public ThriftDataHandler(final ThriftClient thriftClient, final KunderaMetadata kunderaMetadata)
+    public ThriftDataHandler(final ThriftClient thriftClient, final KunderaMetadata kunderaMetadata,
+            final TimestampGenerator generator)
     {
-        super(thriftClient, kunderaMetadata);
+        super(thriftClient, kunderaMetadata, generator);
         this.thriftClient = thriftClient;
     }
 

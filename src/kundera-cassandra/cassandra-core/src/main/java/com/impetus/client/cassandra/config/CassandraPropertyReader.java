@@ -104,8 +104,7 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
             String placementStrategy = SimpleStrategy.class.getName();
             if (schema != null && schema.getSchemaProperties() != null && !schema.getSchemaProperties().isEmpty())
             {
-                placementStrategy = schema.getSchemaProperties().getProperty(CassandraConstants.PLACEMENT_STRATEGY)
-                        ;
+                placementStrategy = schema.getSchemaProperties().getProperty(CassandraConstants.PLACEMENT_STRATEGY);
             }
 
             if (logger.isInfoEnabled())
@@ -142,7 +141,7 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
                         break;
                     }
                 }
-                
+
             }
             return result;
         }
@@ -250,6 +249,17 @@ public class CassandraPropertyReader extends AbstractPropertyReader implements P
                 return servers;
             }
             return servers;
+        }
+
+        public Properties getDatastoreProperties()
+        {
+            DataStore ds = getDataStore(dataStoreName);
+            Properties properties = new Properties();
+            if (ds != null && ds.getProperties() != null)
+            {
+                properties.putAll(ds.getProperties());
+            }
+            return properties;
         }
     }
 }

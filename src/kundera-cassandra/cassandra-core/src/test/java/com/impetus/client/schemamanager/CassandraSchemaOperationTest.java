@@ -277,8 +277,8 @@ public class CassandraSchemaOperationTest
                 {
                     if (new String(columnDef.getName(), Constants.ENCODING).equals("AGE"))
                     {
-                        Assert.assertFalse(columnDef.isSetIndex_type());
-                        Assert.assertNull(columnDef.index_name);
+                        Assert.assertTrue(columnDef.isSetIndex_type());
+                        Assert.assertNotNull(columnDef.index_name);
                         Assert.assertEquals(IntegerType.class.getName(), columnDef.getValidation_class());
                         // Assert.assertEquals("age_index",
                         // columnDef.index_name);

@@ -43,27 +43,28 @@ import com.impetus.kundera.db.SearchResult;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
+import com.impetus.kundera.utils.TimestampGenerator;
 
 /**
  * Pelops implementation of {@link InvertedIndexHandler}
  * 
  * @author amresh.singh
  */
-public class PelopsInvertedIndexHandler extends InvertedIndexHandlerBase
-		implements InvertedIndexHandler {
-	private static final Logger log = LoggerFactory
-			.getLogger(PelopsInvertedIndexHandler.class);
+public class PelopsInvertedIndexHandler extends InvertedIndexHandlerBase implements InvertedIndexHandler
+{
+    private static final Logger log = LoggerFactory.getLogger(PelopsInvertedIndexHandler.class);
 
-	private final PelopsClient pelopsClient;
+    private final PelopsClient pelopsClient;
 
-	/**
-	 * @param externalProperties
-	 */
-	public PelopsInvertedIndexHandler(final PelopsClient pelopsClient,
-			final boolean useSecondryIndex) {
-		this.pelopsClient = pelopsClient;
-		this.useSecondryIndex = useSecondryIndex;
-	}
+    /**
+     * @param externalProperties
+     */
+    public PelopsInvertedIndexHandler(final PelopsClient pelopsClient, final boolean useSecondryIndex, final TimestampGenerator generator)
+    {
+        super(generator);
+        this.pelopsClient = pelopsClient;
+        this.useSecondryIndex = useSecondryIndex;
+    }
 
 	@Override
 	public void write(Node node, EntityMetadata entityMetadata,

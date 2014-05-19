@@ -51,6 +51,7 @@ import com.impetus.kundera.index.IndexingException;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.utils.TimestampGenerator;
 
 /**
  * Thrift implementation of {@link InvertedIndexHandler}
@@ -64,8 +65,9 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
 
     private final ThriftClient thriftClient;
 
-    public ThriftInvertedIndexHandler(final ThriftClient thriftClient, final boolean useSecondryIndex)
+    public ThriftInvertedIndexHandler(final ThriftClient thriftClient, final boolean useSecondryIndex, final TimestampGenerator generator)
     {
+        super(generator);
         this.thriftClient = thriftClient;
         this.useSecondryIndex = useSecondryIndex;
     }
@@ -304,7 +306,7 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
             {
                 cp.setColumn(columnName);
             }
-            conn.getClient().remove(ByteBuffer.wrap(rowKey.getBytes()), cp, System.currentTimeMillis(),
+            conn.getClient().remove(ByteBuffer.wrap(rowKey.getBytes()), cp, generator.getTimestamp(),
                     consistencyLevel);
         }
         catch (InvalidRequestException e)

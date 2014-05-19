@@ -19,6 +19,11 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
 
+/**
+ * 
+ * @author Kuldeep.Mishra
+ * 
+ */
 @Embeddable
 public class IdWithMultiplePartitionKey
 {

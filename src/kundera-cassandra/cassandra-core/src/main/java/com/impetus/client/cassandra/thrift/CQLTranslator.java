@@ -322,7 +322,7 @@ public final class CQLTranslator
         else if (!ReflectUtils.isTransientOrStatic(field))
         {
             onTranslation(type, builder, columnBuilder,
-                    CassandraUtilities.getIdColumnName(kunderaMetadata, m, externalProperties), record, field);
+                    CassandraUtilities.getIdColumnName(kunderaMetadata, m, externalProperties, true), record, field);
         }
     }
 

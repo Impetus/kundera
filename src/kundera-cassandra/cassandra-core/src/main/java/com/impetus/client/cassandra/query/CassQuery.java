@@ -162,12 +162,13 @@ public class CassQuery extends QueryImpl
                         {
                             result = ((CassandraClientBase) client).find(ixClause.get(isRowKeyQuery), m, false, null,
                                     isSingleResult ? 1 : this.maxResult,
-                                    getColumnList(m, getKunderaQuery().getResult(), null));
+                                    getColumnList(m, metaModel, getKunderaQuery().getResult(), null));
                         }
                         else
                         {
                             result = ((CassandraEntityReader) getReader()).handleFindByRange(m, client, result,
-                                    ixClause, isRowKeyQuery, getColumnList(m, getKunderaQuery().getResult(), null),
+                                    ixClause, isRowKeyQuery,
+                                    getColumnList(m, metaModel, getKunderaQuery().getResult(), null),
                                     isSingleResult ? 1 : this.maxResult);
                         }
                     }
@@ -325,7 +326,7 @@ public class CassQuery extends QueryImpl
      *            the results
      * @return the column list
      */
-    List<String> getColumnList(EntityMetadata m, String[] results, EmbeddableType compoundKey)
+    List<String> getColumnList(EntityMetadata m, MetamodelImpl metamodel, String[] results, EmbeddableType compoundKey)
     {
         List<String> columns = new ArrayList<String>();
         if (results != null && results.length > 0)
@@ -334,35 +335,49 @@ public class CassQuery extends QueryImpl
                     m.getPersistenceUnit());
             EntityType entity = metaModel.entity(m.getEntityClazz());
 
-            String keyFieldName = CassandraUtilities.getIdColumnName(kunderaMetadata, m, externalProperties);
+            String keyFieldName = CassandraUtilities.getIdColumnName(kunderaMetadata, m, externalProperties,
+                    ((CassandraClientBase) persistenceDelegeator.getClient(m)).isCql3Enabled(m));
             for (int i = 1; i < results.length; i++)
             {
                 if (results[i] != null)
                 {
-                    Attribute attribute = entity.getAttribute(results[i]);
-                    if (attribute == null)
+                    if (results[i].indexOf(".") > 0)
                     {
-                        throw new QueryHandlerException("Column type is null for : " + results);
-                    }
-                    else if (m.getIdAttribute().equals(attribute) && compoundKey != null)
-                    {
-                        Field[] fields = m.getIdAttribute().getBindableJavaType().getDeclaredFields();
-                        for (Field field : fields)
-                        {
-                            if (!ReflectUtils.isTransientOrStatic(field))
-                            {
-                                Attribute compositeColumn = compoundKey.getAttribute(field.getName());
-                                columns.add(((AbstractAttribute) compositeColumn).getJPAColumnName());
-                            }
-                        }
-                    }
-                    else if (m.getIdAttribute().equals(attribute) && compoundKey == null)
-                    {
-                        columns.add(keyFieldName);
+                        String fieldName = results[i].substring(0, results[i].indexOf("."));
+                        String embeddedFieldName = results[i].substring(results[i].indexOf(".") + 1,
+                                results[i].length());
+                        AbstractAttribute attribute = (AbstractAttribute) entity.getAttribute(fieldName);
+                        EmbeddableType embeddable = metamodel.embeddable(attribute.getBindableJavaType());
+                        Attribute embeddableAttribute = embeddable.getAttribute(embeddedFieldName);
+                        columns.add(((AbstractAttribute) embeddableAttribute).getJPAColumnName());
                     }
                     else
                     {
-                        columns.add(((AbstractAttribute) attribute).getJPAColumnName());
+                        Attribute attribute = entity.getAttribute(results[i]);
+                        if (attribute == null)
+                        {
+                            throw new QueryHandlerException("Column type is null for : " + results);
+                        }
+                        else if (m.getIdAttribute().equals(attribute) && compoundKey != null)
+                        {
+                            Field[] fields = m.getIdAttribute().getBindableJavaType().getDeclaredFields();
+                            for (Field field : fields)
+                            {
+                                if (!ReflectUtils.isTransientOrStatic(field))
+                                {
+                                    Attribute compositeColumn = compoundKey.getAttribute(field.getName());
+                                    columns.add(((AbstractAttribute) compositeColumn).getJPAColumnName());
+                                }
+                            }
+                        }
+                        else if (m.getIdAttribute().equals(attribute) && compoundKey == null)
+                        {
+                            columns.add(keyFieldName);
+                        }
+                        else
+                        {
+                            columns.add(((AbstractAttribute) attribute).getJPAColumnName());
+                        }
                     }
                 }
             }
@@ -642,7 +657,7 @@ public class CassQuery extends QueryImpl
         StringBuilder builder = new StringBuilder();
 
         boolean isPresent = false;
-        List<String> columns = getColumnList(m, getKunderaQuery().getResult(), compoundKey);
+        List<String> columns = getColumnList(m, metaModel, getKunderaQuery().getResult(), compoundKey);
         String selectQuery = columns != null && !columns.isEmpty() ? CQLTranslator.SELECT_QUERY
                 : CQLTranslator.SELECTALL_QUERY;
 
@@ -752,8 +767,9 @@ public class CassQuery extends QueryImpl
                 else if (idColumn.equals(fieldName))
                 {
                     isPresent = buildWhereClause(builder, isPresent, translator, condition, value, useInClause,
-                            ((AbstractAttribute) m.getIdAttribute()),
-                            CassandraUtilities.getIdColumnName(kunderaMetadata, m, externalProperties), use);
+                            ((AbstractAttribute) m.getIdAttribute()), CassandraUtilities.getIdColumnName(
+                                    kunderaMetadata, m, externalProperties,
+                                    ((CassandraClientBase) persistenceDelegeator.getClient(m)).isCql3Enabled(m)), use);
                 }
                 else
                 {
@@ -1166,11 +1182,10 @@ public class CassQuery extends QueryImpl
 
         Object ttlColumns = ((CassandraClientBase) persistenceDelegeator.getClient(metadata)).getTtlValues().get(
                 metadata.getTableName());
-        
-        
-        if ((ttlColumns != null && ttlColumns instanceof Integer) || this.ttl != null )
+
+        if ((ttlColumns != null && ttlColumns instanceof Integer) || this.ttl != null)
         {
-            int ttl = this.ttl != null? this.ttl : ((Integer) ttlColumns).intValue();
+            int ttl = this.ttl != null ? this.ttl : ((Integer) ttlColumns).intValue();
             if (ttl != 0)
             {
                 builder.append(" USING TTL ");
@@ -1324,7 +1339,8 @@ public class CassQuery extends QueryImpl
         if (property.equals(((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName()))
         {
             jpaColumnName = CassandraUtilities.getIdColumnName(kunderaMetadata, metadata,
-                    ((CassandraClientBase) persistenceDelegeator.getClient(metadata)).getExternalProperties());
+                    ((CassandraClientBase) persistenceDelegeator.getClient(metadata)).getExternalProperties(),
+                    ((CassandraClientBase) persistenceDelegeator.getClient(metadata)).isCql3Enabled(metadata));
         }
         else
         {
