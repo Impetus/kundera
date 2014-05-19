@@ -107,6 +107,7 @@ import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.property.accessor.StringAccessor;
+import com.impetus.kundera.utils.TimestampGenerator;
 
 /**
  * Base Class for all Cassandra Clients Contains methods that are applicable to
@@ -145,6 +146,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     protected CQLClient cqlClient;
 
+    protected TimestampGenerator generator;
+
     /**
      * constructor using fields.
      * 
@@ -153,12 +156,13 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      * @param externalProperties
      */
     protected CassandraClientBase(String persistenceUnit, Map<String, Object> externalProperties,
-            final KunderaMetadata kunderaMetadata)
+            final KunderaMetadata kunderaMetadata, final TimestampGenerator generator)
     {
         super(kunderaMetadata);
         this.persistenceUnit = persistenceUnit;
         this.externalProperties = externalProperties;
         this.cqlClient = new CQLClient();
+        this.generator = generator;
         setBatchSize(persistenceUnit, this.externalProperties);
         populateCqlVersion(externalProperties);
     }
@@ -415,7 +419,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     {
         if (relations != null)
         {
-            long timestamp = System.currentTimeMillis();
+            long timestamp = generator.getTimestamp();
             MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                     metadata.getPersistenceUnit());
             for (RelationHolder rh : relations)
@@ -1081,8 +1085,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
             // strip last "," clause.
             builder.delete(builder.lastIndexOf(CQLTranslator.COMMA_STR), builder.length());
-            
-            builder.append(CQLTranslator.ADD_WHERE_CLAUSE);            
+
+            builder.append(CQLTranslator.ADD_WHERE_CLAUSE);
             onWhereClause(entityMetadata, rowId, translator, builder, metaModel, entityMetadata.getIdAttribute());
 
             // strip last "AND" clause.
@@ -1195,8 +1199,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 translator.ensureCase(new StringBuilder(), tableName, false).toString());
 
         StringBuilder deleteQueryBuilder = new StringBuilder(deleteQuery);
-        
-        deleteQueryBuilder.append(CQLTranslator.ADD_WHERE_CLAUSE);  
+
+        deleteQueryBuilder.append(CQLTranslator.ADD_WHERE_CLAUSE);
         onWhereClause(metadata, keyObject, translator, deleteQueryBuilder, metaModel, metadata.getIdAttribute());
 
         // strip last "AND" clause.
@@ -1256,8 +1260,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         else
         {
             translator.buildWhereClause(queryBuilder, ((AbstractAttribute) attribute).getBindableJavaType(),
-                    CassandraUtilities.getIdColumnName(kunderaMetadata, metadata, getExternalProperties(), isCql3Enabled(metadata)), key,
-                    translator.EQ_CLAUSE, false);
+                    CassandraUtilities.getIdColumnName(kunderaMetadata, metadata, getExternalProperties(),
+                            isCql3Enabled(metadata)), key, translator.EQ_CLAUSE, false);
         }
     }
 
@@ -2048,7 +2052,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
                         CqlRow row = iter.next();
                         Object rowKey = null;
-                        
+
                         ThriftRow thriftRow = null;
                         thriftRow = new ThriftRow(rowKey, entityMetadata.getTableName(), row.getColumns(),
                                 new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0),
@@ -2112,8 +2116,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                     Attribute attribute = entityMetadata.getIdAttribute();
                     translator.buildWhereClause(queryBuilder, ((AbstractAttribute) entityMetadata.getIdAttribute())
                             .getBindableJavaType(), CassandraUtilities.getIdColumnName(kunderaMetadata, entityMetadata,
-                            getExternalProperties(), isCql3Enabled(entityMetadata)), PropertyAccessorHelper.getId(e, entityMetadata),
-                            translator.EQ_CLAUSE, false);
+                            getExternalProperties(), isCql3Enabled(entityMetadata)), PropertyAccessorHelper.getId(e,
+                            entityMetadata), translator.EQ_CLAUSE, false);
                     // strip last "AND" clause.
                     queryBuilder.delete(queryBuilder.lastIndexOf(CQLTranslator.AND_CLAUSE), queryBuilder.length());
 
@@ -2161,7 +2165,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             select_Query = StringUtils.replace(select_Query, CQLTranslator.COLUMN_FAMILY,
                     translator.ensureCase(new StringBuilder(), tableName, false).toString());
             StringBuilder builder = new StringBuilder(select_Query);
-            builder.append(CQLTranslator.ADD_WHERE_CLAUSE);  
+            builder.append(CQLTranslator.ADD_WHERE_CLAUSE);
             onWhereClause(metadata, rowId, translator, builder, metaModel, metadata.getIdAttribute());
 
             // strip last "AND" clause.

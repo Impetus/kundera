@@ -61,6 +61,8 @@ public class ClientProperties implements Serializable
 
         private String name;
 
+        private Properties properties;
+
         /**
          * @return the connection
          */
@@ -103,6 +105,23 @@ public class ClientProperties implements Serializable
         public void setName(String name)
         {
             this.name = name;
+        }
+
+        /**
+         * @return the properties
+         */
+        public Properties getProperties()
+        {
+            return properties;
+        }
+
+        /**
+         * @param properties
+         *            the properties to set
+         */
+        public void setProperties(Properties properties)
+        {
+            this.properties = properties;
         }
 
         /**

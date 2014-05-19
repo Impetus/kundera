@@ -49,7 +49,6 @@ import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
-import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.service.Host;
 import com.impetus.kundera.utils.InvalidConfigurationException;
@@ -60,7 +59,7 @@ import com.impetus.kundera.utils.InvalidConfigurationException;
  * @author vivek.mishra
  * 
  */
-public class DSClientFactory extends GenericClientFactory implements CassandraClientFactory
+public class DSClientFactory extends CassandraClientFactory
 {
 
     /** The logger. */
@@ -143,6 +142,8 @@ public class DSClientFactory extends GenericClientFactory implements CassandraCl
         configuration = new CassandraHostConfiguration(externalProperties, CassandraPropertyReader.csmd,
                 getPersistenceUnit(), kunderaMetadata);
 
+        // initialize timestamp generator.
+        initializeTimestampGenerator(externalProperty);
     }
 
     /*
@@ -264,7 +265,7 @@ public class DSClientFactory extends GenericClientFactory implements CassandraCl
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
-        return new DSClient(this, persistenceUnit, externalProperties, kunderaMetadata, reader);
+        return new DSClient(this, persistenceUnit, externalProperties, kunderaMetadata, reader, timestampGenerator);
     }
 
     Session getConnection()
@@ -393,8 +394,8 @@ public class DSClientFactory extends GenericClientFactory implements CassandraCl
 
             String usedHostsPerRemoteDc = (String) conProperties.get("usedHostsPerRemoteDc");
             String localdc = (String) conProperties.get("localdc");
-            loadBalancingPolicy = new DCAwareRoundRobinPolicy(localdc==null?"DC1":localdc,
-                    usedHostsPerRemoteDc != null ? Integer.parseInt(usedHostsPerRemoteDc):0);
+            loadBalancingPolicy = new DCAwareRoundRobinPolicy(localdc == null ? "DC1" : localdc,
+                    usedHostsPerRemoteDc != null ? Integer.parseInt(usedHostsPerRemoteDc) : 0);
             break;
 
         case RoundRobinPolicy:
@@ -421,13 +422,13 @@ public class DSClientFactory extends GenericClientFactory implements CassandraCl
         {
         case ConstantReconnectionPolicy:
             String property = props.getProperty("constantDelayMs");
-            long constantDelayMs = property != null ? new Long(property): 0l;
+            long constantDelayMs = property != null ? new Long(property) : 0l;
             reconnectionPolicy = new ConstantReconnectionPolicy(constantDelayMs);
             break;
 
         case ExponentialReconnectionPolicy:
-            String baseDelayMsAsStr= props.getProperty("baseDelayMs") ;
-            String maxDelayMsAsStr = props.getProperty("maxDelayMs"); 
+            String baseDelayMsAsStr = props.getProperty("baseDelayMs");
+            String maxDelayMsAsStr = props.getProperty("maxDelayMs");
             if (!StringUtils.isBlank(baseDelayMsAsStr) && !StringUtils.isBlank(maxDelayMsAsStr))
             {
                 long baseDelayMs = new Long(baseDelayMsAsStr);

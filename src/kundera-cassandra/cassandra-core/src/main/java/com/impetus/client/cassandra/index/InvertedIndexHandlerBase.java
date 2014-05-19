@@ -49,6 +49,7 @@ import com.impetus.kundera.metadata.model.attributes.DefaultSingularAttribute;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.QueryHandlerException;
+import com.impetus.kundera.utils.TimestampGenerator;
 
 /**
  * Base class for
@@ -59,8 +60,16 @@ public abstract class InvertedIndexHandlerBase
 {
     /** log for this class. */
     private static Logger log = LoggerFactory.getLogger(InvertedIndexHandlerBase.class);
-    
+
     protected boolean useSecondryIndex;
+
+    /** For time stamp generation. */
+    protected TimestampGenerator generator;
+
+    public InvertedIndexHandlerBase(final TimestampGenerator generator)
+    {
+        this.generator = generator;
+    }
 
     public List<SearchResult> search(EntityMetadata m, String persistenceUnit, ConsistencyLevel consistencyLevel,
             Map<Boolean, List<IndexClause>> indexClauseMap)
@@ -88,30 +97,65 @@ public abstract class InvertedIndexHandlerBase
      * search result to <code>searchResults</code>
      */
     private void searchAndAddToResults(EntityMetadata m, String persistenceUnit, ConsistencyLevel consistencyLevel,
-            String columnFamilyName, List<SearchResult> searchResults, IndexExpression expression,
-            boolean isRowKeyQuery)
+            String columnFamilyName, List<SearchResult> searchResults, IndexExpression expression, boolean isRowKeyQuery)
     {
         SearchResult searchResult = new SearchResult();
 
         byte[] superColumnName = expression.getValue();
-        String superColumnNameStr=null;
+        String superColumnNameStr = null;
         String rowKey = null;
-		try 
-		{
-			
-			rowKey = ByteBufferUtil.string(ByteBuffer.wrap(expression.getColumn_name()), Charset.forName(Constants.CHARSET_UTF8));/*UTF8Type.instance.compose(ByteBuffer.wrap(expression.getColumn_name()));*/
-			superColumnNameStr = new String(expression.getValue(), Charset.forName(Constants.CHARSET_UTF8));/*ByteBufferUtil.string(ByteBuffer.wrap(expression.getValue()), Charset.forName(Constants.CHARSET_UTF8));*/
-		} catch (CharacterCodingException e) 
-		{
-			log.error("Error while retrieving records {}, Caused by:", e);
-			throw new PersistenceException(e);
-		}
+        try
+        {
+
+            rowKey = ByteBufferUtil.string(ByteBuffer.wrap(expression.getColumn_name()),
+                    Charset.forName(Constants.CHARSET_UTF8));/*
+                                                              * UTF8Type.instance
+                                                              * .
+                                                              * compose(ByteBuffer
+                                                              * .
+                                                              * wrap(expression.
+                                                              * getColumn_name
+                                                              * ()));
+                                                              */
+            superColumnNameStr = new String(expression.getValue(), Charset.forName(Constants.CHARSET_UTF8));/*
+                                                                                                             * ByteBufferUtil
+                                                                                                             * .
+                                                                                                             * string
+                                                                                                             * (
+                                                                                                             * ByteBuffer
+                                                                                                             * .
+                                                                                                             * wrap
+                                                                                                             * (
+                                                                                                             * expression
+                                                                                                             * .
+                                                                                                             * getValue
+                                                                                                             * (
+                                                                                                             * )
+                                                                                                             * )
+                                                                                                             * ,
+                                                                                                             * Charset
+                                                                                                             * .
+                                                                                                             * forName
+                                                                                                             * (
+                                                                                                             * Constants
+                                                                                                             * .
+                                                                                                             * CHARSET_UTF8
+                                                                                                             * )
+                                                                                                             * )
+                                                                                                             * ;
+                                                                                                             */
+        }
+        catch (CharacterCodingException e)
+        {
+            log.error("Error while retrieving records {}, Caused by:", e);
+            throw new PersistenceException(e);
+        }
         Object pk = PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(), superColumnName);
         IndexOperator condition = expression.getOp();
 
         if (log.isInfoEnabled())
         {
-            log.info("RowKey: {} ; Super column Name: {} on condition.",rowKey,superColumnNameStr, condition);
+            log.info("RowKey: {} ; Super column Name: {} on condition.", rowKey, superColumnNameStr, condition);
         }
 
         // TODO: Second check unnecessary but unavoidable as filter clause
@@ -232,7 +276,8 @@ public abstract class InvertedIndexHandlerBase
         }
     }
 
-    public void delete(Object entity, EntityMetadata metadata, ConsistencyLevel consistencyLevel, final KunderaMetadata kunderaMetadata)
+    public void delete(Object entity, EntityMetadata metadata, ConsistencyLevel consistencyLevel,
+            final KunderaMetadata kunderaMetadata)
     {
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 metadata.getPersistenceUnit());

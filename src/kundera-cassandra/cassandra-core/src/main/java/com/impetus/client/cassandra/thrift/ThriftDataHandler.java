@@ -40,6 +40,7 @@ import com.impetus.kundera.metadata.model.annotation.DefaultEntityAnnotationProc
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.utils.TimestampGenerator;
 
 /**
  * Data handler for Thrift Clients
@@ -54,9 +55,10 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
 {
     private final ThriftClient thriftClient;
 
-    public ThriftDataHandler(final ThriftClient thriftClient, final KunderaMetadata kunderaMetadata)
+    public ThriftDataHandler(final ThriftClient thriftClient, final KunderaMetadata kunderaMetadata,
+            final TimestampGenerator generator)
     {
-        super(thriftClient, kunderaMetadata);
+        super(thriftClient, kunderaMetadata, generator);
         this.thriftClient = thriftClient;
     }
 
@@ -76,7 +78,8 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
 
         Object e = null;
         SlicePredicate predicate = new SlicePredicate();
-        predicate.setSlice_range(new SliceRange(ByteBufferUtil.EMPTY_BYTE_BUFFER, ByteBufferUtil.EMPTY_BYTE_BUFFER, true, 10000));
+        predicate.setSlice_range(new SliceRange(ByteBufferUtil.EMPTY_BYTE_BUFFER, ByteBufferUtil.EMPTY_BYTE_BUFFER,
+                true, 10000));
 
         ByteBuffer key = ByteBuffer.wrap(PropertyAccessorHelper.toBytes(rowKey, m.getIdAttribute().getJavaType()));
         Connection conn = thriftClient.getConnection();
@@ -101,7 +104,8 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
                 thriftColumnOrSuperColumns.put(key, columnOrSuperColumns);
                 if (!columnOrSuperColumns.isEmpty())
                 {
-                    e = populateEntityFromSlice(m, relationNames, isWrapReq, CassandraUtilities.getEntity(e) , thriftColumnOrSuperColumns);
+                    e = populateEntityFromSlice(m, relationNames, isWrapReq, CassandraUtilities.getEntity(e),
+                            thriftColumnOrSuperColumns);
                 }
             }
             return e;
@@ -128,8 +132,7 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
      * @throws CharacterCodingException
      */
     private Object populateEntityFromSlice(EntityMetadata m, List<String> relationNames, boolean isWrapReq, Object e,
-            Map<ByteBuffer, List<ColumnOrSuperColumn>> columnOrSuperColumnsFromRow)
-            throws CharacterCodingException
+            Map<ByteBuffer, List<ColumnOrSuperColumn>> columnOrSuperColumnsFromRow) throws CharacterCodingException
     {
         ThriftDataResultHelper dataGenerator = new ThriftDataResultHelper();
         for (ByteBuffer key : columnOrSuperColumnsFromRow.keySet())

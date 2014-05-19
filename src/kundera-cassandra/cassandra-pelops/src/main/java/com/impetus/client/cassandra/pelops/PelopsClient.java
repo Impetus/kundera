@@ -88,6 +88,7 @@ import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.utils.TimestampGenerator;
 
 /**
  * Client implementation using Pelops. http://code.google.com/p/pelops/
@@ -126,17 +127,17 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
      */
     public PelopsClient(IndexManager indexManager, EntityReader reader, PelopsClientFactory clientFactory,
             String persistenceUnit, Map<String, Object> externalProperties, IThriftPool pool,
-            final KunderaMetadata kunderaMetadata)
+            final KunderaMetadata kunderaMetadata, final TimestampGenerator generator)
     {
-        super(persistenceUnit, externalProperties, kunderaMetadata);
+        super(persistenceUnit, externalProperties, kunderaMetadata, generator);
         this.persistenceUnit = persistenceUnit;
         this.indexManager = indexManager;
-        this.dataHandler = new PelopsDataHandler(this, kunderaMetadata);
+        this.dataHandler = new PelopsDataHandler(this, kunderaMetadata, generator);
         this.reader = reader;
         this.clientFactory = clientFactory;
         this.clientMetadata = clientFactory.getClientMetadata();
         this.invertedIndexHandler = new PelopsInvertedIndexHandler(this,
-                MetadataUtils.useSecondryIndex(this.clientMetadata));
+                MetadataUtils.useSecondryIndex(this.clientMetadata), generator);
         this.pool = pool;
     }
 
@@ -280,7 +281,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
                     column.setName(PropertyAccessorFactory.STRING.toBytes(invJoinColumnName
                             + Constants.JOIN_COLUMN_NAME_SEPARATOR + value.toString()));
                     column.setValue(PropertyAccessorHelper.getBytes(value));
-                    column.setTimestamp(System.currentTimeMillis());
+                    column.setTimestamp(generator.getTimestamp());
                     columnType = value.getClass();
                     columns.add(column);
                 }

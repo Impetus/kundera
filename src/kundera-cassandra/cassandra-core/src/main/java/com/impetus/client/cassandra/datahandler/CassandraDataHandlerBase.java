@@ -73,6 +73,7 @@ import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.property.accessor.LongAccessor;
+import com.impetus.kundera.utils.TimestampGenerator;
 
 /**
  * Base class for all Cassandra Data Handlers.
@@ -92,8 +93,12 @@ public abstract class CassandraDataHandlerBase
 
     protected KunderaMetadata kunderaMetadata;
 
-    public CassandraDataHandlerBase(final CassandraClientBase clientBase, final KunderaMetadata kunderaMetadata)
+    protected TimestampGenerator generator;
+
+    public CassandraDataHandlerBase(final CassandraClientBase clientBase, final KunderaMetadata kunderaMetadata,
+            final TimestampGenerator generator)
     {
+        this.generator = generator;
         this.clientBase = clientBase;
         this.kunderaMetadata = kunderaMetadata;
     }
@@ -367,7 +372,7 @@ public abstract class CassandraDataHandlerBase
             Object columnTTLs) throws Exception
     {
         // timestamp to use in thrift column objects
-        long timestamp = System.currentTimeMillis();
+        long timestamp = generator.getTimestamp();
         // Add super columns to thrift row
         return onColumnOrSuperColumnThriftRow(/* tr, */m, e, id, timestamp, columnTTLs);
     }
@@ -524,7 +529,7 @@ public abstract class CassandraDataHandlerBase
             Column thriftColumn = new Column();
             thriftColumn.setName(rowKey);
             thriftColumn.setValue(ecValue.getBytes());
-            thriftColumn.setTimestamp(System.currentTimeMillis());
+            thriftColumn.setTimestamp(generator.getTimestamp());
 
             thriftSuperColumn.addToColumns(thriftColumn);
 

@@ -75,6 +75,7 @@ import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.utils.TimestampGenerator;
 
 /**
  * Kundera powered data stax java driver based client.
@@ -95,9 +96,9 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
     private Session session;
 
     public DSClient(DSClientFactory factory, String persistenceUnit, Map<String, Object> externalProperties,
-            KunderaMetadata kunderaMetadata, EntityReader reader)
+            KunderaMetadata kunderaMetadata, EntityReader reader, final TimestampGenerator generator)
     {
-        super(persistenceUnit, externalProperties, kunderaMetadata);
+        super(persistenceUnit, externalProperties, kunderaMetadata, generator);
         this.factory = factory;
         this.reader = reader;
         this.clientMetadata = factory.getClientMetadata();
