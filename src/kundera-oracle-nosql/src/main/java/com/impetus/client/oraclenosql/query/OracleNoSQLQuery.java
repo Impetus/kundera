@@ -16,6 +16,7 @@
 package com.impetus.client.oraclenosql.query;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -37,9 +38,9 @@ import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
-import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
@@ -54,7 +55,8 @@ public class OracleNoSQLQuery extends QueryImpl
 {
     private static Logger log = LoggerFactory.getLogger(OracleNoSQLQuery.class);
 
-    public OracleNoSQLQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator, final KunderaMetadata kunderaMetadata)
+    public OracleNoSQLQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator,
+            final KunderaMetadata kunderaMetadata)
     {
         super(kunderaQuery, persistenceDelegator, kunderaMetadata);
     }
@@ -147,10 +149,13 @@ public class OracleNoSQLQuery extends QueryImpl
                 {
                     interpreter.setFindById(true);
                     // To convert rowkey string to object.
+                 // With 2.11 onwards Filter clause values has been changed to collection of values. other than IN or sub query
+                    // doing get(0) here.
                     Object keyObj = PropertyAccessorHelper.fromSourceToTargetClass(
                             ((AbstractAttribute) idAttribute).getBindableJavaType(), String.class,
                             ((FilterClause) clause).getValue().get(0));
-                    interpreter.setRowKey(keyObj/*
+                    
+                    interpreter.setRowKey((keyObj)/*
                                                  * ((FilterClause)
                                                  * clause).getValue()
                                                  */);

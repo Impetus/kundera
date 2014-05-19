@@ -28,9 +28,41 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+/**
+ * 
+table create -name PERSON_ALL_DATA_TYPE
+add-field -type Long -name PERSON_ID
+add-field -type string -name PERSON_NAME
+add-field -type boolean -name IS_EXCEPTIONAL
+add-field -type integer -name AGE
+add-field -type BINARY -name DIGITAL_SIGNATURE
+add-field -type BINARY -name RATING
+add-field -type float -name COMPLIANCE
+add-field -type double -name HEIGHT
+add-field -type string -name GRADE
+add-field -type BINARY -name ENROLMENT_DATE
+add-field -type BINARY -name ENROLMENT_TIME
+add-field -type BINARY -name JOINING_DATE_TIME
+add-field -type integer -name YEARS_SPENT
+add-field -type Long -name UNIQUE_ID
+add-field -type Long -name BIRTH_DAY
+add-field -type double -name MONTHLY_SALARY
+add-field -type BINARY -name BIRTH_TIME
+add-field -type BINARY -name ANNIVERSARY
+add-field -type BINARY -name JOB_ATTEMPTS
+add-field -type BINARY -name ACCUMULATED_WEALTH
+add-field -type BINARY -name GRADUATION_DAY
+primary-key -field PERSON_ID
+exit
+plan add-table -name PERSON_ALL_DATA_TYPE -wait
+ */
 
 /**
  * The Class Person.
+ */
+/**
+ * @author vivek.mishra
+ *
  */
 @Entity
 @Table(name = "PERSON_ALL_DATA_TYPE", schema = "OracleNoSqlTests@twikvstore")
@@ -88,13 +120,13 @@ public class PersonOracleNoSQLAllDataType
     private Double monthlySalary;
 
     @Column(name = "BIRTH_DAY")
-    private java.sql.Date birthday;
+    private java.util.Date birthday;
 
     @Column(name = "BIRTH_TIME")
-    private java.sql.Time birthtime;
+    private java.util.Date birthtime;
 
     @Column(name = "ANNIVERSARY")
-    private java.sql.Timestamp anniversary;
+    private java.util.Date anniversary;
 
     @Column(name = "JOB_ATTEMPTS")
     private BigInteger jobAttempts;
@@ -396,7 +428,7 @@ public class PersonOracleNoSQLAllDataType
     /**
      * @return the birthday
      */
-    public java.sql.Date getBirthday()
+    public java.util.Date getBirthday()
     {
         return birthday;
     }
@@ -413,7 +445,7 @@ public class PersonOracleNoSQLAllDataType
     /**
      * @return the birthtime
      */
-    public java.sql.Time getBirthtime()
+    public java.util.Date getBirthtime()
     {
         return birthtime;
     }
@@ -422,7 +454,7 @@ public class PersonOracleNoSQLAllDataType
      * @param birthtime
      *            the birthtime to set
      */
-    public void setBirthtime(java.sql.Time birthtime)
+    public void setBirthtime(java.util.Date birthtime)
     {
         this.birthtime = birthtime;
     }
@@ -430,7 +462,7 @@ public class PersonOracleNoSQLAllDataType
     /**
      * @return the anniversary
      */
-    public java.sql.Timestamp getAnniversary()
+    public java.util.Date getAnniversary()
     {
         return anniversary;
     }
@@ -439,7 +471,7 @@ public class PersonOracleNoSQLAllDataType
      * @param anniversary
      *            the anniversary to set
      */
-    public void setAnniversary(java.sql.Timestamp anniversary)
+    public void setAnniversary(java.util.Date anniversary)
     {
         this.anniversary = anniversary;
     }

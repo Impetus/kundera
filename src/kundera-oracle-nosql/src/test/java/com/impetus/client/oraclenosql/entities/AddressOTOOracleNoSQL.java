@@ -8,6 +8,10 @@ import javax.persistence.Table;
 import com.impetus.kundera.index.Index;
 import com.impetus.kundera.index.IndexCollection;
 
+/**
+ * @author vivek.mishra
+ *
+ */
 @Entity
 @Table(name = "ADDRESS_OTO", schema = "OracleNoSqlTests@twikvstore")
 @IndexCollection(columns = { @Index(name = "street") })

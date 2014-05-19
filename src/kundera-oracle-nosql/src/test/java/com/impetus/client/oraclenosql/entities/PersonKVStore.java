@@ -26,13 +26,26 @@ import com.impetus.kundera.index.Index;
 import com.impetus.kundera.index.IndexCollection;
 
 /**
+ * 
+table create -name PERSON
+add-field -type string -name PERSON_ID
+add-field -type string -name PERSON_NAME
+add-field -type integer -name AGE
+primary-key -field PERSON_ID
+exit
+plan add-table -name PERSON -wait
+ */
+
+/**
  * Entity class for Person
  * 
  * @author amresh.singh
  */
 @Entity
 @Table(name = "PERSON", schema = "OracleNoSqlTests@twikvstore")
-@IndexCollection(columns = { @Index(name = "personName"), @Index(name = "age") })
+@IndexCollection(columns = { @Index(indexName = "personName", name = "personName"),
+        @Index(indexName = "age", name = "age"),
+        @Index(indexName = "personId_age", name = "personId,age", type = "composite") })
 @NamedQueries(value = { @NamedQuery(name = "findByAge", query = "Select p from PersonKVStore p where p.age=:age"),
         @NamedQuery(name = "findByName", query = "Select p from PersonKVStore p where p.personName = ?1") })
 public class PersonKVStore

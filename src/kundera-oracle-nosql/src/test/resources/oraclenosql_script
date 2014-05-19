@@ -1,0 +1,289 @@
+table create -name PERSON_ALL_DATA_TYPE
+add-field -type Long -name PERSON_ID
+add-field -type string -name PERSON_NAME
+add-field -type boolean -name IS_EXCEPTIONAL
+add-field -type integer -name AGE
+add-field -type BINARY -name DIGITAL_SIGNATURE
+add-field -type BINARY -name RATING
+add-field -type float -name COMPLIANCE
+add-field -type double -name HEIGHT
+add-field -type string -name GRADE
+add-field -type BINARY -name ENROLMENT_DATE
+add-field -type BINARY -name ENROLMENT_TIME
+add-field -type BINARY -name JOINING_DATE_TIME
+add-field -type integer -name YEARS_SPENT
+add-field -type Long -name UNIQUE_ID
+add-field -type double -name MONTHLY_SALARY
+add-field -type BINARY -name BIRTH_TIME
+add-field -type BINARY -name ANNIVERSARY
+add-field -type BINARY -name JOB_ATTEMPTS
+add-field -type BINARY -name ACCUMULATED_WEALTH
+add-field -type BINARY -name GRADUATION_DAY
+primary-key -field PERSON_ID
+exit
+plan add-table -name PERSON_ALL_DATA_TYPE -wait
+
+table create -name PERSON
+add-field -type string -name PERSON_ID
+add-field -type string -name PERSON_NAME
+add-field -type integer -name AGE
+primary-key -field PERSON_ID
+exit
+plan add-table -name PERSON -wait
+plan add-index -name age -table PERSON -field AGE -wait
+plan add-index -name personName -table PERSON -field PERSON_NAME -wait
+plan add-index -name personId_age -table PERSON -field PERSON_ID -field AGE -wait
+
+table create -name USER_PROFILE
+add-field -type integer -name USER_ID
+add-field -type string -name USER_NAME
+add-field -type binary -name PROFILE_PICTURE
+primary-key -field USER_ID
+exit
+plan add-table -name USER_PROFILE -wait
+
+table create -name PERSON_OTO
+add-field -type string -name PERSON_ID
+add-field -type string -name PERSON_NAME
+add-field -type integer -name AGE
+add-field -type double -name ADDRESS_ID
+primary-key -field PERSON_ID
+exit
+plan add-table -name PERSON_OTO -wait
+
+table create -name ADDRESS_OTO
+add-field -type string -name street
+add-field -type double -name ADDRESS_ID
+primary-key -field ADDRESS_ID
+exit
+plan add-table -name ADDRESS_OTO -wait
+
+table create -name PersonOracleNoSqlMTO
+add-field -type string -name PERSON_ID
+add-field -type string -name PERSON_NAME
+add-field -type string -name ADDRESS_ID
+primary-key -field PERSON_ID
+exit
+plan add-table -name PersonOracleNoSqlMTO -wait
+
+table create -name AddressOracleNoSqlMTO
+add-field -type string -name ADDRESS_ID
+primary-key -field ADDRESS_ID
+add-field -type string -name STREET
+exit
+plan add-table -name AddressOracleNoSqlMTO -wait
+
+table create -name AddressOracleNoSqlOTM
+add-field -type string -name STREET
+add-field -type string -name ADDRESS_ID
+add-field -type string -name PERSON_ID
+primary-key -field ADDRESS_ID
+exit
+plan add-table -name AddressOracleNoSqlOTM -wait
+plan add-index -name PERSON_ID -table AddressOracleNoSqlOTM -field PERSON_ID -wait
+
+table create -name PersonOracleNoSqlOTM
+add-field -type string -name PERSON_ID
+add-field -type string -name PERSON_NAME
+primary-key -field PERSON_ID
+exit
+plan add-table -name PersonOracleNoSqlOTM -wait
+
+table create -name PersonOracleNoSqlOTO
+add-field -type string -name PERSON_ID
+add-field -type string -name PERSON_NAME
+add-field -type string -name ADDRESS_ID
+primary-key -field PERSON_ID
+exit
+plan add-table -name PersonOracleNoSqlOTO -wait
+
+table create -name AddressOracleNoSqlOTO
+add-field -type string -name ADDRESS_ID
+add-field -type string -name STREET
+primary-key -field ADDRESS_ID
+exit
+plan add-table -name AddressOracleNoSqlOTO -wait
+
+table create -name StudentOracleNoSQLFloatPrimitive
+add-field -type float -name id
+add-field -type binary -name AGE
+add-field -type string -name NAME
+primary-key -field id
+exit
+plan add-table -name StudentOracleNoSQLFloatPrimitive -wait
+
+table create -name StudentOracleNoSQLLongPrimitive
+add-field -type long -name id
+add-field -type binary -name AGE
+add-field -type string -name NAME
+primary-key -field id
+exit
+plan add-table -name StudentOracleNoSQLLongPrimitive -wait
+
+table create -name StudentOracleNoSQLSqlDate
+add-field -type long -name id
+add-field -type binary -name AGE
+add-field -type string -name NAME
+primary-key -field id
+exit
+plan add-table -name StudentOracleNoSQLSqlDate -wait
+
+table create -name StudentOracleNoSQLFloatWrapper
+add-field -type float -name id
+add-field -type binary -name AGE
+add-field -type string -name NAME
+primary-key -field id
+exit
+plan add-table -name StudentOracleNoSQLFloatWrapper -wait
+
+table create -name StudentOracleNoSQLDoublePrimitiv
+add-field -type double -name id
+add-field -type binary -name AGE
+add-field -type string -name NAME
+primary-key -field id
+exit
+plan add-table -name StudentOracleNoSQLDoublePrimitiv -wait
+
+table create -name StudentOracleNoSQLString
+add-field -type string -name id
+add-field -type binary -name AGE
+add-field -type string -name NAME
+primary-key -field id
+exit
+plan add-table -name StudentOracleNoSQLString -wait
+
+table create -name StudentOracleNoSQLInt
+add-field -type integer -name id
+add-field -type string -name NAME
+add-field -type binary -name AGE
+primary-key -field id
+exit
+plan add-table -name StudentOracleNoSQLInt -wait
+
+table create -name StudentOracleNoSQLDoubleWrapper
+add-field -type double -name id
+add-field -type binary -name AGE
+add-field -type string -name NAME
+primary-key -field id
+exit
+plan add-table -name StudentOracleNoSQLDoubleWrapper -wait
+
+table create -name StudentOracleNoSQLLongWrapper
+add-field -type long -name id
+add-field -type binary -name AGE
+add-field -type string -name NAME
+primary-key -field id
+exit
+plan add-table -name StudentOracleNoSQLLongWrapper -wait
+
+table create -name StudentOracleNoSQLInteger
+add-field -type integer -name id
+add-field -type binary -name AGE
+add-field -type string -name NAME
+primary-key -field id
+exit
+plan add-table -name StudentOracleNoSQLInteger -wait
+
+table create -name StudentOracleNoSQLDate
+add-field -type long -name id
+add-field -type binary -name AGE
+add-field -type string -name NAME
+primary-key -field id
+exit
+plan add-table -name StudentOracleNoSQLDate -wait
+
+table create -name StudentOracleNoSQLCharacter
+add-field -type string -name id
+add-field -type binary -name AGE
+add-field -type string -name NAME
+primary-key -field id
+exit
+plan add-table -name StudentOracleNoSQLCharacter -wait
+
+table create -name StudentOracleNoSQLChar
+add-field -type string -name id
+add-field -type binary -name AGE
+add-field -type string -name NAME
+primary-key -field id
+exit
+plan add-table -name StudentOracleNoSQLChar -wait
+
+table create -name User
+add-field -type string -name user_Id
+add-field -type integer -name tweetId
+add-field -type string -name timeLineId
+add-field -type string -name tweetBody
+add-field -type long -name tweetDate
+primary-key -field user_Id -field tweetId -field timeLineId
+exit
+plan add-table -name User -wait
+plan add-index -name user_tweet -table User -field user_Id -field tweetId -wait
+
+table create -name PERSON_BATCH
+add-field -type string -name PERSON_ID
+add-field -type string -name PERSON_NAME
+add-field -type integer -name AGE
+add-field -type binary -name AGEss
+primary-key -field PERSON_ID
+exit
+plan add-table -name PERSON_BATCH -wait
+
+table create -name ADDRESS_BATCH
+add-field -type string -name ADDRESS_ID
+add-field -type string -name STREET
+primary-key -field ADDRESS_ID
+exit
+plan add-table -name ADDRESS_BATCH -wait
+
+table create -name PersonOracleNoSqlMTM
+add-field -type string -name PERSON_ID
+add-field -type string -name PERSON_NAME
+primary-key -field PERSON_ID
+exit
+plan add-table -name PersonOracleNoSqlMTM -wait
+
+table create -name AddressOracleNoSqlMTM
+add-field -type string -name ADDRESS_ID
+add-field -type string -name STREET
+primary-key -field ADDRESS_ID
+exit
+plan add-table -name AddressOracleNoSqlMTM -wait
+
+table create -name PERSONNEL_ADDRESS
+add-field -type string -name PERSON_ID_ADDRESS_ID
+add-field -type string -name PERSON_ID
+add-field -type string -name ADDRESS_ID
+primary-key -field PERSON_ID_ADDRESS_ID
+exit
+plan add-table -name PERSONNEL_ADDRESS -wait
+plan add-index -name PERSON_ID -table PERSONNEL_ADDRESS -field PERSON_ID -wait
+plan add-index -name ADDRESS_ID -table PERSONNEL_ADDRESS -field ADDRESS_ID -wait
+
+table create -name PERSON_ADDRESS
+add-field -type string -name PERSON_ID_ADDRESS_ID
+add-field -type string -name PERSON_ID
+add-field -type string -name ADDRESS_ID
+primary-key -field PERSON_ID_ADDRESS_ID
+exit
+plan add-table -name PERSON_ADDRESS -wait
+plan add-index -name PERSON_ID -table PERSON_ADDRESS -field PERSON_ID -wait
+plan add-index -name ADDRESS_ID -table PERSON_ADDRESS -field ADDRESS_ID -wait
+
+
+table create -name PERSON_EMBEDDED
+add-field -type string -name PERSON_ID
+add-field -type string -name PERSON_NAME
+add-field -type integer -name AGE
+add-field -type integer -name officeId
+add-field -type string -name companyName
+add-field -type string -name location
+primary-key -field PERSON_ID
+exit
+plan add-table -name PERSON_EMBEDDED -wait
+plan add-index -name officeId -table PERSON_EMBEDDED -field officeId -wait
+plan add-index -name companyName -table PERSON_EMBEDDED -field companyName -wait
+plan add-index -name location -table PERSON_EMBEDDED -field location -wait
+plan add-index -name age -table PERSON_EMBEDDED -field AGE -wait
+plan add-index -name personName -table PERSON_EMBEDDED -field PERSON_NAME -wait
+plan add-index -name compositeIdx -table PERSON_EMBEDDED -field PERSON_ID -field AGE -wait
+

@@ -144,7 +144,7 @@ public class OracleNoSQLInvertedIndexer implements Indexer
 
                 String columnName = ((FilterClause) clause).getProperty();
                 String condition = ((FilterClause) clause).getCondition();
-                Object value = ((FilterClause) clause).getValue().get(0);
+                Object value = ((FilterClause) clause).getValue();
 
                 if (columnName.equals(((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName())
                         && condition.equals("="))

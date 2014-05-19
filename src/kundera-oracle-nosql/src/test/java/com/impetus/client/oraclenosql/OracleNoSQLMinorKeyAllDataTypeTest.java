@@ -72,8 +72,7 @@ public class OracleNoSQLMinorKeyAllDataTypeTest
     {
         em.close();
         emf.close();
-        
-    }
+   }
 
     @Test
     public void executeTest()
@@ -154,8 +153,8 @@ public class OracleNoSQLMinorKeyAllDataTypeTest
         Assert.assertEquals(new Long(3634521523423L), p.getUniqueId());
         Assert.assertEquals(new Double(0.23452342343), p.getMonthlySalary());
         Assert.assertEquals(new java.sql.Date(new Date(Long.parseLong("1344079061111")).getTime()), p.getBirthday());
-        Assert.assertEquals(new java.sql.Time(new Date(Long.parseLong("1344079062222")).getTime()), p.getBirthtime());
-        Assert.assertEquals(new java.sql.Timestamp(new Date(Long.parseLong("13440790653333")).getTime()),
+        Assert.assertEquals(new java.util.Date(new Date(Long.parseLong("1344079062222")).getTime()), p.getBirthtime());
+        Assert.assertEquals(new java.util.Date(new Date(Long.parseLong("13440790653333")).getTime()),
                 p.getAnniversary());
         Assert.assertEquals(new BigInteger("123456789"), p.getJobAttempts());
         Assert.assertEquals(new BigDecimal(123456789), p.getAccumulatedWealth());
@@ -194,9 +193,9 @@ public class OracleNoSQLMinorKeyAllDataTypeTest
         Assert.assertEquals(new Integer(5), p.getYearsSpent());
         Assert.assertEquals(new Long(25423452343L), p.getUniqueId());
         Assert.assertEquals(new Double(0.76452343), p.getMonthlySalary());
-        Assert.assertEquals(new java.sql.Date(new Date(Long.parseLong("1344079064444")).getTime()), p.getBirthday());
-        Assert.assertEquals(new java.sql.Time(new Date(Long.parseLong("1344079065555")).getTime()), p.getBirthtime());
-        Assert.assertEquals(new java.sql.Timestamp(new Date(Long.parseLong("1344079066666")).getTime()),
+        Assert.assertEquals(new java.util.Date(new Date(Long.parseLong("1344079064444")).getTime()), p.getBirthday());
+        Assert.assertEquals(new java.util.Date(new Date(Long.parseLong("1344079065555")).getTime()), p.getBirthtime());
+        Assert.assertEquals(new java.util.Date(new Date(Long.parseLong("1344079066666")).getTime()),
                 p.getAnniversary());
         Assert.assertEquals(new BigInteger("123456790"), p.getJobAttempts());
         Assert.assertEquals(new BigDecimal(123456790), p.getAccumulatedWealth());

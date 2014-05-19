@@ -32,7 +32,7 @@ import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.loader.ClientFactory;
 
 /**
- * Test case for {@link OracleNoSQLClientFactory}
+ * Test case for {@link OracleNoSQLClientFactory_legacy}
  * 
  * @author amresh.singh
  */
@@ -63,12 +63,11 @@ public class OracleNoSQLClientFactoryTest
     public void tearDown() throws Exception
     {
         emf.close();
-        
     }
 
     /**
      * Test method for
-     * {@link com.impetus.client.oraclenosql.OracleNoSQLClientFactory#createPoolOrConnection()}
+     * {@link com.impetus.client.oraclenosql.OracleNoSQLClientFactory_legacy#createPoolOrConnection()}
      * .
      */
     @Test

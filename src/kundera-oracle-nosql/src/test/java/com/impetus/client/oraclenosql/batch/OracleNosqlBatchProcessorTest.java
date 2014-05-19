@@ -133,7 +133,6 @@ public class OracleNosqlBatchProcessorTest
         }
         em.close();
         emf.close();
-        
     }
 
     private List<PersonBatchOracleNosqlEntity> prepareData(Integer noOfRecords)

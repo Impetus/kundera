@@ -26,6 +26,18 @@ import com.impetus.kundera.index.Index;
 import com.impetus.kundera.index.IndexCollection;
 
 /**
+ * 
+table create -name USER_PROFILE
+add-field -type integer -name USER_ID
+add-field -type string -name USER_NAME
+add-field -type binary -name PROFILE_PICTURE
+primary-key -field USER_ID
+exit
+plan add-table -name USER_PROFILE -wait
+
+ */
+
+/**
  * UserProfile entity class
  * 
  * @author amresh.singh

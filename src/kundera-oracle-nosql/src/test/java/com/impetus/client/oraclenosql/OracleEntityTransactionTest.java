@@ -299,7 +299,6 @@ public class OracleEntityTransactionTest
         int updateCount = query.executeUpdate();
         em.close();
         emf.close();
-        
     }
 
     /**

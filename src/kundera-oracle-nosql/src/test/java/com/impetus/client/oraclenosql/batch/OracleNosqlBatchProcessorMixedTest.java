@@ -112,7 +112,6 @@ public class OracleNosqlBatchProcessorMixedTest
         }
         em.close();
         emf.close();
-        
     }
 
     private List<PersonBatchOracleNosql> preparePersonData(Integer noOfRecords)
