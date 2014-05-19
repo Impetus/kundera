@@ -194,24 +194,14 @@ public class CassandraUtilities
      * 
      * 
      * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
+     *     
      * } if user opted for
      * {@PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE
      * 
      * 
      * 
      * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
+     *       
      * } otherwise returns
      * JPAColumnName of id attribute.
      * 
@@ -220,7 +210,7 @@ public class CassandraUtilities
      * @return
      */
     public static String getIdColumnName(final KunderaMetadata kunderaMetadata, final EntityMetadata m,
-            final Map<String, Object> externalProperties)
+            final Map<String, Object> externalProperties, final boolean isCql3Enabled)
     {
         // key for auto schema generation.
         String persistenceUnit = m.getPersistenceUnit();
@@ -234,14 +224,16 @@ public class CassandraUtilities
                     .getProperty(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE) : null;
         }
 
-        String cql_version = externalProperties != null ? (String) externalProperties
-                .get(CassandraConstants.CQL_VERSION) : null;
-        boolean isCql3Enabled = (cql_version != null && cql_version.equals(CassandraConstants.CQL_VERSION_3_0))
-                || m.getIdAttribute().getBindableJavaType().isAnnotationPresent(Embeddable.class);
-        // check if id attribute is embeddable
         boolean containsBasicCollectionField = MetadataUtils.containsBasicElementCollectionField(m, kunderaMetadata);
-        return isCql3Enabled || containsBasicCollectionField ? ((AbstractAttribute) m.getIdAttribute())
-                .getJPAColumnName() : CassandraConstants.CQL_KEY;
+
+        if (!StringUtils.isBlank(autoDdlOption) && !(isCql3Enabled || containsBasicCollectionField))
+        {
+            return CassandraConstants.CQL_KEY;
+        }
+        else
+        {
+            return ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName();
+        }
     }
 
     public static Object getEntity(Object e)

@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.SingularAttribute;
@@ -152,7 +153,7 @@ public final class GraphEntityMapper
 
         try
         {
-            entity = m.getEntityClazz().newInstance();
+            // entity = m.getEntityClazz().newInstance();
 
             for (Attribute attribute : attributes)
             {
@@ -164,24 +165,33 @@ public final class GraphEntityMapper
                         && m.getIdAttribute().getJavaType().equals(field.getType()))
                 {
                     Object idValue = deserializeIdAttributeValue(m, (String) node.getProperty(columnName));
-                    PropertyAccessorHelper.set(entity, field, idValue);
+                    if (idValue != null)
+                    {
+                        entity = initialize(m, entity);
+                        PropertyAccessorHelper.set(entity, field, idValue);
+                    }
                 }
-                else if (!attribute.isCollection() && !attribute.isAssociation())
+                else if (!attribute.isCollection() && !attribute.isAssociation()
+                        && !((AbstractAttribute) m.getIdAttribute()).getJPAColumnName().equals(columnName))
                 {
-                    PropertyAccessorHelper.set(entity, field,
-                            fromNeo4JObject(node.getProperty(columnName), field));
+                    Object columnValue = node.getProperty(columnName, null);
+                    if (columnValue != null)
+                    {
+                        entity = initialize(m, entity);
+                        PropertyAccessorHelper.set(entity, field, fromNeo4JObject(columnValue, field));
+                    }
                 }
             }
-        }
-        catch (InstantiationException e)
-        {
-            log.error("Error while converting Neo4j object to entity, Caused by {}.", e);
-            throw new EntityReaderException("Error while converting Neo4j object to entity", e);
-        }
-        catch (IllegalAccessException e)
-        {
-            log.error("Error while converting Neo4j object to entity, Caused by {}.", e);
-            throw new EntityReaderException("Error while converting Neo4j object to entity", e);
+
+            if (entity != null && !metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
+            {
+                Object rowKey = node.getProperty(((AbstractAttribute) m.getIdAttribute()).getJPAColumnName());
+                if (rowKey != null)
+                {
+                    PropertyAccessorHelper.setId(entity, m,
+                            fromNeo4JObject(rowKey, (Field) m.getIdAttribute().getJavaMember()));
+                }
+            }
         }
         catch (NotFoundException e)
         {
@@ -213,7 +223,8 @@ public final class GraphEntityMapper
 
         try
         {
-            entity = relationshipEntityMetadata.getEntityClazz().newInstance();
+            // entity =
+            // relationshipEntityMetadata.getEntityClazz().newInstance();
 
             for (Attribute attribute : attributes)
             {
@@ -226,27 +237,44 @@ public final class GraphEntityMapper
                 {
                     Object idValue = deserializeIdAttributeValue(relationshipEntityMetadata,
                             (String) relationship.getProperty(columnName));
-                    PropertyAccessorHelper.set(entity, field, idValue);
+                    if (idValue != null)
+                    {
+                        entity = initialize(relationshipEntityMetadata, entity);
+                        PropertyAccessorHelper.set(entity, field, idValue);
+                    }
                 }
                 else if (!attribute.isCollection() && !attribute.isAssociation()
                         && !field.getType().equals(topLevelEntityMetadata.getEntityClazz())
                         && !field.getType().equals(relation.getTargetEntity()))
                 {
-                    Object value = relationship.getProperty(columnName);
-                    PropertyAccessorHelper.set(entity, field, fromNeo4JObject(value, field));
+                    Object value = relationship.getProperty(columnName, null);
+                    if (value != null)
+                    {
+                        entity = initialize(relationshipEntityMetadata, entity);
+                        PropertyAccessorHelper.set(entity, field, fromNeo4JObject(value, field));
+                    }
+                }
+            }
 
+            if (entity != null
+                    && !metaModel.isEmbeddable(relationshipEntityMetadata.getIdAttribute().getBindableJavaType()))
+            {
+                Object rowKey = relationship.getProperty(((AbstractAttribute) relationshipEntityMetadata
+                        .getIdAttribute()).getJPAColumnName());
+                if (rowKey != null)
+                {
+                    PropertyAccessorHelper
+                            .setId(entity,
+                                    relationshipEntityMetadata,
+                                    fromNeo4JObject(rowKey, (Field) relationshipEntityMetadata.getIdAttribute()
+                                            .getJavaMember()));
                 }
             }
         }
-        catch (InstantiationException e)
+        catch (NotFoundException e)
         {
-            log.error("Error while converting Neo4j object to entity, Caused by {}.", e);
-            throw new EntityReaderException("Error while converting Neo4j object to entity");
-        }
-        catch (IllegalAccessException e)
-        {
-            log.error("Error while converting Neo4j object to entity, Caused by {}.", e);
-            throw new EntityReaderException("Error while converting Neo4j object to entity");
+            log.info(e.getMessage());
+            return null;
         }
 
         return entity;
@@ -735,4 +763,27 @@ public final class GraphEntityMapper
         return getNonProxyNode(nodesFound);
     }
 
+    /**
+     * 
+     * @param m
+     * @param entity
+     * @param id
+     * @return
+     */
+    private Object initialize(EntityMetadata m, Object entity)
+    {
+        try
+        {
+            if (entity == null)
+            {
+                entity = m.getEntityClazz().newInstance();
+            }
+
+            return entity;
+        }
+        catch (Exception e)
+        {
+            throw new PersistenceException("Error occured while instantiating entity, Caused by : ", e);
+        }
+    }
 }
