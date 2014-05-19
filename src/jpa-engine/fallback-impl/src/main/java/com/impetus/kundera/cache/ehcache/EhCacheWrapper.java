@@ -149,6 +149,15 @@ public class EhCacheWrapper implements Cache
         }
     }
 
+    @Override
+    public <T> T unwrap(Class<T> arg0)
+    {
+        // Not yet supported.
+        //TODO: See https://github.com/impetus-opensource/Kundera/issues/457
+        
+        return null;
+    }
+    
     private boolean isAlive()
     {
         return ehcache.getStatus().equals(Status.STATUS_ALIVE);
