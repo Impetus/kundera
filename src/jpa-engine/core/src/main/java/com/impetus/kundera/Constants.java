@@ -88,7 +88,7 @@ public interface Constants
     public final static String INDEX_TABLE_EC_DELIMITER = "@SuperColumn:";
 
     public final static String LOADBALANCING_POLICY = "loadbalancing.policy";
-    
+
     public final static String FAILOVER_POLICY = "failover.policy";
 
     public final static String FAIL_FAST = "fail.fast";
@@ -96,35 +96,16 @@ public interface Constants
     public final static String ON_FAIL_TRY_ONE_NEXT_AVAILABLE = "on.fail.try.one.next.available";
 
     public final static String ON_FAIL_TRY_ALL_AVAILABLE = "on.fail.try.all.available";
-    
+
     public final static String RETRY_DELAY = "retry.delay";
-    
+
     public final static String RETRY = "retry";
-    
+
     public final static String PERSISTENCE_UNIT_LOCATIION = "persistenceunit.location";
-    
+
     public final static String DEFAULT_PERSISTENCE_UNIT_LOCATIION = "META-INF/persistence.xml";
-    
-    public final static String SPACE=" ";
 
-    // public final static String INVERTED_INDEXING_ENABLED =
-    // "inverted.indexing.enabled";
+    public final static String SPACE = " ";
 
-    // public final static String ZOOKEEPER_PORT = "zookeeper_port";
-    //
-    // public final static String ZOOKEEPER_HOST = "zookeeper_host";
-
-    // public final static String PLACEMENT_STRATEGY = "placement_strategy";
-    //
-    // public final static String REPLICATION_FACTOR = "replication_factor";
-    //
-    // public final static String CF_DEFS = "cf_defs";
-    //
-    // public final static String DATA_CENTERS = "datacenters";
-    //
-    // public final static String CONNECTIONS = "mongodb.servers";
-    //
-    // public final static String SOCKET_TIMEOUT = "socket.timeout";
-    //
-    // public final static String READ_PREFERENCE = "read.preference";
+    public final static String DEFAULT_TIMESTAMP_GENERATOR = "default.timestamp.generator";
 }

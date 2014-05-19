@@ -18,6 +18,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
+import com.impetus.kundera.Constants;
 import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
 
 /**
@@ -52,6 +53,7 @@ public class CassandraUserTest
         puProperties.put("kundera.port", "9160");
         puProperties.put("kundera.client.property", "kunderaTest.xml");
         puProperties.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_2_0);
+        puProperties.put(Constants.DEFAULT_TIMESTAMP_GENERATOR, CassandraTimestampGenerator.class.getName());
         emf = Persistence.createEntityManagerFactory(_PU, puProperties);
         em = emf.createEntityManager();
     }
