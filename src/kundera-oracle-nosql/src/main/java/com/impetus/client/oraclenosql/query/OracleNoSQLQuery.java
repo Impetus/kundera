@@ -150,11 +150,11 @@ public class OracleNoSQLQuery extends QueryImpl
                     // To convert rowkey string to object.
                  // With 2.11 onwards Filter clause values has been changed to collection of values. other than IN or sub query
                     // doing get(0) here.
-//                    Object keyObj = PropertyAccessorHelper.fromSourceToTargetClass(
-//                            ((AbstractAttribute) idAttribute).getBindableJavaType(), String.class,
-//                            ((FilterClause) clause).getValue().get(0));
+                    Object keyObj = PropertyAccessorHelper.fromSourceToTargetClass(
+                            ((AbstractAttribute) idAttribute).getBindableJavaType(), (((FilterClause) clause).getValue().get(0)).getClass(),
+                            ((FilterClause) clause).getValue().get(0));
                     
-                    interpreter.setRowKey((((FilterClause) clause).getValue().get(0))/*
+                    interpreter.setRowKey(keyObj/*(((FilterClause) clause).getValue().get(0))
                                                  * ((FilterClause)
                                                  * clause).getValue()
                                                  */);
