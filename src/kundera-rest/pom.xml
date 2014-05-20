@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<artifactId>kundera</artifactId>
@@ -33,84 +34,36 @@
 	</repositories>
 
 	<dependencies>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.8.2</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.persistence</groupId>
-			<artifactId>persistence-api</artifactId>
-			<version>2.0</version>
-		</dependency>
-
-		<!-- Kundera Libraries -->
-		<dependency>
-			<groupId>com.impetus.kundera.core</groupId>
-			<artifactId>kundera-core</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.impetus.kundera.client</groupId>
-			<artifactId>kundera-cassandra</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.impetus.kundera.client</groupId>
-			<artifactId>kundera-cassandra</artifactId>
-			<version>${project.version}</version>
-			<type>test-jar</type>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>com.impetus.kundera.client</groupId>
-			<artifactId>kundera-cassandra-pelops</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
-		</dependency>
-
 		<!-- JAX-RS Libraries -->
-
 		<dependency>
 			<groupId>com.sun.jersey</groupId>
 			<artifactId>jersey-server</artifactId>
-			<version>1.12</version>
-		</dependency>
+			<version>1.18</version>
+    	</dependency>
 		<dependency>
 			<groupId>com.sun.jersey</groupId>
 			<artifactId>jersey-core</artifactId>
-			<version>1.12</version>
+			<version>1.18</version>
 		</dependency>
-
 		<dependency>
 			<groupId>com.sun.jersey</groupId>
 			<artifactId>jersey-servlet</artifactId>
-			<version>1.12</version>
+			<version>1.18</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.sun.jersey</groupId>
 			<artifactId>jersey-json</artifactId>
-			<version>1.12</version>
+			<version>1.18</version>
 		</dependency>
 
 		<!-- Unit Testing libraries -->
 		<dependency>
 			<groupId>com.sun.jersey.jersey-test-framework</groupId>
 			<artifactId>jersey-test-framework-grizzly</artifactId>
-			<version>1.12</version>
+			<version>1.18</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>com.sun.grizzly</groupId>
-			<artifactId>grizzly-servlet-webserver</artifactId>
-			<version>1.9.8</version>
-		</dependency>
-
 		<!-- contiperf dependency should not be here -->
 		<dependency>
 			<groupId>org.databene</groupId>
@@ -118,9 +71,53 @@
 			<version>2.2.0</version>
 			<scope>test</scope>
 		</dependency>
-
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.8.2</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.impetus.kundera.client</groupId>
+			<artifactId>kundera-cassandra</artifactId>
+			<version>${project.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.ws.rs</groupId>
+					<artifactId>javax.ws.rs-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>javax</groupId>
+					<artifactId>javaee-web-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.glassfish</groupId>
+					<artifactId>javax.faces</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>javax.jws</groupId>
+					<artifactId>jsr181-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>javax.xml.ws</groupId>
+					<artifactId>jaxws-api</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>com.impetus.kundera.client</groupId>
+			<artifactId>kundera-cassandra</artifactId>
+			<version>${project.version}</version>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.impetus.kundera.client</groupId>
+			<artifactId>kundera-cassandra-pelops</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
-
 	<!-- Assembly build -->
 	<build>
 		<plugins>
@@ -135,7 +132,6 @@
 					</descriptorRefs>
 				</configuration>
 			</plugin>
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
@@ -157,6 +153,4 @@
 				<skip>true</skip> </configuration> </execution> </executions> </plugin> -->
 		</plugins>
 	</build>
-
-
 </project>
