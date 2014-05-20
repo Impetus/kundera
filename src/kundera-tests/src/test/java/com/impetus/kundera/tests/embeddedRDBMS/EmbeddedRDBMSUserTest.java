@@ -114,7 +114,9 @@ public class EmbeddedRDBMSUserTest
         {
 
             
-        }
+        } catch (SchemaDisagreementException e) {
+		
+		}
         
         EntityManager em = emf.createEntityManager();
         // em.getTransaction().begin();

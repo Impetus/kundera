@@ -376,7 +376,9 @@ public class MTMBiAssociationTest extends TwinAssociation
         catch (TException e)
         {
             
-        }
+        } catch (SchemaDisagreementException e) {
+
+		}
     }
 
     /*

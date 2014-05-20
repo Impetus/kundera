@@ -67,6 +67,22 @@ public class LazyTestSetup
             {
                 
             }
+            catch (InvalidRequestException e)
+            {
+			
+			}
+            catch (UnavailableException e) 
+            {
+			
+			} 
+            catch (TimedOutException e) 
+            {
+
+			} 
+            catch (SchemaDisagreementException e) 
+            {
+
+			}
         }
 
     }
@@ -75,7 +91,7 @@ public class LazyTestSetup
     {
     }
 
-    void createSchema()
+    void createSchema() throws SchemaDisagreementException
     {
         if (AUTO_MANAGE_SCHEMA)
         {
@@ -156,14 +172,22 @@ public class LazyTestSetup
                     // Set replication factor, the value MUST be an integer
                     ksDef.strategy_options.put("replication_factor", "1");
                     CassandraCli.client.system_add_keyspace(ksDef);
-                }
+                } 
+                catch (InvalidRequestException e) 
+                {
+				
+				}
 
                 CassandraCli.client.set_keyspace(KEYSPACE);
             }
             catch (TException e)
             {
                 
-            }
+            } 
+            catch (InvalidRequestException e) 
+            {
+				
+			}
            
 
         }
