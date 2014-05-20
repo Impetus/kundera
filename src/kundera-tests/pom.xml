@@ -3,11 +3,11 @@
 	<parent>
 		<groupId>com.impetus</groupId>
 		<artifactId>kundera</artifactId>
-		<version>2.12-1.x-SNAPSHOT</version>
+		<version>2.12-1.x</version>
 	</parent>
 	<groupId>com.impetus.kundera</groupId>
 	<artifactId>kundera-tests</artifactId>
-	<version>2.12-1.x-SNAPSHOT</version>
+	<version>2.12-1.x</version>
 	<packaging>jar</packaging>
 
 	<name>kundera-tests</name>
