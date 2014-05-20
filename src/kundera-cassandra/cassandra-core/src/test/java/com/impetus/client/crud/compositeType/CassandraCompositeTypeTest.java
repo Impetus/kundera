@@ -186,7 +186,7 @@ public class CassandraCompositeTypeTest
 
         final String withSelectiveCompositeColClause = "Select u.key from CassandraPrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId = :timeLineId";
 
-        final String withSelectCompositeKeyColumnClause = "Select u.key.userId from CassandraPrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId = :timeLineId";
+        final String withSelectCompositeKeyColumnClause = "Select u.key.userId,u.key.timeLineId, u.tweetDate from CassandraPrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId = :timeLineId";
 
         // query over 1 composite and 1 non-column
 
@@ -257,8 +257,9 @@ public class CassandraCompositeTypeTest
         Assert.assertNotNull(results.get(0).getKey());
         Assert.assertNotNull(results.get(0).getKey().getUserId());
         Assert.assertNull(results.get(0).getKey().getFullName());
-        Assert.assertNull(results.get(0).getKey().getTimeLineId());
+        Assert.assertNotNull(results.get(0).getKey().getTimeLineId());
         Assert.assertEquals(0, results.get(0).getKey().getTweetId());
+        Assert.assertEquals(currentDate, results.get(0).getTweetDate());
         Assert.assertNull(results.get(0).getTweetBody());
         Assert.assertNull(results.get(0).getKey().getFullName());
 
@@ -770,4 +771,6 @@ public class CassandraCompositeTypeTest
         Assert.assertNull(result);
         em.close();
     }
+    
+    
 }
