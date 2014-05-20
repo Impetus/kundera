@@ -1097,15 +1097,14 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
                     }
                     else
                     {
+                    	fieldMetadata = schemaTable.getField(jpaColumnName);
+                    	value = row.get(jpaColumnName);
 
-                        fieldMetadata = schemaTable.getField(jpaColumnName);
-                        value = row.get(jpaColumnName);
-
-                        if (!attribute.isAssociation())
+                    	if (!attribute.isAssociation() && value != null)
                         {
                             NoSqlDBUtils.get(fieldMetadata, value, entity, (Field) attribute.getJavaMember());
                         }
-                        else if (attribute.isAssociation())
+                        else if (attribute.isAssociation() && value != null)
                         {
                             Relation relation = entityMetadata.getRelation(attribute.getName());
 
