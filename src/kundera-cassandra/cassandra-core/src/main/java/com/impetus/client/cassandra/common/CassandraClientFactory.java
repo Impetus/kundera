@@ -61,7 +61,7 @@ public abstract class CassandraClientFactory extends GenericClientFactory
      */
     protected void initializeTimestampGenerator(Map<String, Object> externalProperty)
     {
-        String timestampGeneratorClass = (String) externalProperty.get(Constants.DEFAULT_TIMESTAMP_GENERATOR);
+        String timestampGeneratorClass = externalProperty != null ?(String) externalProperty.get(Constants.DEFAULT_TIMESTAMP_GENERATOR):null;
         if (timestampGeneratorClass == null)
         {
             timestampGeneratorClass = CassandraPropertyReader.csmd != null ? CassandraPropertyReader.csmd
