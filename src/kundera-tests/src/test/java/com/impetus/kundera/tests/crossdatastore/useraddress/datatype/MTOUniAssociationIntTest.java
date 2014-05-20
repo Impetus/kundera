@@ -26,6 +26,8 @@ import junit.framework.Assert;
 
 import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.ColumnDef;
+import org.apache.cassandra.thrift.Compression;
+import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.IndexType;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KsDef;
@@ -268,114 +270,48 @@ public class MTOUniAssociationIntTest extends TwinAssociation
     protected void loadDataForPERSONNEL() throws TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException
     {
-        KsDef ksDef = null;
+        String keyspaceName = "KunderaTests";
+        CassandraCli.createKeySpace(keyspaceName);
 
-        CfDef cfDef = new CfDef();
-        cfDef.name = "PersonnelUniMTo1Int";
-        cfDef.keyspace = "KunderaTests";
-        // cfDef.column_type = "Super";
-        cfDef.setComparator_type("UTF8Type");
-        cfDef.setKey_validation_class("Int32Type");
-        ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("PERSON_NAME".getBytes()), "UTF8Type");
-        columnDef.index_type = IndexType.KEYS;
-        cfDef.addToColumn_metadata(columnDef);
-
-        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("ADDRESS_ID".getBytes()), "LongType");
-        columnDef1.index_type = IndexType.KEYS;
-        cfDef.addToColumn_metadata(columnDef1);
-
-        List<CfDef> cfDefs = new ArrayList<CfDef>();
-        cfDefs.add(cfDef);
-
+        CassandraCli.client.set_keyspace(keyspaceName);
         try
         {
-            ksDef = CassandraCli.client.describe_keyspace("KunderaTests");
-            CassandraCli.client.set_keyspace("KunderaTests");
-
-            // List<CfDef> cfDefn = ksDef.getCf_defs();
-            //
-            // // CassandraCli.client.set_keyspace("KunderaTests");
-            // for (CfDef cfDef1 : cfDefn)
-            // {
-            //
-            // if (cfDef1.getName().equalsIgnoreCase("PERSONNEL"))
-            // {
-            //
-            // CassandraCli.client.system_drop_column_family("PERSONNEL");
-            //
-            // }
-            // }
-            // CassandraCli.client.system_add_column_family(cfDef);
-            // if (!CassandraCli.columnFamilyExist("PersonnelUniMTo1Int",
-            // "KunderaTests")) {
-            // CassandraCli.client.system_add_column_family(cfDef);
-            // } else {
-            // CassandraCli.truncateColumnFamily("KunderaTests",
-            // "PersonnelUniMTo1Int");
-            // }
-            if (CassandraCli.columnFamilyExist("PersonnelUniMTo1Int", "KunderaTests"))
-            {
-                CassandraCli.client.system_drop_column_family("PersonnelUniMTo1Int");
-
-            }
-            CassandraCli.client.system_add_column_family(cfDef);
-
+            CassandraCli.client.execute_cql3_query(
+                    ByteBuffer.wrap("drop table \"PersonnelUniMTo1Int\"".getBytes("UTF-8")), Compression.NONE,
+                    ConsistencyLevel.ONE);
         }
-        catch (NotFoundException e)
+        catch (Exception ex)
         {
-            addKeyspace(ksDef, cfDefs);
+
         }
-
-        CassandraCli.client.set_keyspace("KunderaTests");
-
+        CassandraCli
+                .executeCqlQuery(
+                        "create table \"PersonnelUniMTo1Int\" ( \"PERSON_ID\" int PRIMARY KEY,  \"PERSON_NAME\" text, \"ADDRESS_ID\" bigint)",
+                        keyspaceName);
+        CassandraCli.executeCqlQuery("create index on \"PersonnelUniMTo1Int\" ( \"PERSON_NAME\")", keyspaceName);
+        CassandraCli.executeCqlQuery("create index on \"PersonnelUniMTo1Int\" ( \"ADDRESS_ID\")", keyspaceName);
     }
 
     @Override
     protected void loadDataForHABITAT() throws TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException
     {
-        KsDef ksDef = null;
-        CfDef cfDef2 = new CfDef();
-        cfDef2.name = "HabitatUniMTo1Long";
-        cfDef2.keyspace = "KunderaTests";
-        cfDef2.setKey_validation_class("LongType");
-        cfDef2.setComparator_type("UTF8Type");
-        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("STREET".getBytes()), "UTF8Type");
-        columnDef1.index_type = IndexType.KEYS;
-        cfDef2.addToColumn_metadata(columnDef1);
+        String keyspaceName = "KunderaTests";
+        CassandraCli.createKeySpace(keyspaceName);
 
-        List<CfDef> cfDefs = new ArrayList<CfDef>();
-        cfDefs.add(cfDef2);
-
+        CassandraCli.client.set_keyspace(keyspaceName);
         try
         {
-            ksDef = CassandraCli.client.describe_keyspace("KunderaTests");
-            CassandraCli.client.set_keyspace("KunderaTests");
-            // List<CfDef> cfDefss = ksDef.getCf_defs();
-            // // CassandraCli.client.set_keyspace("KunderaTests");
-            // for (CfDef cfDef : cfDefss)
-            // {
-            //
-            // if (cfDef.getName().equalsIgnoreCase("ADDRESS"))
-            // {
-            //
-            // CassandraCli.client.system_drop_column_family("ADDRESS");
-            //
-            // }
-            // }
-            // CassandraCli.client.system_add_column_family(cfDef2);
-            if (CassandraCli.columnFamilyExist("HabitatUniMTo1Long", "KunderaTests"))
-            {
-                CassandraCli.client.system_drop_column_family("HabitatUniMTo1Long");
-            }
-            CassandraCli.client.system_add_column_family(cfDef2);
+            CassandraCli.client.execute_cql3_query(ByteBuffer.wrap("drop table \"HabitatUniMTo1Long\"".getBytes("UTF-8")),
+                    Compression.NONE, ConsistencyLevel.ONE);
         }
-        catch (NotFoundException e)
+        catch (Exception ex)
         {
-            addKeyspace(ksDef, cfDefs);
-        }
-        CassandraCli.client.set_keyspace("KunderaTests");
 
+        }
+        CassandraCli.executeCqlQuery(
+                "create table \"HabitatUniMTo1Long\" ( \"ADDRESS_ID\" bigint PRIMARY KEY,  \"STREET\" text)", keyspaceName);
+        CassandraCli.executeCqlQuery("create index on \"HabitatUniMTo1Long\" ( \"STREET\")", keyspaceName);
     }
 
     /*

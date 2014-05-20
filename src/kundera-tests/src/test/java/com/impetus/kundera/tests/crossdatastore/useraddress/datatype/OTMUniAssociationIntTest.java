@@ -26,6 +26,8 @@ import junit.framework.Assert;
 
 import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.ColumnDef;
+import org.apache.cassandra.thrift.Compression;
+import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.IndexType;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KsDef;
@@ -273,112 +275,49 @@ public class OTMUniAssociationIntTest extends TwinAssociation
     protected void loadDataForPERSONNEL() throws TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException
     {
+        String keyspaceName = "KunderaTests";
+        CassandraCli.createKeySpace(keyspaceName);
 
-        KsDef ksDef = null;
-
-        CfDef cfDef = new CfDef();
-        cfDef.name = "PersonnelUni1ToMInt";
-        cfDef.keyspace = "KunderaTests";
-        // cfDef.column_type = "Super";
-        cfDef.setComparator_type("UTF8Type");
-        cfDef.setKey_validation_class("Int32Type");
-        ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("PERSON_NAME".getBytes()), "UTF8Type");
-        columnDef.index_type = IndexType.KEYS;
-        cfDef.addToColumn_metadata(columnDef);
-
-        List<CfDef> cfDefs = new ArrayList<CfDef>();
-        cfDefs.add(cfDef);
-
+        CassandraCli.client.set_keyspace(keyspaceName);
         try
         {
-            ksDef = CassandraCli.client.describe_keyspace("KunderaTests");
-            CassandraCli.client.set_keyspace("KunderaTests");
-
-//            List<CfDef> cfDefn = ksDef.getCf_defs();
-//
-//            // CassandraCli.client.set_keyspace("KunderaTests");
-//            for (CfDef cfDef1 : cfDefn)
-//            {
-//
-//                if (cfDef1.getName().equalsIgnoreCase("PERSONNEL"))
-//                {
-//
-//                    CassandraCli.client.system_drop_column_family("PERSONNEL");
-//
-//                }
-//            }
-//            CassandraCli.client.system_add_column_family(cfDef);
-//            if (!CassandraCli.columnFamilyExist("PersonnelUni1ToMInt", "KunderaTests")) {
-//                CassandraCli.client.system_add_column_family(cfDef);
-//            } else {
-//                CassandraCli.truncateColumnFamily("KunderaTests", "PersonnelUni1ToMInt");
-//            }
-            if (CassandraCli.columnFamilyExist("PersonnelUni1ToMInt", "KunderaTests")) {
-                CassandraCli.client.system_drop_column_family("PersonnelUni1ToMInt");
-            } 
-            CassandraCli.client.system_add_column_family(cfDef);
-
+            CassandraCli.client.execute_cql3_query(
+                    ByteBuffer.wrap("drop table \"PersonnelUni1ToMInt\"".getBytes("UTF-8")), Compression.NONE,
+                    ConsistencyLevel.ONE);
         }
-        catch (NotFoundException e)
+        catch (Exception ex)
         {
 
-            addKeyspace(ksDef, cfDefs);
         }
-
-        CassandraCli.client.set_keyspace("KunderaTests");
-
+        CassandraCli.executeCqlQuery(
+                "create table \"PersonnelUni1ToMInt\" ( \"PERSON_ID\" int PRIMARY KEY,  \"PERSON_NAME\" text)",
+                keyspaceName);
+        CassandraCli.executeCqlQuery("create index on \"PersonnelUni1ToMInt\" ( \"PERSON_NAME\")", keyspaceName);
     }
 
     @Override
     protected void loadDataForHABITAT() throws TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException
     {
-        KsDef ksDef = null;
-        CfDef cfDef2 = new CfDef();
-        cfDef2.name = "HabitatUni1ToMFloat";
-        cfDef2.keyspace = "KunderaTests";
-        cfDef2.setKey_validation_class("FloatType");
-        cfDef2.setComparator_type("UTF8Type");
+        String keyspaceName = "KunderaTests";
+        CassandraCli.createKeySpace(keyspaceName);
 
-        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("STREET".getBytes()), "UTF8Type");
-        columnDef1.index_type = IndexType.KEYS;
-        cfDef2.addToColumn_metadata(columnDef1);
-
-        ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("PERSON_ID".getBytes()), "Int32Type");
-        columnDef2.index_type = IndexType.KEYS;
-        cfDef2.addToColumn_metadata(columnDef2);
-
-        List<CfDef> cfDefs = new ArrayList<CfDef>();
-        cfDefs.add(cfDef2);
-
+        CassandraCli.client.set_keyspace(keyspaceName);
         try
         {
-            ksDef = CassandraCli.client.describe_keyspace("KunderaTests");
-            CassandraCli.client.set_keyspace("KunderaTests");
-//            List<CfDef> cfDefss = ksDef.getCf_defs();
-//            // CassandraCli.client.set_keyspace("KunderaTests");
-//            for (CfDef cfDef : cfDefss)
-//            {
-//
-//                if (cfDef.getName().equalsIgnoreCase("ADDRESS"))
-//                {
-//
-//                    CassandraCli.client.system_drop_column_family("ADDRESS");
-//
-//                }
-//            }
-//            CassandraCli.client.system_add_column_family(cfDef2);
-            if (CassandraCli.columnFamilyExist("HabitatUni1ToMFloat", "KunderaTests")) {
-                CassandraCli.client.system_drop_column_family("HabitatUni1ToMFloat");
-            } 
-            CassandraCli.client.system_add_column_family(cfDef2);
+            CassandraCli.client.execute_cql3_query(ByteBuffer.wrap("drop table \"HabitatUni1ToMFloat\"".getBytes("UTF-8")),
+                    Compression.NONE, ConsistencyLevel.ONE);
         }
-        catch (NotFoundException e)
+        catch (Exception ex)
         {
-            addKeyspace(ksDef, cfDefs);
-        }
-        CassandraCli.client.set_keyspace("KunderaTests");
 
+        }
+        CassandraCli
+                .executeCqlQuery(
+                        "create table \"HabitatUni1ToMFloat\" ( \"ADDRESS_ID\" float PRIMARY KEY,  \"STREET\" text, \"PERSON_ID\" int )",
+                        keyspaceName);
+        CassandraCli.executeCqlQuery("create index on \"HabitatUni1ToMFloat\" ( \"STREET\")", keyspaceName);
+        CassandraCli.executeCqlQuery("create index on \"HabitatUni1ToMFloat\" ( \"PERSON_ID\")", keyspaceName);
     }
 
     /*

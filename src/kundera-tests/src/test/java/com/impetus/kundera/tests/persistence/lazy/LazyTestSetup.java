@@ -61,11 +61,11 @@ public class LazyTestSetup
             }
             catch (IOException e)
             {
-                
+
             }
             catch (TException e)
             {
-                
+
             }
         }
 
@@ -119,27 +119,22 @@ public class LazyTestSetup
                     CassandraCli.initClient();
                     ksDef = CassandraCli.client.describe_keyspace(KEYSPACE);
                     CassandraCli.client.set_keyspace(KEYSPACE);
-//                    if (!CassandraCli.columnFamilyExist(COLUMN_FAMILY_PHOTOGRAPHER, KEYSPACE)) {
-//                        CassandraCli.client.system_add_column_family(cfDefPhotographer);
-//                    } else {
-//                        CassandraCli.truncateColumnFamily(KEYSPACE, COLUMN_FAMILY_PHOTOGRAPHER);
-//                    }
-//                    
-//                    if (!CassandraCli.columnFamilyExist(COLUMN_FAMILY_ALBUM, KEYSPACE)) {
-//                        CassandraCli.client.system_add_column_family(cfDefAlbum);
-//                    } else {
-//                        CassandraCli.truncateColumnFamily(KEYSPACE, COLUMN_FAMILY_ALBUM);
-//                    }
-                    
-                    if (!CassandraCli.columnFamilyExist(COLUMN_FAMILY_PHOTOGRAPHER,KEYSPACE)) {
+
+                    if (!CassandraCli.columnFamilyExist(COLUMN_FAMILY_PHOTOGRAPHER, KEYSPACE))
+                    {
                         CassandraCli.client.system_add_column_family(cfDefPhotographer);
-                    } else {
+                    }
+                    else
+                    {
                         CassandraCli.truncateColumnFamily(KEYSPACE, COLUMN_FAMILY_PHOTOGRAPHER);
                     }
-                    
-                    if (!CassandraCli.columnFamilyExist(COLUMN_FAMILY_ALBUM,KEYSPACE)) {
+
+                    if (!CassandraCli.columnFamilyExist(COLUMN_FAMILY_ALBUM, KEYSPACE))
+                    {
                         CassandraCli.client.system_add_column_family(cfDefAlbum);
-                    } else {
+                    }
+                    else
+                    {
                         CassandraCli.truncateColumnFamily(KEYSPACE, COLUMN_FAMILY_ALBUM);
                     }
 
@@ -162,9 +157,8 @@ public class LazyTestSetup
             }
             catch (TException e)
             {
-                
+
             }
-           
 
         }
 
@@ -174,8 +168,8 @@ public class LazyTestSetup
     {
         if (AUTO_MANAGE_SCHEMA)
         {
-           // CassandraCli.dropKeySpace(KEYSPACE);
-            CassandraCli.truncateColumnFamily(KEYSPACE,COLUMN_FAMILY_PHOTOGRAPHER,COLUMN_FAMILY_ALBUM);
+            // CassandraCli.dropKeySpace(KEYSPACE);
+            CassandraCli.truncateColumnFamily(KEYSPACE, COLUMN_FAMILY_PHOTOGRAPHER, COLUMN_FAMILY_ALBUM);
         }
 
     }

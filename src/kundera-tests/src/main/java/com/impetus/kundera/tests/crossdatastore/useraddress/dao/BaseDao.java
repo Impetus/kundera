@@ -23,6 +23,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
+import com.impetus.kundera.PersistenceProperties;
 
 public class BaseDao
 {
@@ -38,6 +39,7 @@ public class BaseDao
             if (propertyMap.isEmpty())
             {
                 propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
+                propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "");
             }
             Map mapOfExternalProperties = new HashMap<String, Map>();
             mapOfExternalProperties.put("addCassandra", propertyMap);

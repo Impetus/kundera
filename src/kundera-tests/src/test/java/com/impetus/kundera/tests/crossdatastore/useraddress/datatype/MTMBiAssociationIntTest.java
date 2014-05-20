@@ -1,18 +1,18 @@
 /*******************************************************************************
- * * Copyright 2012 Impetus Infotech.
- *  *
- *  * Licensed under the Apache License, Version 2.0 (the "License");
- *  * you may not use this file except in compliance with the License.
- *  * You may obtain a copy of the License at
- *  *
- *  *      http://www.apache.org/licenses/LICENSE-2.0
- *  *
- *  * Unless required by applicable law or agreed to in writing, software
- *  * distributed under the License is distributed on an "AS IS" BASIS,
- *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  * See the License for the specific language governing permissions and
- *  * limitations under the License.
- ******************************************************************************/
+* * Copyright 2012 Impetus Infotech.
+* *
+* * Licensed under the Apache License, Version 2.0 (the "License");
+* * you may not use this file except in compliance with the License.
+* * You may obtain a copy of the License at
+* *
+* * http://www.apache.org/licenses/LICENSE-2.0
+* *
+* * Unless required by applicable law or agreed to in writing, software
+* * distributed under the License is distributed on an "AS IS" BASIS,
+* * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* * See the License for the specific language governing permissions and
+* * limitations under the License.
+******************************************************************************/
 package com.impetus.kundera.tests.crossdatastore.useraddress.datatype;
 
 import java.nio.ByteBuffer;
@@ -24,12 +24,9 @@ import java.util.Set;
 
 import junit.framework.Assert;
 
-import org.apache.cassandra.thrift.CfDef;
-import org.apache.cassandra.thrift.ColumnDef;
-import org.apache.cassandra.thrift.IndexType;
+import org.apache.cassandra.thrift.Compression;
+import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.InvalidRequestException;
-import org.apache.cassandra.thrift.KsDef;
-import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
@@ -47,7 +44,7 @@ import com.impetus.kundera.tests.crossdatastore.useraddress.datatype.entities.Pe
 public class MTMBiAssociationIntTest extends TwinAssociation
 
 {
-    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "addCassandra", "addMongo", "oracle_kvstore",
+    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "addCassandra", "addMongo", 
             "addCouchdb" };
 
     private short addressID1 = Short.MAX_VALUE;
@@ -57,8 +54,8 @@ public class MTMBiAssociationIntTest extends TwinAssociation
     private short addressID3 = (short) 3;
 
     /**
-     * Inits the.
-     */
+* Inits the.
+*/
     @BeforeClass
     public static void init() throws Exception
     {
@@ -80,11 +77,11 @@ public class MTMBiAssociationIntTest extends TwinAssociation
     }
 
     /**
-     * Sets the up.
-     * 
-     * @throws Exception
-     *             the exception
-     */
+* Sets the up.
+*
+* @throws Exception
+* the exception
+*/
     @Before
     public void setUp() throws Exception
     {
@@ -202,11 +199,11 @@ public class MTMBiAssociationIntTest extends TwinAssociation
     }
 
     /**
-     * Tear down.
-     * 
-     * @throws Exception
-     *             the exception
-     */
+* Tear down.
+*
+* @throws Exception
+* the exception
+*/
     @After
     public void tearDown() throws Exception
     {
@@ -215,8 +212,8 @@ public class MTMBiAssociationIntTest extends TwinAssociation
     }
 
     /**
-     * @param person2
-     */
+* @param person2
+*/
     private void assertPerson2(PersonnelBiMToMInt person2)
     {
         Assert.assertNotNull(person2);
@@ -235,8 +232,8 @@ public class MTMBiAssociationIntTest extends TwinAssociation
     }
 
     /**
-     * @param person1
-     */
+* @param person1
+*/
     private void assertPerson1(PersonnelBiMToMInt person1)
     {
         Assert.assertNotNull(person1);
@@ -257,160 +254,74 @@ public class MTMBiAssociationIntTest extends TwinAssociation
     protected void loadDataForPERSONNEL() throws TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException
     {
+        String keyspaceName = "KunderaTests";
+        CassandraCli.createKeySpace(keyspaceName);
 
-        KsDef ksDef = null;
+        CassandraCli.client.set_keyspace(keyspaceName);
+        try
+        {
+            CassandraCli.client.execute_cql3_query(
+                    ByteBuffer.wrap("drop table \"PersonnelBiMToMInt\"".getBytes("UTF-8")), Compression.NONE,
+                    ConsistencyLevel.ONE);
+        }
+        catch (Exception ex)
+        {
 
-        CfDef cfDef = new CfDef();
-        cfDef.name = "PersonnelBiMToMInt";
-        cfDef.keyspace = "KunderaTests";
-        cfDef.setComparator_type("UTF8Type");
-        cfDef.setKey_validation_class("Int32Type");
-
-        ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("PERSON_NAME".getBytes()), "UTF8Type");
-        columnDef.index_type = IndexType.KEYS;
-        cfDef.addToColumn_metadata(columnDef);
-
-        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("ADDRESS_ID".getBytes()), "Int32Type");
-        columnDef1.index_type = IndexType.KEYS;
-        cfDef.addToColumn_metadata(columnDef1);
-
-        List<CfDef> cfDefs = new ArrayList<CfDef>();
-        cfDefs.add(cfDef);
+        }
+        CassandraCli
+                .executeCqlQuery(
+                        "create table \"PersonnelBiMToMInt\" ( \"PERSON_ID\" int PRIMARY KEY,  \"PERSON_NAME\" text, \"ADDRESS_ID\" text)",
+                        keyspaceName);
+        CassandraCli.executeCqlQuery("create index on \"PersonnelBiMToMInt\" ( \"PERSON_NAME\")", keyspaceName);
 
         try
         {
-            ksDef = CassandraCli.client.describe_keyspace("KunderaTests");
-            CassandraCli.client.set_keyspace("KunderaTests");
-
-            // List<CfDef> cfDefn = ksDef.getCf_defs();
-            //
-            // for (CfDef cfDef1 : cfDefn)
-            // {
-            //
-            // if (cfDef1.getName().equalsIgnoreCase("PERSONNEL"))
-            // {
-            //
-            // CassandraCli.client.system_drop_column_family("PERSONNEL");
-            //
-            // }
-            // }
-            // CassandraCli.client.system_add_column_family(cfDef);
-            // if (!CassandraCli.columnFamilyExist("PersonnelBiMToMInt",
-            // "KunderaTests")) {
-            // CassandraCli.client.system_add_column_family(cfDef);
-            // } else {
-            // CassandraCli.truncateColumnFamily("KunderaTests",
-            // "PersonnelBiMToMInt");
-            // }
-            if (CassandraCli.columnFamilyExist("PersonnelBiMToMInt", "KunderaTests"))
-            {
-                CassandraCli.client.system_drop_column_family("PersonnelBiMToMInt");
-
-            }
-            CassandraCli.client.system_add_column_family(cfDef);
-
+            CassandraCli.client.execute_cql3_query(
+                    ByteBuffer.wrap("drop table \"PersonnelBiMToMInt_HabitatBiMToMShort\"".getBytes("UTF-8")), Compression.NONE,
+                    ConsistencyLevel.ONE);
         }
-        catch (NotFoundException e)
+        catch (Exception ex)
         {
 
-            addKeyspace(ksDef, cfDefs);
         }
-
-        CassandraCli.client.set_keyspace("KunderaTests");
-
-        loadDataForPersonnelAddress();
-
+        CassandraCli
+                .executeCqlQuery(
+                        "create table \"PersonnelBiMToMInt_HabitatBiMToMShort\" ( \"PERSON_ID\" int,  \"key\" text PRIMARY KEY, \"ADDRESS_ID\" int)",
+                        keyspaceName);
+        CassandraCli.executeCqlQuery("create index on \"PersonnelBiMToMInt_HabitatBiMToMShort\" ( \"PERSON_ID\")", keyspaceName);
+        CassandraCli.executeCqlQuery("create index on \"PersonnelBiMToMInt_HabitatBiMToMShort\" ( \"ADDRESS_ID\")", keyspaceName);
     }
 
     @Override
     protected void loadDataForHABITAT() throws TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException
     {
-        KsDef ksDef = null;
-        CfDef cfDef2 = new CfDef();
-        cfDef2.name = "HabitatBiMToMShort";
-        cfDef2.keyspace = "KunderaTests";
-        cfDef2.setKey_validation_class("Int32Type");
-        cfDef2.setComparator_type("UTF8Type");
+        String keyspaceName = "KunderaTests";
+        CassandraCli.createKeySpace(keyspaceName);
 
-        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("STREET".getBytes()), "UTF8Type");
-        columnDef1.index_type = IndexType.KEYS;
-        cfDef2.addToColumn_metadata(columnDef1);
-
-        ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("PERSON_ID".getBytes()), "Int32Type");
-        columnDef2.index_type = IndexType.KEYS;
-        cfDef2.addToColumn_metadata(columnDef2);
-
-        List<CfDef> cfDefs = new ArrayList<CfDef>();
-        cfDefs.add(cfDef2);
-
+        CassandraCli.client.set_keyspace(keyspaceName);
         try
         {
-            ksDef = CassandraCli.client.describe_keyspace("KunderaTests");
-            CassandraCli.client.set_keyspace("KunderaTests");
-            // List<CfDef> cfDefss = ksDef.getCf_defs();
-            // // CassandraCli.client.set_keyspace("KunderaTests");
-            // for (CfDef cfDef : cfDefss)
-            // {
-            //
-            // if (cfDef.getName().equalsIgnoreCase("ADDRESS"))
-            // {
-            //
-            // CassandraCli.client.system_drop_column_family("ADDRESS");
-            //
-            // }
-            // }
-
-            // CassandraCli.client.system_add_column_family(cfDef2);
-            if (CassandraCli.columnFamilyExist("HabitatBiMToMShort", "KunderaTests"))
-            {
-                CassandraCli.client.system_drop_column_family("HabitatBiMToMShort");
-
-            }
-            CassandraCli.client.system_add_column_family(cfDef2);
+            CassandraCli.client.execute_cql3_query(ByteBuffer.wrap("drop table \"HabitatBiMToMShort\"".getBytes("UTF-8")),
+                    Compression.NONE, ConsistencyLevel.ONE);
         }
-        catch (NotFoundException e)
+        catch (Exception ex)
         {
-            addKeyspace(ksDef, cfDefs);
+
         }
-        CassandraCli.client.set_keyspace("KunderaTests");
-
+        CassandraCli.executeCqlQuery(
+                "create table \"HabitatBiMToMShort\" ( \"ADDRESS_ID\" int PRIMARY KEY,  \"STREET\" text)", keyspaceName);
+        CassandraCli.executeCqlQuery("create index on \"HabitatBiMToMShort\" ( \"STREET\")", keyspaceName);
     }
-
-    static void loadDataForPersonnelAddress()
-    {/*
-      * try { KsDef ksDef =
-      * CassandraCli.client.describe_keyspace("KunderaTests"); CfDef cfDef2 =
-      * new CfDef(); cfDef2.name = "PERSONNEL_ADDRESS"; cfDef2.keyspace =
-      * "KunderaTests"; cfDef2.setComparator_type("UTF8Type"); List<CfDef>
-      * cfDefss = ksDef.getCf_defs();
-      * CassandraCli.client.set_keyspace("KunderaTests"); for (CfDef cfDef :
-      * cfDefss) {
-      * 
-      * if (cfDef.getName().equalsIgnoreCase("PERSONNEL_ADDRESS")) {
-      * 
-      * CassandraCli.client.system_drop_column_family("PERSONNEL_ADDRESS");
-      * 
-      * } } CassandraCli.client.system_add_column_family(cfDef2); } catch
-      * (NotFoundException e) {
-      * 
-      * } catch (InvalidRequestException e) {
-      * 
-      * } catch (TException e) {
-      * 
-      * } catch (SchemaDisagreementException e) {
-      * 
-      * }
-      */
-    }
+    
 
     /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.tests.crossdatastore.useraddress.AssociationBase#
-     * createSchemaForPERSONNEL()
-     */
+* (non-Javadoc)
+*
+* @see
+* com.impetus.kundera.tests.crossdatastore.useraddress.AssociationBase#
+* createSchemaForPERSONNEL()
+*/
     @Override
     protected void createSchemaForPERSONNEL() throws SQLException
     {
@@ -438,12 +349,12 @@ public class MTMBiAssociationIntTest extends TwinAssociation
     }
 
     /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.tests.crossdatastore.useraddress.AssociationBase#
-     * createSchemaForHABITAT()
-     */
+* (non-Javadoc)
+*
+* @see
+* com.impetus.kundera.tests.crossdatastore.useraddress.AssociationBase#
+* createSchemaForHABITAT()
+*/
     @Override
     protected void createSchemaForHABITAT() throws SQLException
     {

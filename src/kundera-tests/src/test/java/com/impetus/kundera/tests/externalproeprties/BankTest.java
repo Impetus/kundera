@@ -29,7 +29,7 @@ public class BankTest
     /**
      * 
      */
-    private static final String _PU = "secIdxAddCassandra,addMongo,piccandra,picongo";
+    private static final String _PU = "rdbms,secIdxAddCassandra,addMongo,piccandra,picongo";
 
     private EntityManagerFactory emf;
 

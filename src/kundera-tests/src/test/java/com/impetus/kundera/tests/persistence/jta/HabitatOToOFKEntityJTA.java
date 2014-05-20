@@ -21,7 +21,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "ADDRESS", schema = "KunderaJTATests@addMongoJTA")
+@Table(name = "HabitatOToOFKEntityJTA", schema = "KunderaJTATests@addMongoJTA")
 public class HabitatOToOFKEntityJTA
 {
     @Id

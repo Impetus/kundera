@@ -74,7 +74,7 @@ public abstract class AssociationBase
 
     public static final boolean RUN_IN_EMBEDDED_MODE = true;
 
-    public static final boolean AUTO_MANAGE_SCHEMA = false;
+    public static final boolean AUTO_MANAGE_SCHEMA = true;
 
     protected Map propertyMap = new HashMap();
 
@@ -107,7 +107,7 @@ public abstract class AssociationBase
 
     private String persistenceUnits = "rdbms,addMongo,oracle_kvstore,addCassandra,piccandra,secIdxAddCassandra,picongo,redis,addCouchdb";
 
-    protected static final String[] ALL_PUs_UNDER_TEST = new String[] { "addMongo", "rdbms", "redis", "addCassandra",
+    protected static final String[] ALL_PUs_UNDER_TEST = new String[] { "addMongo" ,"rdbms", "redis", "addCassandra",
             "oracle_kvstore", "addCouchdb" /* , "addHbase" */};
 
     protected RDBMSCli cli;
@@ -130,6 +130,7 @@ public abstract class AssociationBase
             cli.createSchema(KEYSPACE);
             CassandraCli.cassandraSetUp();
             CassandraCli.createKeySpace("Pickr");
+            CassandraCli.createKeySpace(KEYSPACE);
 
             dao = new UserAddressDaoImpl(persistenceUnits);
 

@@ -15,9 +15,15 @@
  ******************************************************************************/
 package com.impetus.kundera.tests.crossdatastore.imdb.dao;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+
+import com.impetus.client.cassandra.common.CassandraConstants;
+import com.impetus.kundera.PersistenceProperties;
 
 public class BaseDao
 {
@@ -30,7 +36,18 @@ public class BaseDao
     {
         if (emf == null)
         {
-            emf = Persistence.createEntityManagerFactory(pu);
+            Map<String, String> propertyMap = new HashMap<String, String>();
+
+            if (propertyMap.isEmpty())
+            {
+                propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "");
+            }
+            Map mapOfExternalProperties = new HashMap<String, Map>();
+            mapOfExternalProperties.put("imdbCassandra", propertyMap);
+            mapOfExternalProperties.put("piccandra", propertyMap);
+            mapOfExternalProperties.put("secIdxAddCassandra", propertyMap);
+            
+            emf = Persistence.createEntityManagerFactory(pu, mapOfExternalProperties);
             em = emf.createEntityManager();
         }
 

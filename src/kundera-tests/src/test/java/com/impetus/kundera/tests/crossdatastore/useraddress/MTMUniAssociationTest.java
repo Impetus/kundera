@@ -26,6 +26,8 @@ import junit.framework.Assert;
 
 import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.ColumnDef;
+import org.apache.cassandra.thrift.Compression;
+import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.IndexType;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KsDef;
@@ -71,7 +73,7 @@ public class MTMUniAssociationTest extends TwinAssociation
     @Before
     public void setUp() throws Exception
     {
-        setUpInternal("ADDRESS", "PERSONNEL", "PERSONNEL_ADDRESS");
+        setUpInternal("HabitatUniMToM", "PersonnelUniMToM", "PERSONNEL_ADDRESS");
     }
 
     /**
@@ -323,136 +325,64 @@ public class MTMUniAssociationTest extends TwinAssociation
     protected void loadDataForPERSONNEL() throws TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException
     {
+        String keyspaceName = "KunderaTests";
+        CassandraCli.createKeySpace(keyspaceName);
 
-        KsDef ksDef = null;
+        CassandraCli.client.set_keyspace(keyspaceName);
+        try
+        {
+            CassandraCli.client.execute_cql3_query(
+                    ByteBuffer.wrap("drop table \"PersonnelUniMToM\"".getBytes("UTF-8")), Compression.NONE,
+                    ConsistencyLevel.ONE);
+        }
+        catch (Exception ex)
+        {
 
-        CfDef cfDef = new CfDef();
-        cfDef.name = "PERSONNEL";
-        cfDef.keyspace = "KunderaTests";
-        // cfDef.column_type = "Super";
-
-        cfDef.setComparator_type("UTF8Type");
-        cfDef.setDefault_validation_class("UTF8Type");
-        cfDef.setKey_validation_class("UTF8Type");
-        ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("PERSON_NAME".getBytes()), "UTF8Type");
-        columnDef.index_type = IndexType.KEYS;
-        cfDef.addToColumn_metadata(columnDef);
-
-        // ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("PERSON_ID"
-        // .getBytes()), "IntegerType");
-        // cfDef.addToColumn_metadata(columnDef2);
-
-        List<CfDef> cfDefs = new ArrayList<CfDef>();
-        cfDefs.add(cfDef);
+        }
+        CassandraCli
+                .executeCqlQuery(
+                        "create table \"PersonnelUniMToM\" ( \"PERSON_ID\" text PRIMARY KEY,  \"PERSON_NAME\" text, \"ADDRESS_ID\" text)",
+                        keyspaceName);
+        CassandraCli.executeCqlQuery("create index on \"PersonnelUniMToM\" ( \"PERSON_NAME\")", keyspaceName);
 
         try
         {
-            ksDef = CassandraCli.client.describe_keyspace("KunderaTests");
-            CassandraCli.client.set_keyspace("KunderaTests");
-            if (!CassandraCli.columnFamilyExist("PERSONNEL", "KunderaTests"))
-            {
-                CassandraCli.client.system_add_column_family(cfDef);
-            }
-            else
-            {
-                CassandraCli.truncateColumnFamily("KunderaTests", "PERSONNEL");
-            }
-
+            CassandraCli.client.execute_cql3_query(
+                    ByteBuffer.wrap("drop table \"PERSONNEL_ADDRESS\"".getBytes("UTF-8")), Compression.NONE,
+                    ConsistencyLevel.ONE);
         }
-        catch (NotFoundException e)
+        catch (Exception ex)
         {
-            addKeyspace(ksDef, cfDefs);
+
         }
-
-        CassandraCli.client.set_keyspace("KunderaTests");
-
-        loadDataForPersonnelAddress();
-
+        CassandraCli
+                .executeCqlQuery(
+                        "create table \"PERSONNEL_ADDRESS\" ( \"PERSON_ID\" text,  \"key\" text PRIMARY KEY, \"ADDRESS_ID\" text)",
+                        keyspaceName);
+        CassandraCli.executeCqlQuery("create index on \"PERSONNEL_ADDRESS\" ( \"PERSON_ID\")", keyspaceName);
+        CassandraCli.executeCqlQuery("create index on \"PERSONNEL_ADDRESS\" ( \"ADDRESS_ID\")", keyspaceName);
     }
 
     @Override
     protected void loadDataForHABITAT() throws TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException
     {
-        KsDef ksDef = null;
-        CfDef cfDef2 = new CfDef();
-        cfDef2.name = "ADDRESS";
-        cfDef2.keyspace = "KunderaTests";
-        cfDef2.setKey_validation_class("UTF8Type");
-        cfDef2.setComparator_type("UTF8Type");
-        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("STREET".getBytes()), "UTF8Type");
-        columnDef1.index_type = IndexType.KEYS;
-        cfDef2.addToColumn_metadata(columnDef1);
+        String keyspaceName = "KunderaTests";
+        CassandraCli.createKeySpace(keyspaceName);
 
-        List<CfDef> cfDefs = new ArrayList<CfDef>();
-        cfDefs.add(cfDef2);
-
+        CassandraCli.client.set_keyspace(keyspaceName);
         try
         {
-            ksDef = CassandraCli.client.describe_keyspace("KunderaTests");
-            CassandraCli.client.set_keyspace("KunderaTests");
-            if (!CassandraCli.columnFamilyExist("ADDRESS", "KunderaTests"))
-            {
-                CassandraCli.client.system_add_column_family(cfDef2);
-            }
-            else
-            {
-                CassandraCli.truncateColumnFamily("KunderaTests", "ADDRESS");
-            }
-
+            CassandraCli.client.execute_cql3_query(ByteBuffer.wrap("drop table \"HabitatUniMToM\"".getBytes("UTF-8")),
+                    Compression.NONE, ConsistencyLevel.ONE);
         }
-        catch (NotFoundException e)
-        {
-
-            addKeyspace(ksDef, cfDefs);
-
-        }
-        CassandraCli.client.set_keyspace("KunderaTests");
-    }
-
-    static void loadDataForPersonnelAddress()
-    {
-        try
-        {
-            KsDef ksDef = CassandraCli.client.describe_keyspace("KunderaTests");
-            CfDef cfDef2 = new CfDef();
-            cfDef2.name = "PERSONNEL_ADDRESS";
-            cfDef2.keyspace = "KunderaTests";
-            cfDef2.setKey_validation_class("UTF8Type");
-            ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("PERSON_ID".getBytes()), "UTF8Type");
-            columnDef1.index_type = IndexType.KEYS;
-            cfDef2.addToColumn_metadata(columnDef1);
-
-            ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("ADDRESS_ID".getBytes()), "UTF8Type");
-            columnDef2.index_type = IndexType.KEYS;
-            cfDef2.addToColumn_metadata(columnDef2);
-
-            // List<CfDef> cfDefss = ksDef.getCf_defs();
-            CassandraCli.client.set_keyspace("KunderaTests");
-
-            if (!CassandraCli.columnFamilyExist("PERSONNEL_ADDRESS", "KunderaTests"))
-            {
-                CassandraCli.client.system_add_column_family(cfDef2);
-            }
-            else
-            {
-                CassandraCli.truncateColumnFamily("KunderaTests", "PERSONNEL_ADDRESS");
-            }
-
-        }
-        catch (NotFoundException e)
+        catch (Exception ex)
         {
 
         }
-        catch (InvalidRequestException e)
-        {
-
-        }
-        catch (TException e)
-        {
-
-        }
-
+        CassandraCli.executeCqlQuery(
+                "create table \"HabitatUniMToM\" ( \"ADDRESS_ID\" text PRIMARY KEY,  \"STREET\" text)", keyspaceName);
+        CassandraCli.executeCqlQuery("create index on \"HabitatUniMToM\" ( \"STREET\")", keyspaceName);
     }
 
     /*
@@ -467,14 +397,14 @@ public class MTMUniAssociationTest extends TwinAssociation
     {
         try
         {
-            // cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL (PERSON_ID VARCHAR(150) PRIMARY KEY, PERSON_NAME VARCHAR(256))");
-            cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL (PERSON_ID VARCHAR(150) PRIMARY KEY, PERSON_NAME VARCHAR(150), ADDRESS_ID VARCHAR(150))");
+            // cli.update("CREATE TABLE KUNDERATESTS.PersonnelUniMToM (PERSON_ID VARCHAR(150) PRIMARY KEY, PERSON_NAME VARCHAR(256))");
+            cli.update("CREATE TABLE KUNDERATESTS.PersonnelUniMToM (PERSON_ID VARCHAR(150) PRIMARY KEY, PERSON_NAME VARCHAR(150), ADDRESS_ID VARCHAR(150))");
         }
         catch (Exception e)
         {
-            cli.update("DELETE FROM KUNDERATESTS.PERSONNEL");
-            // cli.update("DROP TABLE KUNDERATESTS.PERSONNEL");
-            // cli.update("CREATE TABLE KUNDERATESTS.PERSONNEL (PERSON_ID VARCHAR(150) PRIMARY KEY, PERSON_NAME VARCHAR(256))");
+            cli.update("DELETE FROM KUNDERATESTS.PersonnelUniMToM");
+            // cli.update("DROP TABLE KUNDERATESTS.PersonnelUniMToM");
+            // cli.update("CREATE TABLE KUNDERATESTS.PersonnelUniMToM (PERSON_ID VARCHAR(150) PRIMARY KEY, PERSON_NAME VARCHAR(256))");
         }
         try
         {
@@ -500,14 +430,14 @@ public class MTMUniAssociationTest extends TwinAssociation
     {
         try
         {
-            // cli.update("CREATE TABLE KUNDERATESTS.ADDRESS (ADDRESS_ID VARCHAR(150) PRIMARY KEY, STREET VARCHAR(256))");
-            cli.update("CREATE TABLE KUNDERATESTS.ADDRESS (ADDRESS_ID VARCHAR(150) PRIMARY KEY, STREET VARCHAR(256),PERSON_ID VARCHAR(150))");
+            // cli.update("CREATE TABLE KUNDERATESTS.HabitatUniMToM (ADDRESS_ID VARCHAR(150) PRIMARY KEY, STREET VARCHAR(256))");
+            cli.update("CREATE TABLE KUNDERATESTS.HabitatUniMToM (ADDRESS_ID VARCHAR(150) PRIMARY KEY, STREET VARCHAR(256),PERSON_ID VARCHAR(150))");
         }
         catch (Exception e)
         {
-            cli.update("DELETE FROM KUNDERATESTS.ADDRESS");
-            // cli.update("DROP TABLE KUNDERATESTS.ADDRESS");
-            // cli.update("CREATE TABLE KUNDERATESTS.ADDRESS (ADDRESS_ID VARCHAR(150) PRIMARY KEY, STREET VARCHAR(256))");
+            cli.update("DELETE FROM KUNDERATESTS.HabitatUniMToM");
+            // cli.update("DROP TABLE KUNDERATESTS.HabitatUniMToM");
+            // cli.update("CREATE TABLE KUNDERATESTS.HabitatUniMToM (ADDRESS_ID VARCHAR(150) PRIMARY KEY, STREET VARCHAR(256))");
         }
     }
 

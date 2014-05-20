@@ -15,6 +15,9 @@
  ******************************************************************************/
 package com.impetus.kundera.tests.persistence.lazy;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -28,6 +31,7 @@ import org.junit.Test;
 
 import com.impetus.kundera.KunderaPersistence;
 import com.impetus.kundera.KunderaPersistenceProviderUtil;
+import com.impetus.kundera.PersistenceProperties;
 
 /**
  * @author amresh.singh Test case for {@link KunderaPersistenceProviderUtil}
@@ -66,8 +70,18 @@ public class KunderaPersistenceProviderUtilTest
         setup.startServer();
         setup.createSchema();
 
+        Map<String, String> propertyMap = new HashMap<String, String>();
+        if (propertyMap.isEmpty())
+        {
+            propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "");
+        }
+        Map mapOfExternalProperties = new HashMap<String, Map>();
+        mapOfExternalProperties.put("addCassandra", propertyMap);
+        mapOfExternalProperties.put("piccandra", propertyMap);
+        mapOfExternalProperties.put("secIdxAddCassandra", propertyMap);
+        
         emf = Persistence
-                .createEntityManagerFactory("rdbms,addMongo,addCassandra,piccandra,secIdxAddCassandra,picongo");
+                .createEntityManagerFactory("rdbms,addMongo,addCassandra,piccandra,secIdxAddCassandra,picongo", mapOfExternalProperties);
         em = emf.createEntityManager();
     }
 

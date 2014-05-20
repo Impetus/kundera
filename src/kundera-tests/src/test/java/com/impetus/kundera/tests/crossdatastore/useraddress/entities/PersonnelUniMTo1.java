@@ -28,7 +28,7 @@ import com.impetus.kundera.index.Index;
 import com.impetus.kundera.index.IndexCollection;
 
 @Entity
-@Table(name = "PERSONNEL", schema = "KunderaTests")
+@Table(name = "PersonnelUniMTo1", schema = "KunderaTests")
 @IndexCollection(columns = { @Index(name = "personName") })
 public class PersonnelUniMTo1
 {

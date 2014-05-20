@@ -1,0 +1,343 @@
+# Uni OTO
+
+plan remove-table -name PersonnelUni1To1FK -wait
+plan remove-table -name HabitatUni1To1FK -wait
+
+table create -name PersonnelUni1To1FK
+add-field -type string -name PERSON_ID
+add-field -type string -name PERSON_NAME
+add-field -type string -name ADDRESS_ID
+primary-key -field PERSON_ID
+exit
+plan add-table -name PersonnelUni1To1FK -wait
+plan add-index -name PERSON_NAME -table PersonnelUni1To1FK -field PERSON_NAME -wait
+
+table create -name HabitatUni1To1FK
+add-field -type string -name ADDRESS_ID
+add-field -type string -name STREET
+primary-key -field ADDRESS_ID
+exit
+plan add-table -name HabitatUni1To1FK -wait
+plan add-index -name STREET -table HabitatUni1To1FK -field STREET -wait
+
+# Bi OTO
+
+plan remove-table -name PersonnelBi1To1FK -wait
+plan remove-table -name HabitatBi1To1FK -wait
+
+table create -name PersonnelBi1To1FK
+add-field -type string -name PERSON_ID
+add-field -type string -name PERSON_NAME
+add-field -type string -name ADDRESS_ID
+primary-key -field PERSON_ID
+exit
+plan add-table -name PersonnelBi1To1FK -wait
+plan add-index -name PERSON_NAME -table PersonnelBi1To1FK -field PERSON_NAME -wait
+
+table create -name HabitatBi1To1FK
+add-field -type string -name ADDRESS_ID
+add-field -type string -name STREET
+primary-key -field ADDRESS_ID
+exit
+plan add-table -name HabitatBi1To1FK -wait
+plan add-index -name STREET -table HabitatBi1To1FK -field STREET -wait
+
+
+# Bi OTM
+
+plan remove-table -name PersonnelBi1ToM -wait
+plan remove-table -name HabitatBi1ToM -wait
+
+table create -name PersonnelBi1ToM
+add-field -type string -name PERSON_ID
+add-field -type string -name PERSON_NAME
+primary-key -field PERSON_ID
+exit
+plan add-table -name PersonnelBi1ToM -wait
+
+plan add-index -name PERSON_NAME -table PersonnelBi1ToM -field PERSON_NAME -wait
+
+table create -name HabitatBi1ToM
+add-field -type string -name ADDRESS_ID
+add-field -type string -name PERSON_ID
+add-field -type string -name STREET
+primary-key -field ADDRESS_ID
+exit
+plan add-table -name HabitatBi1ToM -wait
+
+plan add-index -name STREET -table HabitatBi1ToM -field STREET -wait
+plan add-index -name PERSON_ID -table HabitatBi1ToM -field PERSON_ID -wait
+
+# Uni OTM
+
+plan remove-table -name PersonnelUni1ToM -wait
+plan remove-table -name HabitatUni1ToM -wait
+
+table create -name PersonnelUni1ToM
+add-field -type string -name PERSON_ID
+add-field -type string -name PERSON_NAME
+primary-key -field PERSON_ID
+exit
+plan add-table -name PersonnelUni1ToM -wait
+
+plan add-index -name PERSON_NAME -table PersonnelUni1ToM -field PERSON_NAME -wait
+
+table create -name HabitatUni1ToM
+add-field -type string -name ADDRESS_ID
+add-field -type string -name PERSON_ID
+add-field -type string -name STREET
+primary-key -field ADDRESS_ID
+exit
+plan add-table -name HabitatUni1ToM -wait
+
+plan add-index -name STREET -table HabitatUni1ToM -field STREET -wait
+plan add-index -name PERSON_ID -table HabitatUni1ToM -field PERSON_ID -wait
+
+
+# Bi MTO
+
+plan remove-table -name PersonnelBiMTo1 -wait
+plan remove-table -name HabitatBiMTo1 -wait
+
+table create -name PersonnelBiMTo1
+add-field -type string -name PERSON_ID
+add-field -type string -name PERSON_NAME
+add-field -type string -name ADDRESS_ID
+primary-key -field PERSON_ID
+exit
+plan add-table -name PersonnelBiMTo1 -wait
+
+plan add-index -name PERSON_NAME -table PersonnelBiMTo1 -field PERSON_NAME -wait
+plan add-index -name ADDRESS_ID -table PersonnelBiMTo1 -field ADDRESS_ID -wait
+
+table create -name HabitatBiMTo1
+add-field -type string -name ADDRESS_ID
+add-field -type string -name STREET
+primary-key -field ADDRESS_ID
+exit
+plan add-table -name HabitatBiMTo1 -wait
+
+plan add-index -name STREET -table HabitatBiMTo1 -field STREET -wait
+
+# Uni MTO
+
+plan remove-table -name PersonnelUniMTo1 -wait
+plan remove-table -name HabitatUniMTo1 -wait
+
+table create -name PersonnelUniMTo1
+add-field -type string -name PERSON_ID
+add-field -type string -name PERSON_NAME
+add-field -type string -name ADDRESS_ID
+primary-key -field PERSON_ID
+exit
+plan add-table -name PersonnelUniMTo1 -wait
+
+plan add-index -name PERSON_NAME -table PersonnelUniMTo1 -field PERSON_NAME -wait
+plan add-index -name ADDRESS_ID -table PersonnelUniMTo1 -field ADDRESS_ID -wait
+
+table create -name HabitatUniMTo1
+add-field -type string -name ADDRESS_ID
+add-field -type string -name STREET
+primary-key -field ADDRESS_ID
+exit
+plan add-table -name HabitatUniMTo1 -wait
+
+plan add-index -name STREET -table HabitatUniMTo1 -field STREET -wait
+
+# Uni MTM
+
+plan remove-table -name PersonnelUniMToM -wait
+plan remove-table -name HabitatUniMToM -wait
+plan remove-table -name PERSONNEL_ADDRESS -wait
+
+table create -name PersonnelUniMToM
+add-field -type string -name PERSON_ID
+add-field -type string -name PERSON_NAME
+primary-key -field PERSON_ID
+exit
+plan add-table -name PersonnelUniMToM -wait
+
+plan add-index -name PERSON_NAME -table PersonnelUniMToM -field PERSON_NAME -wait
+plan add-index -name ADDRESS_ID -table PersonnelUniMToM -field ADDRESS_ID -wait
+
+table create -name HabitatUniMToM
+add-field -type string -name ADDRESS_ID
+add-field -type string -name STREET
+primary-key -field ADDRESS_ID
+exit
+plan add-table -name HabitatUniMToM -wait
+
+plan add-index -name STREET -table HabitatUniMToM -field STREET -wait
+
+table create -name PERSONNEL_ADDRESS
+add-field -type string -name ADDRESS_ID
+add-field -type string -name PERSON_ID
+add-field -type string -name PERSON_ID_ADDRESS_ID
+primary-key -field PERSON_ID_ADDRESS_ID
+exit
+plan add-table -name PERSONNEL_ADDRESS -wait
+
+plan add-index -name ADDRESS_ID -table PERSONNEL_ADDRESS -field ADDRESS_ID -wait
+plan add-index -name PERSON_ID -table PERSONNEL_ADDRESS -field PERSON_ID -wait
+
+# Bi MTM
+
+plan remove-table -name PersonnelBiMToM -wait
+plan remove-table -name HabitatBiMToM -wait
+
+table create -name PersonnelBiMToM
+add-field -type string -name PERSON_ID
+add-field -type string -name PERSON_NAME
+primary-key -field PERSON_ID
+exit
+plan add-table -name PersonnelBiMToM -wait
+
+plan add-index -name PERSON_NAME -table PersonnelBiMToM -field PERSON_NAME -wait
+plan add-index -name ADDRESS_ID -table PersonnelBiMToM -field ADDRESS_ID -wait
+
+table create -name HabitatBiMToM
+add-field -type string -name ADDRESS_ID
+add-field -type string -name STREET
+primary-key -field ADDRESS_ID
+exit
+plan add-table -name HabitatBiMToM -wait
+
+plan add-index -name STREET -table HabitatBiMToM -field STREET -wait
+
+
+plan remove-table -name HabitatBiMTo1Char -wait
+plan remove-table -name PersonnelBiMTo1Int -wait
+
+table create -name HabitatBiMTo1Char
+add-field -type string -name ADDRESS_ID
+add-field -type string -name STREET
+primary-key -field ADDRESS_ID
+exit
+plan add-table -name HabitatBiMTo1Char -wait
+
+table create -name PersonnelBiMTo1Int
+add-field -type string -name PERSON_NAME
+add-field -type integer -name PERSON_ID
+add-field -type string -name ADDRESS_ID
+primary-key -field PERSON_ID
+exit
+plan add-table -name PersonnelBiMTo1Int -wait
+
+plan add-index -name STREET -table HabitatBiMTo1Char -field STREET -wait
+plan add-index -name PERSON_NAME -table PersonnelBiMTo1Int -field PERSON_NAME -wait
+plan add-index -name ADDRESS_ID -table PersonnelBiMTo1Int -field ADDRESS_ID -wait
+
+
+plan remove-table -name HabitatUniMTo1Long -wait
+plan remove-table -name PersonnelUniMTo1Int -wait
+
+table create -name HabitatUniMTo1Long
+add-field -type long -name ADDRESS_ID
+add-field -type string -name STREET
+primary-key -field ADDRESS_ID
+exit
+plan add-table -name HabitatUniMTo1Long -wait
+
+
+table create -name PersonnelUniMTo1Int
+add-field -type string -name PERSON_NAME
+add-field -type integer -name PERSON_ID
+add-field -type long -name ADDRESS_ID
+primary-key -field PERSON_ID
+exit
+plan add-table -name PersonnelUniMTo1Int -wait
+
+plan add-index -name STREET -table HabitatUniMTo1Long -field STREET -wait
+plan add-index -name PERSON_NAME -table PersonnelUniMTo1Int -field PERSON_NAME -wait
+plan add-index -name ADDRESS_ID -table PersonnelUniMTo1Int -field ADDRESS_ID -wait
+
+
+plan remove-table -name PersonnelBi1ToMInt -wait
+plan remove-table -name HabitatBi1ToMDouble -wait
+
+table create -name HabitatBi1ToMDouble
+add-field -type double -name ADDRESS_ID
+add-field -type string -name STREET
+add-field -type integer -name PERSON_ID
+primary-key -field ADDRESS_ID
+exit
+plan add-table -name HabitatBi1ToMDouble -wait
+
+table create -name PersonnelBi1ToMInt
+add-field -type string -name PERSON_NAME
+add-field -type integer -name PERSON_ID
+primary-key -field PERSON_ID
+exit
+plan add-table -name PersonnelBi1ToMInt -wait
+
+
+plan add-index -name STREET -table HabitatBi1ToMDouble -field STREET -wait
+plan add-index -name PERSON_NAME -table PersonnelBi1ToMInt -field PERSON_NAME -wait
+plan add-index -name PERSON_ID -table HabitatBi1ToMDouble -field PERSON_ID -wait
+
+
+
+plan remove-table -name PersonnelUni1ToMInt -wait
+plan remove-table -name HabitatUni1ToMFloat -wait
+
+table create -name HabitatUni1ToMFloat
+add-field -type float -name ADDRESS_ID
+add-field -type string -name STREET
+add-field -type integer -name PERSON_ID
+primary-key -field ADDRESS_ID
+exit
+plan add-table -name HabitatUni1ToMFloat -wait
+
+table create -name PersonnelUni1ToMInt
+add-field -type string -name PERSON_NAME
+add-field -type integer -name PERSON_ID
+primary-key -field PERSON_ID
+exit
+plan add-table -name PersonnelUni1ToMInt -wait
+
+
+plan add-index -name STREET -table HabitatUni1ToMFloat -field STREET -wait
+plan add-index -name PERSON_NAME -table PersonnelUni1ToMInt -field PERSON_NAME -wait
+plan add-index -name PERSON_ID -table HabitatUni1ToMFloat -field PERSON_ID -wait
+
+
+plan remove-table -name PersonnelUni1To1FKInt -wait
+plan remove-table -name HabitatUni1To1FKInteger -wait
+
+
+table create -name PersonnelUni1To1FKInt
+add-field -type string -name PERSON_NAME
+add-field -type integer -name PERSON_ID
+add-field -type integer -name ADDRESS_ID
+primary-key -field PERSON_ID
+exit
+plan add-table -name PersonnelUni1To1FKInt -wait
+
+table create -name HabitatUni1To1FKInteger
+add-field -type integer -name ADDRESS_ID
+add-field -type string -name STREET
+primary-key -field ADDRESS_ID
+exit
+plan add-table -name HabitatUni1To1FKInteger -wait
+
+plan add-index -name STREET -table HabitatUni1To1FKInteger -field STREET -wait
+plan add-index -name PERSON_NAME -table PersonnelUni1To1FKInt -field PERSON_NAME -wait
+plan add-index -name ADDRESS_ID -table PersonnelUni1To1FKInt -field ADDRESS_ID -wait
+
+table create -name OraclePersonnelOTOFKEntityJTA
+add-field -type string -name PERSON_NAME
+add-field -type string -name PERSON_ID
+add-field -type string -name ADDRESS_ID
+primary-key -field PERSON_ID
+exit
+plan add-table -name OraclePersonnelOTOFKEntityJTA -wait
+plan add-index -name ADDRESS_ID -table OraclePersonnelOTOFKEntityJTA -field ADDRESS_ID -wait
+
+
+
+table create -name HabitatOToOFKEntityJTA
+add-field -type string -name ADDRESS_ID
+add-field -type string -name STREET
+primary-key -field ADDRESS_ID
+exit
+plan add-table -name HabitatOToOFKEntityJTA -wait

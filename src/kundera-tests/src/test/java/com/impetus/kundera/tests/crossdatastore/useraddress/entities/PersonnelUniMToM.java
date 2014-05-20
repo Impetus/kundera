@@ -31,49 +31,42 @@ import com.impetus.kundera.index.Index;
 import com.impetus.kundera.index.IndexCollection;
 
 @Entity
-@Table(name = "PERSONNEL", schema = "KunderaTests")
+@Table(name = "PersonnelUniMToM", schema = "KunderaTests")
 @IndexCollection(columns = { @Index(name = "personName") })
-public class PersonnelUniMToM
-{
-    @Id
-    @Column(name = "PERSON_ID")
-    private String personId;
+public class PersonnelUniMToM {
+	@Id
+	@Column(name = "PERSON_ID")
+	private String personId;
 
-    @Column(name = "PERSON_NAME")
-    private String personName;
+	@Column(name = "PERSON_NAME")
+	private String personName;
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinTable(name = "PERSONNEL_ADDRESS", schema = "KunderaTests", joinColumns = { @JoinColumn(name = "PERSON_ID") }, inverseJoinColumns = { @JoinColumn(name = "ADDRESS_ID") })
-    private Set<HabitatUniMToM> addresses;
+	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JoinTable(name = "PERSONNEL_ADDRESS", schema = "KunderaTests", joinColumns = { @JoinColumn(name = "PERSON_ID") }, inverseJoinColumns = { @JoinColumn(name = "ADDRESS_ID") })
+	private Set<HabitatUniMToM> addresses;
 
-    public String getPersonId()
-    {
-        return personId;
-    }
+	public String getPersonId() {
+		return personId;
+	}
 
-    public String getPersonName()
-    {
-        return personName;
-    }
+	public String getPersonName() {
+		return personName;
+	}
 
-    public void setPersonName(String personName)
-    {
-        this.personName = personName;
-    }
+	public void setPersonName(String personName) {
+		this.personName = personName;
+	}
 
-    public void setPersonId(String personId)
-    {
-        this.personId = personId;
-    }
+	public void setPersonId(String personId) {
+		this.personId = personId;
+	}
 
-    public Set<HabitatUniMToM> getAddresses()
-    {
-        return addresses;
-    }
+	public Set<HabitatUniMToM> getAddresses() {
+		return addresses;
+	}
 
-    public void setAddresses(Set<HabitatUniMToM> addresses)
-    {
-        this.addresses = addresses;
-    }
+	public void setAddresses(Set<HabitatUniMToM> addresses) {
+		this.addresses = addresses;
+	}
 
 }
