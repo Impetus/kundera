@@ -59,6 +59,13 @@ Recent Releases
 ================================
 ####Please Note: trunk is current development branch. kundera-2.9 is released tag.
 
+#### 21-May-2014 - Kundera 2.12 released
+This release includes [bug fixes] (https://github.com/impetus-opensource/Kundera/wiki/Bug-Fixes), additional  improvements and the following new features compared to version 2.11:
+
+* Support added for Oracle-KV 3.0.5
+* Support  for JPA-2.1 enabled
+
+
 #### 24-March-2014 - Kundera 2.11 released
 This release includes [bug fixes] (https://github.com/impetus-opensource/Kundera/wiki/Bug-Fixes), performance improvements and the following new features compared to version 2.10:
 
