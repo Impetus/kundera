@@ -133,61 +133,6 @@ public class JAXBUtils {
 		}
 	}
 
-	public static String getSchema(Class<?> objectClass, String mediaType) {
-		try {
 
-			if (mediaType == MediaType.APPLICATION_JSON) {
-
-				final ObjectMapper objectMapper = new ObjectMapper();
-				JsonSchema jsonSchema = objectMapper
-						.generateJsonSchema(objectClass);
-
-				return jsonSchema.toString();
-
-			} else if (mediaType == MediaType.APPLICATION_XML) {
-				JAXBContext jc = JAXBContext.newInstance(objectClass);
-				// generate the schemas
-				final List<ByteArrayOutputStream> schemaStreams = new ArrayList<ByteArrayOutputStream>();
-				jc.generateSchema(new SchemaOutputResolver() {
-					@Override
-					public Result createOutput(String namespaceUri,
-							String suggestedFileName) throws IOException {
-						ByteArrayOutputStream out = new ByteArrayOutputStream();
-						schemaStreams.add(out);
-						StreamResult streamResult = new StreamResult(out);
-						streamResult.setSystemId("");
-						return streamResult;
-					}
-				});
-
-				// convert to a list of string
-				List<String> schemas = new ArrayList<String>();
-				for (ByteArrayOutputStream os : schemaStreams) {
-					schemas.add(os.toString());
-
-				}
-
-				return schemaStreams.get(0).toString();
-
-			}
-
-		} catch (JAXBException e) {
-			log.error("Error during translation, Caused by:" + e.getMessage()
-					+ ", returning null");
-			return null;
-		} catch (IOException e) {
-			log.error("Error during translation, Caused by:" + e.getMessage()
-					+ ", returning null");
-		}
-		return null;
-	}
-
-	public byte[] decode(String s) throws DecoderException {
-		return Hex.decodeHex(s.toCharArray());
-	}
-
-	public String encode(byte[] b) {
-		return Hex.encodeHex(b).toString();
-	}
 
 }
