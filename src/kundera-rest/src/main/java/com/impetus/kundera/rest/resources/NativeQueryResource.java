@@ -15,14 +15,13 @@
  */
 package com.impetus.kundera.rest.resources;
 
+import java.net.URLDecoder;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
@@ -46,228 +45,138 @@ import com.impetus.kundera.rest.repository.EMRepository;
  */
 
 @Path("/" + Constants.KUNDERA_API_PATH + Constants.NATIVE_QUERY_RESOURCE_PATH)
-public class NativeQueryResource
-{
-    private static Logger log = LoggerFactory.getLogger(NativeQueryResource.class);
+public class NativeQueryResource {
+	private static Logger log = LoggerFactory
+			.getLogger(NativeQueryResource.class);
 
-    /************** Native Queries **************************/
+	/************** Native Queries **************************/
 
-    /**
-     * Handler for POST method requests for this resource Retrieves records from
-     * datasource for a given Native query
-     * 
-     * @return
-     */
+	/**
+	 * Handler for POST method requests for this resource Retrieves records from
+	 * datasource for a given Native query
+	 * 
+	 * @return
+	 */
 
-    @POST
-    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    @Path("/{entityClassName}/q={nativeQuery}")
-    public Response executeInsertNativeQuery(@Context HttpHeaders headers, @Context UriInfo info)
-    {
-        return executeNativeQuery(headers, info);
-    }
+	/************** Named Native Queries **************************/
 
-    /**
-     * Handler for GET method requests for this resource Retrieves records from
-     * datasource for a given Native query
-     * 
-     * @return
-     */
+	/**
+	 * Executes Native Query and returns resposne
+	 * 
+	 * @param headers
+	 * @param info
+	 * @return
+	 */
+	@POST
+	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+	@Path("/{entityClassName}")
+	public Response executeNativeQuery(@Context HttpHeaders headers,
+			@Context UriInfo info, String query) {
 
-    @GET
-    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    @Path("/{entityClassName}/q={nativeQuery}")
-    public Response executeSelectNativeQuery(@Context HttpHeaders headers, @Context UriInfo info)
-    {
-        return executeNativeQuery(headers, info);
-    }
+		String sessionToken = headers.getRequestHeader(
+				Constants.SESSION_TOKEN_HEADER_NAME).get(0);
 
-    /**
-     * Handler for PUT method requests for this resource Retrieves records from
-     * datasource for a given Native query
-     * 
-     * @return
-     */
+		String mediaType = headers.getRequestHeader("Content-type").get(0);
+		String entityClassName = info.getPathParameters().getFirst(
+				"entityClassName");
+		if (log.isDebugEnabled())
+			log.debug("GET:: Session Token:" + sessionToken
+					+ ", Entity Class Name:" + entityClassName
+					+ ", Native Query:" + query + ", Media Type:" + mediaType);
 
-    @PUT
-    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    @Path("/{entityClassName}/q={nativeQuery}")
-    public Response executeUpdateNativeQuery(@Context HttpHeaders headers, @Context UriInfo info)
-    {
-        return executeNativeQuery(headers, info);
-    }
+		List result = null;
+		Class<?> entityClass = null;
+		Query q;
 
-    /**
-     * Handler for DELETE method requests for this resource Retrieves records
-     * from datasource for a given Native query
-     * 
-     * @return
-     */
+		try {
+			query = URLDecoder.decode(query, "UTF-8");
+			sessionToken = sessionToken.replaceAll("^\"|\"$", "");
+			EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
 
-    @DELETE
-    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    @Path("/{entityClassName}/q={nativeQuery}")
-    public Response executeDeleteNativeQuery(@Context HttpHeaders headers, @Context UriInfo info)
-    {
-        return executeNativeQuery(headers, info);
-    }
+			entityClass = EntityUtils.getEntityClass(entityClassName, em);
+			if (log.isDebugEnabled())
+				log.debug("GET: entityClass" + entityClass);
+			if (entityClass == null) {
+				return Response.serverError().build();
+			}
 
-    /************** Named Native Queries **************************/
+			q = em.createNativeQuery(query, entityClass);
+			result = q.getResultList();
+		} catch (Exception e) {
+			log.error(e.getMessage());
+			return Response.serverError().build();
+		}
 
-    /**
-     * Handler for POST method requests for this resource Retrieves all entities
-     * for the given named native query
-     * 
-     * @return
-     */
+		if (result == null) {
+			return Response.noContent().build();
+		}
 
-    @POST
-    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    @Path("/{entityClass}/{namedNativeQueryName}")
-    public Response executeInsertNamedNativeQuery(@Context HttpHeaders headers, @Context UriInfo info)
-    {
-        return executeNamedNativeQuery(headers, info);
-    }
+		if (log.isDebugEnabled())
+			log.debug("GET: Media Type:" + mediaType);
 
-    /**
-     * Handler for GET method requests for this resource Retrieves all entities
-     * for the given named native query
-     */
-    @GET
-    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    @Path("/{entityClass}/{namedNativeQueryName}")
-    public Response executeSelectNamedNativeQuery(@Context HttpHeaders headers, @Context UriInfo info)
-    {
-        return executeNamedNativeQuery(headers, info);
-    }
+		String output = CollectionConverter.toString(result, entityClass,
+				mediaType);
 
-    /**
-     * Handler for PUT method requests for this resource Retrieves all entities
-     * for the given named native query
-     */
-    @PUT
-    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    @Path("/{entityClass}/{namedNativeQueryName}")
-    public Response executeUpdateNamedNativeQuery(@Context HttpHeaders headers, @Context UriInfo info)
-    {
-        return executeNamedNativeQuery(headers, info);
-    }
+		return Response.ok(output, mediaType).build();
+	}
 
-    /**
-     * Handler for DELETE method requests for this resource Retrieves all
-     * entities for the given named native query
-     */
-    @DELETE
-    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    @Path("/{entityClass}/{namedNativeQueryName}")
-    public Response executeDeleteNamedNativeQuery(@Context HttpHeaders headers, @Context UriInfo info)
-    {
-        return executeNamedNativeQuery(headers, info);
-    }
+	/**
+	 * Executes named native queries and returns response
+	 * 
+	 * @param headers
+	 * @param info
+	 * @return
+	 */
 
-    /**
-     * Executes Native Query and returns resposne
-     * 
-     * @param headers
-     * @param info
-     * @return
-     */
-    private Response executeNativeQuery(HttpHeaders headers, UriInfo info)
-    {
-        String entityClassName = info.getPathParameters().getFirst("entityClassName");
-        String nativeQueryName = info.getPathParameters().getFirst("nativeQuery");
-        String sessionToken = headers.getRequestHeader(Constants.SESSION_TOKEN_HEADER_NAME).get(0);
-        String mediaType = headers.getRequestHeader("accept").get(0);
+	@GET
+	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+	@Path("/{entityClass}/{namedNativeQueryName}")
+	public Response executeNamedNativeQuery(@Context HttpHeaders headers,
+			@Context UriInfo info) {
 
-        if (log.isDebugEnabled())
-            log.debug("GET:: Session Token:" + sessionToken + ", Entity Class Name:" + entityClassName
-                    + ", Native Query:" + nativeQueryName + ", Media Type:" + mediaType);
+		String entityClassName = info.getPathParameters().getFirst(
+				"entityClass");
+		String namedNativeQueryName = info.getPathParameters().getFirst(
+				"namedNativeQueryName");
+		String sessionToken = headers.getRequestHeader(
+				Constants.SESSION_TOKEN_HEADER_NAME).get(0);
 
-        List result = null;
-        Class<?> entityClass = null;
-        Query q;
-        try
-        {
-            EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
+		String mediaType = headers.getRequestHeader("Content-type").get(0);
+		sessionToken = sessionToken.replaceAll("^\"|\"$", "");
+		if (log.isDebugEnabled())
+			log.debug("GET:: Session Token:" + sessionToken
+					+ ", Entity Class Name:" + entityClassName
+					+ ", Named Native Query:" + namedNativeQueryName
+					+ ", Media Type:" + mediaType);
 
-            entityClass = EntityUtils.getEntityClass(entityClassName, em);
-            if (log.isDebugEnabled())
-                log.debug("GET: entityClass" + entityClass);
-            if (entityClass == null)
-            {
-                return Response.serverError().build();
-            }
+		Class<?> entityClass = null;
+		List result = null;
 
-            q = em.createNativeQuery(nativeQueryName, entityClass);
-            result = q.getResultList();
-        }
-        catch (Exception e)
-        {
-            log.error(e.getMessage());
-            return Response.serverError().build();
-        }
+		try {
+			EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
 
-        if (result == null)
-        {
-            return Response.noContent().build();
-        }
+			entityClass = EntityUtils.getEntityClass(entityClassName, em);
+			if (log.isDebugEnabled())
+				log.debug("GET: entityClass" + entityClass);
+			if (entityClass == null) {
+				return Response.serverError().build();
+			}
 
-        if (log.isDebugEnabled())
-            log.debug("GET: Media Type:" + mediaType);
+			Query q = em.createNamedQuery(namedNativeQueryName);
+			result = q.getResultList();
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			return Response.serverError().build();
+		}
 
-        String output = CollectionConverter.toString(result, entityClass, mediaType);
-        return Response.ok(output).build();
-    }
+		if (result == null) {
+			return Response.noContent().build();
+		}
 
-    /**
-     * Executes named native queries and returns response
-     * 
-     * @param headers
-     * @param info
-     * @return
-     */
-    private Response executeNamedNativeQuery(HttpHeaders headers, UriInfo info)
-    {
-        String entityClassName = info.getPathParameters().getFirst("entityClass");
-        String namedNativeQueryName = info.getPathParameters().getFirst("namedNativeQueryName");
-        String sessionToken = headers.getRequestHeader(Constants.SESSION_TOKEN_HEADER_NAME).get(0);
-        String mediaType = headers.getRequestHeader("accept").get(0);
+		String output = CollectionConverter.toString(result, entityClass,
+				mediaType);
 
-        if (log.isDebugEnabled())
-            log.debug("GET:: Session Token:" + sessionToken + ", Entity Class Name:" + entityClassName
-                    + ", Named Native Query:" + namedNativeQueryName + ", Media Type:" + mediaType);
-
-        Class<?> entityClass = null;
-        List result = null;
-
-        try
-        {
-            EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
-
-            entityClass = EntityUtils.getEntityClass(entityClassName, em);
-            if (log.isDebugEnabled())
-                log.debug("GET: entityClass" + entityClass);
-            if (entityClass == null)
-            {
-                return Response.serverError().build();
-            }
-
-            Query q = em.createNamedQuery(namedNativeQueryName);
-            result = q.getResultList();
-        }
-        catch (Exception e)
-        {
-            log.error(e.getMessage(),e);
-            return Response.serverError().build();
-        }
-
-        if (result == null)
-        {
-            return Response.noContent().build();
-        }
-
-        String output = CollectionConverter.toString(result, entityClass, mediaType);
-        return Response.ok(output).build();
-    }
+		return Response.ok(output, mediaType).build();
+	}
 
 }

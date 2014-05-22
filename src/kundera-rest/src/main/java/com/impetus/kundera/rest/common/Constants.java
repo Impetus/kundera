@@ -40,7 +40,7 @@ public interface Constants
     public static final String APPLICATION_RESOURCE_PATH = "/application";
 
     public static final String SESSION_RESOURCE_PATH = "/session";
-
+    
     public static final String TRANSACTION_RESOURCE_PATH = "/tx";
 
     public static final String CRUD_RESOURCE_PATH = "/crud";

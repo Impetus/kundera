@@ -28,7 +28,7 @@ import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
-@Table(name = "PERSONNEL", schema = "KunderaExamples@twissandra")
+@Table(name = "PERSONNEL")
 @XmlRootElement
 public class PersonnelUni1ToM
 {

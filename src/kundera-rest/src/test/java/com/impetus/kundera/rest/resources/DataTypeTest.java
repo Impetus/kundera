@@ -22,8 +22,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.ws.rs.core.MediaType;
 
@@ -52,6 +54,11 @@ import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
 import com.impetus.kundera.rest.common.Constants;
 import com.impetus.kundera.rest.common.JAXBUtils;
 import com.impetus.kundera.rest.common.Professional;
+import com.impetus.kundera.rest.common.PreferenceCassandra;
+import com.impetus.kundera.rest.common.ExternalLink;
+import com.impetus.kundera.rest.common.ProfessionalDetailCassandra;
+import com.impetus.kundera.rest.common.TweetCassandra;
+import com.impetus.kundera.rest.common.UserCassandra;
 import com.impetus.kundera.rest.dao.RESTClient;
 import com.impetus.kundera.rest.dao.RESTClientImpl;
 import com.sun.jersey.api.client.WebResource;
@@ -94,7 +101,7 @@ public class DataTypeTest extends JerseyTest
 
     private static Logger log = LoggerFactory.getLogger(DataTypeTest.class);
 
-    static String mediaType = MediaType.APPLICATION_XML;
+    static String mediaType = MediaType.APPLICATION_JSON;
 
     static RESTClient restClient;
 
@@ -105,10 +112,16 @@ public class DataTypeTest extends JerseyTest
     String professionalStr1;
 
     String professionalStr2;
+    
+    String userString;
 
     String pk1;
 
     String pk2;
+    
+    String userId1;
+    
+    String userId2;
 
     Professional prof1;
 
@@ -134,7 +147,7 @@ public class DataTypeTest extends JerseyTest
         if (AUTO_MANAGE_SCHEMA)
         {
             CassandraCli.dropKeySpace(_KEYSPACE.toLowerCase());
-            loadData();
+           // loadData();
         }
     }
 
@@ -167,24 +180,14 @@ public class DataTypeTest extends JerseyTest
         restClient = new RESTClientImpl();
         restClient.initialize(webResource, mediaType);
 
-        if (MediaType.APPLICATION_XML.equals(mediaType))
-        {
-            buildProfessional1Str();
-            buildProfessional2Str();
 
-        }
-        else if (MediaType.APPLICATION_JSON.equals(mediaType))
-        {
-            Assert.fail("Incorrect Media Type:" + mediaType);
-        }
-        else
-        {
-            Assert.fail("Incorrect Media Type:" + mediaType);
-            return;
-        }
+        buildProfessional1Str();
+        buildProfessional2Str();
+
+
 
         // Get Application Token
-        applicationToken = restClient.getApplicationToken("twissandra");
+        applicationToken = restClient.getApplicationToken("cassTest");
         Assert.assertNotNull(applicationToken);
         Assert.assertTrue(applicationToken.startsWith("AT_"));
 
@@ -199,8 +202,8 @@ public class DataTypeTest extends JerseyTest
 
         Assert.assertNotNull(insertResponse1);
         Assert.assertNotNull(insertResponse2);
-        Assert.assertTrue(insertResponse1.indexOf("201") > 0);
-        Assert.assertTrue(insertResponse2.indexOf("201") > 0);
+        Assert.assertTrue(insertResponse1.indexOf("200") > 0);
+        Assert.assertTrue(insertResponse2.indexOf("200") > 0);
 
         // Find Record
         String foundProfessional = restClient.findEntity(sessionToken, pk1, PROFESSIONAL_CLASS_NAME);
@@ -253,11 +256,13 @@ public class DataTypeTest extends JerseyTest
         // Close Application
         restClient.closeApplication(applicationToken);
     }
+    
+   
 
     private void assertAllProfessionalsString(String queryResult)
     {
         Assert.assertFalse(StringUtils.isEmpty(queryResult));
-        Assert.assertTrue(queryResult.indexOf("professionals") > 0);
+        Assert.assertTrue(queryResult.indexOf("professional") > 0);
         Assert.assertTrue(queryResult.indexOf(pk1) > 0);
         Assert.assertTrue(queryResult.indexOf(pk2) > 0);
     }
@@ -280,7 +285,8 @@ public class DataTypeTest extends JerseyTest
          */
         new BigInteger("123456789"), new BigDecimal(123456789), cal);
 
-        professionalStr1 = JAXBUtils.toString(Professional.class, prof1, MediaType.APPLICATION_XML);
+        professionalStr1 = JAXBUtils.toString(Professional.class, prof1, mediaType);
+       
 
     }
 
@@ -302,7 +308,7 @@ public class DataTypeTest extends JerseyTest
          */
         new BigInteger("123456790"), new BigDecimal(123456790), cal);
 
-        professionalStr2 = JAXBUtils.toString(Professional.class, prof2, MediaType.APPLICATION_XML);
+        professionalStr2 = JAXBUtils.toString(Professional.class, prof2, mediaType);
 
     }
 

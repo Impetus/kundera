@@ -70,7 +70,7 @@ public class JAXBUtilsTest extends TestCase
     public void testJSONToObject()
     {
 
-        String json = "{book:{\"isbn\":\"2222\",\"author\":\"Kuldeep\", \"publication\":\"McGraw\"}}";
+        String json = "{\"isbn\":\"2222\",\"author\":\"Kuldeep\", \"publication\":\"McGraw\"}";
         try
         {
 
@@ -98,5 +98,6 @@ public class JAXBUtilsTest extends TestCase
         Assert.assertNotNull(s);
 
     }
+
 
 }

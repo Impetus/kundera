@@ -34,7 +34,7 @@ import com.impetus.kundera.index.Index;
 import com.impetus.kundera.index.IndexCollection;
 
 @Entity
-@Table(name = "PROFESSIONAL", schema = "KunderaExamples@twissandra")
+@Table(name = "PROFESSIONAL")
 @IndexCollection(columns = { @Index(name = "departmentId"), @Index(name = "isExceptional"), @Index(name = "age"),
         @Index(name = "grade"), @Index(name = "digitalSignature"), @Index(name = "rating"),
         @Index(name = "compliance"), @Index(name = "height"), @Index(name = "enrolmentDate"),

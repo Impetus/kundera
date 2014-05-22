@@ -15,20 +15,31 @@
  */
 package com.impetus.kundera.rest.common;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.SchemaOutputResolver;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.Result;
+import javax.xml.transform.stream.StreamResult;
 
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.schema.JsonSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.jersey.api.json.JSONConfiguration;
 import com.sun.jersey.api.json.JSONJAXBContext;
+import com.sun.jersey.api.json.JSONMarshaller;
 import com.sun.jersey.api.json.JSONUnmarshaller;
 
 /**
@@ -36,90 +47,147 @@ import com.sun.jersey.api.json.JSONUnmarshaller;
  * 
  * @author amresh.singh
  */
-public class JAXBUtils
-{
-    private static Logger log = LoggerFactory.getLogger(JAXBUtils.class);
+public class JAXBUtils {
+	private static Logger log = LoggerFactory.getLogger(JAXBUtils.class);
 
-    /**
-     * Converts <code>InputStream</code> to Object using JAXB
-     * 
-     * @param str
-     * @param objectClass
-     * @return
-     */
-    public static Object toObject(InputStream is, Class<?> objectClass, String mediaType)
-    {
-        Object output = null;
+	/**
+	 * Converts <code>InputStream</code> to Object using JAXB
+	 * 
+	 * @param str
+	 * @param objectClass
+	 * @return
+	 */
+	public static Object toObject(InputStream is, Class<?> objectClass,
+			String mediaType) {
+		Object output = null;
 
-        try
-        {
-            output = objectClass.newInstance();
+		try {
+			output = objectClass.newInstance();
 
-            if (MediaType.APPLICATION_XML.equals(mediaType))
-            {
-                JAXBContext jaxbContext = JAXBContext.newInstance(objectClass);
+			if (MediaType.APPLICATION_XML.equals(mediaType)) {
+				JAXBContext jaxbContext = JAXBContext.newInstance(objectClass);
 
-                Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+				Unmarshaller jaxbUnmarshaller = jaxbContext
+						.createUnmarshaller();
 
-                output = jaxbUnmarshaller.unmarshal(is);
-            }
-            else if (MediaType.APPLICATION_JSON.equals(mediaType))
-            {
+				output = jaxbUnmarshaller.unmarshal(is);
+			} else if (MediaType.APPLICATION_JSON.equals(mediaType)) {
 
-                JSONJAXBContext context = new JSONJAXBContext(JSONConfiguration.mappedJettison().build(), objectClass);
-                JSONUnmarshaller jsonUnmarshaller = context.createJSONUnmarshaller();
+				JAXBContext context = JSONJAXBContext.newInstance(objectClass);
 
-                output = jsonUnmarshaller.unmarshalFromJSON(is, objectClass);
-            }
+				Unmarshaller m = context.createUnmarshaller();
+				JSONUnmarshaller unmarshaller = JSONJAXBContext
+						.getJSONUnmarshaller(m, context);
 
-        }
-        catch (JAXBException e)
-        {
-            log.warn("Error while converting String to Object using JAXB:" + e.getMessage());
-            return null;
-        }
-        catch (InstantiationException e)
-        {
-            log.warn("Error while converting String to Object using JAXB:" + e.getMessage());
-            return null;
-        }
-        catch (IllegalAccessException e)
-        {
-            log.warn("Error while converting String to Object using JAXB:" + e.getMessage());
-            return null;
-        }
-        return output;
-    }
+				output = unmarshaller.unmarshalFromJSON(is, objectClass);
 
-    public static String toString(Class<?> objectClass, Object object, String mediaType)
-    {
-        try
-        {
-            if (MediaType.APPLICATION_XML.equals(mediaType))
-            {
-                JAXBContext jaxbContext = JAXBContext.newInstance(objectClass);
-                Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+			}
 
-                StringWriter writer = new StringWriter();
+		} catch (JAXBException e) {
+			log.warn("Error while converting String to Object using JAXB:"
+					+ e.getMessage());
+			return null;
+		} catch (InstantiationException e) {
+			log.warn("Error while converting String to Object using JAXB:"
+					+ e.getMessage());
+			return null;
+		} catch (IllegalAccessException e) {
+			log.warn("Error while converting String to Object using JAXB:"
+					+ e.getMessage());
+			return null;
+		}
+		return output;
+	}
 
-                jaxbMarshaller.marshal(object, writer);
-                return writer.toString();
+	public static String toString(Class<?> objectClass, Object object,
+			String mediaType) {
+		try {
+			if (MediaType.APPLICATION_XML.equals(mediaType)) {
+				JAXBContext jaxbContext = JAXBContext.newInstance(objectClass);
+				Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
 
-            }
-            else if (MediaType.APPLICATION_JSON.equals(mediaType))
-            {
-                return null;
-            }
-            else
-            {
-                return null;
-            }
-        }
-        catch (JAXBException e)
-        {
-            log.error("Error during translation, Caused by:" + e.getMessage() + ", returning null");
-            return null;
-        }
-    }
+				StringWriter writer = new StringWriter();
+
+				jaxbMarshaller.marshal(object, writer);
+				return writer.toString();
+
+			} else if (MediaType.APPLICATION_JSON.equals(mediaType)) {
+				StringWriter writer = new StringWriter();
+				JAXBContext context = JSONJAXBContext
+						.newInstance(new Class[] { objectClass });
+
+				Marshaller m = context.createMarshaller();
+				JSONMarshaller marshaller = JSONJAXBContext.getJSONMarshaller(
+						m, context);
+
+				marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+				marshaller.marshallToJSON(object, writer);
+				return writer.toString();
+			} else {
+				return null;
+			}
+		} catch (JAXBException e) {
+			log.error("Error during translation, Caused by:" + e.getMessage()
+					+ ", returning null");
+			return null;
+		}
+	}
+
+	public static String getSchema(Class<?> objectClass, String mediaType) {
+		try {
+
+			if (mediaType == MediaType.APPLICATION_JSON) {
+
+				final ObjectMapper objectMapper = new ObjectMapper();
+				JsonSchema jsonSchema = objectMapper
+						.generateJsonSchema(objectClass);
+
+				return jsonSchema.toString();
+
+			} else if (mediaType == MediaType.APPLICATION_XML) {
+				JAXBContext jc = JAXBContext.newInstance(objectClass);
+				// generate the schemas
+				final List<ByteArrayOutputStream> schemaStreams = new ArrayList<ByteArrayOutputStream>();
+				jc.generateSchema(new SchemaOutputResolver() {
+					@Override
+					public Result createOutput(String namespaceUri,
+							String suggestedFileName) throws IOException {
+						ByteArrayOutputStream out = new ByteArrayOutputStream();
+						schemaStreams.add(out);
+						StreamResult streamResult = new StreamResult(out);
+						streamResult.setSystemId("");
+						return streamResult;
+					}
+				});
+
+				// convert to a list of string
+				List<String> schemas = new ArrayList<String>();
+				for (ByteArrayOutputStream os : schemaStreams) {
+					schemas.add(os.toString());
+
+				}
+
+				return schemaStreams.get(0).toString();
+
+			}
+
+		} catch (JAXBException e) {
+			log.error("Error during translation, Caused by:" + e.getMessage()
+					+ ", returning null");
+			return null;
+		} catch (IOException e) {
+			log.error("Error during translation, Caused by:" + e.getMessage()
+					+ ", returning null");
+		}
+		return null;
+	}
+
+	public byte[] decode(String s) throws DecoderException {
+		return Hex.decodeHex(s.toCharArray());
+	}
+
+	public String encode(byte[] b) {
+		return Hex.encodeHex(b).toString();
+	}
 
 }

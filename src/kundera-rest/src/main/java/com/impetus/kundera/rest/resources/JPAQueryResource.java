@@ -49,307 +49,278 @@ import com.impetus.kundera.rest.repository.EMRepository;
  */
 
 @Path("/" + Constants.KUNDERA_API_PATH + Constants.JPA_QUERY_RESOURCE_PATH)
-public class JPAQueryResource
-{
+public class JPAQueryResource {
 
-    private static Logger log = LoggerFactory.getLogger(JPAQueryResource.class);
+	private static Logger log = LoggerFactory.getLogger(JPAQueryResource.class);
 
-    /**
-     * Handler for GET method requests for this resource. Retrieves all entities
-     * for a given table from datasource that match after running named query.
-     * If named query=All, it returns all records.
-     * 
-     * @param sessionToken
-     * @param entityClassName
-     * @param id
-     * @return
-     */
+	/**
+	 * Handler for GET method requests for this resource. Retrieves all entities
+	 * for a given table from datasource that match after running named query.
+	 * If named query=All, it returns all records.
+	 * 
+	 * @param sessionToken
+	 * @param entityClassName
+	 * @param id
+	 * @return
+	 */
 
-    @GET
-    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    @Path("/{entityClass}/{namedQueryName}")
-    public Response executeNamedQuery(@Context HttpHeaders headers, @Context UriInfo info)
-    {
+	@GET
+	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+	@Path("/{entityClass}/{namedQueryName}")
+	public Response executeNamedQuery(@Context HttpHeaders headers,
+			@Context UriInfo info) {
 
-        String entityClassName = info.getPathParameters().getFirst("entityClass");
-        String namedQueryName = info.getPathParameters().getFirst("namedQueryName");
-        String sessionToken = headers.getRequestHeader(Constants.SESSION_TOKEN_HEADER_NAME).get(0);
-        String mediaType = headers.getRequestHeader("accept").get(0);
+		String entityClassName = info.getPathParameters().getFirst(
+				"entityClass");
+		String namedQueryName = info.getPathParameters().getFirst(
+				"namedQueryName");
+		String params = info.getRequestUri().getQuery();
+		String sessionToken = headers.getRequestHeader(
+				Constants.SESSION_TOKEN_HEADER_NAME).get(0);
+		String mediaType = headers.getRequestHeader("Content-type").get(0);
 
-        if (log.isDebugEnabled())
-            log.debug("GET: sessionToken:" + sessionToken + ", entityClass:" + entityClassName + ", Named Query:"
-                    + namedQueryName + ", Media Type:" + mediaType);
+		if (log.isDebugEnabled())
+			log.debug("GET: sessionToken:" + sessionToken + ", entityClass:"
+					+ entityClassName + ", Named Query:" + namedQueryName
+					+ ", Media Type:" + mediaType);
 
-        List result = null;
-        Class<?> entityClass = null;
-        try
-        {
-            EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
-            entityClass = EntityUtils.getEntityClass(entityClassName, em);
-            if (log.isDebugEnabled())
-                log.debug("GET: entityClass" + entityClass);
+		List result = null;
+		Class<?> entityClass = null;
+		try {
+			sessionToken = sessionToken.replaceAll("^\"|\"$", "");
+			EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
+			entityClass = EntityUtils.getEntityClass(entityClassName, em);
+			if (log.isDebugEnabled())
+				log.debug("GET: entityClass" + entityClass);
 
-            if (Constants.NAMED_QUERY_ALL.equalsIgnoreCase(namedQueryName))
-            {
-                String alias = entityClassName.substring(0, 1).toLowerCase();
+			if (Constants.NAMED_QUERY_ALL.equalsIgnoreCase(namedQueryName)) {
+				String alias = entityClassName.substring(0, 1).toLowerCase();
 
-                StringBuilder sb = new StringBuilder().append("SELECT ").append(alias).append(" FROM ")
-                        .append(entityClassName).append(" ").append(alias);
+				StringBuilder sb = new StringBuilder().append("SELECT ")
+						.append(alias).append(" FROM ").append(entityClassName)
+						.append(" ").append(alias);
 
-                Query q = em.createQuery(sb.toString());
-                result = q.getResultList();
-            }
-            else
-            {
-                String queryPart = EntityUtils.getQueryPart(namedQueryName);
-                String paramPart = EntityUtils.getParameterPart(namedQueryName);
+				Query q = em.createQuery(sb.toString());
+				result = q.getResultList();
+			} else {
+				String queryPart = EntityUtils.getQueryPart(namedQueryName);
+				String paramPart = params != null ? params : EntityUtils
+						.getParameterPart(namedQueryName);
 
-                Query q = em.createNamedQuery(queryPart);
-                if (q == null)
-                {
-                    return Response.serverError().build();
-                }
+				Query q = em.createNamedQuery(queryPart);
+				if (q == null) {
+					return Response.serverError().build();
+				}
 
-                boolean isDeleteOrUpdateQuery = ((QueryImpl) q).getKunderaQuery().isDeleteUpdate();
-                if (isDeleteOrUpdateQuery)
-                {
-                    log.error("Incorrect HTTP method GET for query:" + queryPart);
-                    return Response.noContent().build();
-                }
+				boolean isDeleteOrUpdateQuery = ((QueryImpl) q)
+						.getKunderaQuery().isDeleteUpdate();
+				if (isDeleteOrUpdateQuery) {
+					log.error("Incorrect HTTP method GET for query:"
+							+ queryPart);
+					return Response.noContent().build();
+				}
 
-                EntityUtils.setQueryParameters(queryPart, paramPart, q);
+				EntityUtils.setQueryParameters(queryPart, paramPart, q);
 
-                result = q.getResultList();
-            }
+				result = q.getResultList();
+			}
 
-        }
-        catch (Exception e)
-        {
-            log.error(e.getMessage());
-            return Response.serverError().build();
-        }
+		} catch (Exception e) {
+			log.error(e.getMessage());
+			return Response.serverError().build();
+		}
 
-        if (log.isDebugEnabled())
-            log.debug("GET: Result of " + namedQueryName + " Query : " + result);
+		if (log.isDebugEnabled())
+			log.debug("GET: Result of " + namedQueryName + " Query : " + result);
 
-        if (result == null)
-        {
-            return Response.noContent().build();
-        }
+		if (result == null) {
+			return Response.noContent().build();
+		}
 
-        String output = CollectionConverter.toString(result, entityClass, mediaType);
+		String output = CollectionConverter.toString(result, entityClass,
+				mediaType);
 
-        return Response.ok(output).build();
+		return Response.ok(output, mediaType).build();
 
-    }
+	}
 
-    /**
-     * Handler for POST method requests for this resource Retrieves records from
-     * datasource for a given INSERT JPA query
-     * 
-     * @param sessionToken
-     * @param entityClassName
-     * @param id
-     * @return
-     */
+	/**
+	 * Handler for GET method requests for this resource Retrieves records from
+	 * datasource for a given select JPA query
+	 * 
+	 * @param sessionToken
+	 * @param entityClassName
+	 * @param id
+	 * @return
+	 */
 
-    @POST
-    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    @Path("/{jpaQuery}")
-    public Response executeInsertJPAQuery(@Context HttpHeaders headers, @Context UriInfo info)
-    {
-        String jpaQuery = info.getPathParameters().getFirst("jpaQuery");
-        String sessionToken = headers.getRequestHeader(Constants.SESSION_TOKEN_HEADER_NAME).get(0);
-        String mediaType = headers.getRequestHeader("accept").get(0);
-        if (log.isDebugEnabled())
-            log.debug("GET: sessionToken:" + sessionToken + ", jpaQuery:" + jpaQuery + ", Media Type:" + mediaType);
+	@POST
+	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+	@Path("/{jpaQuery}")
+	public Response executeSelectJPAQuery(@Context HttpHeaders headers,
+			@Context UriInfo info, String parameters) {
+		String jpaQuery = info.getPathParameters().getFirst("jpaQuery");
+		String params = info.getRequestUri().getQuery();
 
-        if (!EntityUtils.isValidQuery(jpaQuery, HttpMethod.POST))
-        {
-            log.error("Incorrect HTTP method POST for query:" + jpaQuery);
-            return Response.noContent().build();
-        }
+		String sessionToken = headers.getRequestHeader(
+				Constants.SESSION_TOKEN_HEADER_NAME).get(0);
+		sessionToken = sessionToken.replaceAll("^\"|\"$", "");
+		String mediaType = headers.getRequestHeader("Content-type").get(0);
+		if (log.isDebugEnabled())
+			log.debug("GET: sessionToken:" + sessionToken + ", jpaQuery:"
+					+ jpaQuery + ", Media Type:" + mediaType);
 
-        int result = executeWrite(jpaQuery, sessionToken);
-        if (log.isDebugEnabled())
-            log.debug("GET: Result for JPA Query: " + result);
+		if (!EntityUtils.isValidQuery(jpaQuery, HttpMethod.GET)) {
+			log.error("Incorrect HTTP method GET for query:" + jpaQuery);
+			return Response.noContent().build();
+		}
 
-        if (result < 0)
-        {
-            return Response.noContent().build();
-        }
+		List result = null;
+		Query q = null;
+		try {
+			EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
 
-        return Response.ok(result).build();
-    }
+			String queryPart = EntityUtils.getQueryPart(jpaQuery);
+			String paramPart = params != null ? params : EntityUtils
+					.getParameterPart(jpaQuery);
 
-    /**
-     * Handler for GET method requests for this resource Retrieves records from
-     * datasource for a given select JPA query
-     * 
-     * @param sessionToken
-     * @param entityClassName
-     * @param id
-     * @return
-     */
+			q = em.createQuery(queryPart);
+			if (q == null) {
+				return Response.serverError().build();
+			}
 
-    @GET
-    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    @Path("/{jpaQuery}")
-    public Response executeSelectJPAQuery(@Context HttpHeaders headers, @Context UriInfo info)
-    {
-        String jpaQuery = info.getPathParameters().getFirst("jpaQuery");
-        String sessionToken = headers.getRequestHeader(Constants.SESSION_TOKEN_HEADER_NAME).get(0);
-        String mediaType = headers.getRequestHeader("accept").get(0);
-        if (log.isDebugEnabled())
-            log.debug("GET: sessionToken:" + sessionToken + ", jpaQuery:" + jpaQuery + ", Media Type:" + mediaType);
+			EntityUtils.setQueryParameters(queryPart, paramPart, q);
+			EntityUtils.setObjectQueryParameters(queryPart, parameters, q, em,
+					mediaType);
 
-        if (!EntityUtils.isValidQuery(jpaQuery, HttpMethod.GET))
-        {
-            log.error("Incorrect HTTP method GET for query:" + jpaQuery);
-            return Response.noContent().build();
-        }
+			result = q.getResultList();
+		} catch (Exception e) {
+			log.error(e.getMessage());
+			return Response.serverError().build();
+		}
 
-        List result = null;
-        Query q = null;
-        try
-        {
-            EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
+		if (log.isDebugEnabled())
+			log.debug("GET: Result for JPA Query: " + result);
 
-            String queryPart = EntityUtils.getQueryPart(jpaQuery);
-            String paramPart = EntityUtils.getParameterPart(jpaQuery);
+		if (result == null) {
+			return Response.noContent().build();
+		}
 
-            q = em.createQuery(queryPart);
-            if (q == null)
-            {
-                return Response.serverError().build();
-            }
+		Class<?> genericClass = ((QueryImpl) q).getKunderaQuery()
+				.getEntityClass();
+		String output = CollectionConverter.toString(result, genericClass,
+				mediaType);
+		return Response.ok(output, mediaType).build();
 
-            EntityUtils.setQueryParameters(queryPart, paramPart, q);
+	}
 
-            result = q.getResultList();
-        }
-        catch (Exception e)
-        {
-            log.error(e.getMessage());
-            return Response.serverError().build();
-        }
+	/**
+	 * Handler for PUT method requests for this resource Retrieves records from
+	 * datasource for a given UPDATE JPA query
+	 * 
+	 * @param sessionToken
+	 * @param entityClassName
+	 * @param id
+	 * @return
+	 */
+	@PUT
+	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+	@Path("/{jpaQuery}")
+	public Response executeUpdateJPAQuery(@Context HttpHeaders headers,
+			@Context UriInfo info, String parameters) {
+		String jpaQuery = info.getPathParameters().getFirst("jpaQuery");
+		String params = info.getRequestUri().getQuery();
+		String sessionToken = headers.getRequestHeader(
+				Constants.SESSION_TOKEN_HEADER_NAME).get(0);
+		sessionToken = sessionToken.replaceAll("^\"|\"$", "");
+		String mediaType = headers.getRequestHeader("Content-type").get(0);
 
-        if (log.isDebugEnabled())
-            log.debug("GET: Result for JPA Query: " + result);
+		if (log.isDebugEnabled())
+			log.debug("GET: sessionToken:" + sessionToken + ", jpaQuery:"
+					+ jpaQuery + ", Media Type:" + mediaType);
 
-        if (result == null)
-        {
-            return Response.noContent().build();
-        }
+		if (!EntityUtils.isValidQuery(jpaQuery, HttpMethod.PUT)) {
+			log.error("Incorrect HTTP method POST for query:" + jpaQuery);
+			return Response.noContent().build();
+		}
 
-        Class<?> genericClass = ((QueryImpl) q).getKunderaQuery().getEntityClass();
-        String output = CollectionConverter.toString(result, genericClass, mediaType);
+		int result = executeWrite(jpaQuery, params, sessionToken, parameters,
+				mediaType);
+		if (log.isDebugEnabled())
+			log.debug("GET: Result for JPA Query: " + result);
 
-        return Response.ok(output).build();
-    }
+		if (result < 0) {
+			return Response.noContent().build();
+		}
 
-    /**
-     * Handler for PUT method requests for this resource Retrieves records from
-     * datasource for a given UPDATE JPA query
-     * 
-     * @param sessionToken
-     * @param entityClassName
-     * @param id
-     * @return
-     */
-    @PUT
-    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    @Path("/{jpaQuery}")
-    public Response executeUpdateJPAQuery(@Context HttpHeaders headers, @Context UriInfo info)
-    {
-        String jpaQuery = info.getPathParameters().getFirst("jpaQuery");
-        String sessionToken = headers.getRequestHeader(Constants.SESSION_TOKEN_HEADER_NAME).get(0);
-        String mediaType = headers.getRequestHeader("accept").get(0);
+		return Response.ok(result, mediaType).build();
+	}
 
-        if (log.isDebugEnabled())
-            log.debug("GET: sessionToken:" + sessionToken + ", jpaQuery:" + jpaQuery + ", Media Type:" + mediaType);
+	/**
+	 * Handler for DELETE method requests for this resource Retrieves records
+	 * from datasource for a given UPDATE JPA query
+	 * 
+	 * @param sessionToken
+	 * @param entityClassName
+	 * @param id
+	 * @return
+	 */
+	@DELETE
+	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+	@Path("/{jpaQuery}")
+	public Response executeDeleteJPAQuery(@Context HttpHeaders headers,
+			@Context UriInfo info, String parameters) {
+		String jpaQuery = info.getPathParameters().getFirst("jpaQuery");
+		String params = info.getRequestUri().getQuery();
+		String sessionToken = headers.getRequestHeader(
+				Constants.SESSION_TOKEN_HEADER_NAME).get(0);
+		sessionToken = sessionToken.replaceAll("^\"|\"$", "");
+		String mediaType = headers.getRequestHeader("Content-type").get(0);
 
-        if (!EntityUtils.isValidQuery(jpaQuery, HttpMethod.PUT))
-        {
-            log.error("Incorrect HTTP method POST for query:" + jpaQuery);
-            return Response.noContent().build();
-        }
+		if (log.isDebugEnabled())
+			log.debug("GET: sessionToken:" + sessionToken + ", jpaQuery:"
+					+ jpaQuery + ", Media Type:" + mediaType);
 
-        int result = executeWrite(jpaQuery, sessionToken);
-        if (log.isDebugEnabled())
-            log.debug("GET: Result for JPA Query: " + result);
+		if (!EntityUtils.isValidQuery(jpaQuery, HttpMethod.DELETE)) {
+			log.error("Incorrect HTTP method POST for query:" + jpaQuery);
+			return Response.noContent().build();
+		}
 
-        if (result < 0)
-        {
-            return Response.noContent().build();
-        }
+		int result = executeWrite(jpaQuery, params, sessionToken, parameters,
+				mediaType);
+		if (log.isDebugEnabled())
+			log.debug("GET: Result for JPA Query: " + result);
 
-        return Response.ok(result).build();
-    }
+		if (result < 0) {
+			return Response.noContent().build();
+		}
 
-    /**
-     * Handler for DELETE method requests for this resource Retrieves records
-     * from datasource for a given UPDATE JPA query
-     * 
-     * @param sessionToken
-     * @param entityClassName
-     * @param id
-     * @return
-     */
-    @DELETE
-    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    @Path("/{jpaQuery}")
-    public Response executeDeleteJPAQuery(@Context HttpHeaders headers, @Context UriInfo info)
-    {
-        String jpaQuery = info.getPathParameters().getFirst("jpaQuery");
-        String sessionToken = headers.getRequestHeader(Constants.SESSION_TOKEN_HEADER_NAME).get(0);
-        String mediaType = headers.getRequestHeader("accept").get(0);
+		return Response.ok(result, mediaType).build();
+	}
 
-        if (log.isDebugEnabled())
-            log.debug("GET: sessionToken:" + sessionToken + ", jpaQuery:" + jpaQuery + ", Media Type:" + mediaType);
+	private int executeWrite(String jpaQuery, String params,
+			String sessionToken, String parameters, String mediaType) {
+		int result = -1;
+		Query q = null;
+		try {
+			EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
 
-        if (!EntityUtils.isValidQuery(jpaQuery, HttpMethod.DELETE))
-        {
-            log.error("Incorrect HTTP method POST for query:" + jpaQuery);
-            return Response.noContent().build();
-        }
+			String queryPart = EntityUtils.getQueryPart(jpaQuery);
+			String paramPart = params != null ? params : EntityUtils
+					.getParameterPart(jpaQuery);
 
-        int result = executeWrite(jpaQuery, sessionToken);
-        if (log.isDebugEnabled())
-            log.debug("GET: Result for JPA Query: " + result);
+			q = em.createQuery(queryPart);
 
-        if (result < 0)
-        {
-            return Response.noContent().build();
-        }
-
-        return Response.ok(result).build();
-    }
-
-    private int executeWrite(String jpaQuery, String sessionToken)
-    {
-        int result = -1;
-        Query q = null;
-        try
-        {
-            EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
-
-            String queryPart = EntityUtils.getQueryPart(jpaQuery);
-            String paramPart = EntityUtils.getParameterPart(jpaQuery);
-
-            q = em.createQuery(queryPart);
-
-            if (q != null)
-            {
-                EntityUtils.setQueryParameters(queryPart, paramPart, q);
-                result = q.executeUpdate();
-            }
-        }
-        catch (Exception e)
-        {
-            log.error(e.getMessage());
-        }
-        return result;
-    }
+			if (q != null) {
+				EntityUtils.setQueryParameters(queryPart, paramPart, q);
+				EntityUtils.setObjectQueryParameters(queryPart, parameters, q,
+						em, mediaType);
+				result = q.executeUpdate();
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage());
+		}
+		return result;
+	}
 
 }

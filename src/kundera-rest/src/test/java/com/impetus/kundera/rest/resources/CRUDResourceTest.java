@@ -194,7 +194,7 @@ public class CRUDResourceTest extends JerseyTest
         }
 
         // Get Application Token
-        applicationToken = restClient.getApplicationToken("twissandra");
+        applicationToken = restClient.getApplicationToken("cassTest");
         Assert.assertNotNull(applicationToken);
         Assert.assertTrue(applicationToken.startsWith("AT_"));
 
@@ -209,8 +209,8 @@ public class CRUDResourceTest extends JerseyTest
 
         Assert.assertNotNull(insertResponse1);
         Assert.assertNotNull(insertResponse2);
-        Assert.assertTrue(insertResponse1.indexOf("201") > 0);
-        Assert.assertTrue(insertResponse2.indexOf("201") > 0);
+        Assert.assertTrue(insertResponse1.indexOf("200") > 0);
+        Assert.assertTrue(insertResponse2.indexOf("200") > 0);
 
         // Find Record
         String foundBook = restClient.findEntity(sessionToken, pk1, "Book");
@@ -342,7 +342,7 @@ public class CRUDResourceTest extends JerseyTest
         personStr1 = JAXBUtils.toString(PersonnelUni1ToM.class, p1, mediaType);
 
         // Get Application Token
-        applicationToken = restClient.getApplicationToken("twissandra");
+        applicationToken = restClient.getApplicationToken("cassTest");
         Assert.assertNotNull(applicationToken);
         Assert.assertTrue(applicationToken.startsWith("AT_"));
 
@@ -356,9 +356,9 @@ public class CRUDResourceTest extends JerseyTest
         String insertResponse1 = restClient.insertPerson(sessionToken, personStr1);
 
         Assert.assertNotNull(insertResponse);
-        Assert.assertTrue(insertResponse.indexOf("201") > 0);
+        Assert.assertTrue(insertResponse.indexOf("200") > 0);
         Assert.assertNotNull(insertResponse1);
-        Assert.assertTrue(insertResponse1.indexOf("201") > 0);
+        Assert.assertTrue(insertResponse1.indexOf("200") > 0);
 
         // Find person.
         String foundPerson = restClient.findPerson(sessionToken, personPk);
@@ -386,6 +386,7 @@ public class CRUDResourceTest extends JerseyTest
         String jpaQuery = "select p from PersonnelUni1ToM p where p.personId >= " + person1Pk;
         String queryResult = restClient.runJPAQuery(sessionToken, jpaQuery, new HashMap<String, Object>());
         log.debug("Query Result:" + queryResult);
+        Assert.assertNotNull(queryResult);
 
         // Delete person.
         restClient.deletePerson(sessionToken, updatedPerson, personPk);

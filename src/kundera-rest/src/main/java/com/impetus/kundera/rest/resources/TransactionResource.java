@@ -29,7 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.rest.common.Constants;
-import com.impetus.kundera.rest.common.Response;
+import com.impetus.kundera.rest.common.ResponseCode;
 import com.impetus.kundera.rest.repository.EMRepository;
 
 /**
@@ -39,111 +39,103 @@ import com.impetus.kundera.rest.repository.EMRepository;
  */
 
 @Path("/" + Constants.KUNDERA_API_PATH + Constants.TRANSACTION_RESOURCE_PATH)
-public class TransactionResource
-{
-    private static Logger log = LoggerFactory.getLogger(TransactionResource.class);
+public class TransactionResource {
+	private static Logger log = LoggerFactory
+			.getLogger(TransactionResource.class);
 
-    /**
-     * Handler for GET method requests for this resource Begins a fresh
-     * transaction for given session
-     * 
-     * @return
-     */
-    @GET
-    @Produces(MediaType.TEXT_PLAIN)
-    public String begin(@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken)
-    {
-        if (log.isDebugEnabled())
-            log.debug("GET: Session Token:" + sessionToken);
+	/**
+	 * Handler for GET method requests for this resource Begins a fresh
+	 * transaction for given session
+	 * 
+	 * @return
+	 */
+	@GET
+	@Produces(MediaType.TEXT_PLAIN)
+	public String begin(
+			@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken) {
+		if (log.isDebugEnabled())
+			log.debug("GET: Session Token:" + sessionToken);
 
-        EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
-        if (em == null)
-        {
-            if (log.isDebugEnabled())
-                log.warn("GET: Session Token:" + sessionToken + " doesn't exist and transaction failed to begin");
-            return Response.GET_TX_FAILED;
-        }
+		EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
+		if (em == null) {
+			if (log.isDebugEnabled())
+				log.warn("GET: Session Token:" + sessionToken
+						+ " doesn't exist and transaction failed to begin");
+			return ResponseCode.GET_TX_FAILED;
+		}
 
-        try
-        {
-            em.getTransaction().begin();
-        }
-        catch (Exception e)
-        {
-            log.error("GET: Failed: " + e.getMessage());
-            return Response.GET_TX_FAILED;
-        }
-        return Response.GET_TX_SUCCESS;
-    }
+		try {
+			em.getTransaction().begin();
+		} catch (Exception e) {
+			log.error("GET: Failed: " + e.getMessage());
+			return ResponseCode.GET_TX_FAILED;
+		}
+		return ResponseCode.GET_TX_SUCCESS;
+	}
 
-    /**
-     * Handler for POST method requests for this resource Commits transaction
-     * for the given session
-     * 
-     * @param applicationToken
-     * @return
-     */
-    @POST
-    @Consumes(MediaType.TEXT_PLAIN)
-    public String commit(@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken)
-    {
-        if (log.isDebugEnabled())
-            log.debug("POST: Session Token:" + sessionToken);
+	/**
+	 * Handler for POST method requests for this resource Commits transaction
+	 * for the given session
+	 * 
+	 * @param applicationToken
+	 * @return
+	 */
+	@POST
+	@Consumes(MediaType.TEXT_PLAIN)
+	public String commit(
+			@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken) {
+		if (log.isDebugEnabled())
+			log.debug("POST: Session Token:" + sessionToken);
 
-        EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
-        if (em == null)
-        {
-            if (log.isDebugEnabled())
-                log.warn("POST: Session Token:" + sessionToken + " doesn't exist and transaction could not be commited");
-            return Response.POST_TX_FAILED;
-        }
+		EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
+		if (em == null) {
+			if (log.isDebugEnabled())
+				log.warn("POST: Session Token:"
+						+ sessionToken
+						+ " doesn't exist and transaction could not be commited");
+			return ResponseCode.POST_TX_FAILED;
+		}
 
-        try
-        {
-            em.getTransaction().commit();
-        }
-        catch (Exception e)
-        {
-            log.error("POST: Failed: " + e.getMessage());
-            return Response.POST_TX_FAILED;
-        }
-        return Response.POST_TX_SUCCESS;
-    }
+		try {
+			em.getTransaction().commit();
+		} catch (Exception e) {
+			log.error("POST: Failed: " + e.getMessage());
+			return ResponseCode.POST_TX_FAILED;
+		}
+		return ResponseCode.POST_TX_SUCCESS;
+	}
 
-    /**
-     * Handler for DELETE method requests for this resource Rolls back
-     * transaction for the given session
-     * 
-     * @return
-     */
-    @DELETE
-    @Consumes(MediaType.TEXT_PLAIN)
-    public String rollback(@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken)
-    {
-        if (log.isDebugEnabled())
-            log.debug("DELETE: Session Token:" + sessionToken);
+	/**
+	 * Handler for DELETE method requests for this resource Rolls back
+	 * transaction for the given session
+	 * 
+	 * @return
+	 */
+	@DELETE
+	@Consumes(MediaType.TEXT_PLAIN)
+	public String rollback(
+			@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken) {
+		if (log.isDebugEnabled())
+			log.debug("DELETE: Session Token:" + sessionToken);
 
-        EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
-        if (em == null)
-        {
-            if (log.isDebugEnabled())
-                log.warn("DELETE: Session Token:" + sessionToken
-                        + " doesn't exist and transaction could not be rolled back");
-            return Response.DELETE_TX_FAILED;
+		EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
+		if (em == null) {
+			if (log.isDebugEnabled())
+				log.warn("DELETE: Session Token:"
+						+ sessionToken
+						+ " doesn't exist and transaction could not be rolled back");
+			return ResponseCode.DELETE_TX_FAILED;
 
-        }
+		}
 
-        try
-        {
-            em.getTransaction().rollback();
-        }
-        catch (Exception e)
-        {
-            log.error("DELETE: Failed: " + e.getMessage());
-            return Response.DELETE_TX_FAILED;
-        }
+		try {
+			em.getTransaction().rollback();
+		} catch (Exception e) {
+			log.error("DELETE: Failed: " + e.getMessage());
+			return ResponseCode.DELETE_TX_FAILED;
+		}
 
-        return Response.DELETE_TX_SUCCESS;
-    }
+		return ResponseCode.DELETE_TX_SUCCESS;
+	}
 
 }

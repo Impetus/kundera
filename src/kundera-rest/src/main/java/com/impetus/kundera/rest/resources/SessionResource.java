@@ -24,13 +24,16 @@ import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.rest.common.Constants;
-import com.impetus.kundera.rest.common.Response;
+import com.impetus.kundera.rest.common.ResponseCode;
 import com.impetus.kundera.rest.common.TokenUtils;
 import com.impetus.kundera.rest.repository.EMFRepository;
 import com.impetus.kundera.rest.repository.EMRepository;
@@ -42,102 +45,109 @@ import com.impetus.kundera.rest.repository.EMRepository;
  */
 
 @Path("/" + Constants.KUNDERA_API_PATH + Constants.SESSION_RESOURCE_PATH)
-public class SessionResource
-{
-    private static Logger log = LoggerFactory.getLogger(SessionResource.class);
+public class SessionResource {
+	private static Logger log = LoggerFactory.getLogger(SessionResource.class);
 
-    /**
-     * Handler for GET method requests for this resource Generates Session token
-     * and returns, creates and puts EM into repository
-     * 
-     * @param applicationToken
-     * @return
-     */
-    @GET
-    @Produces(MediaType.TEXT_PLAIN)
-    @Consumes(MediaType.TEXT_PLAIN)
-    public String getSessionToken(@HeaderParam(Constants.APPLICATION_TOKEN_HEADER_NAME) String applicationToken)
-    {
-        if (log.isDebugEnabled())
-            log.debug("GET: Application Token:" + applicationToken);
+	/**
+	 * Handler for GET method requests for this resource Generates Session token
+	 * and returns, creates and puts EM into repository
+	 * 
+	 * @param applicationToken
+	 * @return
+	 */
 
-        EntityManagerFactory emf = EMFRepository.INSTANCE.getEMF(applicationToken);
+	@GET
+	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+	@Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+	public Response getSessionToken(
+			@HeaderParam(Constants.APPLICATION_TOKEN_HEADER_NAME) String applicationToken,
+			@Context HttpHeaders headers) {
+		if (log.isDebugEnabled())
+			log.debug("GET: Application Token:" + applicationToken);
+		String mediaType = headers.getRequestHeader("Content-type").get(0);
+		EntityManagerFactory emf = EMFRepository.INSTANCE
+				.getEMF(applicationToken);
 
-        if (emf == null)
-        {
-            if (log.isDebugEnabled())
-                log.warn("GET: Application Token:" + applicationToken
-                        + " doesn't exist and hence Session can't be created");
-            return Response.GET_ST_FAILED;
-        }
+		if (emf == null) {
+			if (log.isDebugEnabled())
+				log.warn("GET: Application Token:" + applicationToken
+						+ " doesn't exist and hence Session can't be created");
+			return Response.serverError().build();
+		}
 
-        String sessionToken = TokenUtils.generateSessionToken();
-        EntityManager em = emf.createEntityManager();
+		String sessionToken = TokenUtils.generateSessionToken();
+		EntityManager em = emf.createEntityManager();
 
-        EMRepository.INSTANCE.addEm(sessionToken, em);
-        return sessionToken;
-    }
+		EMRepository.INSTANCE.addEm(sessionToken, em);
+		return Response.ok(new String(sessionToken), mediaType).build();
+	}
 
-    /**
-     * Handler for GET method requests for this resource Generates Session token
-     * and returns, creates and puts EM into repository
-     * 
-     * @param applicationToken
-     * @return
-     */
-    @PUT
-    @Produces(MediaType.TEXT_PLAIN)
-    @Consumes(MediaType.TEXT_PLAIN)
-    public String flush(@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken)
-    {
-        if (log.isDebugEnabled())
-            log.debug("PUT: Session Token:" + sessionToken);
+	/**
+	 * Handler for GET method requests for this resource Generates Session token
+	 * and returns, creates and puts EM into repository
+	 * 
+	 * @param applicationToken
+	 * @return
+	 */
+	@PUT
+	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+	@Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+	public Response flush(
+			@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken,
+			@Context HttpHeaders headers) {
+		if (log.isDebugEnabled())
+			log.debug("PUT: Session Token:" + sessionToken);
+		String mediaType = headers.getRequestHeader("Content-type").get(0);
+		EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
 
-        EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
-        if (em == null)
-        {
-            if (log.isDebugEnabled())
-                log.warn("PUT: Session Token:" + sessionToken + " doesn't exist and hence can't be deleted");
-            return Response.PUT_ST_FAILED;
-        }
+		if (em == null) {
+			if (log.isDebugEnabled())
+				log.warn("PUT: Session Token:" + sessionToken
+						+ " doesn't exist and hence can't be deleted");
+			return Response.serverError().build();
+		}
 
-        try
-        {
-            em.flush();
-        }
-        catch (Exception e)
-        {
-            log.error("PUT: Failed: " + e.getMessage());
-            return Response.PUT_ST_FAILED;
-        }
-        return Response.PUT_ST_SUCCESS;
-    }
+		try {
+			em.flush();
+		} catch (Exception e) {
+			log.error("PUT: Failed: " + e.getMessage());
+			Response.serverError().build();
+		}
 
-    /**
-     * Handler for DELETE method requests for this resource Closes EM and
-     * removes session token alongwith from repository
-     * 
-     * @param id
-     * @return
-     */
-    @DELETE
-    @Produces(MediaType.TEXT_PLAIN)
-    @Consumes(MediaType.TEXT_PLAIN)
-    public String deleteSession(@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken)
-    {
-        if (log.isDebugEnabled())
-            log.debug("DELETE: Session Token:" + sessionToken);
+		return Response.ok(new String(ResponseCode.PUT_ST_SUCCESS), mediaType)
+				.build();
+	}
 
-        EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
-        if (em == null)
-        {
-            if (log.isDebugEnabled())
-                log.warn("DELETE: Session Token:" + sessionToken + " doesn't exist and hence can't be deleted");
-            return Response.DELETE_ST_FAILED;
-        }
+	/**
+	 * Handler for DELETE method requests for this resource Closes EM and
+	 * removes session token alongwith from repository
+	 * 
+	 * @param id
+	 * @return
+	 */
+	@DELETE
+	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+	@Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+	public Response deleteSession(
+			@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken,
+			@Context HttpHeaders headers) {
 
-        EMRepository.INSTANCE.removeEm(sessionToken);
-        return Response.DELETE_ST_SUCCESS;
-    }
+		if (log.isDebugEnabled())
+			log.debug("DELETE: Session Token:" + sessionToken);
+		String mediaType = headers.getRequestHeader("Content-type").get(0);
+		EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
+		if (em == null) {
+			if (log.isDebugEnabled())
+				log.warn("DELETE: Session Token:" + sessionToken
+						+ " doesn't exist and hence can't be deleted");
+
+			Response.serverError().build();
+		}
+
+		EMRepository.INSTANCE.removeEm(sessionToken);
+		return Response.ok(new String(ResponseCode.DELETE_ST_SUCCESS),
+				mediaType).build();
+
+	}
 
 }

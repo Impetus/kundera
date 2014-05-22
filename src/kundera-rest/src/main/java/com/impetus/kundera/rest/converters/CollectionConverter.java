@@ -66,10 +66,28 @@ public class CollectionConverter
             sb.append("<").append(genericClass.getSimpleName().toLowerCase()).append("s>");
             return sb.toString();
         }
-        else
+        else if (MediaType.APPLICATION_JSON.equals(mediaType))
         {
-            return null;
+            int i = 0;
+            StringBuilder sb = new StringBuilder("{").append(genericClass.getSimpleName().toLowerCase()).append(":");
+            for (Object obj : input)
+            {
+                if (obj != null)
+                {
+                    String s = JAXBUtils.toString(genericClass, obj, mediaType);
+                    i++;
+                    sb.append(s);
+                    if(i < input.size()) {
+                        sb.append(",");
+                    }
+                }
+                
+            }
+            sb.append("}");
+            return sb.toString();
         }
+
+        return null;
     }
 
     /**
@@ -109,10 +127,12 @@ public class CollectionConverter
                 return c;
 
             }
-            else
+            else if (MediaType.APPLICATION_JSON.equals(mediaType))
             {
                 return null;
+                
             }
+            return null;
         }
         catch (InstantiationException e)
         {

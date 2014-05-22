@@ -72,4 +72,7 @@ public interface RESTClient
 
     void deletePerson(String sessionToken, String updatedPerson, String isbn);
 
+	String runObjectJPAQuery(String sessionToken, String jpaQuery,
+			Map<String, Object> params);
+
 }

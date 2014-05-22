@@ -25,6 +25,9 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
+
 /**
  * Entity class for Book
  * 
@@ -32,11 +35,12 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 
 @Entity
-@Table(name = "BOOK", schema = "KunderaExamples@twissandra")
+@Table(name = "BOOK")
 @NamedQueries(value = { @NamedQuery(name = "findByAuthor", query = "Select b from Book b where b.author = :author"),
         @NamedQuery(name = "findByPublication", query = "Select b from Book b where b.publication = ?1"),
         @NamedQuery(name = "findAllBooks", query = "Select b from Book b") })
 @NamedNativeQueries(value = { @NamedNativeQuery(name = "findAllBooksNative", query = "select * from " + "\"BOOK\"") })
+@IndexCollection(columns = {@Index(name = "publication"), @Index(name = "author")})
 @XmlRootElement
 public class Book
 {
