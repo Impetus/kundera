@@ -97,7 +97,7 @@ public class PolyglotQueryTest extends JerseyTest
 {
     private static final String _KEYSPACE = "KunderaExamples";
     
-    private static final String _PU = "twissandra,addMongo";
+    private static final String _PU = "twissandra,twiMongo";
 
     private static Logger log = LoggerFactory.getLogger(DataTypeTest.class);
 

@@ -21,7 +21,7 @@
 				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
 		</properties>
 	</persistence-unit>
-	<persistence-unit name="addMongo">
+	<persistence-unit name="twiMongo">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<class>com.impetus.kundera.rest.common.ExternalLink</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
