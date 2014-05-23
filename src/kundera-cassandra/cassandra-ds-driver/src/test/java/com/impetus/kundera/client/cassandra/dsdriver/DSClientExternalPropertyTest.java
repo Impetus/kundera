@@ -196,6 +196,8 @@ public class DSClientExternalPropertyTest
         final String DRRP = "com.datastax.driver.core.policies.DCAwareRoundRobinPolicy";
         final String CRP = "com.datastax.driver.core.policies.ConstantReconnectionPolicy";
         final String DCRP = "com.datastax.driver.core.policies.DowngradingConsistencyRetryPolicy";
+        final String LRTP = "com.datastax.driver.core.policies.LoggingRetryPolicy";
+        final String TAP = "com.datastax.driver.core.policies.TokenAwarePolicy";
         Properties connectionProperties = initialize(ds);
 
         ds.initialize(propertyMap);
@@ -220,10 +222,9 @@ public class DSClientExternalPropertyTest
                 .getMaxSimultaneousRequestsPerConnectionThreshold(distance), 200);
         Assert.assertEquals(configuration.getPoolingOptions()
                 .getMinSimultaneousRequestsPerConnectionThreshold(distance), 65);
-
-        Assert.assertEquals(configuration.getPolicies().getLoadBalancingPolicy().getClass().getName(), DRRP);
+        Assert.assertEquals(configuration.getPolicies().getLoadBalancingPolicy().getClass().getName(), TAP);
         Assert.assertEquals(configuration.getPolicies().getReconnectionPolicy().getClass().getName(), CRP);
-        Assert.assertEquals(configuration.getPolicies().getRetryPolicy().getClass().getName(), DCRP);
+        Assert.assertEquals(configuration.getPolicies().getRetryPolicy().getClass().getName(), LRTP);
 
         Assert.assertEquals(connectionProperties.getProperty("constantDelayMs"), "110000");
         Assert.assertEquals(connectionProperties.getProperty("localdc"), "dc1");

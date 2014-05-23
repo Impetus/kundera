@@ -407,7 +407,7 @@ public class DSClientFactory extends CassandraClientFactory
             break;
         }
 
-        if (loadBalancingPolicy != null && StringUtils.isBlank(isTokenAware) && Boolean.valueOf(isTokenAware))
+        if (loadBalancingPolicy != null && Boolean.valueOf(isTokenAware))
         {
             loadBalancingPolicy = new TokenAwarePolicy(loadBalancingPolicy);
         }
@@ -448,7 +448,7 @@ public class DSClientFactory extends CassandraClientFactory
     {
         com.datastax.driver.core.policies.RetryPolicy retryPolicy = null;
 
-        String isTokenAware = (String) props.get("isLoggingRetry");
+        String isLoggingRetry = (String) props.get("isLoggingRetry");
         switch (policy)
         {
         case DowngradingConsistencyRetryPolicy:
@@ -463,7 +463,7 @@ public class DSClientFactory extends CassandraClientFactory
             break;
         }
 
-        if (retryPolicy != null && StringUtils.isBlank(isTokenAware) && Boolean.valueOf(isTokenAware))
+        if (retryPolicy != null && Boolean.valueOf(isLoggingRetry))
         {
             retryPolicy = new LoggingRetryPolicy(retryPolicy);
         }
