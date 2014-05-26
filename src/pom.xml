@@ -232,6 +232,16 @@
         <module>kundera-cassandra</module>
       </modules>
     </profile>
+    <profile>
+      <id>rest</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <modules>
+        <module>jpa-engine</module>
+        <module>kundera-rest</module>
+      </modules>
+    </profile>
   </profiles>
 
   <build>
