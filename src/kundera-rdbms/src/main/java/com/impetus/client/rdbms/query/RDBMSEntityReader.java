@@ -30,6 +30,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.Transient;
 import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
@@ -244,6 +245,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
         {
             if (!field.isAssociation() && !field.isCollection()
                     && !((Field) field.getJavaMember()).isAnnotationPresent(ManyToMany.class)
+                    && !((Field) field.getJavaMember()).isAnnotationPresent(Transient.class)
                     && !((MetamodelImpl) metaModel).isEmbeddable(((AbstractAttribute) field).getBindableJavaType()))
             {
                 queryBuilder.append(aliasName);
