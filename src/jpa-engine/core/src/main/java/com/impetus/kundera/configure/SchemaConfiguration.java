@@ -155,7 +155,7 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
                     tableInfos.add(tableInfo);
                 }
                 // Add table for GeneratedValue if opted TableStrategy
-                addTableGenerator(appMetadata, persistenceUnit, tableInfos, entityMetadata, idClassName, idName);
+                addTableGenerator(appMetadata, persistenceUnit, tableInfos, entityMetadata);
 
                 // Validating entity against counter column family.
                 validator.validateEntity(entityMetadata.getEntityClazz(), kunderaMetadata);
@@ -217,19 +217,17 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
      * @param persistenceUnit
      * @param tableInfos
      * @param entityMetadata
-     * @param idClassName
-     * @param idName
      * @param isCompositeId
      */
     private void addTableGenerator(ApplicationMetadata appMetadata, String persistenceUnit, List<TableInfo> tableInfos,
-            EntityMetadata entityMetadata, Class idClassName, String idName)
+            EntityMetadata entityMetadata)
     {
         Metamodel metamodel = appMetadata.getMetamodel(persistenceUnit);
         IdDiscriptor keyValue = ((MetamodelImpl) metamodel).getKeyValue(entityMetadata.getEntityClazz().getName());
         if (keyValue != null && keyValue.getTableDiscriptor() != null)
         {
             TableInfo tableGeneratorDiscriptor = new TableInfo(keyValue.getTableDiscriptor().getTable(),
-                    "CounterColumnType", String.class, idName);
+                    "CounterColumnType", String.class, keyValue.getTableDiscriptor().getPkColumnName());
             if (!tableInfos.contains(tableGeneratorDiscriptor))
             {
                 tableGeneratorDiscriptor.addColumnInfo(getJoinColumn(tableGeneratorDiscriptor, keyValue

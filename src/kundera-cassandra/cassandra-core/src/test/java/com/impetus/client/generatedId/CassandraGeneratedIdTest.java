@@ -15,7 +15,9 @@
  */
 package com.impetus.client.generatedId;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -45,11 +47,21 @@ public class CassandraGeneratedIdTest
 {
     private EntityManagerFactory emf;
 
+    protected Map<String, String> properties = new HashMap<String, String>();
+    
+    
     @Before
     public void setUp() throws Exception
     {
         CassandraCli.cassandraSetUp();
-        emf = Persistence.createEntityManagerFactory("cassandra_generated_id");
+        if(properties.isEmpty())
+        {
+        	emf = Persistence.createEntityManagerFactory("cassandra_generated_id");
+        }
+        else
+        {       	
+        	emf = Persistence.createEntityManagerFactory("cassandra_generated_id", properties);
+        }
     }
 
     @After
