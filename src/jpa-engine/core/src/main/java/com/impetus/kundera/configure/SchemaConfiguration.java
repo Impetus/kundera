@@ -325,8 +325,8 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
                     {
                         joinTableInfo.addColumnInfo(getJoinColumn(joinTableInfo, joinColumnName, entityMetadata
                                 .getIdAttribute().getJavaType()));
-                        joinTableInfo.addColumnInfo(getJoinColumn(joinTableInfo, inverseJoinColumnName, targetEntityMetadata
-                                .getIdAttribute().getJavaType()));
+                        joinTableInfo.addColumnInfo(getJoinColumn(joinTableInfo, inverseJoinColumnName,
+                                targetEntityMetadata.getIdAttribute().getJavaType()));
 
                         // // Do not delete above lines. Currently join table
                         // columns are of type string only.
