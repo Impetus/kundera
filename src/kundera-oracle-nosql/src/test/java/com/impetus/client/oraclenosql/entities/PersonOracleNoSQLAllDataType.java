@@ -28,34 +28,6 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-/**
- * 
-table create -name PERSON_ALL_DATA_TYPE
-add-field -type Long -name PERSON_ID
-add-field -type string -name PERSON_NAME
-add-field -type boolean -name IS_EXCEPTIONAL
-add-field -type integer -name AGE
-add-field -type BINARY -name DIGITAL_SIGNATURE
-add-field -type BINARY -name RATING
-add-field -type float -name COMPLIANCE
-add-field -type double -name HEIGHT
-add-field -type string -name GRADE
-add-field -type BINARY -name ENROLMENT_DATE
-add-field -type BINARY -name ENROLMENT_TIME
-add-field -type BINARY -name JOINING_DATE_TIME
-add-field -type integer -name YEARS_SPENT
-add-field -type Long -name UNIQUE_ID
-add-field -type Long -name BIRTH_DAY
-add-field -type double -name MONTHLY_SALARY
-add-field -type BINARY -name BIRTH_TIME
-add-field -type BINARY -name ANNIVERSARY
-add-field -type BINARY -name JOB_ATTEMPTS
-add-field -type BINARY -name ACCUMULATED_WEALTH
-add-field -type BINARY -name GRADUATION_DAY
-primary-key -field PERSON_ID
-exit
-plan add-table -name PERSON_ALL_DATA_TYPE -wait
- */
 
 /**
  * The Class Person.

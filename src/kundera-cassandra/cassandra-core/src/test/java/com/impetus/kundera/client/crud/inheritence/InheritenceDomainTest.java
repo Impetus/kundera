@@ -33,8 +33,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
-import com.impetus.client.cassandra.thrift.ThriftClient;
-import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
 
 /**

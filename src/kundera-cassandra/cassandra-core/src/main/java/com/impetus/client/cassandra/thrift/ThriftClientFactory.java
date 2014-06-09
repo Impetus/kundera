@@ -52,8 +52,6 @@ import com.impetus.kundera.service.Host;
 import com.impetus.kundera.service.HostConfiguration;
 import com.impetus.kundera.service.policy.LeastActiveBalancingPolicy;
 import com.impetus.kundera.service.policy.RoundRobinBalancingPolicy;
-import com.impetus.kundera.utils.DefaultTimestampGenerator;
-import com.impetus.kundera.utils.TimestampGenerator;
 
 /**
  * A factory of {@link ThriftClient} Currently it uses Pelops for Connection

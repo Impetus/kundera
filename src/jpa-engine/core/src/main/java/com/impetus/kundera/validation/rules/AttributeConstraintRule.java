@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 
+import javax.validation.ValidationException;
 import javax.validation.constraints.AssertFalse;
 import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.DecimalMax;
@@ -40,7 +41,6 @@ import javax.validation.constraints.Null;
 import javax.validation.constraints.Past;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
-import javax.validation.ValidationException;
 
 import org.apache.commons.lang.math.NumberUtils;
 

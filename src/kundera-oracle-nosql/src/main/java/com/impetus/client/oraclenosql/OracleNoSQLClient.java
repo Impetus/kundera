@@ -37,7 +37,6 @@ import oracle.kv.DurabilityException;
 import oracle.kv.FaultException;
 import oracle.kv.KVStore;
 import oracle.kv.Key;
-import oracle.kv.Operation;
 import oracle.kv.OperationExecutionException;
 import oracle.kv.impl.api.table.TableImpl;
 import oracle.kv.table.FieldDef;
@@ -51,7 +50,6 @@ import oracle.kv.table.Row;
 import oracle.kv.table.Table;
 import oracle.kv.table.TableAPI;
 import oracle.kv.table.TableOperation;
-import oracle.kv.table.WriteOptions;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;

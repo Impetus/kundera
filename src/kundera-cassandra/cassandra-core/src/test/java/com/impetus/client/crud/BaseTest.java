@@ -28,7 +28,6 @@ import javax.persistence.criteria.Root;
 import junit.framework.Assert;
 
 import com.impetus.client.crud.PersonCassandra.Day;
-import com.impetus.kundera.query.Person;
 
 /**
  * The Class BaseTest.

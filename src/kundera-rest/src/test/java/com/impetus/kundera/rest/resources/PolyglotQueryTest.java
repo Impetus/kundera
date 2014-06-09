@@ -17,7 +17,6 @@ package com.impetus.kundera.rest.resources;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -31,34 +30,21 @@ import javax.ws.rs.core.MediaType;
 
 import junit.framework.Assert;
 
-import org.apache.cassandra.thrift.CfDef;
-import org.apache.cassandra.thrift.ColumnDef;
-import org.apache.cassandra.thrift.IndexType;
-import org.apache.cassandra.thrift.InvalidRequestException;
-import org.apache.cassandra.thrift.KsDef;
-import org.apache.cassandra.thrift.NotFoundException;
-import org.apache.cassandra.thrift.SchemaDisagreementException;
-import org.apache.cassandra.thrift.TimedOutException;
-import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.commons.lang.StringUtils;
-import org.apache.thrift.TException;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
 import com.impetus.kundera.rest.common.Constants;
-import com.impetus.kundera.rest.common.JAXBUtils;
-import com.impetus.kundera.rest.common.PersonalDetailCassandra;
-import com.impetus.kundera.rest.common.Professional;
-import com.impetus.kundera.rest.common.PreferenceCassandra;
 import com.impetus.kundera.rest.common.ExternalLink;
+import com.impetus.kundera.rest.common.JAXBUtils;
+import com.impetus.kundera.rest.common.PreferenceCassandra;
+import com.impetus.kundera.rest.common.Professional;
 import com.impetus.kundera.rest.common.ProfessionalDetailCassandra;
-import com.impetus.kundera.rest.common.StreamUtils;
 import com.impetus.kundera.rest.common.TweetCassandra;
 import com.impetus.kundera.rest.common.UserCassandra;
 import com.impetus.kundera.rest.dao.RESTClient;

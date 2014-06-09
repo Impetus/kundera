@@ -17,10 +17,7 @@ package com.impetus.client.cassandra.generatedId;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.GenerationType;
 import javax.persistence.Persistence;
-
-import junit.framework.Assert;
 
 import org.junit.After;
 import org.junit.Before;
@@ -28,7 +25,6 @@ import org.junit.Test;
 
 import com.impetus.client.cassandra.generatedId.entites.CassandraGeneratedIdDefault;
 import com.impetus.client.cassandra.generatedId.entites.CassandraGeneratedIdStrategyAuto;
-import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
 
 /**

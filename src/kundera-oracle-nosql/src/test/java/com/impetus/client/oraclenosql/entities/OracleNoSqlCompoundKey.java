@@ -18,9 +18,6 @@ package com.impetus.client.oraclenosql.entities;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
-import com.impetus.kundera.index.Index;
-import com.impetus.kundera.index.IndexCollection;
-
 /**
  * @author vivek.mishra
  */

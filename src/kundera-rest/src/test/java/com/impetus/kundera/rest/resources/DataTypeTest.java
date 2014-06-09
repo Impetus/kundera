@@ -22,10 +22,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.ws.rs.core.MediaType;
 
@@ -54,11 +52,6 @@ import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
 import com.impetus.kundera.rest.common.Constants;
 import com.impetus.kundera.rest.common.JAXBUtils;
 import com.impetus.kundera.rest.common.Professional;
-import com.impetus.kundera.rest.common.PreferenceCassandra;
-import com.impetus.kundera.rest.common.ExternalLink;
-import com.impetus.kundera.rest.common.ProfessionalDetailCassandra;
-import com.impetus.kundera.rest.common.TweetCassandra;
-import com.impetus.kundera.rest.common.UserCassandra;
 import com.impetus.kundera.rest.dao.RESTClient;
 import com.impetus.kundera.rest.dao.RESTClientImpl;
 import com.sun.jersey.api.client.WebResource;

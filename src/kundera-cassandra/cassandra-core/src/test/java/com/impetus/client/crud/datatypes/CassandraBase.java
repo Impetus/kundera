@@ -7,10 +7,6 @@ import java.util.Map;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
-import org.apache.cassandra.thrift.InvalidRequestException;
-import org.apache.cassandra.thrift.SchemaDisagreementException;
-import org.apache.cassandra.thrift.TimedOutException;
-import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.thrift.TException;
 
 import com.impetus.client.cassandra.common.CassandraConstants;

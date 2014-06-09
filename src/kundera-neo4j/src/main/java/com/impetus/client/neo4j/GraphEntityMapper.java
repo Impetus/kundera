@@ -52,7 +52,6 @@ import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
-import com.impetus.kundera.persistence.EntityReaderException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.utils.ReflectUtils;
 

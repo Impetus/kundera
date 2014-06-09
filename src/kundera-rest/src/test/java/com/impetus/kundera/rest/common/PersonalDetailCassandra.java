@@ -19,7 +19,6 @@ import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
-import javax.xml.bind.annotation.XmlRootElement;
 
 import com.impetus.kundera.index.Index;
 import com.impetus.kundera.index.IndexCollection;

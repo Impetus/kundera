@@ -15,26 +15,15 @@
  */
 package com.impetus.kundera.rest.common;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import javax.xml.bind.SchemaOutputResolver;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.transform.Result;
-import javax.xml.transform.stream.StreamResult;
 
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Hex;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.schema.JsonSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

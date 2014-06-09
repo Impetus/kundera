@@ -15,14 +15,6 @@
  ******************************************************************************/
 package com.impetus.client.cassandra.pelops;
 
-import java.io.IOException;
-import java.net.Socket;
-import java.net.UnknownHostException;
-
-import net.dataforte.cassandra.pool.CassandraHost;
-import net.dataforte.cassandra.pool.HostFailoverPolicy;
-import net.dataforte.cassandra.pool.PoolConfiguration;
-
 import org.scale7.cassandra.pelops.SimpleConnectionAuthenticator;
 import org.scale7.cassandra.pelops.pool.CommonsBackedPool;
 import org.scale7.cassandra.pelops.pool.CommonsBackedPool.Policy;

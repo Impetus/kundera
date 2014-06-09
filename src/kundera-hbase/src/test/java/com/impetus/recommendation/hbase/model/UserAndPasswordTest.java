@@ -28,7 +28,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 import com.impetus.client.hbase.junits.HBaseCli;
 
 /**
