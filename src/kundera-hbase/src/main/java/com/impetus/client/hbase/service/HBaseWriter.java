@@ -335,7 +335,6 @@ public class HBaseWriter implements Writer
                 String qualifier = columnName;
                 try
                 {
-                    //Object o = PropertyAccessorHelper.getObject(columnFamilyObj, (Field) column.getJavaMember());
                     Object o = values.get(columnName);
                     byte[] value = HBaseUtils.getBytes(o);
                     if (value != null && columnFamily != null)

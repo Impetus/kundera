@@ -168,8 +168,6 @@ public class HBaseQuery extends QueryImpl
                     columns.toArray(new String[columns.size()]), null);
         }
 
-        // MetadataUtils.useSecondryIndex(((ClientBase)
-        // client).getClientMetadata());
         if (MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
         {
             if (filter == null && !translator.isFindById)
@@ -543,10 +541,6 @@ public class HBaseQuery extends QueryImpl
         {
             // Treat default as UTF8-Type. { in case of discriminator column}
             return HBaseUtils.getBytes(value, String.class);
-            // log.error("Error while handling data type for {} .",
-            // jpaFieldName);
-            // throw new QueryHandlerException("field type is null for:" +
-            // jpaFieldName);
         }
     }
 
@@ -563,8 +557,6 @@ public class HBaseQuery extends QueryImpl
         EntityMetadata m = getEntityMetadata();
         Client client = persistenceDelegeator.getClient(m);
 
-        // MetadataUtils.useSecondryIndex(((ClientBase)
-        // client).getClientMetadata());
         if (!MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
         {
             throw new UnsupportedOperationException("Scrolling over hbase is unsupported for lucene queries");

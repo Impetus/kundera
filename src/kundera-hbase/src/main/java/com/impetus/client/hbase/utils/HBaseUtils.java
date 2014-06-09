@@ -2,11 +2,16 @@ package com.impetus.client.hbase.utils;
 
 import java.math.BigDecimal;
 
+import javax.persistence.metamodel.Metamodel;
+
 import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessorFactory;
+import com.impetus.kundera.utils.KunderaCoreUtils;
 
 public final class HBaseUtils
 {
@@ -84,9 +89,13 @@ public final class HBaseUtils
         return null;
     }
 
-    public static Object fromBytes(EntityMetadata m, byte[] b)
+    public static Object fromBytes(EntityMetadata m, MetamodelImpl metaModel, byte[] b)
     {
         Class idFieldClass = m.getIdAttribute().getJavaType();
+        if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
+        {
+            return fromBytes(b, String.class);
+        }
         return fromBytes(b, idFieldClass);
     }
 
@@ -113,10 +122,6 @@ public final class HBaseUtils
         {
             return Bytes.toDouble(b);
         }
-        // else if (clazz.isAssignableFrom(java.util.UUID.class))
-        // {
-        // return Bytes.toBytes(b.toString());
-        // }
         else if (clazz.equals(float.class) || clazz.isAssignableFrom(Float.class))
         {
             return Bytes.toFloat(b);
@@ -146,15 +151,15 @@ public final class HBaseUtils
      */
     public static CompareOp getOperator(String condition, boolean idPresent, boolean useFilter)
     {
-        if (/* !idPresent && */condition.equals("="))
+        if (condition.equals("="))
         {
             return CompareOp.EQUAL;
         }
-        else if (/* !idPresent && */condition.equals(">"))
+        else if (condition.equals(">"))
         {
             return CompareOp.GREATER;
         }
-        else if (/* !idPresent && */condition.equals("<"))
+        else if (condition.equals("<"))
         {
             return CompareOp.LESS;
         }
