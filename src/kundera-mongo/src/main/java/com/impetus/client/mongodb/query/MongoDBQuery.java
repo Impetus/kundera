@@ -395,9 +395,9 @@ public class MongoDBQuery extends QueryImpl {
 						}
 					} else if (condition.equalsIgnoreCase("like")) {
 						if (isCompositeColumn) {
-							compositeColumns.put(property, value);
+							compositeColumns.put(property, java.util.regex.Pattern.compile((String) value));
 						} else {
-							query.append(property, value);
+							query.append(property, java.util.regex.Pattern.compile((String) value));
 						}
 					} else if (condition.equalsIgnoreCase(">")) {
 						if (isCompositeColumn) {

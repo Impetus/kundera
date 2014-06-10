@@ -284,6 +284,32 @@ public abstract class BaseTest
         Assert.assertEquals(1, results.size());
         Assert.assertNotSame(oldName, getPersonName(e, results.get(0)));
         Assert.assertEquals(newName, getPersonName(e, results.get(0)));
+        
+  
+        
+        q = em.createQuery("Select p from " + clazz + " p where p." + fieldName + " like :name");
+        q.setParameter("name", "test");
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(1, results.size());
+        
+        q = em.createQuery("Select p from " + clazz + " p where p." + fieldName + " like :name");
+        q.setParameter("name", "for");
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(1, results.size());
+        
+        q = em.createQuery("Select p from " + clazz + " p where p." + fieldName + " like :name");
+        q.setParameter("name", "name");
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(1, results.size());
+        
+        q = em.createQuery("Select p from " + clazz + " p where p." + fieldName + " like :name");
+        q.setParameter("name", "operator");
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(1, results.size());
     }
 
     /**
