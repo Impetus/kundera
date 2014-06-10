@@ -13,9 +13,17 @@
 	<url>http://maven.apache.org</url>
 
 	<properties>
-		<hadoop.version>1.1.1</hadoop.version>
-		<hbase.version>0.94.3</hbase.version>
+		<hadoop.version>2.2.0</hadoop.version>
+                <hbase.version>0.96.1.1-hadoop2</hbase.version>
+                <thrift.version>0.9.0</thrift.version>
 	</properties>
+
+        <repositories>
+            <repository>
+                <id>central</id>
+                <url>http://repo1.maven.org/maven2/</url>
+            </repository>
+        </repositories>
 
 
 	<!-- Dependencies -->
@@ -63,7 +71,48 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.hbase</groupId>
-			<artifactId>hbase</artifactId>
+			<artifactId>hbase-client</artifactId>
+			<version>${hbase.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.hbase</groupId>
+			<artifactId>hbase-server</artifactId>
+			<version>${hbase.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.hbase</groupId>
+			<artifactId>hbase-server</artifactId>
+			<version>${hbase.version}</version>
+                        <classifier>tests</classifier>
+                        <scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.hbase</groupId>
+			<artifactId>hbase-common</artifactId>
+			<version>${hbase.version}</version>
+                        <classifier>tests</classifier>
+                        <scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.thrift</groupId>
+			<artifactId>libthrift</artifactId>
+			<version>${thrift.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.hbase</groupId>
+			<artifactId>hbase-common</artifactId>
 			<version>${hbase.version}</version>
 			<exclusions>
 				<exclusion>
@@ -74,7 +123,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
-			<artifactId>hadoop-core</artifactId>
+			<artifactId>hadoop-common</artifactId>
 			<version>${hadoop.version}</version>
 		</dependency>
 		<!-- <dependency> <groupId>org.apache.hbase.zookeeper</groupId> <artifactId>zookeeper</artifactId> 
@@ -83,13 +132,16 @@
 		<!-- Test Dependencies -->
 		<!-- <dependency> <groupId>org.apache.hbase</groupId> <artifactId>hbase</artifactId> 
 			<version>0.92.1</version> <type>test-jar</type> <scope>test</scope> </dependency> -->
+                <!--
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-test</artifactId>
 			<version>${hadoop.version}</version>
 			<scope>test</scope>
 		</dependency>
+                -->
 
+                <!--
 		<dependency>
 			<groupId>org.apache.hbase</groupId>
 			<artifactId>hbase</artifactId>
@@ -97,6 +149,7 @@
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
+                -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>

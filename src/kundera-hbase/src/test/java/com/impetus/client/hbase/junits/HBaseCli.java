@@ -124,7 +124,7 @@ public class HBaseCli
                 zkCluster.setDefaultClientPort(2181);
                 zkCluster.setTickTime(18000);
                 // utility.setupClusterTestDir();
-                zkDir = new File(utility.getClusterTestDir().toString());
+                zkDir = new File(utility.getDataTestDir().toString()).getAbsoluteFile();
 
                 zkCluster.startup(zkDir);
                 utility.setZkCluster(zkCluster);
