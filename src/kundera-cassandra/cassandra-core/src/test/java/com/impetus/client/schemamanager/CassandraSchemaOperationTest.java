@@ -25,7 +25,6 @@ import javax.persistence.Persistence;
 
 import junit.framework.Assert;
 
-import org.apache.cassandra.db.marshal.Int32Type;
 import org.apache.cassandra.db.marshal.IntegerType;
 import org.apache.cassandra.db.marshal.UTF8Type;
 import org.apache.cassandra.thrift.Cassandra;

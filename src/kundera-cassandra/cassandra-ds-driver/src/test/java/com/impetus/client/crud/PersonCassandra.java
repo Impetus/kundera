@@ -23,7 +23,6 @@ import javax.persistence.Id;
 import javax.persistence.NamedNativeQuery;
 import javax.persistence.Table;
 
-import com.impetus.client.crud.Month;
 import com.impetus.kundera.index.Index;
 import com.impetus.kundera.index.IndexCollection;
 

@@ -29,7 +29,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.kundera.PersistenceProperties;
 
 /**

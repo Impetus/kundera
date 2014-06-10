@@ -33,7 +33,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.impetus.client.cassandra.CassandraClientBase;
 import com.impetus.client.crud.PersonCassandra;
 import com.impetus.client.crud.compositeType.CassandraCompoundKey;
 import com.impetus.client.crud.compositeType.CassandraPrimeUser;

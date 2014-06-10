@@ -34,9 +34,6 @@ import com.impetus.kundera.client.cassandra.pelops.crud.CassandraUUIDEntity;
 import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
-import com.impetus.kundera.query.JPQLParseException;
-import com.impetus.kundera.query.KunderaQuery;
-import com.impetus.kundera.query.KunderaQueryParser;
 
 /**
  * @author kuldeep.mishra

@@ -1787,31 +1787,47 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     public Long getGeneratedValue(TableGeneratorDiscriptor descriptor, String pu)
     {
         Cassandra.Client conn = getRawClient(descriptor.getSchema());
+        long latestCount = 0l;
         try
         {
             conn.set_keyspace(descriptor.getSchema());
-            ColumnPath columnPath = new ColumnPath(descriptor.getTable());
-            columnPath.setColumn(descriptor.getValueColumnName().getBytes());
-            long latestCount = 0l;
 
-            try
+            if (isCql3Enabled())
             {
-                latestCount = conn.get(ByteBuffer.wrap(descriptor.getPkColumnValue().getBytes()), columnPath,
-                        getConsistencyLevel()).counter_column.value;
+                CQLTranslator translator = new CQLTranslator();
+                execute(translator.buildUpdateQuery(descriptor).toString(), conn);
+
+                CqlResult result = execute(translator.buildSelectQuery(descriptor).toString(), conn);
+
+                for (CqlRow row : result.getRows())
+                {
+                    latestCount = ByteBufferUtil.toLong(ByteBuffer.wrap(row.getColumns().get(0).getValue()));
+                }
             }
-            catch (NotFoundException e)
+            else
             {
-                log.warn("Counter value not found for {}, resetting it to zero.", descriptor.getPkColumnName());
-                latestCount = 0;
+
+                ColumnPath columnPath = new ColumnPath(descriptor.getTable());
+                columnPath.setColumn(descriptor.getValueColumnName().getBytes());
+
+                try
+                {
+                    latestCount = conn.get(ByteBuffer.wrap(descriptor.getPkColumnValue().getBytes()), columnPath,
+                            getConsistencyLevel()).counter_column.value;
+                }
+                catch (NotFoundException e)
+                {
+                    log.warn("Counter value not found for {}, resetting it to zero.", descriptor.getPkColumnName());
+                    latestCount = 0;
+                }
+                ColumnParent columnParent = new ColumnParent(descriptor.getTable());
+
+                CounterColumn counterColumn = new CounterColumn(ByteBuffer.wrap(descriptor.getValueColumnName()
+                        .getBytes()), 1);
+
+                conn.add(ByteBuffer.wrap(descriptor.getPkColumnValue().getBytes()), columnParent, counterColumn,
+                        getConsistencyLevel());
             }
-            ColumnParent columnParent = new ColumnParent(descriptor.getTable());
-
-            CounterColumn counterColumn = new CounterColumn(
-                    ByteBuffer.wrap(descriptor.getValueColumnName().getBytes()), 1);
-
-            conn.add(ByteBuffer.wrap(descriptor.getPkColumnValue().getBytes()), columnParent, counterColumn,
-                    getConsistencyLevel());
-
             if (latestCount == 0)
             {
                 return (long) descriptor.getInitialValue();
@@ -2438,9 +2454,6 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             {
                 Column column = row.getColumns().get(0);
                 Object columnValue = CassandraDataTranslator.decompose(columnJavaType, column.getValue(), true);
-                // Object columnValue =
-                // PropertyAccessorHelper.getObject(columnJavaType,
-                // column.getValue());
                 results.add(columnValue);
             }
         }

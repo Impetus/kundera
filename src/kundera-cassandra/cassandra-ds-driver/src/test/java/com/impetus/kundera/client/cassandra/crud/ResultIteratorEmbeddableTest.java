@@ -29,6 +29,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
 import com.impetus.kundera.client.cassandra.composite.PrimeUser;
 import com.impetus.kundera.client.cassandra.composite.UserTimeLine;
 import com.impetus.kundera.client.cassandra.persistence.CassandraCli;

@@ -30,13 +30,13 @@ public class MailUtils
 
     public static void sendMail(Map<String, Double> delta, String operationType, String dataStore)
     {
-        onSendEmail(delta, operationType, dataStore, new String[] { "vivek.mishra@impetus.co.in",
+        onSendEmail(delta, operationType, dataStore, new String[] { "shaheed.hussain@impetus.co.in",
                 "chhavi.gangwal@impetus.co.in", "kuldeep.mishra@impetus.co.in", "vivek.shrivastava@impetus.co.in" });
     }
 
     public static void sendPositiveEmail(Map<String, Double> delta, String operationType, String dataStore)
     {
-        onSendEmail(delta, operationType, dataStore, new String[] { "vivek.mishra@impetus.co.in",
+        onSendEmail(delta, operationType, dataStore, new String[] { "kuldeep.mishra@impetus.co.in",
                 "vivek.shrivastava@impetus.co.in" });
     }
 

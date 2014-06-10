@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 
-import javax.persistence.Embeddable;
 import javax.persistence.PersistenceException;
 
 import net.dataforte.cassandra.pool.HostFailoverPolicy;

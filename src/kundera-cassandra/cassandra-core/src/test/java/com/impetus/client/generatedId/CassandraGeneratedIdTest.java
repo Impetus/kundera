@@ -15,7 +15,9 @@
  */
 package com.impetus.client.generatedId;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -45,11 +47,20 @@ public class CassandraGeneratedIdTest
 {
     private EntityManagerFactory emf;
 
+    protected Map<String, String> properties = new HashMap<String, String>();
+
     @Before
     public void setUp() throws Exception
     {
         CassandraCli.cassandraSetUp();
-        emf = Persistence.createEntityManagerFactory("cassandra_generated_id");
+        if (properties.isEmpty())
+        {
+            emf = Persistence.createEntityManagerFactory("cassandra_generated_id");
+        }
+        else
+        {
+            emf = Persistence.createEntityManagerFactory("cassandra_generated_id", properties);
+        }
     }
 
     @After
@@ -68,8 +79,8 @@ public class CassandraGeneratedIdTest
             CassandraGeneratedIdDefault idDefault = new CassandraGeneratedIdDefault();
             idDefault.setName("kuldeep");
             em.persist(idDefault);
-            List<CassandraGeneratedIdDefault> list = em.createQuery(
-                    "Select c from CassandraGeneratedIdDefault c").getResultList();
+            List<CassandraGeneratedIdDefault> list = em.createQuery("Select c from CassandraGeneratedIdDefault c")
+                    .getResultList();
             Assert.assertNotNull(list);
             Assert.assertEquals(1, list.size());
             Assert.assertEquals("kuldeep", list.get(0).getName());
@@ -83,7 +94,7 @@ public class CassandraGeneratedIdTest
         {
             Assert.fail();
         }
-        
+
         try
         {
             CassandraGeneratedIdStrategyAuto strategyAuto = new CassandraGeneratedIdStrategyAuto();

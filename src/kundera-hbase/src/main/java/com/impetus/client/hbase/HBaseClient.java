@@ -71,6 +71,7 @@ import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**
  * HBase client.
@@ -148,7 +149,15 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
             {
                 return null;
             }
+            
+            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                    entityMetadata.getPersistenceUnit());
 
+            if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
+            {
+                rowId = KunderaCoreUtils.prepareCompositeKey(entityMetadata, metaModel, rowId);
+            }
+            
             results = fetchEntity(entityClass, rowId, entityMetadata, relationNames, tableName, results, null, null);
 
             if (results != null && !results.isEmpty())
@@ -244,9 +253,6 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
                     List results = new ArrayList();
                     fetchEntity(entityClass, entityId, entityMetadata, entityMetadata.getRelationNames(),
                             entityMetadata.getSchema(), results, null, null);
-                    // handler.readData(entityMetadata.getSchema(),
-                    // entityMetadata.getEntityClazz(),
-                    // entityMetadata, entityId, null, null);
                     if (results != null)
                     {
                         e = (E) results.get(0);
@@ -309,10 +315,6 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         try
         {
             results = fetchEntity(entityClass, null, entityMetadata, relationNames, tableName, results, filter, columns);
-            // results = handler.readData(tableName,
-            // entityMetadata.getEntityClazz(), entityMetadata, null,
-            // relationNames,
-            // filter, columns);
         }
         catch (IOException ioex)
         {
@@ -344,7 +346,6 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         // columnFamily has a different meaning for HBase, so it won't be used
         // here
         String tableName = entityMetadata.getSchema();
-        // Object enhancedEntity = null;
         List results = new ArrayList();
 
         FilterList filter = new FilterList();
@@ -376,9 +377,6 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
                     List found = handler.readDataByRange(tableName, subEntityMetadata.getEntityClazz(),
                             subEntityMetadata, startRow, endRow, columns, filter);
                     results.addAll(found);
-                    /*
-                     * if (!results.isEmpty()) { break; }
-                     */
                 }
             }
             else
@@ -582,6 +580,11 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
                 .getSecondaryTablesName();
         secondaryTables.add(metadata.getTableName());
 
+        if (metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
+        {
+            pKey = KunderaCoreUtils.prepareCompositeKey(metadata, metaModel, pKey);
+        }
+        
         for (String colTableName : secondaryTables)
         {
             deleteByColumn(metadata.getSchema(), colTableName,
@@ -612,7 +615,6 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         List output = new ArrayList();
         try
         {
-
             List<AbstractManagedType> subManagedType = getSubManagedType(entityClazz, m);
 
             if (!subManagedType.isEmpty())
@@ -627,7 +629,6 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
                     {
                         output.addAll(results);
                     }
-
                 }
             }
             else
@@ -960,10 +961,8 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         }
         else
         {
-
             results = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata, rowId,
                     relationNames, filter, columns);
-
         }
 
         return results;

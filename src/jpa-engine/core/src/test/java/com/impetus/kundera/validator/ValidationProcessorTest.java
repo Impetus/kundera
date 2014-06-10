@@ -20,14 +20,11 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
-import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 import javax.validation.ValidationException;
 
@@ -41,14 +38,12 @@ import org.slf4j.LoggerFactory;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.processor.MetaModelBuilder;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
-import com.impetus.kundera.metadata.processor.MetaModelBuilder;
-import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.validation.ValidationFactory;
 import com.impetus.kundera.validation.ValidationFactoryGenerator;
 import com.impetus.kundera.validation.ValidationFactoryGenerator.ValidationFactoryType;
-
 import com.impetus.kundera.validation.rules.AttributeConstraintRule;
 
 /**

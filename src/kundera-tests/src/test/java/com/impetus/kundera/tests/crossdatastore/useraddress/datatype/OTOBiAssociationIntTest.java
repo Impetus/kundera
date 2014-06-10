@@ -23,14 +23,9 @@ import java.util.List;
 
 import junit.framework.Assert;
 
-import org.apache.cassandra.thrift.CfDef;
-import org.apache.cassandra.thrift.ColumnDef;
 import org.apache.cassandra.thrift.Compression;
 import org.apache.cassandra.thrift.ConsistencyLevel;
-import org.apache.cassandra.thrift.IndexType;
 import org.apache.cassandra.thrift.InvalidRequestException;
-import org.apache.cassandra.thrift.KsDef;
-import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
@@ -40,8 +35,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.impetus.client.cassandra.common.CassandraConstants;
-import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
 import com.impetus.kundera.tests.crossdatastore.useraddress.TwinAssociation;
 import com.impetus.kundera.tests.crossdatastore.useraddress.datatype.entities.HabitatBi1To1FKBigDecimal;

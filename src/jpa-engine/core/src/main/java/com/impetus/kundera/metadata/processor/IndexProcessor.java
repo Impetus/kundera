@@ -24,7 +24,6 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 import javax.persistence.Column;
-import javax.persistence.Embeddable;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;

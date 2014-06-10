@@ -55,18 +55,6 @@ public class HBaseReader implements Reader
      * com.impetus.client.hbase.Reader#LoadData(org.apache.hadoop.hbase.client
      * .HTable, java.lang.String, java.lang.String)
      */
-    /*
-     * @Override public List<HBaseData> LoadData(HTableInterface hTable, String
-     * columnFamily, Object rowKey, Filter filter, String... columns) throws
-     * IOException { List<HBaseData> results = null; if (scanner == null) {
-     * 
-     * // only in case of find by id Scan scan = null; if (rowKey != null) {
-     * byte[] rowKeyBytes = HBaseUtils.getBytes(rowKey); Get g = new
-     * Get(rowKeyBytes); scan = new Scan(g); } else { scan = new Scan(); }
-     * setScanCriteria(filter, columnFamily, null, scan, columns); scanner =
-     * hTable.getScanner(scan); resultsIter = scanner.iterator(); } return
-     * scanResults(columnFamily, results); }
-     */
 
     @Override
     public List<HBaseData> LoadData(HTableInterface hTable, String columnFamily, Object rowKey, Filter filter,
@@ -356,23 +344,6 @@ public class HBaseReader implements Reader
         data.setColumns(values);
         return data;
     }
-
-    // public List<HBaseData> next(final int chunkSize)
-    // {
-    // List<HBaseData> results = new ArrayList<HBaseData>();
-    // for (int i = 1; i <= chunkSize; i++)
-    // {
-    // HBaseData data = next();
-    // if (data == null)
-    // {
-    // counter++;
-    // resultsIter = null;
-    // break;
-    // }
-    // results.add(data);
-    // }
-    // return results;
-    // }
 
     public boolean hasNext()
     {

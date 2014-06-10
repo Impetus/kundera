@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
-
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.metadata.processor.MetaModelBuilder;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;

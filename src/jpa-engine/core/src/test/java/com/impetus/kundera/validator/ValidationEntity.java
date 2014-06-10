@@ -15,13 +15,9 @@
  ******************************************************************************/
 package com.impetus.kundera.validator;
 
-import java.sql.Date;
-
 import javax.persistence.Column;
-import javax.persistence.Id;
 import javax.persistence.Entity;
-
-
+import javax.persistence.Id;
 import javax.validation.constraints.AssertFalse;
 import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.DecimalMax;

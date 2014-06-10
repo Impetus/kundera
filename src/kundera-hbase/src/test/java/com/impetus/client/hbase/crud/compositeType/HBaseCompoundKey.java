@@ -13,7 +13,9 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.client.oraclenosql.entities;
+package com.impetus.client.hbase.crud.compositeType;
+
+import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -22,21 +24,21 @@ import javax.persistence.Embeddable;
  * @author vivek.mishra
  */
 @Embeddable
-public class OracleNoSqlCompoundKey
+public class HBaseCompoundKey
 {
     @Column
-    private String user_Id;
+    private String userId;
 
     @Column
     private int tweetId;
 
     @Column
-    private String timeLineId;
+    private UUID timeLineId;
 
     /**
      * 
      */
-    public OracleNoSqlCompoundKey()
+    public HBaseCompoundKey()
     {
     }
 
@@ -45,9 +47,9 @@ public class OracleNoSqlCompoundKey
      * @param tweetId
      * @param timeLineId
      */
-    public OracleNoSqlCompoundKey(String userId, int tweetId, String timeLineId)
+    public HBaseCompoundKey(String userId, int tweetId, UUID timeLineId)
     {
-       this.user_Id = userId;
+        this.userId = userId;
         this.tweetId = tweetId;
         this.timeLineId = timeLineId;
     }
@@ -57,7 +59,7 @@ public class OracleNoSqlCompoundKey
      */
     public String getUserId()
     {
-        return user_Id;
+        return userId;
     }
 
     /**
@@ -71,7 +73,7 @@ public class OracleNoSqlCompoundKey
     /**
      * @return the timeLineId
      */
-    public String getTimeLineId()
+    public UUID getTimeLineId()
     {
         return timeLineId;
     }

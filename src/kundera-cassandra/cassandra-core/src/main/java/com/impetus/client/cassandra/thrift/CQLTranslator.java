@@ -59,6 +59,7 @@ import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.model.TableGeneratorDiscriptor;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
@@ -144,14 +145,12 @@ public final class CQLTranslator
     public static final String CREATE_COLUMNFAMILY_CLUSTER_ORDER = " WITH CLUSTERING ORDER BY ($COLUMNS";
 
     public static final String DEFAULT_KEY_NAME = "key";
-    
+
     public static final String CREATE_KEYSPACE = "CREATE KEYSPACE IF NOT EXISTS $KEYSPACE WITH REPLICATION = { 'class':'$CLASS',$REPLICATION} and durable_writes = '$DURABLE_WRITES'";
-    
+
     public static final String SIMPLE_REPLICATION = "'replication_factor':$REPLICATION_FACTOR";
-    
+
     public static final String DURABLE_WRITES = "durable_writes=$DURABLE_WRITES";
-    
-    
 
     public CQLTranslator()
     {
@@ -903,4 +902,26 @@ public final class CQLTranslator
         builder.append(orderType);
     }
 
+    public StringBuilder buildSelectQuery(TableGeneratorDiscriptor descriptor)
+    {
+        StringBuilder builder = new StringBuilder("Select ");
+        ensureCase(builder, descriptor.getValueColumnName(), false).append(" from ");
+        ensureCase(builder, descriptor.getTable(), false).append(" where ");
+        ensureCase(builder, descriptor.getPkColumnName(), false).append(" = '").append(
+                descriptor.getPkColumnValue() + "'");
+
+        return builder;
+    }
+
+    public StringBuilder buildUpdateQuery(TableGeneratorDiscriptor descriptor)
+    {
+        StringBuilder builder = new StringBuilder("Update ");
+        ensureCase(builder, descriptor.getTable(), false).append(" set ");
+        ensureCase(builder, descriptor.getValueColumnName(), false).append(" = ");
+        ensureCase(builder, descriptor.getValueColumnName(), false).append(" + ").append(1).append(" where ");
+        ensureCase(builder, descriptor.getPkColumnName(), false).append(" = '").append(
+                descriptor.getPkColumnValue() + "'");
+
+        return builder;
+    }
 }

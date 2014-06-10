@@ -38,9 +38,6 @@ public class HBaseData implements DataWrapper
     /** The row key. */
     private byte[] rowKey;
 
-    /** The columns. */
-//    private List<KeyValue> columns;
-    
     private Map<String, byte[]> columns = new HashMap<String, byte[]>();
 
     /**

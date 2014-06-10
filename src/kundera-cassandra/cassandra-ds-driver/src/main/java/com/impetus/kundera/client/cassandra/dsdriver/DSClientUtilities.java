@@ -30,8 +30,8 @@ import javax.persistence.metamodel.EntityType;
 import org.apache.cassandra.db.marshal.BytesType;
 import org.apache.cassandra.utils.ByteBufferUtil;
 
-import com.datastax.driver.core.Row;
 import com.datastax.driver.core.DataType.Name;
+import com.datastax.driver.core.Row;
 import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.schemamanager.CassandraDataTranslator;
 import com.impetus.client.cassandra.schemamanager.CassandraValidationClassMapper;

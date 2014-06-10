@@ -29,7 +29,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.impetus.client.cassandra.query.CassQuery;
 import com.impetus.client.crud.PersonCassandra;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
@@ -37,9 +36,9 @@ import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityManagerImpl;
 import com.impetus.kundera.persistence.PersistenceDelegator;
-import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.KunderaQueryParser;
 import com.vividsolutions.jts.util.Assert;

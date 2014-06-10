@@ -27,7 +27,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.kundera.client.DummyDatabase;
-import com.impetus.kundera.index.IndexingConstants;
 import com.impetus.kundera.query.Person;
 
 /**

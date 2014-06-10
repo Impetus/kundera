@@ -3,7 +3,6 @@
  */
 package com.impetus.kundera.persistence;
 
-import javax.persistence.OrderBy;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Order;
 
