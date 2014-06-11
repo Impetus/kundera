@@ -50,10 +50,12 @@ import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.QueryHandlerException;
 import com.impetus.kundera.query.QueryImpl;
+import com.impetus.kundera.utils.ReflectUtils;
 
 /**
  * Query implementation for HBase, translates JPQL into HBase Filters using
@@ -76,7 +78,8 @@ public class HBaseQuery extends QueryImpl
      * @param persistenceDelegator
      *            persistence delegator interface.
      */
-    public HBaseQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator, final KunderaMetadata kunderaMetadata)
+    public HBaseQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator,
+            final KunderaMetadata kunderaMetadata)
     {
         super(kunderaQuery, persistenceDelegator, kunderaMetadata);
     }
@@ -150,27 +153,17 @@ public class HBaseQuery extends QueryImpl
         translator.translate(getKunderaQuery(), m, ((ClientBase) client).getClientMetadata());
         // start with 1 as first element is alias.
         List<String> columns = getTranslatedColumns(m, getKunderaQuery().getResult(), 1);
-        Map<Boolean, Filter> filter = translator.getFilter();
-        if (translator.isFindById && (filter == null && columns == null))
-        {
-            List results = new ArrayList();
+        Filter filter = translator.getFilter();
 
-            Object output = client.find(m.getEntityClazz(), translator.rowKey);
-            if (output != null)
-            {
-                results.add(output);
-            }
-            return results;
-        }
-        if (translator.isFindById && filter == null && columns != null)
+        if (filter == null && columns != null)
         {
-            return ((HBaseClient) client).findByRange(m.getEntityClazz(), m, translator.rowKey, translator.rowKey,
-                    columns.toArray(new String[columns.size()]), null);
+            return ((HBaseClient) client).findByRange(m.getEntityClazz(), m, translator.getStartRow(),
+                    translator.getEndRow(), columns.toArray(new String[columns.size()]), null);
         }
 
         if (MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
         {
-            if (filter == null && !translator.isFindById)
+            if (filter == null)
             {
                 // means complete scan without where clause, scan all records.
                 // findAll.
@@ -188,15 +181,10 @@ public class HBaseQuery extends QueryImpl
             else
             {
                 // means WHERE clause is present.
-                Filter f = null;
-                if (filter != null && filter.values() != null && !filter.values().isEmpty())
-                {
-                    f = filter.values().iterator().next();
-                }
                 if (translator.isRangeScan())
                 {
                     return ((HBaseClient) client).findByRange(m.getEntityClazz(), m, translator.getStartRow(),
-                            translator.getEndRow(), columns.toArray(new String[columns.size()]), f);
+                            translator.getEndRow(), columns.toArray(new String[columns.size()]), filter);
                 }
                 else
                 {
@@ -205,7 +193,7 @@ public class HBaseQuery extends QueryImpl
 
                     // else setFilter to client and invoke new method. find by
                     // query if isFindById is false! else invoke findById
-                    return ((HBaseClient) client).findByQuery(m.getEntityClazz(), m, f,
+                    return ((HBaseClient) client).findByQuery(m.getEntityClazz(), m, filter,
                             columns.toArray(new String[columns.size()]));
                 }
             }
@@ -304,9 +292,6 @@ public class HBaseQuery extends QueryImpl
         /* filter list to hold collection for applied filters */
         private List<Filter> filterList;
 
-        /* Returns true, if intended for id column */
-        private boolean isIdColumn;
-
         /*
          * byte[] value for start row, in case of range query, else will contain
          * null.
@@ -318,12 +303,6 @@ public class HBaseQuery extends QueryImpl
          * null.
          */
         private byte[] endRow;
-
-        /* is true, if query intended for row key equality. */
-        private boolean isFindById;
-
-        /* row key value. */
-        byte[] rowKey;
 
         /**
          * Translates kundera query into collection of to be applied HBase
@@ -368,7 +347,6 @@ public class HBaseQuery extends QueryImpl
                         }
                     }
                 }
-
             }
         }
 
@@ -377,15 +355,13 @@ public class HBaseQuery extends QueryImpl
          * 
          * @return map.
          */
-        Map<Boolean, Filter> getFilter()
+        Filter getFilter()
         {
-            if (filterList != null)
+            if (filterList == null)
             {
-                Map<Boolean, Filter> queryClause = new HashMap<Boolean, Filter>();
-                queryClause.put(isIdColumn, new FilterList(filterList));
-                return queryClause;
+                return null;
             }
-            return null;
+            return new FilterList(filterList);
         }
 
         /**
@@ -402,14 +378,15 @@ public class HBaseQuery extends QueryImpl
          * @param m
          *            entity metadata.
          */
-        private void onParseFilter(String condition, String name, Object value, boolean isIdColumn, EntityMetadata m, boolean useFilter)
+        private void onParseFilter(String condition, String name, Object value, boolean isIdColumn, EntityMetadata m,
+                boolean useFilter)
         {
-            CompareOp operator = HBaseUtils.getOperator(condition, isIdColumn,useFilter);
-            byte[] valueInBytes = getBytes(name, m, value);
+            CompareOp operator = HBaseUtils.getOperator(condition, isIdColumn, useFilter);
 
             if (!isIdColumn)
             {
                 List<String> columns = null;
+                byte[] valueInBytes = getBytes(name, m, value);
                 if (new StringTokenizer(name, ".").countTokens() > 1)
                 {
                     columns = getTranslatedColumns(m, new String[] { name }, 0);
@@ -427,20 +404,19 @@ public class HBaseQuery extends QueryImpl
             {
                 if (operator.equals(CompareOp.GREATER_OR_EQUAL) || operator.equals(CompareOp.GREATER))
                 {
+                    byte[] valueInBytes = getBytes(name, m, value);
                     startRow = valueInBytes;
                 }
                 else if (operator.equals(CompareOp.LESS_OR_EQUAL) || operator.equals(CompareOp.LESS))
                 {
+                    byte[] valueInBytes = getBytes(name, m, value);
                     endRow = valueInBytes;
                 }
                 else if (operator.equals(CompareOp.EQUAL))
                 {
-                    rowKey = getBytes(m.getIdAttribute().getName(), m, value);
-                    endRow = null;
-                    isFindById = true;
+                    startRow = endRow = getBytes(m.getIdAttribute().getName(), m, value);
                 }
             }
-            this.isIdColumn = isIdColumn;
         }
 
         /**
@@ -459,17 +435,9 @@ public class HBaseQuery extends QueryImpl
             return endRow;
         }
 
-        /**
-         * @return the isFindById
-         */
-        boolean isFindById()
-        {
-            return isFindById;
-        }
-
         boolean isRangeScan()
         {
-            return startRow != null || endRow != null && !isFindById;
+            return startRow != null || endRow != null;
         }
 
         /**
@@ -495,7 +463,7 @@ public class HBaseQuery extends QueryImpl
      */
     private byte[] getBytes(String jpaFieldName, EntityMetadata m, Object value)
     {
-        Attribute idCol = m.getIdAttribute();
+        AbstractAttribute idCol = (AbstractAttribute) m.getIdAttribute();
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
 
@@ -504,7 +472,33 @@ public class HBaseQuery extends QueryImpl
         if (idCol.getName().equals(jpaFieldName))
         {
             Field f = (Field) idCol.getJavaMember();
-            fieldClazz = f.getType();
+
+            if (metaModel.isEmbeddable(idCol.getBindableJavaType()))
+            {
+                fieldClazz = String.class;
+                Map<Attribute, List<Object>> columnValues = new HashMap<Attribute, List<Object>>();
+                Field[] fields = m.getIdAttribute().getBindableJavaType().getDeclaredFields();
+                EmbeddableType embeddable = metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
+
+                StringBuilder compositeKey = new StringBuilder();
+                for (Field field : fields)
+                {
+                    if (!ReflectUtils.isTransientOrStatic(field))
+                    {
+                        AbstractAttribute attrib = (AbstractAttribute) embeddable.getAttribute(field.getName());
+                        Object obj = PropertyAccessorHelper.getObject(value, field);
+                        compositeKey.append(
+                                PropertyAccessorHelper.fromSourceToTargetClass(String.class,
+                                        attrib.getBindableJavaType(), obj)).append("\001");
+                    }
+                }
+                compositeKey.delete(compositeKey.lastIndexOf("\001"), compositeKey.length());
+                value = compositeKey.toString();
+            }
+            else
+            {
+                fieldClazz = f.getType();
+            }
         }
         else
         {

@@ -106,7 +106,7 @@ public class HBaseCompositeTypeTest
         Assert.assertNull(result);
     }
 
-    // TODO : open it after implementation @Test
+     @Test
     public synchronized void onQuery()
     {
         EntityManager em = emf.createEntityManager();
@@ -147,7 +147,7 @@ public class HBaseCompositeTypeTest
         q.setParameter("userId", "mevivs");
         results = q.getResultList();
         Assert.assertNotNull(results);
-        Assert.assertTrue(results.isEmpty());
+        Assert.assertEquals(1, results.size());
 
         // Query with composite key clause.
         q = em.createQuery(withClauseOnNoncomposite);
@@ -160,7 +160,7 @@ public class HBaseCompositeTypeTest
         q.setParameter("tweetId", 1);
         results = q.getResultList();
         Assert.assertNotNull(results);
-        Assert.assertTrue(results.isEmpty());
+        Assert.assertEquals(1, results.size());
 
         // Query with composite key clause.
         q = em.createQuery(withBothCompositeColClause);
@@ -168,7 +168,7 @@ public class HBaseCompositeTypeTest
         q.setParameter("tweetId", 1);
         results = q.getResultList();
         Assert.assertNotNull(results);
-        Assert.assertTrue(results.isEmpty());
+        Assert.assertEquals(1, results.size());
 
         // Query with composite key clause.
         q = em.createQuery(withAllCompositeColClause);
@@ -185,8 +185,7 @@ public class HBaseCompositeTypeTest
         q.setParameter("tweetId", 1);
         q.setParameter("timeLineId", timeLineId);
         results = q.getResultList();
-        // TODO::
-        // Assert.assertEquals(1, results.size());
+        Assert.assertEquals(1, results.size());
 
         // Query with composite key with selective clause.
         q = em.createQuery(withSelectiveCompositeColClause);
@@ -232,7 +231,7 @@ public class HBaseCompositeTypeTest
         em.clear();// optional,just to clear persistence cache.
     }
 
-    // TODO : open it after implementation @Test
+     @Test
     public synchronized void onNamedQueryTest()
     {
         updateNamed();

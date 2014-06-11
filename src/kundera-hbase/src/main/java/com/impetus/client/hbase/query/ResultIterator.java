@@ -17,7 +17,6 @@ package com.impetus.client.hbase.query;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 
 import org.apache.hadoop.hbase.filter.Filter;
@@ -162,7 +161,11 @@ class ResultIterator<E> implements IResultIterator<E>
         try
         {
             // Called only in case of standalone entity.
-            Map<Boolean, Filter> filter = translator.getFilter();
+            FilterList filter = null;
+            if (translator.getFilter() != null)
+            {
+                filter = new FilterList(translator.getFilter());
+            }
             String[] columnAsArr = getColumnsAsArray();
 
             if (isFindKeyOnly(m, columnAsArr))
@@ -170,20 +173,14 @@ class ResultIterator<E> implements IResultIterator<E>
                 this.handler.setFilter(new KeyOnlyFilter());
             }
 
-            if (this.translator.isFindById() && (filter == null && columns == null))
+            if (filter == null && columns != null)
             {
-                handler.readData(m.getSchema(), m.getEntityClazz(), entityMetadata, translator.rowKey,
-                        m.getRelationNames(), null);
-
-            }
-            if (translator.isFindById() && filter == null && columns != null)
-            {
-                handler.readDataByRange(m.getSchema(), m.getEntityClazz(), m, translator.rowKey, translator.rowKey,
-                        columnAsArr, null);
+                handler.readDataByRange(m.getSchema(), m.getEntityClazz(), m, translator.getStartRow(),
+                        translator.getEndRow(), columnAsArr, null);
             }
             if (MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
             {
-                if (filter == null && !translator.isFindById())
+                if (filter == null)
                 {
                     // means complete scan without where clause, scan all
                     // records.
@@ -201,16 +198,10 @@ class ResultIterator<E> implements IResultIterator<E>
                 else
                 {
                     // means WHERE clause is present.
-
-                    FilterList f = new FilterList();
-                    if (filter != null && filter.values() != null && !filter.values().isEmpty())
-                    {
-                        f.addFilter(filter.values().iterator().next());
-                    }
                     if (translator.isRangeScan())
                     {
                         handler.readDataByRange(m.getSchema(), m.getEntityClazz(), m, translator.getStartRow(),
-                                translator.getEndRow(), columnAsArr, f);
+                                translator.getEndRow(), columnAsArr, filter);
                     }
                     else
                     {
@@ -219,7 +210,7 @@ class ResultIterator<E> implements IResultIterator<E>
                         // scan method.
 
                         handler.readData(m.getSchema(), entityMetadata.getEntityClazz(), entityMetadata, null,
-                                m.getRelationNames(), f, columnAsArr);
+                                m.getRelationNames(), filter, columnAsArr);
                     }
                 }
             }
