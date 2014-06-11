@@ -28,9 +28,9 @@ public class CoreTestClient extends ClientBase implements Client<LuceneQuery>, A
 
     public CoreTestClient(IndexManager indexManager, String persistenceUnit, final KunderaMetadata kunderaMetadata)
     {
-        super(kunderaMetadata);
+        super(kunderaMetadata, null,persistenceUnit);
         this.indexManager = indexManager;
-        this.persistenceUnit = persistenceUnit;
+       
     }
 
     @Override

@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
@@ -33,6 +34,7 @@ import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**
  * Base class for all Client implementations providing common utility methods to
@@ -56,9 +58,17 @@ public abstract class ClientBase
 
     protected final KunderaMetadata kunderaMetadata;
 
-    protected ClientBase(final KunderaMetadata kunderaMetadata)
+    protected boolean showQuery;
+
+    protected Map<String, Object> externalProperties;
+
+    protected ClientBase(final KunderaMetadata kunderaMetadata, final Map<String, Object> properties,
+            final String persistenceUnit)
     {
         this.kunderaMetadata = kunderaMetadata;
+        this.externalProperties = properties;
+        this.persistenceUnit = persistenceUnit;
+        this.showQuery = KunderaCoreUtils.isShowQuery(properties, persistenceUnit, kunderaMetadata);
     }
 
     /*
@@ -90,7 +100,7 @@ public abstract class ClientBase
     {
         Object entity = node.getData();
         Object id = node.getEntityId();
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,  node.getDataClass());
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, node.getDataClass());
         isUpdate = node.isUpdate();
         List<RelationHolder> relationHolders = getRelationHolders(node);
         onPersist(metadata, entity, id, relationHolders);

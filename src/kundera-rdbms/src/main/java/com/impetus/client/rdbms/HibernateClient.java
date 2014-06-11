@@ -87,8 +87,6 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     /** The reader. */
     private EntityReader reader;
 
-    private Map<String, Object> puProperties;
-
     /** The Constant log. */
     private static final Logger log = LoggerFactory.getLogger(HibernateClient.class);
 
@@ -104,18 +102,16 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      * @param puProperties
      */
     public HibernateClient(final String persistenceUnit, IndexManager indexManager, EntityReader reader,
-            RDBMSClientFactory clientFactory, Map<String, Object> puProperties, final ClientMetadata clientMetadata,
-            final KunderaMetadata kunderaMetadata)
+            RDBMSClientFactory clientFactory, Map<String, Object> externalProperties,
+            final ClientMetadata clientMetadata, final KunderaMetadata kunderaMetadata)
     {
 
-        super(kunderaMetadata);
+        super(kunderaMetadata, externalProperties, persistenceUnit);
         this.clientFactory = clientFactory;
         // TODO . once we clear this persistenceUnit stuff we need to simply
         // modify this to have a properties or even pass an EMF!
-        this.persistenceUnit = persistenceUnit;
         this.indexManager = indexManager;
         this.reader = reader;
-        this.puProperties = puProperties;
         this.clientMetadata = clientMetadata;
     }
 
@@ -133,7 +129,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
             s.close();
             s = null;
         }
-        puProperties = null;
+        externalProperties = null;
     }
 
     /*
@@ -161,10 +157,11 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     private Transaction onBegin()
     {
         Transaction tx;
-        if(((StatelessSessionImpl)s).getTransactionCoordinator().isTransactionInProgress())
+        if (((StatelessSessionImpl) s).getTransactionCoordinator().isTransactionInProgress())
         {
-            tx = ((StatelessSessionImpl)s).getTransactionCoordinator().getTransaction();
-        } else
+            tx = ((StatelessSessionImpl) s).getTransactionCoordinator().getTransaction();
+        }
+        else
         {
             tx = s.beginTransaction();
         }
@@ -250,7 +247,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
 
                 // Update foreign Keys
                 updateForeignKeys(metadata, id, relationHolders);
-                onCommit(tx);/*tx.commit();*/
+                onCommit(tx);/* tx.commit(); */
             }
             else
             {
@@ -271,7 +268,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
             s.update(entity);
             log.info(e.getMessage());
             onCommit(tx);
-//            tx.commit();
+            // tx.commit();
         }
         catch (HibernateException e)
         {
@@ -282,7 +279,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
 
     private void onCommit(Transaction tx)
     {
-        if(tx.isActive())
+        if (tx.isActive())
         {
             tx.commit();
         }
@@ -371,13 +368,13 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
 
         query.append("DELETE FROM ").append(getFromClause(schemaName, tableName)).append(" WHERE ").append(columnName)
                 .append("=").append("'").append(columnValue).append("'");
-        
+
         StatelessSession s = getStatelessSession();
-        
+
         Transaction tx = onBegin();
         onNativeUpdate(query.toString(), null);
         onCommit(tx);
-        
+
     }
 
     /**
@@ -433,7 +430,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
             }
         }
         onCommit(tx);
-//        tx.commit();
+        // tx.commit();
     }
 
     /**
@@ -564,13 +561,13 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         Query q = s.createSQLQuery(query);
         setParameters(parameterMap, q);
 
-        
-//        Transaction tx = s.getTransaction() == null ? s.beginTransaction(): s.getTransaction();
-        
-//        tx.begin();
+        // Transaction tx = s.getTransaction() == null ? s.beginTransaction():
+        // s.getTransaction();
+
+        // tx.begin();
         int i = q.executeUpdate();
 
-//        tx.commit();
+        // tx.commit();
 
         return i;
     }
@@ -594,11 +591,11 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         setParameters(parameterMap, q);
 
         Transaction tx = onBegin();
-        
+
         int i = q.executeUpdate();
 
         onCommit(tx);
-//        tx.commit();
+        // tx.commit();
 
         return i;
     }
@@ -740,14 +737,17 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
             if (linkName != null && linkValue != null)
             {
 
-//                String fieldName = metadata.getFieldName(linkName);
-                
+                // String fieldName = metadata.getFieldName(linkName);
+
                 String clause = getFromClause(metadata.getSchema(), metadata.getTableName());
-//                String updateSql = "Update " + metadata.getEntityClazz().getSimpleName() + " SET " + fieldName + "= '" + linkValue + "' WHERE "
-//                        + ((AbstractAttribute) metadata.getIdAttribute()).getName() + " = '" + id + "'";
+                // String updateSql = "Update " +
+                // metadata.getEntityClazz().getSimpleName() + " SET " +
+                // fieldName + "= '" + linkValue + "' WHERE "
+                // + ((AbstractAttribute) metadata.getIdAttribute()).getName() +
+                // " = '" + id + "'";
 
                 String updateSql = "Update " + clause + " SET " + linkName + "= '" + linkValue + "' WHERE "
-                        + ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName()+ " = '" + id + "'";
+                        + ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName() + " = '" + id + "'";
 
                 onNativeUpdate(updateSql, null);
             }

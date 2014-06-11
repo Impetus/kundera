@@ -32,6 +32,7 @@ import org.apache.commons.configuration.SystemConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -291,5 +292,29 @@ public class KunderaCoreUtils
         }
 
         return property;
+    }
+
+    public static boolean isShowQuery(final Map<String, Object> properties,
+            final String persistenceUnit,final KunderaMetadata kunderaMetadata)
+    {
+        boolean showQuery=false;
+        showQuery=properties != null ? Boolean.parseBoolean((String) properties
+                .get(PersistenceProperties.KUNDERA_SHOW_QUERY)) : false;
+        if (!showQuery)
+        {
+            showQuery = persistenceUnit != null ? Boolean.parseBoolean(kunderaMetadata.getApplicationMetadata()
+                    .getPersistenceUnitMetadata(persistenceUnit).getProperties()
+                    .getProperty(PersistenceProperties.KUNDERA_SHOW_QUERY)) : false;
+        }
+        return showQuery;
+    }
+    
+    
+    public static void showQuery(String query, boolean showQuery)
+    {
+        if (showQuery)
+        {
+            System.out.println(query);
+        }
     }
 }

@@ -25,6 +25,7 @@ import com.impetus.kundera.configure.ClientProperties.DataStore.Schema;
 import com.impetus.kundera.configure.schema.TableInfo;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
+import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**
  * Abstract Schema Manager has abstract method to handle
@@ -56,6 +57,9 @@ public abstract class AbstractSchemaManager
 
     /** The operation variable. */
     protected String operation;
+
+    /** for kundera.show property */
+    protected boolean showQuery;
 
     protected List<Schema> schemas = null;
 
@@ -94,8 +98,7 @@ public abstract class AbstractSchemaManager
     protected void exportSchema(final String persistenceUnit, List<TableInfo> tables)
     {
         // Get persistence unit metadata
-        this.puMetadata = kunderaMetadata.getApplicationMetadata()
-                .getPersistenceUnitMetadata(persistenceUnit);
+        this.puMetadata = kunderaMetadata.getApplicationMetadata().getPersistenceUnitMetadata(persistenceUnit);
         String paramString = externalProperties != null ? (String) externalProperties
                 .get(PersistenceProperties.KUNDERA_CLIENT_FACTORY) : null;
         if (clientFactory != null
@@ -132,6 +135,7 @@ public abstract class AbstractSchemaManager
             schemaName = (String) externalProperties.get(PersistenceProperties.KUNDERA_KEYSPACE);
             // get type of schema of operation.
             operationType = (String) externalProperties.get(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE);
+            showQuery = KunderaCoreUtils.isShowQuery(externalProperties, puMetadata.getPersistenceUnitName(), kunderaMetadata);
         }
         if (portName == null)
             portName = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_PORT);
@@ -142,6 +146,10 @@ public abstract class AbstractSchemaManager
         // get type of schema of operation.
         if (operationType == null)
             operationType = puMetadata.getProperty(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE);
+       /* if (!showQuery)
+            showQuery = Boolean.parseBoolean(puMetadata.getProperties().getProperty(
+                    PersistenceProperties.KUNDERA_SHOW_QUERY));
+*/
         if (userName == null)
         {
             userName = puMetadata.getProperty(PersistenceProperties.KUNDERA_USERNAME);

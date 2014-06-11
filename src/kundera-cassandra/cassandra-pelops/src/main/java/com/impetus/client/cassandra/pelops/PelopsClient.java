@@ -129,7 +129,6 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             final KunderaMetadata kunderaMetadata, final TimestampGenerator generator)
     {
         super(persistenceUnit, externalProperties, kunderaMetadata, generator);
-        this.persistenceUnit = persistenceUnit;
         this.indexManager = indexManager;
         this.dataHandler = new PelopsDataHandler(this, kunderaMetadata, generator);
         this.reader = reader;

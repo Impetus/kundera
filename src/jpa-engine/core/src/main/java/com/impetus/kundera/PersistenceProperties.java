@@ -73,6 +73,8 @@ public interface PersistenceProperties
     /** Option to create schema. */
     public static final String KUNDERA_DDL_AUTO_PREPARE = "kundera.ddl.auto.prepare";
 
+    public static final String KUNDERA_SHOW_QUERY="kundera.show.query";
+    
     /** Option to give kundera-cassandra property information */
     public static final String KUNDERA_CLIENT_PROPERTY = "kundera.client.property";
 

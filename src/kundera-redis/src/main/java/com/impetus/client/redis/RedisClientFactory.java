@@ -184,7 +184,7 @@ public class RedisClientFactory extends GenericClientFactory
     protected Client<RedisQuery> instantiateClient(String persistenceUnit)
     {
         logger.info("instantiating client instance");
-        return new RedisClient(this, persistenceUnit, kunderaMetadata);
+        return new RedisClient(this, externalProperties, persistenceUnit, kunderaMetadata);
     }
 
     Map<String, Object> getOverridenProperties()

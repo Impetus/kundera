@@ -237,6 +237,7 @@
 			<property name="kundera.keyspace" value="CqlKeyspace" />
 			<property name="kundera.dialect" value="cassandra" />
 			<property name="kundera.ddl.auto.prepare" value="update" />
+			<!-- <property name="kundera.show.query" value="true" /> -->
 			<property name="kundera.client" value="thrift" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
