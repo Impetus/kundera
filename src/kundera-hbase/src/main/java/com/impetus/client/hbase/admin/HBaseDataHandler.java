@@ -33,6 +33,7 @@ import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
@@ -83,7 +84,7 @@ public class HBaseDataHandler implements DataHandler
     private HBaseAdmin admin;
 
     /** The conf. */
-    private HBaseConfiguration conf;
+    private Configuration conf;
 
     /** The h table pool. */
     private HTablePool hTablePool;
@@ -108,7 +109,7 @@ public class HBaseDataHandler implements DataHandler
      * @param hTablePool
      *            the h table pool
      */
-    public HBaseDataHandler(final KunderaMetadata kunderaMetadata, HBaseConfiguration conf, HTablePool hTablePool)
+    public HBaseDataHandler(final KunderaMetadata kunderaMetadata, Configuration conf, HTablePool hTablePool)
     {
         try
         {

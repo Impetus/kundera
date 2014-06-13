@@ -329,7 +329,7 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                 hadoopConf.set("hbase.zookeeper.quorum", host);
                 hadoopConf.set("hbase.zookeeper.property.clientPort", DEFAULT_ZOOKEEPER_PORT);
             }
-            HBaseConfiguration conf = new HBaseConfiguration(hadoopConf);
+            Configuration conf = HBaseConfiguration.create(hadoopConf);
             try
             {
                 admin = new HBaseAdmin(conf);
