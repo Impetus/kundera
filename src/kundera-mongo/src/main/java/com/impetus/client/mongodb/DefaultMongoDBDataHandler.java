@@ -54,11 +54,11 @@ import com.mongodb.DBObject;
  * 
  * @author amresh.singh
  */
-public final class MongoDBDataHandler
+public final class DefaultMongoDBDataHandler implements MongoDBDataHandler
 {
 
     /** The log. */
-    private static Logger log = LoggerFactory.getLogger(MongoDBDataHandler.class);
+    private static Logger log = LoggerFactory.getLogger(DefaultMongoDBDataHandler.class);
 
     /**
      * Gets the entity from document.
@@ -185,7 +185,7 @@ public final class MongoDBDataHandler
      * @throws PropertyAccessException
      *             the property access exception
      */
-    Map<String, DBObject> getDocumentFromEntity(EntityMetadata m, Object entity, List<RelationHolder> relations, final KunderaMetadata kunderaMetadata)
+    public Map<String, DBObject> getDocumentFromEntity(EntityMetadata m, Object entity, List<RelationHolder> relations, final KunderaMetadata kunderaMetadata)
             throws PropertyAccessException
     {
         Map<String, DBObject> dbObjects = new HashMap<String, DBObject>();
@@ -297,7 +297,7 @@ public final class MongoDBDataHandler
      * @throws IllegalAccessException
      * @throws InstantiationException
      */
-    List getEmbeddedObjectList(DBCollection dbCollection, EntityMetadata m, String documentName,
+    public List getEmbeddedObjectList(DBCollection dbCollection, EntityMetadata m, String documentName,
             BasicDBObject mongoQuery, String result, BasicDBObject orderBy, int maxResult, int firstResult, BasicDBObject keys, final KunderaMetadata kunderaMetadata)
             throws PropertyAccessException, InstantiationException, IllegalAccessException
     {

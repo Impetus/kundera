@@ -79,7 +79,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     private EntityReader reader;
 
     /** The data handler. */
-    private MongoDBDataHandler handler;
+    private DefaultMongoDBDataHandler handler;
 
     /** The log. */
     private static Logger log = LoggerFactory.getLogger(MongoDBClient.class);
@@ -113,7 +113,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         this.mongoDb = (DB) mongo;
         this.indexManager = mgr;
         this.reader = reader;
-        handler = new MongoDBDataHandler();
+        handler = new DefaultMongoDBDataHandler();
         this.clientMetadata = clientMetadata;
         populateBatchSize(persistenceUnit, this.externalProperties);
     }
@@ -452,7 +452,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             BasicDBObject keys, String documentName, boolean isCountQuery)
     {
         DBCollection dbCollection = mongoDb.getCollection(documentName);
-        KunderaCoreUtils.showQuery("Find document: " + mongoQuery, showQuery);
+       
         DBCursor cursor = null;
         if (isCountQuery)
             return dbCollection.count(mongoQuery);
@@ -852,7 +852,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      * @param handler
      *            the handler to set
      */
-    public void setHandler(MongoDBDataHandler handler)
+    public void setHandler(DefaultMongoDBDataHandler handler)
     {
         this.handler = handler;
     }

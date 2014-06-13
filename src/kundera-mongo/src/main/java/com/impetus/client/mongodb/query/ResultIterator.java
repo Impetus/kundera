@@ -23,7 +23,7 @@ import java.util.NoSuchElementException;
 import javax.persistence.PersistenceException;
 
 import com.impetus.client.mongodb.MongoDBClient;
-import com.impetus.client.mongodb.MongoDBDataHandler;
+import com.impetus.client.mongodb.DefaultMongoDBDataHandler;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -51,7 +51,7 @@ class ResultIterator<E> implements IResultIterator<E>
 
     private int fetchSize;
 
-    private MongoDBDataHandler handler;
+    private DefaultMongoDBDataHandler handler;
 
     private PersistenceDelegator persistenceDelegator;
 
@@ -62,7 +62,7 @@ class ResultIterator<E> implements IResultIterator<E>
         this.client = client;
         this.fetchSize = fetchSize;
         this.persistenceDelegator = pd;
-        this.handler = new MongoDBDataHandler();
+        this.handler = new DefaultMongoDBDataHandler();
         this.cursor = (DBCursor)client.getDBCursorInstance(basicDBObject, orderByClause, fetchSize, 0, keys, m.getTableName(), false);
     }
 

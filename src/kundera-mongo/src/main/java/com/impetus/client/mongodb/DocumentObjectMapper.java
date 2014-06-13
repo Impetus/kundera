@@ -91,7 +91,7 @@ public class DocumentObjectMapper
 
             if (((MetamodelImpl) metaModel).isEmbeddable(((AbstractAttribute) column).getBindableJavaType()))
             {
-                MongoDBDataHandler handler = new MongoDBDataHandler();
+                DefaultMongoDBDataHandler handler = new DefaultMongoDBDataHandler();
                 handler.onEmbeddable(column, obj, metaModel, dBObj, collectionName);
             }
             else
@@ -152,7 +152,7 @@ public class DocumentObjectMapper
         {
             if (((MetamodelImpl) metamodel).isEmbeddable(((AbstractAttribute) column).getBindableJavaType()))
             {
-                MongoDBDataHandler handler = new MongoDBDataHandler();
+                DefaultMongoDBDataHandler handler = new DefaultMongoDBDataHandler();
                 handler.onViaEmbeddable(column, obj, metamodel, documentObj);
             }
             else
