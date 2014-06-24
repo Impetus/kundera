@@ -17,6 +17,7 @@
 				value="com.impetus.client.mongodb.MongoDBClientFactory" />
 			<property name="kundera.ddl.auto.prepare" value="create" />
 			<property name="kundera.show.query" value="true" />
+			<!-- <property name="index.home.dir" value="lucene" /> -->
 			<!-- <property name="kundera.client.property" value="kundera-mongo.properties" 
 				/> -->
 		</properties>
@@ -99,5 +100,38 @@
 			<property name="kundera.client.property" value="kunderaMongoTest.xml" />
 		</properties>
 	</persistence-unit>
+
+	<persistence-unit name="mongoShowQueryEnabledPU">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.client.crud.entities.UserInformation</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="27017" />
+			<property name="kundera.keyspace" value="showQueryKeyspace" />
+			<property name="kundera.dialect" value="mongodb" />
+			<property name="kundera.ddl.auto.prepare" value="create-drop" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.mongodb.MongoDBClientFactory" />
+			<property name="kundera.show.query" value="true" />
+		</properties>
+	</persistence-unit>
+	
+	<persistence-unit name="mongoShowQueryDisabledPU">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.client.crud.entities.UserInformation</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="27017" />
+			<property name="kundera.keyspace" value="showQueryKeyspace" />
+			<property name="kundera.dialect" value="mongodb" />
+			<property name="kundera.ddl.auto.prepare" value="create-drop" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.mongodb.MongoDBClientFactory" />
+			</properties>
+	</persistence-unit>
+	
+	
 </persistence>
 

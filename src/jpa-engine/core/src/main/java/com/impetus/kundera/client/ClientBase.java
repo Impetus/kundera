@@ -68,7 +68,7 @@ public abstract class ClientBase
         this.kunderaMetadata = kunderaMetadata;
         this.externalProperties = properties;
         this.persistenceUnit = persistenceUnit;
-        this.showQuery = KunderaCoreUtils.isShowQuery(properties, persistenceUnit, kunderaMetadata);
+        this.showQuery = KunderaCoreUtils.isShowQueryEnabled(properties, persistenceUnit, kunderaMetadata);
     }
 
     /*

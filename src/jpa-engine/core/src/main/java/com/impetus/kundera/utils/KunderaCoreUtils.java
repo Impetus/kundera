@@ -294,7 +294,7 @@ public class KunderaCoreUtils
         return property;
     }
 
-    public static boolean isShowQuery(final Map<String, Object> properties,
+    public static boolean isShowQueryEnabled(final Map<String, Object> properties,
             final String persistenceUnit,final KunderaMetadata kunderaMetadata)
     {
         boolean showQuery=false;

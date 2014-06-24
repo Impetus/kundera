@@ -286,7 +286,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         }
 
         tableAPI.delete(key, null, null);
-        KunderaCoreUtils.showQuery("Delete data from " + entityMetadata.getTableName() + " for PK " + key, showQuery);
+        KunderaCoreUtils.showQuery("Delete data from " + entityMetadata.getTableName() + " for PK " + pKey, showQuery);
         getIndexManager().remove(entityMetadata, entity, pKey.toString());
     }
 
@@ -351,10 +351,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
                     NoSqlDBUtils.add(schemaTable.getField(primaryKey), row,
                             pk.toString() + SEPERATOR + childId.toString(), primaryKey);
 
-                    addOps(operations, schemaTable, row);
-                    // operations.put(((TableImpl)schemaTable).createKey(row,false),
-                    // tableAPI.getTableOperationFactory().createPut(row,
-                    // Choice.NONE, true));
+                    addOps(operations, schemaTable, row);             
                 }
             }
 
@@ -444,7 +441,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
             EntityType entityType = metamodel.entity(entityMetadata.getEntityClazz());
 
             Table schemaTable = tableAPI.getTable(entityMetadata.getTableName());
-            KunderaCoreUtils.showQuery("Get all records for " + entityMetadata.getTableName(), showQuery);
+            //KunderaCoreUtils.showQuery("Get all records for " + entityMetadata.getTableName(), showQuery);
             Iterator<Row> rowsIter = tableAPI.tableIterator(schemaTable.createPrimaryKey(), null, null);
 
             Map<String, Object> relationMap = initialize(entityMetadata);
@@ -561,7 +558,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
 
         // StringBuilder indexNamebuilder = new StringBuilder();
         NoSqlDBUtils.add(schemaTable.getField(pKeyColumnName), indexKey, pKeyColumnValue, pKeyColumnName);
-        KunderaCoreUtils.showQuery("Get columns by id from:" + tableName + "for column:"+columnName+ " where value:"+pKeyColumnName, showQuery);
+        KunderaCoreUtils.showQuery("Get columns by id from:" + tableName + " for column:"+columnName+ " where value:"+pKeyColumnValue, showQuery);
         Iterator<Row> rowsIter = tableAPI.tableIterator(indexKey, null, null);
 
         while (rowsIter.hasNext())
@@ -598,7 +595,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
             {
                 PrimaryKey primaryKey = schemaTable.createPrimaryKey();
                 NoSqlDBUtils.add(schemaTable.getField(primaryKeys.get(0)), primaryKey, key, primaryKeys.get(0));
-                KunderaCoreUtils.showQuery("  Delete for id:" + primaryKey, showQuery);
+                KunderaCoreUtils.showQuery("  Delete for id:" + key, showQuery);
                 tableAPI.delete(primaryKey, null, null);
             }
         }
@@ -705,7 +702,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
                     EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
                             node.getDataClass());
                     List<RelationHolder> relationHolders = getRelationHolders(node);
-                    KunderaCoreUtils.showQuery("Execute batch for" + metadata.getSchema() + "." + metadata.getTableName(), showQuery);
+                    //KunderaCoreUtils.showQuery("Execute batch for" + metadata.getSchema() + "." + metadata.getTableName(), showQuery);
                     Row row = createRow(metadata, node.getData(), node.getEntityId(), relationHolders);
                    
                     Table schemaTable = tableAPI.getTable(metadata.getTableName());
@@ -937,7 +934,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
                     if (valueObj != null)
                     {
                         NoSqlDBUtils.add(schemaTable.getField(relationName), row, valueObj, relationName);
-                        KunderaCoreUtils.showQuery("Add relation: relation name:" + relationName + "relstion value:"
+                        KunderaCoreUtils.showQuery("Add relation: relation name:" + relationName + "relation value:"
                                 + valueObj, showQuery);
                     }
                 }

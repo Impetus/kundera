@@ -16,6 +16,7 @@
 			<!-- <property name="kundera.ddl.auto.prepare" value="create" /> -->
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
+				<property name="kundera.show.query" value="true" />
 		</properties>
 	</persistence-unit>
 
@@ -178,7 +179,8 @@
 			<property name="kundera.client" value="pelops" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
-			<property name="kundera.batch.size" value="500" />
+			<property name="index.home.dir" value="/home/impadmin/lucene" />
+			<!-- <property name="kundera.batch.size" value="500" /> -->
 			<property name="kundera.client.property" value="kunderaConnectionTest.xml" />
 		</properties>
 	</persistence-unit>
@@ -344,12 +346,44 @@
 		<properties>
 			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="9160" />
-			<property name="kundera.keyspace" value="KunderaCoreExmples" />
+			<property name="kundera.keyspace" value="showQueryKeyspace" />
 			<property name="kundera.dialect" value="cassandra" />
 			<property name="kundera.client" value="thrift" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
 		</properties>
 	</persistence-unit>
+
+	<persistence-unit name="CassandraShowQueryEnabledPu">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.client.cassandra.thrift.cql.UserInformation</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="9160" />
+			<property name="kundera.keyspace" value="showQueryKeyspace" />
+			<property name="kundera.dialect" value="cassandra" />
+			<property name="kundera.ddl.auto.prepare" value="create" /> 
+			<property name="kundera.show.query" value="true" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
+		</properties>
+	</persistence-unit>
+	
+	<persistence-unit name="CassandraShowQueryDisabledPu">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.client.cassandra.thrift.cql.UserInformation</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="9160" />
+			<property name="kundera.keyspace" value="showQueryKeyspace" />
+			<property name="kundera.dialect" value="cassandra" />
+			<property name="kundera.ddl.auto.prepare" value="create" /> 			
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
+		</properties>
+	</persistence-unit>
+	
 
 </persistence>
