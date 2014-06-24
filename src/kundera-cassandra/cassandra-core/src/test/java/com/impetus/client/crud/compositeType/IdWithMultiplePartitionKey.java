@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.impetus.client.crud.compositeType;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
@@ -25,8 +27,9 @@ import javax.persistence.Embedded;
  * 
  */
 @Embeddable
-public class IdWithMultiplePartitionKey
+public class IdWithMultiplePartitionKey implements Serializable
 {
+    private static final long serialVersionUID = 10000000L;
 
     @Embedded
     private PartitionKey partitionKey;

@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.impetus.client.crud.compositeType;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
@@ -24,8 +26,10 @@ import javax.persistence.Embeddable;
  * 
  */
 @Embeddable
-public class PartitionKey
+public class PartitionKey implements Serializable
 {
+
+    private static final long serialVersionUID = 100000L;
 
     @Column
     private String partitionKey1;

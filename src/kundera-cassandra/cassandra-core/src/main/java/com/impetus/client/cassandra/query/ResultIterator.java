@@ -28,6 +28,7 @@ import javax.persistence.Query;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 
+import org.apache.cassandra.thrift.Cassandra.AsyncProcessor.get;
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.IndexExpression;
 import org.apache.commons.lang.StringUtils;
@@ -52,6 +53,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.IResultIterator;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.QueryImpl;
+import com.impetus.kundera.utils.ReflectUtils;
 
 /**
  * @author vivek.mishra .
@@ -276,8 +278,8 @@ class ResultIterator<E> implements IResultIterator<E>
 
                 results = ((CassandraClientBase) client).findByRange(minValue, maxVal, m, m.getRelationNames() != null
                         && !m.getRelationNames().isEmpty(), m.getRelationNames(),
-                        query.getColumnList(m, metaModel, ((QueryImpl) query).getKunderaQuery().getResult(), null), expressions,
-                        maxResult);
+                        query.getColumnList(m, metaModel, ((QueryImpl) query).getKunderaQuery().getResult(), null),
+                        expressions, maxResult);
 
                 if (maxResult == 1)
                 {
@@ -419,7 +421,7 @@ class ResultIterator<E> implements IResultIterator<E>
             if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
             {
                 keyObj = metaModel.embeddable(entityMetadata.getIdAttribute().getBindableJavaType());
-                Field embeddedField = entityMetadata.getIdAttribute().getBindableJavaType().getDeclaredFields()[0];
+                Field embeddedField = getPartitionKeyField();
                 Attribute partitionKey = keyObj.getAttribute(embeddedField.getName());
                 Object partitionKeyValue = PropertyAccessorHelper.getObject(id, (Field) partitionKey.getJavaMember());
                 columnName = ((AbstractAttribute) partitionKey).getJPAColumnName();
@@ -429,7 +431,8 @@ class ResultIterator<E> implements IResultIterator<E>
             }
             else
             {
-                columnName = CassandraUtilities.getIdColumnName(kunderaMetadata, entityMetadata, externalProperties, ((CassandraClientBase)client).isCql3Enabled(entityMetadata));
+                columnName = CassandraUtilities.getIdColumnName(kunderaMetadata, entityMetadata, externalProperties,
+                        ((CassandraClientBase) client).isCql3Enabled(entityMetadata));
             }
 
             translator.appendColumnName(builder, columnName);
@@ -499,7 +502,7 @@ class ResultIterator<E> implements IResultIterator<E>
         if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
         {
             keyObj = metaModel.embeddable(entityMetadata.getIdAttribute().getBindableJavaType());
-            Field embeddedField = entityMetadata.getIdAttribute().getBindableJavaType().getDeclaredFields()[0];
+            Field embeddedField = getPartitionKeyField();
             Attribute partitionKey = keyObj.getAttribute(embeddedField.getName());
             Object partitionKeyValue = PropertyAccessorHelper.getObject(id, (Field) partitionKey.getJavaMember());
             bytes = CassandraUtilities.toBytes(partitionKeyValue, (Field) partitionKey.getJavaMember());
@@ -511,6 +514,28 @@ class ResultIterator<E> implements IResultIterator<E>
 
         return bytes.array();
 
+    }
+
+    /**
+     * Will return partition key part of composite id.
+     * 
+     * @return
+     */
+    private Field getPartitionKeyField()
+    {
+        Field[] embeddedFields = entityMetadata.getIdAttribute().getBindableJavaType().getDeclaredFields();
+
+        Field field = null;
+        for (Field embeddedField : embeddedFields)
+        {
+            if (!ReflectUtils.isTransientOrStatic(embeddedField))
+            {
+                field = embeddedField;
+                ;
+                break;
+            }
+        }
+        return field;
     }
 
     /**
