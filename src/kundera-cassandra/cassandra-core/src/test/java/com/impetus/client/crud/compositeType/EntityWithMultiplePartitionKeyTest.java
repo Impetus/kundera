@@ -41,6 +41,8 @@ import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
 public class EntityWithMultiplePartitionKeyTest
 {
 
+    protected static String _PU = "compositedatatype";
+
     private EntityManagerFactory emf;
 
     private static final String _keyspace = "CompositeCassandra";
@@ -70,7 +72,7 @@ public class EntityWithMultiplePartitionKeyTest
         }
         Map<String, String> propertymap = new HashMap<String, String>();
         propertymap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "");
-        emf = Persistence.createEntityManagerFactory("compositedatatype", propertymap);
+        emf = Persistence.createEntityManagerFactory(_PU, propertymap);
     }
 
     /**

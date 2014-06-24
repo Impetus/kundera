@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.client.crud.compositeType;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -24,8 +25,10 @@ import javax.persistence.Embeddable;
  * @author vivek.mishra
  */
 @Embeddable
-public class CassandraCompoundKey
+public class CassandraCompoundKey implements Serializable
 {
+    private static final long serialVersionUID = -8055485531216607863L;
+            
     @Column
     private String userId;
 
