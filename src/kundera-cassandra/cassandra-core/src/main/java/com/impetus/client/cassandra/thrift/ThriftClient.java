@@ -87,6 +87,7 @@ import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.utils.KunderaCoreUtils;
 import com.impetus.kundera.utils.TimestampGenerator;
 
 /**
@@ -120,12 +121,12 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     {
         super(persistenceUnit, externalProperties, kunderaMetadata, generator);
         this.clientFactory = clientFactory;
-        this.persistenceUnit = persistenceUnit;
         this.indexManager = indexManager;
         this.dataHandler = new ThriftDataHandler(this, kunderaMetadata, generator);
         this.reader = reader;
         this.clientMetadata = clientFactory.getClientMetadata();
-        this.invertedIndexHandler = new ThriftInvertedIndexHandler(this, MetadataUtils.useSecondryIndex(clientMetadata), generator);
+        this.invertedIndexHandler = new ThriftInvertedIndexHandler(this,
+                MetadataUtils.useSecondryIndex(clientMetadata), generator);
         this.pool = pool;
     }
 
@@ -227,6 +228,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             }
             else
             {
+                KunderaCoreUtils.showQuery("Persist join table:" + joinTableName, showQuery);
                 for (Object key : joinTableRecords.keySet())
                 {
                     PropertyAccessor accessor = PropertyAccessorFactory.getPropertyAccessor((Field) entityMetadata
@@ -363,6 +365,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         List<ByteBuffer> columnNames = new ArrayList<ByteBuffer>();
         for (String superColumnName : superColumnNames)
         {
+            KunderaCoreUtils.showQuery("Fetch superColumn:" + superColumnName, showQuery);
             columnNames.add(ByteBuffer.wrap(superColumnName.getBytes()));
         }
 
@@ -440,6 +443,12 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                 Connection conn = null;
                 try
                 {
+                    /*
+                     * KunderaCoreUtils.ddlShow("getting columns by id from:"+
+                     * tableName+
+                     * " for primary key:"+pKeyColumnValue.toString(),
+                     * showSchema);
+                     */
                     conn = getConnection();
                     results = conn.getClient().get_slice(ByteBuffer.wrap(rowKey), parent, predicate,
                             getConsistencyLevel());
@@ -516,6 +525,11 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             Connection conn = null;
             try
             {
+                /*
+                 * KunderaCoreUtils.ddlShow("get ids for column:"+columnName+
+                 * " for value:"+columnValue.toString(), showSchema);
+                 */
+
                 conn = getConnection();
                 List<KeySlice> keySlices = conn.getClient().get_indexed_slices(columnParent, ix, slicePredicate,
                         getConsistencyLevel());
@@ -715,6 +729,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                 {
                     String deleteQuery = onDeleteQuery(metadata, tableName, metaModel, pKey);
                     executeCQLQuery(deleteQuery, isCql3Enabled(metadata));
+
                 }
                 else
                 {

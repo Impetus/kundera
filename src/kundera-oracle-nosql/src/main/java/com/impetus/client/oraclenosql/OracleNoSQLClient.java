@@ -83,6 +83,7 @@ import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.QueryHandlerException;
+import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**
  * Implementation of {@link Client} interface for Oracle NoSQL database
@@ -137,8 +138,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
             final KVStore kvStore, Map<String, Object> puProperties, String persistenceUnit,
             final KunderaMetadata kunderaMetadata)
     {
-        super(kunderaMetadata);
-        this.persistenceUnit = persistenceUnit;
+        super(kunderaMetadata, puProperties, persistenceUnit);
         this.factory = factory;
         this.kvStore = kvStore;
         // this.handler = new OracleNoSQLDataHandler(this, kvStore,
@@ -197,7 +197,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
                 NoSqlDBUtils.add(schemaTable.getField(idColumnName), rowKey, key, idColumnName);
             }
         }
-
+        KunderaCoreUtils.showQuery("Fetch data from " + entityMetadata.getTableName() + " for PK " + key, showQuery);
         if (log.isDebugEnabled())
         {
             log.debug("Fetching data from " + entityMetadata.getTableName() + " for PK " + key);
@@ -286,7 +286,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         }
 
         tableAPI.delete(key, null, null);
-
+        KunderaCoreUtils.showQuery("Delete data from " + entityMetadata.getTableName() + " for PK " + key, showQuery);
         getIndexManager().remove(entityMetadata, entity, pKey.toString());
     }
 
@@ -309,8 +309,10 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     @Override
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
     {
+        KunderaCoreUtils.showQuery("Persist data into " + entityMetadata.getSchema() + "." + entityMetadata.getTableName() + " for " + id, showQuery);
         Row row = createRow(entityMetadata, entity, id, rlHolders);
         // TODO:: handle case for putDate??????
+
         tableAPI.put(row, null, null);
     }
 
@@ -326,7 +328,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         Table schemaTable = tableAPI.getTable(joinTableName);
         Row row = schemaTable.createRow();
         String primaryKey = joinColumnName + SEPERATOR + invJoinColumnName;
-
+        KunderaCoreUtils.showQuery("Persist Join Table:" + joinTableName, showQuery);
         Map<Object, Set<Object>> joinTableRecords = joinTableData.getJoinTableRecords();
 
         try
@@ -442,7 +444,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
             EntityType entityType = metamodel.entity(entityMetadata.getEntityClazz());
 
             Table schemaTable = tableAPI.getTable(entityMetadata.getTableName());
-
+            KunderaCoreUtils.showQuery("Get all records for " + entityMetadata.getTableName(), showQuery);
             Iterator<Row> rowsIter = tableAPI.tableIterator(schemaTable.createPrimaryKey(), null, null);
 
             Map<String, Object> relationMap = initialize(entityMetadata);
@@ -559,7 +561,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
 
         // StringBuilder indexNamebuilder = new StringBuilder();
         NoSqlDBUtils.add(schemaTable.getField(pKeyColumnName), indexKey, pKeyColumnValue, pKeyColumnName);
-
+        KunderaCoreUtils.showQuery("Get columns by id from:" + tableName + "for column:"+columnName+ " where value:"+pKeyColumnName, showQuery);
         Iterator<Row> rowsIter = tableAPI.tableIterator(indexKey, null, null);
 
         while (rowsIter.hasNext())
@@ -589,13 +591,14 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
 
         Object[] foundRecords = findIdsByColumn(schemaName, tableName, primaryKeys.get(0), columnName, columnValue,
                 null);
-
+        KunderaCoreUtils.showQuery("Delete columns by id from:" + tableName, showQuery);
         if (foundRecords != null)
         {
             for (Object key : foundRecords)
             {
                 PrimaryKey primaryKey = schemaTable.createPrimaryKey();
                 NoSqlDBUtils.add(schemaTable.getField(primaryKeys.get(0)), primaryKey, key, primaryKeys.get(0));
+                KunderaCoreUtils.showQuery("  Delete for id:" + primaryKey, showQuery);
                 tableAPI.delete(primaryKey, null, null);
             }
         }
@@ -702,9 +705,9 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
                     EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
                             node.getDataClass());
                     List<RelationHolder> relationHolders = getRelationHolders(node);
-
+                    KunderaCoreUtils.showQuery("Execute batch for" + metadata.getSchema() + "." + metadata.getTableName(), showQuery);
                     Row row = createRow(metadata, node.getData(), node.getEntityId(), relationHolders);
-
+                   
                     Table schemaTable = tableAPI.getTable(metadata.getTableName());
 
                     addOps(operations, schemaTable, row);
@@ -934,6 +937,8 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
                     if (valueObj != null)
                     {
                         NoSqlDBUtils.add(schemaTable.getField(relationName), row, valueObj, relationName);
+                        KunderaCoreUtils.showQuery("Add relation: relation name:" + relationName + "relstion value:"
+                                + valueObj, showQuery);
                     }
                 }
             }
@@ -967,6 +972,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
 
             byte[] valueInBytes = PropertyAccessorHelper.getBytes(discrValue);
             NoSqlDBUtils.add(schemaTable.getField(discrColumn), row, discrValue, discrColumn);
+           
         }
     }
 
@@ -987,6 +993,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
 
         if (valueObj != null)
             NoSqlDBUtils.add(fieldDef, row, valueObj, ((AbstractAttribute) embeddedAttrib).getJPAColumnName());
+        
     }
 
     private void populateId(EntityMetadata entityMetadata, Table schemaTable, Object entity, Row row)
@@ -1095,10 +1102,10 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
                     }
                     else
                     {
-                    	fieldMetadata = schemaTable.getField(jpaColumnName);
-                    	value = row.get(jpaColumnName);
+                        fieldMetadata = schemaTable.getField(jpaColumnName);
+                        value = row.get(jpaColumnName);
 
-                    	if (!attribute.isAssociation() && value != null)
+                        if (!attribute.isAssociation() && value != null)
                         {
                             NoSqlDBUtils.get(fieldMetadata, value, entity, (Field) attribute.getJavaMember());
                         }
@@ -1166,7 +1173,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
                 {
                     fieldName = stringTokenizer.nextToken();
                 }
-                
+
                 fieldName = stringTokenizer.nextToken();
                 Object value = ((FilterClause) clause).getValue();
                 if (!indexes.containsKey(fieldName))
@@ -1232,7 +1239,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         {
             log.debug("Persisting data into " + schema + "." + table + " for " + id);
         }
-
+        
         EntityType entityType = metamodel.entity(entityMetadata.getEntityClazz());
 
         Set<Attribute> attributes = entityType.getAttributes();

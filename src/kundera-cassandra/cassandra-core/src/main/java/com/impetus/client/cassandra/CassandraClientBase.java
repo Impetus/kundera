@@ -107,6 +107,7 @@ import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.property.accessor.StringAccessor;
+import com.impetus.kundera.utils.KunderaCoreUtils;
 import com.impetus.kundera.utils.TimestampGenerator;
 
 /**
@@ -142,8 +143,6 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     /** batch size. */
     private int batchSize;
 
-    private Map<String, Object> externalProperties;
-
     protected CQLClient cqlClient;
 
     protected TimestampGenerator generator;
@@ -158,9 +157,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     protected CassandraClientBase(String persistenceUnit, Map<String, Object> externalProperties,
             final KunderaMetadata kunderaMetadata, final TimestampGenerator generator)
     {
-        super(kunderaMetadata);
-        this.persistenceUnit = persistenceUnit;
-        this.externalProperties = externalProperties;
+        super(kunderaMetadata, externalProperties, persistenceUnit);
         this.cqlClient = new CQLClient();
         this.generator = generator;
         setBatchSize(persistenceUnit, this.externalProperties);
@@ -1891,7 +1888,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             {
                 return execute(cqlQuery, conn);
             }
-
+            KunderaCoreUtils.showQuery(cqlQuery, showQuery);
             if (log.isInfoEnabled())
             {
                 log.info("Executing cql query {}.", cqlQuery);
@@ -2031,6 +2028,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             for (String query : queries)
             {
                 execute(query, conn);
+                
             }
         }
 
@@ -2324,6 +2322,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         {
             org.apache.cassandra.thrift.Cassandra.Client conn = (org.apache.cassandra.thrift.Cassandra.Client) connection;
             conn.set_cql_version(CassandraConstants.CQL_VERSION_3_0);
+            KunderaCoreUtils.showQuery(query, showQuery);
             return (T) conn.execute_cql3_query(ByteBuffer.wrap(query.getBytes(Constants.CHARSET_UTF8)),
                     Compression.NONE, getConsistencyLevel());
         }
@@ -2442,7 +2441,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 CQLTranslator.EQ_CLAUSE, false);
         selectQueryBuilder
                 .delete(selectQueryBuilder.lastIndexOf(CQLTranslator.AND_CLAUSE), selectQueryBuilder.length());
-
+        
         CqlResult cqlResult = execute(selectQueryBuilder.toString(), getRawClient(schemaName));
 
         Iterator<CqlRow> rowIter = cqlResult.getRows().iterator();

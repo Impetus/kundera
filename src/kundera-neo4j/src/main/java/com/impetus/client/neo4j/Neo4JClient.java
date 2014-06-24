@@ -95,8 +95,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
     Neo4JClient(final Neo4JClientFactory factory, Map<String, Object> puProperties, String persistenceUnit,
             final KunderaMetadata kunderaMetadata)
     {
-        super(kunderaMetadata);
-        this.persistenceUnit = persistenceUnit;
+        super(kunderaMetadata, puProperties, persistenceUnit);       
         this.factory = factory;
         reader = new Neo4JEntityReader(kunderaMetadata);
         indexer = new Neo4JIndexManager();

@@ -94,8 +94,6 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
 
     private int batchSize;
 
-    private Map<String, Object> puProperties;
-
     /**
      * Instantiates a new h base client.
      * 
@@ -112,19 +110,15 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
      * @param puProperties
      */
     public HBaseClient(IndexManager indexManager, HBaseConfiguration conf, HTablePool hTablePool, EntityReader reader,
-            String persistenceUnit, Map<String, Object> puProperties, ClientMetadata clientMetadata,
+            String persistenceUnit, Map<String, Object> externalProperties, ClientMetadata clientMetadata,
             final KunderaMetadata kunderaMetadata)
     {
-        super(kunderaMetadata);
+        super(kunderaMetadata, externalProperties, persistenceUnit);
         this.indexManager = indexManager;
         this.handler = new HBaseDataHandler(kunderaMetadata, conf, hTablePool);
         this.reader = reader;
-        this.persistenceUnit = persistenceUnit;
-        this.puProperties = puProperties;
-
         this.clientMetadata = clientMetadata;
-
-        getBatchSize(persistenceUnit, this.puProperties);
+        getBatchSize(persistenceUnit, this.externalProperties);
     }
 
     /*
@@ -149,7 +143,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
             {
                 return null;
             }
-            
+
             MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                     entityMetadata.getPersistenceUnit());
 
@@ -157,7 +151,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
             {
                 rowId = KunderaCoreUtils.prepareCompositeKey(entityMetadata, metaModel, rowId);
             }
-            
+
             results = fetchEntity(entityClass, rowId, entityMetadata, relationNames, tableName, results, null, null);
 
             if (results != null && !results.isEmpty())
@@ -436,7 +430,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
     public void close()
     {
         handler.shutdown();
-        puProperties = null;
+        externalProperties = null;
     }
 
     /**
@@ -584,7 +578,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         {
             pKey = KunderaCoreUtils.prepareCompositeKey(metadata, metaModel, pKey);
         }
-        
+
         for (String colTableName : secondaryTables)
         {
             deleteByColumn(metadata.getSchema(), colTableName,

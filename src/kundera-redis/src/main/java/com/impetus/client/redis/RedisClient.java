@@ -105,14 +105,14 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
     private Jedis connection;
 
-    RedisClient(final RedisClientFactory factory, final String persistenceUnit, final KunderaMetadata kunderaMetadata)
+    RedisClient(final RedisClientFactory factory, final Map<String, Object> puProperties, final String persistenceUnit,
+            final KunderaMetadata kunderaMetadata)
     {
-        super(kunderaMetadata);
+        super(kunderaMetadata, puProperties, persistenceUnit);
         this.factory = factory;
         this.reader = new RedisEntityReader(kunderaMetadata);
         this.indexManager = factory.getIndexManager();
         initializeIndexer();
-        this.persistenceUnit = persistenceUnit;
         this.clientMetadata = factory.getClientMetadata();
         setBatchSize(persistenceUnit, factory.getOverridenProperties());
     }

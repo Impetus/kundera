@@ -38,6 +38,7 @@ import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.loader.ClientLoaderException;
 import com.impetus.kundera.loader.KunderaAuthenticationException;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
+import com.impetus.kundera.utils.KunderaCoreUtils;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -66,7 +67,10 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
     /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(MongoDBSchemaManager.class);
 
-    public MongoDBSchemaManager(String clientFactory, Map<String, Object> externalProperties, final KunderaMetadata kunderaMetadata)
+    Logger mongoLogger = LoggerFactory.getLogger(com.mongodb.DB.class);
+
+    public MongoDBSchemaManager(String clientFactory, Map<String, Object> externalProperties,
+            final KunderaMetadata kunderaMetadata)
     {
         super(clientFactory, externalProperties, kunderaMetadata);
     }
@@ -91,6 +95,8 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
             {
                 coll = db.getCollection(tableInfo.getTableName());
                 coll.drop();
+
+                KunderaCoreUtils.showQuery("Drop collection:" + tableInfo.getTableName(), showQuery);
             }
         }
         db = null;
@@ -111,13 +117,17 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
             if (db.collectionExists(tableInfo.getTableName()))
             {
                 db.getCollection(tableInfo.getTableName()).drop();
+
+                KunderaCoreUtils.showQuery("Drop existing collection:" + tableInfo.getTableName(), showQuery);
             }
             DBCollection collection = db.createCollection(tableInfo.getTableName(), options);
 
+            KunderaCoreUtils.showQuery("Create collection:" + tableInfo.getTableName(), showQuery);
             boolean isCappedCollection = isCappedCollection(tableInfo);
             if (!isCappedCollection)
             {
                 createIndexes(tableInfo, collection);
+
             }
         }
     }
@@ -149,6 +159,7 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
             if (!db.collectionExists(tableInfo.getTableName()))
             {
                 collection = db.createCollection(tableInfo.getTableName(), options);
+                KunderaCoreUtils.showQuery("Create collection:" + tableInfo.getTableName(), showQuery);
             }
             collection = collection != null ? collection : db.getCollection(tableInfo.getTableName());
 
@@ -171,6 +182,7 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
         db = mongo.getDB(databaseName);
         if (db == null)
         {
+
             logger.error("Database " + databaseName + "does not exist");
             throw new SchemaGenerationException("database " + databaseName + "does not exist", "mongoDb", databaseName);
         }
@@ -222,7 +234,7 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
                 {
                     throw new SchemaGenerationException(e);
                 }
-                
+
                 return true;
             }
             catch (UnknownHostException e)
@@ -309,6 +321,7 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
             options.put(MongoDBConstants.MAX, indexInfo.getMaxValue());
         }
         collection.ensureIndex(keys, options);
+        KunderaCoreUtils.showQuery("Create indexes on:" + keys, showQuery);
     }
 
     private void indexEmbeddedColumn(IndexInfo indexInfo, String embeddedColumnName, DBCollection collection)
@@ -325,6 +338,7 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
             options.put(MongoDBConstants.MAX, indexInfo.getMaxValue());
         }
         collection.ensureIndex(keys, options);
+        KunderaCoreUtils.showQuery("Create indexes on:" + keys, showQuery);
     }
 
     /**
@@ -357,7 +371,6 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
         keys.put(columnName, 1);
         return;
     }
-
 
     @Override
     public boolean validateEntity(Class clazz)

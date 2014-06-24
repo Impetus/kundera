@@ -92,8 +92,6 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
 
     private HttpClient httpClient;
 
-    private Map<String, Object> externalProperty;
-
     private HttpHost httpHost;
 
     private List<Node> nodes = new ArrayList<Node>();
@@ -106,13 +104,12 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
     public CouchDBClient(HttpClient client, HttpHost httpHost, EntityReader reader, String persistenceUnit,
             Map<String, Object> externalProperties, ClientMetadata clientMetadata, final KunderaMetadata kunderaMetadata)
     {
-        super(kunderaMetadata);
+        super(kunderaMetadata, externalProperties, persistenceUnit);
         this.httpClient = client;
         this.httpHost = httpHost;
-        this.externalProperty = externalProperties;
         this.reader = reader;
         this.clientMetadata = clientMetadata;
-        this.setBatchSize(persistenceUnit, externalProperty);
+        this.setBatchSize(persistenceUnit, externalProperties);
     }
 
     @Override
@@ -197,7 +194,7 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
     @Override
     public void close()
     {
-        externalProperty = null;
+        externalProperties = null;
     }
 
     @Override

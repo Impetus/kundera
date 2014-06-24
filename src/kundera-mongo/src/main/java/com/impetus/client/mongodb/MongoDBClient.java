@@ -53,6 +53,7 @@ import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.utils.KunderaCoreUtils;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -91,8 +92,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
     private DBEncoder encoder = DefaultDBEncoder.FACTORY.create();
 
-    private Map<String, Object> puProperties;
-
     /**
      * Instantiates a new mongo db client.
      * 
@@ -105,21 +104,18 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      * @param puProperties
      */
     public MongoDBClient(Object mongo, IndexManager mgr, EntityReader reader, String persistenceUnit,
-            Map<String, Object> puProperties, ClientMetadata clientMetadata, final KunderaMetadata kunderaMetadata)
+            Map<String, Object> externalProperties, ClientMetadata clientMetadata, final KunderaMetadata kunderaMetadata)
     {
-        // TODO: This could be a constly call, see how connection pooling is
+        // TODO: This could be a constantly called, see how connection pooling
+        // is
         // relevant here
-        super(kunderaMetadata);
+        super(kunderaMetadata, externalProperties, persistenceUnit);
         this.mongoDb = (DB) mongo;
         this.indexManager = mgr;
         this.reader = reader;
-        this.persistenceUnit = persistenceUnit;
-        this.puProperties = puProperties;
         handler = new MongoDBDataHandler();
         this.clientMetadata = clientMetadata;
-
-        populateBatchSize(persistenceUnit, this.puProperties);
-
+        populateBatchSize(persistenceUnit, this.externalProperties);
     }
 
     @Override
@@ -131,6 +127,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         Map<Object, Set<Object>> joinTableRecords = joinTableData.getJoinTableRecords();
 
         DBCollection dbCollection = mongoDb.getCollection(joinTableName);
+        KunderaCoreUtils.showQuery("Persist join table:" + joinTableName, showQuery);
         List<DBObject> documents = new ArrayList<DBObject>();
 
         for (Object key : joinTableRecords.keySet())
@@ -145,6 +142,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
                 dbObj.put(joinColumnName, MongoDBUtils.populateValue(joinColumnValue, joinColumnValue.getClass()));
                 dbObj.put(invJoinColumnName, MongoDBUtils.populateValue(childId, childId.getClass()));
                 documents.add(dbObj);
+                KunderaCoreUtils.showQuery("id:" + joinColumnValue.toString() + childId + "   " + joinColumnName + ":"
+                        + joinColumnValue + "   " + invJoinColumnName + ":" + childId, showQuery);
             }
         }
         dbCollection.insert(documents.toArray(new BasicDBObject[0]), getWriteConcern(), encoder);
@@ -160,7 +159,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         BasicDBObject query = new BasicDBObject();
 
         query.put(joinColumnName, MongoDBUtils.populateValue(parentId, parentId.getClass()));
-
+        KunderaCoreUtils.showQuery("Find by Id:" + query, showQuery);
         DBCursor cursor = dbCollection.find(query);
         DBObject fetchedDocument = null;
 
@@ -194,6 +193,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         query.put(columnName, MongoDBUtils.populateValue(columnValue, columnValue.getClass()));
 
         DBCursor cursor = dbCollection.find(query);
+        KunderaCoreUtils.showQuery("Find id by column:" + query, showQuery);
         DBObject fetchedDocument = null;
 
         while (cursor.hasNext())
@@ -257,7 +257,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         for (String tableName : secondaryTables)
         {
             DBCollection dbCollection = mongoDb.getCollection(tableName);
-
+            KunderaCoreUtils.showQuery("Find document:" + query, showQuery);
             DBObject fetchedDocument = dbCollection.findOne(query);
 
             if (fetchedDocument != null)
@@ -348,24 +348,11 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         query.put("_id", new BasicDBObject("$in", keys));
 
         DBCursor cursor = dbCollection.find(query);
-
+        KunderaCoreUtils.showQuery("Find collection:" + query, showQuery);
         List entities = new ArrayList<E>();
         while (cursor.hasNext())
         {
             DBObject fetchedDocument = cursor.next();
-
-            // Object entity = instantiateEntity(entityClass, null);
-            // Map<String, Object> relationValue = null;
-            // relationValue = handler.getEntityFromDocument(entityClass,
-            // entity, entityMetadata, fetchedDocument,
-            // entityMetadata.getRelationNames(), relationValue);
-            // if (relationValue != null && !relationValue.isEmpty())
-            // {
-            // entity = new EnhanceEntity(entity,
-            // PropertyAccessorHelper.getId(entity, entityMetadata),
-            // relationValue);
-            // }
-            // entities.add(entity);
 
             populateEntity(entityMetadata, entities, fetchedDocument);
         }
@@ -395,7 +382,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      *             the exception
      */
     public <E> List<E> loadData(EntityMetadata entityMetadata, BasicDBObject mongoQuery, List<String> relationNames,
-            BasicDBObject orderBy, int maxResult, int firstResult, BasicDBObject keys, String... results) throws Exception
+            BasicDBObject orderBy, int maxResult, int firstResult, BasicDBObject keys, String... results)
+            throws Exception
     {
         String documentName = entityMetadata.getTableName();
         Class clazz = entityMetadata.getEntityClazz();
@@ -403,27 +391,34 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         List entities = new ArrayList<E>();
 
         boolean isCountQuery = false;
-        if(results!=null && results.length>1) {
-        	if(results[0].toLowerCase().indexOf("count(")==0) {
-        		isCountQuery = true;
-        	}
+        if (results != null && results.length > 1)
+        {
+            if (results[0].toLowerCase().indexOf("count(") == 0)
+            {
+                isCountQuery = true;
+            }
         }
-        
-        Object object = getDBCursorInstance(mongoQuery, orderBy, maxResult, firstResult, keys, documentName, isCountQuery);
-        
+
+        Object object = getDBCursorInstance(mongoQuery, orderBy, maxResult, firstResult, keys, documentName,
+                isCountQuery);
+
         DBCursor cursor = null;
-        
-        if(object instanceof Long) {
-        	List<Long> lst = new ArrayList<Long>();
-        	lst.add((Long)object);
-        	return (List<E>)lst;
-        } else {
-        	cursor = (DBCursor)object;
+
+        if (object instanceof Long)
+        {
+            List<Long> lst = new ArrayList<Long>();
+            lst.add((Long) object);
+            return (List<E>) lst;
+        }
+        else
+        {
+            cursor = (DBCursor) object;
         }
 
         if (results != null && results.length > 0)
         {
             DBCollection dbCollection = mongoDb.getCollection(documentName);
+            KunderaCoreUtils.showQuery("Find document: " + mongoQuery, showQuery);
             for (int i = 1; i < results.length; i++)
             {
                 String result = results[i];
@@ -437,7 +432,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
                 {
                     // TODO i need to discuss with Amresh before modifying it.
                     entities.addAll(handler.getEmbeddedObjectList(dbCollection, entityMetadata, documentName,
-                    		mongoQuery, result, orderBy, maxResult, firstResult, keys, kunderaMetadata));
+                            mongoQuery, result, orderBy, maxResult, firstResult, keys, kunderaMetadata));
                     return entities;
                 }
             }
@@ -448,23 +443,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         {
             DBObject fetchedDocument = cursor.next();
 
-            // Object entity = instantiateEntity(clazz, null);
-            // Map<String, Object> relationValue = null;
-            // relationValue = handler.getEntityFromDocument(clazz, entity,
-            // entityMetadata, fetchedDocument,
-            // relationNames, relationValue);
-            // if (relationValue != null && !relationValue.isEmpty())
-            // {
-            // entity = new EnhanceEntity(entity,
-            // PropertyAccessorHelper.getId(entity, entityMetadata),
-            // relationValue);
-            // }
-            // entities.add(entity);
-
             populateEntity(entityMetadata, entities, fetchedDocument);
-            // Object entity = handler.getEntityFromDocument(clazz,
-            // entityMetadata, fetchedDocument, relationNames);
-            // entities.add(entity);
         }
         return entities;
     }
@@ -473,17 +452,18 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             BasicDBObject keys, String documentName, boolean isCountQuery)
     {
         DBCollection dbCollection = mongoDb.getCollection(documentName);
+        KunderaCoreUtils.showQuery("Find document: " + mongoQuery, showQuery);
         DBCursor cursor = null;
-        if(isCountQuery)
-        	return dbCollection.count(mongoQuery);
+        if (isCountQuery)
+            return dbCollection.count(mongoQuery);
         else
-        	cursor = orderBy != null ? dbCollection.find(mongoQuery, keys).sort(orderBy).limit(maxResult).skip(firstResult) 
-        				: dbCollection.find(mongoQuery, keys).limit(maxResult).skip(firstResult);
+            cursor = orderBy != null ? dbCollection.find(mongoQuery, keys).sort(orderBy).limit(maxResult)
+                    .skip(firstResult) : dbCollection.find(mongoQuery, keys).limit(maxResult).skip(firstResult);
         return cursor;
     }
 
     /*
-     * (non-Javadoc)
+     * (non-Javadoc) object
      * 
      * @see com.impetus.kundera.client.Client#delete(java.lang.Object,
      * java.lang.Object)
@@ -517,6 +497,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
         for (String collectionName : secondaryTables)
         {
+            KunderaCoreUtils.showQuery("Drop existing collection:" + query, showQuery);
             DBCollection dbCollection = mongoDb.getCollection(collectionName);
             dbCollection.remove(query, getWriteConcern(), encoder);
         }
@@ -534,7 +515,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         // TODO Once pool is implemented this code should not be there.
         // Workaround for pool
         this.indexManager.flush();
-        puProperties = null;
+        externalProperties = null;
         clear();
     }
 
@@ -569,6 +550,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         {
             if (!indexNames.contains(columnName))
             {
+                KunderaCoreUtils.showQuery("Create index on:" + columnName, showQuery);
                 coll.createIndex(new BasicDBObject(columnName, order));
             }
         }
@@ -606,7 +588,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         BasicDBObject query = new BasicDBObject();
 
         query.put(colName, MongoDBUtils.populateValue(colValue, colValue.getClass()));
-
+        KunderaCoreUtils.showQuery("Find by relation:" + query, showQuery);
         DBCursor cursor = dbCollection.find(query);
         DBObject fetchedDocument = null;
         List<Object> results = new ArrayList<Object>();
@@ -641,6 +623,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         DBCollection dbCollection = mongoDb.getCollection(tableName);
         BasicDBObject query = new BasicDBObject();
         query.put(columnName, columnValue);
+        KunderaCoreUtils.showQuery("Delete column:" + query, showQuery);
         dbCollection.remove(query, getWriteConcern(), encoder);
     }
 
@@ -754,6 +737,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         for (String tableName : collections.keySet())
         {
             DBCollection dbCollection = mongoDb.getCollection(tableName);
+            KunderaCoreUtils.showQuery("Persist collection:" + tableName, showQuery);
             dbCollection.insert(collections.get(tableName).toArray(new DBObject[0]), getWriteConcern(), encoder);
         }
     }
@@ -800,7 +784,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
                     query.put("_id", MongoDBUtils.populateValue(id, id.getClass()));
                 }
                 DBCollection dbCollection = mongoDb.getCollection(documentName);
-
+                KunderaCoreUtils.showQuery("Persist collection:" + documentName, showQuery);
                 DBObject obj = dbCollection.findOne(query);
                 if (obj != null)
                 {
@@ -971,6 +955,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     public Object executeScript(String script)
     {
         Object result = mongoDb.eval(script);
+        KunderaCoreUtils.showQuery("Execute mongo jscripts:" + script, showQuery);
         return result;
     }
 
@@ -1028,13 +1013,15 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             }
         }
     }
-    
-    public int handleUpdateFunctions(BasicDBObject query, BasicDBObject update, String collName) {
-    	DBCollection collection = mongoDb.getCollection(collName);
-    	WriteResult result = collection.update(query, update);
-    	if(result.getError()!=null || result.getN()<=0)
-    		return -1;
-    	return result.getN();
+
+    public int handleUpdateFunctions(BasicDBObject query, BasicDBObject update, String collName)
+    {
+        DBCollection collection = mongoDb.getCollection(collName);
+        KunderaCoreUtils.showQuery("Update collection:" + query, showQuery);
+        WriteResult result = collection.update(query, update);
+        if (result.getError() != null || result.getN() <= 0)
+            return -1;
+        return result.getN();
     }
 
 }

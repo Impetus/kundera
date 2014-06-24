@@ -75,6 +75,7 @@ import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.utils.KunderaCoreUtils;
 import com.impetus.kundera.utils.TimestampGenerator;
 
 /**
@@ -169,6 +170,7 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         builder.append(CQLTranslator.ADD_WHERE_CLAUSE);
         onWhereClause(metadata, rowId, translator, builder, metaModel, metadata.getIdAttribute());
         builder.delete(builder.lastIndexOf(CQLTranslator.AND_CLAUSE), builder.length());
+        
         return builder;
     }
 
@@ -516,6 +518,7 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         try
         {
             Statement queryStmt = new SimpleStatement(query);
+            KunderaCoreUtils.showQuery(query, showQuery);
             queryStmt.setConsistencyLevel(ConsistencyLevel.valueOf(this.consistencyLevel.name()));
             return (T) session.execute(queryStmt);
         }
@@ -540,6 +543,7 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
                 log.info("Executing cql query {}.", cqlQuery);
             }
             session = session == null ? factory.getConnection() : this.session;
+            KunderaCoreUtils.showQuery(cqlQuery, showQuery);
             session.execute(cqlQuery);
         }
         finally

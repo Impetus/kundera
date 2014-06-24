@@ -101,9 +101,9 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
     private static final String KEY_SEPERATOR = "\001";
 
     ESClient(final ESClientFactory factory, final TransportClient client, final Map<String, Object> externalProperties,
-            final KunderaMetadata kunderaMetadata)
+            final KunderaMetadata kunderaMetadata, final String persistenceUnit)
     {
-        super(kunderaMetadata);
+        super(kunderaMetadata, externalProperties,persistenceUnit);
         this.factory = factory;
         this.clientMetadata = factory.getClientMetadata();
         this.txClient = client;

@@ -46,15 +46,16 @@ public abstract class Neo4JClientBase extends ClientBase implements ClientProper
     /** list of nodes for batch processing. */
     protected List<Node> nodes = new ArrayList<Node>();
 
-    Neo4JClientBase(KunderaMetadata kunderaMetadata)
+    Neo4JClientBase(KunderaMetadata kunderaMetadata, Map<String, Object> puProperties, String persistenceUnit)
     {
-        super(kunderaMetadata);
+        super(kunderaMetadata, puProperties, persistenceUnit);
     }
 
     protected boolean isEntityForNeo4J(EntityMetadata entityMetadata)
     {
         String persistenceUnit = entityMetadata.getPersistenceUnit();
-        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata, persistenceUnit);
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata,
+                persistenceUnit);
         String clientFactory = puMetadata.getProperty(PersistenceProperties.KUNDERA_CLIENT_FACTORY);
         if (clientFactory.indexOf("com.impetus.client.neo4j") >= 0)
         {
@@ -77,7 +78,8 @@ public abstract class Neo4JClientBase extends ClientBase implements ClientProper
         }
         else
         {
-            PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata, persistenceUnit);
+            PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata,
+                    persistenceUnit);
             setBatchSize(puMetadata.getBatchSize());
         }
     }

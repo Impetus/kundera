@@ -149,7 +149,7 @@ public class ESClientFactory extends GenericClientFactory
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
-        return new ESClient(this,((TransportClient) getConnectionPoolOrConnection()),this.externalProperties, kunderaMetadata);
+        return new ESClient(this,((TransportClient) getConnectionPoolOrConnection()),this.externalProperties, kunderaMetadata, persistenceUnit);
     }
 
     /*

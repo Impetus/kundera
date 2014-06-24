@@ -40,7 +40,7 @@ import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
  */
 public class ESClientFactoryTest
 {
-    private final static String persistenceUnit = "es";
+    private final static String persistenceUnit = "es-pu";
 
     private EntityManagerFactory emf;
 
