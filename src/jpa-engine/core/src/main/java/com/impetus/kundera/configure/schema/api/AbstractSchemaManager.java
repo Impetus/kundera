@@ -135,7 +135,7 @@ public abstract class AbstractSchemaManager
             schemaName = (String) externalProperties.get(PersistenceProperties.KUNDERA_KEYSPACE);
             // get type of schema of operation.
             operationType = (String) externalProperties.get(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE);
-            showQuery = KunderaCoreUtils.isShowQuery(externalProperties, puMetadata.getPersistenceUnitName(), kunderaMetadata);
+            showQuery = KunderaCoreUtils.isShowQueryEnabled(externalProperties, puMetadata.getPersistenceUnitName(), kunderaMetadata);
         }
         if (portName == null)
             portName = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_PORT);

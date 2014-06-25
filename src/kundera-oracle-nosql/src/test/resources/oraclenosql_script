@@ -271,6 +271,13 @@ plan add-table -name PERSON_ADDRESS -wait
 plan add-index -name PERSON_ID -table PERSON_ADDRESS -field PERSON_ID -wait
 plan add-index -name ADDRESS_ID -table PERSON_ADDRESS -field ADDRESS_ID -wait
 
+table create -name UserInformation
+add-field -type integer -name age
+add-field -type string -name name
+add-field -type string -name id
+primary-key -field id
+exit
+plan add-table -name UserInformation -wait
 
 table create -name PERSON_EMBEDDED
 add-field -type string -name PERSON_ID

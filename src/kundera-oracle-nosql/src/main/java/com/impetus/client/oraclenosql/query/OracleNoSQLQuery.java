@@ -154,10 +154,7 @@ public class OracleNoSQLQuery extends QueryImpl
                             ((AbstractAttribute) idAttribute).getBindableJavaType(), (((FilterClause) clause).getValue().get(0)).getClass(),
                             ((FilterClause) clause).getValue().get(0));
                     
-                    interpreter.setRowKey(keyObj/*(((FilterClause) clause).getValue().get(0))
-                                                 * ((FilterClause)
-                                                 * clause).getValue()
-                                                 */);
+                    interpreter.setRowKey(keyObj);
                     idClauseFound = true;
                 }
             }

@@ -66,629 +66,708 @@ import com.mongodb.BasicDBObject;
  * 
  * @author amresh.singh
  */
-public class MongoDBQuery extends QueryImpl {
-	/** The log used by this class. */
-	private static Logger log = LoggerFactory.getLogger(MongoDBQuery.class);
+public class MongoDBQuery extends QueryImpl
+{
+    /** The log used by this class. */
+    private static Logger log = LoggerFactory.getLogger(MongoDBQuery.class);
 
-	private boolean isSingleResult;
+    private boolean isSingleResult;
 
-	/**
-	 * Instantiates a new mongo db query.
-	 * 
-	 * @param jpaQuery
-	 *            the jpa query
-	 * @param kunderaQuery
-	 *            the kundera query
-	 * @param persistenceDelegator
-	 *            the persistence delegator
-	 * @param persistenceUnits
-	 *            the persistence units
-	 */
-	public MongoDBQuery(KunderaQuery kunderaQuery,
-			PersistenceDelegator persistenceDelegator,
-			final KunderaMetadata kunderaMetadata) {
-		super(kunderaQuery, persistenceDelegator, kunderaMetadata);
-	}
+    /**
+     * Instantiates a new mongo db query.
+     * 
+     * @param jpaQuery
+     *            the jpa query
+     * @param kunderaQuery
+     *            the kundera query
+     * @param persistenceDelegator
+     *            the persistence delegator
+     * @param persistenceUnits
+     *            the persistence units
+     */
+    public MongoDBQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator,
+            final KunderaMetadata kunderaMetadata)
+    {
+        super(kunderaQuery, persistenceDelegator, kunderaMetadata);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.impetus.kundera.query.QueryImpl#executeUpdate()
-	 */
-	@Override
-	public int executeUpdate() {
-		return super.executeUpdate();
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.query.QueryImpl#executeUpdate()
+     */
+    @Override
+    public int executeUpdate()
+    {
+        return super.executeUpdate();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.impetus.kundera.query.QueryImpl#setFirstResult(int)
-	 */
-	@Override
-	public Query setFirstResult(int firstResult) {
-		return super.setFirstResult(firstResult);
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.query.QueryImpl#setFirstResult(int)
+     */
+    @Override
+    public Query setFirstResult(int firstResult)
+    {
+        return super.setFirstResult(firstResult);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.impetus.kundera.query.QueryImpl#setMaxResults(int)
-	 */
-	@Override
-	public Query setMaxResults(int maxResult) {
-		return super.setMaxResults(maxResult);
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.query.QueryImpl#setMaxResults(int)
+     */
+    @Override
+    public Query setMaxResults(int maxResult)
+    {
+        return super.setMaxResults(maxResult);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.impetus.kundera.query.QueryImpl#populateEntities(com.impetus.kundera
-	 * .metadata.model.EntityMetadata, com.impetus.kundera.client.Client)
-	 */
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.query.QueryImpl#populateEntities(com.impetus.kundera
+     * .metadata.model.EntityMetadata, com.impetus.kundera.client.Client)
+     */
 
-	@Override
-	protected List<Object> populateEntities(EntityMetadata m, Client client) {
-		ApplicationMetadata appMetadata = kunderaMetadata
-				.getApplicationMetadata();
-		try {
-			String query = appMetadata.getQuery(getJPAQuery());
-			boolean isNative = kunderaQuery.isNative();
+    @Override
+    protected List<Object> populateEntities(EntityMetadata m, Client client)
+    {
+        ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
+        try
+        {
+            String query = appMetadata.getQuery(getJPAQuery());
+            boolean isNative = kunderaQuery.isNative();
 
-			if (isNative) {
-				throw new UnsupportedOperationException(
-						"Native query support is not enabled in mongoDB");
-			}
-			BasicDBObject orderByClause = getOrderByClause(m);
-			return ((MongoDBClient) client).loadData(
-					m,
-					createMongoQuery(m, getKunderaQuery()
-							.getFilterClauseQueue()), null, orderByClause,
-					isSingleResult ? 1 : maxResult, firstResult,
-					getKeys(m, getKunderaQuery().getResult()),
-					getKunderaQuery().getResult());
-		} catch (Exception e) {
-			log.error("Error during executing query, Caused by:", e);
-			throw new QueryHandlerException(e);
-		}
-	}
+            if (isNative)
+            {
+                throw new UnsupportedOperationException("Native query support is not enabled in mongoDB");
+            }
+            BasicDBObject orderByClause = getOrderByClause(m);
+            return ((MongoDBClient) client).loadData(m, createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()),
+                    null, orderByClause, isSingleResult ? 1 : maxResult, firstResult,
+                    getKeys(m, getKunderaQuery().getResult()), getKunderaQuery().getResult());
+        }
+        catch (Exception e)
+        {
+            log.error("Error during executing query, Caused by:", e);
+            throw new QueryHandlerException(e);
+        }
+    }
 
-	@Override
-	protected List<Object> recursivelyPopulateEntities(EntityMetadata m,
-			Client client) {
-		// TODO : required to modify client return relation.
-		// if it is a parent..then find data related to it only
-		// else u need to load for associated fields too.
-		List<EnhanceEntity> ls = new ArrayList<EnhanceEntity>();
-		ApplicationMetadata appMetadata = kunderaMetadata
-				.getApplicationMetadata();
-		try {
-			String query = appMetadata.getQuery(getJPAQuery());
-			boolean isNative = kunderaQuery.isNative();
+    @Override
+    protected List<Object> recursivelyPopulateEntities(EntityMetadata m, Client client)
+    {
+        // TODO : required to modify client return relation.
+        // if it is a parent..then find data related to it only
+        // else u need to load for associated fields too.
+        List<EnhanceEntity> ls = new ArrayList<EnhanceEntity>();
+        ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
+        try
+        {
+            String query = appMetadata.getQuery(getJPAQuery());
+            boolean isNative = kunderaQuery.isNative();
 
-			if (isNative) {
-				throw new UnsupportedOperationException(
-						"Native query support is not enabled in mongoDB");
-			}
+            if (isNative)
+            {
+                throw new UnsupportedOperationException("Native query support is not enabled in mongoDB");
+            }
 
-			BasicDBObject orderByClause = getOrderByClause(m);
-			ls = ((MongoDBClient) client).loadData(
-					m,
-					createMongoQuery(m, getKunderaQuery()
-							.getFilterClauseQueue()), m.getRelationNames(),
-					orderByClause, isSingleResult ? 1 : maxResult, firstResult,
-					getKeys(m, getKunderaQuery().getResult()),
-					getKunderaQuery().getResult());
-		} catch (Exception e) {
-			log.error("Error during executing query, Caused by:", e);
-			throw new QueryHandlerException(e);
-		}
+            BasicDBObject orderByClause = getOrderByClause(m);
+            ls = ((MongoDBClient) client).loadData(m, createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()),
+                    m.getRelationNames(), orderByClause, isSingleResult ? 1 : maxResult, firstResult,
+                    getKeys(m, getKunderaQuery().getResult()), getKunderaQuery().getResult());
+        }
+        catch (Exception e)
+        {
+            log.error("Error during executing query, Caused by:", e);
+            throw new QueryHandlerException(e);
+        }
 
-		return setRelationEntities(ls, client, m);
-	}
+        return setRelationEntities(ls, client, m);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.impetus.kundera.query.QueryImpl#getReader()
-	 */
-	@Override
-	protected EntityReader getReader() {
-		return new MongoEntityReader(kunderaQuery, kunderaMetadata);
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.query.QueryImpl#getReader()
+     */
+    @Override
+    protected EntityReader getReader()
+    {
+        return new MongoEntityReader(kunderaQuery, kunderaMetadata);
+    }
 
-	static class QueryComponent {
-		boolean isAnd;
-		Queue clauses = new LinkedList();
-		List<QueryComponent> children = new ArrayList<MongoDBQuery.QueryComponent>();
-		QueryComponent parent;
-		BasicDBObject actualQuery;
-	}
+    static class QueryComponent
+    {
+        boolean isAnd;
 
-	private void populateQueryComponents(EntityMetadata m, QueryComponent sq) {
-		boolean hasChildren = false;
-		if (sq.children != null && sq.children.size() > 0) {
-			hasChildren = true;
-			for (QueryComponent subQ : sq.children) {
-				populateQueryComponents(m, subQ);
-			}
-		}
-		if (sq.clauses.size() > 0 || hasChildren) {
-			if (sq.clauses.size() > 0)
-				sq.actualQuery = createSubMongoQuery(m, sq.clauses);
-			if (hasChildren) {
-				List<BasicDBObject> childQs = new ArrayList<BasicDBObject>();
-				if (sq.clauses.size() > 0)
-					childQs.add(sq.actualQuery);
-				for (QueryComponent subQ : sq.children) {
-					childQs.add(subQ.actualQuery);
-				}
-				if (sq.isAnd) {
-					BasicDBObject dbo = new BasicDBObject("$and", childQs);
-					sq.actualQuery = dbo;
-				} else {
-					BasicDBObject dbo = new BasicDBObject("$or", childQs);
-					sq.actualQuery = dbo;
-				}
-			}
-		}
-		return;
-	}
+        Queue clauses = new LinkedList();
 
-	private static QueryComponent getQueryComponent(Queue filterClauseQueue) {
-		QueryComponent subQuery = new QueryComponent();
-		QueryComponent currentSubQuery = subQuery;
+        List<QueryComponent> children = new ArrayList<MongoDBQuery.QueryComponent>();
 
-		for (Object object : filterClauseQueue) {
-			if (object instanceof FilterClause) {
-				currentSubQuery.clauses.add(object);
-			} else if (object instanceof String) {
-				String interClauseConstruct = (String) object;
-				if (interClauseConstruct.equals("(")) {
-					QueryComponent temp = new QueryComponent();
-					currentSubQuery.children.add(temp);
-					temp.parent = currentSubQuery;
-					currentSubQuery = temp;
-				} else if (interClauseConstruct.equals(")")) {
-					currentSubQuery = currentSubQuery.parent;
-				} else if (interClauseConstruct.equalsIgnoreCase("AND")) {
-					currentSubQuery.isAnd = true;
-				} else if (interClauseConstruct.equalsIgnoreCase("OR")) {
-					currentSubQuery.isAnd = false;
-				}
-			}
-		}
+        QueryComponent parent;
 
-		return subQuery;
-	}
+        BasicDBObject actualQuery;
+    }
 
-	public BasicDBObject createMongoQuery(EntityMetadata m,
-			Queue filterClauseQueue) {
-		QueryComponent sq = getQueryComponent(filterClauseQueue);
-		populateQueryComponents(m, sq);
-		return sq.actualQuery == null ? new BasicDBObject() : sq.actualQuery;
-	}
+    private void populateQueryComponents(EntityMetadata m, QueryComponent sq)
+    {
+        boolean hasChildren = false;
+        if (sq.children != null && sq.children.size() > 0)
+        {
+            hasChildren = true;
+            for (QueryComponent subQ : sq.children)
+            {
+                populateQueryComponents(m, subQ);
+            }
+        }
+        if (sq.clauses.size() > 0 || hasChildren)
+        {
+            if (sq.clauses.size() > 0)
+                sq.actualQuery = createSubMongoQuery(m, sq.clauses);
+            if (hasChildren)
+            {
+                List<BasicDBObject> childQs = new ArrayList<BasicDBObject>();
+                if (sq.clauses.size() > 0)
+                    childQs.add(sq.actualQuery);
+                for (QueryComponent subQ : sq.children)
+                {
+                    childQs.add(subQ.actualQuery);
+                }
+                if (sq.isAnd)
+                {
+                    BasicDBObject dbo = new BasicDBObject("$and", childQs);
+                    sq.actualQuery = dbo;
+                }
+                else
+                {
+                    BasicDBObject dbo = new BasicDBObject("$or", childQs);
+                    sq.actualQuery = dbo;
+                }
+            }
+        }
+        return;
+    }
 
-	/**
-	 * Creates MongoDB Query object from filterClauseQueue.
-	 * 
-	 * @param m
-	 *            the m
-	 * @param filterClauseQueue
-	 *            the filter clause queue
-	 * @param columns
-	 * @return the basic db object
-	 */
-	public BasicDBObject createSubMongoQuery(EntityMetadata m,
-			Queue filterClauseQueue) {
-		BasicDBObject query = new BasicDBObject();
-		BasicDBObject compositeColumns = new BasicDBObject();
+    private static QueryComponent getQueryComponent(Queue filterClauseQueue)
+    {
+        QueryComponent subQuery = new QueryComponent();
+        QueryComponent currentSubQuery = subQuery;
 
-		MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata
-				.getApplicationMetadata().getMetamodel(m.getPersistenceUnit());
+        for (Object object : filterClauseQueue)
+        {
+            if (object instanceof FilterClause)
+            {
+                currentSubQuery.clauses.add(object);
+            }
+            else if (object instanceof String)
+            {
+                String interClauseConstruct = (String) object;
+                if (interClauseConstruct.equals("("))
+                {
+                    QueryComponent temp = new QueryComponent();
+                    currentSubQuery.children.add(temp);
+                    temp.parent = currentSubQuery;
+                    currentSubQuery = temp;
+                }
+                else if (interClauseConstruct.equals(")"))
+                {
+                    currentSubQuery = currentSubQuery.parent;
+                }
+                else if (interClauseConstruct.equalsIgnoreCase("AND"))
+                {
+                    currentSubQuery.isAnd = true;
+                }
+                else if (interClauseConstruct.equalsIgnoreCase("OR"))
+                {
+                    currentSubQuery.isAnd = false;
+                }
+            }
+        }
 
-		for (Object object : filterClauseQueue) {
-			boolean isCompositeColumn = false;
+        return subQuery;
+    }
 
-			boolean isSubCondition = false;
+    public BasicDBObject createMongoQuery(EntityMetadata m, Queue filterClauseQueue)
+    {
+        QueryComponent sq = getQueryComponent(filterClauseQueue);
+        populateQueryComponents(m, sq);
+        return sq.actualQuery == null ? new BasicDBObject() : sq.actualQuery;
+    }
 
-			if (object instanceof FilterClause) {
-				FilterClause filter = (FilterClause) object;
-				String property = filter.getProperty();
-				String condition = filter.getCondition();
-				Object value = filter.getValue().get(0);
+    /**
+     * Creates MongoDB Query object from filterClauseQueue.
+     * 
+     * @param m
+     *            the m
+     * @param filterClauseQueue
+     *            the filter clause queue
+     * @param columns
+     * @return the basic db object
+     */
+    public BasicDBObject createSubMongoQuery(EntityMetadata m, Queue filterClauseQueue)
+    {
+        BasicDBObject query = new BasicDBObject();
+        BasicDBObject compositeColumns = new BasicDBObject();
 
-				// value is string but field.getType is different, then get
-				// value using
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                m.getPersistenceUnit());
 
-				Field f = null;
+        for (Object object : filterClauseQueue)
+        {
+            boolean isCompositeColumn = false;
 
-				// if alias is still present .. means it is an enclosing
-				// document search.
+            boolean isSubCondition = false;
 
-				if (((AbstractAttribute) m.getIdAttribute()).getJPAColumnName()
-						.equalsIgnoreCase(property)) {
-					property = "_id";
-					f = (Field) m.getIdAttribute().getJavaMember();
-					if (metaModel.isEmbeddable(m.getIdAttribute()
-							.getBindableJavaType())
-							&& value.getClass().isAssignableFrom(f.getType())) {
-						EmbeddableType compoundKey = metaModel.embeddable(m
-								.getIdAttribute().getBindableJavaType());
-						compositeColumns = MongoDBUtils.getCompoundKeyColumns(
-								m, value, compoundKey);
-						isCompositeColumn = true;
-						continue;
-					}
-				} else if (metaModel.isEmbeddable(m.getIdAttribute()
-						.getBindableJavaType())
-						&& StringUtils.contains(property, '.')) {
-					// Means it is a case of composite column.
-					property = property.substring(property.indexOf(".") + 1);
-					isCompositeColumn = true;
-				} /*
-				 * if a composite key. "." assuming "." is part of property in
-				 * case of embeddable only
-				 */
-				else if (StringUtils.contains(property, '.')) {
-					EntityType entity = metaModel.entity(m.getEntityClazz());
-					StringTokenizer tokenizer = new StringTokenizer(property,
-							".");
-					String embeddedAttributeAsStr = tokenizer.nextToken();
-					String embeddableAttributeAsStr = tokenizer.nextToken();
-					Attribute embeddedAttribute = entity
-							.getAttribute(embeddedAttributeAsStr);
-					EmbeddableType embeddableEntity = metaModel
-							.embeddable(((AbstractAttribute) embeddedAttribute)
-									.getBindableJavaType());
-					f = (Field) embeddableEntity.getAttribute(
-							embeddableAttributeAsStr).getJavaMember();
-					property = ((AbstractAttribute) embeddedAttribute)
-							.getJPAColumnName()
-							+ "."
-							+ ((AbstractAttribute) embeddableEntity
-									.getAttribute(embeddableAttributeAsStr))
-									.getJPAColumnName();
-				} else {
-					EntityType entity = metaModel.entity(m.getEntityClazz());
-					String discriminatorColumn = ((AbstractManagedType) entity)
-							.getDiscriminatorColumn();
+            if (object instanceof FilterClause)
+            {
+                FilterClause filter = (FilterClause) object;
+                String property = filter.getProperty();
+                String condition = filter.getCondition();
+                Object value = filter.getValue().get(0);
 
-					if (!property.equals(discriminatorColumn)) {
-						String fieldName = m.getFieldName(property);
-						f = (Field) entity.getAttribute(fieldName)
-								.getJavaMember();
-					}
-				}
+                // value is string but field.getType is different, then get
+                // value using
 
-				if (value.getClass().isAssignableFrom(String.class)
-						&& f != null && !f.getType().equals(value.getClass())) {
-					value = PropertyAccessorFactory.getPropertyAccessor(f)
-							.fromString(f.getType().getClass(),
-									value.toString());
-				}
-				value = MongoDBUtils.populateValue(value, value.getClass());
+                Field f = null;
 
-				// Property, if doesn't exist in entity, may be there in a
-				// document embedded within it, so we have to check that
-				// TODO: Query should actually be in a format
-				// documentName.embeddedDocumentName.column, remove below if
-				// block once this is decided
+                // if alias is still present .. means it is an enclosing
+                // document search.
 
-				// Query could be geospatial in nature
-				if (f != null && f.getType().equals(Point.class)) {
-					GeospatialQuery geospatialQueryimpl = GeospatialQueryFactory
-							.getGeospatialQueryImplementor(condition, value);
-					query = (BasicDBObject) geospatialQueryimpl
-							.createGeospatialQuery(property, value, query);
+                if (((AbstractAttribute) m.getIdAttribute()).getJPAColumnName().equalsIgnoreCase(property))
+                {
+                    property = "_id";
+                    f = (Field) m.getIdAttribute().getJavaMember();
+                    if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType())
+                            && value.getClass().isAssignableFrom(f.getType()))
+                    {
+                        EmbeddableType compoundKey = metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
+                        compositeColumns = MongoDBUtils.getCompoundKeyColumns(m, value, compoundKey);
+                        isCompositeColumn = true;
+                        continue;
+                    }
+                }
+                else if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType())
+                        && StringUtils.contains(property, '.'))
+                {
+                    // Means it is a case of composite column.
+                    property = property.substring(property.indexOf(".") + 1);
+                    isCompositeColumn = true;
+                } /*
+                   * if a composite key. "." assuming "." is part of property in
+                   * case of embeddable only
+                   */
+                else if (StringUtils.contains(property, '.'))
+                {
+                    EntityType entity = metaModel.entity(m.getEntityClazz());
+                    StringTokenizer tokenizer = new StringTokenizer(property, ".");
+                    String embeddedAttributeAsStr = tokenizer.nextToken();
+                    String embeddableAttributeAsStr = tokenizer.nextToken();
+                    Attribute embeddedAttribute = entity.getAttribute(embeddedAttributeAsStr);
+                    EmbeddableType embeddableEntity = metaModel.embeddable(((AbstractAttribute) embeddedAttribute)
+                            .getBindableJavaType());
+                    f = (Field) embeddableEntity.getAttribute(embeddableAttributeAsStr).getJavaMember();
+                    property = ((AbstractAttribute) embeddedAttribute).getJPAColumnName()
+                            + "."
+                            + ((AbstractAttribute) embeddableEntity.getAttribute(embeddableAttributeAsStr))
+                                    .getJPAColumnName();
+                }
+                else
+                {
+                    EntityType entity = metaModel.entity(m.getEntityClazz());
+                    String discriminatorColumn = ((AbstractManagedType) entity).getDiscriminatorColumn();
 
-				} else {
-					if (condition.equals("=")) {
-						if (isCompositeColumn) {
-							compositeColumns.put(property, value);
-						} else {
-							query.append(property, value);
-						}
-					} else if (condition.equalsIgnoreCase("like")) {
-						if (isCompositeColumn) {
-							compositeColumns.put(property, java.util.regex.Pattern.compile((String) value));
-						} else {
-							query.append(property, java.util.regex.Pattern.compile((String) value));
-						}
-					} else if (condition.equalsIgnoreCase(">")) {
-						if (isCompositeColumn) {
-							compositeColumns.put(property, new BasicDBObject(
-									"$gt", value));
-						} else {
-							if (query.containsField(property)) {
-								query.get(property);
-								query.put(property, ((BasicDBObject) query
-										.get(property)).append("$gt", value));
-							} else {
-								query.append(property, new BasicDBObject("$gt",
-										value));
-							}
-						}
-					} else if (condition.equalsIgnoreCase(">=")) {
-						if (isCompositeColumn) {
-							compositeColumns.put(property, new BasicDBObject(
-									"$gte", value));
-						} else {
-							if (query.containsField(property))
+                    if (!property.equals(discriminatorColumn))
+                    {
+                        String fieldName = m.getFieldName(property);
+                        f = (Field) entity.getAttribute(fieldName).getJavaMember();
+                    }
+                }
 
-							{
-								query.get(property);
-								query.put(property, ((BasicDBObject) query
-										.get(property)).append("$gte", value));
-							} else {
-								query.append(property, new BasicDBObject(
-										"$gte", value));
-							}
-						}
-					} else if (condition.equalsIgnoreCase("<")) {
-						if (isCompositeColumn) {
-							compositeColumns.put(property, new BasicDBObject(
-									"$lt", value));
-						} else {
-							if (query.containsField(property)) {
-								query.get(property);
-								query.put(property, ((BasicDBObject) query
-										.get(property)).append("$lt", value));
-							} else {
-								query.append(property, new BasicDBObject("$lt",
-										value));
-							}
-						}
-					} else if (condition.equalsIgnoreCase("<=")) {
-						if (isCompositeColumn) {
-							compositeColumns.put(property, new BasicDBObject(
-									"$lte", value));
-						} else {
-							if (query.containsField(property)) {
-								query.get(property);
-								query.put(property, ((BasicDBObject) query
-										.get(property)).append("$lte", value));
-							} else {
-								query.append(property, new BasicDBObject(
-										"$lte", value));
-							}
-						}
-					} else if (condition.equalsIgnoreCase("in")) {
-						if (isCompositeColumn) {
-							compositeColumns.put(property, new BasicDBObject(
-									"$in", filter.getValue()));
-						} else {
-							if (query.containsField(property)) {
-								query.get(property);
-								query.put(property, ((BasicDBObject) query
-										.get(property)).append("$in",
-										filter.getValue()));
-							} else {
-								query.append(property, new BasicDBObject("$in",
-										filter.getValue()));
-							}
-						}
-					} else if (condition.equalsIgnoreCase("not in")) {
-						if (isCompositeColumn) {
-							compositeColumns.put(property, new BasicDBObject(
-									"$nin", filter.getValue()));
-						} else {
-							if (query.containsField(property)) {
-								query.get(property);
-								query.put(property, ((BasicDBObject) query
-										.get(property)).append("$nin",
-										filter.getValue()));
-							} else {
-								query.append(property, new BasicDBObject(
-										"$nin", filter.getValue()));
-							}
-						}
-					} else if (condition.equalsIgnoreCase("<>")) {
-						if (isCompositeColumn) {
-							compositeColumns.put(property, new BasicDBObject(
-									"$ne", value));
-						} else {
-							if (query.containsField(property)) {
-								query.get(property);
-								query.put(property, ((BasicDBObject) query
-										.get(property)).append("$ne", value));
-							} else {
-								query.append(property, new BasicDBObject("$ne",
-										value));
-							}
-						}
-					}
-				}
+                if (value.getClass().isAssignableFrom(String.class) && f != null
+                        && !f.getType().equals(value.getClass()))
+                {
+                    value = PropertyAccessorFactory.getPropertyAccessor(f).fromString(f.getType().getClass(),
+                            value.toString());
+                }
+                value = MongoDBUtils.populateValue(value, value.getClass());
 
-				// TODO: Add support for other operators like >, <, >=, <=,
-				// order by asc/ desc, limit, skip, count etc
-			}
-		}
+                // Property, if doesn't exist in entity, may be there in a
+                // document embedded within it, so we have to check that
+                // TODO: Query should actually be in a format
+                // documentName.embeddedDocumentName.column, remove below if
+                // block once this is decided
 
-		if (!compositeColumns.isEmpty()) {
-			query.append("_id", compositeColumns);
-		}
-		return query;
-	}
+                // Query could be geospatial in nature
+                if (f != null && f.getType().equals(Point.class))
+                {
+                    GeospatialQuery geospatialQueryimpl = GeospatialQueryFactory.getGeospatialQueryImplementor(
+                            condition, value);
+                    query = (BasicDBObject) geospatialQueryimpl.createGeospatialQuery(property, value, query);
 
-	private BasicDBObject getKeys(EntityMetadata m, String[] columns) {
-		BasicDBObject keys = new BasicDBObject();
-		if (columns != null && columns.length > 0) {
-			MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata
-					.getApplicationMetadata().getMetamodel(
-							m.getPersistenceUnit());
-			EntityType entity = metaModel.entity(m.getEntityClazz());
-			for (int i = 1; i < columns.length; i++) {
-				if (columns[i] != null) {
-					Attribute col = entity.getAttribute(columns[i]);
-					if (col == null) {
-						throw new QueryHandlerException(
-								"column type is null for: " + columns);
-					}
-					keys.put(((AbstractAttribute) col).getJPAColumnName(), 1);
-				}
-			}
-		}
-		return keys;
-	}
+                }
+                else
+                {
+                    if (condition.equals("="))
+                    {
+                        if (isCompositeColumn)
+                        {
+                            compositeColumns.put(property, value);
+                        }
+                        else
+                        {
+                            query.append(property, value);
+                        }
+                    }
+                    else if (condition.equalsIgnoreCase("like"))
+                    {
+                        if (isCompositeColumn)
+                        {
+                            compositeColumns.put(property, java.util.regex.Pattern.compile((String) value));
+                        }
+                        else
+                        {
+                            query.append(property, java.util.regex.Pattern.compile((String) value));
+                        }
+                    }
+                    else if (condition.equalsIgnoreCase(">"))
+                    {
+                        if (isCompositeColumn)
+                        {
+                            compositeColumns.put(property, new BasicDBObject("$gt", value));
+                        }
+                        else
+                        {
+                            if (query.containsField(property))
+                            {
+                                query.get(property);
+                                query.put(property, ((BasicDBObject) query.get(property)).append("$gt", value));
+                            }
+                            else
+                            {
+                                query.append(property, new BasicDBObject("$gt", value));
+                            }
+                        }
+                    }
+                    else if (condition.equalsIgnoreCase(">="))
+                    {
+                        if (isCompositeColumn)
+                        {
+                            compositeColumns.put(property, new BasicDBObject("$gte", value));
+                        }
+                        else
+                        {
+                            if (query.containsField(property))
 
-	/**
-	 * Prepare order by clause.
-	 * 
-	 * @return order by clause.
-	 */
-	private BasicDBObject getOrderByClause(final EntityMetadata metadata) {
-		BasicDBObject orderByClause = null;
-		Metamodel metaModel = kunderaMetadata.getApplicationMetadata()
-				.getMetamodel(metadata.getPersistenceUnit());
-		EntityType entityType = metaModel.entity(metadata.getEntityClazz());
+                            {
+                                query.get(property);
+                                query.put(property, ((BasicDBObject) query.get(property)).append("$gte", value));
+                            }
+                            else
+                            {
+                                query.append(property, new BasicDBObject("$gte", value));
+                            }
+                        }
+                    }
+                    else if (condition.equalsIgnoreCase("<"))
+                    {
+                        if (isCompositeColumn)
+                        {
+                            compositeColumns.put(property, new BasicDBObject("$lt", value));
+                        }
+                        else
+                        {
+                            if (query.containsField(property))
+                            {
+                                query.get(property);
+                                query.put(property, ((BasicDBObject) query.get(property)).append("$lt", value));
+                            }
+                            else
+                            {
+                                query.append(property, new BasicDBObject("$lt", value));
+                            }
+                        }
+                    }
+                    else if (condition.equalsIgnoreCase("<="))
+                    {
+                        if (isCompositeColumn)
+                        {
+                            compositeColumns.put(property, new BasicDBObject("$lte", value));
+                        }
+                        else
+                        {
+                            if (query.containsField(property))
+                            {
+                                query.get(property);
+                                query.put(property, ((BasicDBObject) query.get(property)).append("$lte", value));
+                            }
+                            else
+                            {
+                                query.append(property, new BasicDBObject("$lte", value));
+                            }
+                        }
+                    }
+                    else if (condition.equalsIgnoreCase("in"))
+                    {
+                        if (isCompositeColumn)
+                        {
+                            compositeColumns.put(property, new BasicDBObject("$in", filter.getValue()));
+                        }
+                        else
+                        {
+                            if (query.containsField(property))
+                            {
+                                query.get(property);
+                                query.put(property,
+                                        ((BasicDBObject) query.get(property)).append("$in", filter.getValue()));
+                            }
+                            else
+                            {
+                                query.append(property, new BasicDBObject("$in", filter.getValue()));
+                            }
+                        }
+                    }
+                    else if (condition.equalsIgnoreCase("not in"))
+                    {
+                        if (isCompositeColumn)
+                        {
+                            compositeColumns.put(property, new BasicDBObject("$nin", filter.getValue()));
+                        }
+                        else
+                        {
+                            if (query.containsField(property))
+                            {
+                                query.get(property);
+                                query.put(property,
+                                        ((BasicDBObject) query.get(property)).append("$nin", filter.getValue()));
+                            }
+                            else
+                            {
+                                query.append(property, new BasicDBObject("$nin", filter.getValue()));
+                            }
+                        }
+                    }
+                    else if (condition.equalsIgnoreCase("<>"))
+                    {
+                        if (isCompositeColumn)
+                        {
+                            compositeColumns.put(property, new BasicDBObject("$ne", value));
+                        }
+                        else
+                        {
+                            if (query.containsField(property))
+                            {
+                                query.get(property);
+                                query.put(property, ((BasicDBObject) query.get(property)).append("$ne", value));
+                            }
+                            else
+                            {
+                                query.append(property, new BasicDBObject("$ne", value));
+                            }
+                        }
+                    }
+                }
 
-		List<SortOrdering> orders = kunderaQuery.getOrdering();
-		if (orders != null) {
-			orderByClause = new BasicDBObject();
-			for (SortOrdering order : orders) {
-				orderByClause.append(
-						getColumnName(metadata, entityType,
-								order.getColumnName()), order.getOrder()
-								.equals(SortOrder.ASC) ? 1 : -1);
-			}
-		}
+                // TODO: Add support for other operators like >, <, >=, <=,
+                // order by asc/ desc, limit, skip, count etc
+            }
+        }
 
-		return orderByClause;
-	}
+        if (!compositeColumns.isEmpty())
+        {
+            query.append("_id", compositeColumns);
+        }
+        return query;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.impetus.kundera.query.QueryImpl#onExecuteUpdate()
-	 */
-	@Override
-	protected int onExecuteUpdate() {
-		int ret = handleSpecialFunctions();
-		if (ret == -1) {
-			return onUpdateDeleteEvent();
-		}
-		return ret;
-	}
+    private BasicDBObject getKeys(EntityMetadata m, String[] columns)
+    {
+        BasicDBObject keys = new BasicDBObject();
+        if (columns != null && columns.length > 0)
+        {
+            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                    m.getPersistenceUnit());
+            EntityType entity = metaModel.entity(m.getEntityClazz());
+            for (int i = 1; i < columns.length; i++)
+            {
+                if (columns[i] != null)
+                {
+                    Attribute col = entity.getAttribute(columns[i]);
+                    if (col == null)
+                    {
+                        throw new QueryHandlerException("column type is null for: " + columns);
+                    }
+                    keys.put(((AbstractAttribute) col).getJPAColumnName(), 1);
+                }
+            }
+        }
+        return keys;
+    }
 
-	/** The Constant SINGLE_STRING_KEYWORDS. */
-	public static final String[] FUNCTION_KEYWORDS = { "INCREMENT\\(\\d+\\)",
-			"DECREMENT\\(\\d+\\)" };
+    /**
+     * Prepare order by clause.
+     * 
+     * @return order by clause.
+     */
+    private BasicDBObject getOrderByClause(final EntityMetadata metadata)
+    {
+        BasicDBObject orderByClause = null;
+        Metamodel metaModel = kunderaMetadata.getApplicationMetadata().getMetamodel(metadata.getPersistenceUnit());
+        EntityType entityType = metaModel.entity(metadata.getEntityClazz());
 
-	private int handleSpecialFunctions() {
+        List<SortOrdering> orders = kunderaQuery.getOrdering();
+        if (orders != null)
+        {
+            orderByClause = new BasicDBObject();
+            for (SortOrdering order : orders)
+            {
+                orderByClause.append(getColumnName(metadata, entityType, order.getColumnName()), order.getOrder()
+                        .equals(SortOrder.ASC) ? 1 : -1);
+            }
+        }
 
-		boolean needsSpecialAttention = false;
-		outer: for (UpdateClause c : kunderaQuery.getUpdateClauseQueue()) {
-			for (int i = 0; i < FUNCTION_KEYWORDS.length; i++) {
-				if (c.getValue() instanceof String) {
-					String func = c.getValue().toString();
-					func = func.replaceAll(" ", "");
-					if (func.toUpperCase().matches(FUNCTION_KEYWORDS[i])) {
-						needsSpecialAttention = true;
-						c.setValue(func);
-						break outer;
-					}
-				}
-			}
-		}
+        return orderByClause;
+    }
 
-		if (!needsSpecialAttention)
-			return -1;
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.query.QueryImpl#onExecuteUpdate()
+     */
+    @Override
+    protected int onExecuteUpdate()
+    {
+        int ret = handleSpecialFunctions();
+        if (ret == -1)
+        {
+            return onUpdateDeleteEvent();
+        }
+        return ret;
+    }
 
-		EntityMetadata m = getEntityMetadata();
-		Metamodel metaModel = kunderaMetadata.getApplicationMetadata()
-				.getMetamodel(m.getPersistenceUnit());
-		Queue filterClauseQueue = kunderaQuery.getFilterClauseQueue();
-		BasicDBObject query = createMongoQuery(m, filterClauseQueue);
+    /** The Constant SINGLE_STRING_KEYWORDS. */
+    public static final String[] FUNCTION_KEYWORDS = { "INCREMENT\\(\\d+\\)", "DECREMENT\\(\\d+\\)" };
 
-		BasicDBObject update = new BasicDBObject();
-		for (UpdateClause c : kunderaQuery.getUpdateClauseQueue()) {
-			String columName = getColumnName(m,
-					metaModel.entity(m.getEntityClazz()), c.getProperty());
-			boolean isSpecialFunction = false;
-			for (int i = 0; i < FUNCTION_KEYWORDS.length; i++) {
+    private int handleSpecialFunctions()
+    {
 
-				if (c.getValue() instanceof String
-						&& c.getValue().toString().toUpperCase()
-								.matches(FUNCTION_KEYWORDS[i])) {
-					isSpecialFunction = true;
+        boolean needsSpecialAttention = false;
+        outer: for (UpdateClause c : kunderaQuery.getUpdateClauseQueue())
+        {
+            for (int i = 0; i < FUNCTION_KEYWORDS.length; i++)
+            {
+                if (c.getValue() instanceof String)
+                {
+                    String func = c.getValue().toString();
+                    func = func.replaceAll(" ", "");
+                    if (func.toUpperCase().matches(FUNCTION_KEYWORDS[i]))
+                    {
+                        needsSpecialAttention = true;
+                        c.setValue(func);
+                        break outer;
+                    }
+                }
+            }
+        }
 
-					if (c.getValue().toString().toUpperCase()
-							.startsWith("INCREMENT(")) {
-						String val = c.getValue().toString().toUpperCase();
-						val = val.substring(10, val.indexOf(")"));
-						update.put(
-								"$inc",
-								new BasicDBObject(columName, Integer
-										.valueOf(val)));
-					} else if (c.getValue().toString().toUpperCase()
-							.startsWith("DECREMENT(")) {
-						String val = c.getValue().toString().toUpperCase();
-						val = val.substring(10, val.indexOf(")"));
-						update.put("$inc", new BasicDBObject(columName,
-								-Integer.valueOf(val)));
-					}
-				}
-			}
-			if (!isSpecialFunction) {
-				update.put(columName, c.getValue());
-			}
-		}
+        if (!needsSpecialAttention)
+            return -1;
 
-		Client client = persistenceDelegeator.getClient(m);
-		return ((MongoDBClient) client).handleUpdateFunctions(query, update,
-				m.getTableName());
-	}
+        EntityMetadata m = getEntityMetadata();
+        Metamodel metaModel = kunderaMetadata.getApplicationMetadata().getMetamodel(m.getPersistenceUnit());
+        Queue filterClauseQueue = kunderaQuery.getFilterClauseQueue();
+        BasicDBObject query = createMongoQuery(m, filterClauseQueue);
 
-	@Override
-	public void close() {
-		// TODO Auto-generated method stub
+        BasicDBObject update = new BasicDBObject();
+        for (UpdateClause c : kunderaQuery.getUpdateClauseQueue())
+        {
+            String columName = getColumnName(m, metaModel.entity(m.getEntityClazz()), c.getProperty());
+            boolean isSpecialFunction = false;
+            for (int i = 0; i < FUNCTION_KEYWORDS.length; i++)
+            {
 
-	}
+                if (c.getValue() instanceof String
+                        && c.getValue().toString().toUpperCase().matches(FUNCTION_KEYWORDS[i]))
+                {
+                    isSpecialFunction = true;
 
-	@Override
-	public Iterator iterate() {
-		EntityMetadata m = getEntityMetadata();
-		Client client = persistenceDelegeator.getClient(m);
-		return new ResultIterator((MongoDBClient) client, m, createMongoQuery(
-				m, getKunderaQuery().getFilterClauseQueue()),
-				getOrderByClause(m), getKeys(m, getKunderaQuery().getResult()),
-				persistenceDelegeator, getFetchSize() != null ? getFetchSize()
-						: this.maxResult);
-	}
+                    if (c.getValue().toString().toUpperCase().startsWith("INCREMENT("))
+                    {
+                        String val = c.getValue().toString().toUpperCase();
+                        val = val.substring(10, val.indexOf(")"));
+                        update.put("$inc", new BasicDBObject(columName, Integer.valueOf(val)));
+                    }
+                    else if (c.getValue().toString().toUpperCase().startsWith("DECREMENT("))
+                    {
+                        String val = c.getValue().toString().toUpperCase();
+                        val = val.substring(10, val.indexOf(")"));
+                        update.put("$inc", new BasicDBObject(columName, -Integer.valueOf(val)));
+                    }
+                }
+            }
+            if (!isSpecialFunction)
+            {
+                update.put(columName, c.getValue());
+            }
+        }
 
-	private String getColumnName(EntityMetadata metadata,
-			EntityType entityType, String property) {
-		String columnName = null;
+        Client client = persistenceDelegeator.getClient(m);
+        return ((MongoDBClient) client).handleUpdateFunctions(query, update, m.getTableName());
+    }
 
-		if (property.indexOf(".") > 0) {
-			property = property.substring((kunderaQuery.getEntityAlias() + ".")
-					.length());
-		}
-		try {
-			columnName = ((AbstractAttribute) entityType.getAttribute(property))
-					.getJPAColumnName();
-		} catch (IllegalArgumentException iaex) {
-			log.warn("No column found by this name : " + property
-					+ " checking for embeddedfield");
-		}
-		// where condition may be for search within embedded object
-		if (columnName == null && property.indexOf(".") > 0) {
-			String enclosingEmbeddedField = MetadataUtils
-					.getEnclosingEmbeddedFieldName(metadata, property, true,
-							kunderaMetadata);
-			if (enclosingEmbeddedField != null) {
-				columnName = property;
-			}
-		}
+    @Override
+    public void close()
+    {
+        // TODO Auto-generated method stub
 
-		if (columnName == null) {
-			log.error("No column found by this name : " + property);
-			throw new JPQLParseException("No column found by this name : "
-					+ property + ". Check your query.");
-		}
-		return columnName;
-	}
+    }
+
+    @Override
+    public Iterator iterate()
+    {
+        EntityMetadata m = getEntityMetadata();
+        Client client = persistenceDelegeator.getClient(m);
+        return new ResultIterator((MongoDBClient) client, m, createMongoQuery(m, getKunderaQuery()
+                .getFilterClauseQueue()), getOrderByClause(m), getKeys(m, getKunderaQuery().getResult()),
+                persistenceDelegeator, getFetchSize() != null ? getFetchSize() : this.maxResult);
+    }
+
+    private String getColumnName(EntityMetadata metadata, EntityType entityType, String property)
+    {
+        String columnName = null;
+
+        if (property.indexOf(".") > 0)
+        {
+            property = property.substring((kunderaQuery.getEntityAlias() + ".").length());
+        }
+        try
+        {
+            columnName = ((AbstractAttribute) entityType.getAttribute(property)).getJPAColumnName();
+        }
+        catch (IllegalArgumentException iaex)
+        {
+            log.warn("No column found by this name : " + property + " checking for embeddedfield");
+        }
+        // where condition may be for search within embedded object
+        if (columnName == null && property.indexOf(".") > 0)
+        {
+            String enclosingEmbeddedField = MetadataUtils.getEnclosingEmbeddedFieldName(metadata, property, true,
+                    kunderaMetadata);
+            if (enclosingEmbeddedField != null)
+            {
+                columnName = property;
+            }
+        }
+
+        if (columnName == null)
+        {
+            log.error("No column found by this name : " + property);
+            throw new JPQLParseException("No column found by this name : " + property + ". Check your query.");
+        }
+        return columnName;
+    }
 
 }

@@ -11,6 +11,7 @@
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.oraclenosql.OracleNoSQLClientFactory" />
 			<property name="kundera.keyspace" value="OracleNoSqlTests" />
+			<property name="kundera.show.query" value="true"/>
 			<property name="kundera.dialect" value="kvstore" />
 			<property name="kundera.client" value="kvstore" />
 <!-- 			<property name="kundera.cache.provider.class"
@@ -55,12 +56,47 @@
 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
+			<property name="kundera.show.query" value="true"/>
 			<!-- <property name="index.home.dir" value="./lucene"/> -->
 			<property name="kundera.indexer.class"
 				value="com.impetus.client.oraclenosql.index.OracleNoSQLInvertedIndexer" />
 			<property name="kundera.batch.size" value="20" />
 		</properties>
 	</persistence-unit>
+
+<persistence-unit name="oracleNosqlShowQueryEnabledPU">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.client.oraclenosql.entities.UserInformation</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="5000" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.oraclenosql.OracleNoSQLClientFactory" />
+			<property name="kundera.keyspace" value="OracleNoSqlTests" />
+			<property name="kundera.show.query" value="true"/>
+			<property name="kundera.dialect" value="kvstore" />
+			<property name="kundera.client" value="kvstore" />
+  		</properties>
+	</persistence-unit>
+
+<persistence-unit name="oracleNosqlShowQueryDisabledPU">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.client.oraclenosql.entities.UserInformation</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="5000" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.oraclenosql.OracleNoSQLClientFactory" />
+			<property name="kundera.keyspace" value="OracleNoSqlTests" />
+			<property name="kundera.dialect" value="kvstore" />
+			<property name="kundera.client" value="kvstore" />
+  		</properties>
+	</persistence-unit>
+
+
+
 
 </persistence>
 
