@@ -1,5 +1,5 @@
 /*******************************************************************************
- * * Copyright 2013 Impetus Infotech.
+ * * Copyright 2014 Impetus Infotech.
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -15,79 +15,60 @@
  ******************************************************************************/
 package com.impetus.kundera.client.cassandra.composite;
 
-import java.util.UUID;
+import java.io.Serializable;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 /**
- * User time line composite key.
  * 
- * @author vivek.mishra
+ * @author Kuldeep.Mishra
+ * 
  */
 @Embeddable
-public class UserTimeLine
+public class DSPartitionKey implements Serializable
 {
-    private static final long serialVersionUID = -8055485531216607863L;
-    
-    @Column
-    private String userId;
+
+    private static final long serialVersionUID = 100000L;
 
     @Column
-    private int tweetId;
+    private String partitionKey1;
 
     @Column
-    private UUID timeLineId;
-
-    @Column
-    private transient String fullName;
+    private int partitionKey2;
 
     /**
-     * 
+     * @return the partitionKey1
      */
-    public UserTimeLine()
+    public String getPartitionKey1()
     {
+        return partitionKey1;
     }
 
     /**
-     * @param userId
-     * @param tweetId
-     * @param timeLineId
+     * @param partitionKey1
+     *            the partitionKey1 to set
      */
-    public UserTimeLine(String userId, int tweetId, UUID timeLineId)
+    public void setPartitionKey1(String partitionKey1)
     {
-        this.userId = userId;
-        this.tweetId = tweetId;
-        this.timeLineId = timeLineId;
-        this.fullName = "kuldeep";
+        this.partitionKey1 = partitionKey1;
     }
 
     /**
-     * @return the userId
+     * @return the partitionKey2
      */
-    public String getUserId()
+    public int getPartitionKey2()
     {
-        return userId;
+        return partitionKey2;
     }
 
     /**
-     * @return the tweetId
+     * @param partitionKey2
+     *            the partitionKey2 to set
      */
-    public int getTweetId()
+    public void setPartitionKey2(int partitionKey2)
     {
-        return tweetId;
+        this.partitionKey2 = partitionKey2;
     }
 
-    /**
-     * @return the timeLineId
-     */
-    public UUID getTimeLineId()
-    {
-        return timeLineId;
-    }
-
-    public String getFullName()
-    {
-        return this.fullName;
-    }
 }

@@ -13,7 +13,7 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.client.crud.compositeType;
+package com.impetus.kundera.client.cassandra.composite;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -32,6 +32,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.client.crud.compositeType.EntityWithMultiplePartitionKey;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
 import com.impetus.kundera.query.Query;
@@ -40,17 +41,17 @@ import com.impetus.kundera.query.Query;
  * @author Kuldeep.Mishra
  * 
  */
-public class EntityWithMultiplePartitionKeyTest
+public class DSEntityWithMultiplePartitionKeyTest
 {
 
-    protected static String _PU = "compositedatatype";
+    protected static String _PU = "ds_pu";
 
     private EntityManagerFactory emf;
 
-    private static final String _keyspace = "CompositeCassandra";
+    private static final String _keyspace = "KunderaExamples";
 
     /** The Constant logger. */
-    private static final Logger log = LoggerFactory.getLogger(EntityWithMultiplePartitionKeyTest.class);
+    private static final Logger log = LoggerFactory.getLogger(DSEntityWithMultiplePartitionKeyTest.class);
 
     /**
      * @throws java.lang.Exception
@@ -65,7 +66,7 @@ public class EntityWithMultiplePartitionKeyTest
         {
             CassandraCli
                     .executeCqlQuery(
-                            "create table \"EntityWithMultiplePartitionKey\"(\"partitionKey1\" text, \"partitionKey2\" int, \"clusterkey1\" text, \"clusterkey2\" int, \"entityDiscription\" text, action text, PRIMARY KEY((\"partitionKey1\", \"partitionKey2\"), \"clusterkey1\", \"clusterkey2\"))",
+                            "create table \"DSEntityWithMultiplePartitionKey\"(\"partitionKey1\" text, \"partitionKey2\" int, \"clusterkey1\" text, \"clusterkey2\" int, \"entityDiscription\" text, action text, PRIMARY KEY((\"partitionKey1\", \"partitionKey2\"), \"clusterkey1\", \"clusterkey2\"))",
                             _keyspace);
         }
         catch (Exception e)
@@ -92,16 +93,16 @@ public class EntityWithMultiplePartitionKeyTest
     {
         EntityManager em = emf.createEntityManager();
 
-        PartitionKey partitionKey = new PartitionKey();
+        DSPartitionKey partitionKey = new DSPartitionKey();
         partitionKey.setPartitionKey1("partitionKey1");
         partitionKey.setPartitionKey2(1);
 
-        IdWithMultiplePartitionKey id = new IdWithMultiplePartitionKey();
+        DSIdWithMultiplePartitionKey id = new DSIdWithMultiplePartitionKey();
         id.setClusterkey1("clusterkey1");
         id.setClusterkey2(11);
         id.setPartitionKey(partitionKey);
 
-        EntityWithMultiplePartitionKey entity = new EntityWithMultiplePartitionKey();
+        DSEntityWithMultiplePartitionKey entity = new DSEntityWithMultiplePartitionKey();
         entity.setEntityDiscription("Entity to test composite key with multiple partition key.");
         entity.setAction("Persisting");
         entity.setId(id);
@@ -112,7 +113,7 @@ public class EntityWithMultiplePartitionKeyTest
         em.clear();
 
         // Retrieve.
-        EntityWithMultiplePartitionKey foundEntity = em.find(EntityWithMultiplePartitionKey.class, id);
+        DSEntityWithMultiplePartitionKey foundEntity = em.find(DSEntityWithMultiplePartitionKey.class, id);
         Assert.assertNotNull(foundEntity);
         Assert.assertNotNull(foundEntity.getId());
         Assert.assertNotNull(foundEntity.getId().getPartitionKey());
@@ -124,13 +125,13 @@ public class EntityWithMultiplePartitionKeyTest
         Assert.assertEquals("partitionKey1", foundEntity.getId().getPartitionKey().getPartitionKey1());
         Assert.assertEquals(1, foundEntity.getId().getPartitionKey().getPartitionKey2());
 
-        foundEntity.setAction("updating");
         // Update.
+        foundEntity.setAction("updating");
         em.merge(foundEntity);
 
         em.clear();
 
-        foundEntity = em.find(EntityWithMultiplePartitionKey.class, id);
+        foundEntity = em.find(DSEntityWithMultiplePartitionKey.class, id);
         Assert.assertNotNull(foundEntity);
         Assert.assertNotNull(foundEntity.getId());
         Assert.assertNotNull(foundEntity.getId().getPartitionKey());
@@ -146,7 +147,7 @@ public class EntityWithMultiplePartitionKeyTest
         em.remove(foundEntity);
         em.clear();
 
-        foundEntity = em.find(EntityWithMultiplePartitionKey.class, id);
+        foundEntity = em.find(DSEntityWithMultiplePartitionKey.class, id);
         Assert.assertNull(foundEntity);
 
     }
@@ -156,44 +157,44 @@ public class EntityWithMultiplePartitionKeyTest
     {
         EntityManager em = emf.createEntityManager();
 
-        PartitionKey partitionKey1 = new PartitionKey();
+        DSPartitionKey partitionKey1 = new DSPartitionKey();
         partitionKey1.setPartitionKey1("partitionKey1");
         partitionKey1.setPartitionKey2(1);
 
-        IdWithMultiplePartitionKey id1 = new IdWithMultiplePartitionKey();
+        DSIdWithMultiplePartitionKey id1 = new DSIdWithMultiplePartitionKey();
         id1.setClusterkey1("clusterkey1");
         id1.setClusterkey2(11);
         id1.setPartitionKey(partitionKey1);
 
-        EntityWithMultiplePartitionKey entity1 = new EntityWithMultiplePartitionKey();
+        DSEntityWithMultiplePartitionKey entity1 = new DSEntityWithMultiplePartitionKey();
         entity1.setEntityDiscription("Entity to test composite key with multiple partition key.");
         entity1.setAction("Persisting");
         entity1.setId(id1);
 
-        PartitionKey partitionKey2 = new PartitionKey();
+        DSPartitionKey partitionKey2 = new DSPartitionKey();
         partitionKey2.setPartitionKey1("partitionKey2");
         partitionKey2.setPartitionKey2(2);
 
-        IdWithMultiplePartitionKey id2 = new IdWithMultiplePartitionKey();
+        DSIdWithMultiplePartitionKey id2 = new DSIdWithMultiplePartitionKey();
         id2.setClusterkey1("clusterkey2");
         id2.setClusterkey2(111);
         id2.setPartitionKey(partitionKey2);
 
-        EntityWithMultiplePartitionKey entity2 = new EntityWithMultiplePartitionKey();
+        DSEntityWithMultiplePartitionKey entity2 = new DSEntityWithMultiplePartitionKey();
         entity2.setEntityDiscription("Entity to test composite key with multiple partition key.");
         entity2.setAction("Persisting");
         entity2.setId(id2);
 
-        PartitionKey partitionKey3 = new PartitionKey();
+        DSPartitionKey partitionKey3 = new DSPartitionKey();
         partitionKey3.setPartitionKey1("partitionKey3");
         partitionKey3.setPartitionKey2(3);
 
-        IdWithMultiplePartitionKey id3 = new IdWithMultiplePartitionKey();
+        DSIdWithMultiplePartitionKey id3 = new DSIdWithMultiplePartitionKey();
         id3.setClusterkey1("clusterkey3");
         id3.setClusterkey2(1111);
         id3.setPartitionKey(partitionKey3);
 
-        EntityWithMultiplePartitionKey entity3 = new EntityWithMultiplePartitionKey();
+        DSEntityWithMultiplePartitionKey entity3 = new DSEntityWithMultiplePartitionKey();
         entity3.setEntityDiscription("Entity to test composite key with multiple partition key.");
         entity3.setAction("Persisting");
         entity3.setId(id3);
@@ -206,15 +207,15 @@ public class EntityWithMultiplePartitionKeyTest
         em.clear();
 
         // Select All query.
-        List<EntityWithMultiplePartitionKey> foundEntitys = em.createQuery(
-                "select e from EntityWithMultiplePartitionKey e").getResultList();
+        List<DSEntityWithMultiplePartitionKey> foundEntitys = em.createQuery(
+                "select e from DSEntityWithMultiplePartitionKey e").getResultList();
 
         Assert.assertNotNull(foundEntitys);
         Assert.assertFalse(foundEntitys.isEmpty());
         Assert.assertEquals(3, foundEntitys.size());
 
         int count = 0;
-        for (EntityWithMultiplePartitionKey foundEntity : foundEntitys)
+        for (DSEntityWithMultiplePartitionKey foundEntity : foundEntitys)
         {
             Assert.assertNotNull(foundEntity);
             Assert.assertNotNull(foundEntity.getId());
@@ -253,7 +254,7 @@ public class EntityWithMultiplePartitionKeyTest
         // Select by both partition key query.
         foundEntitys = em
                 .createQuery(
-                        "select e from EntityWithMultiplePartitionKey e where e.id.partitionKey.partitionKey1=partitionKey1 and e.id.partitionKey.partitionKey2=1")
+                        "select e from DSEntityWithMultiplePartitionKey e where e.id.partitionKey.partitionKey1=partitionKey1 and e.id.partitionKey.partitionKey2=1")
                 .getResultList();
 
         Assert.assertNotNull(foundEntitys);
@@ -261,7 +262,7 @@ public class EntityWithMultiplePartitionKeyTest
         Assert.assertEquals(1, foundEntitys.size());
 
         count = 0;
-        for (EntityWithMultiplePartitionKey foundEntity : foundEntitys)
+        for (DSEntityWithMultiplePartitionKey foundEntity : foundEntitys)
         {
             Assert.assertNotNull(foundEntity);
             Assert.assertNotNull(foundEntity.getId());
@@ -280,7 +281,7 @@ public class EntityWithMultiplePartitionKeyTest
         // Select by both partition key query and one cluster key.
         foundEntitys = em
                 .createQuery(
-                        "select e from EntityWithMultiplePartitionKey e where e.id.partitionKey.partitionKey1=partitionKey1 and e.id.partitionKey.partitionKey2=1 and e.id.clusterkey1=clusterkey1")
+                        "select e from DSEntityWithMultiplePartitionKey e where e.id.partitionKey.partitionKey1=partitionKey1 and e.id.partitionKey.partitionKey2=1 and e.id.clusterkey1=clusterkey1")
                 .getResultList();
 
         Assert.assertNotNull(foundEntitys);
@@ -288,7 +289,7 @@ public class EntityWithMultiplePartitionKeyTest
         Assert.assertEquals(1, foundEntitys.size());
 
         count = 0;
-        for (EntityWithMultiplePartitionKey foundEntity : foundEntitys)
+        for (DSEntityWithMultiplePartitionKey foundEntity : foundEntitys)
         {
             Assert.assertNotNull(foundEntity);
             Assert.assertNotNull(foundEntity.getId());
@@ -306,7 +307,7 @@ public class EntityWithMultiplePartitionKeyTest
 
         // Select by both partition key query.
         foundEntitys = em
-                .createQuery("select e from EntityWithMultiplePartitionKey e where e.id.partitionKey = :partitionKey")
+                .createQuery("select e from DSEntityWithMultiplePartitionKey e where e.id.partitionKey = :partitionKey")
                 .setParameter("partitionKey", partitionKey1).getResultList();
 
         Assert.assertNotNull(foundEntitys);
@@ -314,7 +315,7 @@ public class EntityWithMultiplePartitionKeyTest
         Assert.assertEquals(1, foundEntitys.size());
 
         count = 0;
-        for (EntityWithMultiplePartitionKey foundEntity : foundEntitys)
+        for (DSEntityWithMultiplePartitionKey foundEntity : foundEntitys)
         {
             Assert.assertNotNull(foundEntity);
             Assert.assertNotNull(foundEntity.getId());
@@ -336,7 +337,7 @@ public class EntityWithMultiplePartitionKeyTest
         {
             foundEntitys = em
                     .createQuery(
-                            "select e from EntityWithMultiplePartitionKey e where e.id.partitionKey.partitionKey1=partitionKey1 and e.id.partitionKey.partitionKey2 IN (1, 2, 3)")
+                            "select e from DSEntityWithMultiplePartitionKey e where e.id.partitionKey.partitionKey1=partitionKey1 and e.id.partitionKey.partitionKey2 IN (1, 2, 3)")
                     .getResultList();
 
             Assert.assertNotNull(foundEntitys);
@@ -344,7 +345,7 @@ public class EntityWithMultiplePartitionKeyTest
             Assert.assertEquals(1, foundEntitys.size());
 
             count = 0;
-            for (EntityWithMultiplePartitionKey foundEntity : foundEntitys)
+            for (DSEntityWithMultiplePartitionKey foundEntity : foundEntitys)
             {
                 Assert.assertNotNull(foundEntity);
                 Assert.assertNotNull(foundEntity.getId());
@@ -368,7 +369,7 @@ public class EntityWithMultiplePartitionKeyTest
         // Select by composite id object query.
         try
         {
-            foundEntitys = em.createQuery("select e from EntityWithMultiplePartitionKey e where e.id = :id")
+            foundEntitys = em.createQuery("select e from DSEntityWithMultiplePartitionKey e where e.id = :id")
                     .setParameter("id", id1).getResultList();
 
             Assert.assertNotNull(foundEntitys);
@@ -376,7 +377,7 @@ public class EntityWithMultiplePartitionKeyTest
             Assert.assertEquals(1, foundEntitys.size());
 
             count = 0;
-            for (EntityWithMultiplePartitionKey foundEntity : foundEntitys)
+            for (DSEntityWithMultiplePartitionKey foundEntity : foundEntitys)
             {
                 Assert.assertNotNull(foundEntity);
                 Assert.assertNotNull(foundEntity.getId());
@@ -402,7 +403,7 @@ public class EntityWithMultiplePartitionKeyTest
         {
             foundEntitys = em
                     .createQuery(
-                            "select e from EntityWithMultiplePartitionKey e where e.id.partitionKey.partitionKey1=partitionKey1")
+                            "select e from DSEntityWithMultiplePartitionKey e where e.id.partitionKey.partitionKey1=partitionKey1")
                     .getResultList();
 
             Assert.fail();
@@ -411,21 +412,21 @@ public class EntityWithMultiplePartitionKeyTest
         {
             Assert.assertEquals(
                     "All part of partition key must be in where clause, but provided only first part. ",
-                    "javax.persistence.PersistenceException: com.impetus.kundera.KunderaException: InvalidRequestException(why:Partition key part partitionKey2 must be restricted since preceding part is)",
+                    "com.datastax.driver.core.exceptions.InvalidQueryException: Partition key part partitionKey2 must be restricted since preceding part is",
                     e.getMessage());
         }
 
-        //test iteration of result.
+        // test iteration of result.
         Query query = (com.impetus.kundera.query.Query) em
-                .createQuery("SELECT e FROM EntityWithMultiplePartitionKey e");
+                .createQuery("SELECT e FROM DSEntityWithMultiplePartitionKey e");
 
         query.setFetchSize(1);
 
-        Iterator<EntityWithMultiplePartitionKey> iterator = query.iterate();
+        Iterator<DSEntityWithMultiplePartitionKey> iterator = query.iterate();
         count = 0;
         while (iterator.hasNext())
         {
-            EntityWithMultiplePartitionKey entity = iterator.next();
+            DSEntityWithMultiplePartitionKey entity = iterator.next();
             Assert.assertNotNull(entity);
             Assert.assertNotNull(entity.getId());
             Assert.assertNotNull(entity.getId().getPartitionKey());
