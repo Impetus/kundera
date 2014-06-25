@@ -401,10 +401,11 @@ public class CassandraCompositeTypeTest
         q.setParameter("userId", "mevivs");
         List<CassandraPrimeUser> results = q.getResultList();
         Assert.assertNotNull(results);
+        Assert.assertFalse(results.isEmpty());
+        Assert.assertEquals(3, results.size());
         Assert.assertEquals("my first tweet", results.get(0).getTweetBody());
         Assert.assertEquals("my second tweet", results.get(1).getTweetBody());
         Assert.assertEquals("my third tweet", results.get(2).getTweetBody());
-        Assert.assertEquals(3, results.size());
         Assert.assertNull(results.get(0).getKey().getFullName());
 
         orderClause = "Select u from CassandraPrimeUser u where u.key.userId = :userId ORDER BY u.key.tweetId DESC";
