@@ -61,6 +61,7 @@ public class DSEntityWithMultiplePartitionKeyTest
     {
         CassandraCli.cassandraSetUp();
         CassandraCli.initClient();
+        CassandraCli.dropKeySpace(_keyspace);
         CassandraCli.createKeySpace(_keyspace);
         try
         {

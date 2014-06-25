@@ -30,7 +30,6 @@ import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
-import javax.persistence.metamodel.Metamodel;
 
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.IndexExpression;
@@ -66,7 +65,6 @@ import com.impetus.kundera.generator.AutoGenerator;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
-import com.impetus.kundera.metadata.model.EntityMetadata.Type;
 import com.impetus.kundera.metadata.model.annotation.DefaultEntityAnnotationProcessor;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
@@ -111,7 +109,6 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
     @Override
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
     {
-
         // Insert, update is fine
         try
         {
@@ -186,7 +183,6 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
                 }
             }
         }
-
         return results;
     }
 
@@ -198,7 +194,6 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
 
         UUID uuid = rSet.iterator().next().getUUID(0);
         return uuid;
-        // return uuid.timestamp();
     }
 
     @Override
@@ -221,7 +216,7 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
 
         // need to bring in an insert query for this
         // add columns & execute query
-        //
+
         CQLTranslator translator = new CQLTranslator();
 
         String batch_Query = CQLTranslator.BATCH_QUERY;
@@ -244,9 +239,7 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
 
         StringBuilder statements = new StringBuilder();
 
-        // if
-        // insert query for for each row key and
-
+        // insert query for each row key and
         for (Object key : joinTableRecords.keySet())
         {
             PropertyAccessor accessor = PropertyAccessorFactory.getPropertyAccessor((Field) entityMetadata
@@ -273,9 +266,7 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
                     statements.append(insertQuery);
                     statements.append(" ");
                 }
-
             }
-
         }
 
         if (!StringUtils.isBlank(statements.toString()))
@@ -338,7 +329,6 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
     @Override
     public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
     {
-
         session = session == null ? factory.getConnection() : this.session;
         String rowKeyName = null;
         CQLTranslator translator = new CQLTranslator();
@@ -549,6 +539,13 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
 
     }
 
+    /**
+     * 
+     * @param rSet
+     * @param entityClazz
+     * @param metadata
+     * @return
+     */
     private List iterateAndReturn(ResultSet rSet, Class entityClazz, EntityMetadata metadata)
     {
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
@@ -559,26 +556,6 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         List results = new ArrayList();
 
         Map<String, Object> relationalValues = new HashMap<String, Object>();
-        // Map<String, Field> compositeColumns = new HashMap<String, Field>();
-
-        // Object compositeKeyInstance = null;
-        // boolean isCompositeKey = false;
-        // if
-        // (metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
-        // {
-        // isCompositeKey = true;
-        // EmbeddableType compositeKey =
-        // metaModel.embeddable(metadata.getIdAttribute().getBindableJavaType());
-        // Iterator<Attribute> attributes =
-        // compositeKey.getAttributes().iterator();
-        // while (attributes.hasNext())
-        // {
-        // Attribute attribute = attributes.next();
-        // String columnName = ((AbstractAttribute)
-        // attribute).getJPAColumnName();
-        // compositeColumns.put(columnName, (Field) attribute.getJavaMember());
-        // }
-        // }
 
         while (rowIter.hasNext())
         {
@@ -587,18 +564,7 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
             ColumnDefinitions columnDefs = row.getColumnDefinitions();
             Iterator<Definition> columnDefIter = columnDefs.iterator();
 
-            // if (isCompositeKey)
-            // {
-            // compositeKeyInstance = getCompositeKeyInstance(metadata);
-            // }
             entity = iteratorColumns(metadata, metaModel, entityType, relationalValues, entity, row, columnDefIter);
-
-            // if (compositeKeyInstance != null)
-            // {
-            // // compositeKeyInstance = getCompositeKeyInstance(metadata);
-            // entity = CassandraUtilities.initialize(metadata, entity,
-            // compositeKeyInstance);
-            // }
 
             if (entity != null && entity.getClass().isAssignableFrom(metadata.getEntityClazz()))
             {
@@ -621,7 +587,6 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
                 results.add(entity);
             }
         }
-
         return results;
     }
 
@@ -658,6 +623,17 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         }
     }
 
+    /**
+     * 
+     * @param metadata
+     * @param metamodel
+     * @param entityType
+     * @param relationalValues
+     * @param entity
+     * @param row
+     * @param columnDefIter
+     * @return
+     */
     private Object iteratorColumns(EntityMetadata metadata, MetamodelImpl metamodel, EntityType entityType,
             Map<String, Object> relationalValues, Object entity, Row row, Iterator<Definition> columnDefIter)
     {
@@ -677,7 +653,9 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
             }
             else
             {
-                String fieldName = metadata.getFieldName(columnName);
+                String fieldName = columnName
+                        .equals(((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName()) ? metadata
+                        .getIdAttribute().getName() : metadata.getFieldName(columnName);
                 Attribute attribute = fieldName != null ? entityType.getAttribute(fieldName) : null;
 
                 if (attribute != null)
@@ -688,13 +666,17 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
                                 columnName, null);
                     }
                 }
-                else
+                else if (metamodel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
                 {
                     entity = populateCompositeId(metadata, entity, columnName, row, metamodel,
                             metadata.getIdAttribute(), metadata.getEntityClazz(), dataType);
                 }
+                else
+                {
+                    entity = DSClientUtilities.assign(row, entity, metadata, dataType.getName(), entityType,
+                            columnName, null);
+                }
             }
-
         }
         return entity;
     }
