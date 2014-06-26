@@ -16,7 +16,7 @@
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.mongodb.MongoDBClientFactory" />
 			<property name="kundera.ddl.auto.prepare" value="create" />
-			<property name="kundera.show.query" value="true" />
+			
 			<!-- <property name="index.home.dir" value="lucene" /> -->
 			<!-- <property name="kundera.client.property" value="kundera-mongo.properties" 
 				/> -->
