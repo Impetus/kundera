@@ -28,7 +28,6 @@ import javax.persistence.Query;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 
-import org.apache.cassandra.thrift.Cassandra.AsyncProcessor.get;
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.IndexExpression;
 import org.apache.commons.lang.StringUtils;
