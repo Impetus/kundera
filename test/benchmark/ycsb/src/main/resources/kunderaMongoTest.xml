@@ -6,7 +6,7 @@
 			<connection>
 				<properties>
 					<property name="read.preference" value="primary"></property>
-                                </properties>
+				</properties>
 			</connection>
 		</dataStore>
 	</datastores>
