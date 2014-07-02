@@ -66,13 +66,13 @@ class ResultIterator<E> implements IResultIterator<E>
 {
     private static Logger log = LoggerFactory.getLogger(ResultIterator.class);
 
-    private CassQuery query;
+    private final CassQuery query;
 
-    private EntityMetadata entityMetadata;
+    private final EntityMetadata entityMetadata;
 
-    private Client client;
+    private final Client client;
 
-    private EntityReader reader;
+    private final EntityReader reader;
 
     private int maxResult = 1;
 
@@ -94,7 +94,7 @@ class ResultIterator<E> implements IResultIterator<E>
 
     private E current;
 
-    private KunderaMetadata kunderaMetadata;
+    private final KunderaMetadata kunderaMetadata;
 
     /**
      * Constructor with parameters
@@ -128,10 +128,8 @@ class ResultIterator<E> implements IResultIterator<E>
                 scrollComplete = true;
                 return false;
             }
-
             return true;
         }
-
         return false;
     }
 
@@ -153,7 +151,6 @@ class ResultIterator<E> implements IResultIterator<E>
         current = getEntity(results.get(results.size() - 1));
 
         return current;
-
     }
 
     @Override
@@ -203,10 +200,8 @@ class ResultIterator<E> implements IResultIterator<E>
         }
         catch (Exception e)
         {
-
             throw new PersistenceException("Error while scrolling over results, Caused by :.", e);
         }
-
     }
 
     /**
@@ -348,9 +343,6 @@ class ResultIterator<E> implements IResultIterator<E>
      */
     private String replaceAndAppendLimit(String parsedQuery)
     {
-        // String queryWithoutLimit = parsedQuery.replaceAll(
-        // parsedQuery.substring(parsedQuery.lastIndexOf(CQLTranslator.LIMIT),
-        // parsedQuery.length()), "");
         StringBuilder builder = new StringBuilder(parsedQuery);
         onLimit(builder);
         parsedQuery = builder.toString();
@@ -441,7 +433,6 @@ class ResultIterator<E> implements IResultIterator<E>
             translator.appendValue(builder, idClazz, id, false, false);
             builder.append(CQLTranslator.CLOSE_BRACKET);
             return builder.toString();
-
         }
         return null;
     }
@@ -481,7 +472,6 @@ class ResultIterator<E> implements IResultIterator<E>
                 }
             }
         }
-
         return filterIdResult;
     }
 
@@ -510,9 +500,7 @@ class ResultIterator<E> implements IResultIterator<E>
         {
             bytes = query.getBytesValue(idName, entityMetadata, id);
         }
-
         return bytes.array();
-
     }
 
     /**
@@ -530,7 +518,6 @@ class ResultIterator<E> implements IResultIterator<E>
             if (!ReflectUtils.isTransientOrStatic(embeddedField))
             {
                 field = embeddedField;
-                ;
                 break;
             }
         }
@@ -590,7 +577,8 @@ class ResultIterator<E> implements IResultIterator<E>
             query = query.replaceAll(pattern + object, pattern + builder.toString());
             query = query.replaceAll(pattern, CQLTranslator.TOKEN);
         }
-
         return query;
     }
+    
 }
+

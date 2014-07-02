@@ -294,11 +294,11 @@ public class KunderaCoreUtils
         return property;
     }
 
-    public static boolean isShowQueryEnabled(final Map<String, Object> properties,
-            final String persistenceUnit,final KunderaMetadata kunderaMetadata)
+    public static boolean isShowQueryEnabled(final Map<String, Object> properties, final String persistenceUnit,
+            final KunderaMetadata kunderaMetadata)
     {
-        boolean showQuery=false;
-        showQuery=properties != null ? Boolean.parseBoolean((String) properties
+        boolean showQuery = false;
+        showQuery = properties != null ? Boolean.parseBoolean((String) properties
                 .get(PersistenceProperties.KUNDERA_SHOW_QUERY)) : false;
         if (!showQuery)
         {
@@ -308,8 +308,7 @@ public class KunderaCoreUtils
         }
         return showQuery;
     }
-    
-    
+
     public static void showQuery(String query, boolean showQuery)
     {
         if (showQuery)

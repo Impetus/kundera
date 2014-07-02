@@ -172,7 +172,6 @@ public class CassQuery extends QueryImpl
                                     isSingleResult ? 1 : this.maxResult);
                         }
                     }
-
                 }
                 else
                 {
@@ -277,7 +276,6 @@ public class CassQuery extends QueryImpl
                 }
                 return ((CassandraClientBase) persistenceDelegeator.getClient(m)).executeUpdateDeleteQuery(query);
             }
-
         }
         return 0;
     }
@@ -454,7 +452,6 @@ public class CassQuery extends QueryImpl
                     log.error("Support for OR clause is not enabled within cassandra.");
                     throw new QueryHandlerException("Unsupported clause " + opr + " for cassandra.");
                 }
-
             }
         }
 
@@ -501,7 +498,6 @@ public class CassQuery extends QueryImpl
         }
         else
         {
-
             if (!idPresent)
             {
                 throw new UnsupportedOperationException("Condition " + condition + " is not suported in  cassandra.");
@@ -510,7 +506,6 @@ public class CassQuery extends QueryImpl
             {
                 throw new UnsupportedOperationException("Condition " + condition
                         + " is not suported for query on row key.");
-
             }
         }
 
@@ -528,7 +523,6 @@ public class CassQuery extends QueryImpl
         {
             reader = new CassandraEntityReader(kunderaQuery, kunderaMetadata);
         }
-
         return reader;
     }
 
@@ -592,7 +586,6 @@ public class CassQuery extends QueryImpl
                     log.error("Error while extrating " + jpaFieldName + ", Caused by: ", e);
                     throw new QueryHandlerException("Error while extrating " + jpaFieldName + ".");
                 }
-
             }
             else
             {
@@ -610,7 +603,6 @@ public class CassQuery extends QueryImpl
                     f = (Field) col.getJavaMember();
                 }
             }
-
         }
 
         // need to do integer.parseInt..as value will be string in case of
@@ -718,7 +710,6 @@ public class CassQuery extends QueryImpl
         {
             if (o instanceof FilterClause)
             {
-
                 FilterClause clause = ((FilterClause) o);
                 String fieldName = clause.getProperty();
                 String condition = clause.getCondition();
@@ -806,7 +797,6 @@ public class CassQuery extends QueryImpl
         }
 
         return isPresent;
-
     }
 
     /**
@@ -1017,7 +1007,6 @@ public class CassQuery extends QueryImpl
                     translator.buildWhereClause(builder, nestedAttribute.getJavaType(), columnName, obj,
                             CQLTranslator.EQ_CLAUSE, false);
                 }
-
                 // returning true because builder has AND clause at end.
                 return true;
             }
@@ -1028,7 +1017,6 @@ public class CassQuery extends QueryImpl
                 // returning true because builder has AND clause at end.
                 return true;
             }
-
         }
         // returning false because builder does not have AND clause at end.
         return false;
@@ -1050,7 +1038,6 @@ public class CassQuery extends QueryImpl
             String condition, List<Object> value, boolean useInClause, AbstractAttribute idAttributeColumn,
             String columnName, boolean useToken)
     {
-
         if (value.isEmpty())
         {
             isPresent = appendIn(builder, translator, columnName);
@@ -1094,10 +1081,7 @@ public class CassQuery extends QueryImpl
             Class fieldClazz, String columnName, boolean isPresent)
     {
         isPresent = appendIn(queryBuilder, translator, columnName);
-
-        /*
-         * if (!value.isEmpty()) {
-         */queryBuilder.append("(");
+        queryBuilder.append("(");
         for (Object objectvalue : value)
         {
             translator.appendValue(queryBuilder, fieldClazz, objectvalue, isPresent, false);
@@ -1107,9 +1091,6 @@ public class CassQuery extends QueryImpl
         queryBuilder.deleteCharAt(queryBuilder.lastIndexOf(", "));
         queryBuilder.append(") ");
 
-        /*
-         * } else { queryBuilder.append("( )"); }
-         */
         queryBuilder.append(" AND ");
         return isPresent;
     }
@@ -1209,10 +1190,6 @@ public class CassQuery extends QueryImpl
         }
         builder.delete(builder.lastIndexOf(CQLTranslator.COMMA_STR), builder.length());
         builder.append(CQLTranslator.ADD_WHERE_CLAUSE);
-        // buildWhereClause(kunderaQuery, metadata, metaModel, translator,
-        // builder);
-
-        // addWhereClause(builder);
 
         Class compoundKeyClass = metadata.getIdAttribute().getBindableJavaType();
         EmbeddableType compoundKey = null;
@@ -1252,8 +1229,6 @@ public class CassQuery extends QueryImpl
 
         StringBuilder builder = new StringBuilder(delete_query);
         builder.append(CQLTranslator.ADD_WHERE_CLAUSE);
-        // buildWhereClause(kunderaQuery, metadata, metaModel, translator,
-        // builder);
 
         Class compoundKeyClass = metadata.getIdAttribute().getBindableJavaType();
         EmbeddableType compoundKey = null;
@@ -1313,11 +1288,9 @@ public class CassQuery extends QueryImpl
             }
             else
             {
-                // TODO
                 translator.buildWhereClause(builder, f.getType(), jpaColumnName, filterClause.getValue().get(0),
                         filterClause.getCondition(), false);
             }
-
         }
         builder.delete(builder.lastIndexOf(CQLTranslator.AND_CLAUSE), builder.length());
     }

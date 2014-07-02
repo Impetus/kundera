@@ -97,7 +97,6 @@ public class PropertyAccessorHelper
     {
         if (target != null)
         {
-
             if (!field.isAccessible())
             {
                 field.setAccessible(true);
@@ -132,12 +131,10 @@ public class PropertyAccessorHelper
      */
     public static Object getObject(Object from, Field field)
     {
-
         if (!field.isAccessible())
         {
             field.setAccessible(true);
         }
-
         try
         {
             return field.get(from);
@@ -161,12 +158,10 @@ public class PropertyAccessorHelper
      */
     public static Object getObjectCopy(Object from, Field field)
     {
-
         if (!field.isAccessible())
         {
             field.setAccessible(true);
         }
-
         try
         {
             PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(field);
@@ -200,26 +195,8 @@ public class PropertyAccessorHelper
         PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(field);
         Object object = getObject(from, field);
         return object != null ? accessor.toString(object) : null;
-
     }
 
-    /*
-    *//**
-     * Invokes corresponding accessor and returns string value for that
-     * object.
-     * 
-     * @param obj
-     *            object.
-     * 
-     * @return string value for input object.
-     */
-    /*
-     * public static String getString(Object obj) { PropertyAccessor<?> accessor
-     * = PropertyAccessorFactory.getPropertyAccessor(obj.getClass()); return
-     * accessor.toString(obj);
-     * 
-     * }
-     */
     /**
      * Gets field value as byte-array.
      * 
@@ -255,7 +232,6 @@ public class PropertyAccessorHelper
      */
     public static Object getId(Object entity, EntityMetadata metadata)
     {
-
         // If an Entity has been wrapped in a Proxy, we can call the Proxy
         // classes' getId() method
         if (entity instanceof EnhanceEntity)
@@ -311,13 +287,6 @@ public class PropertyAccessorHelper
         try
         {
             Field idField = (Field) metadata.getIdAttribute().getJavaMember();
-
-            // PropertyAccessor<?> accessor =
-            // PropertyAccessorFactory.getPropertyAccessor(idField);
-            // Object obj = accessor.fromBytes(idField.getClass(), rowKey);
-            //
-            // metadata.getWriteIdentifierMethod().invoke(entity, obj);
-            //
             set(entity, idField, rowKey);
         }
         catch (IllegalArgumentException iarg)
@@ -426,7 +395,6 @@ public class PropertyAccessorHelper
             {
                 genericClass = getTypedClass(arguments[1]);
             }
-
         }
         return genericClass != null ? genericClass : collectionField.getType();
     }
@@ -454,11 +422,8 @@ public class PropertyAccessorHelper
             {
                 // workaround for jdk1.6 issue.
                 genericClasses.add(toClass(parameter));
-
             }
-
         }
-
         return genericClasses;
     }
 

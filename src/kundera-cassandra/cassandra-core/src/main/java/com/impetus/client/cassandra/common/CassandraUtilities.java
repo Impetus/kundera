@@ -136,7 +136,6 @@ public class CassandraUtilities
         }
         else if (clazz.isAssignableFrom(Date.class))
         {
-
             DateAccessor dateAccessor = new DateAccessor();
             return DateType.instance.decompose((Date) value);
         }
@@ -146,7 +145,6 @@ public class CassandraUtilities
             {
                 value = PropertyAccessorFactory.getPropertyAccessor(clazz).fromString(clazz, value.toString());
             }
-
             return BytesType.instance.decompose(ByteBuffer.wrap(PropertyAccessorFactory.getPropertyAccessor(clazz)
                     .toBytes(value)));
         }
@@ -178,8 +176,6 @@ public class CassandraUtilities
         if (builder.lastIndexOf(",") != -1)
         {
             builder.deleteCharAt(builder.length() - 1);
-            // selectQuery = StringUtils.replace(selectQuery,
-            // CQLTranslator.COLUMN_FAMILY, builder.toString());
             selectQuery = StringUtils.replace(selectQuery, CQLTranslator.COLUMNS, builder.toString());
         }
 

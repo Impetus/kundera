@@ -64,7 +64,7 @@ public abstract class InvertedIndexHandlerBase
     protected boolean useSecondryIndex;
 
     /** For time stamp generation. */
-    protected TimestampGenerator generator;
+    protected final TimestampGenerator generator;
 
     public InvertedIndexHandlerBase(final TimestampGenerator generator)
     {
@@ -106,44 +106,9 @@ public abstract class InvertedIndexHandlerBase
         String rowKey = null;
         try
         {
-
             rowKey = ByteBufferUtil.string(ByteBuffer.wrap(expression.getColumn_name()),
-                    Charset.forName(Constants.CHARSET_UTF8));/*
-                                                              * UTF8Type.instance
-                                                              * .
-                                                              * compose(ByteBuffer
-                                                              * .
-                                                              * wrap(expression.
-                                                              * getColumn_name
-                                                              * ()));
-                                                              */
-            superColumnNameStr = new String(expression.getValue(), Charset.forName(Constants.CHARSET_UTF8));/*
-                                                                                                             * ByteBufferUtil
-                                                                                                             * .
-                                                                                                             * string
-                                                                                                             * (
-                                                                                                             * ByteBuffer
-                                                                                                             * .
-                                                                                                             * wrap
-                                                                                                             * (
-                                                                                                             * expression
-                                                                                                             * .
-                                                                                                             * getValue
-                                                                                                             * (
-                                                                                                             * )
-                                                                                                             * )
-                                                                                                             * ,
-                                                                                                             * Charset
-                                                                                                             * .
-                                                                                                             * forName
-                                                                                                             * (
-                                                                                                             * Constants
-                                                                                                             * .
-                                                                                                             * CHARSET_UTF8
-                                                                                                             * )
-                                                                                                             * )
-                                                                                                             * ;
-                                                                                                             */
+                    Charset.forName(Constants.CHARSET_UTF8));
+            superColumnNameStr = new String(expression.getValue(), Charset.forName(Constants.CHARSET_UTF8));
         }
         catch (CharacterCodingException e)
         {
@@ -201,12 +166,6 @@ public abstract class InvertedIndexHandlerBase
                 break;
 
             // LIKE operation not available
-            /*
-             * case LIKE: searchColumnsInRange(columnFamilyName,
-             * consistencyLevel, persistenceUnit, rowKey, columnName,
-             * thriftColumns, columnName.getBytes(), new byte[0]); break;
-             */
-
             // Greater than operator
             case GT:
                 searchSuperColumnsInRange(columnFamilyName, consistencyLevel, persistenceUnit, rowKey, superColumnName,
@@ -231,7 +190,6 @@ public abstract class InvertedIndexHandlerBase
             default:
                 throw new QueryHandlerException(condition
                         + " comparison operator not supported currently for Cassandra Inverted Index.");
-
             }
 
             // Construct search results out of these thrift columns
@@ -286,8 +244,6 @@ public abstract class InvertedIndexHandlerBase
 
             String indexColumnFamily = CassandraIndexHelper.getInvertedIndexTableName(metadata.getTableName());
             Map<String, EmbeddableType> embeddables = metaModel.getEmbeddables(metadata.getEntityClazz());
-            // for (EmbeddedColumn embeddedColumn :
-            // metadata.getEmbeddedColumnsAsList())
             EntityType entityType = metaModel.entity(metadata.getEntityClazz());
 
             byte[] columnName = PropertyAccessorHelper.get(entity, (Field) metadata.getIdAttribute().getJavaMember());
@@ -296,9 +252,6 @@ public abstract class InvertedIndexHandlerBase
             {
                 EmbeddableType embeddedColumn = embeddables.get(fieldName);
                 Attribute embeddedAttribute = entityType.getAttribute(fieldName);
-                // Object embeddedObject =
-                // PropertyAccessorHelper.getObject(entity,
-                // embeddedColumn.getField());
                 Object embeddedObject = PropertyAccessorHelper.getObject(entity,
                         (Field) embeddedAttribute.getJavaMember());
 
@@ -340,7 +293,6 @@ public abstract class InvertedIndexHandlerBase
                                 deleteColumn(indexColumnFamily, rowKey, superColumnName, metadata.getPersistenceUnit(),
                                         consistencyLevel, columnName);
                             }
-
                         }
                     }
                 }

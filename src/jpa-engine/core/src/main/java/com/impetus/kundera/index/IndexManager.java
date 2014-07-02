@@ -45,9 +45,9 @@ public class IndexManager
 {
 
     /** The indexer. */
-    private Indexer indexer;
+    private final Indexer indexer;
 
-    private KunderaMetadata kunderaMetadata;
+    private final KunderaMetadata kunderaMetadata;
 
     /**
      * The Constructor.

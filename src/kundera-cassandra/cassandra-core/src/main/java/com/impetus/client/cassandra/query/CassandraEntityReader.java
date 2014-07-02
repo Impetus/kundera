@@ -49,19 +49,12 @@ import com.impetus.kundera.query.QueryHandlerException;
  */
 public class CassandraEntityReader extends AbstractEntityReader implements EntityReader
 {
-
-    /**
-     * 
-     */
     private static final String MIN_ = "min";
 
-    /**
-     * 
-     */
     private static final String MAX_ = "max";
 
     /** The conditions. */
-    Map<Boolean, List<IndexClause>> conditions = new HashMap<Boolean, List<IndexClause>>();
+    private Map<Boolean, List<IndexClause>> conditions = new HashMap<Boolean, List<IndexClause>>();
 
     /** The log. */
     private static Logger log = LoggerFactory.getLogger(CassandraEntityReader.class);
@@ -129,7 +122,6 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
                 // In case need to use secondary indexes.
                 if (MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
                 {
-
                     ls = ((CassandraClientBase) client).find(m, relationNames, this.conditions.get(isRowKeyQuery),
                             maxResults, null);
                 }
@@ -168,9 +160,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
         }
         else
         {
-            // List<Object> results = new ArrayList<Object>();
             ls = handleFindByRange(m, client, ls, conditions, isRowKeyQuery, null, maxResults);
-            // ls = (List<EnhanceEntity>) results;
         }
         return ls;
     }
@@ -209,7 +199,6 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
 
         try
         {
-
             result = ((CassandraClientBase) client).findByRange(minValue, maxVal, m, m.getRelationNames() != null
                     && !m.getRelationNames().isEmpty(), m.getRelationNames(), columns, expressions, maxResults);
         }
@@ -224,7 +213,6 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
     public List<EnhanceEntity> readFromIndexTable(EntityMetadata m, Client client,
             Map<Boolean, List<IndexClause>> indexClauseMap)
     {
-
         List<SearchResult> searchResults = new ArrayList<SearchResult>();
         List<Object> primaryKeys = new ArrayList<Object>();
 
@@ -248,7 +236,6 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
                 }
             }
         }
-
         List<EnhanceEntity> enhanceEntityList = new ArrayList<EnhanceEntity>();
         if (embeddedColumns != null && !embeddedColumns.isEmpty())
         {
@@ -296,7 +283,6 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
         {
             for (IndexExpression e : expressions)
             {
-
                 if (primaryKeyName.equals(new String(e.getColumn_name())))
                 {
                     IndexOperator operator = e.op;
@@ -312,18 +298,14 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
                     }
                     else if (operator.equals(IndexOperator.EQ))
                     {
-
                         rowKeys.put(MAX_, e.getValue());
                         rowKeys.put(MIN_, e.getValue());
                         rowExpressions.add(e);
                     }
-
                 }
-
             }
             expressions.removeAll(rowExpressions);
         }
         return rowKeys;
-
     }
 }
