@@ -34,6 +34,7 @@ import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy;
 import com.datastax.driver.core.policies.DowngradingConsistencyRetryPolicy;
 import com.datastax.driver.core.policies.ExponentialReconnectionPolicy;
 import com.datastax.driver.core.policies.FallthroughRetryPolicy;
+import com.datastax.driver.core.policies.LatencyAwarePolicy;
 import com.datastax.driver.core.policies.LoadBalancingPolicy;
 import com.datastax.driver.core.policies.LoggingRetryPolicy;
 import com.datastax.driver.core.policies.RoundRobinPolicy;
@@ -386,6 +387,7 @@ public class DSClientFactory extends CassandraClientFactory
 
         LoadBalancingPolicy loadBalancingPolicy = null;
         String isTokenAware = (String) conProperties.get("isTokenAware");
+        String isLatencyAware = (String) conProperties.get("isLatencyAware");
         // Policy.v
         switch (policy)
         {
@@ -398,18 +400,23 @@ public class DSClientFactory extends CassandraClientFactory
                     usedHostsPerRemoteDc != null ? Integer.parseInt(usedHostsPerRemoteDc) : 0);
             break;
 
-        case RoundRobinPolicy:
-            loadBalancingPolicy = new RoundRobinPolicy();
-            break;
+        // case RoundRobinPolicy:
+        // loadBalancingPolicy = new RoundRobinPolicy();
+        // break;
 
         default:
-            // default is LatencyAwarePolicy
+            // default is RoundRobinPolicy
+            loadBalancingPolicy = new RoundRobinPolicy();
             break;
         }
 
         if (loadBalancingPolicy != null && Boolean.valueOf(isTokenAware))
         {
             loadBalancingPolicy = new TokenAwarePolicy(loadBalancingPolicy);
+        }
+        else if (loadBalancingPolicy != null && Boolean.valueOf(isLatencyAware))
+        {
+            loadBalancingPolicy = LatencyAwarePolicy.builder(loadBalancingPolicy).build();
         }
 
         return loadBalancingPolicy;
