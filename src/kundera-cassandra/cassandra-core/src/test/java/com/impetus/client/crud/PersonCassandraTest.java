@@ -250,7 +250,7 @@ public class PersonCassandraTest extends BaseTest
             Map<String, Client> clientMap = (Map<String, Client>) entityManager.getDelegate();
             ThriftClient tc = (ThriftClient) clientMap.get(SEC_IDX_CASSANDRA_TEST);
             tc.setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
-            
+
             Query findQuery;
             List<PersonCassandra> allPersons;
             findQuery = entityManager.createQuery("Select p from PersonCassandra p where p.personId IN :idList");
@@ -660,7 +660,7 @@ public class PersonCassandraTest extends BaseTest
 
         List<Future> futureList = new ArrayList<Future>();
 
-        for (int i = 0; i < 10; i++)
+        for (int i = 1; i <= 1000 ; i++)
         {
             HandlePersist persist = new HandlePersist(i);
             futureList.add(executor.submit(persist));
@@ -682,10 +682,43 @@ public class PersonCassandraTest extends BaseTest
         List<PersonCassandra> persons = q.getResultList();
         Assert.assertNotNull(persons);
         Assert.assertFalse(persons.isEmpty());
-        Assert.assertEquals(10000, persons.size());
+        Assert.assertEquals(1000 , persons.size());
     }
 
-    // }
+    private class HandlePersist implements Runnable
+    {
+        private int i;
+
+        public HandlePersist(int i)
+        {
+            this.i = i;
+        }
+
+        @Override
+        public void run()
+        {
+            for (int j = 1; j <= 100; j++)
+            {
+                PersonCassandra foundObject = entityManager.find(PersonCassandra.class, "" + i * 1000);
+
+                if (foundObject != null)
+                {
+                    Assert.assertNotNull(foundObject.getPersonId());
+                    Assert.assertEquals(10 + j - 1, foundObject.getAge().intValue());
+                    Assert.assertEquals("vivek" + (j - 1), foundObject.getPersonName());
+
+                    foundObject.setAge(10 + j);
+                    foundObject.setPersonName("vivek" + j);
+                }
+                else
+                {
+                    foundObject = prepareData("" + i * 1000, 10 + j);
+                    foundObject.setPersonName("vivek" + j);
+                }
+                entityManager.persist(foundObject);
+            }
+        }
+    }
 
     /**
      * Tear down.
@@ -777,25 +810,6 @@ public class PersonCassandraTest extends BaseTest
 
         CassandraCli.client.set_keyspace("KunderaExamples");
 
-    }
-
-    private class HandlePersist implements Runnable
-    {
-        private int i;
-
-        public HandlePersist(int i)
-        {
-            this.i = i;
-        }
-
-        @Override
-        public void run()
-        {
-            for (int j = i * 1000; j < (i + 1) * 1000; j++)
-            {
-                entityManager.persist(prepareData("" + j, j + 10));
-            }
-        }
     }
 
 }
