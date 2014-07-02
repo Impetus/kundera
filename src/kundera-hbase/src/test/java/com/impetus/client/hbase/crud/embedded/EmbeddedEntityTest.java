@@ -81,7 +81,7 @@ public class EmbeddedEntityTest
     public void testSelectOnlySpecificColumnOfEmbeddable()
     {
         persist();
-        String query2 = "select x.id.captureTime," + "x.rowKey," + "x.established, " + "x.closeWait," + "x.finWait,"
+        String query2 = "select x.id.server, x.id.captureTime," + "x.rowKey," + "x.established, " + "x.closeWait," + "x.finWait,"
                 + "x.finWait2," + "x.idle," + "x.listen," + "x.synRecv," + "x.timeWait," + "x.total "
                 + "from NetstatData x " + "where x.id.server= :serverid";
 
@@ -93,7 +93,7 @@ public class EmbeddedEntityTest
         Assert.assertNotNull(result.get(0));
         Assert.assertNotNull(result.get(0).getId());
         Assert.assertEquals(CAPTURE_TIME2, result.get(0).getId().getCaptureTime());
-        Assert.assertNull(result.get(0).getId().getServer());
+        Assert.assertNotNull(result.get(0).getId().getServer());
         Assert.assertNull(result.get(0).getId().getPortMapId());
     }
 

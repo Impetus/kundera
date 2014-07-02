@@ -181,7 +181,8 @@ public class HBaseReader implements Reader
      */
     private void setScanCriteria(Filter filter, String columnFamily, String qualifier, Scan s, String[] columns)
     {
-        if (filter != null)
+    	
+    	if (filter != null && !filter.toString().equals("FilterList AND (0/0): []"))
         {
             s.setFilter(filter);
         }

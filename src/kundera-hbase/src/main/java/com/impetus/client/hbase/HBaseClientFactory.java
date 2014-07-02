@@ -44,7 +44,7 @@ public class HBaseClientFactory extends GenericClientFactory
     private static Logger logger = LoggerFactory.getLogger(HBaseClientFactory.class);
 
     /** The conf. */
-    private HBaseConfiguration conf;
+    private Configuration conf;
 
     /** The h table pool. */
     private HTablePool hTablePool;
@@ -118,7 +118,7 @@ public class HBaseClientFactory extends GenericClientFactory
             hadoopConf.set("hbase.zookeeper.quorum", node);
             hadoopConf.set("hbase.zookeeper.property.clientPort", DEFAULT_ZOOKEEPER_PORT);
         }
-        conf = new HBaseConfiguration(hadoopConf);
+        conf = HBaseConfiguration.create(hadoopConf);
         reader = new HBaseEntityReader(kunderaMetadata);
     }
 

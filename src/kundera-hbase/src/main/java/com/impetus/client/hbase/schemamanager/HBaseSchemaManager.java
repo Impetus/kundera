@@ -329,7 +329,7 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                 hadoopConf.set("hbase.zookeeper.quorum", host);
                 hadoopConf.set("hbase.zookeeper.property.clientPort", DEFAULT_ZOOKEEPER_PORT);
             }
-            HBaseConfiguration conf = new HBaseConfiguration(hadoopConf);
+            Configuration conf = HBaseConfiguration.create(hadoopConf);
             try
             {
                 admin = new HBaseAdmin(conf);
@@ -344,6 +344,11 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
             {
                 message = zkce.getMessage();
                 logger.error("Unable to connect to zookeeper, Caused by:", zkce);
+            }
+            catch (IOException ioe)
+            {
+                message = ioe.getMessage();
+                logger.error("I/O exception, Caused by:", ioe);
             }
         }
         throw new SchemaGenerationException("Master not running exception, Caused by:" + message);

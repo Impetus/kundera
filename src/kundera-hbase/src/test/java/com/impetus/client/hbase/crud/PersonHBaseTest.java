@@ -238,7 +238,7 @@ public class PersonHBaseTest extends BaseTest
         Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
         Client client = clients.get("hbaseTest");
 
-        Filter f = new QualifierFilter();
+        Filter f/* = new QualifierFilter()*/;
         f = new SingleColumnValueFilter("PERSON_NAME".getBytes(), "PERSON_NAME".getBytes(), CompareOp.EQUAL,
                 "vivek".getBytes());
 
