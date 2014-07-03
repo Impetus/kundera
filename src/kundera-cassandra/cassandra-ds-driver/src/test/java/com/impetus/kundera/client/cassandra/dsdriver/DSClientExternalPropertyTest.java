@@ -33,6 +33,15 @@ import org.junit.Test;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Configuration;
 import com.datastax.driver.core.HostDistance;
+import com.datastax.driver.core.policies.ConstantReconnectionPolicy;
+import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy;
+import com.datastax.driver.core.policies.DowngradingConsistencyRetryPolicy;
+import com.datastax.driver.core.policies.ExponentialReconnectionPolicy;
+import com.datastax.driver.core.policies.FallthroughRetryPolicy;
+import com.datastax.driver.core.policies.LatencyAwarePolicy;
+import com.datastax.driver.core.policies.LoggingRetryPolicy;
+import com.datastax.driver.core.policies.RoundRobinPolicy;
+import com.datastax.driver.core.policies.TokenAwarePolicy;
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.config.CassandraPropertyReader;
 import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
@@ -57,7 +66,7 @@ public class DSClientExternalPropertyTest
 
     private final String _PU = "external_pu";
 
-    private Map propertyMap = new HashMap();
+    private Map<String, Object> propertyMap = new HashMap<String, Object>();
 
     /**
      * @throws java.lang.Exception
@@ -66,10 +75,7 @@ public class DSClientExternalPropertyTest
     public void setUp() throws Exception
     {
         CassandraCli.cassandraSetUp();
-//        CassandraCli.initClient();
-//        CassandraCli.createKeySpace(keyspaceName);
         propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
-        // emf = Persistence.createEntityManagerFactory(_PU, propertyMap);
     }
 
     /**
@@ -78,7 +84,6 @@ public class DSClientExternalPropertyTest
     @After
     public void tearDown() throws Exception
     {
-        // emf.close();
         CassandraCli.dropKeySpace(keyspaceName);
     }
 
@@ -100,9 +105,9 @@ public class DSClientExternalPropertyTest
 
         emf = Persistence.createEntityManagerFactory(_PU, propertyMap);
         DSClientFactory ds = new DSClientFactory();
-        final String RRP = "com.datastax.driver.core.policies.RoundRobinPolicy";
-        final String ERP = "com.datastax.driver.core.policies.ExponentialReconnectionPolicy";
-        final String DCRP = "com.datastax.driver.core.policies.FallthroughRetryPolicy";
+        final String RRP = RoundRobinPolicy.class.getName();
+        final String ERP = ExponentialReconnectionPolicy.class.getName();
+        final String DCRP = FallthroughRetryPolicy.class.getName();
         Properties connectionProperties = initialize(ds);
 
         ds.initialize(propertyMap);
@@ -134,7 +139,7 @@ public class DSClientExternalPropertyTest
 
         Assert.assertEquals(connectionProperties.getProperty("baseDelayMs"), "11000");
         Assert.assertEquals(connectionProperties.getProperty("maxDelayMs"), "13000");
-        
+
         emf.close();
 
     }
@@ -193,11 +198,9 @@ public class DSClientExternalPropertyTest
         emf = Persistence.createEntityManagerFactory(_PU, propertyMap);
 
         DSClientFactory ds = new DSClientFactory();
-        final String DRRP = "com.datastax.driver.core.policies.DCAwareRoundRobinPolicy";
-        final String CRP = "com.datastax.driver.core.policies.ConstantReconnectionPolicy";
-        final String DCRP = "com.datastax.driver.core.policies.DowngradingConsistencyRetryPolicy";
-        final String LRTP = "com.datastax.driver.core.policies.LoggingRetryPolicy";
-        final String TAP = "com.datastax.driver.core.policies.TokenAwarePolicy";
+        final String CRP = ConstantReconnectionPolicy.class.getName();
+        final String LRTP = LoggingRetryPolicy.class.getName();
+        final String TAP = TokenAwarePolicy.class.getName();
         Properties connectionProperties = initialize(ds);
 
         ds.initialize(propertyMap);
@@ -238,6 +241,70 @@ public class DSClientExternalPropertyTest
 
     /**
      * Test to check external xml properties in case of
+     * DCAwareRoundRobinPolicy,ConstantReonnectionPolicy
+     * ,DowngradingConsistencyRetryPolicy with
+     * localdc,usedHostsPerRemoteDc,constantDelayMs available in the external
+     * xml file
+     * 
+     * @throws NoSuchMethodException
+     * @throws SecurityException
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     * @throws InvocationTargetException
+     */
+
+    @Test
+    public void testLoadBalancingPolicyShouldBeLatencyAware() throws NoSuchMethodException, SecurityException,
+            IllegalAccessException, IllegalArgumentException, InvocationTargetException
+    {
+        propertyMap.put("kundera.client.property", "dsclienttest3.xml");
+        emf = Persistence.createEntityManagerFactory(_PU, propertyMap);
+
+        DSClientFactory ds = new DSClientFactory();
+        final String CRP = ConstantReconnectionPolicy.class.getName();
+        final String LRTP = LoggingRetryPolicy.class.getName();
+
+        Properties connectionProperties = initialize(ds);
+
+        ds.initialize(propertyMap);
+        Object conn = ds.createPoolOrConnection();
+        Cluster cluster = (Cluster) conn;
+
+        HostDistance distance = HostDistance.LOCAL;
+
+        Configuration configuration = cluster.getConfiguration();
+
+        Assert.assertEquals(configuration.getSocketOptions().getReadTimeoutMillis(), 110000);
+        Assert.assertEquals(configuration.getSocketOptions().getKeepAlive().booleanValue(), false);
+        Assert.assertEquals(configuration.getSocketOptions().getReceiveBufferSize().intValue(), 12);
+        Assert.assertEquals(configuration.getSocketOptions().getReuseAddress().booleanValue(), true);
+        Assert.assertEquals(configuration.getSocketOptions().getSendBufferSize().intValue(), 11);
+        Assert.assertEquals(configuration.getSocketOptions().getSoLinger().intValue(), 10);
+        Assert.assertEquals(configuration.getSocketOptions().getTcpNoDelay().booleanValue(), true);
+
+        Assert.assertEquals(configuration.getPoolingOptions().getCoreConnectionsPerHost(distance), 5);
+        Assert.assertEquals(configuration.getPoolingOptions().getMaxConnectionsPerHost(distance), 12);
+        Assert.assertEquals(configuration.getPoolingOptions()
+                .getMaxSimultaneousRequestsPerConnectionThreshold(distance), 200);
+        Assert.assertEquals(configuration.getPoolingOptions()
+                .getMinSimultaneousRequestsPerConnectionThreshold(distance), 65);
+        Assert.assertEquals(configuration.getPolicies().getLoadBalancingPolicy().getClass().getName(),
+                LatencyAwarePolicy.class.getName());
+        Assert.assertEquals(configuration.getPolicies().getReconnectionPolicy().getClass().getName(), CRP);
+        Assert.assertEquals(configuration.getPolicies().getRetryPolicy().getClass().getName(), LRTP);
+
+        Assert.assertEquals(connectionProperties.getProperty("constantDelayMs"), "110000");
+        Assert.assertEquals(connectionProperties.getProperty("localdc"), "dc1");
+        Assert.assertEquals(connectionProperties.getProperty("usedHostsPerRemoteDc"), "2");
+        Assert.assertEquals(connectionProperties.getProperty("isLatencyAware"), "true");
+        Assert.assertEquals(connectionProperties.getProperty("isLoggingRetry"), "true");
+
+        emf.close();
+
+    }
+
+    /**
+     * Test to check external xml properties in case of
      * RoundRobinPolicy,ExponentialReconnectionPolicy,FallthroughRetryPolicy
      * with baseDelayMs,maxDelayMs missing from external xml file
      * 
@@ -257,9 +324,9 @@ public class DSClientExternalPropertyTest
         emf = Persistence.createEntityManagerFactory(_PU, propertyMap);
 
         DSClientFactory ds = new DSClientFactory();
-        final String RRP = "com.datastax.driver.core.policies.RoundRobinPolicy";
-        final String ERP = "com.datastax.driver.core.policies.ExponentialReconnectionPolicy";
-        final String DCRP = "com.datastax.driver.core.policies.FallthroughRetryPolicy";
+        final String RRP = RoundRobinPolicy.class.getName();
+        final String ERP = ExponentialReconnectionPolicy.class.getName();
+        final String DCRP = FallthroughRetryPolicy.class.getName();
         Properties connectionProperties = initialize(ds);
 
         ds.initialize(propertyMap);
@@ -318,9 +385,9 @@ public class DSClientExternalPropertyTest
         emf = Persistence.createEntityManagerFactory(_PU, propertyMap);
 
         DSClientFactory ds = new DSClientFactory();
-        final String DRRP = "com.datastax.driver.core.policies.DCAwareRoundRobinPolicy";
-        final String CRP = "com.datastax.driver.core.policies.ConstantReconnectionPolicy";
-        final String DCRP = "com.datastax.driver.core.policies.DowngradingConsistencyRetryPolicy";
+        final String DRRP = DCAwareRoundRobinPolicy.class.getName();
+        final String CRP = ConstantReconnectionPolicy.class.getName();
+        final String DCRP = DowngradingConsistencyRetryPolicy.class.getName();
         Properties connectionProperties = initialize(ds);
 
         ds.initialize(propertyMap);
