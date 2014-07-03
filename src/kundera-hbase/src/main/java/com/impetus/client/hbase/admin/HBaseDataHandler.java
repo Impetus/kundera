@@ -355,7 +355,7 @@ public class HBaseDataHandler implements DataHandler
 
         if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
         {
-            rowId = KunderaCoreUtils.prepareCompositeKey(m, metaModel, rowId);
+            rowId = KunderaCoreUtils.prepareCompositeKey(m, rowId);
         }
 
         HBaseDataWrapper columnWrapper = new HBaseDataWrapper(rowId, new java.util.HashMap<String, Attribute>(),

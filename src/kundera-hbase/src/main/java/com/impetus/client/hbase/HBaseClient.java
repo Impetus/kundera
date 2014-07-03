@@ -149,7 +149,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
 
             if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
             {
-                rowId = KunderaCoreUtils.prepareCompositeKey(entityMetadata, metaModel, rowId);
+                rowId = KunderaCoreUtils.prepareCompositeKey(entityMetadata, rowId);
             }
 
             results = fetchEntity(entityClass, rowId, entityMetadata, relationNames, tableName, results, null, null);
@@ -574,10 +574,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
                 .getSecondaryTablesName();
         secondaryTables.add(metadata.getTableName());
 
-        if (metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
-        {
-            pKey = KunderaCoreUtils.prepareCompositeKey(metadata, metaModel, pKey);
-        }
+       
 
         for (String colTableName : secondaryTables)
         {

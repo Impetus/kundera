@@ -22,6 +22,7 @@ import com.impetus.kundera.metadata.model.Employe;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.PropertyIndex;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
+import com.impetus.kundera.query.CoreIndexer;
 import com.impetus.kundera.query.Person;
 import com.impetus.kundera.query.Person.Day;
 import com.impetus.kundera.utils.LuceneCleanupUtilities;
@@ -140,7 +141,7 @@ public class IndexManagerTest
     {
         try
         {
-            CoreTestIndexer indexer = new CoreTestIndexer();
+            CoreIndexer indexer = new CoreIndexer();
             IndexManager ixManager = new IndexManager(indexer, ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());
             
             Map<String, Client> clients = (Map<String, Client>) em.getDelegate();

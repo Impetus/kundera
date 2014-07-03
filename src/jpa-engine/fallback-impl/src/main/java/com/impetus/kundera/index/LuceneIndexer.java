@@ -21,11 +21,15 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 
+import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexNotFoundException;
@@ -52,8 +56,11 @@ import com.impetus.kundera.cache.ElementCollectionCacheManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.query.KunderaQuery;
+import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**
  * Provides indexing functionality using lucene library.
@@ -122,10 +129,6 @@ public class LuceneIndexer extends DocumentIndexer
             logDocMergePolicy.setMergeFactor(1000);
             indexWriterConfig.setMergePolicy(logDocMergePolicy);
             w = new IndexWriter(index, indexWriterConfig);
-            /* reader = */
-            // w.setMergePolicy(new LogDocMergePolicy());
-            // w.setMergeFactor(1);
-            // w.setMergeFactor(1000);
             w.getConfig().setRAMBufferSizeMB(32);
         }
         catch (Exception e)
@@ -184,7 +187,7 @@ public class LuceneIndexer extends DocumentIndexer
                     copy(sourceDir, index);
                     isInitialized = true;
                 }
-                reader = IndexReader.open(index/* , true */);
+                reader = IndexReader.open(index);
             }
             catch (IndexNotFoundException infex)
             {
@@ -223,10 +226,22 @@ public class LuceneIndexer extends DocumentIndexer
     }
 
     @Override
-    public final void unindex(EntityMetadata metadata, Object id) throws LuceneIndexingException
+    public final void unindex(EntityMetadata metadata, Object id, KunderaMetadata kunderaMetadata)
+            throws LuceneIndexingException
     {
         if (log.isDebugEnabled())
             log.debug("Unindexing @Entity[{}] for key:{}", metadata.getEntityClazz().getName(), id);
+        String luceneQuery = null;
+        boolean isEmbeddedId = false;
+
+        MetamodelImpl metaModel = null;
+        if (kunderaMetadata != null && metadata != null)
+        {
+            metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                    metadata.getPersistenceUnit());
+            isEmbeddedId = metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType());
+        }
+
         try
         {
             QueryParser qp = new QueryParser(Version.LUCENE_34, DEFAULT_SEARCHABLE_FIELD, new StandardAnalyzer(
@@ -234,22 +249,7 @@ public class LuceneIndexer extends DocumentIndexer
 
             qp.setLowercaseExpandedTerms(false);
             qp.setAllowLeadingWildcard(true);
-
-            String luceneQuery = "+"
-                    + IndexingConstants.ENTITY_CLASS_FIELD
-                    + ":"
-                    + QueryParser.escape(metadata.getEntityClazz().getCanonicalName().toLowerCase())
-                    + " AND +"
-                    + getCannonicalPropertyName(QueryParser.escape(metadata.getEntityClazz().getSimpleName()),
-                            QueryParser.escape(((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName()))
-                    + ":" + QueryParser.escape(id.toString());
-
-            /* String indexName, Query query, boolean autoCommit */
-            // w.deleteDocuments(new Term(KUNDERA_ID_FIELD,
-            // getKunderaId(metadata, id)));
-
-            // qp.set
-
+            luceneQuery = getLuceneQuery(metadata, id, isEmbeddedId, metaModel);
             Query q = qp.parse(luceneQuery);
 
             w.deleteDocuments(q);
@@ -260,10 +260,7 @@ public class LuceneIndexer extends DocumentIndexer
             logDocMergePolicy.setMergeFactor(1000);
             indexWriterConfig.setMergePolicy(logDocMergePolicy);
             w = new IndexWriter(index, indexWriterConfig);
-            /* reader = */
-            // w.setMergePolicy(new LogDocMergePolicy());
-            // w.setMergeFactor(1);
-            // w.setMergeFactor(1000);
+
             w.getConfig().setRAMBufferSizeMB(32);
             // flushInternal();
         }
@@ -272,6 +269,39 @@ public class LuceneIndexer extends DocumentIndexer
             log.error("Error while instantiating LuceneIndexer, Caused by :.", e);
             throw new LuceneIndexingException(e);
         }
+    }
+
+    /**
+     * @param metadata
+     * @param id
+     * @param isEmbeddedId
+     * @param metaModel
+     * @return
+     */
+    private String getLuceneQuery(EntityMetadata metadata, Object id, boolean isEmbeddedId, MetamodelImpl metaModel)
+    {
+        String luceneQuery;
+        if (isEmbeddedId)
+        {
+            id = KunderaCoreUtils.prepareCompositeKey(metadata, metaModel, id);
+            luceneQuery = "+" + IndexingConstants.ENTITY_CLASS_FIELD + ":"
+                    + QueryParser.escape(metadata.getEntityClazz().getCanonicalName().toLowerCase()) + " AND +"
+                    + IndexingConstants.ENTITY_ID_FIELD + ":" + QueryParser.escape(id.toString());
+
+        }
+        else
+        {
+            luceneQuery = "+"
+                    + IndexingConstants.ENTITY_CLASS_FIELD
+                    + ":"
+                    + QueryParser.escape(metadata.getEntityClazz().getCanonicalName().toLowerCase())
+                    + " AND +"
+                    + getCannonicalPropertyName(QueryParser.escape(metadata.getEntityClazz().getSimpleName()),
+                            QueryParser.escape(((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName()))
+                    + ":" + QueryParser.escape(id.toString());
+
+        }
+        return luceneQuery;
     }
 
     @Override
@@ -286,11 +316,60 @@ public class LuceneIndexer extends DocumentIndexer
         updateDocument(metadata, metaModel, entity, parentId, entity.getClass(), true);
     }
 
-    @SuppressWarnings("deprecation")
-    @Override
-    public final Map<String, Object> search(String luceneQuery, int start, int count, boolean fetchRelation)
+    /**
+     * search the data from lucene for embeddedid
+     * 
+     * @param docs
+     * @param indexCol
+     * @param searcher
+     * @param metadata
+     * @param metaModel
+     */
+    public void prepareEmbeddedId(TopDocs docs, Map<String, Object> indexCol, IndexSearcher searcher,
+            EntityMetadata metadata, MetamodelImpl metaModel)
     {
+        try
+        {
+            for (ScoreDoc sc : docs.scoreDocs)
 
+            {
+                Document doc = searcher.doc(sc.doc);
+                Map<String, Object> embeddedIdFields = new HashMap<String, Object>();
+                EmbeddableType embeddableId = metaModel.embeddable(metadata.getIdAttribute().getBindableJavaType());
+                Set<Attribute> embeddedAttributes = embeddableId.getAttributes();
+
+                for (Attribute embeddedAttrib : embeddedAttributes)
+                {
+                    String columnName = ((AbstractAttribute) embeddedAttrib).getJPAColumnName();
+                    embeddedIdFields.put(columnName,
+                            doc.get(metadata.getEntityClazz().getSimpleName() + "." + columnName));
+                }
+
+                String entityId = doc.get(IndexingConstants.ENTITY_ID_FIELD);
+
+                indexCol.put(entityId, embeddedIdFields);
+            }
+        }
+        catch (Exception e)
+        {
+            log.error("Error while parsing Lucene Query {} ", e);
+            throw new LuceneIndexingException(e);
+        }
+    }
+
+    @Override
+    public final Map<String, Object> search(String luceneQuery, int start, int count, boolean fetchRelation,
+            KunderaMetadata kunderaMetadata, EntityMetadata metadata)
+    {
+        boolean isEmbeddedId = false;
+
+        MetamodelImpl metaModel = null;
+        if (kunderaMetadata != null && metadata != null)
+        {
+            metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                    metadata.getPersistenceUnit());
+            isEmbeddedId = metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType());
+        }
         reader = getIndexReader();
 
         if (Constants.INVALID == count)
@@ -308,14 +387,15 @@ public class LuceneIndexer extends DocumentIndexer
 
         if (reader == null)
         {
+
             return indexCol;
             // throw new
             // LuceneIndexingException("Index reader is not initialized!");
         }
-
+        QueryParser qp = null;
         IndexSearcher searcher = new IndexSearcher(reader);
-        QueryParser qp = new QueryParser(Version.LUCENE_34, DEFAULT_SEARCHABLE_FIELD, new StandardAnalyzer(
-                Version.LUCENE_34));
+
+        qp = new QueryParser(Version.LUCENE_34, DEFAULT_SEARCHABLE_FIELD, new StandardAnalyzer(Version.LUCENE_34));
 
         try
         {
@@ -323,26 +403,35 @@ public class LuceneIndexer extends DocumentIndexer
             qp.setAllowLeadingWildcard(true);
             // qp.set
             Query q = qp.parse(luceneQuery);
+
             TopDocs docs = searcher.search(q, count);
 
             int nullCount = 0;
+
             // Assuming Supercol will be null in case if alias only.
             // This is a quick fix
-
-            for (ScoreDoc sc : docs.scoreDocs)
+            if (isEmbeddedId)
             {
-
-                Document doc = searcher.doc(sc.doc);
-                String entityId = doc.get(fetchRelation ? IndexingConstants.PARENT_ID_FIELD
-                        : IndexingConstants.ENTITY_ID_FIELD);
-                String superCol = doc.get(SUPERCOLUMN_INDEX);
-
-                if (superCol == null)
+                prepareEmbeddedId(docs, indexCol, searcher, metadata, metaModel);
+            }
+            else
+            {
+                for (ScoreDoc sc : docs.scoreDocs)
                 {
-                    superCol = "SuperCol" + nullCount++;
+
+                    Document doc = searcher.doc(sc.doc);
+                    String entityId = doc.get(fetchRelation ? IndexingConstants.PARENT_ID_FIELD
+                            : IndexingConstants.ENTITY_ID_FIELD);
+                    String superCol = doc.get(SUPERCOLUMN_INDEX);
+
+                    if (superCol == null)
+                    {
+                        superCol = "SuperCol" + nullCount++;
+                    }
+                    // In case of super column and association.
+                    indexCol.put(superCol + "|" + entityId, entityId);
                 }
-                // In case of super column and association.
-                indexCol.put(superCol + "|" + entityId, entityId);
+
             }
         }
         catch (Exception e)
@@ -373,11 +462,7 @@ public class LuceneIndexer extends DocumentIndexer
         IndexWriter w = getIndexWriter();
         try
         {
-            // w.setR
             w.addDocument(document);
-            // w.optimize();
-            // w.commit();
-            // w.close();
         }
         catch (Exception e)
         {
@@ -394,7 +479,7 @@ public class LuceneIndexer extends DocumentIndexer
      * @param document
      *            the document
      */
-    public void updateDocument(String id, Document document)
+    public void updateDocument(String id, Document document, String EmbeddedEntityFieldName)
     {
         if (log.isDebugEnabled())
         {
@@ -404,7 +489,15 @@ public class LuceneIndexer extends DocumentIndexer
         IndexWriter w = getIndexWriter();
         try
         {
-            Term term = new Term(IndexingConstants.ENTITY_ID_FIELD, id);
+            Term term = null;
+            if (EmbeddedEntityFieldName == null)
+            {
+                term = new Term(IndexingConstants.ENTITY_ID_FIELD, id);
+            }
+            else
+            {
+                term = new Term(EmbeddedEntityFieldName, id);
+            }
             w.updateDocument(term, document);
 
         }
@@ -488,14 +581,14 @@ public class LuceneIndexer extends DocumentIndexer
     }
 
     @Override
-    public boolean entityExistsInIndex(Class<?> entityClass)
+    public boolean entityExistsInIndex(Class<?> entityClass, KunderaMetadata kunderaMetadata, EntityMetadata metadata)
     {
         String luceneQuery = "+" + IndexingConstants.ENTITY_CLASS_FIELD + ":"
                 + entityClass.getCanonicalName().toLowerCase();
         Map<String, Object> results;
         try
         {
-            results = search(luceneQuery, 0, 10, false);
+            results = search(luceneQuery, 0, 10, false, kunderaMetadata, metadata);
         }
         catch (LuceneIndexingException e)
         {
@@ -512,21 +605,19 @@ public class LuceneIndexer extends DocumentIndexer
     }
 
     @Override
-    public boolean documentExistsInIndex(EntityMetadata metadata, Object id)
+    public boolean documentExistsInIndex(EntityMetadata metadata, Object id, KunderaMetadata kunderaMetadata,
+            boolean isEmbeddedId)
     {
-        String luceneQuery = "+"
-                + IndexingConstants.ENTITY_CLASS_FIELD
-                + ":"
-                + QueryParser.escape(metadata.getEntityClazz().getCanonicalName().toLowerCase())
-                + " AND +"
-                + getCannonicalPropertyName(QueryParser.escape(metadata.getEntityClazz().getSimpleName()),
-                        QueryParser.escape(((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName())) + ":"
-                + QueryParser.escape(id.toString());
+        String luceneQuery = null;
 
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                metadata.getPersistenceUnit());
+
+        luceneQuery = getLuceneQuery(metadata, id, isEmbeddedId, metaModel);
         Map<String, Object> results;
         try
         {
-            results = search(luceneQuery, 0, 10, false);
+            results = search(luceneQuery, 0, 10, false, kunderaMetadata, metadata);
 
         }
         catch (LuceneIndexingException e)
@@ -561,7 +652,7 @@ public class LuceneIndexer extends DocumentIndexer
 
         // In case defined entity is Super column family.
         // we need to create seperate lucene document for indexing.
-        Document currentDoc = updateOrIndexDocument(metadata, metaModel, object, parentId, clazz, false);
+        Document currentDoc = updateOrCreateIndex(metadata, metaModel, object, parentId, clazz, false);
 
         return currentDoc;
 
@@ -580,15 +671,16 @@ public class LuceneIndexer extends DocumentIndexer
      *            the clazz
      * @return the document
      */
-    private Document updateOrIndexDocument(EntityMetadata metadata, final MetamodelImpl metaModel, Object entity,
+    private Document updateOrCreateIndex(EntityMetadata metadata, final MetamodelImpl metaModel, Object entity,
             String parentId, Class<?> clazz, boolean isUpdate)
     {
+        boolean isEmbeddedId = metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType());
         if (!metadata.isIndexable())
         {
             return null;
         }
 
-        Document currentDoc = null;
+        Document document = null;
         Object embeddedObject = null;
         Object rowKey = null;
 
@@ -603,11 +695,6 @@ public class LuceneIndexer extends DocumentIndexer
 
         if (metadata.getType().equals(EntityMetadata.Type.SUPER_COLUMN_FAMILY))
         {
-            //
-            // MetamodelImpl metaModel = (MetamodelImpl)
-            // kunderaMetadata.getApplicationMetadata().getMetamodel(
-            // metadata.getPersistenceUnit());
-
             Map<String, EmbeddableType> embeddables = metaModel.getEmbeddables(metadata.getEntityClazz());
 
             Iterator<String> iter = embeddables.keySet().iterator();
@@ -618,6 +705,7 @@ public class LuceneIndexer extends DocumentIndexer
                 String attributeName = iter.next();
                 EmbeddableType embeddableAttribute = embeddables.get(attributeName);
                 EntityType entityType = metaModel.entity(metadata.getEntityClazz());
+
                 embeddedObject = PropertyAccessorHelper.getObject(entity, (Field) entityType
                         .getAttribute(attributeName).getJavaMember());
 
@@ -627,108 +715,177 @@ public class LuceneIndexer extends DocumentIndexer
                 }
                 if (embeddedObject instanceof Collection<?>)
                 {
-                    ElementCollectionCacheManager ecCacheHandler = ElementCollectionCacheManager.getInstance();
-                    // Check whether it's first time insert or updation
-                    if (ecCacheHandler.isCacheEmpty())
-                    { // First time
-                      // insert
-                        int count = 0;
-                        for (Object obj : (Collection<?>) embeddedObject)
-                        {
-                            String elementCollectionObjectName = attributeName
-                                    + Constants.EMBEDDED_COLUMN_NAME_DELIMITER + count;
-
-                            currentDoc = prepareDocumentForSuperColumn(metadata, entity, elementCollectionObjectName,
-                                    parentId, clazz);
-                            createSuperColumnDocument(metadata, entity, currentDoc, obj, embeddableAttribute);
-                            if (isUpdate)
-                            {
-                                updateDocument(parentId, currentDoc);
-
-                            }
-                            else
-                            {
-                                indexDocument(metadata, currentDoc);
-                            }
-                            count++;
-                        }
-                    }
-                    else
-                    {
-                        // Updation, Check whether this object is already in
-                        // cache, which means we already have an embedded
-                        // column
-                        // Otherwise we need to generate a fresh embedded
-                        // column name
-                        int lastEmbeddedObjectCount = ecCacheHandler.getLastElementCollectionObjectCount(rowKey);
-                        for (Object obj : (Collection<?>) embeddedObject)
-                        {
-                            String elementCollectionObjectName = ecCacheHandler.getElementCollectionObjectName(rowKey,
-                                    obj);
-                            if (elementCollectionObjectName == null)
-                            { // Fresh
-                              // row
-                                elementCollectionObjectName = attributeName + Constants.EMBEDDED_COLUMN_NAME_DELIMITER
-                                        + (++lastEmbeddedObjectCount);
-                            }
-
-                            currentDoc = prepareDocumentForSuperColumn(metadata, entity, elementCollectionObjectName,
-                                    parentId, clazz);
-                            createSuperColumnDocument(metadata, entity, currentDoc, obj, embeddableAttribute);
-                            if (isUpdate)
-                            {
-                                updateDocument(parentId, currentDoc);
-                            }
-                            else
-                            {
-                                indexDocument(metadata, currentDoc);
-                            }
-                        }
-                    }
-
+                    document = updateOrCreateIndexCollectionTypeEmbeddedObject(metadata, metaModel, entity, parentId,
+                            clazz, isUpdate, document, embeddedObject, rowKey, attributeName, embeddableAttribute);
                 }
                 else
                 {
-                    currentDoc = prepareDocumentForSuperColumn(metadata, entity, attributeName, parentId, clazz);
-                    createSuperColumnDocument(metadata, entity, currentDoc,
+                    document = prepareDocumentForSuperColumn(metadata, entity, attributeName, parentId, clazz);
+                    createSuperColumnDocument(metadata, entity, document,
                             metaModel.isEmbeddable(embeddedObject.getClass()) ? embeddedObject : entity,
-                            embeddableAttribute);
+                            embeddableAttribute, metaModel);
                     if (isUpdate)
                     {
-                        updateDocument(parentId, currentDoc);
+                        updateDocument(parentId, document, null);
                     }
                     else
                     {
-                        indexDocument(metadata, currentDoc);
+                        indexDocument(metadata, document);
                     }
                 }
             }
         }
         else
         {
-            currentDoc = new Document();
+            document = updateOrCreateIndexNonSuperColumnFamily(metadata, metaModel, entity, parentId, clazz, isUpdate,
+                    isEmbeddedId, rowKey);
 
-            // Add entity class, PK info into document
+        }
+        return document;
 
-            addEntityClassToDocument(metadata, entity, currentDoc);
+    }
 
-            // Add all entity fields(columns) into document
-            addEntityFieldsToDocument(metadata, entity, currentDoc);
+    /**update or Create Index for non super columnfamily
+     * @param metadata
+     * @param metaModel
+     * @param entity
+     * @param parentId
+     * @param clazz
+     * @param isUpdate
+     * @param isEmbeddedId
+     * @param rowKey
+     * @return
+     */
+    private Document updateOrCreateIndexNonSuperColumnFamily(EntityMetadata metadata, final MetamodelImpl metaModel,
+            Object entity, String parentId, Class<?> clazz, boolean isUpdate, boolean isEmbeddedId, Object rowKey)
+    {
+        
+        Document document = new Document();
 
-            addParentKeyToDocument(parentId, currentDoc, clazz);
-            // Store document into index
-            if (isUpdate)
+        // Add entity class, PK info into document
+
+        addEntityClassToDocument(metadata, entity, document, metaModel);
+
+        // Add all entity fields(columns) into document
+        addEntityFieldsToDocument(metadata, entity, document, metaModel);
+
+        addParentKeyToDocument(parentId, document, clazz);
+        if (isUpdate)
+        {
+            if (isEmbeddedId)
             {
-                updateDocument(rowKey.toString(), currentDoc);
+                // updating delimited composite key
+                String compositeId = KunderaCoreUtils.prepareCompositeKey(metadata, metaModel, rowKey);
+                updateDocument(compositeId, document, null);
+                // updating sub parts of composite key
+                EmbeddableType embeddableId = metaModel.embeddable(metadata.getIdAttribute().getBindableJavaType());
+                Set<Attribute> embeddedAttributes = embeddableId.getAttributes();
+
+                for (Attribute embeddedAttrib : embeddedAttributes)
+                {
+                    String columnName = ((AbstractAttribute) embeddedAttrib).getJPAColumnName();
+                    Object embeddedColumn = PropertyAccessorHelper.getObject(rowKey,
+                            (Field) embeddedAttrib.getJavaMember());
+                    updateDocument(embeddedColumn.toString(), document, columnName);
+                }
             }
             else
             {
-                indexDocument(metadata, currentDoc);
+                updateDocument(rowKey.toString(), document, null);
             }
+        }
+        else
+        {
+            indexDocument(metadata, document);
+        }
+        return document;
+    }
 
+    /**update or create indexes when embedded object is of collection type
+     * @param metadata
+     * @param metaModel
+     * @param entity
+     * @param parentId
+     * @param clazz
+     * @param isUpdate
+     * @param document
+     * @param embeddedObject
+     * @param rowKey
+     * @param attributeName
+     * @param embeddableAttribute
+     * @return
+     */
+    private Document updateOrCreateIndexCollectionTypeEmbeddedObject(EntityMetadata metadata,
+            final MetamodelImpl metaModel, Object entity, String parentId, Class<?> clazz, boolean isUpdate,
+            Document document, Object embeddedObject, Object rowKey, String attributeName,
+            EmbeddableType embeddableAttribute)
+    {
+        ElementCollectionCacheManager ecCacheHandler = ElementCollectionCacheManager.getInstance();
+        // Check whether it's first time insert or updation
+        if (ecCacheHandler.isCacheEmpty())
+        { // First time
+          // insert
+            int count = 0;
+            for (Object obj : (Collection<?>) embeddedObject)
+            {
+                String elementCollectionObjectName = attributeName + Constants.EMBEDDED_COLUMN_NAME_DELIMITER + count;
+
+                document = prepareDocumentForSuperColumn(metadata, entity, elementCollectionObjectName, parentId, clazz);
+                createSuperColumnDocument(metadata, entity, document, obj, embeddableAttribute, metaModel);
+                if (isUpdate)
+                {
+                    updateDocument(parentId, document, null);
+
+                }
+                else
+                {
+                    indexDocument(metadata, document);
+                }
+                count++;
+            }
+        }
+        else
+        {
+            // Updation, Check whether this object is already in
+            // cache, which means we already have an embedded
+            // column
+            // Otherwise we need to generate a fresh embedded
+            // column name
+            int lastEmbeddedObjectCount = ecCacheHandler.getLastElementCollectionObjectCount(rowKey);
+            for (Object obj : (Collection<?>) embeddedObject)
+            {
+                document = indexCollectionObject(metadata, entity, parentId, clazz, isUpdate, rowKey, attributeName,
+                        embeddableAttribute, ecCacheHandler, lastEmbeddedObjectCount, obj, metaModel);
+            }
+        }
+        return document;
+    }
+
+    private Document indexCollectionObject(EntityMetadata metadata, Object entity, String parentId, Class<?> clazz,
+            boolean isUpdate, Object rowKey, String attributeName, EmbeddableType embeddableAttribute,
+            ElementCollectionCacheManager ecCacheHandler, int lastEmbeddedObjectCount, Object obj,
+            MetamodelImpl metamodel)
+    {
+        Document currentDoc;
+        String elementCollectionObjectName = ecCacheHandler.getElementCollectionObjectName(rowKey, obj);
+        if (elementCollectionObjectName == null)
+        { // Fresh
+          // row
+            elementCollectionObjectName = attributeName + Constants.EMBEDDED_COLUMN_NAME_DELIMITER
+                    + (++lastEmbeddedObjectCount);
+        }
+
+        currentDoc = prepareDocumentForSuperColumn(metadata, entity, elementCollectionObjectName, parentId, clazz);
+        createSuperColumnDocument(metadata, entity, currentDoc, obj, embeddableAttribute, metamodel);
+        if (isUpdate)
+        {
+            updateDocument(parentId, currentDoc, null);
+        }
+        else
+        {
+            indexDocument(metadata, currentDoc);
         }
         return currentDoc;
-
     }
 
     /**
@@ -798,7 +955,7 @@ public class LuceneIndexer extends DocumentIndexer
     private void updateDocument(EntityMetadata metadata, final MetamodelImpl metaModel, Object entity, String parentId,
             Class<? extends Object> class1, boolean b)
     {
-        updateOrIndexDocument(metadata, metaModel, entity, parentId, entity.getClass(), true);
+        updateOrCreateIndex(metadata, metaModel, entity, parentId, entity.getClass(), true);
         onCommit();
 
     }

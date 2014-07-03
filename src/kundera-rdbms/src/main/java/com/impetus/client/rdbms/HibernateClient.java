@@ -71,6 +71,7 @@ import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.ProxyHelper;
+import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**
  * The Class HibernateClient.
@@ -146,11 +147,13 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         tx = onBegin();
         s.delete(entity);
         onCommit(tx);
-
+        
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entity.getClass());
+        MetamodelImpl metamodel = (MetamodelImpl) KunderaMetadataManager.getMetamodel(kunderaMetadata,
+                metadata.getPersistenceUnit());
         if (!MetadataUtils.useSecondryIndex(getClientMetadata()))
         {
-            getIndexManager().remove(metadata, entity, pKey.toString());
+            getIndexManager().remove(metadata, entity, pKey);
         }
     }
 

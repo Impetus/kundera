@@ -38,6 +38,7 @@ import com.impetus.client.mongodb.MongoEntityReader;
 import com.impetus.client.mongodb.query.gis.GeospatialQueryFactory;
 import com.impetus.client.mongodb.utils.MongoDBUtils;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.gis.geometry.Point;
 import com.impetus.kundera.gis.query.GeospatialQuery;
@@ -138,17 +139,26 @@ public class MongoDBQuery extends QueryImpl
         ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
         try
         {
-            String query = appMetadata.getQuery(getJPAQuery());
+            List<Object> result = new ArrayList<Object>();
             boolean isNative = kunderaQuery.isNative();
 
             if (isNative)
             {
                 throw new UnsupportedOperationException("Native query support is not enabled in mongoDB");
             }
-            BasicDBObject orderByClause = getOrderByClause(m);
-            return ((MongoDBClient) client).loadData(m, createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()),
-                    null, orderByClause, isSingleResult ? 1 : maxResult, firstResult,
-                    getKeys(m, getKunderaQuery().getResult()), getKunderaQuery().getResult());
+            
+            if (MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
+            {
+                BasicDBObject orderByClause = getOrderByClause(m);
+                return ((MongoDBClient) client).loadData(m,
+                        createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()), null, orderByClause,
+                        isSingleResult ? 1 : maxResult, firstResult, getKeys(m, getKunderaQuery().getResult()),
+                        getKunderaQuery().getResult());
+            }
+            else
+            {
+                return populateUsingLucene(m, client, result, null);
+            }
         }
         catch (Exception e)
         {

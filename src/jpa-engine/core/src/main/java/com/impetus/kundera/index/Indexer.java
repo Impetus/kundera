@@ -19,6 +19,8 @@ import java.util.Map;
 
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
+import com.impetus.kundera.query.KunderaQuery;
 
 /**
  * Indexer interface. Any custom implementation for this interface can be
@@ -85,4 +87,6 @@ public interface Indexer
      * Close indexer instance.
      */
     void close();
+
+    
 }
