@@ -70,7 +70,7 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     private static Logger logger = LoggerFactory.getLogger(EntityManagerImpl.class);
 
     /** The factory. */
-    private EntityManagerFactory factory;
+    private final EntityManagerFactory factory;
 
     /** The closed. */
     private boolean closed;
@@ -82,15 +82,15 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
     private Map<String, Object> properties;
 
     /** Properties provided by user at the time of EntityManager Creation. */
-    private PersistenceDelegator persistenceDelegator;
+    private final PersistenceDelegator persistenceDelegator;
 
     /** Persistence Context Type (Transaction/ Extended) */
-    private PersistenceContextType persistenceContextType;
+    private final PersistenceContextType persistenceContextType;
 
     /** Transaction Type (JTA/ RESOURCE_LOCAL) */
-    private PersistenceUnitTransactionType transactionType;
+    private final PersistenceUnitTransactionType transactionType;
 
-    private PersistenceCache persistenceCache;
+    private final PersistenceCache persistenceCache;
 
     private UserTransaction utx;
 
@@ -104,8 +104,8 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
      * @param properties
      *            the properties
      */
-    EntityManagerImpl(EntityManagerFactory factory, Map properties, PersistenceUnitTransactionType transactionType,
-            PersistenceContextType persistenceContextType)
+    EntityManagerImpl(final EntityManagerFactory factory, final Map properties, PersistenceUnitTransactionType transactionType,
+            final PersistenceContextType persistenceContextType)
     {
         this(factory, transactionType, persistenceContextType);
         this.properties = properties;
@@ -119,8 +119,8 @@ public class EntityManagerImpl implements EntityManager, ResourceManager
      * @param factory
      *            the factory
      */
-    EntityManagerImpl(EntityManagerFactory factory, PersistenceUnitTransactionType transactionType,
-            PersistenceContextType persistenceContextType)
+    EntityManagerImpl(final EntityManagerFactory factory, final PersistenceUnitTransactionType transactionType,
+            final PersistenceContextType persistenceContextType)
     {
         this.factory = factory;
 

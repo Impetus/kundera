@@ -314,7 +314,7 @@ public class PersistenceDelegatorTest
 
         pd.close();
         Assert.assertFalse(pd.isOpen());
-        Assert.assertNull(pd.getDelegate());
+        Assert.assertTrue(pd.getDelegate().isEmpty());
 
     }
 

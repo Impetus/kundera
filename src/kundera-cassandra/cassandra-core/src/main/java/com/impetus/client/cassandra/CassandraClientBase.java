@@ -135,7 +135,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     private Map<String, Object> ttlValues = new HashMap<String, Object>();
 
     /** The closed. */
-    private boolean closed = false;
+    private volatile boolean closed = false;
 
     /** list of nodes for batch processing. */
     private List<Node> nodes = new ArrayList<Node>();
@@ -143,9 +143,9 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     /** batch size. */
     private int batchSize;
 
-    protected CQLClient cqlClient;
+    protected final CQLClient cqlClient;
 
-    protected TimestampGenerator generator;
+    protected final TimestampGenerator generator;
 
     /**
      * constructor using fields.
@@ -238,11 +238,9 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 e = getDataHandler().populateEntity(tr, m, KunderaCoreUtils.getEntity(e), relations, isRelation);
                 entities.add(e);
             }
-
         }
         else
         {
-
             if (log.isInfoEnabled())
             {
                 log.info("On counter column for column family of entity {}", m.getEntityClazz());
@@ -301,7 +299,6 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     protected void computeEntityViaColumns(EntityMetadata m, boolean isRelation, List<String> relations,
             List<Object> entities, Map<ByteBuffer, List<Column>> qResults)
     {
-
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
 
@@ -1525,7 +1522,6 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                                 batchQueryBuilder.append(query);
                             }
                         }
-
                     }
                     else
                     {

@@ -29,7 +29,7 @@ import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 
-import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.HTableInterface;
 import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp;
@@ -109,9 +109,11 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
      *            the persistence unit
      * @param puProperties
      */
-    public HBaseClient(IndexManager indexManager, HBaseConfiguration conf, HTablePool hTablePool, EntityReader reader,
-            String persistenceUnit, Map<String, Object> externalProperties, ClientMetadata clientMetadata,
-            final KunderaMetadata kunderaMetadata)
+public HBaseClient(IndexManager indexManager, Configuration conf, HTablePool hTablePool, EntityReader reader,
+
+             String persistenceUnit, Map<String, Object> externalProperties, ClientMetadata clientMetadata,
+
+             final KunderaMetadata kunderaMetadata)
     {
         super(kunderaMetadata, externalProperties, persistenceUnit);
         this.indexManager = indexManager;

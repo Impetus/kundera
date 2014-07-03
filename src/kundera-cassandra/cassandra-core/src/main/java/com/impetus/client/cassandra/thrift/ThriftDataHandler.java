@@ -75,8 +75,6 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
     public Object fromThriftRow(Class<?> clazz, EntityMetadata m, Object rowKey, List<String> relationNames,
             boolean isWrapReq, ConsistencyLevel consistencyLevel) throws Exception
     {
-        // List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
-
         Object e = null;
         SlicePredicate predicate = new SlicePredicate();
         predicate.setSlice_range(new SliceRange(ByteBufferUtil.EMPTY_BYTE_BUFFER, ByteBufferUtil.EMPTY_BYTE_BUFFER,

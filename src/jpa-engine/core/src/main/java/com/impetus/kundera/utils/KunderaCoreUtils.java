@@ -50,8 +50,9 @@ public class KunderaCoreUtils
 {
 
     private static final String COMPOSITE_KEY_SEPERATOR = "\001";
+
     private static final String LUCENE_COMPOSITE_KEY_SEPERATOR = "_";
-    
+
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(KunderaCoreUtils.class);
 
@@ -287,14 +288,13 @@ public class KunderaCoreUtils
         return count;
     }
 
-    
-
     /**
      * Gets the lucene query from jpa query.
      * 
      * @return the lucene query from jpa query
      */
-    public static String getLuceneQueryFromJPAQuery(final KunderaQuery kunderaQuery, final KunderaMetadata kunderaMetadata)
+    public static String getLuceneQueryFromJPAQuery(final KunderaQuery kunderaQuery,
+            final KunderaMetadata kunderaMetadata)
     {
 
         LuceneQueryBuilder queryBuilder = new LuceneQueryBuilder();
@@ -303,7 +303,7 @@ public class KunderaCoreUtils
                 metadata.getPersistenceUnit());
         Class valueClazz = null;
         EntityType entity = metaModel.entity(metadata.getEntityClazz());
-        
+
         for (Object object : kunderaQuery.getFilterClauseQueue())
         {
             if (object instanceof FilterClause)
@@ -322,14 +322,15 @@ public class KunderaCoreUtils
                     if (idColumn.equals(property))
                     {
                         valueAsString = prepareCompositeKey(metadata, metaModel, filter.getValue().get(0));
-                        queryBuilder.appendIndexName(metadata.getIndexName()).appendPropertyName(idColumn).buildQuery(condition,
-                                valueAsString, valueClazz);
+                        queryBuilder.appendIndexName(metadata.getIndexName()).appendPropertyName(idColumn)
+                                .buildQuery(condition, valueAsString, valueClazz);
                     }
                     else
                     {
                         valueClazz = metadata.getIdAttribute().getBindableJavaType();
                         property = property.substring(property.indexOf(".") + 1);
-                        queryBuilder.appendIndexName(metadata.getIndexName()).appendPropertyName(getPropertyName(metadata, property, kunderaMetadata))
+                        queryBuilder.appendIndexName(metadata.getIndexName())
+                                .appendPropertyName(getPropertyName(metadata, property, kunderaMetadata))
                                 .buildQuery(condition, valueAsString, valueClazz);
                     }
                 }

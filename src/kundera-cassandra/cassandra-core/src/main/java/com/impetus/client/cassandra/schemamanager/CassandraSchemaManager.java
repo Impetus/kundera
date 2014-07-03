@@ -300,8 +300,6 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         String replication_conf = CQLTranslator.SIMPLE_REPLICATION;
         createKeyspace = createKeyspace.replace("$KEYSPACE", "\"" + databaseName + "\"");
 
-        // String placement_strategy = SimpleStrategy.class.getSimpleName();
-
         Schema schema = CassandraPropertyReader.csmd.getSchema(databaseName);
 
         if (schema != null && schema.getName() != null && schema.getName().equalsIgnoreCase(databaseName)
@@ -314,8 +312,6 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 String replicationFactor = schemaProperties.getProperty(CassandraConstants.REPLICATION_FACTOR,
                         CassandraConstants.DEFAULT_REPLICATION_FACTOR);
 
-                // String replication_conf =
-                // CQLTranslator.SIMPLE_REPLICATION;
                 replication_conf = replication_conf.replace("$REPLICATION_FACTOR", replicationFactor);
                 createKeyspace = createKeyspace.replace("$CLASS", placement_strategy);
             }

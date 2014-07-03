@@ -40,7 +40,7 @@ import com.impetus.kundera.index.IndexCollection;
 @Table
 // Ignored for Neo4J
 @IndexCollection(columns = { @Index(name = "name", type = "KEYS") })
-public class Actor
+public class ActorWithMultipleRelation
 {
     @Id
     @Column(name = "ACTOR_ID")
@@ -49,25 +49,40 @@ public class Actor
     @Column(name = "ACTOR_NAME")
     private String name;
 
-    public Actor()
+    public ActorWithMultipleRelation()
     {
     }
 
-    public Actor(int actorId, String actorName)
+    public ActorWithMultipleRelation(int actorId, String actorName)
     {
         this.id = actorId;
         this.name = actorName;
     }
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)    
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @MapKeyJoinColumn(name = "ACTS_IN")
-    private Map<Role, Movie> movies;
+    private Map<NewRole, LatestMovie> latestActedMovies;
 
-    public void addMovie(Role role, Movie movie)
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @MapKeyJoinColumn(name = "ACTS_IN_FAV")
+    private Map<OldRole, ArchivedMovie> oldActedMovies;
+
+    public void addLatestMovie(NewRole role, LatestMovie movie)
     {
-        if (movies == null)
-            movies = new HashMap<Role, Movie>();
-        movies.put(role, movie);
+        if (latestActedMovies == null)
+        {
+            latestActedMovies = new HashMap<NewRole, LatestMovie>();
+        }
+        latestActedMovies.put(role, movie);
+    }
+
+    public void addArchivedMovie(OldRole role, ArchivedMovie movie)
+    {
+        if (oldActedMovies == null)
+        {
+            oldActedMovies = new HashMap<OldRole, ArchivedMovie>();
+        }
+        oldActedMovies.put(role, movie);
     }
 
     /**
@@ -105,20 +120,37 @@ public class Actor
     }
 
     /**
-     * @return the movies
+     * @return the latestMovies
      */
-    public Map<Role, Movie> getMovies()
+    public Map<NewRole, LatestMovie> getLatestMovies()
     {
-        return movies;
+        return latestActedMovies;
     }
 
     /**
-     * @param movies
-     *            the movies to set
+     * @param latestMovies
+     *            the actedMovies to set
      */
-    public void setMovies(Map<Role, Movie> movies)
+    public void setLatestMovies(Map<NewRole, LatestMovie> latestMovies)
     {
-        this.movies = movies;
+        this.latestActedMovies = latestMovies;
+    }
+
+    /**
+     * @return the archivedMovies
+     */
+    public Map<OldRole, ArchivedMovie> getArchivedMovies()
+    {
+        return oldActedMovies;
+    }
+
+    /**
+     * @param archivedMovies
+     *            the favouriteMovies to set
+     */
+    public void setArchivedMovies(Map<OldRole, ArchivedMovie> archivedMovies)
+    {
+        this.oldActedMovies = archivedMovies;
     }
 
 }

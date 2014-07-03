@@ -103,17 +103,17 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     private static Logger log = LoggerFactory.getLogger(ThriftClient.class);
 
     /** The data handler. */
-    private ThriftDataHandler dataHandler;
+    private final ThriftDataHandler dataHandler;
 
     /** Handler for Inverted indexing */
-    private InvertedIndexHandler invertedIndexHandler;
+    private final InvertedIndexHandler invertedIndexHandler;
 
     /** The reader. */
-    private EntityReader reader;
+    private final EntityReader reader;
 
-    private ThriftClientFactory clientFactory;
+    private final ThriftClientFactory clientFactory;
 
-    private ConnectionPool pool;
+    private final ConnectionPool pool;
 
     public ThriftClient(ThriftClientFactory clientFactory, IndexManager indexManager, EntityReader reader,
             String persistenceUnit, ConnectionPool pool, Map<String, Object> externalProperties,
@@ -178,15 +178,6 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             log.error("Error while persisting record, Caused by: .", e);
             throw new KunderaException(e);
         }
-        /*
-         * catch (UnavailableException e) {
-         * log.error("Error while persisting record, Caused by: .", e); throw
-         * new KunderaException(e); } catch (TimedOutException e) {
-         * log.error("Error while persisting record, Caused by: .", e); throw
-         * new KunderaException(e); } catch (SchemaDisagreementException e) {
-         * log.error("Error while persisting record, Caused by: .", e); throw
-         * new KunderaException(e); }
-         */
         catch (UnsupportedEncodingException e)
         {
             log.error("Error while persisting record, Caused by: .", e);
@@ -281,14 +272,6 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             log.error("Error while inserting record into join table, Caused by: .", e);
             throw new PersistenceException(e);
         }
-        /*
-         * catch (UnavailableException e) {
-         * log.error("Error while inserting record into join table, Caused by: ."
-         * , e); throw new PersistenceException(e); } catch (TimedOutException
-         * e) {
-         * log.error("Error while inserting record into join table, Caused by: ."
-         * , e); throw new PersistenceException(e); }
-         */
         finally
         {
             releaseConnection(conn);
@@ -443,12 +426,6 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                 Connection conn = null;
                 try
                 {
-                    /*
-                     * KunderaCoreUtils.ddlShow("getting columns by id from:"+
-                     * tableName+
-                     * " for primary key:"+pKeyColumnValue.toString(),
-                     * showSchema);
-                     */
                     conn = getConnection();
                     results = conn.getClient().get_slice(ByteBuffer.wrap(rowKey), parent, predicate,
                             getConsistencyLevel());
@@ -525,11 +502,6 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             Connection conn = null;
             try
             {
-                /*
-                 * KunderaCoreUtils.ddlShow("get ids for column:"+columnName+
-                 * " for value:"+columnValue.toString(), showSchema);
-                 */
-
                 conn = getConnection();
                 List<KeySlice> keySlices = conn.getClient().get_indexed_slices(columnParent, ix, slicePredicate,
                         getConsistencyLevel());
@@ -764,14 +736,6 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                     pKey, e);
             throw new KunderaException(e);
         }
-        /*
-         * catch (UnavailableException e) { log.error(
-         * "Error while deleting of column family {} for row key {}, Caused by: ."
-         * , metadata.getTableName(), pKey, e); throw new KunderaException(e); }
-         * catch (TimedOutException e) { log.error(
-         * "Error while deleting of column family {} for row key {}, Caused by: ."
-         * , metadata.getTableName(), pKey, e); throw new KunderaException(e); }
-         */
         finally
         {
             releaseConnection(conn);
@@ -807,14 +771,6 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                     e);
             throw new KunderaException(e);
         }
-        /*
-         * catch (UnavailableException e) { log.error(
-         * "Error while deleting of column family {} for row key {}, Caused by: ."
-         * , tableName, columnValue, e); throw new KunderaException(e); } catch
-         * (TimedOutException e) { log.error(
-         * "Error while deleting of column family {} for row key {}, Caused by: ."
-         * , tableName, columnValue, e); throw new KunderaException(e); }
-         */
         finally
         {
             releaseConnection(conn);
@@ -850,8 +806,8 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     public void close()
     {
         this.indexManager.flush();
-        this.dataHandler = null;
-        this.invertedIndexHandler = null;
+//        this.dataHandler = null;
+//        this.invertedIndexHandler = null;
         super.close();
     }
 

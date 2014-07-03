@@ -19,9 +19,6 @@ import com.impetus.kundera.ycsb.utils.MailUtils;
  */
 public class HBaseRunner extends YCSBRunner
 {
-
-//    private HBaseOperationUtils utils;
-
     private String startHBaseServerCommand;
 
     private String stopHBaseServerCommand;
@@ -45,12 +42,7 @@ public class HBaseRunner extends YCSBRunner
     public void startServer(boolean performDelete, Runtime runTime)
     {
         if (performDelete)
-        {/*
-          * HBaseOperationUtils utils = new HBaseOperationUtils(); try {
-          * utils.deleteTable(columnFamilyOrTable); } catch (IOException e) {
-          * throw new RuntimeException("Error while deleting data,Caused by:" ,
-          * e); }
-          */
+        {
             try
             {
                 HBaseOperationUtils.startHBaseServer(runTime, startHBaseServerCommand);
@@ -59,17 +51,13 @@ public class HBaseRunner extends YCSBRunner
             }
             catch (IOException e)
             {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
             catch (InterruptedException e)
             {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
-
-//        utils = new HBaseOperationUtils();
     }
 
     /*
@@ -87,12 +75,10 @@ public class HBaseRunner extends YCSBRunner
         }
         catch (IOException e)
         {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         catch (InterruptedException e)
         {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }

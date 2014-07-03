@@ -94,17 +94,8 @@ public class CassandraRetryService extends RetryService
                 boolean reconnected = verifyConnection(host);
                 if (reconnected)
                 {
-                	
-                	((CassandraClientFactory)clientFactory).addCassandraHost(host);
-/*                    if (clientFactory instanceof ThriftClientFactory)
-                    {
-                        ((ThriftClientFactory) clientFactory).addCassandraHost(host);
-                    }
-                    else
-                    {
-                        ((PelopsClientFactory) clientFactory).addCassandraHost(host);
-                    }
-*/                    iter.remove();
+                    ((CassandraClientFactory) clientFactory).addCassandraHost(host);
+                    iter.remove();
                 }
             }
         }
@@ -122,11 +113,7 @@ public class CassandraRetryService extends RetryService
             {
                 if (verifyConnection(cassandraHost))
                 {
-                    /*if (clientFactory.getClass().getSimpleName("ThriftClientFactory") instanceof ThriftClientFactory
-                            && ((ThriftClientFactory) clientFactory).addCassandraHost(cassandraHost)
-                            || clientFactory instanceof PelopsClientFactory
-                            && ((PelopsClientFactory) clientFactory).addCassandraHost(cassandraHost))*/
-                	if(((CassandraClientFactory)clientFactory).addCassandraHost(cassandraHost))
+                    if (((CassandraClientFactory) clientFactory).addCassandraHost(cassandraHost))
                     {
                         downedHostQueue.remove(cassandraHost);
                     }

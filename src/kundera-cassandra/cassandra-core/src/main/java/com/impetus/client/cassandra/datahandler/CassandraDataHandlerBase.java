@@ -88,13 +88,13 @@ public abstract class CassandraDataHandlerBase
     private static Logger log = LoggerFactory.getLogger(CassandraDataHandlerBase.class);
 
     /** The thrift translator. */
-    protected ThriftDataResultHelper thriftTranslator = new ThriftDataResultHelper();
+    protected final ThriftDataResultHelper thriftTranslator = new ThriftDataResultHelper();
 
-    private CassandraClientBase clientBase;
+    private final CassandraClientBase clientBase;
 
-    protected KunderaMetadata kunderaMetadata;
+    protected final KunderaMetadata kunderaMetadata;
 
-    protected TimestampGenerator generator;
+    protected final TimestampGenerator generator;
 
     public CassandraDataHandlerBase(final CassandraClientBase clientBase, final KunderaMetadata kunderaMetadata,
             final TimestampGenerator generator)
@@ -143,7 +143,7 @@ public abstract class CassandraDataHandlerBase
                 // Instantiate a new instance
                 e = clazz.newInstance();
 
-                // Set row-key. Note:
+                // Set row-key.
                 PropertyAccessorHelper.setId(e, m, tr.getId());
             }
 
@@ -155,7 +155,6 @@ public abstract class CassandraDataHandlerBase
                 scNamePrefix = MetadataUtils.getEmbeddedCollectionPrefix(scName);
                 embeddedCollectionField = superColumnNameToFieldMap.get(scNamePrefix);
                 embeddedCollection = MetadataUtils.getEmbeddedCollectionInstance(embeddedCollectionField);
-
                 Object embeddedObject = populateEmbeddedObject(sc, m);
                 embeddedCollection.add(embeddedObject);
                 PropertyAccessorHelper.set(e, embeddedCollectionField, embeddedCollection);
@@ -183,7 +182,6 @@ public abstract class CassandraDataHandlerBase
                         if (intoRelations)
                         {
                             Relation relation = m.getRelation(name);
-
                             String foreignKeys = PropertyAccessorFactory.STRING.fromBytes(String.class, value);
                             Set<String> keys = MetadataUtils.deserializeKeys(foreignKeys);
                         }
@@ -194,9 +192,7 @@ public abstract class CassandraDataHandlerBase
                             Object embeddedObject = PropertyAccessorHelper.getObject(e, scName);
                             PropertyAccessorHelper.set(embeddedObject, field, value);
                         }
-
                     }
-
                 }
             }
         }
@@ -326,7 +322,6 @@ public abstract class CassandraDataHandlerBase
                 Field columnField = columnNameToFieldMap.get(name);
                 PropertyAccessorHelper.set(embeddedObject, columnField, value);
             }
-
         }
         else
         {
@@ -346,7 +341,6 @@ public abstract class CassandraDataHandlerBase
                 // set value of the field in the bean
                 Field columnField = columnNameToFieldMap.get(name);
                 PropertyAccessorHelper.set(embeddedObject, columnField, value);
-
             }
         }
         return embeddedObject;
@@ -447,9 +441,7 @@ public abstract class CassandraDataHandlerBase
                         {
                             continue;
                         }
-
                         // Column Value
-                        // String id = CassandraUtilities.toUTF8(rowKey);
                         String id = (String) CassandraDataTranslator.decompose(
                                 ((AbstractAttribute) m.getIdAttribute()).getBindableJavaType(), rowKey, false);
                         String superColumnName = ecCacheHandler.getElementCollectionObjectName(id, obj);
@@ -467,7 +459,6 @@ public abstract class CassandraDataHandlerBase
             {
                 for (Object column : embeddedColumn.getAttributes())
                 {
-
                     Attribute columnAttribute = (Attribute) column;
                     String columnName = columnAttribute.getName();
                     Class<?> columnClass = ((AbstractAttribute) columnAttribute).getBindableJavaType();
@@ -631,7 +622,6 @@ public abstract class CassandraDataHandlerBase
                                 isCql3Enabled);
 
                         String discriminatorColumn = ((AbstractManagedType) entityType).getDiscriminatorColumn();
-
                         String discriminatorValue = ((AbstractManagedType) entityType).getDiscriminatorValue();
 
                         if (thriftColumnName != null
@@ -659,8 +649,8 @@ public abstract class CassandraDataHandlerBase
             {
                 if (superColumn != null)
                 {
-                    entity = KunderaCoreUtils.initialize(m, entity, tr.getId());
 
+                    entity = KunderaCoreUtils.initialize(m, entity, tr.getId());
                     String scName = PropertyAccessorFactory.STRING.fromBytes(String.class, superColumn.getName());
                     String scNamePrefix = null;
 
@@ -751,7 +741,6 @@ public abstract class CassandraDataHandlerBase
                     // Map to hold property-name=>foreign-entity relations
                     Map<String, Set<String>> foreignKeysMap = new HashMap<String, Set<String>>();
 
-                    // Get a name->field map for super-columns
                     // Get a name->field map for super-columns
                     if (!mappingProcessed)
                     {
@@ -987,7 +976,6 @@ public abstract class CassandraDataHandlerBase
         byte[] thriftColumnValue = column.getValue();
 
         String discriminatorColumn = ((AbstractManagedType) entityType).getDiscriminatorColumn();
-
         String discriminatorValue = ((AbstractManagedType) entityType).getDiscriminatorValue();
 
         if (!thriftColumnName.equals(discriminatorColumn))
@@ -1188,7 +1176,6 @@ public abstract class CassandraDataHandlerBase
     {
         if (attribute != null)
         {
-
             try
             {
                 if (attribute.isCollection())
@@ -1200,9 +1187,7 @@ public abstract class CassandraDataHandlerBase
                 {
                     PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), CassandraDataTranslator
                             .decompose(((AbstractAttribute) attribute).getBindableJavaType(), thriftColumnValue, true));
-
                 }
-
                 else
                 {
                     PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), (byte[]) thriftColumnValue);
@@ -1221,10 +1206,8 @@ public abstract class CassandraDataHandlerBase
         Object objValue;
         try
         {
-
             if (CassandraDataTranslator.isCassandraDataTypeClass(((AbstractAttribute) attribute).getBindableJavaType()))
             {
-
                 objValue = CassandraDataTranslator.decompose(((AbstractAttribute) attribute).getBindableJavaType(),
                         thriftColumnValue, true);
                 return objValue;
@@ -1284,9 +1267,6 @@ public abstract class CassandraDataHandlerBase
                 Field field = (Field) ((Attribute) attribute).getJavaMember();
                 byte[] name = ByteBufferUtil.bytes(((AbstractAttribute) attribute).getJPAColumnName()).array();
 
-                // PropertyAccessorFactory.STRING
-                // .toBytes(((AbstractAttribute) attribute).getJPAColumnName());
-
                 // if attribute is embeddable.
                 if (metaModel.isEmbeddable(attribute.isCollection() ? ((PluralAttribute) attribute)
                         .getBindableJavaType() : attribute.getJavaType()))
@@ -1343,7 +1323,6 @@ public abstract class CassandraDataHandlerBase
             Column column = prepareColumn(PropertyAccessorHelper.getBytes(discrValue),
                     PropertyAccessorHelper.getBytes(discrColumn), timestamp, 0);
             tr.addColumn(column);
-
         }
     }
 
@@ -1374,7 +1353,6 @@ public abstract class CassandraDataHandlerBase
         Object value;
         if (!m.isCounterColumnType())
         {
-            // value = PropertyAccessorHelper.get(e, field);
             value = getThriftColumnValue(e, attribute);
         }
         else
@@ -1390,14 +1368,12 @@ public abstract class CassandraDataHandlerBase
         Field field = (Field) ((Attribute) attribute).getJavaMember();
         try
         {
-
             if (attribute != null && field.get(e) != null)
             {
 
                 if (CassandraDataTranslator.isCassandraDataTypeClass(((AbstractAttribute) attribute)
                         .getBindableJavaType()))
                 {
-
                     value = CassandraDataTranslator.compose(((AbstractAttribute) attribute).getBindableJavaType(),
                             field.get(e), false);
                 }
@@ -1405,19 +1381,16 @@ public abstract class CassandraDataHandlerBase
                 {
                     value = PropertyAccessorHelper.get(e, field);
                 }
-
             }
         }
         catch (IllegalArgumentException iae)
         {
-
             log.error("Error while persisting data, Caused by: .", iae);
             throw new IllegalArgumentException(iae);
         }
         catch (IllegalAccessException iace)
         {
             log.error("Error while persisting data, Caused by: .", iace);
-
         }
         return value;
     }
@@ -1453,7 +1426,6 @@ public abstract class CassandraDataHandlerBase
                 tr.addColumn(column);
             }
         }
-
     }
 
     /**
@@ -1493,7 +1465,6 @@ public abstract class CassandraDataHandlerBase
                 subColumn.add(column);
                 superCol.setColumns(subColumn);
                 tr.addSuperColumn(superCol);
-
             }
         }
     }
@@ -1518,7 +1489,9 @@ public abstract class CassandraDataHandlerBase
         column.setValue(value);
         column.setTimestamp(timestamp);
         if (ttl != 0)
+        {
             column.setTtl(ttl);
+        }
         return column;
     }
 
@@ -1707,7 +1680,6 @@ public abstract class CassandraDataHandlerBase
             try
             {
                 value = PropertyAccessorHelper.getString(counterSuperColumnObject, field);
-
             }
             catch (PropertyAccessException exp)
             {
@@ -1882,7 +1854,6 @@ public abstract class CassandraDataHandlerBase
                 compoundKeyObject = ((AbstractAttribute) attribute).getBindableJavaType().newInstance();
             }
         }
-
         return compoundKeyObject;
     }
 
@@ -1899,7 +1870,6 @@ public abstract class CassandraDataHandlerBase
         {
             if (Collection.class.isAssignableFrom(((Field) attribute.getJavaMember()).getType()))
             {
-
                 Collection outputCollection = null;
                 ByteBuffer valueByteBuffer = ByteBuffer.wrap((byte[]) thriftColumnValue);
                 Class<?> genericClass = PropertyAccessorHelper.getGenericClass((Field) attribute.getJavaMember());
@@ -1948,7 +1918,6 @@ public abstract class CassandraDataHandlerBase
                 Map dataCollection = marshalMap(mapGenericClasses, keyClass, valueClass, rawMap);
                 PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), dataCollection.isEmpty() ? rawMap
                         : dataCollection);
-
             }
         }
         catch (Exception e)
@@ -1970,7 +1939,6 @@ public abstract class CassandraDataHandlerBase
                 mappedCollection.add(PropertyAccessorHelper.getObject(clazz, ((ByteBuffer) value).array()));
             }
         }
-
         return mappedCollection;
     }
 
@@ -2013,5 +1981,6 @@ public abstract class CassandraDataHandlerBase
         }
         return dataCollection;
     }
-
+    
 }
+

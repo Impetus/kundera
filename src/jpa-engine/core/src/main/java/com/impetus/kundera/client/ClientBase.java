@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
@@ -58,7 +57,7 @@ public abstract class ClientBase
 
     protected final KunderaMetadata kunderaMetadata;
 
-    protected boolean showQuery;
+    protected final boolean showQuery;
 
     protected Map<String, Object> externalProperties;
 
@@ -115,7 +114,6 @@ public abstract class ClientBase
      */
     protected List<RelationHolder> getRelationHolders(Node node)
     {
-
         List<RelationHolder> relationsHolder = new ArrayList<RelationHolder>();
 
         // Add column value for all parent nodes linked to this node
@@ -169,7 +167,6 @@ public abstract class ClientBase
                         RelationHolder relationHolder = new RelationHolder(linkName, relationTo, linkValue);
                         relationsHolder.add(relationHolder);
                     }
-
                 }
             }
         }
@@ -191,7 +188,6 @@ public abstract class ClientBase
                 {
                     for (NodeLink parentNodeLink : parents.keySet())
                     {
-
                         indexManager.update(entityMetadata, node.getData(), parentNodeLink
                                 .getLinkProperty(LinkProperty.LINK_VALUE), parents.get(parentNodeLink).getDataClass());
                     }
@@ -238,11 +234,6 @@ public abstract class ClientBase
      */
     protected abstract void onPersist(EntityMetadata entityMetadata, Object entity, Object id,
             List<RelationHolder> rlHolders);
-
-    // protected abstract Map<String, Object>
-    // preparePersistentObject(EntityMetadata entityMetadata, Object entity,
-    // Object id,
-    // List<RelationHolder> rlHolders);
 
     public ClientMetadata getClientMetadata()
     {

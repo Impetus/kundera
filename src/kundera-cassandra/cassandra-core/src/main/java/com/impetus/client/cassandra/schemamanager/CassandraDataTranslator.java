@@ -459,7 +459,6 @@ public final class CassandraDataTranslator
         return null;
     }
 
-
     /**
      * In case, key or value class is of type blob. Iterate and populate
      * corresponding byte[]
@@ -491,8 +490,7 @@ public final class CassandraDataTranslator
 
                 if (valueClass.isAssignableFrom(BytesType.class))
                 {
-                    value = PropertyAccessorHelper
-                            .getObject(mapGenericClasses.get(1), ((ByteBuffer) value).array());
+                    value = PropertyAccessorHelper.getObject(mapGenericClasses.get(1), ((ByteBuffer) value).array());
                 }
 
                 dataCollection.put(key, value);
@@ -509,14 +507,15 @@ public final class CassandraDataTranslator
      * @param clazz
      * @return
      */
-    public static Collection marshalCollection(Class cassandraTypeClazz, Collection result, Class clazz, Class collectionTypeClazz)
+    public static Collection marshalCollection(Class cassandraTypeClazz, Collection result, Class clazz,
+            Class collectionTypeClazz)
     {
         Collection mappedCollection = result;
 
         if (cassandraTypeClazz.isAssignableFrom(BytesType.class))
         {
             mappedCollection = (Collection) PropertyAccessorHelper.getObject(collectionTypeClazz);
-            
+
             for (Object value : result)
             {
                 mappedCollection.add(PropertyAccessorHelper.getObject(clazz, ((ByteBuffer) value).array()));
@@ -895,7 +894,8 @@ public final class CassandraDataTranslator
                 SetType setType = SetType.getInstance((AbstractType) valueClassInstance);
                 Collection outputCollection = new HashSet();
                 outputCollection.addAll((Collection) setType.compose(buf));
-                return marshalCollection(valueValidationClass, outputCollection, mapGenericClassses,outputCollection.getClass());
+                return marshalCollection(valueValidationClass, outputCollection, mapGenericClassses,
+                        outputCollection.getClass());
             }
             catch (NoSuchFieldException e)
             {
@@ -1082,7 +1082,8 @@ public final class CassandraDataTranslator
                 ListType listType = ListType.getInstance((AbstractType) valueClassInstance);
                 Collection outputCollection = new ArrayList();
                 outputCollection.addAll((Collection) listType.compose(buf));
-                return marshalCollection(valueValidationClass, outputCollection, mapGenericClassses,outputCollection.getClass());
+                return marshalCollection(valueValidationClass, outputCollection, mapGenericClassses,
+                        outputCollection.getClass());
             }
             catch (NoSuchFieldException e)
             {
