@@ -288,28 +288,66 @@ public abstract class BaseTest
   
         
         q = em.createQuery("Select p from " + clazz + " p where p." + fieldName + " like :name");
-        q.setParameter("name", "test");
+        q.setParameter("name", "Mc.John Doe");
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(1, results.size());
+     
+        q = em.createQuery("Select p from " + clazz + " p where p." + fieldName + " like :name");
+        q.setParameter("name", "Mc.");
+        results = q.getResultList();
+        Assert.assertEquals(0, results.size());
+        
+        q = em.createQuery("Select p from " + clazz + " p where p." + fieldName + " like :name");
+        q.setParameter("name", "MC.JOHN DOE");
+        results = q.getResultList();
+        Assert.assertEquals(1, results.size());
+        
+        q = em.createQuery("Select p from " + clazz + " p where p." + fieldName + " like :name");
+        q.setParameter("name", "%Doe");
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(1, results.size());
         
         q = em.createQuery("Select p from " + clazz + " p where p." + fieldName + " like :name");
-        q.setParameter("name", "for");
+        q.setParameter("name", "Mc%");
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(1, results.size());
         
-        q = em.createQuery("Select p from " + clazz + " p where p." + fieldName + " like :name");
-        q.setParameter("name", "name");
+        q = em.createQuery("Select p from " + clazz + " p where (p." + fieldName + " like :name) AND (p.personId like :personId)");
+        q.setParameter("name", "Mc%");
+        q.setParameter("personId", "1");
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(1, results.size());
         
-        q = em.createQuery("Select p from " + clazz + " p where p." + fieldName + " like :name");
-        q.setParameter("name", "operator");
+        q = em.createQuery("Select p from " + clazz + " p where p." + fieldName + " like :name AND p.personId like :personId");
+        q.setParameter("name", "Mc%");
+        q.setParameter("personId", "2");
         results = q.getResultList();
-        Assert.assertNotNull(results);
+        Assert.assertEquals(0, results.size());
+        
+        q = em.createQuery("Select p from " + clazz + " p where p." + fieldName + " like :name AND p.personId = :personId");
+        q.setParameter("name", "Mc%");
+        q.setParameter("personId", "2");
+        results = q.getResultList();
+        Assert.assertEquals(0, results.size());
+        
+        q = em.createQuery("Select p from " + clazz + " p where p." + fieldName + " like :name");
+        q.setParameter("name", "MC_%");
+        results = q.getResultList();
         Assert.assertEquals(1, results.size());
+        
+        q = em.createQuery("Select p from " + clazz + " p where p." + fieldName + " like :name");
+        q.setParameter("name", "%_Jo%");
+        results = q.getResultList();
+        Assert.assertEquals(1, results.size());
+        
+        q = em.createQuery("Select p from " + clazz + " p where p." + fieldName + " like :name");
+        q.setParameter("name", "%_M%");
+        results = q.getResultList();
+        Assert.assertEquals(0, results.size());
     }
 
     /**

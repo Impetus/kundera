@@ -133,6 +133,32 @@ public class PersonnelEmbeddedTest
         Assert.assertNotNull(personnels.get(0).getPersonalDetail().getPhone());
         Assert.assertEquals("xamry", personnels.get(0).getPersonalDetail().getPhone().getContactName().get(0));
         Assert.assertEquals(hashSet, personnels.get(0).getPersonalDetail().getPhone().getContactNumber());
+        
+        personnels = em.createQuery("Select p from PersonnelEmbedded p where p.personalDetail.emailId like :email").setParameter("email" , "xyz%").getResultList();
+        Assert.assertNotNull(personnels);
+        Assert.assertFalse(personnels.isEmpty());
+        Assert.assertNotNull(personnels.get(0));
+        Assert.assertNotNull(personnels.get(0).getPersonalDetail());
+        Assert.assertNotNull(personnels.get(0).getPersonalDetail().getPhone());
+        Assert.assertEquals("xamry", personnels.get(0).getPersonalDetail().getPhone().getContactName().get(0));
+        Assert.assertEquals(hashSet, personnels.get(0).getPersonalDetail().getPhone().getContactNumber());
+        
+        personnels = em.createQuery("Select p from PersonnelEmbedded p where p.personalDetail.emailId like :email").setParameter("email" , "xyz_%").getResultList();
+        Assert.assertNotNull(personnels);
+        Assert.assertFalse(personnels.isEmpty());
+        Assert.assertNotNull(personnels.get(0));
+        Assert.assertEquals(1, personnels.size());
+        
+        personnels = em.createQuery("Select p from PersonnelEmbedded p where p.personalDetail.emailId like :email").setParameter("email" , "xyz_%").getResultList();
+        Assert.assertNotNull(personnels);
+        Assert.assertFalse(personnels.isEmpty());
+        Assert.assertEquals(1, personnels.size());
+        
+        personnels = em.createQuery("Select p from PersonnelEmbedded p where p.personalDetail.emailId like :email").setParameter("email" , "xyz").getResultList();
+        Assert.assertNotNull(personnels);
+        Assert.assertTrue(personnels.isEmpty());
+        Assert.assertEquals(0, personnels.size());
+       
 
     }
 }
