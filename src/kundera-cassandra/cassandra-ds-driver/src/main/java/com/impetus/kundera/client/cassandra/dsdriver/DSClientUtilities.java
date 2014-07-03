@@ -32,7 +32,6 @@ import org.apache.cassandra.utils.ByteBufferUtil;
 
 import com.datastax.driver.core.DataType.Name;
 import com.datastax.driver.core.Row;
-import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.schemamanager.CassandraDataTranslator;
 import com.impetus.client.cassandra.schemamanager.CassandraValidationClassMapper;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -40,6 +39,7 @@ import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.property.accessor.CharAccessor;
 import com.impetus.kundera.property.accessor.EnumAccessor;
+import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**
  * Utility class.
@@ -80,7 +80,7 @@ public final class DSClientUtilities
         {
             if(columnName.equals(((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName()))
             {
-                entity = CassandraUtilities.initialize(metadata, entity, null);
+                entity = KunderaCoreUtils.initialize(metadata, entity, null);
                 fieldName = metadata.getIdAttribute().getName();
                 member = (Field) metadata.getIdAttribute().getJavaMember();
             } else if(metadata.getRelationNames() == null || !metadata.getRelationNames().contains(columnName))
@@ -88,7 +88,7 @@ public final class DSClientUtilities
                 fieldName = metadata.getFieldName(columnName);
                 if (fieldName != null && entityType != null)
                 {
-                    entity = CassandraUtilities.initialize(metadata, entity, null);
+                    entity = KunderaCoreUtils.initialize(metadata, entity, null);
                     member = (Field) entityType.getAttribute(fieldName).getJavaMember();
                 }
             }

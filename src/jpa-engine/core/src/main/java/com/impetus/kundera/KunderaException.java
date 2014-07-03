@@ -30,6 +30,7 @@ public class KunderaException extends RuntimeException
      */
     public KunderaException()
     {
+        super();
     }
 
     /**
@@ -57,7 +58,6 @@ public class KunderaException extends RuntimeException
     public KunderaException(String arg0, Throwable arg1)
     {
         super(arg0, arg1);
-
     }
 
 }

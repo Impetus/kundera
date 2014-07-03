@@ -235,7 +235,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 List<CounterSuperColumn> counterSuperColumns = results.get(key);
                 ThriftRow tr = new ThriftRow(id, m.getTableName(), new ArrayList<Column>(0),
                         new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0), counterSuperColumns);
-                e = getDataHandler().populateEntity(tr, m, CassandraUtilities.getEntity(e), relations, isRelation);
+                e = getDataHandler().populateEntity(tr, m, KunderaCoreUtils.getEntity(e), relations, isRelation);
                 entities.add(e);
             }
 
@@ -273,7 +273,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 List<CounterColumn> columns = results.get(key);
                 ThriftRow tr = new ThriftRow(id, m.getTableName(), new ArrayList<Column>(0),
                         new ArrayList<SuperColumn>(0), columns, new ArrayList<CounterSuperColumn>(0));
-                e = getDataHandler().populateEntity(tr, m, CassandraUtilities.getEntity(e), relations, isRelation);
+                e = getDataHandler().populateEntity(tr, m, KunderaCoreUtils.getEntity(e), relations, isRelation);
 
                 if (e != null)
                 {
@@ -332,7 +332,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                     EntityMetadata subEntityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
                             subEntity.getJavaType());
 
-                    o = getDataHandler().populateEntity(tr, subEntityMetadata, CassandraUtilities.getEntity(o),
+                    o = getDataHandler().populateEntity(tr, subEntityMetadata, KunderaCoreUtils.getEntity(o),
                             subEntityMetadata.getRelationNames(), isRelation);
                     if (o != null)
                     {
@@ -342,7 +342,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             }
             else
             {
-                o = getDataHandler().populateEntity(tr, m, CassandraUtilities.getEntity(o), relations, isRelation);
+                o = getDataHandler().populateEntity(tr, m, KunderaCoreUtils.getEntity(o), relations, isRelation);
             }
 
             if (log.isInfoEnabled())
@@ -389,7 +389,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         ThriftRow tr = new ThriftRow(id, m.getTableName(), new ArrayList<Column>(0), superColumns,
                 new ArrayList<CounterColumn>(0), new ArrayList<CounterSuperColumn>(0));
 
-        e = getDataHandler().populateEntity(tr, m, CassandraUtilities.getEntity(e), relations, isRelation);
+        e = getDataHandler().populateEntity(tr, m, KunderaCoreUtils.getEntity(e), relations, isRelation);
         if (log.isInfoEnabled())
         {
             log.info("Populating data for super column family of clazz {} and row key {}.", m.getEntityClazz(),
@@ -942,7 +942,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             tr.setColumnFamilyName(m.getTableName());
             tr = dataGenerator.translateToThriftRow(data, m.isCounterColumnType(), m.getType(), tr);
 
-            e = dataHandler.populateEntity(tr, m, CassandraUtilities.getEntity(e), relations, isWrapReq);
+            e = dataHandler.populateEntity(tr, m, KunderaCoreUtils.getEntity(e), relations, isWrapReq);
 
             if (e != null)
             {
@@ -1888,7 +1888,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             {
                 return execute(cqlQuery, conn);
             }
-            KunderaCoreUtils.showQuery(cqlQuery, showQuery);
+            KunderaCoreUtils.printQuery(cqlQuery, showQuery);
             if (log.isInfoEnabled())
             {
                 log.info("Executing cql query {}.", cqlQuery);
@@ -2072,7 +2072,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                                 new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0),
                                 new ArrayList<CounterSuperColumn>(0));
 
-                        e = dataHandler.populateEntity(thriftRow, entityMetadata, CassandraUtilities.getEntity(e),
+                        e = dataHandler.populateEntity(thriftRow, entityMetadata, KunderaCoreUtils.getEntity(e),
                                 relationalField, relationalField != null && !relationalField.isEmpty());
 
                         e = populateSecondaryTableData(relationalField, dataHandler, isCql3Enabled, entityMetadata, e);
@@ -2150,7 +2150,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                                     new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0),
                                     new ArrayList<CounterSuperColumn>(0));
 
-                            e = dataHandler.populateEntity(tr, entityMetadata, CassandraUtilities.getEntity(e),
+                            e = dataHandler.populateEntity(tr, entityMetadata, KunderaCoreUtils.getEntity(e),
                                     relationalField, relationalField != null && !relationalField.isEmpty());
                             break;
                         }
@@ -2322,7 +2322,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         {
             org.apache.cassandra.thrift.Cassandra.Client conn = (org.apache.cassandra.thrift.Cassandra.Client) connection;
             conn.set_cql_version(CassandraConstants.CQL_VERSION_3_0);
-            KunderaCoreUtils.showQuery(query, showQuery);
+            KunderaCoreUtils.printQuery(query, showQuery);
             return (T) conn.execute_cql3_query(ByteBuffer.wrap(query.getBytes(Constants.CHARSET_UTF8)),
                     Compression.NONE, getConsistencyLevel());
         }

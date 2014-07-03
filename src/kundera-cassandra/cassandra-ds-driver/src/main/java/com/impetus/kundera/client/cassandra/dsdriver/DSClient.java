@@ -502,7 +502,7 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         try
         {
             Statement queryStmt = new SimpleStatement(query);
-            KunderaCoreUtils.showQuery(query, showQuery);
+            KunderaCoreUtils.printQuery(query, showQuery);
             queryStmt.setConsistencyLevel(ConsistencyLevel.valueOf(this.consistencyLevel.name()));
             return (T) session.execute(queryStmt);
         }
@@ -527,7 +527,7 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
                 log.info("Executing cql query {}.", cqlQuery);
             }
             session = session == null ? factory.getConnection() : this.session;
-            KunderaCoreUtils.showQuery(cqlQuery, showQuery);
+            KunderaCoreUtils.printQuery(cqlQuery, showQuery);
             session.execute(cqlQuery);
         }
         finally
@@ -721,7 +721,7 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
             try
             {
                 Set<Attribute> attributes = compoundKey.getAttributes();
-                entity = CassandraUtilities.initialize(entityClazz, entity);
+                entity = KunderaCoreUtils.initialize(entityClazz, entity);
 
                 for (Attribute compoundAttribute : attributes)
                 {

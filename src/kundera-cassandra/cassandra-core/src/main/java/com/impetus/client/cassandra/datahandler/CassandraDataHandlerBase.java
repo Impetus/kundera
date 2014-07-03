@@ -73,6 +73,7 @@ import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.property.accessor.LongAccessor;
+import com.impetus.kundera.utils.KunderaCoreUtils;
 import com.impetus.kundera.utils.TimestampGenerator;
 
 /**
@@ -621,7 +622,7 @@ public abstract class CassandraDataHandlerBase
                     if ((CassandraConstants.CQL_KEY.equalsIgnoreCase(thriftColumnName) || ((AbstractAttribute) m
                             .getIdAttribute()).getJPAColumnName().equals(thriftColumnName)) && tr.getId() == null)
                     {
-                        entity = CassandraUtilities.initialize(m, entity, null);
+                        entity = KunderaCoreUtils.initialize(m, entity, null);
                         setId(m, entity, column.getValue(), isCql3Enabled);
                     }
                     else
@@ -658,7 +659,7 @@ public abstract class CassandraDataHandlerBase
             {
                 if (superColumn != null)
                 {
-                    entity = CassandraUtilities.initialize(m, entity, tr.getId());
+                    entity = KunderaCoreUtils.initialize(m, entity, tr.getId());
 
                     String scName = PropertyAccessorFactory.STRING.fromBytes(String.class, superColumn.getName());
                     String scNamePrefix = null;
@@ -732,7 +733,7 @@ public abstract class CassandraDataHandlerBase
             {
                 if (counterColumn != null)
                 {
-                    entity = CassandraUtilities.initialize(m, entity, tr.getId());
+                    entity = KunderaCoreUtils.initialize(m, entity, tr.getId());
                     onCounterColumn(counterColumn, m, entity, entityType, relationNames, isWrapReq, relations,
                             isCql3Enabled);
                 }
@@ -742,7 +743,7 @@ public abstract class CassandraDataHandlerBase
             {
                 if (counterSuperColumn != null)
                 {
-                    entity = CassandraUtilities.initialize(m, entity, tr.getId());
+                    entity = KunderaCoreUtils.initialize(m, entity, tr.getId());
                     String scName = PropertyAccessorFactory.STRING
                             .fromBytes(String.class, counterSuperColumn.getName());
                     String scNamePrefix = null;
@@ -1079,7 +1080,7 @@ public abstract class CassandraDataHandlerBase
 
                 if (attribute != null)
                 {
-                    entity = CassandraUtilities.initialize(m, entity, null);
+                    entity = KunderaCoreUtils.initialize(m, entity, null);
                     if (!attribute.isAssociation())
                     {
                         String idColumnName = ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName();
@@ -1131,7 +1132,7 @@ public abstract class CassandraDataHandlerBase
 
                 if (entity == null)
                 {
-                    entity = CassandraUtilities.initialize(m, entity, null);
+                    entity = KunderaCoreUtils.initialize(m, entity, null);
                 }
                 // prepare EnhanceEntity and return it
             }
@@ -1834,7 +1835,7 @@ public abstract class CassandraDataHandlerBase
             try
             {
                 Set<Attribute> attributes = compoundKey.getAttributes();
-                entity = CassandraUtilities.initialize(entityClazz, entity);
+                entity = KunderaCoreUtils.initialize(entityClazz, entity);
 
                 for (Attribute compoundAttribute : attributes)
                 {

@@ -360,7 +360,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
         cassandra_client.execute_cql3_query(ByteBuffer.wrap(createKeyspace.getBytes(Constants.CHARSET_UTF8)),
                 Compression.NONE, ConsistencyLevel.ONE);
-        KunderaCoreUtils.showQuery(createKeyspace, showQuery);
+        KunderaCoreUtils.printQuery(createKeyspace, showQuery);
     }
 
     /**
@@ -687,7 +687,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
 
         try
         {
-            KunderaCoreUtils.showQuery(queryBuilder.toString(), showQuery);
+            KunderaCoreUtils.printQuery(queryBuilder.toString(), showQuery);
 
             cassandra_client.set_cql_version(CassandraConstants.CQL_VERSION_3_0);
             cassandra_client.set_keyspace(databaseName);
@@ -810,7 +810,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                     indexInfo.getColumnName());
             try
             {
-                KunderaCoreUtils.showQuery(replacedWithindexName, showQuery);
+                KunderaCoreUtils.printQuery(replacedWithindexName, showQuery);
                 cassandra_client.execute_cql3_query(ByteBuffer.wrap(replacedWithindexName.getBytes()),
                         Compression.NONE, ConsistencyLevel.ONE);
             }
@@ -841,7 +841,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         StringBuilder dropQuery = new StringBuilder("drop table ");
         translator.ensureCase(dropQuery, tableInfo.getTableName(), false);
 
-        KunderaCoreUtils.showQuery(dropQuery.toString(), showQuery);
+        KunderaCoreUtils.printQuery(dropQuery.toString(), showQuery);
 
         cassandra_client.execute_cql3_query(ByteBuffer.wrap(dropQuery.toString().getBytes()), Compression.NONE,
                 ConsistencyLevel.ONE);
@@ -871,7 +871,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                         isCql3Enabled(tableInfo))));
         try
         {
-            KunderaCoreUtils.showQuery(addColumnQuery.toString(), showQuery);
+            KunderaCoreUtils.printQuery(addColumnQuery.toString(), showQuery);
             cassandra_client.execute_cql3_query(ByteBuffer.wrap(addColumnQuery.toString().getBytes()),
                     Compression.NONE, ConsistencyLevel.ONE);
         }
@@ -918,7 +918,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         cassandra_client.execute_cql3_query(ByteBuffer.wrap(alterColumnTypeQuery.toString().getBytes()),
                 Compression.NONE, ConsistencyLevel.ONE);
 
-        KunderaCoreUtils.showQuery(alterColumnTypeQuery.toString(), showQuery);
+        KunderaCoreUtils.printQuery(alterColumnTypeQuery.toString(), showQuery);
     }
 
     /**
@@ -1164,7 +1164,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 CqlResult cqlResult = cassandra_client.execute_cql3_query(ByteBufferUtil.bytes(builder.toString()),
                         Compression.NONE, ConsistencyLevel.ONE);
 
-                KunderaCoreUtils.showQuery(builder.toString(), showQuery);
+                KunderaCoreUtils.printQuery(builder.toString(), showQuery);
                 CqlMetadata originalMetadata = cqlResult.getSchema();
 
                 int compareResult = originalMetadata.compareTo(metadata);

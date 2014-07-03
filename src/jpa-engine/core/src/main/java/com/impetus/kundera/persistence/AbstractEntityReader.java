@@ -540,7 +540,7 @@ public class AbstractEntityReader
         }
         catch (PropertyAccessException e)
         {
-            log.error("Error while Getting ID, Caused by: ", e);
+            log.error("Error while Getting ID for entity {}, Caused by: {}.", entity, e);
             throw new EntityReaderException("Error while Getting ID for entity " + entity, e);
         }
 

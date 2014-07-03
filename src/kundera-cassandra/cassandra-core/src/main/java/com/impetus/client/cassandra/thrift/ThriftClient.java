@@ -228,7 +228,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             }
             else
             {
-                KunderaCoreUtils.showQuery("Persist join table:" + joinTableName, showQuery);
+                KunderaCoreUtils.printQuery("Persist join table:" + joinTableName, showQuery);
                 for (Object key : joinTableRecords.keySet())
                 {
                     PropertyAccessor accessor = PropertyAccessorFactory.getPropertyAccessor((Field) entityMetadata
@@ -365,7 +365,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         List<ByteBuffer> columnNames = new ArrayList<ByteBuffer>();
         for (String superColumnName : superColumnNames)
         {
-            KunderaCoreUtils.showQuery("Fetch superColumn:" + superColumnName, showQuery);
+            KunderaCoreUtils.printQuery("Fetch superColumn:" + superColumnName, showQuery);
             columnNames.add(ByteBuffer.wrap(superColumnName.getBytes()));
         }
 
@@ -747,8 +747,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                     }
                 }
             }
-            // Delete from Lucene if applicable
-            getIndexManager().remove(metadata, entity, pKey.toString());
+            getIndexManager().remove(metadata, entity, pKey);
 
             // Delete from Inverted Index if applicable
             invertedIndexHandler.delete(entity, metadata, getConsistencyLevel(), kunderaMetadata);
@@ -881,7 +880,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                     Object id = PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(), key);
                     e = dataHandler.populateEntity(new ThriftRow(id, m.getTableName(), columns,
                             new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0),
-                            new ArrayList<CounterSuperColumn>(0)), m, CassandraUtilities.getEntity(e), relationNames,
+                            new ArrayList<CounterSuperColumn>(0)), m, KunderaCoreUtils.getEntity(e), relationNames,
                             isRelational);
                     entities.add(e);
                 }
