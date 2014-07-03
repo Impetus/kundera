@@ -197,7 +197,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
                 NoSqlDBUtils.add(schemaTable.getField(idColumnName), rowKey, key, idColumnName);
             }
         }
-        KunderaCoreUtils.showQuery("Fetch data from " + entityMetadata.getTableName() + " for PK " + key, showQuery);
+        KunderaCoreUtils.printQuery("Fetch data from " + entityMetadata.getTableName() + " for PK " + key, showQuery);
         if (log.isDebugEnabled())
         {
             log.debug("Fetching data from " + entityMetadata.getTableName() + " for PK " + key);
@@ -286,8 +286,9 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         }
 
         tableAPI.delete(key, null, null);
-        KunderaCoreUtils.showQuery("Delete data from " + entityMetadata.getTableName() + " for PK " + pKey, showQuery);
-        getIndexManager().remove(entityMetadata, entity, pKey.toString());
+        KunderaCoreUtils.printQuery("Delete data from " + entityMetadata.getTableName() + " for PK " + pKey, showQuery);
+        
+        getIndexManager().remove(entityMetadata, entity, pKey);
     }
 
     /**
@@ -309,7 +310,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     @Override
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
     {
-        KunderaCoreUtils.showQuery("Persist data into " + entityMetadata.getSchema() + "." + entityMetadata.getTableName() + " for " + id, showQuery);
+        KunderaCoreUtils.printQuery("Persist data into " + entityMetadata.getSchema() + "." + entityMetadata.getTableName() + " for " + id, showQuery);
         Row row = createRow(entityMetadata, entity, id, rlHolders);
         // TODO:: handle case for putDate??????
 
@@ -328,7 +329,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         Table schemaTable = tableAPI.getTable(joinTableName);
         Row row = schemaTable.createRow();
         String primaryKey = joinColumnName + SEPERATOR + invJoinColumnName;
-        KunderaCoreUtils.showQuery("Persist Join Table:" + joinTableName, showQuery);
+        KunderaCoreUtils.printQuery("Persist Join Table:" + joinTableName, showQuery);
         Map<Object, Set<Object>> joinTableRecords = joinTableData.getJoinTableRecords();
 
         try
@@ -558,7 +559,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
 
         // StringBuilder indexNamebuilder = new StringBuilder();
         NoSqlDBUtils.add(schemaTable.getField(pKeyColumnName), indexKey, pKeyColumnValue, pKeyColumnName);
-        KunderaCoreUtils.showQuery("Get columns by id from:" + tableName + " for column:"+columnName+ " where value:"+pKeyColumnValue, showQuery);
+        KunderaCoreUtils.printQuery("Get columns by id from:" + tableName + " for column:"+columnName+ " where value:"+pKeyColumnValue, showQuery);
         Iterator<Row> rowsIter = tableAPI.tableIterator(indexKey, null, null);
 
         while (rowsIter.hasNext())
@@ -588,14 +589,14 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
 
         Object[] foundRecords = findIdsByColumn(schemaName, tableName, primaryKeys.get(0), columnName, columnValue,
                 null);
-        KunderaCoreUtils.showQuery("Delete columns by id from:" + tableName, showQuery);
+        KunderaCoreUtils.printQuery("Delete columns by id from:" + tableName, showQuery);
         if (foundRecords != null)
         {
             for (Object key : foundRecords)
             {
                 PrimaryKey primaryKey = schemaTable.createPrimaryKey();
                 NoSqlDBUtils.add(schemaTable.getField(primaryKeys.get(0)), primaryKey, key, primaryKeys.get(0));
-                KunderaCoreUtils.showQuery("  Delete for id:" + key, showQuery);
+                KunderaCoreUtils.printQuery("  Delete for id:" + key, showQuery);
                 tableAPI.delete(primaryKey, null, null);
             }
         }
@@ -934,7 +935,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
                     if (valueObj != null)
                     {
                         NoSqlDBUtils.add(schemaTable.getField(relationName), row, valueObj, relationName);
-                        KunderaCoreUtils.showQuery("Add relation: relation name:" + relationName + "relation value:"
+                        KunderaCoreUtils.printQuery("Add relation: relation name:" + relationName + "relation value:"
                                 + valueObj, showQuery);
                     }
                 }

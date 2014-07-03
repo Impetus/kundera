@@ -29,7 +29,7 @@ public class EntityReaderException extends KunderaException
      */
     public EntityReaderException()
     {
-        // TODO Auto-generated constructor stub
+        super();
     }
 
     /**
@@ -38,7 +38,6 @@ public class EntityReaderException extends KunderaException
     public EntityReaderException(String arg0)
     {
         super(arg0);
-        // TODO Auto-generated constructor stub
     }
 
     /**
@@ -47,7 +46,6 @@ public class EntityReaderException extends KunderaException
     public EntityReaderException(Throwable arg0)
     {
         super(arg0);
-        // TODO Auto-generated constructor stub
     }
 
     /**
@@ -57,7 +55,6 @@ public class EntityReaderException extends KunderaException
     public EntityReaderException(String arg0, Throwable arg1)
     {
         super(arg0, arg1);
-        // TODO Auto-generated constructor stub
     }
 
 }

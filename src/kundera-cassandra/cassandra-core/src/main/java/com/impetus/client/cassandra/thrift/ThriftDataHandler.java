@@ -40,6 +40,7 @@ import com.impetus.kundera.metadata.model.annotation.DefaultEntityAnnotationProc
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.utils.KunderaCoreUtils;
 import com.impetus.kundera.utils.TimestampGenerator;
 
 /**
@@ -102,7 +103,7 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
                 thriftColumnOrSuperColumns.put(key, columnOrSuperColumns);
                 if (!columnOrSuperColumns.isEmpty())
                 {
-                    e = populateEntityFromSlice(m, relationNames, isWrapReq, CassandraUtilities.getEntity(e),
+                    e = populateEntityFromSlice(m, relationNames, isWrapReq, KunderaCoreUtils.getEntity(e),
                             thriftColumnOrSuperColumns);
                 }
             }

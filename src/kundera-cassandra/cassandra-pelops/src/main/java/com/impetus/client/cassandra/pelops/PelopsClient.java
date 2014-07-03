@@ -87,6 +87,7 @@ import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.utils.KunderaCoreUtils;
 import com.impetus.kundera.utils.TimestampGenerator;
 
 /**
@@ -217,8 +218,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
                 }
             }
         }
-        // Delete from Lucene if applicable
-        getIndexManager().remove(metadata, entity, pKey.toString());
+        getIndexManager().remove(metadata, entity, pKey);
 
         // Delete from Inverted Index if applicable
         Object conn = getConnection();
@@ -984,7 +984,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
                     Object e = null;
                     e = dataHandler.populateEntity(new ThriftRow(id, m.getTableName(), columns,
                             new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0),
-                            new ArrayList<CounterSuperColumn>(0)), m, CassandraUtilities.getEntity(e), relationNames,
+                            new ArrayList<CounterSuperColumn>(0)), m, KunderaCoreUtils.getEntity(e), relationNames,
                             isRelational);
                     if (e != null)
                     {

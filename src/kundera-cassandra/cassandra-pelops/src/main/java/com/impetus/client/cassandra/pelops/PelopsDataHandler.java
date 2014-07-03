@@ -26,7 +26,6 @@ import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.scale7.cassandra.pelops.Selector;
 
-import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandlerBase;
 import com.impetus.client.cassandra.thrift.ThriftRow;
@@ -37,6 +36,7 @@ import com.impetus.kundera.metadata.model.annotation.DefaultEntityAnnotationProc
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.utils.KunderaCoreUtils;
 import com.impetus.kundera.utils.TimestampGenerator;
 
 /**
@@ -96,7 +96,7 @@ final class PelopsDataHandler extends CassandraDataHandlerBase implements Cassan
                     tr = thriftTranslator.translateToThriftRow(thriftColumnOrSuperColumns, m.isCounterColumnType(),
                             m.getType(), tr);
 
-                    e = populateEntity(tr, m, CassandraUtilities.getEntity(e), relationNames, isWrapReq);
+                    e = populateEntity(tr, m, KunderaCoreUtils.getEntity(e), relationNames, isWrapReq);
                 }
             }
         }

@@ -15,10 +15,13 @@
  ******************************************************************************/
 package com.impetus.kundera.index.lucene;
 
+import java.util.List;
 import java.util.Map;
 
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
+import com.impetus.kundera.query.KunderaQuery;
 
 /**
  * Interface to define the behavior of an Indexer.
@@ -37,7 +40,7 @@ public interface Indexer extends com.impetus.kundera.index.Indexer
      *            the id
      */
 
-    void unindex(EntityMetadata metadata, Object id);
+    void unindex(EntityMetadata metadata, Object id,KunderaMetadata kunderaMetadata);
 
     /**
      * Indexes and object.
@@ -78,9 +81,10 @@ public interface Indexer extends com.impetus.kundera.index.Indexer
      * @return the list
      */
 
-    Map<String, Object> search(String luceneQuery, int start, int count, boolean fetchRelation);
+    Map<String, Object> search(String luceneQuery, int start, int count, boolean fetchRelation,
+            KunderaMetadata kunderaMetadata, EntityMetadata metadata);
 
-    boolean entityExistsInIndex(Class<?> entityClass);
+    
 
     /**
      * Close on index writer/reader.
@@ -99,7 +103,7 @@ public interface Indexer extends com.impetus.kundera.index.Indexer
      * @param id   entity id
      * @return true, if exists else false.
      */
-    boolean documentExistsInIndex(EntityMetadata metadata, Object id);
+    
 
     
     /**
@@ -112,4 +116,11 @@ public interface Indexer extends com.impetus.kundera.index.Indexer
      * @param parentClazz  parent class
      */
     void update(EntityMetadata metadata, final MetamodelImpl metaModel, Object entity, Object id, String parentId);
+
+    boolean entityExistsInIndex(Class<?> entityClass, KunderaMetadata kunderaMetadata, EntityMetadata metadata);
+
+    boolean documentExistsInIndex(EntityMetadata metadata, Object id, KunderaMetadata kunderaMetadata,
+            boolean isEmbeddedId);
+
+    
 }

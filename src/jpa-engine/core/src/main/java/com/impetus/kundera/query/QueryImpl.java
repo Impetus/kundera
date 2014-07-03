@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.persistence.FlushModeType;
@@ -57,6 +58,7 @@ import com.impetus.kundera.persistence.context.PersistenceCacheManager;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.KunderaQuery.UpdateClause;
 import com.impetus.kundera.utils.KunderaCoreUtils;
+import com.impetus.kundera.utils.ReflectUtils;
 
 /**
  * The Class QueryImpl.
@@ -86,7 +88,7 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
      * Default maximum result to fetch.
      */
     protected int maxResult = 100;
-    
+
     protected int firstResult = 0;
 
     private Integer fetchSize;
@@ -188,6 +190,42 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
         return result;
     }
 
+   /**
+    * Populate using lucene for embeddeId
+    * @param m
+    * @param client
+    * @param result
+    * @param searchFilter
+    * @param columnsToSelect
+    * @return
+    */
+private List<Object> populateEmbeddedIdUsingLucene(EntityMetadata m, Client client, List<Object> result,
+            Map<String, Object> searchFilter, String[] columnsToSelect)
+    {
+        List<Object> compositeIds = new ArrayList<Object>();
+
+        for (String compositeIdName : searchFilter.keySet())
+        {
+            Object compositeId = null;
+            Map<String, String> uniquePKs = (Map<String, String>) searchFilter.get(compositeIdName);
+            compositeId = KunderaCoreUtils.initialize(m.getIdAttribute().getBindableJavaType(), compositeId);
+
+            for (Field field : m.getIdAttribute().getBindableJavaType().getDeclaredFields())
+            {
+                if (!ReflectUtils.isTransientOrStatic(field))
+                {
+                    PropertyAccessorHelper.set(
+                            compositeId,
+                            field,
+                            PropertyAccessorHelper.fromSourceToTargetClass(field.getType(), String.class,
+                                    uniquePKs.get(field.getName())));
+                }
+            }
+            compositeIds.add(compositeId);
+        }
+        return (List<Object>) persistenceDelegeator.find(m.getEntityClazz(), compositeIds.toArray());
+    }
+
     /**
      * Populate using lucene.
      * 
@@ -204,12 +242,22 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
     protected List<Object> populateUsingLucene(EntityMetadata m, Client client, List<Object> result,
             String[] columnsToSelect)
     {
+
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                m.getPersistenceUnit());
         String luceneQ = KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery, kunderaMetadata);
+        
         Map<String, Object> searchFilter = client.getIndexManager().search(m.getEntityClazz(), luceneQ,
                 Constants.INVALID, Constants.INVALID);
+        boolean isEmbeddedId = metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType());
+
+        if (isEmbeddedId)
+        {
+            return populateEmbeddedIdUsingLucene(m, client, result, searchFilter, columnsToSelect);
+        }
+
         String[] primaryKeys = searchFilter.values().toArray(new String[] {});
         Set<String> uniquePKs = new HashSet<String>(Arrays.asList(primaryKeys));
-
         if (kunderaQuery.isAliasOnly() || !m.getType().isSuperColumnFamilyMetadata())
         {
 
@@ -219,6 +267,7 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
         {
             return (List<Object>) persistenceDelegeator.find(m.getEntityClazz(), uniquePKs.toArray());
         }
+
         return result;
     }
 
@@ -272,7 +321,7 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
         if (kunderaQuery.isDeleteUpdate())
         {
             List result = fetch();
-                       
+
             onDeleteOrUpdate(result);
             return result != null ? result.size() : 0;
         }
@@ -377,8 +426,8 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
     @Override
     public Query setFirstResult(int startPosition)
     {
-    	this.firstResult = startPosition;
-    	return this;
+        this.firstResult = startPosition;
+        return this;
     }
 
     /*
@@ -907,7 +956,7 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
     {
         this.ttl = ttlInSeconds;
     }
-    
+
     public abstract void close();
 
     public abstract <E> Iterator<E> iterate();

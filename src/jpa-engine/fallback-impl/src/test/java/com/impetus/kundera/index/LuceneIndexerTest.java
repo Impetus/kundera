@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.index;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManagerFactory;
@@ -70,7 +71,7 @@ public class LuceneIndexerTest
 
         try
         {
-            indexer.search(luceneQuery, 0, 10, false);
+            indexer.search(luceneQuery, 0, 10, false, null, null);
         }
         catch (LuceneIndexingException liex)
         {
@@ -99,7 +100,7 @@ public class LuceneIndexerTest
         final String luceneQuery = "Invalid lucene query";
         try
         {
-            indexer.search(luceneQuery, 0, 10, false);
+            indexer.search(luceneQuery, 0, 10, false, null, null);
         }
         catch (LuceneIndexingException liex)
         {
@@ -130,7 +131,7 @@ public class LuceneIndexerTest
 
         try
         {
-            Map<String, Object> results = indexer.search(luceneQuery, 0, 10, false);
+            Map<String, Object> results = indexer.search(luceneQuery, 0, 10, false, null, null);
             Assert.assertTrue(!results.isEmpty());
         }
         catch (LuceneIndexingException liex)

@@ -151,7 +151,7 @@ public HBaseClient(IndexManager indexManager, Configuration conf, HTablePool hTa
 
             if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
             {
-                rowId = KunderaCoreUtils.prepareCompositeKey(entityMetadata, metaModel, rowId);
+                rowId = KunderaCoreUtils.prepareCompositeKey(entityMetadata, rowId);
             }
 
             results = fetchEntity(entityClass, rowId, entityMetadata, relationNames, tableName, results, null, null);
@@ -576,10 +576,7 @@ public HBaseClient(IndexManager indexManager, Configuration conf, HTablePool hTa
                 .getSecondaryTablesName();
         secondaryTables.add(metadata.getTableName());
 
-        if (metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
-        {
-            pKey = KunderaCoreUtils.prepareCompositeKey(metadata, metaModel, pKey);
-        }
+       
 
         for (String colTableName : secondaryTables)
         {

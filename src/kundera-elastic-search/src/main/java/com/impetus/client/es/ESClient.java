@@ -679,7 +679,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
     {
         if (metaModel.isEmbeddable(((AbstractAttribute) metadata.getIdAttribute()).getBindableJavaType()))
         {
-            return KunderaCoreUtils.prepareCompositeKey(metadata, metaModel, id);
+            return KunderaCoreUtils.prepareCompositeKey(metadata, id);
         }
         return id.toString();
     }

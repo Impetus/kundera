@@ -34,6 +34,8 @@ import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.query.KunderaQuery;
+import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**
  * Manager responsible to co-ordinate with an Indexer. It is bound with
@@ -80,13 +82,13 @@ public class IndexManager
      * @param key
      *            the key
      */
-    public final void remove(EntityMetadata metadata, Object entity, String key)
+    public final void remove(EntityMetadata metadata, Object entity, Object key)
     {
         if (indexer != null)
         {
             if (indexer.getClass().getName().equals(IndexingConstants.LUCENE_INDEXER))
             {
-                ((com.impetus.kundera.index.lucene.Indexer) indexer).unindex(metadata, key);
+                ((com.impetus.kundera.index.lucene.Indexer) indexer).unindex(metadata, key, kunderaMetadata);
             }
             else
             {
@@ -115,8 +117,10 @@ public class IndexManager
                     MetamodelImpl metamodel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                             metadata.getPersistenceUnit());
                     Object id = PropertyAccessorHelper.getId(entity, metadata);
+                    boolean isEmbeddedId = metamodel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType());
+                    
                     boolean documentExistsInIndex = ((com.impetus.kundera.index.lucene.Indexer) indexer)
-                            .documentExistsInIndex(metadata, id);
+                            .documentExistsInIndex(metadata, id, kunderaMetadata, isEmbeddedId);
 
                     if (documentExistsInIndex)
                     {
@@ -127,10 +131,10 @@ public class IndexManager
                     {
 
                         boolean documentExists = ((com.impetus.kundera.index.lucene.Indexer) indexer)
-                                .entityExistsInIndex(entity.getClass());
+                                .entityExistsInIndex(entity.getClass(), kunderaMetadata, metadata);
                         if (documentExists)
                         {
-                            ((com.impetus.kundera.index.lucene.Indexer) indexer).unindex(metadata, id);
+                            ((com.impetus.kundera.index.lucene.Indexer) indexer).unindex(metadata, id, kunderaMetadata);
                             ((com.impetus.kundera.index.lucene.Indexer) indexer).flush();
                         }
                         ((com.impetus.kundera.index.lucene.Indexer) indexer).index(metadata, metamodel, entity,
@@ -293,7 +297,8 @@ public class IndexManager
                     .toLowerCase(), IndexingConstants.PARENT_ID_FIELD, entityId, childClass.getCanonicalName()
                     .toLowerCase());
             return ((com.impetus.kundera.index.lucene.Indexer) indexer).search(query, Constants.INVALID,
-                    Constants.INVALID, false);
+                    Constants.INVALID, false, kunderaMetadata,
+                    KunderaMetadataManager.getEntityMetadata(kunderaMetadata, parentClass));
         }
         else
         {
@@ -355,8 +360,9 @@ public class IndexManager
         {
             if (indexer != null && indexer.getClass().getName().equals(IndexingConstants.LUCENE_INDEXER))
             {
-                return indexer != null ? ((com.impetus.kundera.index.lucene.Indexer) indexer).search(query, start,
-                        count, false) : null;
+                return indexer != null ? ((com.impetus.kundera.index.lucene.Indexer) indexer)
+                        .search(query, start, count, false, kunderaMetadata,
+                                KunderaMetadataManager.getEntityMetadata(kunderaMetadata, clazz)) : null;
             }
             else
             {
@@ -387,7 +393,8 @@ public class IndexManager
             if (indexer.getClass().getName().equals(IndexingConstants.LUCENE_INDEXER))
             {
                 return indexer != null ? ((com.impetus.kundera.index.lucene.Indexer) indexer).search(query, start,
-                        count, fetchRelation) : null;
+                        count, fetchRelation, kunderaMetadata,
+                        KunderaMetadataManager.getEntityMetadata(kunderaMetadata, clazz)) : null;
             }
             else
             {

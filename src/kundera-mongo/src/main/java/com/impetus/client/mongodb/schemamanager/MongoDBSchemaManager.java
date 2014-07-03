@@ -96,7 +96,7 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
                 coll = db.getCollection(tableInfo.getTableName());
                 coll.drop();
 
-                KunderaCoreUtils.showQuery("Drop collection:" + tableInfo.getTableName(), showQuery);
+                KunderaCoreUtils.printQuery("Drop collection:" + tableInfo.getTableName(), showQuery);
             }
         }
         db = null;
@@ -118,11 +118,11 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
             {
                 db.getCollection(tableInfo.getTableName()).drop();
 
-                KunderaCoreUtils.showQuery("Drop existing collection:" + tableInfo.getTableName(), showQuery);
+                KunderaCoreUtils.printQuery("Drop existing collection:" + tableInfo.getTableName(), showQuery);
             }
             DBCollection collection = db.createCollection(tableInfo.getTableName(), options);
 
-            KunderaCoreUtils.showQuery("Create collection:" + tableInfo.getTableName(), showQuery);
+            KunderaCoreUtils.printQuery("Create collection:" + tableInfo.getTableName(), showQuery);
             boolean isCappedCollection = isCappedCollection(tableInfo);
             if (!isCappedCollection)
             {
@@ -159,7 +159,7 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
             if (!db.collectionExists(tableInfo.getTableName()))
             {
                 collection = db.createCollection(tableInfo.getTableName(), options);
-                KunderaCoreUtils.showQuery("Create collection:" + tableInfo.getTableName(), showQuery);
+                KunderaCoreUtils.printQuery("Create collection:" + tableInfo.getTableName(), showQuery);
             }
             collection = collection != null ? collection : db.getCollection(tableInfo.getTableName());
 
@@ -321,7 +321,7 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
             options.put(MongoDBConstants.MAX, indexInfo.getMaxValue());
         }
         collection.ensureIndex(keys, options);
-        KunderaCoreUtils.showQuery("Create indexes on:" + keys, showQuery);
+        KunderaCoreUtils.printQuery("Create indexes on:" + keys, showQuery);
     }
 
     private void indexEmbeddedColumn(IndexInfo indexInfo, String embeddedColumnName, DBCollection collection)
@@ -338,7 +338,7 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
             options.put(MongoDBConstants.MAX, indexInfo.getMaxValue());
         }
         collection.ensureIndex(keys, options);
-        KunderaCoreUtils.showQuery("Create indexes on:" + keys, showQuery);
+        KunderaCoreUtils.printQuery("Create indexes on:" + keys, showQuery);
     }
 
     /**

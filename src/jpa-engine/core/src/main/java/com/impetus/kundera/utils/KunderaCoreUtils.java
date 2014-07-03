@@ -24,8 +24,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.persistence.PersistenceException;
+import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
-import javax.persistence.metamodel.Metamodel;
 
 import org.apache.commons.configuration.EnvironmentConfiguration;
 import org.apache.commons.configuration.SystemConfiguration;
@@ -33,6 +33,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.client.EnhanceEntity;
+import com.impetus.kundera.index.IndexingConstants;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -48,6 +50,8 @@ public class KunderaCoreUtils
 {
 
     private static final String COMPOSITE_KEY_SEPERATOR = "\001";
+
+    private static final String LUCENE_COMPOSITE_KEY_SEPERATOR = "_";
 
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(KunderaCoreUtils.class);
@@ -126,18 +130,15 @@ public class KunderaCoreUtils
     }
 
     /**
-     * Prepares composite key as a redis key.
+     * Prepares composite key .
      * 
      * @param m
      *            entity metadata
-     * @param metaModel
-     *            meta model.
      * @param compositeKey
      *            composite key instance
      * @return redis key
      */
-    public static String prepareCompositeKey(final EntityMetadata m, final MetamodelImpl metaModel,
-            final Object compositeKey)
+    public static String prepareCompositeKey(final EntityMetadata m, final Object compositeKey)
     {
         Field[] fields = m.getIdAttribute().getBindableJavaType().getDeclaredFields();
 
@@ -149,7 +150,7 @@ public class KunderaCoreUtils
                 try
                 {
                     String fieldValue = PropertyAccessorHelper.getString(compositeKey, f); // field
-                                                                                           // value
+                    // value
 
                     // what if field value is null????
                     stringBuilder.append(fieldValue);
@@ -166,6 +167,58 @@ public class KunderaCoreUtils
         if (stringBuilder.length() > 0)
         {
             stringBuilder.deleteCharAt(stringBuilder.lastIndexOf(COMPOSITE_KEY_SEPERATOR));
+        }
+        return stringBuilder.toString();
+    }
+
+    /**
+     * Prepares composite key as a lucene key.
+     * 
+     * @param m
+     *            entity metadata
+     * @param metaModel
+     *            meta model.
+     * @param compositeKey
+     *            composite key instance
+     * @return redis key
+     */
+    public static String prepareCompositeKey(final EntityMetadata m, final MetamodelImpl metaModel,
+            final Object compositeKey)
+    {
+        Field[] fields = m.getIdAttribute().getBindableJavaType().getDeclaredFields();
+        EmbeddableType embeddable = metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
+
+        StringBuilder stringBuilder = new StringBuilder();
+        for (Field f : fields)
+        {
+            if (!ReflectUtils.isTransientOrStatic(f))
+            {
+                try
+                {
+                    if (metaModel.isEmbeddable(((AbstractAttribute) embeddable.getAttribute(f.getName()))
+                            .getBindableJavaType()))
+                    {
+                        throw new UnsupportedOperationException("composite partition key is not supported in lucene");
+                    }
+
+                    String fieldValue = PropertyAccessorHelper.getString(compositeKey, f); // field
+                    fieldValue = fieldValue.replaceAll("[^a-zA-Z0-9]", "_"); // value
+
+                    // what if field value is null????
+                    stringBuilder.append(fieldValue);
+                    stringBuilder.append(LUCENE_COMPOSITE_KEY_SEPERATOR);
+                }
+                catch (IllegalArgumentException e)
+                {
+                    logger.error("Error during prepare composite key, Caused by {}.", e);
+                    throw new PersistenceException(e);
+                }
+            }
+        }
+
+        if (stringBuilder.length() > 0)
+        {
+            stringBuilder.deleteCharAt(stringBuilder.lastIndexOf(LUCENE_COMPOSITE_KEY_SEPERATOR));
         }
         return stringBuilder.toString();
     }
@@ -240,13 +293,15 @@ public class KunderaCoreUtils
      * 
      * @return the lucene query from jpa query
      */
-    public static String getLuceneQueryFromJPAQuery(KunderaQuery kunderaQuery, final KunderaMetadata kunderaMetadata)
+    public static String getLuceneQueryFromJPAQuery(final KunderaQuery kunderaQuery,
+            final KunderaMetadata kunderaMetadata)
     {
 
         LuceneQueryBuilder queryBuilder = new LuceneQueryBuilder();
         EntityMetadata metadata = kunderaQuery.getEntityMetadata();
-        Metamodel metaModel = kunderaMetadata.getApplicationMetadata().getMetamodel(metadata.getPersistenceUnit());
-
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                metadata.getPersistenceUnit());
+        Class valueClazz = null;
         EntityType entity = metaModel.entity(metadata.getEntityClazz());
 
         for (Object object : kunderaQuery.getFilterClauseQueue())
@@ -258,17 +313,40 @@ public class KunderaCoreUtils
                 String condition = filter.getCondition();
                 String valueAsString = filter.getValue().get(0).toString();
                 String fieldName = metadata.getFieldName(property);
-                Class valueClazz = getValueType(entity, fieldName);
+                boolean isEmbeddedId = metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType());
+                String idColumn = ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName();
+                valueClazz = getValueType(entity, fieldName);
 
-                queryBuilder.appendIndexName(metadata.getIndexName())
-                        .appendPropertyName(getPropertyName(metadata, property, kunderaMetadata))
-                        .buildQuery(condition, valueAsString, valueClazz);
+                if (isEmbeddedId)
+                {
+                    if (idColumn.equals(property))
+                    {
+                        valueAsString = prepareCompositeKey(metadata, metaModel, filter.getValue().get(0));
+                        queryBuilder.appendIndexName(metadata.getIndexName()).appendPropertyName(idColumn)
+                                .buildQuery(condition, valueAsString, valueClazz);
+                    }
+                    else
+                    {
+                        valueClazz = metadata.getIdAttribute().getBindableJavaType();
+                        property = property.substring(property.indexOf(".") + 1);
+                        queryBuilder.appendIndexName(metadata.getIndexName())
+                                .appendPropertyName(getPropertyName(metadata, property, kunderaMetadata))
+                                .buildQuery(condition, valueAsString, valueClazz);
+                    }
+                }
+                else
+                {
+                    queryBuilder.appendIndexName(metadata.getIndexName())
+                            .appendPropertyName(getPropertyName(metadata, property, kunderaMetadata))
+                            .buildQuery(condition, valueAsString, valueClazz);
+                }
             }
             else
             {
                 queryBuilder.buildQuery(object.toString(), object.toString(), String.class);
             }
         }
+
         queryBuilder.appendEntityName(kunderaQuery.getEntityClass().getCanonicalName().toLowerCase());
         return queryBuilder.getQuery();
     }
@@ -309,11 +387,89 @@ public class KunderaCoreUtils
         return showQuery;
     }
 
-    public static void showQuery(String query, boolean showQuery)
+    public static void printQuery(String query, boolean showQuery)
     {
         if (showQuery)
         {
             System.out.println(query);
         }
     }
+
+    public static Object getEntity(Object e)
+    {
+        if (e != null)
+        {
+            return e.getClass().isAssignableFrom(EnhanceEntity.class) ? ((EnhanceEntity) e).getEntity() : e;
+        }
+        return null;
+    }
+
+    /**
+     * Initialize.
+     * 
+     * @param tr
+     *            the tr
+     * @param m
+     *            the m
+     * @param entity
+     *            the entity
+     * @param tr
+     * @return the object
+     * @throws InstantiationException
+     *             the instantiation exception
+     * @throws IllegalAccessException
+     *             the illegal access exception
+     */
+    public static Object initialize(EntityMetadata m, Object entity, Object id)
+    {
+        try
+        {
+            if (entity == null)
+            {
+                entity = m.getEntityClazz().newInstance();
+            }
+            if (id != null)
+            {
+                PropertyAccessorHelper.setId(entity, m, id);
+            }
+            return entity;
+        }
+        catch (Exception e)
+        {
+            throw new PersistenceException("Error occured while instantiating entity.", e);
+        }
+    }
+
+    /**
+     * Initialize.
+     * 
+     * @param tr
+     *            the tr
+     * @param m
+     *            the m
+     * @param entity
+     *            the entity
+     * @param tr
+     * @return the object
+     * @throws InstantiationException
+     *             the instantiation exception
+     * @throws IllegalAccessException
+     *             the illegal access exception
+     */
+    public static Object initialize(Class clazz, Object record)
+    {
+        try
+        {
+            if (record == null)
+            {
+                record = clazz.newInstance();
+            }
+            return record;
+        }
+        catch (Exception e)
+        {
+            throw new PersistenceException("Error occured while instantiating entity.", e);
+        }
+    }
+
 }
