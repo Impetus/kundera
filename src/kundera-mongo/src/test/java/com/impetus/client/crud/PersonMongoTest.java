@@ -286,9 +286,9 @@ public class PersonMongoTest extends BaseTest
         Assert.assertNotNull(p);
         Assert.assertEquals("vivek", p.getPersonName());
         // modify record.
-        p.setPersonName("This is test name for operator");
+        p.setPersonName("Mc.John Doe");
         em.merge(p);
-        assertOnMerge(em, "PersonMongo", PersonMongo.class, "vivek", "This is test name for operator", "personName");
+        assertOnMerge(em, "PersonMongo", PersonMongo.class, "vivek", "Mc.John Doe", "personName");
     }
 
     /**
