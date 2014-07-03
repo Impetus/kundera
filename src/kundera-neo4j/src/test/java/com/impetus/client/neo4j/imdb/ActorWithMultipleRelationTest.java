@@ -65,15 +65,15 @@ public class ActorWithMultipleRelationTest
         ActorWithMultipleRelation actor = new ActorWithMultipleRelation(1, "Tom Cruise");
 
         // Latest Movies
-        LatestMovie latestMovie1 = new LatestMovie("m1", "War of the Worlds", 2005);
-        LatestMovie latestMovie2 = new LatestMovie("m2", "Mission Impossible", 1996);
+        LatestMovie latestMovie1 = new LatestMovie("l1", "Mission:Impossible Ghost Protocol", 2011);
+        LatestMovie latestMovie2 = new LatestMovie("l2", "Jack Reacher", 2012);
 
         // New Roles
-        NewRole newRole1 = new NewRole("Ray Ferrier", "Lead Actor");
+        NewRole newRole1 = new NewRole("Ethan Hunt", "Lead Actor");
         newRole1.setActor(actor);
         newRole1.setMovie(latestMovie1);
 
-        NewRole newRole2 = new NewRole("Ethan Hunt", "Lead Actor");
+        NewRole newRole2 = new NewRole("Jack Reacher", "Lead Actor");
         newRole2.setActor(actor);
         newRole2.setMovie(latestMovie2);
 
@@ -96,8 +96,17 @@ public class ActorWithMultipleRelationTest
         Assert.assertNotNull(result.getId());
         Assert.assertNotNull(result.getLatestMovies());
         Assert.assertFalse(result.getLatestMovies().isEmpty());
+        
         Assert.assertNotNull(result.getLatestMovies().get(newRole1));
+        Assert.assertEquals("Mission:Impossible Ghost Protocol", result.getLatestMovies().get(newRole1).getTitle());
+        Assert.assertEquals("l1", result.getLatestMovies().get(newRole1).getId());
+        Assert.assertEquals(2011, result.getLatestMovies().get(newRole1).getYear());
+
         Assert.assertNotNull(result.getLatestMovies().get(newRole2));
+        Assert.assertEquals("Jack Reacher", result.getLatestMovies().get(newRole2).getTitle());
+        Assert.assertEquals("l2", result.getLatestMovies().get(newRole2).getId());
+        Assert.assertEquals(2012, result.getLatestMovies().get(newRole2).getYear());
+        
         Assert.assertNotNull(result.getArchivedMovies());
         Assert.assertTrue(result.getArchivedMovies().isEmpty());
 
@@ -113,8 +122,17 @@ public class ActorWithMultipleRelationTest
         Assert.assertNotNull(result.getId());
         Assert.assertNotNull(result.getLatestMovies());
         Assert.assertFalse(result.getLatestMovies().isEmpty());
+
         Assert.assertNotNull(result.getLatestMovies().get(newRole1));
+        Assert.assertEquals("Mission:Impossible Ghost Protocol", result.getLatestMovies().get(newRole1).getTitle());
+        Assert.assertEquals("l1", result.getLatestMovies().get(newRole1).getId());
+        Assert.assertEquals(2011, result.getLatestMovies().get(newRole1).getYear());
+
         Assert.assertNotNull(result.getLatestMovies().get(newRole2));
+        Assert.assertEquals("Jack Reacher", result.getLatestMovies().get(newRole2).getTitle());
+        Assert.assertEquals("l2", result.getLatestMovies().get(newRole2).getId());
+        Assert.assertEquals(2012, result.getLatestMovies().get(newRole2).getYear());
+
         Assert.assertNotNull(result.getArchivedMovies());
         Assert.assertTrue(result.getArchivedMovies().isEmpty());
 
@@ -127,15 +145,15 @@ public class ActorWithMultipleRelationTest
 
         // Adding one more relationship to actor.
         // Latest Movies
-        ArchivedMovie archivedMovie1 = new ArchivedMovie("m1", "War of the Worlds", 2005);
-        ArchivedMovie archivedMovie2 = new ArchivedMovie("m2", "Mission Impossible", 1996);
+        ArchivedMovie archivedMovie1 = new ArchivedMovie("a1", "Top Gun", 1986);
+        ArchivedMovie archivedMovie2 = new ArchivedMovie("a2", "A Few Good Men", 1992);
 
         // New Roles
-        OldRole oldRole1 = new OldRole("Ray Ferrier", "Lead Actor");
+        OldRole oldRole1 = new OldRole("LT Pete 'Maverick' Mitchell", "Lead Actor");
         oldRole1.setActor(actor);
         oldRole1.setMovie(archivedMovie1);
 
-        OldRole oldRole2 = new OldRole("Ethan Hunt", "Lead Actor");
+        OldRole oldRole2 = new OldRole("Daniel Kaffee", "Lead Actor");
         oldRole2.setActor(actor);
         oldRole2.setMovie(archivedMovie2);
 
@@ -156,12 +174,30 @@ public class ActorWithMultipleRelationTest
         Assert.assertNotNull(result.getId());
         Assert.assertNotNull(result.getLatestMovies());
         Assert.assertFalse(result.getLatestMovies().isEmpty());
+
         Assert.assertNotNull(result.getLatestMovies().get(newRole1));
+        Assert.assertEquals("Mission:Impossible Ghost Protocol", result.getLatestMovies().get(newRole1).getTitle());
+        Assert.assertEquals("l1", result.getLatestMovies().get(newRole1).getId());
+        Assert.assertEquals(2011, result.getLatestMovies().get(newRole1).getYear());
+
         Assert.assertNotNull(result.getLatestMovies().get(newRole2));
+        Assert.assertEquals("Jack Reacher", result.getLatestMovies().get(newRole2).getTitle());
+        Assert.assertEquals("l2", result.getLatestMovies().get(newRole2).getId());
+        Assert.assertEquals(2012, result.getLatestMovies().get(newRole2).getYear());
+
         Assert.assertNotNull(result.getArchivedMovies());
         Assert.assertFalse(result.getArchivedMovies().isEmpty());
+
         Assert.assertNotNull(result.getArchivedMovies().get(oldRole1));
+        Assert.assertEquals("Top Gun", result.getArchivedMovies().get(oldRole1).getTitle());
+        Assert.assertEquals("a1", result.getArchivedMovies().get(oldRole1).getId());
+        Assert.assertEquals(1986, result.getArchivedMovies().get(oldRole1).getYear());
+
         Assert.assertNotNull(result.getArchivedMovies().get(oldRole2));
+        Assert.assertEquals("A Few Good Men", result.getArchivedMovies().get(oldRole2).getTitle());
+        Assert.assertEquals("a2", result.getArchivedMovies().get(oldRole2).getId());
+        Assert.assertEquals(1992, result.getArchivedMovies().get(oldRole2).getYear());
+
 
         results = em.createQuery("Select a from ActorWithMultipleRelation a").getResultList();
         Assert.assertNotNull(results);
@@ -175,11 +211,27 @@ public class ActorWithMultipleRelationTest
         Assert.assertNotNull(result.getLatestMovies());
         Assert.assertFalse(result.getLatestMovies().isEmpty());
         Assert.assertNotNull(result.getLatestMovies().get(newRole1));
+        Assert.assertEquals("Mission:Impossible Ghost Protocol", result.getLatestMovies().get(newRole1).getTitle());
+        Assert.assertEquals("l1", result.getLatestMovies().get(newRole1).getId());
+        Assert.assertEquals(2011, result.getLatestMovies().get(newRole1).getYear());
+
         Assert.assertNotNull(result.getLatestMovies().get(newRole2));
+        Assert.assertEquals("Jack Reacher", result.getLatestMovies().get(newRole2).getTitle());
+        Assert.assertEquals("l2", result.getLatestMovies().get(newRole2).getId());
+        Assert.assertEquals(2012, result.getLatestMovies().get(newRole2).getYear());
+
         Assert.assertNotNull(result.getArchivedMovies());
         Assert.assertFalse(result.getArchivedMovies().isEmpty());
+
         Assert.assertNotNull(result.getArchivedMovies().get(oldRole1));
+        Assert.assertEquals("Top Gun", result.getArchivedMovies().get(oldRole1).getTitle());
+        Assert.assertEquals("a1", result.getArchivedMovies().get(oldRole1).getId());
+        Assert.assertEquals(1986, result.getArchivedMovies().get(oldRole1).getYear());
+
         Assert.assertNotNull(result.getArchivedMovies().get(oldRole2));
+        Assert.assertEquals("A Few Good Men", result.getArchivedMovies().get(oldRole2).getTitle());
+        Assert.assertEquals("a2", result.getArchivedMovies().get(oldRole2).getId());
+        Assert.assertEquals(1992, result.getArchivedMovies().get(oldRole2).getYear());
 
         // Remove
         em.getTransaction().begin();
