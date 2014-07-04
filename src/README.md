@@ -59,7 +59,7 @@ Recent Releases
 ================================
 ####Please Note: trunk is current development branch. kundera-2.13 is released tag.
 
-#### 4-July-2014 - Kundera 2.12 released
+#### 4-July-2014 - Kundera 2.13 released
 This release includes [bug fixes] (https://github.com/impetus-opensource/Kundera/wiki/Bug-Fixes), additional  improvements and the following new features compared to version 2.13:
 
 * Support added for Hbase-0.96
