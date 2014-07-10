@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.query;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -51,9 +52,10 @@ public class PersonTest
     @Before
     public void setUp() throws Exception
     {
-            
-            emf = Persistence.createEntityManagerFactory(PU, propertyMap);
-            em = emf.createEntityManager();
+        propertyMap = new HashMap<String, String>();
+        propertyMap.put("index.home.dir", "./lucene");
+        emf = Persistence.createEntityManagerFactory(PU, propertyMap);
+        em = emf.createEntityManager();
 
     }
 
@@ -79,7 +81,7 @@ public class PersonTest
         em.persist(p1);
         em.persist(p2);
         em.persist(p3);
-        
+
         findQuery = em.createQuery("Select p from Person p where p.personName = vivek ORDER BY p.age ASC");
         findQuery.setFirstResult(2);
         findQuery.setMaxResults(2);

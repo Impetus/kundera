@@ -221,7 +221,7 @@
 			<!-- <property name="kundera.cache.provider.class" value="com.impetus.kundera.cache.ehcache.EhCacheProvider" 
 				/> <property name="kundera.cache.config.resource" value="/ehcache-test.xml" 
 				/> -->
-			<property name="index.home.dir" value="./lucene" />
+			<!-- <property name="index.home.dir" value="./lucene" /> -->
 			<property name="kundera.batch.size" value="5" />
 		</properties>
 	</persistence-unit>

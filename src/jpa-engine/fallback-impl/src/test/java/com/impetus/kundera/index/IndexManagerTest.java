@@ -1,5 +1,6 @@
 package com.impetus.kundera.index;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
@@ -34,11 +35,14 @@ public class IndexManagerTest
     
     private EntityManagerFactory emf;
     private EntityManager em;
+    Map propertyMap=null;
 
     @Before
     public void setup()
     {
-        emf = Persistence.createEntityManagerFactory("patest");
+        propertyMap=new HashMap<String, String>();
+        propertyMap.put("index.home.dir","./lucene");
+        emf = Persistence.createEntityManagerFactory("patest",propertyMap);
         em = emf.createEntityManager();
     }
 
@@ -74,7 +78,6 @@ public class IndexManagerTest
         p.setAge(35);
         
         ixManager.update(metadata, p, null, Person.class);
-        
         luceneQuery = "+Person.AGE:35 AND +entity.class:com.impetus.kundera.query.Person";
         
         try

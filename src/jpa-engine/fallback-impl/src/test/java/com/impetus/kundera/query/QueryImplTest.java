@@ -17,8 +17,10 @@ package com.impetus.kundera.query;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
@@ -65,14 +67,18 @@ public class QueryImplTest
     private EntityManager em;
 
     private KunderaMetadata kunderaMetadata;
+    
+    Map propertyMap=null;
+    
     /**
      * @throws java.lang.Exception
      */
     @Before
     public void setUp() throws Exception
     {
-                
-        emf = Persistence.createEntityManagerFactory(PU);
+        propertyMap=new HashMap<String, String>();
+        propertyMap.put("index.home.dir","./lucene");      
+        emf = Persistence.createEntityManagerFactory(PU,propertyMap);
         kunderaMetadata = ((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance();
         em = emf.createEntityManager();
 
