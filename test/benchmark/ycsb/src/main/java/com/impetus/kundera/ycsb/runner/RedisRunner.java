@@ -21,7 +21,6 @@ import java.util.Map;
 
 import org.apache.commons.configuration.Configuration;
 
-import com.impetus.kundera.ycsb.utils.HibernateCRUDUtils;
 import com.impetus.kundera.ycsb.utils.MailUtils;
 import com.impetus.kundera.ycsb.utils.RedisOperationUtils;
 import common.Logger;
@@ -52,23 +51,14 @@ public class RedisRunner extends YCSBRunner
         {
             operationUtils.startRedisServer(runTime, redisServerLocation);
         }
-        catch (IOException e1)
+        catch (IOException e)
         {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+            e.printStackTrace();
         }
-        catch (InterruptedException e1)
+        catch (InterruptedException e)
         {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+            e.printStackTrace();
         }
-        /*
-         * if (performCleanup) { try { //
-         * operationUtils.cleanRedisDatabase(host, port, password); } catch
-         * (IOException e) { logger.error(e); throw new RuntimeException(e); }
-         * catch (InterruptedException e) { logger.error(e); throw new
-         * RuntimeException(e); } }
-         */
     }
 
     @Override
@@ -80,12 +70,10 @@ public class RedisRunner extends YCSBRunner
         }
         catch (IOException e)
         {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         catch (InterruptedException e)
         {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }

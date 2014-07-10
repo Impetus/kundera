@@ -16,7 +16,6 @@
 package com.impetus.kundera.ycsb.benchmark;
 
 import java.util.HashMap;
-import java.util.Random;
 import java.util.Set;
 import java.util.Vector;
 

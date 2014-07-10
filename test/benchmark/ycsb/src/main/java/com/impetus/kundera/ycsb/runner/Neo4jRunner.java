@@ -20,7 +20,6 @@ import java.util.Map;
 
 import org.apache.commons.configuration.Configuration;
 
-import com.impetus.kundera.ycsb.utils.HibernateCRUDUtils;
 import com.impetus.kundera.ycsb.utils.MailUtils;
 import common.Logger;
 
