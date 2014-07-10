@@ -45,7 +45,6 @@ public class MongoRunner extends YCSBRunner
         super(propertyFile, config);
         this.startMongoServerCommand = config.getString("server.location");
         operationUtils = new MongoDBOperationUtils();
-        crudUtils = new HibernateCRUDUtils();
         url = "mongodb://" + host + ":" + port;
     }
 

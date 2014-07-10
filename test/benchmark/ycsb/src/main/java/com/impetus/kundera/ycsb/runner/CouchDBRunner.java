@@ -39,7 +39,6 @@ public class CouchDBRunner extends YCSBRunner
     {
         super(propertyFile,config);
         operationUtils = new CouchDBOperationUtils();
-        crudUtils = new HibernateCRUDUtils();
     }
 
     @Override

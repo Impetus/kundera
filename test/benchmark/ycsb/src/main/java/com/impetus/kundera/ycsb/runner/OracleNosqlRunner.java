@@ -37,7 +37,6 @@ public class OracleNosqlRunner extends YCSBRunner
     {
         super(propertyFile, config);
         operationUtils = new OracleNosqlOperationUtils();
-        crudUtils = new HibernateCRUDUtils();
     }
 
     @Override

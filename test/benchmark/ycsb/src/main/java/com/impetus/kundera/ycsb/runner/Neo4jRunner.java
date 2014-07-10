@@ -36,8 +36,6 @@ public class Neo4jRunner extends YCSBRunner
     public Neo4jRunner(final String propertyFile, final Configuration config)
     {
         super(propertyFile,config);
-        crudUtils = new HibernateCRUDUtils();
-
     }
 
     @Override
