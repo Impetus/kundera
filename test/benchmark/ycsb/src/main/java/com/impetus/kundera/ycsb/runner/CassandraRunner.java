@@ -43,7 +43,6 @@ public class CassandraRunner extends YCSBRunner
         super(propertyFile,config);
         this.cassandraServerLocation = config.getString("server.location");
         operationUtils = new CassandraOperationUtils();
-        crudUtils = new HibernateCRUDUtils();
     }
 
     @Override

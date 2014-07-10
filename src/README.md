@@ -44,9 +44,9 @@ If you have worked upon Hibernate or any JPA Compliant ORM Solution, then the wh
 
 Currently Supported Datasources
 ================================
-*	Cassandra
-*	MongoDB
-*	HBase
+*  Cassandra
+*  MongoDB
+*  HBase
 *  Redis
 *  OracleNoSQL
 *  Neo4j
@@ -57,10 +57,16 @@ Currently Supported Datasources
 
 Recent Releases
 ================================
-####Please Note: trunk is current development branch. kundera-2.9 is released tag.
+####Please Note: trunk is current development branch. kundera-2.13 is released tag.
+
+#### 4-July-2014 - Kundera 2.13 released
+This release includes [bug fixes] (https://github.com/impetus-opensource/Kundera/wiki/Bug-Fixes), additional  improvements and the following new features compared to version 2.13:
+
+* Support added for Hbase-0.96
+* Support for composite keys over Lucene and  Hbase enabled
 
 #### 21-May-2014 - Kundera 2.12 released
-This release includes [bug fixes] (https://github.com/impetus-opensource/Kundera/wiki/Bug-Fixes), additional  improvements and the following new features compared to version 2.11:
+This release includes [bug fixes] (https://github.com/impetus-opensource/Kundera/wiki/Bug-Fixes), additional  improvements and the following new features compared to version 2.12:
 
 * Support added for Oracle-KV 3.0.5
 * Support  for JPA-2.1 enabled

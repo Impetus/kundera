@@ -40,15 +40,13 @@ public class RedisRunner extends YCSBRunner
 
     public RedisRunner(final String propertyFile, final Configuration config)
     {
-        super(propertyFile,config);
+        super(propertyFile, config);
         this.redisServerLocation = config.getString("server.location");
         operationUtils = new RedisOperationUtils();
-        crudUtils = new HibernateCRUDUtils();
-
     }
 
     @Override
-    public void startServer(boolean performCleanup,Runtime runTime)
+    public void startServer(boolean performCleanup, Runtime runTime)
     {
         try
         {
@@ -64,23 +62,19 @@ public class RedisRunner extends YCSBRunner
             // TODO Auto-generated catch block
             e1.printStackTrace();
         }
-		/*if (performCleanup) {
-			try {
-//				operationUtils.cleanRedisDatabase(host, port, password);
-			} catch (IOException e) {
-				logger.error(e);
-				throw new RuntimeException(e);
-			} catch (InterruptedException e) {
-				logger.error(e);
-				throw new RuntimeException(e);
-			}
-		}*/
+        /*
+         * if (performCleanup) { try { //
+         * operationUtils.cleanRedisDatabase(host, port, password); } catch
+         * (IOException e) { logger.error(e); throw new RuntimeException(e); }
+         * catch (InterruptedException e) { logger.error(e); throw new
+         * RuntimeException(e); } }
+         */
     }
 
     @Override
     public void stopServer(Runtime runTime)
     {
-    	try
+        try
         {
             operationUtils.stopRedisServer(runTime);
         }
@@ -101,14 +95,16 @@ public class RedisRunner extends YCSBRunner
     {
         Map<String, Double> delta = new HashMap<String, Double>();
 
-        double kunderaRedisToJedisDelta = ((timeTakenByClient.get(clients[1]).doubleValue() - timeTakenByClient.get(clients[0]).doubleValue())
+        double kunderaRedisToJedisDelta = ((timeTakenByClient.get(clients[1]).doubleValue() - timeTakenByClient.get(
+                clients[0]).doubleValue())
                 / timeTakenByClient.get(clients[1]).doubleValue() * 100);
         delta.put("kunderaRedisToJedisDelta", kunderaRedisToJedisDelta);
 
-       if (kunderaRedisToJedisDelta > 10.00)
+        if (kunderaRedisToJedisDelta > 10.00)
         {
-             MailUtils.sendMail(delta, isUpdate ? "update" : runType, "redis");
-        } else
+            MailUtils.sendMail(delta, isUpdate ? "update" : runType, "redis");
+        }
+        else
         {
             MailUtils.sendPositiveEmail(delta, isUpdate ? "update" : runType, "redis");
         }
