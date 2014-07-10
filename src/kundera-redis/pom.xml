@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<artifactId>kundera</artifactId>
@@ -13,18 +14,27 @@
 	<dependencies>
 		<!-- Kundera dependencies -->
 		<dependency>
-	        	<groupId>com.impetus.kundera.core</groupId>
-                	<artifactId>kundera-core</artifactId>
+			<groupId>com.impetus.kundera.core</groupId>
+			<artifactId>kundera-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
-	        	<groupId>com.impetus.kundera.core</groupId>
-                	<artifactId>kundera-core</artifactId>
+			<groupId>com.impetus.kundera.core</groupId>
+			<artifactId>kundera-core</artifactId>
 			<version>${project.version}</version>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>com.impetus.kundera.core</groupId>
+			<artifactId>fallback-impl</artifactId>
+			<version>${project.version}</version>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+
 
 		<!-- JEDIS dependencies -->
 		<dependency>
@@ -77,26 +87,14 @@
 					</execution>
 				</executions>
 			</plugin>
-<!-- 			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<configuration>
-					The destination file for the code coverage report has to be set 
-						to the same value in the parent pom and in each module pom. Then JaCoCo will 
-						add up information in the same report, so that, it will give the cross-module 
-						code coverage.
-					<destFile>${project.basedir}/../target/jacoco-it.exec</destFile>
-				</configuration>
-				<executions>
-					<execution>
-						<id>post-test</id>
-						<configuration>
-							<skip>true</skip>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
- -->		</plugins>
+			<!-- <plugin> <groupId>org.jacoco</groupId> <artifactId>jacoco-maven-plugin</artifactId> 
+				<configuration> The destination file for the code coverage report has to 
+				be set to the same value in the parent pom and in each module pom. Then JaCoCo 
+				will add up information in the same report, so that, it will give the cross-module 
+				code coverage. <destFile>${project.basedir}/../target/jacoco-it.exec</destFile> 
+				</configuration> <executions> <execution> <id>post-test</id> <configuration> 
+				<skip>true</skip> </configuration> </execution> </executions> </plugin> -->
+		</plugins>
 	</build>
 
 </project>

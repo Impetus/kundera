@@ -15,7 +15,9 @@
  ******************************************************************************/
 package com.impetus.kundera.query;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -48,6 +50,8 @@ public class LuceneQueryTest
     private EntityManagerFactory emf;
 
     private EntityManager em;
+    
+    Map propertyMap=null;
 
     /**
      * @throws java.lang.Exception
@@ -55,8 +59,9 @@ public class LuceneQueryTest
     @Before
     public void setUp() throws Exception
     {
-                
-        emf = Persistence.createEntityManagerFactory(PU);
+        propertyMap=new HashMap<String, String>();
+        propertyMap.put("index.home.dir","./lucene");       
+        emf = Persistence.createEntityManagerFactory(PU,propertyMap);
         em = emf.createEntityManager();
 
     }

@@ -16,6 +16,7 @@
 package com.impetus.kundera.polyglot.dao;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -28,12 +29,15 @@ public class BaseDao
 
     EntityManager em;
 
-
-    public EntityManager getEntityManager(String pu)
+    Map propertyMap=null;
+    
+            public EntityManager getEntityManager(String pu)
     {
         if (emf == null)
         {
-            emf = Persistence.createEntityManagerFactory(pu, new HashMap());
+            propertyMap=new HashMap<String, String>();
+            propertyMap.put("index.home.dir","./lucene");
+            emf = Persistence.createEntityManagerFactory(pu, propertyMap);
             em = emf.createEntityManager();
         }
 

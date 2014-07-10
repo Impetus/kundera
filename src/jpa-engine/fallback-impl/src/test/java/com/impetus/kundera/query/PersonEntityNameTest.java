@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.query;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -44,12 +45,14 @@ public class PersonEntityNameTest
     private EntityManagerFactory emf;
     private EntityManager em;
 
-    protected Map propertyMap = null;
+    protected Map<String, String> propertyMap = null;
 
     @Before
     public void setUp() throws Exception
     {
                 
+        propertyMap=new HashMap<String, String>();
+        propertyMap.put("index.home.dir","./lucene");
         emf = Persistence.createEntityManagerFactory(PU, propertyMap);
         em = emf.createEntityManager();
 

@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -14,8 +15,8 @@
 
 	<properties>
 		<hadoop.version>2.2.0</hadoop.version>
-                <hbase.version>0.96.1.1-hadoop2</hbase.version>
-                <thrift.version>0.9.0</thrift.version>
+		<hbase.version>0.96.1.1-hadoop2</hbase.version>
+		<thrift.version>0.9.0</thrift.version>
 	</properties>
 
 	<!-- Dependencies -->
@@ -29,14 +30,22 @@
 		</dependency>
 
 		<dependency>
-	        	<groupId>com.impetus.kundera.core</groupId>
-                	<artifactId>kundera-core</artifactId>
+			<groupId>com.impetus.kundera.core</groupId>
+			<artifactId>fallback-impl</artifactId>
+			<version>${project.version}</version>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.impetus.kundera.core</groupId>
+			<artifactId>kundera-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
-	        	<groupId>com.impetus.kundera.core</groupId>
-                	<artifactId>kundera-core</artifactId>
+			<groupId>com.impetus.kundera.core</groupId>
+			<artifactId>kundera-core</artifactId>
 			<version>${project.version}</version>
 			<type>test-jar</type>
 			<scope>test</scope>
@@ -47,7 +56,7 @@
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.impetus.kundera.core</groupId>
 			<artifactId>fallback-impl</artifactId>
@@ -87,15 +96,15 @@
 			<groupId>org.apache.hbase</groupId>
 			<artifactId>hbase-server</artifactId>
 			<version>${hbase.version}</version>
-                        <classifier>tests</classifier>
-                        <scope>test</scope>
+			<classifier>tests</classifier>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.hbase</groupId>
 			<artifactId>hbase-common</artifactId>
 			<version>${hbase.version}</version>
-                        <classifier>tests</classifier>
-                        <scope>test</scope>
+			<classifier>tests</classifier>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.thrift</groupId>
@@ -124,24 +133,12 @@
 		<!-- Test Dependencies -->
 		<!-- <dependency> <groupId>org.apache.hbase</groupId> <artifactId>hbase</artifactId> 
 			<version>0.92.1</version> <type>test-jar</type> <scope>test</scope> </dependency> -->
-                <!--
-		<dependency>
-			<groupId>org.apache.hadoop</groupId>
-			<artifactId>hadoop-test</artifactId>
-			<version>${hadoop.version}</version>
-			<scope>test</scope>
-		</dependency>
-                -->
+		<!-- <dependency> <groupId>org.apache.hadoop</groupId> <artifactId>hadoop-test</artifactId> 
+			<version>${hadoop.version}</version> <scope>test</scope> </dependency> -->
 
-                <!--
-		<dependency>
-			<groupId>org.apache.hbase</groupId>
-			<artifactId>hbase</artifactId>
-			<version>${hbase.version}</version>
-			<type>test-jar</type>
-			<scope>test</scope>
-		</dependency>
-                -->
+		<!-- <dependency> <groupId>org.apache.hbase</groupId> <artifactId>hbase</artifactId> 
+			<version>${hbase.version}</version> <type>test-jar</type> <scope>test</scope> 
+			</dependency> -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>

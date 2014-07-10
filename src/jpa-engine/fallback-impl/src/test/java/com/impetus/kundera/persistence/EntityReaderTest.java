@@ -70,6 +70,8 @@ public class EntityReaderTest
     private EntityManager em;
 
     private KunderaMetadata kunderaMetadata;
+    
+    Map propertyMap=null;
 
     /**
      * @throws java.lang.Exception
@@ -78,7 +80,9 @@ public class EntityReaderTest
     public void setUp() throws Exception
     {
 
-        emf = Persistence.createEntityManagerFactory(PU);
+        propertyMap=new HashMap<String, String>();
+        propertyMap.put("index.home.dir","./lucene");
+        emf = Persistence.createEntityManagerFactory(PU,propertyMap);
         kunderaMetadata = ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance();
         em = emf.createEntityManager();
 
