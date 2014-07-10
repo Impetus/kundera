@@ -46,7 +46,6 @@ public class CoreIndexer implements Indexer
     public Map<String, Object> search(String query, Class<?> parentClass, EntityMetadata parentMetadata,
             Class<?> childClass, EntityMetadata childMetadata, Object entityId, int start, int count)
     {
-
         return null;
     }
 

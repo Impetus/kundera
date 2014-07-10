@@ -64,6 +64,9 @@ public class LuceneIndexerTest
     @Test
     public void testSearchWithNoResult()
     {
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(
+                ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance(), Person.class);
+        
         LuceneIndexer indexer = LuceneIndexer.getInstance(LUCENE_DIR_PATH);
         Assert.assertNotNull(indexer);
 
@@ -71,7 +74,7 @@ public class LuceneIndexerTest
 
         try
         {
-            indexer.search(luceneQuery, 0, 10, false, null, null);
+            indexer.search(luceneQuery, 0, 10, false, ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance(), metadata);
         }
         catch (LuceneIndexingException liex)
         {
@@ -100,7 +103,7 @@ public class LuceneIndexerTest
         final String luceneQuery = "Invalid lucene query";
         try
         {
-            indexer.search(luceneQuery, 0, 10, false, null, null);
+            indexer.search(luceneQuery, 0, 10, false, ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance(), metadata);
         }
         catch (LuceneIndexingException liex)
         {
@@ -131,7 +134,7 @@ public class LuceneIndexerTest
 
         try
         {
-            Map<String, Object> results = indexer.search(luceneQuery, 0, 10, false, null, null);
+            Map<String, Object> results = indexer.search(luceneQuery, 0, 10, false, ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance(), metadata);
             Assert.assertTrue(!results.isEmpty());
         }
         catch (LuceneIndexingException liex)
