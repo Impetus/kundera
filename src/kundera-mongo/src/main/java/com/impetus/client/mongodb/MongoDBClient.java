@@ -953,6 +953,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      * 
      * @return result object.
      */
+    @Override
     public Object executeScript(String script)
     {
         Object result = mongoDb.eval(script);

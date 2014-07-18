@@ -36,7 +36,6 @@ import com.impetus.client.crud.entities.Day;
 import com.impetus.client.crud.entities.PersonBatchMongoEntity;
 import com.impetus.client.crud.entities.PersonMongo;
 import com.impetus.client.crud.entities.PersonMongo.Month;
-import com.impetus.client.mongodb.MongoDBClient;
 import com.impetus.client.utils.MongoUtils;
 import com.impetus.kundera.client.Client;
 
@@ -321,14 +320,14 @@ public class PersonMongoTest extends BaseTest
         Client client = clients.get(_PU);
 
         String jScript = "db.system.js.save({ _id: \"echoFunction\",value : function(x) { return x; }})";
-        Object result = ((MongoDBClient) client).executeScript(jScript);
+        Object result = ( client).executeScript(jScript);
         Assert.assertNull(result);
         String findOneJScript = "db.PERSON.findOne()";
-        result = ((MongoDBClient) client).executeScript(findOneJScript);
+        result = ( client).executeScript(findOneJScript);
         Assert.assertNotNull(result);
 
         String findAllJScript = "db.PERSON.find( { \"PERSON_NAME\" : \"vivek\" } )";
-        result = ((MongoDBClient) client).executeScript(findAllJScript);
+        result = (client).executeScript(findAllJScript);
         Assert.assertNotNull(result);
 
         try
