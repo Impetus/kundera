@@ -210,5 +210,14 @@ public interface Client<Q extends Query>
      * @return class instance of configured query interface.
      */
     Class<Q> getQueryImplementor();
+    
+    /**
+     * Enables executing native script specific to a db client
+     * 
+     * 
+     * @param script
+     * @return
+     */
+    Object executeScript(String script);
 
 }
