@@ -54,7 +54,7 @@ public abstract class AbstractProxyCollection extends AbstractProxyBase
     @Override
     public Object getDataCollection()
     {
-        return dataCollection != null && ! ((Collection) dataCollection).isEmpty() ? dataCollection : null;
+        return dataCollection != null /*&& ! ((Collection) dataCollection).isEmpty() */? dataCollection : null;
     }
     
     protected boolean add(final Object object)

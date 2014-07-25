@@ -15,7 +15,9 @@
  ******************************************************************************/
 package com.impetus.kundera.proxy.collection;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 
 import com.impetus.kundera.metadata.KunderaMetadataManager;
@@ -124,7 +126,18 @@ public abstract class AbstractProxyBase implements ProxyCollection
 
             if (dataCollection instanceof ProxyCollection)
             {
-                dataCollection = null;
+                if (getRelation().getProperty().getType().isAssignableFrom(java.util.Set.class))
+                {
+                    dataCollection = new HashSet();
+                }
+                else if (getRelation().getProperty().getType().isAssignableFrom(java.util.List.class))
+                {
+                    dataCollection = new ArrayList();
+                }
+                else
+                {
+                    dataCollection = null;
+                }
             }
             PropertyAccessorHelper.set(getOwner(), getRelation().getProperty(), dataCollection);
         }
