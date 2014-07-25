@@ -335,7 +335,8 @@ public class PersistenceXMLLoader
                 }
                 else if (tag.equals("exclude-unlisted-classes"))
                 {
-                    metadata.setExcludeUnlistedClasses(true);
+                    String excludeUnlisted = getElementContent(element);
+                    metadata.setExcludeUnlistedClasses(Boolean.parseBoolean(excludeUnlisted));
                 }
             }
         }
