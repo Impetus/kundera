@@ -29,8 +29,18 @@ public class Table
     private String tableName;
 
     private String entityClassName;
+    
+    private String simpleEntityClassName;
 
-    /**
+    public String getSimpleEntityClassName() {
+		return simpleEntityClassName;
+	}
+
+	public void setSimpleEntityClassName(String simpleEntityClassName) {
+		this.simpleEntityClassName = simpleEntityClassName;
+	}
+
+	/**
      * @return the tableName
      */
     public String getTableName()

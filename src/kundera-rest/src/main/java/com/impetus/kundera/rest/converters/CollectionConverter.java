@@ -68,8 +68,9 @@ public class CollectionConverter
         }
         else if (MediaType.APPLICATION_JSON.equals(mediaType))
         {
+        	
             int i = 0;
-            StringBuilder sb = new StringBuilder("{").append(genericClass.getSimpleName().toLowerCase()).append(":");
+            StringBuilder sb = new StringBuilder("[");
             for (Object obj : input)
             {
                 if (obj != null)
@@ -83,7 +84,7 @@ public class CollectionConverter
                 }
                 
             }
-            sb.append("}");
+            sb.append("]");
             return sb.toString();
         }
 

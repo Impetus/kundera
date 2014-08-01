@@ -85,7 +85,8 @@ public class CollectionConverterTest {
 		books.add(book2);
 
 		String s = CollectionConverter.toString(books, Book.class,
-				MediaType.APPLICATION_XML);
+				MediaType.APPLICATION_JSON);
+
 		Assert.assertNotNull(s);
 	}
 

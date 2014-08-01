@@ -94,7 +94,7 @@ public class DataTypeTest extends JerseyTest
 
     private static Logger log = LoggerFactory.getLogger(DataTypeTest.class);
 
-    static String mediaType = MediaType.APPLICATION_JSON;
+    static String mediaType = MediaType.APPLICATION_XML;
 
     static RESTClient restClient;
 
@@ -180,14 +180,17 @@ public class DataTypeTest extends JerseyTest
 
 
         // Get Application Token
-        applicationToken = restClient.getApplicationToken("cassTest");
+        applicationToken = restClient.getApplicationToken("cassTest", null);
         Assert.assertNotNull(applicationToken);
-        Assert.assertTrue(applicationToken.startsWith("AT_"));
+        Assert.assertTrue(applicationToken.startsWith("\"AT_"));
+        applicationToken = applicationToken.replaceAll("^\"|\"$", "");
 
         // Get Session Token
         sessionToken = restClient.getSessionToken(applicationToken);
         Assert.assertNotNull(sessionToken);
-        Assert.assertTrue(sessionToken.startsWith("ST_"));
+        Assert.assertTrue(sessionToken.startsWith("\"ST_"));
+        
+        sessionToken = sessionToken.replaceAll("^\"|\"$", "");
 
         // Insert Record
         String insertResponse1 = restClient.insertEntity(sessionToken, professionalStr1, PROFESSIONAL_CLASS_NAME);
@@ -205,6 +208,7 @@ public class DataTypeTest extends JerseyTest
 
         // Update Record
         foundProfessional = foundProfessional.replaceAll("163.12", "165.21");
+        
         String updatedProfessional = restClient.updateEntity(sessionToken, foundProfessional, PROFESSIONAL_CLASS_NAME);
         Assert.assertNotNull(updatedProfessional);
         Assert.assertTrue(updatedProfessional.indexOf("165.21") > 0);

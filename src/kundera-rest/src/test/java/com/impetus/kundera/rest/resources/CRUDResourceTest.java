@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.rest.resources;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,6 +38,8 @@ import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.thrift.TException;
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.databene.contiperf.PerfTest;
 import org.databene.contiperf.junit.ContiPerfRule;
 import org.databene.contiperf.report.CSVSummaryReportModule;
@@ -105,6 +108,8 @@ public class CRUDResourceTest extends JerseyTest
     String pk1;
 
     String pk2;
+    
+    private Map<String, Object> puProperties = new HashMap<String, Object>();
 
     @Rule
     public ContiPerfRule i = new ContiPerfRule(new ReportModule[] { new CSVSummaryReportModule(),
@@ -170,7 +175,7 @@ public class CRUDResourceTest extends JerseyTest
 
     @Test
     @PerfTest(invocations = 10)
-    public void testCRUD()
+    public void testCRUD() throws JsonGenerationException, JsonMappingException, IOException
     {
 
         if (MediaType.APPLICATION_XML.equals(mediaType))
@@ -182,8 +187,8 @@ public class CRUDResourceTest extends JerseyTest
         }
         else if (MediaType.APPLICATION_JSON.equals(mediaType))
         {
-            bookStr1 = "{book:{\"isbn\":\"1111111111111\",\"author\":\"Amresh\", \"publication\":\"Willey\"}}";
-            bookStr2 = "{book:{\"isbn\":\"2222222222222\",\"author\":\"Vivek\", \"publication\":\"Oreilly\"}}";
+            bookStr1 = "{\"isbn\":\"1111111111111\",\"author\":\"Amresh\", \"publication\":\"Willey\"}";
+            bookStr2 = "{\"isbn\":\"2222222222222\",\"author\":\"Vivek\", \"publication\":\"Oreilly\"}";
             pk1 = "1111111111111";
             pk2 = "2222222222222";
         }
@@ -194,14 +199,21 @@ public class CRUDResourceTest extends JerseyTest
         }
 
         // Get Application Token
-        applicationToken = restClient.getApplicationToken("cassTest");
+    
+        applicationToken = restClient.getApplicationToken("cassTest", null);
         Assert.assertNotNull(applicationToken);
-        Assert.assertTrue(applicationToken.startsWith("AT_"));
+        
+        Assert.assertTrue(applicationToken.startsWith("\"AT_"));
+        applicationToken = applicationToken.replaceAll("^\"|\"$", "");
 
         // Get Session Token
         sessionToken = restClient.getSessionToken(applicationToken);
         Assert.assertNotNull(sessionToken);
-        Assert.assertTrue(sessionToken.startsWith("ST_"));
+        Assert.assertTrue(sessionToken.startsWith("\"ST_"));
+        
+        sessionToken = sessionToken.replaceAll("^\"|\"$", "");
+        
+   
 
         // Insert Record
         String insertResponse1 = restClient.insertEntity(sessionToken, bookStr1, "Book");
@@ -209,33 +221,36 @@ public class CRUDResourceTest extends JerseyTest
 
         Assert.assertNotNull(insertResponse1);
         Assert.assertNotNull(insertResponse2);
+        
         Assert.assertTrue(insertResponse1.indexOf("200") > 0);
         Assert.assertTrue(insertResponse2.indexOf("200") > 0);
 
         // Find Record
         String foundBook = restClient.findEntity(sessionToken, pk1, "Book");
         Assert.assertNotNull(foundBook);
-        if (MediaType.APPLICATION_JSON.equals(mediaType))
-        {
-            foundBook = "{book:" + foundBook + "}";
-        }
+        foundBook = foundBook.replaceAll("^\'|\'$", "");
+    
         Assert.assertTrue(foundBook.indexOf("Amresh") > 0);
 
         // Update Record
         foundBook = foundBook.replaceAll("Amresh", "Saurabh");
         String updatedBook = restClient.updateEntity(sessionToken, foundBook, "Book");
         Assert.assertNotNull(updatedBook);
+        
         Assert.assertTrue(updatedBook.indexOf("Saurabh") > 0);
 
         /** JPA Query - Select */
         // Get All books
         String jpaQuery = "select b from Book b";
         String queryResult = restClient.runJPAQuery(sessionToken, jpaQuery, new HashMap<String, Object>());
-        log.debug("Query Result:" + queryResult);
 
+        log.debug("Query Result:" + queryResult);
+        
         /** JPA Query - Select All */
         // Get All Books
         String allBooks = restClient.getAllEntities(sessionToken, "Book");
+        
+        
         Assert.assertNotNull(allBooks);
         Assert.assertTrue(allBooks.indexOf("books") > 0);
         Assert.assertTrue(allBooks.indexOf("Saurabh") > 0);
@@ -342,14 +357,18 @@ public class CRUDResourceTest extends JerseyTest
         personStr1 = JAXBUtils.toString(PersonnelUni1ToM.class, p1, mediaType);
 
         // Get Application Token
-        applicationToken = restClient.getApplicationToken("cassTest");
+        applicationToken = restClient.getApplicationToken("cassTest", null);
         Assert.assertNotNull(applicationToken);
-        Assert.assertTrue(applicationToken.startsWith("AT_"));
+        Assert.assertTrue(applicationToken.startsWith("\"AT_"));
+        applicationToken = applicationToken.replaceAll("^\"|\"$", "");
 
         // Get Session Token
         sessionToken = restClient.getSessionToken(applicationToken);
         Assert.assertNotNull(sessionToken);
-        Assert.assertTrue(sessionToken.startsWith("ST_"));
+        Assert.assertNotNull(sessionToken);
+        Assert.assertTrue(sessionToken.startsWith("\"ST_"));
+        
+        sessionToken = sessionToken.replaceAll("^\"|\"$", "");
 
         // Insert person.
         String insertResponse = restClient.insertPerson(sessionToken, personStr);
@@ -363,6 +382,7 @@ public class CRUDResourceTest extends JerseyTest
         // Find person.
         String foundPerson = restClient.findPerson(sessionToken, personPk);
         Assert.assertNotNull(foundPerson);
+        
         if (MediaType.APPLICATION_JSON.equals(mediaType))
         {
             foundPerson = "{personnelUni1ToM:" + foundPerson + "}";
@@ -383,7 +403,7 @@ public class CRUDResourceTest extends JerseyTest
         log.debug(allPersons);
 
         // Run Query.
-        String jpaQuery = "select p from PersonnelUni1ToM p where p.personId >= " + person1Pk;
+        String jpaQuery = "select p from PersonnelUni1ToM p where p.PERSON_ID >= " + person1Pk;
         String queryResult = restClient.runJPAQuery(sessionToken, jpaQuery, new HashMap<String, Object>());
         log.debug("Query Result:" + queryResult);
         Assert.assertNotNull(queryResult);

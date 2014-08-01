@@ -1,5 +1,5 @@
 /*******************************************************************************
- * * Copyright 2012 Impetus Infotech.
+ * * Copyright 2014 Impetus Infotech.
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -43,7 +43,6 @@ import com.impetus.kundera.index.IndexCollection;
 @Entity
 @Table(name = "USER")
 @XmlRootElement
-//@XmlAccessorType(XmlAccessType.FIELD)
 @IndexCollection(columns = { @Index(name = "preference") })
 public class UserCassandra
 {

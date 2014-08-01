@@ -90,6 +90,20 @@ public class EntityUtils {
 		Class<?> entityClass = metamodel.getEntityClass(entityClassName);
 		return entityClass;
 	}
+	
+	/**
+	 * @param entityClassName
+	 * @param em
+	 * @return
+	 */
+	public static EntityMetadata getEntityMetaData(String entityClassName,
+			EntityManager em) {
+		MetamodelImpl metamodel = (MetamodelImpl) em.getEntityManagerFactory()
+				.getMetamodel();
+		Class<?> entityClass = metamodel.getEntityClass(entityClassName);
+		
+		return metamodel.getEntityMetadata(entityClass);
+	}
 
 	public static String getQueryPart(String fullQueryString) {
 		if (fullQueryString.contains("?")) {
