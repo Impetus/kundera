@@ -27,6 +27,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 @Entity
 @Table(name = "PERSONNEL")
 @XmlRootElement
@@ -34,18 +36,19 @@ public class PersonnelUni1ToM
 {
     @Id
     @Column(name = "PERSON_ID")
-    private String personId;
+    private String PERSON_ID;
 
     @Column(name = "PERSON_NAME")
     private String personName;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "PERSON_ID")
-    private Set<HabitatUni1ToM> addresses;
+    private Set<HabitatUni1ToM> HabitatUni1ToM;
 
+    @JsonProperty("PERSON_ID")
     public String getPersonId()
     {
-        return personId;
+        return PERSON_ID;
     }
 
     public String getPersonName()
@@ -57,19 +60,19 @@ public class PersonnelUni1ToM
     {
         this.personName = personName;
     }
-
+    @JsonProperty("PERSON_ID")
     public void setPersonId(String personId)
     {
-        this.personId = personId;
+        this.PERSON_ID = personId;
     }
-
+    @JsonProperty("HabitatUni1ToM")
     public Set<HabitatUni1ToM> getAddresses()
     {
-        return addresses;
+        return HabitatUni1ToM;
     }
-
+    @JsonProperty("HabitatUni1ToM")
     public void setAddresses(Set<HabitatUni1ToM> addresses)
     {
-        this.addresses = addresses;
+        this.HabitatUni1ToM = addresses;
     }
 }

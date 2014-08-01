@@ -41,450 +41,417 @@ import com.sun.jersey.api.client.WebResource;
  * @author amresh.singh
  */
 public class RESTClientImpl implements RESTClient {
-	private static Logger log = LoggerFactory.getLogger(RESTClientImpl.class);
-
-	private WebResource webResource = null;
-
-	private String mediaType;
-
-	@Override
-	public void initialize(WebResource wr, String mediaType) {
-		this.webResource = wr;
-		this.mediaType = mediaType;
-	}
-
-	@Override
-	public String getApplicationToken(String persistenceUnit) {
-		String applicationToken;
-		try {
-			log.debug("\n\nGetting Application Token...");
-			WebResource.Builder atBuilder = webResource
-					.path(Constants.KUNDERA_API_PATH + "/application/"
-							+ persistenceUnit).accept(mediaType)
-					.type(mediaType);
-			// String atResponse =
-			// atBuilder.get(ClientResponse.class).toString();
-			applicationToken = atBuilder.get(String.class);
-			// log.debug("Response: " + atResponse);
-			log.debug("Application Token:" + applicationToken);
-		} catch (UniformInterfaceException e) {
-			log.error("Error during getApplicationToken, Caused by:"
-					+ e.getMessage() + ", returning null");
-			return null;
-		} catch (ClientHandlerException e) {
-			log.error("Error during getApplicationToken, Caused by:"
-					+ e.getMessage() + ", returning null");
-			return null;
-		}
-		return applicationToken;
-	}
-
-	@Override
-	public String closeApplication(String applicationToken) {
-		log.debug("\n\nClosing Application for Token:" + applicationToken);
-		WebResource.Builder atBuilder = webResource
-				.path(Constants.KUNDERA_API_PATH + "/application")
-				.type(mediaType)
-				.accept(mediaType)
-				.header(Constants.APPLICATION_TOKEN_HEADER_NAME,
-						applicationToken);
-		String response = atBuilder.delete(String.class);
-		log.debug("Application Closure Response: " + response);
-		return response;
-	}
-
-	@Override
-	public String getSessionToken(String applicationToken) {
-		log.debug("\n\nGetting Session Token...");
-		WebResource.Builder stBuilder = webResource
-				.path(Constants.KUNDERA_API_PATH + "/session")
-				.type(mediaType)
-				.accept(mediaType)
-				.header(Constants.APPLICATION_TOKEN_HEADER_NAME,
-						applicationToken);
-
-		String sessionToken = stBuilder.get(String.class);
-
-		log.debug("Session Token:" + sessionToken);
-		return sessionToken;
-	}
-
-	@Override
-	public String closeSession(String sessionToken) {
-
-		log.debug("\n\nClosing Session for Token:" + sessionToken);
-		WebResource.Builder stBuilder = webResource
-				.path(Constants.KUNDERA_API_PATH + "/session").type(mediaType)
-				.accept(mediaType)
-				.header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
-		String response = stBuilder.delete(String.class);
-		log.debug("Session Deletion Response: " + response);
-		return response;
-	}
-
-	@Override
-	public String insertEntity(String sessionToken, String entityStr,
-			String entityClassName) {
-		log.debug("\n\nInserting Entity...");
-
-		WebResource.Builder insertBuilder = webResource
-				.path(Constants.KUNDERA_API_PATH + "/crud/" + entityClassName)
-				.type(mediaType).accept(mediaType)
-				.header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
-		StringBuffer sb = new StringBuffer().append(entityStr);
-		ClientResponse insertResponse = (ClientResponse) insertBuilder.post(
-				ClientResponse.class, sb.toString());
-		log.debug("Response From Insert Entity: " + insertResponse);
-		return insertResponse.toString();
-	}
-
-	@Override
-	public String findEntity(String sessionToken, String pk,
-			String entityClassName) {
-		log.debug("\n\nFinding Entity...");
-		WebResource.Builder findBuilder = webResource
-				.path(Constants.KUNDERA_API_PATH + "/crud/" + entityClassName
-						+ "/" + pk).accept(mediaType).type(mediaType)
-				.header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
-		;
-
-		ClientResponse findResponse = (ClientResponse) findBuilder
-				.get(ClientResponse.class);
-
-		InputStream is = findResponse.getEntityInputStream();
-		String entityStr = StreamUtils.toString(is);
-
-		log.debug("Found Entity:" + entityStr);
-		return entityStr;
-	}
-
-	@Override
-	public String updateEntity(String sessionToken, String newEntityStr,
-			String entityClassName) {
-		log.debug("\n\nUpdating Entity... " + newEntityStr);
-		WebResource.Builder updateBuilder = webResource
-				.path(Constants.KUNDERA_API_PATH + "/crud/" + entityClassName)
-				.type(mediaType).accept(mediaType)
-				.header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
-		ClientResponse updateResponse = updateBuilder.put(ClientResponse.class,
-				newEntityStr);
-		InputStream is = updateResponse.getEntityInputStream();
-		String updatedEntityStr = StreamUtils.toString(is);
-		log.debug("Updated Entity: " + updatedEntityStr);
-		return updatedEntityStr;
-	}
-
-	@Override
-	public void deleteEntity(String sessionToken, String entityStr, String pk,
-			String entityClassName) {
-		log.debug("\n\nDeleting Entity... " + entityStr);
-		WebResource.Builder deleteBuilder = webResource
-				.path(Constants.KUNDERA_API_PATH + "/crud/" + entityClassName
-						+ "/delete/" + pk).accept(MediaType.TEXT_PLAIN)
-				.header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
-		ClientResponse deleteResponse = (ClientResponse) deleteBuilder
-				.delete(ClientResponse.class);
-		log.debug("Delete Response:" + deleteResponse.getStatus());
-	}
-
-	@Override
-	public String runJPAQuery(String sessionToken, String jpaQuery,
-			Map<String, Object> params) {
-		log.debug("\n\nRunning JPA Query... ");
-
-		String paramsStr = buildParamString(params);
-		WebResource.Builder queryBuilder = webResource
-				.path(Constants.KUNDERA_API_PATH
-						+ Constants.JPA_QUERY_RESOURCE_PATH + "/" + jpaQuery
-						+ paramsStr).type(mediaType).accept(mediaType)
-				.header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
-		ClientResponse queryResponse = (ClientResponse) queryBuilder
-				.post(ClientResponse.class);
-		log.debug("Query Response:" + queryResponse.getStatus());
-
-		InputStream is = queryResponse.getEntityInputStream();
-
-		String allStr = StreamUtils.toString(is);
-
-		log.debug("Found Entities:" + allStr);
-		return allStr;
-	}
-
-	@Override
-	public String runObjectJPAQuery(String sessionToken, String jpaQuery,
-			Map<String, Object> params) {
-		log.debug("\n\nRunning JPA Query... ");
-
-		String paramsStr = buildObjectParamString(params);
-
-		WebResource.Builder queryBuilder = webResource
-				.path(Constants.KUNDERA_API_PATH
-						+ Constants.JPA_QUERY_RESOURCE_PATH + "/" + jpaQuery)
-				.type(mediaType).accept(mediaType)
-				.header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
-		ClientResponse queryResponse = (ClientResponse) queryBuilder.post(
-				ClientResponse.class, paramsStr);
-
-		log.debug("Query Response:" + queryResponse.getStatus());
-
-		InputStream is = queryResponse.getEntityInputStream();
-
-		String allStr = StreamUtils.toString(is);
-
-		log.debug("Found Entities:" + allStr);
-		return allStr;
-	}
-
-	private String buildObjectParamString(Map<String, Object> params) {
-
-		ObjectMapper mapper = new ObjectMapper();
-
-		String parameterString = null;
-		// convert map to JSON string
-		try {
-			parameterString = mapper.writeValueAsString(params);
-		} catch (JsonGenerationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (JsonMappingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return parameterString;
-	}
-
-	@Override
-	public String runNamedJPAQuery(String sessionToken, String entityClassName,
-			String namedQuery, Map<String, Object> params) {
-		log.debug("\n\nRunning Named JPA Query " + namedQuery + "... ");
-
-		String paramsStr = buildParamString(params);
-
-		WebResource wr = webResource.path(Constants.KUNDERA_API_PATH
-				+ Constants.JPA_QUERY_RESOURCE_PATH + "/" + entityClassName
-				+ "/" + namedQuery + paramsStr);
-
-		WebResource.Builder queryBuilder = wr.accept(mediaType)
-				.header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken)
-				.type(mediaType);
-
-		ClientResponse queryResponse = (ClientResponse) queryBuilder
-				.get(ClientResponse.class);
-		log.debug("Query Response:" + queryResponse.getStatus());
-
-		InputStream is = queryResponse.getEntityInputStream();
-		String allBookStr = StreamUtils.toString(is);
-
-		log.debug("Found Entities for query " + namedQuery + ":" + allBookStr);
-		return allBookStr;
-	}
-
-	@Override
-	public String runNativeQuery(String sessionToken, String entityClassName,
-			String nativeQuery, Map<String, Object> params) {
-		log.debug("\n\nRunning Native Query... ");
-
-		String paramsStr = buildParamString(params);
-		WebResource.Builder queryBuilder = webResource
-				.path(Constants.KUNDERA_API_PATH
-						+ Constants.NATIVE_QUERY_RESOURCE_PATH
-						+ entityClassName/*
-										 * + "/q=" + nativeQuery + paramsStr
-										 */).accept(mediaType).type(mediaType)
-				.header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
-		// ClientResponse queryResponse = (ClientResponse)
-		// queryBuilder.get(ClientResponse.class);
-		ClientResponse queryResponse = (ClientResponse) queryBuilder.post(
-				ClientResponse.class, nativeQuery);
-		log.debug("Query Response:" + queryResponse.getStatus());
-
-		InputStream is = queryResponse.getEntityInputStream();
-
-		String allStr = StreamUtils.toString(is);
-
-		log.debug("Found Entities:" + allStr);
-		return allStr;
-	}
-
-	@Override
-	public String runNamedNativeQuery(String sessionToken,
-			String entityClassName, String namedNativeQuery,
-			Map<String, Object> params) {
-		log.debug("\n\nRunning Named Native JPA Query " + namedNativeQuery
-				+ "... ");
-
-		String paramsStr = buildParamString(params);
-
-		WebResource wr = webResource.path(Constants.KUNDERA_API_PATH
-				+ Constants.NATIVE_QUERY_RESOURCE_PATH + entityClassName + "/"
-				+ namedNativeQuery + paramsStr);
-
-		WebResource.Builder queryBuilder = wr.accept(mediaType).type(mediaType)
-				.header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
-
-		ClientResponse queryResponse = (ClientResponse) queryBuilder
-				.get(ClientResponse.class);
-		log.debug("Query Response:" + queryResponse.getStatus());
-
-		InputStream is = queryResponse.getEntityInputStream();
-		String allBookStr = StreamUtils.toString(is);
-
-		log.debug("Found Entities for query " + namedNativeQuery + ":"
-				+ allBookStr);
-		return allBookStr;
-	}
-
-	@Override
-	public String getAllEntities(String sessionToken, String entityClassName) {
-		log.debug("\n\nFinding all Entities... ");
-		WebResource.Builder queryBuilder = webResource
-				.path(Constants.KUNDERA_API_PATH
-						+ Constants.JPA_QUERY_RESOURCE_PATH + "/"
-						+ entityClassName + "/all").accept(mediaType)
-				.type(mediaType)
-				.header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
-		ClientResponse queryResponse = (ClientResponse) queryBuilder
-				.get(ClientResponse.class);
-		log.debug("Find All Response:" + queryResponse.getStatus());
-
-		InputStream is = queryResponse.getEntityInputStream();
-		// List books = (List) JAXBUtils.toObject(is, ArrayList.class,
-		// MediaType.APPLICATION_XML);
-
-		String allEntitiesStr = StreamUtils.toString(is);
-
-		log.debug("Found All Entities:" + allEntitiesStr);
-		return allEntitiesStr;
-	}
-
-	@Override
-	public String getSchemaList(String persistenceUnit) {
-		log.debug("\n\nGetting Schema List for PU :" + persistenceUnit);
-		WebResource.Builder slBuilder = webResource.path(
-				Constants.KUNDERA_API_PATH + "/metadata/schemaList/"
-						+ persistenceUnit).accept(mediaType);
-		ClientResponse schemaResponse = (ClientResponse) slBuilder
-				.get(ClientResponse.class);
-
-		InputStream is = schemaResponse.getEntityInputStream();
-		String schemaList = StreamUtils.toString(is);
-
-		log.debug("Schema List:" + schemaList);
-		return schemaList;
-	}
-
-	@Override
-	public String insertPerson(String sessionToken, String personStr) {
-
-		log.debug("\n\nInserting Entity...");
-		WebResource.Builder insertBuilder = webResource
-				.path(Constants.KUNDERA_API_PATH + "/crud/PersonnelUni1ToM")
-				.type(mediaType).accept(mediaType)
-				.header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
-		StringBuffer sb = new StringBuffer().append(personStr);
-		ClientResponse insertResponse = (ClientResponse) insertBuilder.post(
-				ClientResponse.class, sb.toString());
-		log.debug("Response From Insert person: " + insertResponse);
-		return insertResponse.toString();
-
-	}
-
-	@Override
-	public String findPerson(String sessionToken, String isbn) {
-
-		log.debug("\n\nFinding Entity...");
-		WebResource.Builder findBuilder = webResource
-				.path(Constants.KUNDERA_API_PATH + "/crud/PersonnelUni1ToM/"
-						+ isbn).accept(mediaType).type(mediaType)
-				.header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
-		;
-
-		ClientResponse findResponse = (ClientResponse) findBuilder
-				.get(ClientResponse.class);
-
-		InputStream is = findResponse.getEntityInputStream();
-		String personkStr = StreamUtils.toString(is);
-
-		log.debug("Found Entity:" + personkStr);
-		return personkStr;
-	}
-
-	@Override
-	public String updatePerson(String sessionToken, String oldPersonStr) {
-
-		log.debug("\n\nUpdating Entity... " + oldPersonStr);
-		oldPersonStr = oldPersonStr.replaceAll("XXXXXXXXX", "YYYYYYYYY");
-		WebResource.Builder updateBuilder = webResource
-				.path(Constants.KUNDERA_API_PATH + "/crud/PersonnelUni1ToM")
-				.type(mediaType).accept(mediaType)
-				.header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
-		ClientResponse updateResponse = updateBuilder.put(ClientResponse.class,
-				oldPersonStr);
-		InputStream is = updateResponse.getEntityInputStream();
-		String updatedPersonStr = StreamUtils.toString(is);
-		log.debug("Updated Person: " + updatedPersonStr);
-		return updatedPersonStr;
-
-	}
-
-	@Override
-	public String getAllPersons(String sessionToken) {
-		log.debug("\n\nFinding all Entities... ");
-		WebResource.Builder queryBuilder = webResource
-				.path(Constants.KUNDERA_API_PATH
-						+ Constants.JPA_QUERY_RESOURCE_PATH
-						+ "/PersonnelUni1ToM/all").type(mediaType)
-				.accept(mediaType)
-				.header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
-		ClientResponse queryResponse = (ClientResponse) queryBuilder
-				.get(ClientResponse.class);
-		log.debug("Find All Response:" + queryResponse.getStatus());
-
-		InputStream is = queryResponse.getEntityInputStream();
-		// List books = (List) JAXBUtils.toObject(is, ArrayList.class,
-		// MediaType.APPLICATION_XML);
-
-		String allPersonStr = StreamUtils.toString(is);
-
-		log.debug("Found All Entities:" + allPersonStr);
-		return allPersonStr;
-	}
-
-	@Override
-	public void deletePerson(String sessionToken, String updatedPerson,
-			String isbn) {
-		log.debug("\n\nDeleting Entity... " + updatedPerson);
-		WebResource.Builder deleteBuilder = webResource
-				.path(Constants.KUNDERA_API_PATH
-						+ "/crud/PersonnelUni1ToM/delete/" + isbn)
-				.accept(mediaType).type(mediaType)
-				.header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
-		ClientResponse deleteResponse = (ClientResponse) deleteBuilder
-				.delete(ClientResponse.class);
-		log.debug("Delete Response:" + deleteResponse.getStatus());
-	}
-
-	/**
-	 * @param params
-	 * @return
-	 */
-	private String buildParamString(Map<String, Object> params) {
-		String paramsStr = "";
-		if (params != null && !params.isEmpty()) {
-			paramsStr += "?";
-
-			for (String paramName : params.keySet()) {
-				if (paramsStr.length() == 1) {
-					paramsStr += (paramName + "=" + params.get(paramName));
-				} else {
-					paramsStr += ("&" + paramName + "=" + params.get(paramName));
-				}
-			}
-		}
-		return paramsStr;
-	}
+    private static Logger log = LoggerFactory.getLogger(RESTClientImpl.class);
+
+    private WebResource webResource = null;
+
+    private String mediaType;
+
+    @Override
+    public void initialize(WebResource wr, String mediaType) {
+        this.webResource = wr;
+        this.mediaType = mediaType;
+    }
+
+    @Override
+    public String getApplicationToken(String persistenceUnit, String externalProperties) {
+        String applicationToken;
+        try {
+            log.debug("\n\nGetting Application Token...");
+            WebResource.Builder atBuilder =
+                webResource.path(Constants.KUNDERA_API_PATH + "/application/" + persistenceUnit).accept(mediaType)
+                    .type(mediaType);
+            StringBuffer sb = new StringBuffer().append(externalProperties);
+            ClientResponse insertResponse = (ClientResponse) atBuilder.post(ClientResponse.class, sb.toString());
+
+            InputStream is = insertResponse.getEntityInputStream();
+            applicationToken = StreamUtils.toString(is);
+
+            log.debug("Application Token:" + applicationToken);
+        } catch (UniformInterfaceException e) {
+            log.error("Error during getApplicationToken, Caused by:" + e.getMessage() + ", returning null");
+            return null;
+        } catch (ClientHandlerException e) {
+            log.error("Error during getApplicationToken, Caused by:" + e.getMessage() + ", returning null");
+            return null;
+        }
+        return applicationToken;
+    }
+
+    @Override
+    public String closeApplication(String applicationToken) {
+        log.debug("\n\nClosing Application for Token:" + applicationToken);
+        WebResource.Builder atBuilder =
+            webResource.path(Constants.KUNDERA_API_PATH + "/application").type(mediaType).accept(mediaType)
+                .header(Constants.APPLICATION_TOKEN_HEADER_NAME, applicationToken);
+        String response = atBuilder.delete(String.class);
+        log.debug("Application Closure Response: " + response);
+        return response;
+    }
+
+    @Override
+    public String getSessionToken(String applicationToken) {
+        log.debug("\n\nGetting Session Token...");
+        WebResource.Builder stBuilder =
+            webResource.path(Constants.KUNDERA_API_PATH + "/session").type(mediaType).accept(mediaType)
+                .header(Constants.APPLICATION_TOKEN_HEADER_NAME, applicationToken);
+
+        String sessionToken = stBuilder.get(String.class);
+
+        log.debug("Session Token:" + sessionToken);
+        return sessionToken;
+    }
+
+    @Override
+    public String closeSession(String sessionToken) {
+
+        log.debug("\n\nClosing Session for Token:" + sessionToken);
+        WebResource.Builder stBuilder =
+            webResource.path(Constants.KUNDERA_API_PATH + "/session").type(mediaType).accept(mediaType)
+                .header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
+        String response = stBuilder.delete(String.class);
+        log.debug("Session Deletion Response: " + response);
+        return response;
+    }
+
+    @Override
+    public String insertEntity(String sessionToken, String entityStr, String entityClassName) {
+        log.debug("\n\nInserting Entity...");
+
+        WebResource.Builder insertBuilder =
+            webResource.path(Constants.KUNDERA_API_PATH + "/crud/" + entityClassName).type(mediaType).accept(mediaType)
+                .header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
+        StringBuffer sb = new StringBuffer().append(entityStr);
+        ClientResponse insertResponse = (ClientResponse) insertBuilder.post(ClientResponse.class, sb.toString());
+        log.debug("Response From Insert Entity: " + insertResponse);
+        return insertResponse.toString();
+    }
+
+    @Override
+    public String findEntity(String sessionToken, String pk, String entityClassName) {
+        log.debug("\n\nFinding Entity...");
+        WebResource.Builder findBuilder =
+            webResource.path(Constants.KUNDERA_API_PATH + "/crud/" + entityClassName + "/" + pk).accept(mediaType)
+                .type(mediaType).header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
+
+        ClientResponse findResponse = (ClientResponse) findBuilder.get(ClientResponse.class);
+
+        InputStream is = findResponse.getEntityInputStream();
+        String entityStr = StreamUtils.toString(is);
+
+        log.debug("Found Entity:" + entityStr);
+        return entityStr;
+    }
+
+    @Override
+    public String updateEntity(String sessionToken, String newEntityStr, String entityClassName) {
+        log.debug("\n\nUpdating Entity... " + newEntityStr);
+        WebResource.Builder updateBuilder =
+            webResource.path(Constants.KUNDERA_API_PATH + "/crud/" + entityClassName).type(mediaType).accept(mediaType)
+                .header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
+        ClientResponse updateResponse = updateBuilder.put(ClientResponse.class, newEntityStr);
+        InputStream is = updateResponse.getEntityInputStream();
+        String updatedEntityStr = StreamUtils.toString(is);
+        log.debug("Updated Entity: " + updatedEntityStr);
+        return updatedEntityStr;
+    }
+
+    @Override
+    public void deleteEntity(String sessionToken, String entityStr, String pk, String entityClassName) {
+        log.debug("\n\nDeleting Entity... " + entityStr);
+        WebResource.Builder deleteBuilder =
+            webResource.path(Constants.KUNDERA_API_PATH + "/crud/" + entityClassName + "/delete/" + pk)
+                .accept(MediaType.TEXT_PLAIN).header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
+        ClientResponse deleteResponse = (ClientResponse) deleteBuilder.delete(ClientResponse.class);
+        log.debug("Delete Response:" + deleteResponse.getStatus());
+    }
+
+    @Override
+    public String runJPAQuery(String sessionToken, String jpaQuery, Map<String, Object> params) {
+        log.debug("\n\nRunning JPA Query... ");
+
+        String paramsStr = buildParamString(params);
+        WebResource.Builder queryBuilder =
+            webResource
+                .path(Constants.KUNDERA_API_PATH + Constants.JPA_QUERY_RESOURCE_PATH + "/" + jpaQuery + paramsStr)
+                .type(mediaType).accept(mediaType).header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
+        ClientResponse queryResponse = (ClientResponse) queryBuilder.post(ClientResponse.class);
+        log.debug("Query Response:" + queryResponse.getStatus());
+
+        InputStream is = queryResponse.getEntityInputStream();
+
+        String allStr = StreamUtils.toString(is);
+
+        log.debug("Found Entities:" + allStr);
+        return allStr;
+    }
+
+    @Override
+    public String runObjectJPAQuery(String sessionToken, String jpaQuery, Map<String, Object> params) {
+        log.debug("\n\nRunning JPA Query... ");
+
+        String paramsStr = buildObjectParamString(params);
+
+        WebResource.Builder queryBuilder =
+            webResource.path(Constants.KUNDERA_API_PATH + Constants.JPA_QUERY_RESOURCE_PATH + "/" + jpaQuery)
+                .type(mediaType).accept(mediaType).header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
+        ClientResponse queryResponse = (ClientResponse) queryBuilder.post(ClientResponse.class, paramsStr);
+
+        log.debug("Query Response:" + queryResponse.getStatus());
+
+        InputStream is = queryResponse.getEntityInputStream();
+
+        String allStr = StreamUtils.toString(is);
+
+        log.debug("Found Entities:" + allStr);
+        return allStr;
+    }
+
+    private String buildObjectParamString(Map<String, Object> params) {
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        String parameterString = null;
+        // convert map to JSON string
+        try {
+            parameterString = mapper.writeValueAsString(params);
+        } catch (JsonGenerationException e) {
+            log.error(e.getMessage());
+        } catch (JsonMappingException e) {
+            log.error(e.getMessage());
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+        return parameterString;
+    }
+
+    @Override
+    public String runNamedJPAQuery(String sessionToken, String entityClassName, String namedQuery,
+        Map<String, Object> params) {
+        log.debug("\n\nRunning Named JPA Query " + namedQuery + "... ");
+
+        String paramsStr = buildParamString(params);
+
+        WebResource wr =
+            webResource.path(Constants.KUNDERA_API_PATH + Constants.JPA_QUERY_RESOURCE_PATH + "/" + entityClassName
+                + "/" + namedQuery + paramsStr);
+
+        WebResource.Builder queryBuilder =
+            wr.accept(mediaType).header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken).type(mediaType);
+
+        ClientResponse queryResponse = (ClientResponse) queryBuilder.get(ClientResponse.class);
+        log.debug("Query Response:" + queryResponse.getStatus());
+
+        InputStream is = queryResponse.getEntityInputStream();
+        String allBookStr = StreamUtils.toString(is);
+
+        log.debug("Found Entities for query " + namedQuery + ":" + allBookStr);
+        return allBookStr;
+    }
+
+    @Override
+    public String runNativeQuery(String sessionToken, String entityClassName, String nativeQuery,
+        Map<String, Object> params) {
+        log.debug("\n\nRunning Native Query... ");
+
+        String paramsStr = buildParamString(params);
+        WebResource.Builder queryBuilder =
+            webResource.path(Constants.KUNDERA_API_PATH + Constants.NATIVE_QUERY_RESOURCE_PATH + entityClassName)
+                .accept(mediaType).type(mediaType).header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
+
+        ClientResponse queryResponse = (ClientResponse) queryBuilder.post(ClientResponse.class, nativeQuery);
+        log.debug("Query Response:" + queryResponse.getStatus());
+
+        InputStream is = queryResponse.getEntityInputStream();
+
+        String allStr = StreamUtils.toString(is);
+
+        log.debug("Found Entities:" + allStr);
+        return allStr;
+    }
+
+    @Override
+    public String runNamedNativeQuery(String sessionToken, String entityClassName, String namedNativeQuery,
+        Map<String, Object> params) {
+        log.debug("\n\nRunning Named Native JPA Query " + namedNativeQuery + "... ");
+
+        String paramsStr = buildParamString(params);
+
+        WebResource wr =
+            webResource.path(Constants.KUNDERA_API_PATH + Constants.NATIVE_QUERY_RESOURCE_PATH + entityClassName + "/"
+                + namedNativeQuery + paramsStr);
+
+        WebResource.Builder queryBuilder =
+            wr.accept(mediaType).type(mediaType).header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
+
+        ClientResponse queryResponse = (ClientResponse) queryBuilder.get(ClientResponse.class);
+        log.debug("Query Response:" + queryResponse.getStatus());
+
+        InputStream is = queryResponse.getEntityInputStream();
+        String allBookStr = StreamUtils.toString(is);
+
+        log.debug("Found Entities for query " + namedNativeQuery + ":" + allBookStr);
+        return allBookStr;
+    }
+
+    @Override
+    public String getAllEntities(String sessionToken, String entityClassName) {
+        log.debug("\n\nFinding all Entities... ");
+        WebResource.Builder queryBuilder =
+            webResource
+                .path(Constants.KUNDERA_API_PATH + Constants.JPA_QUERY_RESOURCE_PATH + "/" + entityClassName + "/all")
+                .accept(mediaType).type(mediaType).header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
+        ClientResponse queryResponse = (ClientResponse) queryBuilder.get(ClientResponse.class);
+        log.debug("Find All Response:" + queryResponse.getStatus());
+
+        InputStream is = queryResponse.getEntityInputStream();
+        // List books = (List) JAXBUtils.toObject(is, ArrayList.class,
+        // MediaType.APPLICATION_XML);
+
+        String allEntitiesStr = StreamUtils.toString(is);
+
+        log.debug("Found All Entities:" + allEntitiesStr);
+        return allEntitiesStr;
+    }
+
+    @Override
+    public String getSchemaList(String sessionToken, String persistenceUnit) {
+        log.debug("\n\nGetting Schema List for PU :" + persistenceUnit);
+        WebResource.Builder slBuilder =
+            webResource.path(Constants.KUNDERA_API_PATH + "/metadata/schemaList/" + persistenceUnit).accept(mediaType)
+                .header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
+        ClientResponse schemaResponse = (ClientResponse) slBuilder.get(ClientResponse.class);
+
+        InputStream is = schemaResponse.getEntityInputStream();
+        String schemaList = StreamUtils.toString(is);
+
+        log.debug("Schema List:" + schemaList);
+        return schemaList;
+    }
+
+    @Override
+    public String insertPerson(String sessionToken, String personStr) {
+
+        log.debug("\n\nInserting Entity...");
+        WebResource.Builder insertBuilder =
+            webResource.path(Constants.KUNDERA_API_PATH + "/crud/PersonnelUni1ToM").type(mediaType).accept(mediaType)
+                .header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
+        StringBuffer sb = new StringBuffer().append(personStr);
+        ClientResponse insertResponse = (ClientResponse) insertBuilder.post(ClientResponse.class, sb.toString());
+        log.debug("Response From Insert person: " + insertResponse);
+        return insertResponse.toString();
+
+    }
+
+    @Override
+    public String findPerson(String sessionToken, String isbn) {
+
+        log.debug("\n\nFinding Entity...");
+        WebResource.Builder findBuilder =
+            webResource.path(Constants.KUNDERA_API_PATH + "/crud/PersonnelUni1ToM/" + isbn).accept(mediaType)
+                .type(mediaType).header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
+        ;
+
+        ClientResponse findResponse = (ClientResponse) findBuilder.get(ClientResponse.class);
+
+        InputStream is = findResponse.getEntityInputStream();
+        String personkStr = StreamUtils.toString(is);
+
+        log.debug("Found Entity:" + personkStr);
+        return personkStr;
+    }
+
+    @Override
+    public String updatePerson(String sessionToken, String oldPersonStr) {
+
+        log.debug("\n\nUpdating Entity... " + oldPersonStr);
+        oldPersonStr = oldPersonStr.replaceAll("XXXXXXXXX", "YYYYYYYYY");
+        WebResource.Builder updateBuilder =
+            webResource.path(Constants.KUNDERA_API_PATH + "/crud/PersonnelUni1ToM").type(mediaType).accept(mediaType)
+                .header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
+        ClientResponse updateResponse = updateBuilder.put(ClientResponse.class, oldPersonStr);
+        InputStream is = updateResponse.getEntityInputStream();
+        String updatedPersonStr = StreamUtils.toString(is);
+        log.debug("Updated Person: " + updatedPersonStr);
+        return updatedPersonStr;
+
+    }
+
+    @Override
+    public String getAllPersons(String sessionToken) {
+        log.debug("\n\nFinding all Entities... ");
+        WebResource.Builder queryBuilder =
+            webResource.path(Constants.KUNDERA_API_PATH + Constants.JPA_QUERY_RESOURCE_PATH + "/PersonnelUni1ToM/all")
+                .type(mediaType).accept(mediaType).header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
+        ClientResponse queryResponse = (ClientResponse) queryBuilder.get(ClientResponse.class);
+        log.debug("Find All Response:" + queryResponse.getStatus());
+
+        InputStream is = queryResponse.getEntityInputStream();
+     
+        String allPersonStr = StreamUtils.toString(is);
+
+        log.debug("Found All Entities:" + allPersonStr);
+        return allPersonStr;
+    }
+
+    @Override
+    public void deletePerson(String sessionToken, String updatedPerson, String isbn) {
+        log.debug("\n\nDeleting Entity... " + updatedPerson);
+        WebResource.Builder deleteBuilder =
+            webResource.path(Constants.KUNDERA_API_PATH + "/crud/PersonnelUni1ToM/delete/" + isbn).accept(mediaType)
+                .type(mediaType).header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
+        ClientResponse deleteResponse = (ClientResponse) deleteBuilder.delete(ClientResponse.class);
+        log.debug("Delete Response:" + deleteResponse.getStatus());
+    }
+
+    /**
+     * @param params
+     * @return
+     */
+    private String buildParamString(Map<String, Object> params) {
+        String paramsStr = "";
+        if (params != null && !params.isEmpty()) {
+            paramsStr += "?";
+
+            for (String paramName : params.keySet()) {
+                if (paramsStr.length() == 1) {
+                    paramsStr += (paramName + "=" + params.get(paramName));
+                } else {
+                    paramsStr += ("&" + paramName + "=" + params.get(paramName));
+                }
+            }
+        }
+        return paramsStr;
+    }
+
+    @Override
+    public String getEntityModel(String sessionToken, String entityClassName) {
+        log.debug("\n\nGetting model for class :" + entityClassName);
+        WebResource.Builder insertBuilder =
+            webResource.path(Constants.KUNDERA_API_PATH + "/metadata/" + entityClassName).accept(mediaType)
+                .header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
+        StringBuffer sb = new StringBuffer();
+        ClientResponse insertResponse = (ClientResponse) insertBuilder.post(ClientResponse.class, sb.toString());
+
+        InputStream is = insertResponse.getEntityInputStream();
+        String model = StreamUtils.toString(is);
+
+        log.debug("Entity Model:" + model);
+        return model;
+    }
+
+    @Override
+    public String runNativeScript(String sessionToken, String nativeScript, String persistenceUnit) {
+
+        log.debug("\n\nUpdating Entity... " + nativeScript);
+        WebResource.Builder updateBuilder =
+            webResource.path(Constants.KUNDERA_API_PATH + Constants.NATIVE_QUERY_RESOURCE_PATH + persistenceUnit)
+                .type(mediaType).accept(mediaType).header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
+        ClientResponse updateResponse = updateBuilder.put(ClientResponse.class, nativeScript);
+        InputStream is = updateResponse.getEntityInputStream();
+        String updatedEntityStr = StreamUtils.toString(is);
+        log.debug("Updated Entity: " + updatedEntityStr);
+        return updatedEntityStr;
+    }
 
 }

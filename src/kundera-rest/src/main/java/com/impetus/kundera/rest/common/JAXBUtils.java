@@ -15,21 +15,31 @@
  */
 package com.impetus.kundera.rest.common;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.SchemaOutputResolver;
+import javax.xml.transform.Result;
+import javax.xml.transform.stream.StreamResult;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.jersey.api.json.JSONJAXBContext;
-import com.sun.jersey.api.json.JSONMarshaller;
-import com.sun.jersey.api.json.JSONUnmarshaller;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
+import com.fasterxml.jackson.module.jsonSchema.factories.SchemaFactoryWrapper;
 
 /**
  * Utility for converting objects into XML and vice versa
@@ -37,91 +47,171 @@ import com.sun.jersey.api.json.JSONUnmarshaller;
  * @author amresh.singh
  */
 public class JAXBUtils {
-	private static Logger log = LoggerFactory.getLogger(JAXBUtils.class);
+    private static Logger log = LoggerFactory.getLogger(JAXBUtils.class);
 
-	/**
-	 * Converts <code>InputStream</code> to Object using JAXB
-	 * 
-	 * @param str
-	 * @param objectClass
-	 * @return
-	 */
-	public static Object toObject(InputStream is, Class<?> objectClass,
-			String mediaType) {
-		Object output = null;
+    private static Map<Class<?>, String> schemaMap;
 
-		try {
-			output = objectClass.newInstance();
+    private final static ObjectMapper mapper;
+    private final static XmlMapper xmlMapper;
+    static {
+        mapper = new ObjectMapper();
+        xmlMapper = new XmlMapper();
+    }
 
-			if (MediaType.APPLICATION_XML.equals(mediaType)) {
-				JAXBContext jaxbContext = JAXBContext.newInstance(objectClass);
+    /**
+     * Converts <code>InputStream</code> to Object using JAXB
+     * 
+     * @param str
+     * @param objectClass
+     * @return
+     */
+    public static Object toObject(InputStream is, Class<?> objectClass, String mediaType) {
+        Object output = null;
 
-				Unmarshaller jaxbUnmarshaller = jaxbContext
-						.createUnmarshaller();
+        try {
+            output = objectClass.newInstance();
 
-				output = jaxbUnmarshaller.unmarshal(is);
-			} else if (MediaType.APPLICATION_JSON.equals(mediaType)) {
+            if (MediaType.APPLICATION_XML.equals(mediaType)) {
 
-				JAXBContext context = JSONJAXBContext.newInstance(objectClass);
+                output = xmlMapper.readValue(is, objectClass);
 
-				Unmarshaller m = context.createUnmarshaller();
-				JSONUnmarshaller unmarshaller = JSONJAXBContext
-						.getJSONUnmarshaller(m, context);
+            } else if (MediaType.APPLICATION_JSON.equals(mediaType)) {
 
-				output = unmarshaller.unmarshalFromJSON(is, objectClass);
+                output = mapper.readValue(is, objectClass);
 
-			}
+            }
+        } catch (InstantiationException e) {
+            log.warn("Error while converting String to Object using JAXB:" + e.getMessage());
+            return null;
+        } catch (IllegalAccessException e) {
+            log.warn("Error while converting String to Object using JAXB:" + e.getMessage());
+            return null;
+        } catch (JsonParseException e) {
+            log.error(e.getMessage());
+        } catch (JsonMappingException e) {
+            log.error(e.getMessage());
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+        return output;
+    }
 
-		} catch (JAXBException e) {
-			log.warn("Error while converting String to Object using JAXB:"
-					+ e.getMessage());
-			return null;
-		} catch (InstantiationException e) {
-			log.warn("Error while converting String to Object using JAXB:"
-					+ e.getMessage());
-			return null;
-		} catch (IllegalAccessException e) {
-			log.warn("Error while converting String to Object using JAXB:"
-					+ e.getMessage());
-			return null;
-		}
-		return output;
-	}
+    /**
+     * Converts <code>InputStream</code> to Object using JAXB
+     * 
+     * @param str
+     * @param objectClass
+     * @return
+     */
+    public static Object toObject(String data, Class<?> objectClass, String mediaType) {
+        Object output = null;
 
-	public static String toString(Class<?> objectClass, Object object,
-			String mediaType) {
-		try {
-			if (MediaType.APPLICATION_XML.equals(mediaType)) {
-				JAXBContext jaxbContext = JAXBContext.newInstance(objectClass);
-				Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+        try {
+            output = objectClass.newInstance();
 
-				StringWriter writer = new StringWriter();
+            if (MediaType.APPLICATION_XML.equals(mediaType)) {
+                output = xmlMapper.readValue(data, objectClass);
 
-				jaxbMarshaller.marshal(object, writer);
-				return writer.toString();
+            } else if (MediaType.APPLICATION_JSON.equals(mediaType)) {
+                if (MediaType.APPLICATION_JSON.equals(mediaType)) {
+                    output = mapper.readValue(data, objectClass);
+                }
+                return output;
+            }
+        } catch (InstantiationException e) {
+            log.warn("Error while converting String to Object using JAXB:" + e.getMessage());
+            return null;
+        } catch (IllegalAccessException e) {
+            log.warn("Error while converting String to Object using JAXB:" + e.getMessage());
+            return null;
+        } catch (JsonParseException e) {
+            log.error(e.getMessage());
+        } catch (JsonMappingException e) {
+            log.error(e.getMessage());
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+        return output;
+    }
 
-			} else if (MediaType.APPLICATION_JSON.equals(mediaType)) {
-				StringWriter writer = new StringWriter();
-				JAXBContext context = JSONJAXBContext
-						.newInstance(new Class[] { objectClass });
+    public static String toString(Class<?> objectClass, Object object, String mediaType) {
+        try {
+            if (MediaType.APPLICATION_XML.equals(mediaType)) {
+                return xmlMapper.writeValueAsString(object);
 
-				Marshaller m = context.createMarshaller();
-				JSONMarshaller marshaller = JSONJAXBContext.getJSONMarshaller(
-						m, context);
+            } else if (MediaType.APPLICATION_JSON.equals(mediaType)) {
+                return mapper.writeValueAsString(object);
+            }
 
-				marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-				marshaller.marshallToJSON(object, writer);
-				return writer.toString();
-			} else {
-				return null;
-			}
-		} catch (JAXBException e) {
-			log.error("Error during translation, Caused by:" + e.getMessage()
-					+ ", returning null");
-			return null;
-		}
-	}
+        } catch (JsonProcessingException e) {
+            log.error(e.getMessage());
+        }
+        return null;
+    }
 
+    /**
+     * @param objectClass
+     * @param mediaType
+     * @return
+     */
+    public static String getSchema(Class<?> objectClass, String mediaType) {
+        try {
 
+            if (mediaType == MediaType.APPLICATION_JSON) {
+
+                String schemaDef = null;
+
+                if (schemaMap == null) {
+                    schemaMap = new HashMap<Class<?>, String>();
+                }
+                if (schemaMap.containsKey(objectClass)) {
+                    schemaDef = schemaMap.get(objectClass);
+
+                } else {
+
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    SchemaFactoryWrapper visitor = new SchemaFactoryWrapper();
+                    objectMapper.acceptJsonFormatVisitor(objectClass, visitor);
+                    JsonSchema schema = visitor.finalSchema();
+                    schemaDef = objectMapper.writeValueAsString(schema);
+                    schemaMap.put(objectClass, schemaDef);
+                }
+
+                return schemaDef;
+
+            } else if (mediaType == MediaType.APPLICATION_XML) {
+                JAXBContext jc = JAXBContext.newInstance(objectClass);
+                // generate the schemas
+                final ArrayList<ByteArrayOutputStream> schemaStreams = new ArrayList<ByteArrayOutputStream>();
+                jc.generateSchema(new SchemaOutputResolver() {
+                    @Override
+                    public Result createOutput(String namespaceUri, String suggestedFileName) throws IOException {
+                        ByteArrayOutputStream out = new ByteArrayOutputStream();
+                        schemaStreams.add(out);
+                        StreamResult streamResult = new StreamResult(out);
+                        streamResult.setSystemId("");
+                        return streamResult;
+                    }
+                });
+
+                // convert to a list of string
+                List<String> schemas = new ArrayList<String>();
+                for (ByteArrayOutputStream os : schemaStreams) {
+                    schemas.add(os.toString());
+
+                }
+
+                return schemaStreams.get(0).toString();
+
+            }
+
+        } catch (JAXBException e) {
+            log.error("Error during translation, Caused by:" + e.getMessage() + ", returning null");
+            return null;
+        } catch (IOException e) {
+            log.error("Error during translation, Caused by:" + e.getMessage() + ", returning null");
+        }
+        return null;
+    }
 
 }

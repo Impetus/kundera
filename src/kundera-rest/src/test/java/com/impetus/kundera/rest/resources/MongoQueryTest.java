@@ -16,16 +16,11 @@
 package com.impetus.kundera.rest.resources;
 
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Calendar;
+import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.UUID;
 
 import javax.ws.rs.core.MediaType;
 
@@ -44,13 +39,10 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
 import com.impetus.kundera.rest.common.Constants;
-import com.impetus.kundera.rest.common.ExternalLink;
 import com.impetus.kundera.rest.common.JAXBUtils;
-import com.impetus.kundera.rest.common.PreferenceCassandra;
+import com.impetus.kundera.rest.common.MongoCompoundKey;
+import com.impetus.kundera.rest.common.MongoPrimeUser;
 import com.impetus.kundera.rest.common.Professional;
-import com.impetus.kundera.rest.common.ProfessionalDetailCassandra;
-import com.impetus.kundera.rest.common.TweetCassandra;
-import com.impetus.kundera.rest.common.UserCassandra;
 import com.impetus.kundera.rest.dao.RESTClient;
 import com.impetus.kundera.rest.dao.RESTClientImpl;
 import com.sun.jersey.api.client.WebResource;
@@ -83,13 +75,13 @@ import com.sun.jersey.test.framework.JerseyTest;
  * 
  * @author chhavi.gangwal
  */
-public class PolyglotQueryTest extends JerseyTest
+public class MongoQueryTest extends JerseyTest
 {
     private static final String _KEYSPACE = "KunderaExamples";
     
-    private static final String _PU = "twiCassandra,twiMongo";
+    private static final String _PU = "mongoPu";
 
-    private static Logger log = LoggerFactory.getLogger(DataTypeTest.class);
+    private static Logger log = LoggerFactory.getLogger(MongoQueryTest.class);
 
     static String mediaType = MediaType.APPLICATION_JSON;
 
@@ -115,7 +107,7 @@ public class PolyglotQueryTest extends JerseyTest
 
     private final static boolean AUTO_MANAGE_SCHEMA = true;
 
-    public PolyglotQueryTest() throws Exception
+    public MongoQueryTest() throws Exception
     {
         super(Constants.KUNDERA_REST_RESOURCES_PACKAGE);
     }
@@ -147,13 +139,12 @@ public class PolyglotQueryTest extends JerseyTest
    
     
     @Test
-    public void testUserCRUD() throws JsonParseException, JsonMappingException, IOException
+    public void testCompositeUserCRUD() throws JsonParseException, JsonMappingException, IOException
     {
         WebResource webResource = resource();
         restClient = new RESTClientImpl();
         restClient.initialize(webResource, mediaType);
 
-        buildUser1Str();
         // Get Application Token
         applicationToken = restClient.getApplicationToken(_PU, null);
         Assert.assertNotNull(applicationToken);
@@ -165,74 +156,111 @@ public class PolyglotQueryTest extends JerseyTest
         Assert.assertNotNull(sessionToken);
         sessionToken = sessionToken.replaceAll("^\"|\"$", "");
         Assert.assertTrue(sessionToken.startsWith("ST_"));
+        
+            
+        UUID timeLineId = UUID.randomUUID();
+        Date currentDate = new Date();
+        MongoCompoundKey key = new MongoCompoundKey("mevivs", 1, timeLineId);
 
+        MongoPrimeUser timeLine = new MongoPrimeUser(key);
+        timeLine.setKey(key);
+        timeLine.setTweetBody("my first tweet");
+        timeLine.setTweetDate(currentDate);
+        
+        MongoCompoundKey key1 = new MongoCompoundKey("john", 2, timeLineId);
+
+        MongoPrimeUser timeLine2 = new MongoPrimeUser(key1);
+        timeLine2.setKey(key1);
+        timeLine2.setTweetBody("my second tweet");
+        timeLine2.setTweetDate(currentDate);
+
+
+        String mongoUser = JAXBUtils.toString(MongoPrimeUser.class, timeLine, MediaType.APPLICATION_JSON);
+        Assert.assertNotNull(mongoUser);
+       
+        String mongoUser1 = JAXBUtils.toString(MongoPrimeUser.class, timeLine2, MediaType.APPLICATION_JSON);
+        Assert.assertNotNull(mongoUser1);
+
+        
         // Insert Record
-        String insertResponse1 = restClient.insertEntity(sessionToken, userString, UserCassandra.class.getSimpleName());
-       
-
+        String insertResponse1 = restClient.insertEntity(sessionToken, mongoUser, "MongoPrimeUser");
+        String insertResponse2 = restClient.insertEntity(sessionToken, mongoUser1, "MongoPrimeUser");
+        
         Assert.assertNotNull(insertResponse1);
+        Assert.assertNotNull(insertResponse2);
+     
         Assert.assertTrue(insertResponse1.indexOf("200") > 0);
-       
-
+        Assert.assertTrue(insertResponse2.indexOf("200") > 0);
+        String encodepk1 = null;
+        pk1 = JAXBUtils.toString(MongoCompoundKey.class, key, MediaType.APPLICATION_JSON);
+        pk2 = JAXBUtils.toString(MongoCompoundKey.class, key1, MediaType.APPLICATION_JSON);
+        try {
+            encodepk1 = java.net.URLEncoder.encode(pk1, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            log.error(e.getMessage());
+        }
         // Find Record
-        String foundUser = restClient.findEntity(sessionToken, "0001", UserCassandra.class.getSimpleName());
+        String foundUser = restClient.findEntity(sessionToken, encodepk1, "MongoPrimeUser");
         Assert.assertNotNull(foundUser);
-        Assert.assertTrue(foundUser.indexOf("0001") > 0);
+        
+        Assert.assertNotNull(foundUser);
+        Assert.assertTrue(foundUser.indexOf("mevivs") > 0);
         
         foundUser = foundUser.substring(1,foundUser.length()-1);
         Map<String, Object> userDetails = new HashMap<String, Object>();
         ObjectMapper mapper = new ObjectMapper();
         userDetails = mapper.readValue(foundUser, userDetails.getClass());
-        foundUser = mapper.writeValueAsString(userDetails.get("usercassandra"));
+        foundUser = mapper.writeValueAsString(userDetails.get("mongoprimeuser"));
      
         // Update Record
-        foundUser = foundUser.replaceAll("163.12", "165.21");
+        foundUser = foundUser.replaceAll("first", "hundreth");
         
-        String updatedUser = restClient.updateEntity(sessionToken, foundUser, UserCassandra.class.getSimpleName());
+        String updatedUser = restClient.updateEntity(sessionToken, foundUser, MongoPrimeUser.class.getSimpleName());
         
         Assert.assertNotNull(updatedUser);
-        Assert.assertTrue(updatedUser.indexOf("165.21") > 0);
+        Assert.assertTrue(updatedUser.indexOf("hundreth") > 0);
 
         /** JPA Query - Select */
-        // Get All Professionals
-        String jpaQuery = "select p from " + UserCassandra.class.getSimpleName() + " p";
+        // Get All users
+        String jpaQuery = "select p from " + MongoPrimeUser.class.getSimpleName() + " p";
         String queryResult = restClient.runJPAQuery(sessionToken, jpaQuery, new HashMap<String, Object>());
         log.debug("Query Result:" + queryResult);
         
         Assert.assertNotNull(queryResult);
         Assert.assertFalse(StringUtils.isEmpty(queryResult));
-        Assert.assertTrue(queryResult.indexOf("usercassandra") > 0);
-        Assert.assertTrue(queryResult.indexOf("0001") > 0);
-        Assert.assertTrue(queryResult.indexOf("0002") > 0);
-        Assert.assertTrue(queryResult.indexOf("0003") > 0);
+
+        Assert.assertTrue(queryResult.indexOf("mongoprimeuser") > 0);
+        Assert.assertTrue(queryResult.indexOf(pk1) > 0);
+        Assert.assertTrue(queryResult.indexOf(pk2) > 0);
+
         
         Assert.assertTrue(queryResult.indexOf("Motif") < 0);
        
-        jpaQuery = "select p from " + UserCassandra.class.getSimpleName() + " p WHERE p.userId = :userId";
+        jpaQuery = "select p from " + MongoPrimeUser.class.getSimpleName() + " p WHERE p.key = :key";
         Map<String, Object> params = new HashMap<String, Object>();
         
-        params.put("userId", "0001");
+        params.put("key", pk1);
         
         
         queryResult = restClient.runObjectJPAQuery(sessionToken, jpaQuery, params);
         log.debug("Query Result:" + queryResult);
-        
+       
         Assert.assertNotNull(queryResult);
         Assert.assertFalse(StringUtils.isEmpty(queryResult));
-        Assert.assertTrue(queryResult.indexOf("usercassandra") > 0);
-        Assert.assertTrue(queryResult.indexOf("0001") > 0);
-
+        Assert.assertTrue(queryResult.indexOf("mongoprimeuser") > 0);
+        Assert.assertTrue(queryResult.indexOf(timeLineId.toString()) > 0);
+        Assert.assertTrue(queryResult.indexOf(pk2) < 0);
         
         Assert.assertTrue(queryResult.indexOf("Motif") < 0);
 
 
         /** JPA Query - Select All */
-        // Get All Professionals
-        String allUsers = restClient.getAllEntities(sessionToken, UserCassandra.class.getSimpleName());
+        // Get All Users
+        String allUsers = restClient.getAllEntities(sessionToken, MongoPrimeUser.class.getSimpleName());
         log.debug(allUsers);
         Assert.assertNotNull(allUsers);
        
-
+       
         // Close Session
         restClient.closeSession(sessionToken);
 
@@ -240,68 +268,39 @@ public class PolyglotQueryTest extends JerseyTest
         restClient.closeApplication(applicationToken);
     }
     
-    private void buildUser1Str()
+    @Test
+    public void testMongoNativeQuery() throws JsonParseException, JsonMappingException, IOException
     {
-    	 
-    	userId1 = "0001";
-    	userId2 = "0002";
-    	
-    	List<UserCassandra> friendList = new ArrayList<UserCassandra>();
-    	
-    	List<UserCassandra> followers = new ArrayList<UserCassandra>();
-    	
-    	 UserCassandra user1 = new UserCassandra(userId1, "Amresh", "password1", "married");
-    	 
-         UserCassandra user2 = new UserCassandra(userId2, "Vivek", "password1", "married");
-         
-         UserCassandra user3 = new UserCassandra("0003", "Kuldeep", "password1", "single");
+        WebResource webResource = resource();
+        restClient = new RESTClientImpl();
+        restClient.initialize(webResource, mediaType);
 
-         friendList.add(user2);
-         Calendar cal = Calendar.getInstance();
-         cal.setTime(new Date(1344079067777l));
+        // Get Application Token
+        applicationToken = restClient.getApplicationToken(_PU, null);
+        Assert.assertNotNull(applicationToken);
+        applicationToken = applicationToken.replaceAll("^\"|\"$", "");
+        Assert.assertTrue(applicationToken.startsWith("AT_"));
 
-         
-         user1.setProfessionalDetail(new ProfessionalDetailCassandra(1234567, true, 31, 'C', (byte) 8, (short) 5, (float) 10.0, 163.12, new Date(
-                 Long.parseLong("1351667541111")), new Date(Long.parseLong("1351667542222")), new Date(
-                 Long.parseLong("1351667543333")), 2, new Long(3634521523423L), new Double(7.23452342343),
-     
-         new BigInteger("123456789"), new BigDecimal(123456789), cal));
-         
-         user2.setProfessionalDetail(new ProfessionalDetailCassandra(1234568, true, 21, 'C', (byte) 8, (short) 5, (float) 10.0, 163.12, new Date(
-                 Long.parseLong("1351667541111")), new Date(Long.parseLong("1351667542222")), new Date(
-                 Long.parseLong("1351667543333")), 2, new Long(3634521523423L), new Double(7.23452342343),
-     
-         new BigInteger("123456789"), new BigDecimal(123456789), cal));
-
-         user1.setPreference(new PreferenceCassandra("P1", "Motif", "2"));
-         
-         followers.add(user3);
-         
-         friendList.add(user2);
-         
-         user1.setFriends(friendList);
-         
-         user1.setFollowers(followers);
-         
-         Set<ExternalLink> externalLinks = new HashSet<ExternalLink>();
-         List<TweetCassandra> tweetList = new ArrayList<TweetCassandra>();
-         
-         externalLinks.add(new ExternalLink("L1", "Facebook", "http://facebook.com/coolnerd"));
-         externalLinks.add(new ExternalLink("L2", "LinkedIn", "http://linkedin.com/in/devilmate"));
-         user1.setExternalLinks(externalLinks);
-         
-         
-         tweetList.add(new TweetCassandra("Here is my first tweet", "Web"));
-         tweetList.add(new TweetCassandra("Second Tweet from me", "Mobile"));
-         user1.setTweets(tweetList);
-         
+        // Get Session Token
+        sessionToken = restClient.getSessionToken(applicationToken);
+        Assert.assertNotNull(sessionToken);
+        sessionToken = sessionToken.replaceAll("^\"|\"$", "");
+        Assert.assertTrue(sessionToken.startsWith("ST_"));
         
-         userString = JAXBUtils.toString(UserCassandra.class, user1, mediaType);
-         
-         
+        String dbResp = restClient.runNativeScript(sessionToken, "db.adminCommand('listDatabases').databases", _PU);
+        Assert.assertNotNull(dbResp);
+        Assert.assertTrue(dbResp.indexOf("local") > 0);
+        
+        // Close Session
+        restClient.closeSession(sessionToken);
 
+        // Close Application
+        restClient.closeApplication(applicationToken);
     }
-
+    
+  
+    
+  
 
    
 
