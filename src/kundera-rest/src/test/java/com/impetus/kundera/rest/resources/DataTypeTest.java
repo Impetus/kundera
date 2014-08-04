@@ -140,7 +140,7 @@ public class DataTypeTest extends JerseyTest
         if (AUTO_MANAGE_SCHEMA)
         {
             CassandraCli.dropKeySpace(_KEYSPACE.toLowerCase());
-           // loadData();
+            loadData();
         }
     }
 
