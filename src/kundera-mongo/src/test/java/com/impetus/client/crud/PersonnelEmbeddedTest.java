@@ -125,7 +125,7 @@ public class PersonnelEmbeddedTest
         personnels = em.createQuery("Select p from PersonnelEmbedded p where p.personalDetail.phoneNo = 12456 and p.age=2").getResultList();
         Assert.assertTrue(personnels.isEmpty());
 
-        personnels = em.createQuery("Select p from PersonnelEmbedded p where p.personalDetail.phoneNo = 12456 or p.age=24").getResultList();
+        personnels = em.createQuery("Select p from PersonnelEmbedded p where (p.personalDetail.phoneNo = 1245) or (p.age=24)").getResultList();
         Assert.assertNotNull(personnels);
         Assert.assertFalse(personnels.isEmpty());
         Assert.assertNotNull(personnels.get(0));
