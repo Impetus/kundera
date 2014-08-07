@@ -371,6 +371,7 @@ public class MongoDBQuery extends QueryImpl {
                     query = (BasicDBObject) geospatialQueryimpl.createGeospatialQuery(property, value, query);
 
                 } else {
+
                     if (isCompositeColumn) {
                         property = new StringBuffer("_id.").append(property).toString();
                     }
@@ -459,6 +460,9 @@ public class MongoDBQuery extends QueryImpl {
                 // TODO: Add support for other operators like >, <, >=, <=,
                 // order by asc/ desc, limit, skip, count etc
             }
+        }
+        if (!compositeColumns.isEmpty()) {
+            query.append("_id", compositeColumns);
         }
 
         return query;
