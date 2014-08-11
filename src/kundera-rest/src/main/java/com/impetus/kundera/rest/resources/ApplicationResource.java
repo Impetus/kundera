@@ -69,7 +69,7 @@ public class ApplicationResource {
 	public Response getApplicationToken(
 			@PathParam("persistenceUnits") String persistenceUnits,
 			@Context HttpHeaders headers, String externalProperties) {
-		String mediaType = headers.getRequestHeader("Content-type").get(0);
+	    String mediaType = headers != null && headers.getRequestHeaders().containsKey("Content-type")? headers.getRequestHeader("Content-type").get(0) : MediaType.APPLICATION_JSON;
 		mediaType = mediaType.equalsIgnoreCase(MediaType.APPLICATION_XML) ? MediaType.APPLICATION_XML : MediaType.APPLICATION_JSON;
 		if (log.isDebugEnabled())
 			log.debug("GET Persistence Unit(s):" + persistenceUnits);
@@ -129,7 +129,7 @@ public class ApplicationResource {
 	public Response closeApplication(
 			@HeaderParam(Constants.APPLICATION_TOKEN_HEADER_NAME) String applicationToken,
 			@Context HttpHeaders headers) {
-		String mediaType = headers.getRequestHeader("Content-type").get(0);
+	    String mediaType = headers != null && headers.getRequestHeaders().containsKey("Content-type")? headers.getRequestHeader("Content-type").get(0) : MediaType.APPLICATION_JSON;
 		mediaType = mediaType.equalsIgnoreCase(MediaType.APPLICATION_XML) ? MediaType.APPLICATION_XML : MediaType.APPLICATION_JSON;
 		if (log.isDebugEnabled())
 			log.debug("DELETE: Application Token:" + applicationToken);

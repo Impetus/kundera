@@ -74,7 +74,7 @@ public class JPAQueryResource {
         String namedQueryName = info.getPathParameters().getFirst("namedQueryName");
         String params = info.getRequestUri().getQuery();
         String sessionToken = headers.getRequestHeader(Constants.SESSION_TOKEN_HEADER_NAME).get(0);
-        String mediaType = headers.getRequestHeader("Content-type").get(0);
+        String mediaType = headers != null && headers.getRequestHeaders().containsKey("Content-type")? headers.getRequestHeader("Content-type").get(0) : MediaType.APPLICATION_JSON;
         mediaType =
             mediaType.equalsIgnoreCase(MediaType.APPLICATION_XML) ? MediaType.APPLICATION_XML
                 : MediaType.APPLICATION_JSON;
@@ -163,7 +163,7 @@ public class JPAQueryResource {
 
         String sessionToken = headers.getRequestHeader(Constants.SESSION_TOKEN_HEADER_NAME).get(0);
         sessionToken = sessionToken.replaceAll("^\"|\"$", "");
-        String mediaType = headers.getRequestHeader("Content-type").get(0);
+        String mediaType = headers != null && headers.getRequestHeaders().containsKey("Content-type")? headers.getRequestHeader("Content-type").get(0) : MediaType.APPLICATION_JSON;
         mediaType =
             mediaType.equalsIgnoreCase(MediaType.APPLICATION_XML) ? MediaType.APPLICATION_XML
                 : MediaType.APPLICATION_JSON;
@@ -234,7 +234,7 @@ public class JPAQueryResource {
         String params = info.getRequestUri().getQuery();
         String sessionToken = headers.getRequestHeader(Constants.SESSION_TOKEN_HEADER_NAME).get(0);
         sessionToken = sessionToken.replaceAll("^\"|\"$", "");
-        String mediaType = headers.getRequestHeader("Content-type").get(0);
+        String mediaType = headers != null && headers.getRequestHeaders().containsKey("Content-type")? headers.getRequestHeader("Content-type").get(0) : MediaType.APPLICATION_JSON;
         mediaType =
             mediaType.equalsIgnoreCase(MediaType.APPLICATION_XML) ? MediaType.APPLICATION_XML
                 : MediaType.APPLICATION_JSON;
@@ -274,7 +274,7 @@ public class JPAQueryResource {
         String params = info.getRequestUri().getQuery();
         String sessionToken = headers.getRequestHeader(Constants.SESSION_TOKEN_HEADER_NAME).get(0);
         sessionToken = sessionToken.replaceAll("^\"|\"$", "");
-        String mediaType = headers.getRequestHeader("Content-type").get(0);
+        String mediaType = headers != null && headers.getRequestHeaders().containsKey("Content-type")? headers.getRequestHeader("Content-type").get(0) : MediaType.APPLICATION_JSON;
         mediaType =
             mediaType.equalsIgnoreCase(MediaType.APPLICATION_XML) ? MediaType.APPLICATION_XML
                 : MediaType.APPLICATION_JSON;

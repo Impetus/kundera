@@ -80,7 +80,7 @@ public class MetadataResource {
         EntityManagerFactoryImpl emfImpl = (EntityManagerFactoryImpl) em.getEntityManagerFactory();
 
         SchemaMetadata schemaMetadata = new SchemaMetadata();
-        String mediaType = headers.getRequestHeader("Content-type").get(0);
+        String mediaType = headers != null && headers.getRequestHeaders().containsKey("Content-type")? headers.getRequestHeader("Content-type").get(0) : MediaType.APPLICATION_JSON;
         mediaType =
             mediaType.equalsIgnoreCase(MediaType.APPLICATION_XML) ? MediaType.APPLICATION_XML
                 : MediaType.APPLICATION_JSON;
@@ -154,7 +154,7 @@ public class MetadataResource {
     public Response getEntityModel(@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken,
         @PathParam("entityClass") String entityClassName, @Context HttpHeaders headers) {
         Class<?> entityClass;
-        String mediaType = headers.getRequestHeader("Content-type").get(0);
+        String mediaType = headers != null && headers.getRequestHeaders().containsKey("Content-type")? headers.getRequestHeader("Content-type").get(0) : MediaType.APPLICATION_JSON;
         mediaType =
             mediaType.equalsIgnoreCase(MediaType.APPLICATION_XML) ? MediaType.APPLICATION_XML
                 : MediaType.APPLICATION_JSON;

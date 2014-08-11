@@ -69,7 +69,7 @@ public class CRUDResource {
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     public Response insert(@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken,
         @PathParam("entityClass") String entityClassName, String input, @Context HttpHeaders headers) {
-        String mediaType = headers.getRequestHeader("Content-type").get(0);
+        String mediaType = headers != null && headers.getRequestHeaders().containsKey("Content-type")? headers.getRequestHeader("Content-type").get(0) : MediaType.APPLICATION_JSON;
 
         mediaType =
             mediaType.equalsIgnoreCase(MediaType.APPLICATION_XML) ? MediaType.APPLICATION_XML
@@ -122,7 +122,7 @@ public class CRUDResource {
         @PathParam("entityClass") String entityClassName, @PathParam("id") String id, @Context HttpHeaders headers) {
 
         sessionToken = sessionToken.replaceAll("^\"|\"$", "");
-        String mediaType = headers.getRequestHeader("Content-type").get(0);
+        String mediaType = headers != null && headers.getRequestHeaders().containsKey("Content-type")? headers.getRequestHeader("Content-type").get(0) : MediaType.APPLICATION_JSON;
         mediaType =
             mediaType.equalsIgnoreCase(MediaType.APPLICATION_XML) ? MediaType.APPLICATION_XML
                 : MediaType.APPLICATION_JSON;
@@ -186,7 +186,7 @@ public class CRUDResource {
 
         log.debug("PUT: sessionToken:" + sessionToken);
         log.debug("PUT: entityClassName:" + entityClassName);
-        String mediaType = headers.getRequestHeader("Content-type").get(0);
+        String mediaType = headers != null && headers.getRequestHeaders().containsKey("Content-type")? headers.getRequestHeader("Content-type").get(0) : MediaType.APPLICATION_JSON;
         mediaType =
             mediaType.equalsIgnoreCase(MediaType.APPLICATION_XML) ? MediaType.APPLICATION_XML
                 : MediaType.APPLICATION_JSON;
@@ -236,7 +236,7 @@ public class CRUDResource {
         @PathParam("entityClass") String entityClassName, @PathParam("id") String id, @Context HttpHeaders headers) {
 
         sessionToken = sessionToken.replaceAll("^\"|\"$", "");
-        String mediaType = headers.getRequestHeader("Content-type").get(0);
+        String mediaType = headers != null && headers.getRequestHeaders().containsKey("Content-type")? headers.getRequestHeader("Content-type").get(0) : MediaType.APPLICATION_JSON;
         mediaType =
             mediaType.equalsIgnoreCase(MediaType.APPLICATION_XML) ? MediaType.APPLICATION_XML
                 : MediaType.APPLICATION_JSON;

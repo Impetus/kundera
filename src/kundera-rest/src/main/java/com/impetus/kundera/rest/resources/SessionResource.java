@@ -65,7 +65,7 @@ public class SessionResource {
 			@Context HttpHeaders headers) {
 		if (log.isDebugEnabled())
 			log.debug("GET: Application Token:" + applicationToken);
-		String mediaType = headers.getRequestHeader("Content-type").get(0);
+		String mediaType = headers != null && headers.getRequestHeaders().containsKey("Content-type")? headers.getRequestHeader("Content-type").get(0) : MediaType.APPLICATION_JSON;
 		mediaType = mediaType.equalsIgnoreCase(MediaType.APPLICATION_XML) ? MediaType.APPLICATION_XML : MediaType.APPLICATION_JSON;
 		EntityManagerFactory emf = EMFRepository.INSTANCE
 				.getEMF(applicationToken);
@@ -100,7 +100,7 @@ public class SessionResource {
 			@Context HttpHeaders headers) {
 		if (log.isDebugEnabled())
 			log.debug("PUT: Session Token:" + sessionToken);
-		String mediaType = headers.getRequestHeader("Content-type").get(0);
+		String mediaType = headers != null && headers.getRequestHeaders().containsKey("Content-type")? headers.getRequestHeader("Content-type").get(0) : MediaType.APPLICATION_JSON;
 		mediaType = mediaType.equalsIgnoreCase(MediaType.APPLICATION_XML) ? MediaType.APPLICATION_XML : MediaType.APPLICATION_JSON;
 		EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
 
@@ -138,7 +138,7 @@ public class SessionResource {
 
 		if (log.isDebugEnabled())
 			log.debug("DELETE: Session Token:" + sessionToken);
-		String mediaType = headers.getRequestHeader("Content-type").get(0);
+		String mediaType = headers != null && headers.getRequestHeaders().containsKey("Content-type")? headers.getRequestHeader("Content-type").get(0) : MediaType.APPLICATION_JSON;
 		mediaType = mediaType.equalsIgnoreCase(MediaType.APPLICATION_XML) ? MediaType.APPLICATION_XML : MediaType.APPLICATION_JSON;
 		EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
 		if (em == null) {

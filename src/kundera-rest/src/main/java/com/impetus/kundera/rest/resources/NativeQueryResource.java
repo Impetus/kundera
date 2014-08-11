@@ -71,7 +71,7 @@ public class NativeQueryResource {
 
         String sessionToken = headers.getRequestHeader(Constants.SESSION_TOKEN_HEADER_NAME).get(0);
 
-        String mediaType = headers.getRequestHeader("Content-type").get(0);
+        String mediaType = headers != null && headers.getRequestHeaders().containsKey("Content-type")? headers.getRequestHeader("Content-type").get(0) : MediaType.APPLICATION_JSON;
         mediaType =
             mediaType.equalsIgnoreCase(MediaType.APPLICATION_XML) ? MediaType.APPLICATION_XML
                 : MediaType.APPLICATION_JSON;
@@ -131,7 +131,7 @@ public class NativeQueryResource {
 
         String sessionToken = headers.getRequestHeader(Constants.SESSION_TOKEN_HEADER_NAME).get(0);
         String persistenceUnit = info.getPathParameters().getFirst("persistenceUnit");
-        String mediaType = headers.getRequestHeader("Content-type").get(0);
+        String mediaType = headers != null && headers.getRequestHeaders().containsKey("Content-type")? headers.getRequestHeader("Content-type").get(0) : MediaType.APPLICATION_JSON;
         mediaType =
             mediaType.equalsIgnoreCase(MediaType.APPLICATION_XML) ? MediaType.APPLICATION_XML
                 : MediaType.APPLICATION_JSON;
@@ -205,7 +205,7 @@ public class NativeQueryResource {
         String namedNativeQueryName = info.getPathParameters().getFirst("namedNativeQueryName");
         String sessionToken = headers.getRequestHeader(Constants.SESSION_TOKEN_HEADER_NAME).get(0);
 
-        String mediaType = headers.getRequestHeader("Content-type").get(0);
+        String mediaType = headers != null && headers.getRequestHeaders().containsKey("Content-type")? headers.getRequestHeader("Content-type").get(0) : MediaType.APPLICATION_JSON;
         mediaType =
             mediaType.equalsIgnoreCase(MediaType.APPLICATION_XML) ? MediaType.APPLICATION_XML
                 : MediaType.APPLICATION_JSON;
