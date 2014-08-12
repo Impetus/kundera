@@ -213,7 +213,7 @@ public class CRUDResource {
         if (output == null) {
             return Response.notModified().build();
         }
-        output = JAXBUtils.toString(entityClass, entity, mediaType);
+        output = JAXBUtils.toString(entityClass, output, mediaType);
         if (mediaType.equalsIgnoreCase(MediaType.APPLICATION_JSON)) {
             return Response.ok(ResponseBuilder.buildOutput(entityClass, entityMetadata, output), mediaType).build();
         } else {
