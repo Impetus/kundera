@@ -611,7 +611,7 @@ public final class EntityMetadata
      */
     private void addRelationName(Relation rField)
     {
-        if (!rField.isRelatedViaJoinTable())
+        if (rField != null && !rField.isRelatedViaJoinTable())
         {
             String relationName = getJoinColumnName(rField.getProperty());
             if (rField.getProperty().isAnnotationPresent(PrimaryKeyJoinColumn.class))

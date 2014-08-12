@@ -44,7 +44,10 @@ public class PersistenceUnitMetadataTest
 
         while (xmls.hasMoreElements())
         {
-            metadatas = PersistenceXMLLoader.findPersistenceUnits(xmls.nextElement());
+            String[] persistenceUnits = new String[1];
+            persistenceUnits[0] = "kunderatest";
+            
+            metadatas = PersistenceXMLLoader.findPersistenceUnits(xmls.nextElement(), persistenceUnits);
         }
     }
 

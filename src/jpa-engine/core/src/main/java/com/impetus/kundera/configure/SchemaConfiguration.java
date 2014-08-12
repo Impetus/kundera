@@ -251,92 +251,98 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
     {
         for (Relation relation : relations)
         {
-            Class entityClass = relation.getTargetEntity();
-            EntityMetadata targetEntityMetadata = KunderaMetadataManager
-                    .getEntityMetadata(kunderaMetadata, entityClass);
-            if (targetEntityMetadata == null)
+            if (relation != null)
             {
-                log.error("Persistence unit for class : " + entityClass + " is not loaded");
-                throw new SchemaGenerationException("Persistence unit for class : " + entityClass + " is not loaded");
-            }
-            ForeignKey relationType = relation.getType();
-
-            // if relation type is one to many or join by primary key
-            if (targetEntityMetadata != null && relationType.equals(ForeignKey.ONE_TO_MANY)
-                    && relation.getJoinColumnName(kunderaMetadata) != null)
-            {
-                // if self association
-                if (targetEntityMetadata.equals(entityMetadata))
+                Class entityClass = relation.getTargetEntity();
+                EntityMetadata targetEntityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
+                        entityClass);
+                if (targetEntityMetadata == null)
                 {
-                    tableInfo.addColumnInfo(getJoinColumn(tableInfo, relation.getJoinColumnName(kunderaMetadata),
-                            entityMetadata.getIdAttribute().getJavaType()));
+                    log.error("Persistence unit for class : " + entityClass + " is not loaded");
+                    throw new SchemaGenerationException("Persistence unit for class : " + entityClass
+                            + " is not loaded");
                 }
-                else
+                ForeignKey relationType = relation.getType();
+
+                // if relation type is one to many or join by primary key
+                if (targetEntityMetadata != null && relationType.equals(ForeignKey.ONE_TO_MANY)
+                        && relation.getJoinColumnName(kunderaMetadata) != null)
                 {
-                    String pu = targetEntityMetadata.getPersistenceUnit();
-                    Type targetEntityType = targetEntityMetadata.getType();
-                    Class idClass = targetEntityMetadata.getIdAttribute().getJavaType();
-                    String idName = ((AbstractAttribute) targetEntityMetadata.getIdAttribute()).getJPAColumnName();
-                    TableInfo targetTableInfo = new TableInfo(targetEntityMetadata.getTableName(),
-                            targetEntityType.name(), idClass, idName);
-
-                    // In case of different persistence unit. case for poly glot
-                    // persistence.
-                    if (!pu.equals(persistenceUnit))
+                    // if self association
+                    if (targetEntityMetadata.equals(entityMetadata))
                     {
-                        List<TableInfo> targetTableInfos = getSchemaInfo(pu);
-
-                        addJoinColumnToInfo(relation.getJoinColumnName(kunderaMetadata), targetTableInfo,
-                                targetTableInfos, entityMetadata);
-
-                        // add for newly discovered persistence unit.
-                        puToSchemaMetadata.put(pu, targetTableInfos);
+                        tableInfo.addColumnInfo(getJoinColumn(tableInfo, relation.getJoinColumnName(kunderaMetadata),
+                                entityMetadata.getIdAttribute().getJavaType()));
                     }
                     else
                     {
-                        addJoinColumnToInfo(relation.getJoinColumnName(kunderaMetadata), targetTableInfo, tableInfos,
-                                entityMetadata);
+                        String pu = targetEntityMetadata.getPersistenceUnit();
+                        Type targetEntityType = targetEntityMetadata.getType();
+                        Class idClass = targetEntityMetadata.getIdAttribute().getJavaType();
+                        String idName = ((AbstractAttribute) targetEntityMetadata.getIdAttribute()).getJPAColumnName();
+                        TableInfo targetTableInfo = new TableInfo(targetEntityMetadata.getTableName(),
+                                targetEntityType.name(), idClass, idName);
+
+                        // In case of different persistence unit. case for poly
+                        // glot
+                        // persistence.
+                        if (!pu.equals(persistenceUnit))
+                        {
+                            List<TableInfo> targetTableInfos = getSchemaInfo(pu);
+
+                            addJoinColumnToInfo(relation.getJoinColumnName(kunderaMetadata), targetTableInfo,
+                                    targetTableInfos, entityMetadata);
+
+                            // add for newly discovered persistence unit.
+                            puToSchemaMetadata.put(pu, targetTableInfos);
+                        }
+                        else
+                        {
+                            addJoinColumnToInfo(relation.getJoinColumnName(kunderaMetadata), targetTableInfo,
+                                    tableInfos, entityMetadata);
+                        }
                     }
                 }
-            }
-            // if relation type is one to one or many to one.
-            else if (relation.isUnary() && relation.getJoinColumnName(kunderaMetadata) != null)
-            {
-                if (!relation.isJoinedByPrimaryKey())
+                // if relation type is one to one or many to one.
+                else if (relation.isUnary() && relation.getJoinColumnName(kunderaMetadata) != null)
                 {
-                    tableInfo.addColumnInfo(getJoinColumn(tableInfo, relation.getJoinColumnName(kunderaMetadata),
-                            targetEntityMetadata.getIdAttribute().getJavaType()));
-                }
-            }
-            // if relation type is many to many and relation via join table.
-            else if ((relationType.equals(ForeignKey.MANY_TO_MANY)) && (entityMetadata.isRelationViaJoinTable()))
-            {
-                JoinTableMetadata joinTableMetadata = relation.getJoinTableMetadata();
-                String joinTableName = joinTableMetadata != null ? joinTableMetadata.getJoinTableName() : null;
-                String joinColumnName = joinTableMetadata != null ? (String) joinTableMetadata.getJoinColumns()
-                        .toArray()[0] : null;
-                String inverseJoinColumnName = joinTableMetadata != null ? (String) joinTableMetadata
-                        .getInverseJoinColumns().toArray()[0] : null;
-                if (joinTableName != null)
-                {
-                    TableInfo joinTableInfo = new TableInfo(joinTableName, Type.COLUMN_FAMILY.name(), String.class,
-                            "key");
-                    if (!tableInfos.isEmpty() && !tableInfos.contains(joinTableInfo) || tableInfos.isEmpty())
+                    if (!relation.isJoinedByPrimaryKey())
                     {
-                        joinTableInfo.addColumnInfo(getJoinColumn(joinTableInfo, joinColumnName, entityMetadata
-                                .getIdAttribute().getJavaType()));
-                        joinTableInfo.addColumnInfo(getJoinColumn(joinTableInfo, inverseJoinColumnName,
+                        tableInfo.addColumnInfo(getJoinColumn(tableInfo, relation.getJoinColumnName(kunderaMetadata),
                                 targetEntityMetadata.getIdAttribute().getJavaType()));
+                    }
+                }
+                // if relation type is many to many and relation via join table.
+                else if ((relationType.equals(ForeignKey.MANY_TO_MANY)) && (entityMetadata.isRelationViaJoinTable()))
+                {
+                    JoinTableMetadata joinTableMetadata = relation.getJoinTableMetadata();
+                    String joinTableName = joinTableMetadata != null ? joinTableMetadata.getJoinTableName() : null;
+                    String joinColumnName = joinTableMetadata != null ? (String) joinTableMetadata.getJoinColumns()
+                            .toArray()[0] : null;
+                    String inverseJoinColumnName = joinTableMetadata != null ? (String) joinTableMetadata
+                            .getInverseJoinColumns().toArray()[0] : null;
+                    if (joinTableName != null)
+                    {
+                        TableInfo joinTableInfo = new TableInfo(joinTableName, Type.COLUMN_FAMILY.name(), String.class,
+                                "key");
+                        if (!tableInfos.isEmpty() && !tableInfos.contains(joinTableInfo) || tableInfos.isEmpty())
+                        {
+                            joinTableInfo.addColumnInfo(getJoinColumn(joinTableInfo, joinColumnName, entityMetadata
+                                    .getIdAttribute().getJavaType()));
+                            joinTableInfo.addColumnInfo(getJoinColumn(joinTableInfo, inverseJoinColumnName,
+                                    targetEntityMetadata.getIdAttribute().getJavaType()));
 
-                        // // Do not delete above lines. Currently join table
-                        // columns are of type string only.
-                        // // It needs to be fixed later.
-                        // joinTableInfo.addColumnInfo(getJoinColumn(joinTableInfo,
-                        // joinColumnName, String.class));
-                        // joinTableInfo.addColumnInfo(getJoinColumn(joinTableInfo,
-                        // inverseJoinColumnName, String.class));
+                            // // Do not delete above lines. Currently join
+                            // table
+                            // columns are of type string only.
+                            // // It needs to be fixed later.
+                            // joinTableInfo.addColumnInfo(getJoinColumn(joinTableInfo,
+                            // joinColumnName, String.class));
+                            // joinTableInfo.addColumnInfo(getJoinColumn(joinTableInfo,
+                            // inverseJoinColumnName, String.class));
 
-                        tableInfos.add(joinTableInfo);
+                            tableInfos.add(joinTableInfo);
+                        }
                     }
                 }
             }

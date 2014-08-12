@@ -768,7 +768,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
 
         for (Relation relation : metadata.getRelations())
         {
-            if (relation.isUnary())
+            if (relation != null && relation.isUnary())
             {
                 Object relationObject = PropertyAccessorHelper.getObject(entity, relation.getProperty());
                 if (relationObject != null && ProxyHelper.isKunderaProxy(relationObject))

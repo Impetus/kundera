@@ -73,8 +73,22 @@ public class PersistenceUnitLoaderTest
 
             while (xmls.hasMoreElements())
             {
+                String[] persistenceUnits = new String[12];
+                persistenceUnits[0] = "kunderatest";
+                persistenceUnits[1] = "PropertyTest";
+                persistenceUnits[2] = "PropertyTestwithvaraiable";
+                persistenceUnits[3] = "PropertyTestwithabsolutepath";
+                persistenceUnits[4] = "metaDataTest";
+                persistenceUnits[5] = "GeneratedValue";
+                persistenceUnits[6] = "patest";
+                persistenceUnits[7] = "mappedsu";
+                persistenceUnits[8] = "invalidmappedsu";
+                persistenceUnits[9] = "keyspace";
+                persistenceUnits[10] = "inheritanceTest";
+                persistenceUnits[11] = "extConfig";
+                
                 final String _pattern = "/core/target/test-classes/";
-                List<PersistenceUnitMetadata> metadatas = PersistenceXMLLoader.findPersistenceUnits(xmls.nextElement());
+                List<PersistenceUnitMetadata> metadatas = PersistenceXMLLoader.findPersistenceUnits(xmls.nextElement(), persistenceUnits);
                 Assert.assertNotNull(metadatas);
                 Assert.assertEquals(12, metadatas.size());
 

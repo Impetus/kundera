@@ -58,7 +58,7 @@ public final class GraphGenerator
     private GraphBuilder builder = new GraphBuilder();
 
     Set<Node> traversedNodes = new HashSet<Node>();
-    
+
     private PersistenceValidator validator = new PersistenceValidator();
 
     /**
@@ -119,8 +119,9 @@ public final class GraphGenerator
     <E> Node generate(E entity, PersistenceDelegator delegator, PersistenceCache pc, NodeState state)
     {
 
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(delegator.getKunderaMetadata(), entity.getClass());
-        
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(delegator.getKunderaMetadata(),
+                entity.getClass());
+
         if (!new NullOrInvalidEntityRule<E>(entityMetadata).validate(entity))
         {
             Object entityId = onPreChecks(entity, delegator);
@@ -148,21 +149,24 @@ public final class GraphGenerator
 
             for (Relation relation : entityMetadata.getRelations())
             {
-                Object childObject = PropertyAccessorHelper.getObject(entity, relation.getProperty());
-
-                // if child object is valid and not a proxy
-                if (childObject != null && !ProxyHelper.isProxyOrCollection(childObject))
+                if (relation != null)
                 {
-                    // check for join by primary key, collection and map
-                    EntityMetadata childMetadata = KunderaMetadataManager.getEntityMetadata(
-                            delegator.getKunderaMetadata(),
-                            PropertyAccessorHelper.getGenericClass(relation.getProperty()));
+                    Object childObject = PropertyAccessorHelper.getObject(entity, relation.getProperty());
 
-                    // set id,in case joined by primary key.
-                    childObject = onIfSharedByPK(relation, childObject, childMetadata, entityId);
+                    // if child object is valid and not a proxy
+                    if (childObject != null && !ProxyHelper.isProxyOrCollection(childObject))
+                    {
+                        // check for join by primary key, collection and map
+                        EntityMetadata childMetadata = KunderaMetadataManager.getEntityMetadata(
+                                delegator.getKunderaMetadata(),
+                                PropertyAccessorHelper.getGenericClass(relation.getProperty()));
 
-                    node = builder.getRelationBuilder(childObject, relation, node)
-                            .assignResources(delegator, pc, childMetadata).build().getNode();
+                        // set id,in case joined by primary key.
+                        childObject = onIfSharedByPK(relation, childObject, childMetadata, entityId);
+
+                        node = builder.getRelationBuilder(childObject, relation, node)
+                                .assignResources(delegator, pc, childMetadata).build().getNode();
+                    }
                 }
             }
 
@@ -227,7 +231,7 @@ public final class GraphGenerator
 
         // check if id is set or not.
         new PrimaryKeyNullCheck<Object>().validate(id);
-       
+
         validator.validate(entity, delegator.getKunderaMetadata());
 
         // }

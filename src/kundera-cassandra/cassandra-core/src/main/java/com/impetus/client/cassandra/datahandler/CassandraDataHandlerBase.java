@@ -181,7 +181,6 @@ public abstract class CassandraDataHandlerBase
 
                         if (intoRelations)
                         {
-                            Relation relation = m.getRelation(name);
                             String foreignKeys = PropertyAccessorFactory.STRING.fromBytes(String.class, value);
                             Set<String> keys = MetadataUtils.deserializeKeys(foreignKeys);
                         }

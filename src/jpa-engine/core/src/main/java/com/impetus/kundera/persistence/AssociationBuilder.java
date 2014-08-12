@@ -128,7 +128,6 @@ public final class AssociationBuilder
                 populateCollectionFromMap(entity, delegator, relation, relObject, relationsMap);
             }
         }
-
     }
 
     /**
@@ -149,7 +148,8 @@ public final class AssociationBuilder
         if (jtMetadata == null)
         {
             columnJavaType = entityMetadata.getIdAttribute().getJavaType();
-            jtMetadata = owningEntityMetadata.getRelation(relation.getMappedBy()).getJoinTableMetadata();
+            Relation owningEntityMetadataRelation = owningEntityMetadata.getRelation(relation.getMappedBy());
+            jtMetadata = owningEntityMetadataRelation.getJoinTableMetadata();
             pClient = delegator.getClient(owningEntityMetadata);
             schema = owningEntityMetadata.getSchema();
         }

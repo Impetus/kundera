@@ -264,4 +264,9 @@ public abstract class AbstractAttribute<X, T>
     {
         return fieldAnnotationProcessor;
     }
+    
+    public void setColumnName(final String columnName)
+    {
+        this.columnName = columnName;
+    }
 }

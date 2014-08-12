@@ -26,8 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.ElementCollection;
-import javax.persistence.Embedded;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.Attribute.PersistentAttributeType;
 import javax.persistence.metamodel.EmbeddableType;
@@ -105,6 +103,7 @@ public class ObjectUtils
             Object id = null;
             if (metadata.getRelations() != null && !metadata.getRelations().isEmpty())
             {
+
                 id = PropertyAccessorHelper.getId(source, metadata);
 
                 StringBuilder keyBuilder = new StringBuilder(sourceObjectClass.getName());
@@ -135,129 +134,134 @@ public class ObjectUtils
                     Object sourceEmbeddedObj = PropertyAccessorHelper.getObject(source, columnField);
                     if (sourceEmbeddedObj != null)
                     {
-                        if (columnField.getAnnotation(Embedded.class) != null)
+                        if (metaModel.isEmbeddable(((AbstractAttribute) attrib).getBindableJavaType()))
                         {
-                            // Copy embedded objects
-                            Class<?> embeddedColumnClass = columnField.getType();
-                            Object targetEmbeddedObj = embeddedColumnClass.newInstance();
-
-                            Set<Attribute> columns = embeddedColumn.getAttributes();
-                            for (Attribute column : columns)
+                            if (attrib.isCollection())
                             {
+                                Class<?> ecDeclaredClass = columnField.getType();
+                                Class<?> actualEcObjectClass = sourceEmbeddedObj.getClass();
 
-                                PropertyAccessorHelper.set(
-                                        targetEmbeddedObj,
-                                        (Field) column.getJavaMember(),
-                                        PropertyAccessorHelper.getObjectCopy(sourceEmbeddedObj,
-                                                (Field) column.getJavaMember()));
-                            }
+                                Object targetCollectionObject = actualEcObjectClass.newInstance();
 
-                            PropertyAccessorHelper.set(target, columnField, targetEmbeddedObj);
-                        }
-                        else if (columnField.getAnnotation(ElementCollection.class) != null)
-                        {
-                            Class<?> ecDeclaredClass = columnField.getType();
-                            Class<?> actualEcObjectClass = sourceEmbeddedObj.getClass();
-
-                            Object targetCollectionObject;
-                            targetCollectionObject = actualEcObjectClass.newInstance();
-
-                            // Copy element collections for List and Set
-                            if (sourceEmbeddedObj instanceof Collection)
-                            {
-                                Class<?> genericClass = PropertyAccessorHelper.getGenericClass(columnField);
-
-                                for (Object sourceEcObj : (Collection) sourceEmbeddedObj)
+                                // Copy element collections for List and Set
+                                if (sourceEmbeddedObj instanceof Collection)
                                 {
-                                    Object targetEcObj = null;
-                                    if (sourceEcObj != null && PersistenceType.BASIC.equals(embeddedColumn.getPersistenceType()))
-                                    {
-                                        PropertyAccessor accessor = PropertyAccessorFactory
-                                                .getPropertyAccessor(sourceEcObj.getClass());
-                                        if (accessor != null)
-                                        {
-                                            targetEcObj = accessor.getCopy(sourceEcObj);
-                                        }
-                                    }
-                                    else if (sourceEcObj != null && PersistenceType.EMBEDDABLE.equals(embeddedColumn.getPersistenceType()))
-                                    {
-                                        targetEcObj = genericClass.newInstance();
+                                    Class<?> genericClass = PropertyAccessorHelper.getGenericClass(columnField);
 
-                                        for (Field f : genericClass.getDeclaredFields())
+                                    for (Object sourceEcObj : (Collection) sourceEmbeddedObj)
+                                    {
+                                        Object targetEcObj = null;
+                                        if (sourceEcObj != null
+                                                && PersistenceType.BASIC.equals(embeddedColumn.getPersistenceType()))
                                         {
-                                            if (f != null && !Modifier.isStatic(f.getModifiers()))
+                                            PropertyAccessor accessor = PropertyAccessorFactory
+                                                    .getPropertyAccessor(sourceEcObj.getClass());
+                                            if (accessor != null)
                                             {
-                                                PropertyAccessorHelper.set(targetEcObj, f,
-                                                        PropertyAccessorHelper.getObjectCopy(sourceEcObj, f));
+                                                targetEcObj = accessor.getCopy(sourceEcObj);
                                             }
                                         }
-                                    }
-                                    if (List.class.isAssignableFrom(ecDeclaredClass))
-                                    {
-                                        Method m = actualEcObjectClass.getMethod("add", Object.class);
-                                        m.invoke(targetCollectionObject, targetEcObj);
-
-                                    }
-                                    else if (Set.class.isAssignableFrom(ecDeclaredClass))
-                                    {
-                                        Method m = actualEcObjectClass.getMethod("add", Object.class);
-                                        m.invoke(targetCollectionObject, targetEcObj);
-                                    }
-                                }
-                            }
-
-                            // Copy element collection for Map
-                            else if (sourceEmbeddedObj instanceof Map)
-                            {
-                                for (Object sourceKey : ((Map) sourceEmbeddedObj).keySet())
-                                {
-                                    Object targetKey = null;
-                                    Object targetValue = null;
-                                    if (PersistenceType.BASIC.equals(embeddedColumn.getPersistenceType()))
-                                    {
-                                        // Create copy of map key
-                                        if (sourceKey != null)
+                                        else if (sourceEcObj != null
+                                                && PersistenceType.EMBEDDABLE.equals(embeddedColumn
+                                                        .getPersistenceType()))
                                         {
-                                            PropertyAccessor keyAccessor = PropertyAccessorFactory
-                                                    .getPropertyAccessor(sourceKey.getClass());
-                                            if (keyAccessor != null)
+                                            targetEcObj = genericClass.newInstance();
+
+                                            for (Field f : genericClass.getDeclaredFields())
                                             {
-                                                targetKey = keyAccessor.getCopy(sourceKey);
+                                                if (f != null && !Modifier.isStatic(f.getModifiers()))
+                                                {
+                                                    PropertyAccessorHelper.set(targetEcObj, f,
+                                                            PropertyAccessorHelper.getObjectCopy(sourceEcObj, f));
+                                                }
                                             }
                                         }
-                                        else
+                                        if (List.class.isAssignableFrom(ecDeclaredClass))
                                         {
-                                            targetKey = null;
-                                        }
+                                            Method m = actualEcObjectClass.getMethod("add", Object.class);
+                                            m.invoke(targetCollectionObject, targetEcObj);
 
-                                        // Create copy of map value
-                                        Object sourceValue = ((Map) sourceEmbeddedObj).get(sourceKey);
-                                        if (sourceValue != null)
-                                        {
-                                            PropertyAccessor valueAccessor = PropertyAccessorFactory
-                                                    .getPropertyAccessor(sourceValue.getClass());
-                                            if (valueAccessor != null)
-                                            {
-                                                targetValue = valueAccessor.getCopy(sourceValue);
-                                            }
                                         }
-                                        else
+                                        else if (Set.class.isAssignableFrom(ecDeclaredClass))
                                         {
-                                            targetValue = null;
-                                        }
-
-                                        if (Map.class.isAssignableFrom(ecDeclaredClass))
-                                        {
-                                            Method m = actualEcObjectClass.getMethod("put", new Class[] { Object.class,
-                                                    Object.class });
-                                            m.invoke(targetCollectionObject, new Object[] { targetKey, targetValue });
+                                            Method m = actualEcObjectClass.getMethod("add", Object.class);
+                                            m.invoke(targetCollectionObject, targetEcObj);
                                         }
                                     }
                                 }
+
+                                // Copy element collection for Map
+                                else if (sourceEmbeddedObj instanceof Map)
+                                {
+                                    for (Object sourceKey : ((Map) sourceEmbeddedObj).keySet())
+                                    {
+                                        Object targetKey = null;
+                                        Object targetValue = null;
+                                        if (PersistenceType.BASIC.equals(embeddedColumn.getPersistenceType()))
+                                        {
+                                            // Create copy of map key
+                                            if (sourceKey != null)
+                                            {
+                                                PropertyAccessor keyAccessor = PropertyAccessorFactory
+                                                        .getPropertyAccessor(sourceKey.getClass());
+                                                if (keyAccessor != null)
+                                                {
+                                                    targetKey = keyAccessor.getCopy(sourceKey);
+                                                }
+                                            }
+                                            else
+                                            {
+                                                targetKey = null;
+                                            }
+
+                                            // Create copy of map value
+                                            Object sourceValue = ((Map) sourceEmbeddedObj).get(sourceKey);
+                                            if (sourceValue != null)
+                                            {
+                                                PropertyAccessor valueAccessor = PropertyAccessorFactory
+                                                        .getPropertyAccessor(sourceValue.getClass());
+                                                if (valueAccessor != null)
+                                                {
+                                                    targetValue = valueAccessor.getCopy(sourceValue);
+                                                }
+                                            }
+                                            else
+                                            {
+                                                targetValue = null;
+                                            }
+
+                                            if (Map.class.isAssignableFrom(ecDeclaredClass))
+                                            {
+                                                Method m = actualEcObjectClass.getMethod("put", new Class[] {
+                                                        Object.class, Object.class });
+                                                m.invoke(targetCollectionObject,
+                                                        new Object[] { targetKey, targetValue });
+                                            }
+                                        }
+                                    }
+                                }
+                                PropertyAccessorHelper.set(target, columnField, targetCollectionObject);
                             }
-                            PropertyAccessorHelper.set(target, columnField, targetCollectionObject);
+                            else
+                            {
+                                // Copy embedded objects
+                                Class<?> embeddedColumnClass = columnField.getType();
+                                Object targetEmbeddedObj = embeddedColumnClass.newInstance();
+
+                                Set<Attribute> columns = embeddedColumn.getAttributes();
+                                for (Attribute column : columns)
+                                {
+                                    PropertyAccessorHelper.set(
+                                            targetEmbeddedObj,
+                                            (Field) column.getJavaMember(),
+                                            PropertyAccessorHelper.getObjectCopy(sourceEmbeddedObj,
+                                                    (Field) column.getJavaMember()));
+                                }
+
+                                PropertyAccessorHelper.set(target, columnField, targetEmbeddedObj);
+                            }
                         }
-                        else if (columnField.getAnnotation(javax.persistence.Column.class) != null)
+                        else if (((AbstractAttribute) attrib).getJPAColumnName() != null)
                         {
                             // Copy columns
                             PropertyAccessorHelper.set(target, columnField, sourceEmbeddedObj);
@@ -284,72 +288,76 @@ public class ObjectUtils
             // Copy Relationships recursively
             for (Relation relation : metadata.getRelations())
             {
-                Field relationField = relation.getProperty();
-                Object sourceRelationObject = PropertyAccessorHelper.getObject(source, relationField);
-
-                if (sourceRelationObject != null)
+                if (relation != null)
                 {
-                    if (sourceRelationObject instanceof KunderaProxy)
-                    {
-                        PropertyAccessorHelper.set(target, relationField, sourceRelationObject);
-                        continue;
-                    }
-                    else if (ProxyHelper.isPersistentCollection(sourceRelationObject))
-                    {
-                        PropertyAccessorHelper.set(target, relationField, sourceRelationObject);
-                        continue;
-                    }
-                    else if (ProxyHelper.isKunderaProxyCollection(sourceRelationObject))
-                    {
-                        ProxyCollection pc = ((ProxyCollection) sourceRelationObject).getCopy();
-                        pc.setOwner(target);
-                        PropertyAccessorHelper.set(target, relationField, pc);
-                        continue;
-                    }
+                    Field relationField = relation.getProperty();
+                    Object sourceRelationObject = PropertyAccessorHelper.getObject(source, relationField);
 
-                    Object targetRelationObject = null;
-
-                    Class<?> relationObjectClass = relation.getProperty().getType();
-                    Class<?> actualRelationObjectClass = sourceRelationObject.getClass();
-
-                    if (Collection.class.isAssignableFrom(relationObjectClass))
+                    if (sourceRelationObject != null)
                     {
-                        targetRelationObject = actualRelationObjectClass.newInstance();
-                        Method m = actualRelationObjectClass.getMethod("add", Object.class);
-
-                        for (Object obj : (Collection) sourceRelationObject)
+                        if (sourceRelationObject instanceof KunderaProxy)
                         {
-                            Object copyTargetRelObj = searchInCacheThenCopy(copiedObjectMap, obj, kunderaMetadata);
-                            m.invoke(targetRelationObject, copyTargetRelObj);
+                            PropertyAccessorHelper.set(target, relationField, sourceRelationObject);
+                            continue;
                         }
-                    }
-                    else if (Map.class.isAssignableFrom(relationObjectClass))
-                    {
-                        targetRelationObject = actualRelationObjectClass.newInstance();
-                        Method m = actualRelationObjectClass.getMethod("put", new Class<?>[] { Object.class,
-                                Object.class });
-
-                        for (Object keyObj : ((Map) sourceRelationObject).keySet())
+                        else if (ProxyHelper.isPersistentCollection(sourceRelationObject))
                         {
-                            Object valObj = ((Map) sourceRelationObject).get(keyObj);
-
-                            Object copyTargetKeyObj = searchInCacheThenCopy(copiedObjectMap, keyObj, kunderaMetadata);
-
-                            Object copyTargetValueObj = searchInCacheThenCopy(copiedObjectMap, valObj, kunderaMetadata);
-
-                            m.invoke(targetRelationObject, new Object[] { copyTargetKeyObj, copyTargetValueObj });
+                            PropertyAccessorHelper.set(target, relationField, sourceRelationObject);
+                            continue;
                         }
+                        else if (ProxyHelper.isKunderaProxyCollection(sourceRelationObject))
+                        {
+                            ProxyCollection pc = ((ProxyCollection) sourceRelationObject).getCopy();
+                            pc.setOwner(target);
+                            PropertyAccessorHelper.set(target, relationField, pc);
+                            continue;
+                        }
+
+                        Object targetRelationObject = null;
+
+                        Class<?> relationObjectClass = relation.getProperty().getType();
+                        Class<?> actualRelationObjectClass = sourceRelationObject.getClass();
+
+                        if (Collection.class.isAssignableFrom(relationObjectClass))
+                        {
+                            targetRelationObject = actualRelationObjectClass.newInstance();
+                            Method m = actualRelationObjectClass.getMethod("add", Object.class);
+
+                            for (Object obj : (Collection) sourceRelationObject)
+                            {
+                                Object copyTargetRelObj = searchInCacheThenCopy(copiedObjectMap, obj, kunderaMetadata);
+                                m.invoke(targetRelationObject, copyTargetRelObj);
+                            }
+                        }
+                        else if (Map.class.isAssignableFrom(relationObjectClass))
+                        {
+                            targetRelationObject = actualRelationObjectClass.newInstance();
+                            Method m = actualRelationObjectClass.getMethod("put", new Class<?>[] { Object.class,
+                                    Object.class });
+
+                            for (Object keyObj : ((Map) sourceRelationObject).keySet())
+                            {
+                                Object valObj = ((Map) sourceRelationObject).get(keyObj);
+
+                                Object copyTargetKeyObj = searchInCacheThenCopy(copiedObjectMap, keyObj,
+                                        kunderaMetadata);
+
+                                Object copyTargetValueObj = searchInCacheThenCopy(copiedObjectMap, valObj,
+                                        kunderaMetadata);
+
+                                m.invoke(targetRelationObject, new Object[] { copyTargetKeyObj, copyTargetValueObj });
+                            }
+                        }
+                        else
+                        {
+                            targetRelationObject = searchInCacheThenCopy(copiedObjectMap, sourceRelationObject,
+                                    kunderaMetadata);
+                        }
+                        PropertyAccessorHelper.set(target, relationField, targetRelationObject);
                     }
-                    else
-                    {
-                        targetRelationObject = searchInCacheThenCopy(copiedObjectMap, sourceRelationObject,
-                                kunderaMetadata);
-                    }
-                    PropertyAccessorHelper.set(target, relationField, targetRelationObject);
                 }
             }
         }
-
         catch (InstantiationException e)
         {
             log.warn("Error while instantiating entity/ embeddable class, did you define no-arg constructor?, Caused by:"

@@ -22,6 +22,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.PersistenceException;
@@ -53,7 +54,7 @@ import com.impetus.kundera.utils.InvalidConfigurationException;
 
 /**
  * The Class PersistenceXMLLoader.
- *
+ * 
  * @author amresh.singh
  */
 public class PersistenceXMLLoader
@@ -69,74 +70,102 @@ public class PersistenceXMLLoader
     }
 
     /**
-     * Reads the persistence xml content into an object graph and validates it against the related xsd schema.
-     *
+     * Reads the persistence xml content into an object graph and validates it
+     * against the related xsd schema.
+     * 
      * @param pathToPersistenceXml
      *            path to the persistence.xml file
      * @return parsed persistence xml as object graph
-     * @throws InvalidConfigurationException if the file could not be parsed or is not valid against the schema
+     * @throws InvalidConfigurationException
+     *             if the file could not be parsed or is not valid against the
+     *             schema
      */
-    private static Document getDocument(URL pathToPersistenceXml) throws InvalidConfigurationException {
+    private static Document getDocument(URL pathToPersistenceXml) throws InvalidConfigurationException
+    {
         InputStream is = null;
         Document xmlRootNode = null;
 
-        try {
-            if (pathToPersistenceXml != null) {
+        try
+        {
+            if (pathToPersistenceXml != null)
+            {
                 URLConnection conn = pathToPersistenceXml.openConnection();
-                conn.setUseCaches(false); // avoid JAR locking on Windows and Tomcat.
+                conn.setUseCaches(false); // avoid JAR locking on Windows and
+                                          // Tomcat.
                 is = conn.getInputStream();
             }
 
-            if (is == null) {
+            if (is == null)
+            {
                 throw new IOException("Failed to obtain InputStream from url: " + pathToPersistenceXml);
             }
 
             xmlRootNode = parseDocument(is);
             validateDocumentAgainstSchema(xmlRootNode);
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             throw new InvalidConfigurationException(e);
-        } finally {
-            if(is != null) {
-                try {
+        }
+        finally
+        {
+            if (is != null)
+            {
+                try
+                {
                     is.close();
-                } catch (IOException ex) {
+                }
+                catch (IOException ex)
+                {
                     log.warn("Input stream could not be closed after parsing persistence.xml, caused by: {}", ex);
                 }
             }
         }
-        
+
         return xmlRootNode;
     }
 
     /**
-     * Reads the content of the persistence.xml file into an object model, with the root node of type {@link Document}.
-     *
-     * @param is {@link InputStream} of the persistence.xml content
+     * Reads the content of the persistence.xml file into an object model, with
+     * the root node of type {@link Document}.
+     * 
+     * @param is
+     *            {@link InputStream} of the persistence.xml content
      * @return root node of the parsed xml content
-     * @throws InvalidConfigurationException if the content could not be read due to an I/O error or could not be
-     * parsedÏ
+     * @throws InvalidConfigurationException
+     *             if the content could not be read due to an I/O error or could
+     *             not be parsedÏ
      */
-    private static Document parseDocument(final InputStream is) throws InvalidConfigurationException {
+    private static Document parseDocument(final InputStream is) throws InvalidConfigurationException
+    {
         Document persistenceXmlDoc;
         final List parsingErrors = new ArrayList();
         final InputSource source = new InputSource(is);
         final DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
         docBuilderFactory.setNamespaceAware(true);
 
-        try {
+        try
+        {
             DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
             docBuilder.setErrorHandler(new ErrorLogger("XML InputStream", parsingErrors));
             persistenceXmlDoc = docBuilder.parse(source);
-        } catch (ParserConfigurationException e) {
+        }
+        catch (ParserConfigurationException e)
+        {
             log.error("Error during parsing, Caused by: {}.", e);
             throw new PersistenceLoaderException("Error during parsing persistence.xml, caused by: ", e);
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             throw new InvalidConfigurationException("Error reading persistence.xml, caused by: ", e);
-        } catch (SAXException e) {
+        }
+        catch (SAXException e)
+        {
             throw new InvalidConfigurationException("Error parsing persistence.xml, caused by: ", e);
         }
 
-        if (!parsingErrors.isEmpty()) {
+        if (!parsingErrors.isEmpty())
+        {
             throw new InvalidConfigurationException("Invalid persistence.xml", (Throwable) parsingErrors.get(0));
         }
 
@@ -144,36 +173,46 @@ public class PersistenceXMLLoader
     }
 
     /**
-     * Validates an xml object graph against its schema. Therefore it reads the version from the root tag
-     * and tries to load the related xsd file from the classpath.
+     * Validates an xml object graph against its schema. Therefore it reads the
+     * version from the root tag and tries to load the related xsd file from the
+     * classpath.
      * 
-     * @param xmlRootNode root xml node of the document to validate
-     * @throws InvalidConfigurationException if the validation could not be performed or the xml graph is invalid
-     * against the schema
+     * @param xmlRootNode
+     *            root xml node of the document to validate
+     * @throws InvalidConfigurationException
+     *             if the validation could not be performed or the xml graph is
+     *             invalid against the schema
      */
-    private static void validateDocumentAgainstSchema(final Document xmlRootNode) throws InvalidConfigurationException {
+    private static void validateDocumentAgainstSchema(final Document xmlRootNode) throws InvalidConfigurationException
+    {
         final Element rootElement = xmlRootNode.getDocumentElement();
         final String version = rootElement.getAttribute("version");
         String schemaFileName = "persistence_" + version.replace(".", "_") + ".xsd";
-        
-        try {
-        final List validationErrors = new ArrayList();
-        final String schemaLanguage = XMLConstants.W3C_XML_SCHEMA_NS_URI;
-        final StreamSource streamSource = new StreamSource(getStreamFromClasspath(schemaFileName));
-        final Schema schemaDefinition = SchemaFactory.newInstance(schemaLanguage).newSchema(streamSource);
 
-        final Validator schemaValidator = schemaDefinition.newValidator();
-        schemaValidator.setErrorHandler(new ErrorLogger("XML InputStream", validationErrors));
-        schemaValidator.validate(new DOMSource(xmlRootNode));
-        
-        if(!validationErrors.isEmpty()) {
-            final String exceptionText = "persistence.xml is not conform against the supported schema definitions.";
-            throw new InvalidConfigurationException(exceptionText);
+        try
+        {
+            final List validationErrors = new ArrayList();
+            final String schemaLanguage = XMLConstants.W3C_XML_SCHEMA_NS_URI;
+            final StreamSource streamSource = new StreamSource(getStreamFromClasspath(schemaFileName));
+            final Schema schemaDefinition = SchemaFactory.newInstance(schemaLanguage).newSchema(streamSource);
+
+            final Validator schemaValidator = schemaDefinition.newValidator();
+            schemaValidator.setErrorHandler(new ErrorLogger("XML InputStream", validationErrors));
+            schemaValidator.validate(new DOMSource(xmlRootNode));
+
+            if (!validationErrors.isEmpty())
+            {
+                final String exceptionText = "persistence.xml is not conform against the supported schema definitions.";
+                throw new InvalidConfigurationException(exceptionText);
+            }
         }
-        } catch(SAXException e) {
+        catch (SAXException e)
+        {
             final String exceptionText = "Error validating persistence.xml against schema defintion, caused by: ";
-            throw new InvalidConfigurationException(exceptionText , e);
-        } catch(IOException e) {
+            throw new InvalidConfigurationException(exceptionText, e);
+        }
+        catch (IOException e)
+        {
             final String exceptionText = "Error opening xsd schema file. The given persistence.xml descriptor version "
                     + version + " might not be supported yet.";
             throw new InvalidConfigurationException(exceptionText, e);
@@ -182,7 +221,7 @@ public class PersistenceXMLLoader
 
     /**
      * Get stream from classpath.
-     *
+     * 
      * @param fileName
      *            the file name
      * @return the stream
@@ -198,21 +237,22 @@ public class PersistenceXMLLoader
 
     /**
      * Find persistence units.
-     *
+     * 
      * @param url
      *            the url
      * @return the list
      * @throws Exception
      *             the exception
      */
-    public static List<PersistenceUnitMetadata> findPersistenceUnits(URL url) throws Exception
+    public static List<PersistenceUnitMetadata> findPersistenceUnits(URL url, final String[] persistenceUnits)
+            throws Exception
     {
-        return findPersistenceUnits(url, PersistenceUnitTransactionType.JTA);
+        return findPersistenceUnits(url, persistenceUnits, PersistenceUnitTransactionType.JTA);
     }
 
     /**
      * Find persistence units.
-     *
+     * 
      * @param url
      *            the url
      * @param defaultTransactionType
@@ -221,7 +261,7 @@ public class PersistenceXMLLoader
      * @throws Exception
      *             the exception
      */
-    public static List<PersistenceUnitMetadata> findPersistenceUnits(final URL url,
+    public static List<PersistenceUnitMetadata> findPersistenceUnits(final URL url, final String[] persistenceUnits,
             PersistenceUnitTransactionType defaultTransactionType) throws InvalidConfigurationException
     {
         Document doc;
@@ -251,8 +291,11 @@ public class PersistenceXMLLoader
                 // look for "persistence-unit" element
                 if (tag.equals("persistence-unit"))
                 {
-                    PersistenceUnitMetadata metadata = parsePersistenceUnit(url, element, versionName);
-                    units.add(metadata);
+                    PersistenceUnitMetadata metadata = parsePersistenceUnit(url, persistenceUnits, element, versionName);
+                    if (metadata != null)
+                    {
+                        units.add(metadata);
+                    }
                 }
             }
         }
@@ -261,18 +304,27 @@ public class PersistenceXMLLoader
 
     /**
      * Parses the persistence unit.
-     *
+     * 
      * @param top
      *            the top
      * @return the persistence metadata
      * @throws Exception
      *             the exception
      */
-    private static PersistenceUnitMetadata parsePersistenceUnit(final URL url, Element top, final String versionName)
+    private static PersistenceUnitMetadata parsePersistenceUnit(final URL url, final String[] persistenceUnits,
+            Element top, final String versionName)
     {
         PersistenceUnitMetadata metadata = new PersistenceUnitMetadata(versionName, getPersistenceRootUrl(url), url);
 
         String puName = top.getAttribute("name");
+
+        if (!Arrays.asList(persistenceUnits).contains(puName))
+        {
+            // Returning null because this persistence unit is not intended for
+            // creating entity manager factory.
+            return null;
+        }
+
         if (!isEmpty(puName))
         {
             log.trace("Persistent Unit name from persistence.xml: " + puName);
@@ -350,7 +402,7 @@ public class PersistenceXMLLoader
 
     /**
      * Gets the transaction type.
-     *
+     * 
      * @param elementContent
      *            the element content
      * @return the transaction type
@@ -390,7 +442,7 @@ public class PersistenceXMLLoader
 
         /**
          * Instantiates a new error logger.
-         *
+         * 
          * @param file
          *            the file
          * @param errors
@@ -444,7 +496,7 @@ public class PersistenceXMLLoader
 
     /**
      * Checks if is empty.
-     *
+     * 
      * @param str
      *            the str
      * @return true, if is empty
@@ -456,7 +508,7 @@ public class PersistenceXMLLoader
 
     /**
      * Gets the element content.
-     *
+     * 
      * @param element
      *            the element
      * @return the element content
@@ -470,7 +522,7 @@ public class PersistenceXMLLoader
 
     /**
      * Get the content of the given element.
-     *
+     * 
      * @param element
      *            The element to get the content for.
      * @param defaultStr
@@ -501,7 +553,7 @@ public class PersistenceXMLLoader
 
     /**
      * Returns persistence unit root url
-     *
+     * 
      * @param url
      *            raw url
      * @return rootUrl rootUrl
@@ -547,7 +599,7 @@ public class PersistenceXMLLoader
 
     /**
      * Parse and exclude path till META-INF
-     *
+     * 
      * @param file
      *            raw file path.
      * @return extracted/parsed file path.
@@ -572,7 +624,7 @@ public class PersistenceXMLLoader
 
         /**
          * In case it is jar protocol
-         *
+         * 
          * @param protocol
          * @return
          */
@@ -584,7 +636,7 @@ public class PersistenceXMLLoader
 
         /**
          * If provided protocol is within allowed protocol.
-         *
+         * 
          * @param protocol
          *            protocol
          * @return true, if it is in allowed protocol.

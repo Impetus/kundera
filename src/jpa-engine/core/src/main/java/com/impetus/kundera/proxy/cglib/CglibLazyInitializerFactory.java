@@ -80,8 +80,7 @@ public class CglibLazyInitializerFactory implements LazyInitializerFactory
         }
         proxies.clear();
     }
-    
- 
+
     @Override
     public <E> void setProxyOwners(EntityMetadata entityMetadata, E e)
     {
@@ -89,16 +88,19 @@ public class CglibLazyInitializerFactory implements LazyInitializerFactory
         {
             for (Relation r : entityMetadata.getRelations())
             {
-                Object entityId = PropertyAccessorHelper.getId(e, entityMetadata);
-                if (r.isUnary())
+                if (r != null)
                 {
-                    String entityName = entityMetadata.getEntityClazz().getName() + "_" + entityId + "#"
-                            + r.getProperty().getName();
-
-                    KunderaProxy kunderaProxy = getProxy(entityName);
-                    if (kunderaProxy != null)
+                    Object entityId = PropertyAccessorHelper.getId(e, entityMetadata);
+                    if (r.isUnary())
                     {
-                        kunderaProxy.getKunderaLazyInitializer().setOwner(e);
+                        String entityName = entityMetadata.getEntityClazz().getName() + "_" + entityId + "#"
+                                + r.getProperty().getName();
+
+                        KunderaProxy kunderaProxy = getProxy(entityName);
+                        if (kunderaProxy != null)
+                        {
+                            kunderaProxy.getKunderaLazyInitializer().setOwner(e);
+                        }
                     }
                 }
             }

@@ -2156,23 +2156,26 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             boolean isValid = true;
             for (Relation relation : metadata.getRelations())
             {
-                EntityMetadata targetEntityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
-                        relation.getTargetEntity());
-                if (((relation.getType().equals(ForeignKey.ONE_TO_ONE) && !relation.isJoinedByPrimaryKey()) || relation
-                        .getType().equals(ForeignKey.MANY_TO_MANY)) && relation.getMappedBy() == null)
+                if (relation != null)
                 {
-                    // validate Id column of target entity
-                    validateColumn(targetEntityMetadata.getIdAttribute().getJavaType());
-                }
-                else if (relation.getType().equals(ForeignKey.ONE_TO_MANY) && relation.getMappedBy() == null)
-                {
-                    // if target entity is also counter column the validate
-                    // source
-                    // IdColumn
-                    String targetTableName = targetEntityMetadata.getTableName();
-                    if (csmd.isCounterColumn(targetEntityMetadata.getSchema(), targetTableName))
+                    EntityMetadata targetEntityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
+                            relation.getTargetEntity());
+                    if (((relation.getType().equals(ForeignKey.ONE_TO_ONE) && !relation.isJoinedByPrimaryKey()) || relation
+                            .getType().equals(ForeignKey.MANY_TO_MANY)) && relation.getMappedBy() == null)
                     {
-                        isValid = validateColumn(metadata.getIdAttribute().getJavaType()) ? true : false;
+                        // validate Id column of target entity
+                        validateColumn(targetEntityMetadata.getIdAttribute().getJavaType());
+                    }
+                    else if (relation.getType().equals(ForeignKey.ONE_TO_MANY) && relation.getMappedBy() == null)
+                    {
+                        // if target entity is also counter column the validate
+                        // source
+                        // IdColumn
+                        String targetTableName = targetEntityMetadata.getTableName();
+                        if (csmd.isCounterColumn(targetEntityMetadata.getSchema(), targetTableName))
+                        {
+                            isValid = validateColumn(metadata.getIdAttribute().getJavaType()) ? true : false;
+                        }
                     }
                 }
             }

@@ -96,7 +96,8 @@ public class ObjectGraphBuilder
         {
             return null;
         }
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(pd.getKunderaMetadata(),  entity.getClass());
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(pd.getKunderaMetadata(),
+                entity.getClass());
 
         // entity metadata could be null.
         if (entityMetadata == null)
@@ -120,7 +121,7 @@ public class ObjectGraphBuilder
             throw new IllegalArgumentException(
                     "Entity object is invalid, operation failed. Please check previous log message for details");
         }
-      
+
         // id = PropertyAccessorHelper.getId(entity, entityMetadata);
 
         String nodeId = ObjectGraphUtils.getNodeId(id, entity.getClass());
@@ -163,9 +164,8 @@ public class ObjectGraphBuilder
             {
                 node.setDirty(false);
             }
-            
+
             node.setData(entity);
-            
 
             // If node is NOT in managed state, its data needs to be
             // replaced with the one provided in entity object
@@ -177,57 +177,59 @@ public class ObjectGraphBuilder
         // Iterate over relations and construct children nodes
         for (Relation relation : entityMetadata.getRelations())
         {
-
-            // Child Object set in this entity
-            Object childObject = PropertyAccessorHelper.getObject(entity, relation.getProperty());
-
-            if (childObject != null && !ProxyHelper.isProxy(childObject))
+            if (relation != null)
             {
-                EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(pd.getKunderaMetadata(), PropertyAccessorHelper
-                        .getGenericClass(relation.getProperty()));
+                // Child Object set in this entity
+                Object childObject = PropertyAccessorHelper.getObject(entity, relation.getProperty());
 
-                if (metadata != null && relation.isJoinedByPrimaryKey())
+                if (childObject != null && !ProxyHelper.isProxy(childObject))
                 {
-                    PropertyAccessorHelper.setId(childObject, metadata,
-                            PropertyAccessorHelper.getId(entity, entityMetadata));
-                }
-                // This child object could be either an entity(1-1 or M-1)
-                // or a
-                // collection/ Map of entities(1-M or M-M)
-                if (Collection.class.isAssignableFrom(childObject.getClass()))
-                {
-                    // For each entity in the collection, construct a child
-                    // node and add to graph
-                    Collection childrenObjects = (Collection) childObject;
+                    EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(pd.getKunderaMetadata(),
+                            PropertyAccessorHelper.getGenericClass(relation.getProperty()));
 
-                    if (childrenObjects != null && !ProxyHelper.isProxyCollection(childrenObjects))
+                    if (metadata != null && relation.isJoinedByPrimaryKey())
+                    {
+                        PropertyAccessorHelper.setId(childObject, metadata,
+                                PropertyAccessorHelper.getId(entity, entityMetadata));
+                    }
+                    // This child object could be either an entity(1-1 or M-1)
+                    // or a
+                    // collection/ Map of entities(1-M or M-M)
+                    if (Collection.class.isAssignableFrom(childObject.getClass()))
+                    {
+                        // For each entity in the collection, construct a child
+                        // node and add to graph
+                        Collection childrenObjects = (Collection) childObject;
 
-                        for (Object childObj : childrenObjects)
-                        {
-                            if (childObj != null)
+                        if (childrenObjects != null && !ProxyHelper.isProxyCollection(childrenObjects))
+
+                            for (Object childObj : childrenObjects)
                             {
-                                addChildNodesToGraph(graph, node, relation, childObj,
-                                        metadata != null ? getChildNodeState(metadata, childObj) : initialNodeState);
+                                if (childObj != null)
+                                {
+                                    addChildNodesToGraph(graph, node, relation, childObj,
+                                            metadata != null ? getChildNodeState(metadata, childObj) : initialNodeState);
+                                }
+                            }
+                    }
+                    else if (Map.class.isAssignableFrom(childObject.getClass()))
+                    {
+                        Map childrenObjects = (Map) childObject;
+                        if (childrenObjects != null && !ProxyHelper.isProxyCollection(childrenObjects))
+                        {
+                            for (Map.Entry entry : (Set<Map.Entry>) childrenObjects.entrySet())
+                            {
+                                addChildNodesToGraph(graph, node, relation, entry,
+                                        metadata != null ? getChildNodeState(metadata, entry) : initialNodeState);
                             }
                         }
-                }
-                else if (Map.class.isAssignableFrom(childObject.getClass()))
-                {
-                    Map childrenObjects = (Map) childObject;
-                    if (childrenObjects != null && !ProxyHelper.isProxyCollection(childrenObjects))
-                    {
-                        for (Map.Entry entry : (Set<Map.Entry>) childrenObjects.entrySet())
-                        {
-                            addChildNodesToGraph(graph, node, relation, entry,
-                                    metadata != null ? getChildNodeState(metadata, entry) : initialNodeState);
-                        }
                     }
-                }
-                else
-                {
-                    // Construct child node and add to graph
-                    addChildNodesToGraph(graph, node, relation, childObject,
-                            metadata != null ? getChildNodeState(metadata, childObject) : initialNodeState);
+                    else
+                    {
+                        // Construct child node and add to graph
+                        addChildNodesToGraph(graph, node, relation, childObject,
+                                metadata != null ? getChildNodeState(metadata, childObject) : initialNodeState);
+                    }
                 }
             }
         }
@@ -280,7 +282,8 @@ public class ObjectGraphBuilder
                 NodeLink nodeLink = new NodeLink(node.getNodeId(), childNode.getNodeId());
                 nodeLink.setMultiplicity(relation.getType());
 
-                EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(pd.getKunderaMetadata(), node.getDataClass());
+                EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(pd.getKunderaMetadata(),
+                        node.getDataClass());
                 nodeLink.setLinkProperties(getLinkProperties(metadata, relation));
 
                 nodeLink.addLinkProperty(LinkProperty.LINK_VALUE, relObject);
@@ -303,7 +306,8 @@ public class ObjectGraphBuilder
                 NodeLink nodeLink = new NodeLink(node.getNodeId(), childNode.getNodeId());
                 nodeLink.setMultiplicity(relation.getType());
 
-                EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(pd.getKunderaMetadata(), node.getDataClass());
+                EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(pd.getKunderaMetadata(),
+                        node.getDataClass());
                 nodeLink.setLinkProperties(getLinkProperties(metadata, relation));
 
                 // Add Parent node to this child
@@ -326,7 +330,8 @@ public class ObjectGraphBuilder
     {
         Map<LinkProperty, Object> linkProperties = new HashMap<NodeLink.LinkProperty, Object>();
 
-        linkProperties.put(LinkProperty.LINK_NAME, MetadataUtils.getMappedName(metadata, relation, pd.getKunderaMetadata()));
+        linkProperties.put(LinkProperty.LINK_NAME,
+                MetadataUtils.getMappedName(metadata, relation, pd.getKunderaMetadata()));
         linkProperties.put(LinkProperty.IS_SHARED_BY_PRIMARY_KEY, relation.isJoinedByPrimaryKey());
         linkProperties.put(LinkProperty.IS_BIDIRECTIONAL, !relation.isUnary());
         linkProperties.put(LinkProperty.IS_RELATED_VIA_JOIN_TABLE, relation.isRelatedViaJoinTable());
