@@ -152,7 +152,7 @@ public class PersistenceUnitConfiguration extends AbstractSchemaConfiguration im
             URL url = xmls.nextElement();
 
             log.trace("Analysing persistence.xml: " + url);
-            List<PersistenceUnitMetadata> metadataFiles = PersistenceXMLLoader.findPersistenceUnits(url,
+            List<PersistenceUnitMetadata> metadataFiles = PersistenceXMLLoader.findPersistenceUnits(url, persistenceUnits, 
                     PersistenceUnitTransactionType.RESOURCE_LOCAL);
 
             // Pick only those that have Kundera Provider
