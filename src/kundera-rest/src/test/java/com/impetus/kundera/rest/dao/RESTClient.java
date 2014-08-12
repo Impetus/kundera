@@ -30,7 +30,7 @@ public interface RESTClient
     /** Handshake and metadata methods */
     void initialize(WebResource wr, String mediaType);
 
-    String getApplicationToken(String persistenceUnit);
+    String getApplicationToken(String persistenceUnit, String externalProperties);
 
     String closeApplication(String applicationToken);
 
@@ -38,7 +38,9 @@ public interface RESTClient
 
     String closeSession(String sessionToken);
 
-    String getSchemaList(String persistenceUnit);
+    String getSchemaList(String sessionToken,String persistenceUnit);
+    
+    String getEntityModel(String sessionToken,String entityClassName);
 
     /** Operations on Book entity */
     String insertEntity(String sessionToken, String entityStr, String entityClassName);
@@ -56,6 +58,8 @@ public interface RESTClient
     String runNamedJPAQuery(String sessionToken, String entityClassName, String namedQuery, Map<String, Object> params);
 
     String runNativeQuery(String sessionToken, String entityClassName, String nativeQuery, Map<String, Object> params);
+    
+    String runNativeScript(String sessionToken, String nativeQuery, String persistenceUnit);
 
     String runNamedNativeQuery(String sessionToken, String entityClassName, String namedNativeQuery,
             Map<String, Object> params);

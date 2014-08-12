@@ -38,8 +38,7 @@ import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.persistence.event.AddressEntity;
 
 /**
- * @author vivek.mishra
- * junit for {@link ProxySet}
+ * @author vivek.mishra junit for {@link ProxySet}
  */
 public class ProxySetTest
 {
@@ -51,7 +50,6 @@ public class ProxySetTest
     public void setup()
     {
 
-        
         emf = Persistence.createEntityManagerFactory("kunderatest");
         em = emf.createEntityManager();
 
@@ -76,7 +74,7 @@ public class ProxySetTest
 
         proxySet.setOwner(p);
         proxySet.add(p);
-        
+
         Assert.assertTrue(proxySet.contains(p));
         Assert.assertEquals(p, proxySet.getOwner());
         Assert.assertNotNull(proxySet.getDataCollection());
@@ -84,60 +82,58 @@ public class ProxySetTest
         Assert.assertEquals(relation, proxySet.getRelation());
         Assert.assertEquals(delegator, proxySet.getPersistenceDelegator());
         Assert.assertNotNull(proxySet.getCopy());
-        Assert.assertEquals(proxySet.getRelation(),proxySet.getCopy().getRelation());
+        Assert.assertEquals(proxySet.getRelation(), proxySet.getCopy().getRelation());
 
         proxySet.addAll(subaddresses);
         Assert.assertNotNull(proxySet.getDataCollection());
-        Assert.assertEquals(2, ((Collection)proxySet.getDataCollection()).size());
+        Assert.assertEquals(2, ((Collection) proxySet.getDataCollection()).size());
         Assert.assertTrue(proxySet.contains(p));
         Assert.assertTrue(proxySet.containsAll(subaddresses));
 
-        // TODO: This needs to fixed. There is an issue(runtime error) with proxy.remove(). Amresh need to fix it.
-//        proxySet.remove(p);
-//        Assert.assertNotNull(proxySet.getDataCollection());
-//        Assert.assertEquals(1,proxySet.getDataCollection().size());
-//
-//        proxySet.removeAll(subaddresses);
-//        Assert.assertNull(proxySet.getDataCollection());
+        // TODO: This needs to fixed. There is an issue(runtime error) with
+        // proxy.remove(). Amresh need to fix it.
+        // proxySet.remove(p);
+        // Assert.assertNotNull(proxySet.getDataCollection());
+        // Assert.assertEquals(1,proxySet.getDataCollection().size());
+        //
+        // proxySet.removeAll(subaddresses);
+        // Assert.assertNull(proxySet.getDataCollection());
 
         proxySet.retainAll(subaddresses);
         Assert.assertNotNull(proxySet.getDataCollection());
-        Assert.assertEquals(2, ((Collection)proxySet.getDataCollection()).size());
-        
+        Assert.assertEquals(2, ((Collection) proxySet.getDataCollection()).size());
+
         Iterator<AddressEntity> iter = proxySet.iterator();
-        int counter=0;
-        while(iter.hasNext())
+        int counter = 0;
+        while (iter.hasNext())
         {
             Assert.assertNotNull(iter.next());
             ++counter;
         }
-        
+
         Assert.assertEquals(2, counter);
-        
+
         Assert.assertNotNull(proxySet.toArray());
         Assert.assertEquals(2, proxySet.toArray().length);
         Assert.assertEquals(2, proxySet.size());
-        
-        
-       proxySet.remove(p);
-       Assert.assertNotNull(proxySet.getDataCollection());
-       Assert.assertEquals(1,proxySet.size());
 
-       proxySet.removeAll(subaddresses);
-       Assert.assertNull(proxySet.getDataCollection());
-      
-        
+        proxySet.remove(p);
+        Assert.assertNotNull(proxySet.getDataCollection());
+        Assert.assertEquals(1, proxySet.size());
+
+        proxySet.removeAll(subaddresses);
+        Assert.assertNotNull(proxySet.getDataCollection());
+        Assert.assertTrue(((HashSet)proxySet.getDataCollection()).isEmpty());
+
         proxySet.clear();
         Assert.assertTrue(proxySet.isEmpty());
-        
-        
+
     }
-    
+
     @After
     public void tearDown()
     {
-        
-        
+
     }
 
 }

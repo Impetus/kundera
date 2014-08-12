@@ -161,7 +161,14 @@ public class MongoCompositeTypeTest
         q.setParameter("userId", "mevivs");
         results = q.getResultList();
         Assert.assertNotNull(results);
-        Assert.assertTrue(results.isEmpty());
+        Assert.assertEquals(1, results.size());
+        
+     // Query with composite key clause.
+        q = em.createQuery(withFirstCompositeColClause);
+        q.setParameter("userId", "kkmishra");
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(0, results.size());
 
         // Query with composite key clause.
         q = em.createQuery(withClauseOnNoncomposite);
@@ -174,15 +181,15 @@ public class MongoCompositeTypeTest
         q.setParameter("tweetId", 1);
         results = q.getResultList();
         Assert.assertNotNull(results);
-        Assert.assertTrue(results.isEmpty());
-
+        Assert.assertEquals(1, results.size());
+        
         // Query with composite key clause.
         q = em.createQuery(withBothCompositeColClause);
         q.setParameter("userId", "mevivs");
         q.setParameter("tweetId", 1);
         results = q.getResultList();
         Assert.assertNotNull(results);
-        Assert.assertTrue(results.isEmpty());
+        Assert.assertEquals(1, results.size());
 
         // Query with composite key clause.
         q = em.createQuery(withAllCompositeColClause);
@@ -200,7 +207,7 @@ public class MongoCompositeTypeTest
         q.setParameter("timeLineId", timeLineId);
         results = q.getResultList();
         // TODO::
-        // Assert.assertEquals(1, results.size());
+         Assert.assertEquals(1, results.size());
 
         // Query with composite key with selective clause.
         q = em.createQuery(withSelectiveCompositeColClause);

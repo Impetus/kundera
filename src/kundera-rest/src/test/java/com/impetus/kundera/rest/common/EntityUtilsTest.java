@@ -88,5 +88,7 @@ public class EntityUtilsTest
         Assert.assertFalse(EntityUtils.isValidQuery(junkQuery, HttpMethod.DELETE));
         Assert.assertFalse(EntityUtils.isValidQuery(junkQuery, HttpMethod.PUT));
     }
+    
+   
 
 }

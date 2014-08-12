@@ -15,6 +15,9 @@
  */
 package com.impetus.kundera.rest.common;
 
+import java.util.Date;
+import java.util.UUID;
+
 import javax.ws.rs.core.MediaType;
 
 import junit.framework.Assert;
@@ -74,7 +77,7 @@ public class JAXBUtilsTest extends TestCase
         try
         {
 
-            Book book = (Book) JAXBUtils.toObject(StreamUtils.toInputStream(json), Book.class,
+            Book book = (Book) JAXBUtils.toObject(json, Book.class,
                     MediaType.APPLICATION_JSON);
             assertNotNull(book);
             assertEquals("2222", book.getIsbn());
@@ -94,10 +97,31 @@ public class JAXBUtilsTest extends TestCase
         b.setAuthor("Xamry");
         b.setPublication("McGraw");
 
-        String s = JAXBUtils.toString(Book.class, b, MediaType.APPLICATION_XML);
+        String s = JAXBUtils.toString(Book.class, b, MediaType.APPLICATION_JSON);
         Assert.assertNotNull(s);
-
+        
+      
     }
+    
+    public void testObject()
+    {
+        UUID timeLineId = UUID.randomUUID();
+        Date currentDate = new Date();
+        MongoCompoundKey key = new MongoCompoundKey("mevivs", 1, timeLineId);
+        key.setTimeLineId(timeLineId);
+        key.setTweetId(1);
+        key.setUserId("mevivs");
+        MongoPrimeUser timeLine = new MongoPrimeUser(key);
+        timeLine.setKey(key);
+        timeLine.setTweetBody("my first tweet");
+        timeLine.setTweetDate(currentDate);
+
+        String s = JAXBUtils.toString(MongoPrimeUser.class, timeLine, MediaType.APPLICATION_JSON);
+        Assert.assertNotNull(s);
+        
+            
+    }
+
 
 
 }

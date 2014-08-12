@@ -47,10 +47,10 @@ public class MailUtils
         JavaMailSenderImpl emailSender = new JavaMailSenderImpl();
         emailSender.setHost(host);
         // emailSender.setPort(port);
-        emailSender.setUsername("noreply-kundera@impetus.co.in");
+        emailSender.setUsername("noreply-kundera@build.co.in");
         SimpleMailMessage mail = new SimpleMailMessage();
         mail.setTo(reciepents);
-        mail.setFrom("noreply-kundera@impetus.co.in");
+        mail.setFrom("noreply-kundera@build.co.in");
 
         if (operationType.equalsIgnoreCase("load"))
         {

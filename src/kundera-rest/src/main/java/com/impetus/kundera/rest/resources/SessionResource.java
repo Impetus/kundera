@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.rest.common.Constants;
 import com.impetus.kundera.rest.common.ResponseCode;
+import com.impetus.kundera.rest.common.ResponseBuilder;
 import com.impetus.kundera.rest.common.TokenUtils;
 import com.impetus.kundera.rest.repository.EMFRepository;
 import com.impetus.kundera.rest.repository.EMRepository;
@@ -64,7 +65,8 @@ public class SessionResource {
 			@Context HttpHeaders headers) {
 		if (log.isDebugEnabled())
 			log.debug("GET: Application Token:" + applicationToken);
-		String mediaType = headers.getRequestHeader("Content-type").get(0);
+		String mediaType = headers != null && headers.getRequestHeaders().containsKey("Content-type")? headers.getRequestHeader("Content-type").get(0) : MediaType.APPLICATION_JSON;
+		mediaType = mediaType.equalsIgnoreCase(MediaType.APPLICATION_XML) ? MediaType.APPLICATION_XML : MediaType.APPLICATION_JSON;
 		EntityManagerFactory emf = EMFRepository.INSTANCE
 				.getEMF(applicationToken);
 
@@ -79,7 +81,8 @@ public class SessionResource {
 		EntityManager em = emf.createEntityManager();
 
 		EMRepository.INSTANCE.addEm(sessionToken, em);
-		return Response.ok(new String(sessionToken), mediaType).build();
+		//sessionToken = "\""+sessionToken+"\"";
+		return Response.ok(ResponseBuilder.buildOutput(sessionToken, "\""), mediaType).build();
 	}
 
 	/**
@@ -97,7 +100,8 @@ public class SessionResource {
 			@Context HttpHeaders headers) {
 		if (log.isDebugEnabled())
 			log.debug("PUT: Session Token:" + sessionToken);
-		String mediaType = headers.getRequestHeader("Content-type").get(0);
+		String mediaType = headers != null && headers.getRequestHeaders().containsKey("Content-type")? headers.getRequestHeader("Content-type").get(0) : MediaType.APPLICATION_JSON;
+		mediaType = mediaType.equalsIgnoreCase(MediaType.APPLICATION_XML) ? MediaType.APPLICATION_XML : MediaType.APPLICATION_JSON;
 		EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
 
 		if (em == null) {
@@ -134,7 +138,8 @@ public class SessionResource {
 
 		if (log.isDebugEnabled())
 			log.debug("DELETE: Session Token:" + sessionToken);
-		String mediaType = headers.getRequestHeader("Content-type").get(0);
+		String mediaType = headers != null && headers.getRequestHeaders().containsKey("Content-type")? headers.getRequestHeader("Content-type").get(0) : MediaType.APPLICATION_JSON;
+		mediaType = mediaType.equalsIgnoreCase(MediaType.APPLICATION_XML) ? MediaType.APPLICATION_XML : MediaType.APPLICATION_JSON;
 		EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
 		if (em == null) {
 			if (log.isDebugEnabled())

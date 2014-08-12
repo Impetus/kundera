@@ -84,4 +84,13 @@ public class HibernateCRUDUtils
         return results.get(0) != null ? (Integer) results.get(0) : 0;
     }
 
+    
+    public static void main(String[] args)
+    {
+        HibernateCRUDUtils utils = new HibernateCRUDUtils();
+        
+        EntityManager em  = utils.getEntityManager();
+        
+        System.out.println(em.getProperties());
+    }
 }

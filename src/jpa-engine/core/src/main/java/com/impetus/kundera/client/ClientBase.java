@@ -244,5 +244,18 @@ public abstract class ClientBase
     {
         return clientMetadata != null ? clientMetadata.isUseSecondryIndex() : false;
     }
+    
+    /**
+     * Method to execute mongo jscripts.
+     * 
+     * @param script
+     *            jscript in string format
+     * 
+     * @return result object.
+     */
+    public Object executeScript(String script)
+    {
+        throw new UnsupportedOperationException("Execute script is not supported by this client");
+    }
 
 }

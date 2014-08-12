@@ -16,6 +16,7 @@
 package com.impetus.kundera.rest.resources;
 
 import javax.persistence.EntityManager;
+import javax.persistence.metamodel.EmbeddableType;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -33,10 +34,12 @@ import javax.ws.rs.core.UriInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.rest.common.Constants;
 import com.impetus.kundera.rest.common.EntityUtils;
 import com.impetus.kundera.rest.common.JAXBUtils;
-import com.impetus.kundera.rest.common.StreamUtils;
+import com.impetus.kundera.rest.common.ResponseBuilder;
 import com.impetus.kundera.rest.repository.EMRepository;
 
 /**
@@ -45,201 +48,227 @@ import com.impetus.kundera.rest.repository.EMRepository;
  * @author amresh.singh
  */
 
-@Path("/" + Constants.KUNDERA_API_PATH + Constants.CRUD_RESOURCE_PATH
-		+ "/{entityClass}")
+@Path("/" + Constants.KUNDERA_API_PATH + Constants.CRUD_RESOURCE_PATH + "/{entityClass}")
 public class CRUDResource {
-	/** log for this class. */
-	private static Logger log = LoggerFactory.getLogger(CRUDResource.class);
+    /** log for this class. */
+    private static Logger log = LoggerFactory.getLogger(CRUDResource.class);
 
-	@Context
-	UriInfo uriInfo;
+    @Context
+    UriInfo uriInfo;
 
-	/**
-	 * Handler for POST method requests for this resource Inserts an entity into
-	 * datastore
-	 * 
-	 * @param sessionToken
-	 * @param entityClassName
-	 * @param in
-	 * @return
-	 */
-	@POST
-	// @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-	public Response insert(
-			@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken,
-			@PathParam("entityClass") String entityClassName, String input,
-			@Context HttpHeaders headers) {
-		String mediaType = headers.getRequestHeader("Content-type").get(0);
-		// String mediaType = MediaType.APPLICATION_JSON;
-		sessionToken = sessionToken.replaceAll("^\"|\"$", "");
+    /**
+     * Handler for POST method requests for this resource Inserts an entity into datastore
+     * 
+     * @param sessionToken
+     * @param entityClassName
+     * @param in
+     * @return
+     */
+    @POST
+    // @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    public Response insert(@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken,
+        @PathParam("entityClass") String entityClassName, String input, @Context HttpHeaders headers) {
+        String mediaType = headers != null && headers.getRequestHeaders().containsKey("Content-type")? headers.getRequestHeader("Content-type").get(0) : MediaType.APPLICATION_JSON;
 
-		if (log.isDebugEnabled()) {
-			log.debug("POST: SessionToken: " + sessionToken);
-			log.debug("POST: entityClass: " + entityClassName);
-		}
+        mediaType =
+            mediaType.equalsIgnoreCase(MediaType.APPLICATION_XML) ? MediaType.APPLICATION_XML
+                : MediaType.APPLICATION_JSON;
+        sessionToken = sessionToken.replaceAll("^\"|\"$", "");
+        input = input.replaceAll("^\"|\"$", "");
 
-		Object id;
-		try {
-			EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
-			Class<?> entityClass = EntityUtils.getEntityClass(entityClassName,
-					em);
+        if (log.isDebugEnabled()) {
+            log.debug("POST: SessionToken: " + sessionToken);
+            log.debug("POST: entityClass: " + entityClassName);
+        }
 
-			if (log.isDebugEnabled())
-				log.debug("POST: entityClass" + entityClass);
+        try {
+            EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
+            Class<?> entityClass = EntityUtils.getEntityClass(entityClassName, em);
 
-			if (log.isDebugEnabled())
-				log.debug("POST: Media Type:" + mediaType);
+            if (log.isDebugEnabled())
+                log.debug("POST: entityClass" + entityClass);
 
-			log.debug("Entity Data" + input);
+            if (log.isDebugEnabled())
+                log.debug("POST: Media Type:" + mediaType);
 
-			Object entity = JAXBUtils.toObject(
-					StreamUtils.toInputStream(input), entityClass, mediaType);
+            log.debug("Entity Data" + input);
 
-			log.debug("Entity Data" + entity);
-			em.persist(entity);
+            Object entity = JAXBUtils.toObject(input, entityClass, mediaType);
 
-		} catch (Exception e) {
-			log.error(e.getMessage());
-			return Response.serverError().build();
-		}
+            log.debug("Entity Data" + entity);
+            em.persist(entity);
 
-		return Response.ok("Record persisted", mediaType).build();
-	}
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return Response.serverError().build();
+        }
 
-	/**
-	 * Handler for GET method requests for this resource Finds an entity from
-	 * datastore
-	 * 
-	 * @param sessionToken
-	 * @param entityClassName
-	 * @param id
-	 * @return
-	 */
-	@GET
-	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-	@Path("/{id}")
-	public Response find(
-			@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken,
-			@PathParam("entityClass") String entityClassName,
-			@PathParam("id") String id, @Context HttpHeaders headers) {
+        return Response.ok("Record persisted", mediaType).build();
+    }
 
-		sessionToken = sessionToken.replaceAll("^\"|\"$", "");
-		String mediaType = headers.getRequestHeader("Content-type").get(0);
-		log.debug("GET: sessionToken:" + sessionToken);
-		log.debug("GET: entityClass:" + entityClassName);
-		log.debug("GET: ID:" + id);
+    /**
+     * Handler for GET method requests for this resource Finds an entity from datastore
+     * 
+     * @param sessionToken
+     * @param entityClassName
+     * @param id
+     * @return
+     */
+    @GET
+    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Path("/{id}")
+    public Response find(@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken,
+        @PathParam("entityClass") String entityClassName, @PathParam("id") String id, @Context HttpHeaders headers) {
 
-		Object entity = null;
-		Class<?> entityClass;
-		try {
-			EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
-			entityClass = EntityUtils.getEntityClass(entityClassName, em);
-			log.debug("GET: entityClass" + entityClass);
+        sessionToken = sessionToken.replaceAll("^\"|\"$", "");
+        String mediaType = headers != null && headers.getRequestHeaders().containsKey("Content-type")? headers.getRequestHeader("Content-type").get(0) : MediaType.APPLICATION_JSON;
+        mediaType =
+            mediaType.equalsIgnoreCase(MediaType.APPLICATION_XML) ? MediaType.APPLICATION_XML
+                : MediaType.APPLICATION_JSON;
+        log.debug("GET: sessionToken:" + sessionToken);
+        log.debug("GET: entityClass:" + entityClassName);
+        log.debug("GET: ID:" + id);
 
-			entity = em.find(entityClass, id);
-		} catch (Exception e) {
-			log.error(e.getMessage());
-			return Response.serverError().build();
-		}
+        Object entity = null;
+        Class<?> entityClass;
+        EntityMetadata entityMetadata = null;
+        try {
+            EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
+            entityClass = EntityUtils.getEntityClass(entityClassName, em);
+            entityMetadata = EntityUtils.getEntityMetaData(entityClass.getSimpleName(), em);
+            log.debug("GET: entityClass" + entityClass);
+            MetamodelImpl metaModel = (MetamodelImpl) em.getEntityManagerFactory().getMetamodel();
+            EmbeddableType keyObj = null;
+            Object key = null;
+            id = java.net.URLDecoder.decode(id, "UTF-8");
+            if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType())) {
+                keyObj = metaModel.embeddable(entityMetadata.getIdAttribute().getBindableJavaType());
+                key = JAXBUtils.toObject(id, keyObj.getJavaType(), mediaType);
+            } else {
+                key = id;
+            }
 
-		log.debug("GET: " + entity);
+            entity = em.find(entityClass, key);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return Response.serverError().build();
+        }
 
-		if (entity == null) {
-			return Response.noContent().build();
-		}
+        log.debug("GET: " + entity);
 
-		return Response.ok(JAXBUtils.toString(entityClass, entity, mediaType),
-				mediaType).build();
-	}
+        if (entity == null) {
+            return Response.noContent().build();
+        }
+        String output = JAXBUtils.toString(entityClass, entity, mediaType);
+        if (mediaType.equalsIgnoreCase(MediaType.APPLICATION_JSON)) {
+            return Response.ok(ResponseBuilder.buildOutput(entityClass, entityMetadata, output), mediaType).build();
+        } else {
+            return Response.ok(output.toString(), mediaType).build();
+        }
+    }
 
-	/**
-	 * Handler for PUT method requests for this resource Updates an entity into
-	 * datastore
-	 * 
-	 * @param sessionToken
-	 * @param entityClassName
-	 * @param in
-	 * @return
-	 */
-	@PUT
-	// @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-	public Response update(
-			@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken,
-			@PathParam("entityClass") String entityClassName, String input,
-			@Context HttpHeaders headers) {
-		sessionToken = sessionToken.replaceAll("^\"|\"$", "");
+    /**
+     * Handler for PUT method requests for this resource Updates an entity into datastore
+     * 
+     * @param sessionToken
+     * @param entityClassName
+     * @param in
+     * @return
+     */
+    @PUT
+    // @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    public Response update(@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken,
+        @PathParam("entityClass") String entityClassName, String input, @Context HttpHeaders headers) {
+        sessionToken = sessionToken.replaceAll("^\"|\"$", "");
+        input = input.replaceAll("^\"|\"$", "");
 
-		log.debug("PUT: sessionToken:" + sessionToken);
-		log.debug("PUT: entityClassName:" + entityClassName);
-		String mediaType = headers.getRequestHeader("Content-type").get(0);
+        log.debug("PUT: sessionToken:" + sessionToken);
+        log.debug("PUT: entityClassName:" + entityClassName);
+        String mediaType = headers != null && headers.getRequestHeaders().containsKey("Content-type")? headers.getRequestHeader("Content-type").get(0) : MediaType.APPLICATION_JSON;
+        mediaType =
+            mediaType.equalsIgnoreCase(MediaType.APPLICATION_XML) ? MediaType.APPLICATION_XML
+                : MediaType.APPLICATION_JSON;
 
-		log.debug("POST: Media Type:" + mediaType);
+        log.debug("POST: Media Type:" + mediaType);
 
-		Object output;
-		Class<?> entityClass;
-		Object entity;
-		try {
-			EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
-			entityClass = EntityUtils.getEntityClass(entityClassName, em);
-			log.debug("PUT: entityClass: " + entityClass);
+        Object output;
+        Class<?> entityClass;
+        Object entity;
+        EntityMetadata entityMetadata = null;
+        try {
+            EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
+            entityClass = EntityUtils.getEntityClass(entityClassName, em);
+            log.debug("PUT: entityClass: " + entityClass);
+            entityMetadata = EntityUtils.getEntityMetaData(entityClass.getSimpleName(), em);
 
-			entity = JAXBUtils.toObject(StreamUtils.toInputStream(input),
-					entityClass, mediaType);
-			output = em.merge(entity);
-		} catch (Exception e) {
-			log.error(e.getMessage());
-			return Response.serverError().build();
-		}
+            entity = JAXBUtils.toObject(input, entityClass, mediaType);
+            output = em.merge(entity);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return Response.serverError().build();
+        }
 
-		if (output == null) {
-			return Response.notModified().build();
-		}
+        if (output == null) {
+            return Response.notModified().build();
+        }
+        output = JAXBUtils.toString(entityClass, output, mediaType);
+        if (mediaType.equalsIgnoreCase(MediaType.APPLICATION_JSON)) {
+            return Response.ok(ResponseBuilder.buildOutput(entityClass, entityMetadata, output), mediaType).build();
+        } else {
+            return Response.ok(output.toString(), mediaType).build();
+        }
+    }
 
-		return Response.ok(JAXBUtils.toString(entityClass, entity, mediaType),
-				mediaType).build();
-	}
+    /**
+     * Handler for DELETE method requests for this resource Deletes an entity from datastore
+     * 
+     * @param sessionToken
+     * @param entityClassName
+     * @param id
+     * @return
+     */
+    @DELETE
+    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Path("/delete/{id}")
+    public Response delete(@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken,
+        @PathParam("entityClass") String entityClassName, @PathParam("id") String id, @Context HttpHeaders headers) {
 
-	/**
-	 * Handler for DELETE method requests for this resource Deletes an entity
-	 * from datastore
-	 * 
-	 * @param sessionToken
-	 * @param entityClassName
-	 * @param id
-	 * @return
-	 */
-	@DELETE
-	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-	@Path("/delete/{id}")
-	public Response delete(
-			@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken,
-			@PathParam("entityClass") String entityClassName,
-			@PathParam("id") String id, @Context HttpHeaders headers) {
+        sessionToken = sessionToken.replaceAll("^\"|\"$", "");
+        String mediaType = headers != null && headers.getRequestHeaders().containsKey("Content-type")? headers.getRequestHeader("Content-type").get(0) : MediaType.APPLICATION_JSON;
+        mediaType =
+            mediaType.equalsIgnoreCase(MediaType.APPLICATION_XML) ? MediaType.APPLICATION_XML
+                : MediaType.APPLICATION_JSON;
+        log.debug("DELETE: sessionToken:" + sessionToken);
+        log.debug("DELETE: entityClass Name:" + entityClassName);
+        log.debug("DELETE: ID:" + id);
 
-		sessionToken = sessionToken.replaceAll("^\"|\"$", "");
-		String mediaType = headers.getRequestHeader("Content-type").get(0);
-		log.debug("DELETE: sessionToken:" + sessionToken);
-		log.debug("DELETE: entityClass Name:" + entityClassName);
-		log.debug("DELETE: ID:" + id);
+        try {
+            EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
+            Class<?> entityClass = EntityUtils.getEntityClass(entityClassName, em);
+            log.debug("DELETE: entityClass" + entityClass);
+            EntityMetadata entityMetadata = EntityUtils.getEntityMetaData(entityClass.getSimpleName(), em);
+            MetamodelImpl metaModel = (MetamodelImpl) em.getEntityManagerFactory().getMetamodel();
+            EmbeddableType keyObj = null;
+            Object key = null;
+            id = java.net.URLDecoder.decode(id, "UTF-8");
+            if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType())) {
+                keyObj = metaModel.embeddable(entityMetadata.getIdAttribute().getBindableJavaType());
+                key = JAXBUtils.toObject(id, keyObj.getJavaType(), mediaType);
+            } else {
+                key = id;
+            }
 
-		try {
-			EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
-			Class<?> entityClass = EntityUtils.getEntityClass(entityClassName,
-					em);
-			log.debug("DELETE: entityClass" + entityClass);
+            Object entity = em.find(entityClass, key);
+            em.remove(entity);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return Response.serverError().build();
+        }
 
-			Object entity = em.find(entityClass, id);
-			em.remove(entity);
-		} catch (Exception e) {
-			log.error(e.getMessage());
-			return Response.serverError().build();
-		}
+        return Response.ok(new String("Deleted Successfully"), mediaType).build();
 
-		return Response.ok(new String("Deleted Successfully"), mediaType)
-				.build();
-
-	}
+    }
 
 }
