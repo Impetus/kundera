@@ -159,7 +159,7 @@ public abstract class YCSBRunner
                      */
                     // if(!(line.contains("CLEANUP") || line.contains("UPDATE")
                     // || line.contains("INSERT") )){
-                    // logger.info(line);
+//                     logger.info(line);
                     // }
                 }
 
@@ -195,7 +195,7 @@ public abstract class YCSBRunner
             }
         }
 
-        sendMail();
+//        sendMail();
     }
 
     protected String getCommandString(String clazz, String workLoad)

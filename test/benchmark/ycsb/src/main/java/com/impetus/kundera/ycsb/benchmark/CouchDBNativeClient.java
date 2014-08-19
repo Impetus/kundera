@@ -34,6 +34,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 
 import redis.clients.jedis.Protocol;
@@ -41,6 +42,8 @@ import redis.clients.jedis.Protocol;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.impetus.client.couchdb.CouchDBConstants;
+import com.impetus.client.couchdb.CouchDBUtils;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.ycsb.utils.CouchDBOperationUtils;
 import com.yahoo.ycsb.ByteIterator;
@@ -72,31 +75,33 @@ public class CouchDBNativeClient extends DB
 
     public void init() throws DBException
     {
-        System.out.println("Initailizing ....");
         Properties props = getProperties();
-        int port;
-
-        database = props.getProperty("schema", "kundera");
-
-        String portString = props.getProperty(PORT_PROPERTY);
-        if (portString != null)
+        database = props.getProperty("schema", "kundera_native");
+        if (httpClient == null || httpHost == null)
         {
-            port = Integer.parseInt(portString);
-        }
-        else
-        {
-            port = Protocol.DEFAULT_PORT;
-        }
-        String host = props.getProperty(HOST_PROPERTY);
+            System.out.println("Initailizing ....");
+            int port;
 
-        httpClient = utils.initiateClient(host, port);
-        httpHost = new HttpHost(host, port);
+            String portString = props.getProperty(PORT_PROPERTY);
+            if (portString != null)
+            {
+                port = Integer.parseInt(portString);
+            }
+            else
+            {
+                port = Protocol.DEFAULT_PORT;
+            }
+            String host = props.getProperty(HOST_PROPERTY);
+
+            httpClient = utils.initiateClient(host, port);
+            httpHost = new HttpHost(host, port);
+        }
     }
 
     public void cleanup() throws DBException
     {
-        httpClient.getConnectionManager().shutdown();
-        httpHost = null;
+        // httpClient.getConnectionManager().shutdown();
+        // httpHost = null;
     }
 
     /*
@@ -119,12 +124,12 @@ public class CouchDBNativeClient extends DB
         try
         {
             System.out.println("Reading ....");
-//            URI uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-//                    CouchDBConstants.URL_SAPRATOR + database.toLowerCase() + CouchDBConstants.URL_SAPRATOR + table
-//                            + key, null, null);
-//            HttpGet get = new HttpGet(uri);
-//            get.addHeader("Accept", "application/json");
-//            response = httpClient.execute(httpHost, get, CouchDBUtils.getContext(httpHost));
+            URI uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
+                    CouchDBConstants.URL_SAPRATOR + database.toLowerCase() + CouchDBConstants.URL_SAPRATOR + table
+                            + key, null, null);
+            HttpGet get = new HttpGet(uri);
+            get.addHeader("Accept", "application/json");
+            response = httpClient.execute(httpHost, get, CouchDBUtils.getContext(httpHost));
 
             InputStream content = response.getEntity().getContent();
             Reader reader = new InputStreamReader(content);
@@ -143,7 +148,7 @@ public class CouchDBNativeClient extends DB
         }
         finally
         {
-//            CouchDBUtils.closeContent(response);
+            // CouchDBUtils.closeContent(response);
         }
     }
 
@@ -159,19 +164,19 @@ public class CouchDBNativeClient extends DB
             {
                 object.addProperty(entry.getKey(), entry.getValue().toString());
             }
-//            URI uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-//                    CouchDBConstants.URL_SAPRATOR + database.toLowerCase() + CouchDBConstants.URL_SAPRATOR + table
-//                            + key, null, null);
+            URI uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
+                    CouchDBConstants.URL_SAPRATOR + database.toLowerCase() + CouchDBConstants.URL_SAPRATOR + table
+                            + key, null, null);
 
-//            HttpPut put = new HttpPut(uri);
+            HttpPut put = new HttpPut(uri);
 
             StringEntity stringEntity = null;
             object.addProperty("_id", table + key);
             stringEntity = new StringEntity(object.toString(), Constants.CHARSET_UTF8);
             stringEntity.setContentType("application/json");
-//            put.setEntity(stringEntity);
+            put.setEntity(stringEntity);
 
-//            response = httpClient.execute(httpHost, put, CouchDBUtils.getContext(httpHost));
+            response = httpClient.execute(httpHost, put, CouchDBUtils.getContext(httpHost));
 
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND)
             {
@@ -185,7 +190,7 @@ public class CouchDBNativeClient extends DB
         }
         finally
         {
-//            CouchDBUtils.closeContent(response);
+            // CouchDBUtils.closeContent(response);
         }
     }
 
@@ -200,16 +205,16 @@ public class CouchDBNativeClient extends DB
             System.out.println("Deleting ....");
             HttpGet get;
             Reader reader;
-//            uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-//                    CouchDBConstants.URL_SAPRATOR + database.toLowerCase() + CouchDBConstants.URL_SAPRATOR + table
-//                            + key, null, null);
+            uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
+                    CouchDBConstants.URL_SAPRATOR + database.toLowerCase() + CouchDBConstants.URL_SAPRATOR + table
+                            + key, null, null);
             get = new HttpGet(uri);
             get.addHeader("Accept", "application/json");
             response = httpClient.execute(get);
 
             reader = new InputStreamReader(response.getEntity().getContent());
             JsonObject json = gson.fromJson(reader, JsonObject.class);
-//            CouchDBUtils.closeContent(response);
+            // CouchDBUtils.closeContent(response);
             if (!(response.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND))
             {
                 onDelete(database, table + key, response, json);
@@ -223,7 +228,7 @@ public class CouchDBNativeClient extends DB
         }
         finally
         {
-//            CouchDBUtils.closeContent(response);
+            // CouchDBUtils.closeContent(response);
         }
 
     }
@@ -254,14 +259,16 @@ public class CouchDBNativeClient extends DB
         builder.append(rev.getAsString());
         q = builder.toString();
 
-//        uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-//                CouchDBConstants.URL_SAPRATOR + schemaName.toLowerCase() + CouchDBConstants.URL_SAPRATOR + pKey, q,
-//                null);
+        // uri = new URI(CouchDBConstants.PROTOCOL, null,
+        // httpHost.getHostName(), httpHost.getPort(),
+        // CouchDBConstants.URL_SAPRATOR + schemaName.toLowerCase() +
+        // CouchDBConstants.URL_SAPRATOR + pKey, q,
+        // null);
 
-//        HttpDelete delete = new HttpDelete(uri);
+        // HttpDelete delete = new HttpDelete(uri);
 
-//        response = httpClient.execute(delete);
-//        CouchDBUtils.closeContent(response);
+        // response = httpClient.execute(delete);
+        // CouchDBUtils.closeContent(response);
     }
 
     public static void main(String[] args)

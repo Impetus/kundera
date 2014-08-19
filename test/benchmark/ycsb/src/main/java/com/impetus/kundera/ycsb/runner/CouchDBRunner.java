@@ -61,7 +61,7 @@ public class CouchDBRunner extends YCSBRunner
     	
         try
         {
-            operationUtils.dropDatabase(schema, host, port);
+//            operationUtils.dropDatabase(schema, host, port);
         }
         catch (Exception e)
         {

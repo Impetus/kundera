@@ -105,6 +105,10 @@ public class CouchDBOperationUtils
 
             schemeRegistry.register(new Scheme("http", port, ssf));
             PoolingClientConnectionManager ccm = new PoolingClientConnectionManager(schemeRegistry);
+            
+            ccm.setMaxTotal(100);
+//            ccm.setDefaultMaxPerRoute(50);
+            
             httpClient = new DefaultHttpClient(ccm);
             httpHost = new HttpHost(host, port);
 
