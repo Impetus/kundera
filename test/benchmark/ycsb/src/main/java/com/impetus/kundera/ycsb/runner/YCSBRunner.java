@@ -195,7 +195,7 @@ public abstract class YCSBRunner
             }
         }
 
-//        sendMail();
+       sendMail();
     }
 
     protected String getCommandString(String clazz, String workLoad)
