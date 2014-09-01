@@ -222,6 +222,47 @@ public abstract class BaseTest
         Assert.assertFalse(results.isEmpty());
         Assert.assertEquals(2, results.size());
     }
+    
+    
+    /**
+     * @param em
+     * @param clazz
+     * @param e
+     * @param rowIds
+     * @param fieldName
+     * @param size
+     */
+    protected <E extends Object> void assertFindByRowIds(EntityManager em, String clazz, E e, String rowIds, String fieldName, int size)
+
+    {
+        // find by Range.
+        Query q = em.createQuery("Select p from " + clazz + " p where p." + fieldName + " IN ( " + rowIds + " ) ");
+        List<E> results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertFalse(results.isEmpty());
+        Assert.assertEquals(size, results.size());
+    }
+    
+    /**
+     * @param em
+     * @param clazz
+     * @param e
+     * @param fieldValues
+     * @param fieldName
+     * @param size
+     */
+    protected <E extends Object> void assertFindByFieldValues(EntityManager em, String clazz, E e, String fieldValues, String fieldName, int size)
+
+    {
+        // find by Range.
+        Query q = em.createQuery("Select p from " + clazz + " p where p." + fieldName + " IN ( " + fieldValues + " ) ");
+        List<E> results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertFalse(results.isEmpty());
+        Assert.assertEquals(size, results.size());
+    }
+    
+    
 
     /**
      * Assert find without where clause.

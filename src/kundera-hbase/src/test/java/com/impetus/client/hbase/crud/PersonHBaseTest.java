@@ -94,10 +94,12 @@ public class PersonHBaseTest extends BaseTest
         init();
         em.clear();
         PersonHBase personHBase = findById(PersonHBase.class, "1", em);
+        
         Assert.assertNotNull(personHBase);
         Assert.assertEquals("vivek", personHBase.getPersonName());
         Assert.assertEquals(Day.MONDAY, personHBase.getDay());
         Assert.assertEquals(Month.MARCH, personHBase.getMonth());
+       
 
         assertFindByName(em, "PersonHBase", PersonHBase.class, "vivek", "personName");
         assertFindByNameAndAge(em, "PersonHBase", PersonHBase.class, "vivek", "10", "personName");
@@ -105,7 +107,21 @@ public class PersonHBaseTest extends BaseTest
         assertFindByNameAndAgeBetween(em, "PersonHBase", PersonHBase.class, "vivek", "10", "15", "personName");
         assertFindByRange(em, "PersonHBase", PersonHBase.class, "1", "3", "personId");
         assertFindWithoutWhereClause(em, "PersonHBase", PersonHBase.class);
+        assertFindByRowIds(em, "PersonHBase", PersonHBase.class, "1,2,6","personId", 2);
+        assertFindByRowIds(em, "PersonHBase", PersonHBase.class, "1,2,3","personId", 3);
         selectIdQuery();
+        personHBase.setPersonName("Bob");
+        em.merge(personHBase);
+        
+        personHBase = findById(PersonHBase.class, "2", em);
+        personHBase.setPersonName("John");
+        em.merge(personHBase);
+        //test case for In clause query
+        assertFindByFieldValues(em, "PersonHBase", PersonHBase.class, "Bob,vivek","personName", 2);
+        assertFindByFieldValues(em, "PersonHBase", PersonHBase.class, "John,vivek,Bob","personName", 3);
+        assertFindByFieldValues(em, "PersonHBase", PersonHBase.class, "John,xyz","personName", 1);
+        
+      
     }
 
     private void selectIdQuery()
@@ -156,17 +172,31 @@ public class PersonHBaseTest extends BaseTest
         Assert.assertNull(results.get(0).getPersonName());
         Assert.assertNull(results.get(0).getAge());
         
-        try{
+        q = em.createQuery("Select p.personId from PersonHBase p where p.personName = john OR p.age > " + 15);
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertFalse(results.isEmpty());
+        Assert.assertEquals(1, results.size());
+        Assert.assertNotNull(results.get(0).getPersonId());
+        Assert.assertNull(results.get(0).getPersonName());
+        Assert.assertNull(results.get(0).getAge()); 
         
-          q = em.createQuery("Select p.personId from PersonHBase p where p.personName = vivek OR p.age > " + 10);
-          results = q.getResultList();
-          Assert.fail("Should have gone to catch block");
+        q = em.createQuery("Select p.personId from PersonHBase p where p.personName = xyz OR p.age = " + 15);
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertFalse(results.isEmpty());
+        Assert.assertEquals(1, results.size());
+        Assert.assertNotNull(results.get(0).getPersonId());
+        Assert.assertNull(results.get(0).getPersonName());
+        Assert.assertNull(results.get(0).getAge()); 
         
-        } 
-        catch(Exception e){
-            Assert.assertNotNull(e.getMessage());
-            
-        }
+        q = em.createQuery("Select p.personId from PersonHBase p where p.personName = xyz OR p.age = " + 45);
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertTrue(results.isEmpty());
+        
+              
+       
     }
     
     @Test
@@ -202,6 +232,7 @@ public class PersonHBaseTest extends BaseTest
              
         
         Query q = emLucene.createQuery("Select p.personId from PersonHBase p where p.personName = vivek1 OR p.age= 10");
+        
         List<PersonHBase> results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertFalse(results.isEmpty());

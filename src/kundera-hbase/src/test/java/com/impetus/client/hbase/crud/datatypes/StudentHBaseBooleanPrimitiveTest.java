@@ -228,12 +228,12 @@ public class StudentHBaseBooleanPrimitiveTest extends Base
         List<StudentHBaseBooleanPrimitive> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentHBaseBooleanPrimitive s where s.name = Kuldeep or s.age > " + getPartialValue(short.class);
+        query = "Select s From StudentHBaseBooleanPrimitive s where s.name = John or s.age > " + getPartialValue(short.class);
         try
         {
             q = em.createQuery(query);
             students = q.getResultList();
-            Assert.fail("Should have gone to catch block");
+          //  Assert.fail("Should have gone to catch block");
             Assert.assertNotNull(students);
             Assert.assertEquals(1, students.size());
             count = 0;
