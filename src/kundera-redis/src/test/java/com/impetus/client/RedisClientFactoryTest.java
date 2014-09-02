@@ -17,9 +17,12 @@
 package com.impetus.client;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
@@ -31,9 +34,16 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+
+import com.impetus.client.redis.RedisClient;
 import com.impetus.client.redis.RedisClientFactory;
+import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.loader.ClientFactory;
+import com.impetus.kundera.persistence.api.Batcher;
 
 /**
  * The Class RedisClientFactoryTest. Junit for {@link RedisClientFactory}
@@ -42,7 +52,7 @@ public class RedisClientFactoryTest
 {
 
     /** The Constant REDIS_PU. */
-    private static final String REDIS_PU = "redis_pu";
+    private static final String REDIS_PU = "redisClientFactoryTest_pu";
 
     /** The emf. */
     private EntityManagerFactory emf;
@@ -57,8 +67,11 @@ public class RedisClientFactoryTest
     public void setup()
     {
         Map<String, String> properties = new HashMap<String, String>(1);
-        properties.put("kundera.transaction.timeout", "30000");
+        properties.put("kundera.transaction.timeout", "20000");
         properties.put("kundera.pool.size.max.active", "10");
+        properties.put("kundera.nodes", "localhost");
+        properties.put("kundera.port", "6379");
+        properties.put("kundera.batch.size", "5");
         emf = Persistence.createEntityManagerFactory(REDIS_PU, properties);
     }
 
@@ -77,6 +90,7 @@ public class RedisClientFactoryTest
         try
         {
             String field_name = "connectionPoolOrConnection";
+            
             connectionField = ((RedisClientFactory) clientFactory).getClass().getSuperclass()
                     .getDeclaredField(field_name);
 
@@ -86,7 +100,18 @@ public class RedisClientFactoryTest
             }
 
             Object connectionObj = connectionField.get(clientFactory);
-
+           
+            EntityManager em = emf.createEntityManager();
+            Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
+            RedisClient redisClient = (RedisClient) clients.get(REDIS_PU);
+            Assert.assertEquals(5, ((Batcher) redisClient).getBatchSize());
+            Field field=redisClient.getClass().getDeclaredField("connection");
+            field.setAccessible(true);
+            Jedis connection=(Jedis) field.get(redisClient);
+            Assert.assertEquals(6379, connection.getClient().getPort());
+            Assert.assertEquals("localhost", connection.getClient().getHost());
+            Assert.assertEquals(20000, connection.getClient().getTimeout());
+            
             Assert.assertNotNull(connectionObj);
 
         }
@@ -110,7 +135,7 @@ public class RedisClientFactoryTest
             logger.error(e.getMessage());
             Assert.fail(e.getMessage());
         }
-
+       
     }
 
     /**
