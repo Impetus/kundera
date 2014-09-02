@@ -152,11 +152,35 @@ public class OracleNoSQLClientFactory extends GenericClientFactory
                 .getPersistenceUnitMetadata(getPersistenceUnit());
 
         Properties props = persistenceUnitMetadata.getProperties();
-        String hostName = (String) props.get(PersistenceProperties.KUNDERA_NODES);
-        String defaultPort = (String) props.get(PersistenceProperties.KUNDERA_PORT);
+        String hostName = null;
+        String defaultPort = null;
+        String storeName = null;
+        String poolSize = null;
+        if (externalProperties != null)
+        {
+            hostName = (String) externalProperties.get(PersistenceProperties.KUNDERA_NODES);
+            defaultPort = (String) externalProperties.get(PersistenceProperties.KUNDERA_PORT);
+            storeName = (String) externalProperties.get(PersistenceProperties.KUNDERA_KEYSPACE);
+            poolSize = (String) externalProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
+        }
+
+        if (hostName == null)
+        {
+            hostName = (String) props.get(PersistenceProperties.KUNDERA_NODES);
+        }
+        if (defaultPort == null)
+        {
+            defaultPort = (String) props.get(PersistenceProperties.KUNDERA_PORT);
+        }
         // keyspace is keystore
-        String storeName = (String) props.get(PersistenceProperties.KUNDERA_KEYSPACE);
-        String poolSize = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
+        if (storeName == null)
+        {
+            storeName = (String) props.get(PersistenceProperties.KUNDERA_KEYSPACE);
+        }
+        if (poolSize == null)
+        {
+            poolSize = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
+        }
         return KVStoreFactory.getStore(new KVStoreConfig(storeName, hostName + ":" + defaultPort));
     }
 
