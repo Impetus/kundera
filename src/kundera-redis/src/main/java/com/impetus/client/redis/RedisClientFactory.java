@@ -77,65 +77,73 @@ public class RedisClientFactory extends GenericClientFactory
                 getPersistenceUnit());
 
         Properties props = puMetadata.getProperties();
-        String contactNode = RedisPropertyReader.rsmd.getHost() != null ? RedisPropertyReader.rsmd.getHost()
-                : (String) props.get(PersistenceProperties.KUNDERA_NODES);
-        if (contactNode == null)
+        String contactNode = null;
+        String defaultPort = null;
+        String password = null;
+        String maxActivePerNode = null;
+        String maxIdlePerNode = null;
+        String minIdlePerNode = null;
+        String maxTotal = null;
+        String txTimeOut = null;
+
+        if (externalProperties != null)
         {
             contactNode = (String) externalProperties.get(PersistenceProperties.KUNDERA_NODES);
+            defaultPort = (String) externalProperties.get(PersistenceProperties.KUNDERA_PORT);
+            password = (String) externalProperties.get(PersistenceProperties.KUNDERA_PASSWORD);
+            maxActivePerNode = (String) externalProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
+            maxIdlePerNode = (String) externalProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_IDLE);
+            minIdlePerNode = (String) externalProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MIN_IDLE);
+            maxTotal = (String) externalProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_TOTAL);
+            txTimeOut = (String) externalProperties.get(PersistenceProperties.KUNDERA_TRANSACTION_TIMEOUT);
         }
-        String defaultPort = RedisPropertyReader.rsmd.getPort() != null ? RedisPropertyReader.rsmd.getPort()
-                : (String) props.get(PersistenceProperties.KUNDERA_PORT);
+
+        if (contactNode == null)
+        {
+            contactNode = RedisPropertyReader.rsmd.getHost() != null ? RedisPropertyReader.rsmd.getHost()
+                    : (String) props.get(PersistenceProperties.KUNDERA_NODES);
+        }
 
         if (defaultPort == null)
         {
-            defaultPort = (String) externalProperties.get(PersistenceProperties.KUNDERA_PORT);
+            defaultPort = RedisPropertyReader.rsmd.getPort() != null ? RedisPropertyReader.rsmd.getPort()
+                    : (String) props.get(PersistenceProperties.KUNDERA_PORT);
         }
-
-        String password = RedisPropertyReader.rsmd.getPassword() != null ? RedisPropertyReader.rsmd.getPassword()
-                : (String) props.get(PersistenceProperties.KUNDERA_PASSWORD);
 
         if (password == null)
         {
-            password = (String) externalProperties.get(PersistenceProperties.KUNDERA_PASSWORD);
+            password = RedisPropertyReader.rsmd.getPassword() != null ? RedisPropertyReader.rsmd.getPassword()
+                    : (String) props.get(PersistenceProperties.KUNDERA_PASSWORD);
         }
-
-        String maxActivePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
 
         if (maxActivePerNode == null)
         {
-            maxActivePerNode = (String) externalProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
+            maxActivePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
         }
-
-        String maxIdlePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_IDLE);
 
         if (maxIdlePerNode == null)
         {
-            maxIdlePerNode = (String) externalProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_IDLE);
+            maxIdlePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_IDLE);
         }
-
-        String minIdlePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MIN_IDLE);
 
         if (minIdlePerNode == null)
         {
-            minIdlePerNode = (String) externalProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MIN_IDLE);
+            minIdlePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MIN_IDLE);
         }
-
-        String maxTotal = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_TOTAL);
 
         if (maxTotal == null)
         {
-            maxTotal = (String) externalProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_TOTAL);
+            maxTotal = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_TOTAL);
         }
-
-        String txTimeOut = props.getProperty(PersistenceProperties.KUNDERA_TRANSACTION_TIMEOUT);
 
         if (txTimeOut == null)
         {
-            txTimeOut = (String) externalProperties.get(PersistenceProperties.KUNDERA_TRANSACTION_TIMEOUT);
+            txTimeOut = props.getProperty(PersistenceProperties.KUNDERA_TRANSACTION_TIMEOUT);
         }
 
         JedisPoolConfig poolConfig = onPoolConfig(WHEN_EXHAUSTED_FAIL, maxActivePerNode, maxIdlePerNode,
                 minIdlePerNode, maxTotal);
+        
 
         JedisPool pool = null;
         onValidation(contactNode, defaultPort);
@@ -154,6 +162,7 @@ public class RedisClientFactory extends GenericClientFactory
             }
 
             return pool;
+            
         }
         else
         {
@@ -252,6 +261,7 @@ public class RedisClientFactory extends GenericClientFactory
                 }
             }
             return connection;
+            
         }
         else
         {
@@ -259,14 +269,31 @@ public class RedisClientFactory extends GenericClientFactory
                     getPersistenceUnit());
 
             Properties props = puMetadata.getProperties();
+            String contactNode = null;
+            String defaultPort = null;
+            String password = null;
+            if (externalProperties != null)
+            {
+                contactNode = (String) externalProperties.get(PersistenceProperties.KUNDERA_NODES);
+                defaultPort = (String) externalProperties.get(PersistenceProperties.KUNDERA_PORT);
+                password = (String) externalProperties.get(PersistenceProperties.KUNDERA_PASSWORD);
+            }
 
-            String contactNode = RedisPropertyReader.rsmd.getHost() != null ? RedisPropertyReader.rsmd.getHost()
-                    : (String) props.get(PersistenceProperties.KUNDERA_NODES);
-            String defaultPort = RedisPropertyReader.rsmd.getPort() != null ? RedisPropertyReader.rsmd.getPort()
-                    : (String) props.get(PersistenceProperties.KUNDERA_PORT);
-            String password = RedisPropertyReader.rsmd.getPassword() != null ? RedisPropertyReader.rsmd.getPassword()
-                    : (String) props.get(PersistenceProperties.KUNDERA_PASSWORD);
-
+            if (contactNode == null)
+            {
+                contactNode = RedisPropertyReader.rsmd.getHost() != null ? RedisPropertyReader.rsmd.getHost()
+                        : (String) props.get(PersistenceProperties.KUNDERA_NODES);
+            }
+            if (defaultPort == null)
+            {
+                defaultPort = RedisPropertyReader.rsmd.getPort() != null ? RedisPropertyReader.rsmd.getPort()
+                        : (String) props.get(PersistenceProperties.KUNDERA_PORT);
+            }
+            if (password == null)
+            {
+                password = RedisPropertyReader.rsmd.getPassword() != null ? RedisPropertyReader.rsmd.getPassword()
+                        : (String) props.get(PersistenceProperties.KUNDERA_PASSWORD);
+            }
             if (defaultPort == null || !StringUtils.isNumeric(defaultPort))
             {
                 throw new RuntimeException("Invalid port provided: " + defaultPort);
