@@ -41,8 +41,7 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
  * 
  * @author amresh.singh
  */
-public class OracleNoSQLClientFactory extends GenericClientFactory
-{
+public class OracleNoSQLClientFactory extends GenericClientFactory {
 
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(OracleNoSQLClientFactory.class);
@@ -51,64 +50,56 @@ public class OracleNoSQLClientFactory extends GenericClientFactory
     private KVStore kvStore;
 
     @Override
-    public SchemaManager getSchemaManager(Map<String, Object> puProperties)
-    {
+    public SchemaManager getSchemaManager(Map<String, Object> puProperties) {
         return null;
     }
 
     @Override
-    public void initialize(Map<String, Object> puProperties)
-    {
+    public void initialize(Map<String, Object> puProperties) {
         initializePropertyReader();
         setExternalProperties(puProperties);
         reader = new OracleNoSQLEntityReader(kunderaMetadata);
     }
 
     @Override
-    protected Client instantiateClient(String persistenceUnit)
-    {
-        String indexerClass = kunderaMetadata.getApplicationMetadata().getPersistenceUnitMetadata(getPersistenceUnit())
-                .getProperties().getProperty(PersistenceProperties.KUNDERA_INDEXER_CLASS);
+    protected Client instantiateClient(String persistenceUnit) {
+        String indexerClass =
+            kunderaMetadata.getApplicationMetadata().getPersistenceUnitMetadata(getPersistenceUnit()).getProperties()
+                .getProperty(PersistenceProperties.KUNDERA_INDEXER_CLASS);
 
-        Client client = new OracleNoSQLClient(this, reader, indexManager, kvStore, externalProperties,
-                getPersistenceUnit(), kunderaMetadata);
+        Client client =
+            new OracleNoSQLClient(this, reader, indexManager, kvStore, externalProperties, getPersistenceUnit(),
+                kunderaMetadata);
         populateIndexer(indexerClass, client);
 
         return client;
     }
 
     @Override
-    public boolean isThreadSafe()
-    {
+    public boolean isThreadSafe() {
         return false;
     }
 
     @Override
-    public void destroy()
-    {
+    public void destroy() {
         indexManager.close();
-        if (schemaManager != null)
-        {
+        if (schemaManager != null) {
             getSchemaManager(externalProperties).dropSchema();
         }
         schemaManager = null;
         externalProperties = null;
 
-        if (kvStore != null)
-        {
+        if (kvStore != null) {
             logger.info("Closing connection to kvStore.");
             kvStore.close();
             logger.info("Closed connection to kvStore.");
-        }
-        else
-        {
+        } else {
             logger.warn("Can't close connection to kvStore, it was already disconnected");
         }
     }
 
     @Override
-    protected Object createPoolOrConnection()
-    {
+    protected Object createPoolOrConnection() {
         kvStore = getConnection();
 
         return kvStore;
@@ -120,21 +111,18 @@ public class OracleNoSQLClientFactory extends GenericClientFactory
      * @param indexerClass
      * @param client
      */
-    private void populateIndexer(String indexerClass, Client client)
-    {
-        if (indexerClass != null && indexerClass.equals(OracleNoSQLInvertedIndexer.class.getName()))
-        {
+    private void populateIndexer(String indexerClass, Client client) {
+        if (indexerClass != null && indexerClass.equals(OracleNoSQLInvertedIndexer.class.getName())) {
             ((OracleNoSQLInvertedIndexer) indexManager.getIndexer()).setKvStore(kvStore);
             ((OracleNoSQLInvertedIndexer) indexManager.getIndexer()).setHandler(((OracleNoSQLClient) client)
-                    .getHandler());
+                .getHandler());
         }
     }
 
-    private void initializePropertyReader()
-    {
-        if (propertyReader == null)
-        {
-            propertyReader = new OracleNoSQLPropertyReader(externalProperties, kunderaMetadata.getApplicationMetadata()
+    private void initializePropertyReader() {
+        if (propertyReader == null) {
+            propertyReader =
+                new OracleNoSQLPropertyReader(externalProperties, kunderaMetadata.getApplicationMetadata()
                     .getPersistenceUnitMetadata(getPersistenceUnit()));
             propertyReader.read(getPersistenceUnit());
         }
@@ -145,25 +133,50 @@ public class OracleNoSQLClientFactory extends GenericClientFactory
      * 
      * @return the connection
      */
-    private KVStore getConnection()
-    {
+    private KVStore getConnection() {
 
-        PersistenceUnitMetadata persistenceUnitMetadata = kunderaMetadata.getApplicationMetadata()
-                .getPersistenceUnitMetadata(getPersistenceUnit());
+        PersistenceUnitMetadata persistenceUnitMetadata =
+            kunderaMetadata.getApplicationMetadata().getPersistenceUnitMetadata(getPersistenceUnit());
 
         Properties props = persistenceUnitMetadata.getProperties();
-        String hostName = (String) props.get(PersistenceProperties.KUNDERA_NODES);
-        String defaultPort = (String) props.get(PersistenceProperties.KUNDERA_PORT);
+        String hostName = null;
+        String defaultPort = null;
+        String storeName = null;
+        String poolSize = null;
+        if (externalProperties != null) {
+            hostName =
+                externalProperties.containsKey(PersistenceProperties.KUNDERA_NODES) ? (String) externalProperties
+                    .get(PersistenceProperties.KUNDERA_NODES) : null;
+            defaultPort =
+                externalProperties.containsKey(PersistenceProperties.KUNDERA_PORT) ? (String) externalProperties
+                    .get(PersistenceProperties.KUNDERA_PORT) : null;
+            storeName =
+                externalProperties.containsKey(PersistenceProperties.KUNDERA_KEYSPACE) ? (String) externalProperties
+                    .get(PersistenceProperties.KUNDERA_KEYSPACE) : null;
+            poolSize =
+                externalProperties.containsKey(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE)
+                    ? (String) externalProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE) : null;
+        }
+
+        if (hostName == null) {
+            hostName = (String) props.get(PersistenceProperties.KUNDERA_NODES);
+        }
+        if (defaultPort == null) {
+            defaultPort = (String) props.get(PersistenceProperties.KUNDERA_PORT);
+        }
         // keyspace is keystore
-        String storeName = (String) props.get(PersistenceProperties.KUNDERA_KEYSPACE);
-        String poolSize = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
+        if (storeName == null) {
+            storeName = (String) props.get(PersistenceProperties.KUNDERA_KEYSPACE);
+        }
+        if (poolSize == null) {
+            poolSize = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
+        }
         return KVStoreFactory.getStore(new KVStoreConfig(storeName, hostName + ":" + defaultPort));
     }
 
     @Override
-    protected void initializeLoadBalancer(String loadBalancingPolicyName)
-    {
+    protected void initializeLoadBalancer(String loadBalancingPolicyName) {
         throw new UnsupportedOperationException("Load balancing feature is not supported in "
-                + this.getClass().getSimpleName());
+            + this.getClass().getSimpleName());
     }
 }
