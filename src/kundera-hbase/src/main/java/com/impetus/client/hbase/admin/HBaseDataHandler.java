@@ -625,7 +625,6 @@ public class HBaseDataHandler implements DataHandler
                         Object[] embeddedObjectArr = new Object[hbaseData.getColumns().size()];
                         Object embeddedObject = MetadataUtils.getEmbeddedGenericObjectInstance(embeddedCollectionField);
 
-
                         Map<String, byte[]> hbaseValues = hbaseData.getColumns();
 
                         Set<String> columnNames = hbaseValues.keySet();
@@ -648,8 +647,8 @@ public class HBaseDataHandler implements DataHandler
                                 }
 
                                 // Set Hbase data into the embedded object
-                                setHBaseDataIntoObject(columnName, columnValue, columnFamilyFieldInEntity,
-                                        columnNameToFieldMap, embeddedObject);
+                                setHBaseDataIntoObject(columnName, columnValue, columnNameToFieldMap, embeddedObject,
+                                        metaModel.isEmbeddable(javaType));
 
                                 elementCollectionObjects.put(cfNameCounter, embeddedObject);
 
@@ -713,7 +712,8 @@ public class HBaseDataHandler implements DataHandler
                             Field columnField = columnNameToFieldMap.get(columnName);
                             if (columnField != null && columnValue.length != 0)
                             {
-                                if (columnFamilyFieldInEntity.isAnnotationPresent(Embedded.class) || columnFamilyFieldInEntity.isAnnotationPresent(EmbeddedId.class)
+                                if (columnFamilyFieldInEntity.isAnnotationPresent(Embedded.class)
+                                        || columnFamilyFieldInEntity.isAnnotationPresent(EmbeddedId.class)
                                         || columnFamilyFieldInEntity.isAnnotationPresent(ElementCollection.class))
                                 {
                                     PropertyAccessorHelper.set(columnFamilyObj, columnField,
@@ -737,14 +737,13 @@ public class HBaseDataHandler implements DataHandler
 
                     byte[] columnValue = hbaseData.getColumnValue(columnName);
 
-
                     if (relationNames != null && relationNames.contains(columnName) && columnValue != null
                             && columnValue.length > 0)
                     {
                         relations.put(columnName, getObjectFromByteArray(entityType, columnValue, columnName, m));
                     }
-                     else if (columnValue != null && columnValue.length > 0)
-                    
+                    else if (columnValue != null && columnValue.length > 0)
+
                     {
                         PropertyAccessorHelper.set(entity, columnField,
                                 HBaseUtils.fromBytes(columnValue, columnField.getType()));
@@ -788,8 +787,8 @@ public class HBaseDataHandler implements DataHandler
      * @throws PropertyAccessException
      *             the property access exception
      */
-    private void setHBaseDataIntoObject(String columnName, byte[] columnValue, Field columnFamilyField,
-            Map<String, Field> columnNameToFieldMap, Object columnFamilyObj) throws PropertyAccessException
+    private void setHBaseDataIntoObject(String columnName, byte[] columnValue, Map<String, Field> columnNameToFieldMap,
+            Object columnFamilyObj, boolean isEmbeddeble) throws PropertyAccessException
     {
         String qualifier = columnName.substring(columnName.indexOf("#") + 1, columnName.lastIndexOf("#"));
 
@@ -797,8 +796,7 @@ public class HBaseDataHandler implements DataHandler
         Field columnField = columnNameToFieldMap.get(qualifier);
         if (columnField != null)
         {
-            if (columnFamilyField.isAnnotationPresent(Embedded.class)
-                    || columnFamilyField.isAnnotationPresent(ElementCollection.class))
+            if (isEmbeddeble)
             {
                 PropertyAccessorHelper.set(columnFamilyObj, columnField, columnValue);
             }
@@ -1211,7 +1209,7 @@ public class HBaseDataHandler implements DataHandler
                                     embeddableColumnWrapper.addValue(columnName,
                                             PropertyAccessorHelper.getObject(obj, (Field) attribute.getJavaMember()));
                                 }
-                                     count++;
+                                count++;
                             }
                         }
                         else
@@ -1257,7 +1255,7 @@ public class HBaseDataHandler implements DataHandler
                                                 obj, (Field) attribute.getJavaMember()));
                                     }
                                 }
-                                                          }
+                            }
                             // Clear embedded collection cache for GC
                             ecCacheHandler.clearCache();
                         }
@@ -1373,7 +1371,6 @@ public class HBaseDataHandler implements DataHandler
 
         return output != null && !output.isEmpty() ? output.get(0) : output;
     }
-
 
     public boolean hasNext()
     {

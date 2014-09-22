@@ -652,7 +652,7 @@ public class PersonCassandraTest extends BaseTest
 
     }
 
-    @Test
+   // @Test
     public void testWithMultipleThread() throws TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException
     {
