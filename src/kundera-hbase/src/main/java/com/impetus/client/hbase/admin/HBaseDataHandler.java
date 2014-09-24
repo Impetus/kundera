@@ -437,7 +437,7 @@ public class HBaseDataHandler implements DataHandler
      * (java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
-    public <E> List<E> getForeignKeysFromJoinTable(String joinTableName, Object rowKey, String inverseJoinColumnName)
+    public <E> List<E> getForeignKeysFromJoinTable(String schemaName,String joinTableName, Object rowKey, String inverseJoinColumnName)
     {
         List<E> foreignKeys = new ArrayList<E>();
 
@@ -446,7 +446,7 @@ public class HBaseDataHandler implements DataHandler
         // Load raw data from Join Table in HBase
         try
         {
-            hTable = gethTable(joinTableName);
+            hTable = gethTable(schemaName);
 
             List<HBaseData> results = hbaseReader.LoadData(hTable, joinTableName, rowKey, getFilter(joinTableName));
 

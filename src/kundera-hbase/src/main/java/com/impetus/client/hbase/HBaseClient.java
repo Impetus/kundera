@@ -473,8 +473,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
     @Override
     public <E> List<E> getColumnsById(String schemaName, String joinTableName, String joinColumnName,
         String inverseJoinColumnName, Object parentId, Class columnJavaType) {
-        return handler.getForeignKeysFromJoinTable(joinTableName, parentId, inverseJoinColumnName);
-
+        return handler.getForeignKeysFromJoinTable(schemaName,joinTableName, parentId, inverseJoinColumnName);
     }
 
     public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue) {
