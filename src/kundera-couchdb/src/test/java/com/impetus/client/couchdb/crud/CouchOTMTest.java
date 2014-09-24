@@ -16,11 +16,13 @@
 package com.impetus.client.couchdb.crud;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.Query;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -30,12 +32,12 @@ import org.junit.Test;
 import com.impetus.client.couchdb.entities.AddressCouchOTM;
 import com.impetus.client.couchdb.entities.PersonCouchOTM;
 
+
 /**
  * @author impadmin
  * 
  */
-public class CouchOTMTest
-{
+public class CouchOTMTest {
     private EntityManagerFactory emf;
 
     private EntityManager em;
@@ -44,8 +46,7 @@ public class CouchOTMTest
      * @throws java.lang.Exception
      */
     @Before
-    public void setUp() throws Exception
-    {
+    public void setUp() throws Exception {
         emf = Persistence.createEntityManagerFactory("couchdb_pu");
         em = getNewEM();
     }
@@ -54,15 +55,13 @@ public class CouchOTMTest
      * @throws java.lang.Exception
      */
     @After
-    public void tearDown() throws Exception
-    {
+    public void tearDown() throws Exception {
         em.close();
         emf.close();
     }
 
     @Test
-    public void testCRUD()
-    {
+    public void testCRUD() {
         AddressCouchOTM address1 = new AddressCouchOTM();
         address1.setAddressId("a");
         address1.setStreet("sector 11");
@@ -91,15 +90,11 @@ public class CouchOTMTest
         Assert.assertEquals("Kuldeep", foundPerson.getPersonName());
 
         int counter = 0;
-        for (AddressCouchOTM address : foundPerson.getAddresses())
-        {
-            if (address.getAddressId().equals("a"))
-            {
+        for (AddressCouchOTM address : foundPerson.getAddresses()) {
+            if (address.getAddressId().equals("a")) {
                 counter++;
                 Assert.assertEquals("sector 11", address.getStreet());
-            }
-            else
-            {
+            } else {
                 Assert.assertEquals("b", address.getAddressId());
                 Assert.assertEquals("sector 12", address.getStreet());
                 counter++;
@@ -121,15 +116,11 @@ public class CouchOTMTest
         Assert.assertEquals("KK", foundPerson.getPersonName());
 
         counter = 0;
-        for (AddressCouchOTM address : foundPerson.getAddresses())
-        {
-            if (address.getAddressId().equals("a"))
-            {
+        for (AddressCouchOTM address : foundPerson.getAddresses()) {
+            if (address.getAddressId().equals("a")) {
                 counter++;
                 Assert.assertEquals("sector 11", address.getStreet());
-            }
-            else
-            {
+            } else {
                 Assert.assertEquals("b", address.getAddressId());
                 Assert.assertEquals("sector 12", address.getStreet());
                 counter++;
@@ -144,10 +135,103 @@ public class CouchOTMTest
         Assert.assertNull(foundPerson);
     }
 
-    private EntityManager getNewEM()
-    {
-        if (em != null && em.isOpen())
-        {
+    @Test
+    public void testQuery() {
+        AddressCouchOTM address1 = new AddressCouchOTM();
+        address1.setAddressId("a");
+        address1.setStreet("sector 11");
+
+        AddressCouchOTM address2 = new AddressCouchOTM();
+        address2.setAddressId("b");
+        address2.setStreet("sector 12");
+
+        Set<AddressCouchOTM> addresses = new HashSet<AddressCouchOTM>();
+        addresses.add(address1);
+        addresses.add(address2);
+
+        PersonCouchOTM person = new PersonCouchOTM();
+        person.setPersonId("1");
+        person.setPersonName("Kuldeep");
+        person.setAddresses(addresses);
+
+        em.persist(person);
+
+        PersonCouchOTM person1 = new PersonCouchOTM();
+        person1.setPersonId("2");
+        person1.setPersonName("KK");
+
+        address1.setAddressId("a1");
+        address1.setStreet("Sector a1");
+
+        address2.setAddressId("a2");
+        address2.setStreet("Sector a2");
+
+        AddressCouchOTM address3 = new AddressCouchOTM();
+        address3.setAddressId("a3");
+        address3.setStreet("Sector a3");
+
+        addresses = new HashSet<AddressCouchOTM>();
+        addresses.add(address1);
+        addresses.add(address2);
+        addresses.add(address3);
+
+        person1.setAddresses(addresses);
+
+        em.persist(person1);
+
+        em = getNewEM();
+
+        Query q = em.createQuery("Select p from PersonCouchOTM p");
+        List<PersonCouchOTM> results = q.getResultList();
+        Assert.assertEquals(2, results.size());
+
+        for (PersonCouchOTM foundPerson : results) {
+            if (foundPerson.getPersonId().equals("1")) {
+
+                Assert.assertEquals("Kuldeep", foundPerson.getPersonName());
+                Assert.assertEquals(2, foundPerson.getAddresses().size());
+
+                for (AddressCouchOTM address : foundPerson.getAddresses()) {
+                    if (address.getAddressId().equals("a")) {
+                        Assert.assertEquals("sector 11", address.getStreet());
+                    } else {
+                        Assert.assertEquals("b", address.getAddressId());
+                        Assert.assertEquals("sector 12", address.getStreet());
+
+                    }
+                }
+
+            } else if (foundPerson.getPersonId().equals("2")) {
+                
+                Assert.assertEquals("KK", foundPerson.getPersonName());
+                Assert.assertEquals(3, foundPerson.getAddresses().size());
+
+                for (AddressCouchOTM address : foundPerson.getAddresses()) {
+                    if (address.getAddressId().equals("a1")) {
+                        
+                        Assert.assertEquals("Sector a1", address.getStreet());
+                        
+                    } else if (address.getAddressId().equals("a2")) {
+
+                        Assert.assertEquals("Sector a2", address.getStreet());
+
+                    } else {
+                        
+                        Assert.assertEquals("a3", address.getAddressId());
+                        Assert.assertEquals("Sector a3", address.getStreet());
+
+                    }
+                }
+
+            }
+        }
+        em.remove(person);
+        em.remove(person1);
+
+    }
+
+    private EntityManager getNewEM() {
+        if (em != null && em.isOpen()) {
             em.close();
         }
         return em = emf.createEntityManager();

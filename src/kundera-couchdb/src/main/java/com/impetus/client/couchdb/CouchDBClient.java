@@ -798,9 +798,11 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
             JsonArray array = jsonElement.getAsJsonArray();
             for (JsonElement element : array)
             {
+                String id = element.getAsJsonObject().get("value").getAsJsonObject()
+                                    .get(((AbstractAttribute) m.getIdAttribute()).getJPAColumnName()).getAsString();
                 Object entityFromJson = CouchDBObjectMapper.getEntityFromJson(m.getEntityClazz(), m, element
                         .getAsJsonObject().get("value").getAsJsonObject(), m.getRelationNames(), kunderaMetadata);
-                if (entityFromJson != null)
+                if (entityFromJson != null && (m.getTableName().concat(id)).equals(element.getAsJsonObject().get("id").getAsString()))
                 {
                     results.add(entityFromJson);
                 }
