@@ -34,11 +34,17 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.client.cassandra.CassandraClientBase;
 import com.impetus.client.cassandra.common.CassandraConstants;
+import com.impetus.client.cassandra.service.CassandraHostConfiguration;
+import com.impetus.client.cassandra.thrift.ThriftClientFactory;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
+import com.impetus.kundera.service.HostConfiguration;
 
 /**
  * Junit to test Kundera-Cassandra's implementation of {@link PropertySetter}
+ * 
  * @author Chhavi Gangwal
  * 
  */
@@ -55,7 +61,7 @@ public class CassandraPropertySetterTest
     private EntityManager em;
 
     private Map<String, Object> puProperties = new HashMap<String, Object>();
-    
+
     private Logger logger = LoggerFactory.getLogger(CassandraPropertySetterTest.class);
 
     /**
@@ -130,21 +136,20 @@ public class CassandraPropertySetterTest
         catch (NoSuchFieldException nfe)
         {
             Assert.fail();
-            logger.error("Error in test, Caused by: .",nfe.getMessage());
-          
+            logger.error("Error in test, Caused by: .", nfe.getMessage());
+
         }
         catch (IllegalArgumentException iae)
         {
             Assert.fail();
-            logger.error("Error in test, Caused by: .",iae.getMessage());
+            logger.error("Error in test, Caused by: .", iae.getMessage());
         }
         catch (IllegalAccessException e)
         {
             Assert.fail();
-            logger.error("Error in test, Caused by: .",e.getMessage());
+            logger.error("Error in test, Caused by: .", e.getMessage());
         }
-        
-        
+
     }
 
     /**
@@ -188,20 +193,44 @@ public class CassandraPropertySetterTest
         catch (NoSuchFieldException nfe)
         {
             Assert.fail();
-            logger.error("Error in test, Caused by: .",nfe.getMessage());
-          
+            logger.error("Error in test, Caused by: .", nfe.getMessage());
+
         }
         catch (IllegalArgumentException iae)
         {
             Assert.fail();
-            logger.error("Error in test, Caused by: .",iae.getMessage());
+            logger.error("Error in test, Caused by: .", iae.getMessage());
         }
         catch (IllegalAccessException e)
         {
             Assert.fail();
-            logger.error("Error in test, Caused by: .",e.getMessage());
+            logger.error("Error in test, Caused by: .", e.getMessage());
         }
-        
+
+    }
+
+    /*
+     * tests emf properties set partially from external map and persistence.xml
+     */
+    @Test
+    public void testPartialOverridingOfPUProperties()
+    {
+
+        Map<String, Object> puMap = new HashMap<String, Object>();
+
+        puMap.put("kundera.keyspace", "KunderaKeyspace");
+        puMap.put("kundera.port", "9160");
+
+        puMap.put("kundera.client.lookup.class", "com.impetus.client.cassandra.thrift.ThriftClientFactory");
+        puMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
+
+        emf = Persistence.createEntityManagerFactory("partialPropertyOverridePU", puMap);
+        em = emf.createEntityManager();
+
+        HostConfiguration hostConfig = new CassandraHostConfiguration(puMap, CassandraPropertyReader.csmd,
+                "partialPropertyOverridePU", ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance());
+        Assert.assertEquals(hostConfig.getHosts().get(0).getHost(), "localhost");
+        Assert.assertEquals(hostConfig.getHosts().get(0).getPort(), 9160);
     }
 
 }

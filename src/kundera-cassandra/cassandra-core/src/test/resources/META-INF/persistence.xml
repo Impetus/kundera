@@ -384,4 +384,16 @@
 		</properties>
 	</persistence-unit>
 	
+	 <persistence-unit name="partialPropertyOverridePU">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.client.cassandra.thrift.cql.UserInformation</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.dialect" value="cassandra" />
+		    <property name="kundera.ddl.auto.prepare" value="create" /> 
+		</properties>
+	</persistence-unit> 
+	
+	
 </persistence>
