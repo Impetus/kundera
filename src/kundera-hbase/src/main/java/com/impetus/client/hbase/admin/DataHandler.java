@@ -147,7 +147,7 @@ public interface DataHandler
      *            the inverse join column name
      * @return the foreign keys from join table
      */
-    <E> List<E> getForeignKeysFromJoinTable(String joinTableName, Object rowKey, String inverseJoinColumnName);
+    <E> List<E> getForeignKeysFromJoinTable(String schemaName,String joinTableName, Object rowKey, String inverseJoinColumnName);
 
     /**
      * Retrieves a list of parent entity from join table..
