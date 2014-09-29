@@ -48,7 +48,6 @@ public abstract class HostConfiguration
      */
     protected PersistenceUnitMetadata persistenceUnitMetadata;
 
-
     protected Properties connectionProperties = new Properties();
 
     /**
@@ -61,7 +60,8 @@ public abstract class HostConfiguration
      */
     protected List<Host> hostsList = new CopyOnWriteArrayList<Host>();
 
-    public HostConfiguration(Map externalProperties, List<Server> servers, String persistenceUnit, final KunderaMetadata kunderaMetadata)
+    public HostConfiguration(Map externalProperties, List<Server> servers, String persistenceUnit,
+            final KunderaMetadata kunderaMetadata)
     {
         buildHosts(externalProperties, servers, persistenceUnit, kunderaMetadata);
     }
@@ -73,30 +73,36 @@ public abstract class HostConfiguration
      * @param servers
      * @param persistenceUnit
      */
-    private void buildHosts(Map externalProperties, List<Server> servers, String persistenceUnit, final KunderaMetadata kunderaMetadata)
+    private void buildHosts(Map externalProperties, List<Server> servers, String persistenceUnit,
+            final KunderaMetadata kunderaMetadata)
     {
-        persistenceUnitMetadata = kunderaMetadata.getApplicationMetadata().getPersistenceUnitMetadata(
-                persistenceUnit);
+        persistenceUnitMetadata = kunderaMetadata.getApplicationMetadata().getPersistenceUnitMetadata(persistenceUnit);
+        Properties props = persistenceUnitMetadata.getProperties();
         this.externalProperties = externalProperties;
-        String hosts = externalProperties != null ? (String) externalProperties
-                .get(PersistenceProperties.KUNDERA_NODES) : null;
-        String portAsString = externalProperties != null ? (String) externalProperties
-                .get(PersistenceProperties.KUNDERA_PORT) : null;
+        String hosts = null;
+        String portAsString = null;
 
-        if (hosts != null)
+        if (externalProperties != null)
         {
-            buildHosts(hosts, portAsString,  this.hostsList);
+            hosts = (String) externalProperties.get(PersistenceProperties.KUNDERA_NODES);
+            portAsString = (String) externalProperties.get(PersistenceProperties.KUNDERA_PORT);
+        }
+        if (hosts == null)
+        {
+            hosts = (String) props.get(PersistenceProperties.KUNDERA_NODES);
+        }
+        if (portAsString == null)
+        {
+            portAsString = (String) props.get(PersistenceProperties.KUNDERA_PORT);
+        }
+
+        if (hosts != null && portAsString != null)
+        {
+            buildHosts(hosts, portAsString, this.hostsList);
         }
         else if (servers != null && servers.size() >= 1)
         {
             buildHosts(servers, this.hostsList);
-        }
-        else
-        {
-            Properties props = persistenceUnitMetadata.getProperties();
-            String contactNodes = (String) props.get(PersistenceProperties.KUNDERA_NODES);
-            String defaultPort = (String) props.get(PersistenceProperties.KUNDERA_PORT);
-            buildHosts(contactNodes, defaultPort,  this.hostsList);
         }
     }
 
