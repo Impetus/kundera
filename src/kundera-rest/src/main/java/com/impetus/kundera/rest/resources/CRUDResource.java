@@ -34,6 +34,7 @@ import javax.ws.rs.core.UriInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.rest.common.Constants;
@@ -53,8 +54,6 @@ public class CRUDResource {
     /** log for this class. */
     private static Logger log = LoggerFactory.getLogger(CRUDResource.class);
 
-    @Context
-    UriInfo uriInfo;
 
     /**
      * Handler for POST method requests for this resource Inserts an entity into datastore
@@ -146,9 +145,10 @@ public class CRUDResource {
                 keyObj = metaModel.embeddable(entityMetadata.getIdAttribute().getBindableJavaType());
                 key = JAXBUtils.toObject(id, keyObj.getJavaType(), mediaType);
             } else {
-                key = id;
+                ObjectMapper mapper = new ObjectMapper();
+                key = mapper.convertValue(id, entityMetadata.getIdAttribute().getBindableJavaType());
             }
-
+            
             entity = em.find(entityClass, key);
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -257,7 +257,8 @@ public class CRUDResource {
                 keyObj = metaModel.embeddable(entityMetadata.getIdAttribute().getBindableJavaType());
                 key = JAXBUtils.toObject(id, keyObj.getJavaType(), mediaType);
             } else {
-                key = id;
+                ObjectMapper mapper = new ObjectMapper();
+                key = mapper.convertValue(id, entityMetadata.getIdAttribute().getBindableJavaType());
             }
 
             Object entity = em.find(entityClass, key);
