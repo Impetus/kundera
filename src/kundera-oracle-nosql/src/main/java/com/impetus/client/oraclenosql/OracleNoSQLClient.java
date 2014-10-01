@@ -640,6 +640,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         {
             Index index = schemaTable.getIndex(colName);
             IndexKey indexKey = index.createIndexKey();
+            NoSqlDBUtils.add(schemaTable.getField(colName), indexKey, colValue, colName);
             rowsIter = tableAPI.tableIterator(indexKey, null, null);
         }
 
