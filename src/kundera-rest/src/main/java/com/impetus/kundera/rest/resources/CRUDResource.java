@@ -160,7 +160,7 @@ public class CRUDResource {
         if (entity == null) {
             return Response.noContent().build();
         }
-        String output = JAXBUtils.toString(entityClass, entity, mediaType);
+        String output = JAXBUtils.toString(entity, mediaType);
         if (mediaType.equalsIgnoreCase(MediaType.APPLICATION_JSON)) {
             return Response.ok(ResponseBuilder.buildOutput(entityClass, entityMetadata, output), mediaType).build();
         } else {
@@ -213,7 +213,7 @@ public class CRUDResource {
         if (output == null) {
             return Response.notModified().build();
         }
-        output = JAXBUtils.toString(entityClass, output, mediaType);
+        output = JAXBUtils.toString(output, mediaType);
         if (mediaType.equalsIgnoreCase(MediaType.APPLICATION_JSON)) {
             return Response.ok(ResponseBuilder.buildOutput(entityClass, entityMetadata, output), mediaType).build();
         } else {

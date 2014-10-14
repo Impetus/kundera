@@ -97,7 +97,7 @@ public class JAXBUtilsTest extends TestCase
         b.setAuthor("Xamry");
         b.setPublication("McGraw");
 
-        String s = JAXBUtils.toString(Book.class, b, MediaType.APPLICATION_JSON);
+        String s = JAXBUtils.toString(b, MediaType.APPLICATION_JSON);
         Assert.assertNotNull(s);
         
       
@@ -116,7 +116,7 @@ public class JAXBUtilsTest extends TestCase
         timeLine.setTweetBody("my first tweet");
         timeLine.setTweetDate(currentDate);
 
-        String s = JAXBUtils.toString(MongoPrimeUser.class, timeLine, MediaType.APPLICATION_JSON);
+        String s = JAXBUtils.toString(timeLine, MediaType.APPLICATION_JSON);
         Assert.assertNotNull(s);
         
             

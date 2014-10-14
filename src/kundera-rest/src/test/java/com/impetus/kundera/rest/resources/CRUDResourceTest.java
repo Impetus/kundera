@@ -353,8 +353,8 @@ public class CRUDResourceTest extends JerseyTest
         p1.setPersonName("kuldeep");
         p1.setAddresses(addresses);
 
-        personStr = JAXBUtils.toString(PersonnelUni1ToM.class, p, mediaType);
-        personStr1 = JAXBUtils.toString(PersonnelUni1ToM.class, p1, mediaType);
+        personStr = JAXBUtils.toString(p, mediaType);
+        personStr1 = JAXBUtils.toString(p1, mediaType);
 
         // Get Application Token
         applicationToken = restClient.getApplicationToken("cassTest", null);

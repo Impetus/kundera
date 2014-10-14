@@ -15,13 +15,15 @@
  ******************************************************************************/
 package com.impetus.kundera.rest.converters;
 
+import java.io.IOException;
 import java.util.Collection;
-
 import javax.ws.rs.core.MediaType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.impetus.kundera.rest.common.JAXBUtils;
 import com.impetus.kundera.rest.common.StreamUtils;
 
@@ -54,7 +56,7 @@ public class CollectionConverter
             {
                 if (obj != null)
                 {
-                    String s = JAXBUtils.toString(genericClass, obj, mediaType);
+                    String s = JAXBUtils.toString(obj, mediaType);
 
                     if (s.startsWith("<?xml"))
                     {
@@ -75,7 +77,7 @@ public class CollectionConverter
             {
                 if (obj != null)
                 {
-                    String s = JAXBUtils.toString(genericClass, obj, mediaType);
+                    String s = JAXBUtils.toString(obj, mediaType);
                     i++;
                     sb.append(s);
                     if(i < input.size()) {
@@ -130,7 +132,10 @@ public class CollectionConverter
             }
             else if (MediaType.APPLICATION_JSON.equals(mediaType))
             {
-                return null;
+                
+                    return  JAXBUtils.mapper.readValue(input, JAXBUtils.mapper.getTypeFactory()
+                                        .constructCollectionType((Class<? extends Collection>) collectionClass, genericClass));
+               
                 
             }
             return null;
@@ -142,6 +147,15 @@ public class CollectionConverter
         }
         catch (IllegalAccessException e)
         {
+            log.error("Error during translation, Caused by:" + e.getMessage() + ", returning null");
+            return null;
+        } catch (JsonParseException e) {
+            log.error("Error during translation, Caused by:" + e.getMessage() + ", returning null");
+            return null;
+        } catch (JsonMappingException e) {
+            log.error("Error during translation, Caused by:" + e.getMessage() + ", returning null");
+            return null;
+        } catch (IOException e) {
             log.error("Error during translation, Caused by:" + e.getMessage() + ", returning null");
             return null;
         }
