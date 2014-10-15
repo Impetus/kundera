@@ -451,30 +451,33 @@ public class PersonCassandraLuceneTest extends BaseTest
     }
 
     private void selectIdQuery()
-    {/*
-      * String query = "select p.personId from PersonLuceneCassandra p"; Query q
-      * = em.createQuery(query); List<PersonLuceneCassandra> results =
-      * q.getResultList(); Assert.assertNotNull(results); Assert.assertEquals(3,
-      * results.size()); Assert.assertNotNull(results.get(0).getPersonId());
-      * Assert.assertNull(results.get(0).getPersonName());
-      * 
-      * query =
-      * "Select p.personId from PersonLuceneCassandra p where p.personName = vivek"
-      * ; // // find by name. q = em.createQuery(query); results =
-      * q.getResultList(); Assert.assertNotNull(results);
-      * Assert.assertFalse(results.isEmpty()); Assert.assertEquals(3,
-      * results.size()); Assert.assertNotNull(results.get(0).getPersonId());
-      * Assert.assertNull(results.get(0).getPersonName());
-      * Assert.assertNull(results.get(0).getAge());
-      * 
-      * q = em.createQuery(
-      * "Select p.personId from PersonLuceneCassandra p where p.personName = vivek and p.age > "
-      * + 10); results = q.getResultList(); Assert.assertNotNull(results);
-      * Assert.assertFalse(results.isEmpty()); Assert.assertEquals(2,
-      * results.size()); Assert.assertNotNull(results.get(0).getPersonId());
-      * Assert.assertNull(results.get(0).getPersonName());
-      * Assert.assertNull(results.get(0).getAge());
-      */
+    {
+        String query = "select p.personId from PersonLuceneCassandra p";
+        Query q = em.createQuery(query);
+        List<PersonLuceneCassandra> results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(3, results.size());
+        Assert.assertNotNull(results.get(0).getPersonId());
+        Assert.assertNull(results.get(0).getPersonName());
+
+        query = "Select p.personId from PersonLuceneCassandra p where p.personName = vivek"; 
+        q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertFalse(results.isEmpty());
+        Assert.assertEquals(3, results.size());
+        Assert.assertNotNull(results.get(0).getPersonId());
+        Assert.assertNull(results.get(0).getPersonName());
+        Assert.assertNull(results.get(0).getAge());
+
+        q = em.createQuery("Select p.personId from PersonLuceneCassandra p where p.personName = vivek and p.age > " + 10);
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertFalse(results.isEmpty());
+        Assert.assertEquals(2, results.size());
+        Assert.assertNotNull(results.get(0).getPersonId());
+        Assert.assertNull(results.get(0).getPersonName());
+        Assert.assertNull(results.get(0).getAge());
+
     }
 
     /**
