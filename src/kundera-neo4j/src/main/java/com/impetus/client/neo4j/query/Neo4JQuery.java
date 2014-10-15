@@ -254,5 +254,11 @@ public class Neo4JQuery extends QueryImpl
         sb.append(inclusive ? "]" : "}");
         return sb.toString();
     }
+    
+    @Override
+    protected List findUsingLucene(EntityMetadata m, Client client)
+    {
+        return null;
+    }
 
 }

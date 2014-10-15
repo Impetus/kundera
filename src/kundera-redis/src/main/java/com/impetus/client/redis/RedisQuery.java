@@ -256,5 +256,11 @@ public class RedisQuery extends QueryImpl
         // TODO Auto-generated method stub
         return null;
     }
+    
+    @Override
+    protected List findUsingLucene(EntityMetadata m, Client client)
+    {
+       throw new UnsupportedOperationException("select colummn via lucene is unsupported in couchdb");
+    }
 
 }

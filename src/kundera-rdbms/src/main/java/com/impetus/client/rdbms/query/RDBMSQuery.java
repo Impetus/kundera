@@ -277,4 +277,10 @@ public class RDBMSQuery extends QueryImpl
         return parameterMap;
     }
 
+    @Override
+    protected List findUsingLucene(EntityMetadata m, Client client)
+    {
+        return ((HibernateClient) client).findByQuery(getJPAQuery(), getParamaters());
+    }
+
 }

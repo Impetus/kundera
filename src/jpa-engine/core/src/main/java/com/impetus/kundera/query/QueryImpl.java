@@ -25,7 +25,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Queue;
 import java.util.Set;
 
 import javax.persistence.FlushModeType;
@@ -56,6 +56,7 @@ import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.persistence.context.PersistenceCacheManager;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.KunderaQuery.UpdateClause;
 import com.impetus.kundera.utils.KunderaCoreUtils;
 import com.impetus.kundera.utils.ReflectUtils;
@@ -190,16 +191,17 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
         return result;
     }
 
-   /**
-    * Populate using lucene for embeddeId
-    * @param m
-    * @param client
-    * @param result
-    * @param searchFilter
-    * @param columnsToSelect
-    * @return
-    */
-private List<Object> populateEmbeddedIdUsingLucene(EntityMetadata m, Client client, List<Object> result,
+    /**
+     * Populate using lucene for embeddeId
+     * 
+     * @param m
+     * @param client
+     * @param result
+     * @param searchFilter
+     * @param columnsToSelect
+     * @return
+     */
+    private List<Object> populateEmbeddedIdUsingLucene(EntityMetadata m, Client client, List<Object> result,
             Map<String, Object> searchFilter, String[] columnsToSelect)
     {
         List<Object> compositeIds = new ArrayList<Object>();
@@ -223,7 +225,31 @@ private List<Object> populateEmbeddedIdUsingLucene(EntityMetadata m, Client clie
             }
             compositeIds.add(compositeId);
         }
-        return (List<Object>) persistenceDelegeator.find(m.getEntityClazz(), compositeIds.toArray());
+        return findUsingLucene(m, client, compositeIds.toArray());
+    }
+
+    private List<Object> findUsingLucene(EntityMetadata m, Client client, Object[] primaryKeys)
+    {
+        String idField = m.getIdAttribute().getName();
+        String equals = "=";
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                m.getPersistenceUnit());
+        EntityType entityType = metaModel.entity(m.getEntityClazz());
+        String columnName = ((AbstractAttribute) entityType.getAttribute(idField)).getJPAColumnName();
+        List<Object> result = new ArrayList<Object>();
+        Queue queue = getKunderaQuery().getFilterClauseQueue();
+        KunderaQuery kunderaQuery = getKunderaQuery();
+
+        for (Object primaryKey : primaryKeys)
+        {
+            FilterClause filterClause = kunderaQuery.new FilterClause(columnName, equals, primaryKey);
+            queue.clear();
+            queue.add(filterClause);
+            List<Object> object = findUsingLucene(m, client);
+            if (object != null && !object.isEmpty())
+                result.add(object.get(0));
+        }
+        return result;
     }
 
     /**
@@ -246,7 +272,7 @@ private List<Object> populateEmbeddedIdUsingLucene(EntityMetadata m, Client clie
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
         String luceneQ = KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery, kunderaMetadata);
-        
+
         Map<String, Object> searchFilter = client.getIndexManager().search(m.getEntityClazz(), luceneQ,
                 Constants.INVALID, Constants.INVALID);
         boolean isEmbeddedId = metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType());
@@ -258,17 +284,7 @@ private List<Object> populateEmbeddedIdUsingLucene(EntityMetadata m, Client clie
 
         String[] primaryKeys = searchFilter.values().toArray(new String[] {});
         Set<String> uniquePKs = new HashSet<String>(Arrays.asList(primaryKeys));
-        if (kunderaQuery.isAliasOnly() || !m.getType().isSuperColumnFamilyMetadata())
-        {
-
-            result = (List<Object>) client.findAll(m.getEntityClazz(), columnsToSelect, uniquePKs.toArray());
-        }
-        else
-        {
-            return (List<Object>) persistenceDelegeator.find(m.getEntityClazz(), uniquePKs.toArray());
-        }
-
-        return result;
+        return findUsingLucene(m, client, uniquePKs.toArray());
     }
 
     /**
@@ -282,8 +298,11 @@ private List<Object> populateEmbeddedIdUsingLucene(EntityMetadata m, Client clie
      */
     protected abstract List<Object> populateEntities(EntityMetadata m, Client client);
 
+    protected abstract List findUsingLucene(EntityMetadata m, Client client);
+
     /**
      * Recursively populate entities.
+     * 
      * 
      * @param m
      * @param client

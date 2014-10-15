@@ -241,4 +241,12 @@ public class CouchDBQuery extends QueryImpl
         }
         return interpreter;
     }
+    
+    @Override
+    protected List findUsingLucene(EntityMetadata m, Client client)
+    {
+       throw new UnsupportedOperationException("select colummn via lucene is unsupported in couchdb");
+    }
+
+    
 }

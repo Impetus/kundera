@@ -16,6 +16,7 @@
 package com.impetus.client.crud.compositeType;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -30,14 +31,11 @@ import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.impetus.client.cassandra.CassandraClientBase;
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
-import com.impetus.kundera.utils.LuceneCleanupUtilities;
 /**
  * test case for lucenecompositekey
  * @author shaheed.hussain
@@ -61,9 +59,11 @@ public class LuceneCompositeKeyTest
     @Before
     public void setUp() throws Exception
     {
+        Map<String, Object> puProperties = new HashMap<String, Object>();
+        puProperties.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
         CassandraCli.cassandraSetUp();
         CassandraCli.initClient();
-        emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT);
+        emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT,puProperties);
         em = emf.createEntityManager();
         Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
         Client client = clients.get(PERSISTENCE_UNIT);
@@ -86,6 +86,7 @@ public class LuceneCompositeKeyTest
 
         CassandraCompoundKey key = new CassandraCompoundKey("mevivs", 1, timeLineId);
         CassandraPrimeUser user = new CassandraPrimeUser(key);
+        user.setName("ankit");
         user.setTweetBody("my first tweet");
         user.setTweetDate(currentDate);
         em.persist(user);
@@ -103,6 +104,14 @@ public class LuceneCompositeKeyTest
         CassandraPrimeUser u=em.find(CassandraPrimeUser.class, key);
         Assert.assertEquals("my first tweet",u.getTweetBody());
         
+        em.clear();
+        
+        final String s = "Select u.name from CassandraPrimeUser u where u.name=ankit";
+        Query qu = em.createQuery(s);
+        List<CassandraPrimeUser> result = qu.getResultList();
+        Assert.assertNotNull(result.get(0).getName());
+        Assert.assertNull(result.get(0).getTweetBody());
+        Assert.assertNull(result.get(0).getTweetDate());
         
         final String selectiveColumnTweetBodyWithAllCompositeColClause = "Select u from CassandraPrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId = :timeLineId";
 
@@ -153,7 +162,7 @@ public class LuceneCompositeKeyTest
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(1, results.size());
-        LuceneCleanupUtilities.cleanDir(LUCENE_DIR_PATH);
+        //LuceneCleanupUtilities.cleanDir(LUCENE_DIR_PATH);
     }
     
     @SuppressWarnings("all")
@@ -187,7 +196,7 @@ public class LuceneCompositeKeyTest
         u=em.find(CassandraPrimeUser.class, key);
         Assert.assertEquals("my second tweet",u.getTweetBody());
         em.remove(user2);
-        LuceneCleanupUtilities.cleanDir(LUCENE_DIR_PATH);
+       // LuceneCleanupUtilities.cleanDir(LUCENE_DIR_PATH);
     }
 
 }

@@ -177,4 +177,9 @@ public class LuceneQuery extends QueryImpl
         // TODO Auto-generated method stub
         return null;
     }
+    
+    protected List findUsingLucene(EntityMetadata m, Client client)
+    {
+        throw new UnsupportedOperationException("Method supported in native clients");
+    }
 }

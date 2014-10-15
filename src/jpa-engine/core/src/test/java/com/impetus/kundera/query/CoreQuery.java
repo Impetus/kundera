@@ -129,4 +129,14 @@ public class CoreQuery<E> extends QueryImpl<E>
         return super.getColumns(columns, m);
     }
 
+
+    @Override
+    protected List findUsingLucene(EntityMetadata m, Client client)
+    {
+        return null;
+    }
+
+
+   
+
 }

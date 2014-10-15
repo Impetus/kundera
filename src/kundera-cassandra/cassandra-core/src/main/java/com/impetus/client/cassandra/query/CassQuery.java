@@ -19,7 +19,9 @@ import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -28,6 +30,9 @@ import java.util.Set;
 
 import javassist.Modifier;
 
+import javax.persistence.Parameter;
+import javax.persistence.Query;
+import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
@@ -175,11 +180,19 @@ public class CassQuery extends QueryImpl
                 }
                 else
                 {
-                    result = populateUsingLucene(m, client, result, null);
+                    result = populateUsingLucene(m, client, result, getKunderaQuery().getResult());
                 }
             }
         }
         return result;
+    }
+
+    protected List findUsingLucene(EntityMetadata m, Client client)
+    {
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                m.getPersistenceUnit());
+        return ((CassandraClientBase) client).executeQuery(m.getEntityClazz(), null, false,
+                onQueryOverCQL3(m, client, metaModel, null));
     }
 
     /**
@@ -1327,4 +1340,5 @@ public class CassQuery extends QueryImpl
     {
         return kunderaQuery.isNative();
     }
+
 }

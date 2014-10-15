@@ -183,5 +183,11 @@ public class ESQuery<E> extends QueryImpl
 
         return filterBuilder;
     }
+    
+    @Override
+    protected List findUsingLucene(EntityMetadata m, Client client)
+    {
+       throw new UnsupportedOperationException("select colummn via lucene is unsupported in couchdb");
+    }
 
 }
