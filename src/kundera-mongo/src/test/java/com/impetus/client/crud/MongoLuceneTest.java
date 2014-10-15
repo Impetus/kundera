@@ -33,26 +33,26 @@ import org.junit.Test;
 import com.impetus.client.crud.entities.Day;
 import com.impetus.client.crud.entities.PersonMongoEmptyTableName;
 import com.impetus.client.crud.entities.PersonMongoNameAnnotation;
-import com.impetus.kundera.client.DummyDatabase;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
+import com.impetus.kundera.utils.LuceneCleanupUtilities;
 
 /**
- * Test case to check lucene support in mongodb
- * select)
+ * Test case to check lucene support in mongodb select)
  */
-public class MongoLuceneTest 
+public class MongoLuceneTest
 {
     private static final String PU = "mongoTest";
 
-
     private EntityManagerFactory emf;
+
     private EntityManager em;
 
-    protected Map<String,String> propertyMap = new HashMap<String, String>();
+    protected Map<String, String> propertyMap = new HashMap<String, String>();
 
     @Before
     public void setUp() throws Exception
     {
-        propertyMap.put("index.home.dir", "lucene");        
+        propertyMap.put("index.home.dir", "lucene");
         emf = Persistence.createEntityManagerFactory(PU, propertyMap);
         em = emf.createEntityManager();
 
@@ -71,7 +71,7 @@ public class MongoLuceneTest
 
         PersonMongoNameAnnotation personWithKey = new PersonMongoNameAnnotation();
         personWithKey.setPersonId("111");
-        em.persist(personWithKey);        
+        em.persist(personWithKey);
 
         em.clear();
         PersonMongoNameAnnotation p = findById(PersonMongoNameAnnotation.class, "1", em);
@@ -84,15 +84,15 @@ public class MongoLuceneTest
         Query q = em.createQuery(qry);
         List<PersonMongoNameAnnotation> persons = q.getResultList();
 
-        assertFindByName(em, "PersonEntityNameAnnotation", PersonMongoNameAnnotation.class, "vivek", "personName");  
-        
+        assertFindByName(em, "PersonEntityNameAnnotation", PersonMongoNameAnnotation.class, "vivek", "personName");
+
         // Delete without WHERE clause.
         String deleteQuery = "DELETE from PesonMongo";
         q = em.createQuery(deleteQuery);
         q.executeUpdate();
 
     }
-    
+
     @Test
     public void testEmptytableName() throws Exception
     {
@@ -100,7 +100,6 @@ public class MongoLuceneTest
         p1.setPersonId("1");
         p1.setPersonName("vivek");
         p1.setAge(10);
-       
 
         Query findQuery = em.createQuery("Select p from PersonMongoEmptyTableName p", PersonMongoEmptyTableName.class);
         List<PersonMongoEmptyTableName> allPersons = findQuery.getResultList();
@@ -115,17 +114,15 @@ public class MongoLuceneTest
         Assert.assertNotNull(allPersons);
 
         em.persist(p1);
-     
 
         PersonMongoEmptyTableName personWithKey = new PersonMongoEmptyTableName();
         personWithKey.setPersonId("111");
-        em.persist(personWithKey);        
+        em.persist(personWithKey);
 
         em.clear();
         PersonMongoEmptyTableName p = findById(PersonMongoEmptyTableName.class, "1", em);
         Assert.assertNotNull(p);
         Assert.assertEquals("vivek", p.getPersonName());
-       
 
         em.clear();
         String qry = "Select p.personId,p.personName from PersonMongoEmptyTableName p where p.personId = 1";
@@ -133,7 +130,7 @@ public class MongoLuceneTest
         List<PersonMongoEmptyTableName> persons = q.getResultList();
         Assert.assertNotNull(persons.get(0).getPersonName());
         Assert.assertNull(persons.get(0).getAge());
-     
+
         // Delete without WHERE clause.
         String deleteQuery = "DELETE from PersonMongoEmptyTableName";
         q = em.createQuery(deleteQuery);
@@ -144,11 +141,11 @@ public class MongoLuceneTest
     @After
     public void tearDown() throws Exception
     {
+        LuceneCleanupUtilities.cleanLuceneDirectory(((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance()
+                .getApplicationMetadata().getPersistenceUnitMetadata("hbaseTest"));
         em.close();
         emf.close();
-        DummyDatabase.INSTANCE.dropDatabase();
     }
-    
 
     private PersonMongoNameAnnotation prepareData(String rowKey, int age)
     {
@@ -160,15 +157,12 @@ public class MongoLuceneTest
         return o;
     }
 
- 
     private <E extends Object> E findById(Class<E> clazz, Object rowKey, EntityManager em)
     {
         return em.find(clazz, rowKey);
     }
 
- 
-    private <E extends Object> void assertFindByName(EntityManager em, String clazz, E e, String name,
-            String fieldName)
+    private <E extends Object> void assertFindByName(EntityManager em, String clazz, E e, String name, String fieldName)
     {
 
         String query = "Select p from PesonMongo p where p." + fieldName + " = " + name;
@@ -185,4 +179,3 @@ public class MongoLuceneTest
         return ((PersonMongoNameAnnotation) result).getPersonName();
     }
 }
-
