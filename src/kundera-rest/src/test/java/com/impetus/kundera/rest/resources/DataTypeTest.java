@@ -242,7 +242,7 @@ public class DataTypeTest extends JerseyTest
                 "findByEnrolmentDate", params2);
         Assert.assertTrue(profByEnrolmentDate.indexOf(pk1) > 0);
         log.debug(profByEnrolmentDate);
-
+  
         // Delete Records
         restClient.deleteEntity(sessionToken, updatedProfessional, pk1, PROFESSIONAL_CLASS_NAME);
         restClient.deleteEntity(sessionToken, updatedProfessional, pk2, PROFESSIONAL_CLASS_NAME);
@@ -282,7 +282,7 @@ public class DataTypeTest extends JerseyTest
          */
         new BigInteger("123456789"), new BigDecimal(123456789), cal);
 
-        professionalStr1 = JAXBUtils.toString(Professional.class, prof1, mediaType);
+        professionalStr1 = JAXBUtils.toString(prof1, mediaType);
        
 
     }
@@ -305,7 +305,7 @@ public class DataTypeTest extends JerseyTest
          */
         new BigInteger("123456790"), new BigDecimal(123456790), cal);
 
-        professionalStr2 = JAXBUtils.toString(Professional.class, prof2, mediaType);
+        professionalStr2 = JAXBUtils.toString(prof2, mediaType);
 
     }
 

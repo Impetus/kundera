@@ -50,273 +50,252 @@ import com.impetus.kundera.query.QueryImpl;
  */
 public class EntityUtils {
 
-	public static Map<String, String> httpMethods = new HashMap<String, String>();
+    public static Map<String, String> httpMethods = new HashMap<String, String>();
 
-	private static Logger log = LoggerFactory.getLogger(EntityUtils.class);
+    private static Logger log = LoggerFactory.getLogger(EntityUtils.class);
 
-	static {
-		httpMethods.put(HttpMethod.GET, "SELECT");
-		httpMethods.put(HttpMethod.POST, "INSERT");
-		httpMethods.put(HttpMethod.PUT, "UPDATE");
-		httpMethods.put(HttpMethod.DELETE, "DELETE");
-	}
+    static {
+        httpMethods.put(HttpMethod.GET, "SELECT");
+        httpMethods.put(HttpMethod.POST, "INSERT");
+        httpMethods.put(HttpMethod.PUT, "UPDATE");
+        httpMethods.put(HttpMethod.DELETE, "DELETE");
+    }
 
-	/**
-	 * @param entityClassName
-	 * @param em
-	 * @return
-	 */
-	public static AbstractManagedType getEntityManagedType(
-			String entityClassName, EntityManager em) {
-		MetamodelImpl metamodel = (MetamodelImpl) em.getEntityManagerFactory()
-				.getMetamodel();
-		Class<?> entityClass = metamodel.getEntityClass(entityClassName);
-		EntityMetadata entityMetadata = metamodel
-				.getEntityMetadata(entityClass);
-		AbstractManagedType managedType = (AbstractManagedType) metamodel
-				.entity(entityMetadata.getEntityClazz());
-		return managedType;
-	}
+    /**
+     * @param entityClassName
+     * @param em
+     * @return
+     */
+    public static AbstractManagedType getEntityManagedType(String entityClassName, EntityManager em) {
+        MetamodelImpl metamodel = (MetamodelImpl) em.getEntityManagerFactory().getMetamodel();
+        Class<?> entityClass = metamodel.getEntityClass(entityClassName);
+        EntityMetadata entityMetadata = metamodel.getEntityMetadata(entityClass);
+        AbstractManagedType managedType = (AbstractManagedType) metamodel.entity(entityMetadata.getEntityClazz());
+        return managedType;
+    }
 
-	/**
-	 * @param entityClassName
-	 * @param em
-	 * @return
-	 */
-	public static Class<?> getEntityClass(String entityClassName,
-			EntityManager em) {
-		MetamodelImpl metamodel = (MetamodelImpl) em.getEntityManagerFactory()
-				.getMetamodel();
-		Class<?> entityClass = metamodel.getEntityClass(entityClassName);
-		return entityClass;
-	}
-	
-	/**
-	 * @param entityClassName
-	 * @param em
-	 * @return
-	 */
-	public static EntityMetadata getEntityMetaData(String entityClassName,
-			EntityManager em) {
-		MetamodelImpl metamodel = (MetamodelImpl) em.getEntityManagerFactory()
-				.getMetamodel();
-		Class<?> entityClass = metamodel.getEntityClass(entityClassName);
-		
-		return metamodel.getEntityMetadata(entityClass);
-	}
+    /**
+     * @param entityClassName
+     * @param em
+     * @return
+     */
+    public static Class<?> getEntityClass(String entityClassName, EntityManager em) {
+        MetamodelImpl metamodel = (MetamodelImpl) em.getEntityManagerFactory().getMetamodel();
+        Class<?> entityClass = metamodel.getEntityClass(entityClassName);
+        return entityClass;
+    }
 
-	public static String getQueryPart(String fullQueryString) {
-		if (fullQueryString.contains("?")) {
-			return fullQueryString.substring(0, fullQueryString.indexOf("?"));
-		} else {
-			return fullQueryString;
-		}
-	}
+    /**
+     * @param entityClassName
+     * @param em
+     * @return
+     */
+    public static EntityMetadata getEntityMetaData(String entityClassName, EntityManager em) {
+        MetamodelImpl metamodel = (MetamodelImpl) em.getEntityManagerFactory().getMetamodel();
+        Class<?> entityClass = metamodel.getEntityClass(entityClassName);
 
-	public static String getParameterPart(String fullQueryString) {
-		if (fullQueryString.contains("?")) {
-			return fullQueryString.substring(fullQueryString.indexOf("?") + 1,
-					fullQueryString.length());
-		} else {
-			return "";
-		}
-	}
+        return metamodel.getEntityMetadata(entityClass);
+    }
 
-	/**
-	 * @param queryString
-	 * @param q
-	 * @param em
-	 */
-	public static void setObjectQueryParameters(String queryString,
-			String parameterString, Query q, EntityManager em, String mediaType) {
-		MetamodelImpl metamodel = (MetamodelImpl) em.getEntityManagerFactory()
-				.getMetamodel();
+    public static String getQueryPart(String fullQueryString) {
+        if (fullQueryString.contains("?")) {
+            return fullQueryString.substring(0, fullQueryString.indexOf("?"));
+        } else {
+            return fullQueryString;
+        }
+    }
 
-		if (parameterString == null || parameterString.isEmpty()) {
-			return;
-		}
+    public static String getParameterPart(String fullQueryString) {
+        if (fullQueryString.contains("?")) {
+            return fullQueryString.substring(fullQueryString.indexOf("?") + 1, fullQueryString.length());
+        } else {
+            return "";
+        }
+    }
 
-		Map<String, String> paramsMap = new HashMap<String, String>();
-		ObjectMapper mapper = new ObjectMapper();
+    /**
+     * @param queryString
+     * @param q
+     * @param em
+     */
+    public static void setObjectQueryParameters(String queryString, String parameterString, Query q, EntityManager em,
+        String mediaType) {
+        MetamodelImpl metamodel = (MetamodelImpl) em.getEntityManagerFactory().getMetamodel();
 
-		try {
-			paramsMap = mapper.readValue(parameterString,
-					new TypeReference<HashMap<String, String>>() {
-					});
+        if (parameterString == null || parameterString.isEmpty()) {
+            return;
+        }
 
-			for (String paramName : paramsMap.keySet()) {
-				String value = paramsMap.get(paramName);
+        Map<String, String> paramsMap = new HashMap<String, String>();
+        ObjectMapper mapper = new ObjectMapper();
 
-				KunderaQuery kq = ((QueryImpl) q).getKunderaQuery();
-				Set<Parameter<?>> parameters = kq.getParameters();
+        try {
+            paramsMap = mapper.readValue(parameterString, new TypeReference<HashMap<String, String>>() {
+            });
+            KunderaQuery kq = ((QueryImpl) q).getKunderaQuery();
+            Set<Parameter<?>> parameters = kq.getParameters();
+            for (String paramName : paramsMap.keySet()) {
+                String value = paramsMap.get(paramName);
 
-				if (StringUtils.isNumeric(paramName)) {
-					for (Parameter param : parameters) {
-						if (param.getPosition() == Integer.parseInt(paramName)) {
+                if (paramName.equalsIgnoreCase("firstResult")) {
+                    q.setFirstResult(Integer.parseInt(value));
 
-							Class<?> paramClass = param.getParameterType();
-							Object paramValue = null;
-							if (metamodel.isEmbeddable(paramClass)) {
-								paramValue = JAXBUtils.toObject(
-										StreamUtils.toInputStream(value),
-										paramClass, mediaType);
+                } else if (paramName.equalsIgnoreCase("maxResult")) {
+                    q.setMaxResults(Integer.parseInt(value));
 
-							} else {
-								PropertyAccessor accessor = PropertyAccessorFactory
-										.getPropertyAccessor(paramClass);
-								paramValue = accessor.fromString(paramClass,
-										value);
-							}
+                } else if (StringUtils.isNumeric(paramName)) {
+                    for (Parameter param : parameters) {
+                        if (param.getPosition() == Integer.parseInt(paramName)) {
 
-							q.setParameter(Integer.parseInt(paramName),
-									paramValue);
-							break;
-						}
-					}
-				} else {
-					for (Parameter param : parameters) {
-						if (param.getName().equals(paramName)) {
-							Class<?> paramClass = param.getParameterType();
-							Object paramValue = null;
+                            Class<?> paramClass = param.getParameterType();
+                            Object paramValue = null;
+                            if (metamodel.isEmbeddable(paramClass)) {
+                                paramValue =
+                                    JAXBUtils.toObject(StreamUtils.toInputStream(value), paramClass, mediaType);
 
-							if (metamodel.isEmbeddable(paramClass)) {
-								paramValue = JAXBUtils.toObject(
-										StreamUtils.toInputStream(value),
-										paramClass, mediaType);
+                            } else {
+                                PropertyAccessor accessor = PropertyAccessorFactory.getPropertyAccessor(paramClass);
+                                paramValue = accessor.fromString(paramClass, value);
+                            }
 
-							} else {
-								PropertyAccessor accessor = PropertyAccessorFactory
-										.getPropertyAccessor(paramClass);
-								paramValue = accessor.fromString(paramClass,
-										value);
-							}
+                            q.setParameter(Integer.parseInt(paramName), paramValue);
+                            break;
+                        }
+                    }
+                } else {
+                    for (Parameter param : parameters) {
+                        if (param.getName().equals(paramName)) {
 
-							q.setParameter(paramName, paramValue);
-							break;
-						}
-					}
+                            Class<?> paramClass = param.getParameterType();
+                            Object paramValue = null;
 
-				}
-			}
+                            if (metamodel.isEmbeddable(paramClass)) {
+                                paramValue =
+                                    JAXBUtils.toObject(StreamUtils.toInputStream(value), paramClass, mediaType);
 
-		} catch (JsonParseException e) {
-			log.error(e.getMessage());
-		} catch (JsonMappingException e) {
-			log.error(e.getMessage());
-		} catch (IOException e) {
-			log.error(e.getMessage());
-		}
-	}
+                            } else {
+                                PropertyAccessor accessor = PropertyAccessorFactory.getPropertyAccessor(paramClass);
+                                paramValue = accessor.fromString(paramClass, value);
+                            }
+                            q.setParameter(paramName, paramValue);
+                            break;
+                        }
+                    }
 
-	/**
-	 * @param queryString
-	 * @param q
-	 */
-	public static void setQueryParameters(String queryString,
-			String parameterString, Query q) {
-		Map<String, String> paramsMap = new HashMap<String, String>();
+                }
+            }
 
-		StringTokenizer st = new StringTokenizer(parameterString, "&");
-		while (st.hasMoreTokens()) {
-			String element = st.nextToken();
-			paramsMap.put(
-					element.substring(0, element.indexOf("=")),
-					element.substring(element.indexOf("=") + 1,
-							element.length()));
-		}
+        } catch (JsonParseException e) {
+            log.error(e.getMessage());
+        } catch (JsonMappingException e) {
+            log.error(e.getMessage());
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+    }
 
-		for (String paramName : paramsMap.keySet()) {
-			String value = paramsMap.get(paramName);
+    /**
+     * @param queryString
+     * @param q
+     */
+    public static void setQueryParameters(String queryString, String parameterString, Query q) {
+        Map<String, String> paramsMap = new HashMap<String, String>();
 
-			KunderaQuery kq = ((QueryImpl) q).getKunderaQuery();
-			Set<Parameter<?>> parameters = kq.getParameters();
+        StringTokenizer st = new StringTokenizer(parameterString, "&");
+        while (st.hasMoreTokens()) {
+            String element = st.nextToken();
+            paramsMap.put(element.substring(0, element.indexOf("=")),
+                element.substring(element.indexOf("=") + 1, element.length()));
+        }
+        KunderaQuery kq = ((QueryImpl) q).getKunderaQuery();
+        Set<Parameter<?>> parameters = kq.getParameters();
+        for (String paramName : paramsMap.keySet()) {
+            String value = paramsMap.get(paramName);
+            if (paramName.equalsIgnoreCase("firstResult")) {
+                q.setFirstResult(Integer.parseInt(value));
+            } else if (paramName.equalsIgnoreCase("maxResult")) {
+                q.setMaxResults(Integer.parseInt(value));
+            } else if (StringUtils.isNumeric(paramName)) {
+                for (Parameter param : parameters) {
+                    if (param.getPosition() == Integer.parseInt(paramName)) {
+                        Class<?> paramClass = param.getParameterType();
+                        PropertyAccessor accessor = PropertyAccessorFactory.getPropertyAccessor(paramClass);
+                        Object paramValue = accessor.fromString(paramClass, value);
+                        q.setParameter(Integer.parseInt(paramName), paramValue);
+                        break;
+                    }
+                }
+            } else {
+                for (Parameter param : parameters) {
+                    if (param.getName().equals(paramName)) {
+                        Class<?> paramClass = param.getParameterType();
+                        PropertyAccessor accessor = PropertyAccessorFactory.getPropertyAccessor(paramClass);
+                        Object paramValue = accessor.fromString(paramClass, value);
+                        q.setParameter(paramName, paramValue);
 
-			if (StringUtils.isNumeric(paramName)) {
-				for (Parameter param : parameters) {
-					if (param.getPosition() == Integer.parseInt(paramName)) {
-						Class<?> paramClass = param.getParameterType();
-						PropertyAccessor accessor = PropertyAccessorFactory
-								.getPropertyAccessor(paramClass);
-						Object paramValue = accessor.fromString(paramClass,
-								value);
-						q.setParameter(Integer.parseInt(paramName), paramValue);
-						break;
-					}
-				}
-			} else {
-				for (Parameter param : parameters) {
-					if (param.getName().equals(paramName)) {
-						Class<?> paramClass = param.getParameterType();
-						PropertyAccessor accessor = PropertyAccessorFactory
-								.getPropertyAccessor(paramClass);
-						Object paramValue = accessor.fromString(paramClass,
-								value);
-						q.setParameter(paramName, paramValue);
-						break;
-					}
-				}
+                        break;
+                    }
+                }
 
-			}
-		}
-	}
+            }
+        }
+    }
 
-	/**
-	 * @param queryString
-	 * @param q
-	 */
-	public static void setQueryParameters(String queryString,
-			HashMap<String, String> paramsMap, Query q) {
+    /**
+     * @param queryString
+     * @param q
+     */
+    public static void setQueryParameters(String queryString, HashMap<String, String> paramsMap, Query q) {
+        KunderaQuery kq = ((QueryImpl) q).getKunderaQuery();
+        Set<Parameter<?>> parameters = kq.getParameters();
+        for (String paramName : paramsMap.keySet()) {
+            String value = paramsMap.get(paramName);
 
-		for (String paramName : paramsMap.keySet()) {
-			String value = paramsMap.get(paramName);
+            if (StringUtils.isNumeric(paramName)) {
+                for (Parameter param : parameters) {
+                    if (param.getPosition() == Integer.parseInt(paramName)) {
+                        Class<?> paramClass = param.getParameterType();
+                        PropertyAccessor accessor = PropertyAccessorFactory.getPropertyAccessor(paramClass);
+                        Object paramValue = accessor.fromString(paramClass, value);
+                        q.setParameter(Integer.parseInt(paramName), paramValue);
+                        break;
+                    }
+                }
+            } else {
+                for (Parameter param : parameters) {
+                    if (param.getName().equals(paramName)) {
+                        Class<?> paramClass = param.getParameterType();
+                        PropertyAccessor accessor = PropertyAccessorFactory.getPropertyAccessor(paramClass);
+                        Object paramValue = accessor.fromString(paramClass, value);
+                        if (paramName.equalsIgnoreCase("firstResult")) {
+                            q.setFirstResult(Integer.parseInt((String) paramValue));
+                        } else if (paramName.equalsIgnoreCase("maxResult")) {
+                            q.setMaxResults(Integer.parseInt((String) paramValue));
+                        } else {
+                            q.setParameter(paramName, paramValue);
+                        }
+                        break;
+                    }
+                }
 
-			KunderaQuery kq = ((QueryImpl) q).getKunderaQuery();
-			Set<Parameter<?>> parameters = kq.getParameters();
+            }
+        }
+    }
 
-			if (StringUtils.isNumeric(paramName)) {
-				for (Parameter param : parameters) {
-					if (param.getPosition() == Integer.parseInt(paramName)) {
-						Class<?> paramClass = param.getParameterType();
-						PropertyAccessor accessor = PropertyAccessorFactory
-								.getPropertyAccessor(paramClass);
-						Object paramValue = accessor.fromString(paramClass,
-								value);
-						q.setParameter(Integer.parseInt(paramName), paramValue);
-						break;
-					}
-				}
-			} else {
-				for (Parameter param : parameters) {
-					if (param.getName().equals(paramName)) {
-						Class<?> paramClass = param.getParameterType();
-						PropertyAccessor accessor = PropertyAccessorFactory
-								.getPropertyAccessor(paramClass);
-						Object paramValue = accessor.fromString(paramClass,
-								value);
-						q.setParameter(paramName, paramValue);
-						break;
-					}
-				}
+    public static boolean isValidQuery(String queryString, String httpMethod) {
+        if (queryString == null || httpMethod == null) {
+            return false;
+        }
+        queryString = queryString.trim();
+        if (queryString.length() < 6)
+            return false;
+        String firstKeyword = queryString.substring(0, 6);
+        String allowedKeyword = httpMethods.get(httpMethod);
 
-			}
-		}
-	}
-
-	public static boolean isValidQuery(String queryString, String httpMethod) {
-		if (queryString == null || httpMethod == null) {
-			return false;
-		}
-		queryString = queryString.trim();
-		if (queryString.length() < 6)
-			return false;
-		String firstKeyword = queryString.substring(0, 6);
-		String allowedKeyword = httpMethods.get(httpMethod);
-
-		if (allowedKeyword != null
-				&& firstKeyword.equalsIgnoreCase(allowedKeyword)) {
-			return true;
-		} else {
-			return false;
-		}
-	}
+        if (allowedKeyword != null && firstKeyword.equalsIgnoreCase(allowedKeyword)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

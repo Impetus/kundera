@@ -99,6 +99,14 @@ public class CollectionConverterTest {
 		Assert.assertNotNull(c);
 		Assert.assertFalse(c.isEmpty());
 		Assert.assertEquals(2, c.size());
+		
+		s = "[{\"isbn\":\"1111111111111\",\"author\":\"Amresh\", \"publication\":\"Willey\"},{\"isbn\":\"2222222222222\",\"author\":\"Vivek\", \"publication\":\"Oreilly\"}]";
+		
+		c = CollectionConverter.toCollection(s, ArrayList.class,
+            Book.class, MediaType.APPLICATION_JSON);
+        Assert.assertNotNull(c);
+        Assert.assertFalse(c.isEmpty());
+        Assert.assertEquals(2, c.size());
 
 	}
 
@@ -157,9 +165,9 @@ public class CollectionConverterTest {
          user1.setTweets(tweetList);
          
         
-         String userString1 = JAXBUtils.toString(UserCassandra.class, user1, MediaType.APPLICATION_JSON);
-         String userString2= JAXBUtils.toString(UserCassandra.class, user2, MediaType.APPLICATION_JSON);
-         String userString3 = JAXBUtils.toString(UserCassandra.class, user3, MediaType.APPLICATION_JSON);
+         String userString1 = JAXBUtils.toString(user1, MediaType.APPLICATION_JSON);
+         String userString2= JAXBUtils.toString(user2, MediaType.APPLICATION_JSON);
+         String userString3 = JAXBUtils.toString(user3, MediaType.APPLICATION_JSON);
          
          
          

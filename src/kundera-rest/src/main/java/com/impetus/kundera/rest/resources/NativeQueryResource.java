@@ -17,6 +17,7 @@ package com.impetus.kundera.rest.resources;
 
 import java.io.IOException;
 import java.net.URLDecoder;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +34,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.cassandra.thrift.Column;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -41,6 +43,7 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.rest.common.Constants;
 import com.impetus.kundera.rest.common.EntityUtils;
 import com.impetus.kundera.rest.common.ResponseBuilder;
@@ -96,6 +99,7 @@ public class NativeQueryResource {
                 log.debug("GET: entityClass" + entityClass);
             q = em.createNativeQuery(query, entityClass);
             result = q.getResultList();
+            result = onNativeCassResults(result, entityMetadata, em);
         } catch (Exception e) {
             log.error(e.getMessage());
             return Response.serverError().build();
@@ -107,7 +111,8 @@ public class NativeQueryResource {
 
         if (log.isDebugEnabled())
             log.debug("GET: Media Type:" + mediaType);
-
+       
+    
         String output = CollectionConverter.toString(result, entityClass, mediaType);
         if (mediaType.equalsIgnoreCase(MediaType.APPLICATION_JSON)) {
             return Response.ok(ResponseBuilder.buildOutput(entityClass, entityMetadata, output), mediaType).build();
@@ -115,6 +120,31 @@ public class NativeQueryResource {
             return Response.ok(output.toString(), mediaType).build();
         }
 
+    }
+
+    /**
+     * @param result
+     * @param entityMetadata
+     * @param em
+     * @return
+     */
+    private List onNativeCassResults(List result, EntityMetadata entityMetadata, EntityManager em) {
+        Map<String, Client<Query>> clients = (Map<String, Client<Query>>) em.getDelegate();
+        Client client = clients.get(entityMetadata.getPersistenceUnit());
+        if((client.getClass().getSimpleName().equals("ThriftClient") || client.getClass().getSimpleName().equals("PelopsClient")
+                        || client.getClass().getSimpleName().equals("DSClient"))
+                        && Column.class.equals(result.get(0).getClass())) {
+            int count = 0;
+            for(Object column : result) {
+                Map<Object, Object> valueMap = new HashMap<Object, Object>();
+                valueMap.put(PropertyAccessorHelper.getObject(String.class, ((Column) column).getName()), PropertyAccessorHelper.getObject(Long.class, ((Column) column).getValue()));
+                result.set(count, valueMap);
+                count ++;
+            }
+                      
+           
+        }
+        return result;
     }
 
     /**
@@ -175,9 +205,6 @@ public class NativeQueryResource {
                 } catch (IOException e) {
                     log.error(e.getMessage());
                 }
-
-//                StringBuilder sb = new StringBuilder("'");
-//                sb.append(output).append("'");
                 return Response.ok(ResponseBuilder.buildOutput(output, "'"), mediaType).build();
             } else {
                 return Response.ok(result, mediaType).build();

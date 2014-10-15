@@ -296,7 +296,7 @@ public class PolyglotQueryTest extends JerseyTest
          user1.setTweets(tweetList);
          
         
-         userString = JAXBUtils.toString(UserCassandra.class, user1, mediaType);
+         userString = JAXBUtils.toString(user1, mediaType);
          
          
 

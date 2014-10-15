@@ -51,7 +51,7 @@ public class JAXBUtils {
 
     private static Map<Class<?>, String> schemaMap;
 
-    private final static ObjectMapper mapper;
+    public final static ObjectMapper mapper;
     private final static XmlMapper xmlMapper;
     static {
         mapper = new ObjectMapper();
@@ -134,7 +134,7 @@ public class JAXBUtils {
         return output;
     }
 
-    public static String toString(Class<?> objectClass, Object object, String mediaType) {
+    public static String toString(Object object, String mediaType) {
         try {
             if (MediaType.APPLICATION_XML.equals(mediaType)) {
                 return xmlMapper.writeValueAsString(object);
