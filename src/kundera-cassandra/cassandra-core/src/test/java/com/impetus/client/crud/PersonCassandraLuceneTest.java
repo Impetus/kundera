@@ -49,6 +49,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.thrift.CQLTranslator;
 import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
@@ -96,8 +97,8 @@ public class PersonCassandraLuceneTest extends BaseTest
         CassandraCli.createKeySpace("KunderaExamples");
         // loadData();
         Map propertyMap = new HashMap();
-        // propertyMap.put(CassandraConstants.CQL_VERSION,
-        // CassandraConstants.CQL_VERSION_3_0);
+         propertyMap.put(CassandraConstants.CQL_VERSION,
+         CassandraConstants.CQL_VERSION_3_0);
         emf = Persistence.createEntityManagerFactory(LUCENE_IDX_CASSANDRA_TEST, propertyMap);
         em = emf.createEntityManager();
         col = new java.util.HashMap<Object, Object>();
@@ -132,6 +133,7 @@ public class PersonCassandraLuceneTest extends BaseTest
         Query q = em.createQuery(qry);
         List<PersonLuceneCassandra> persons = q.getResultList();
 
+        selectIdQuery();
         assertFindByName(em, "PersonLuceneCassandra", PersonLuceneCassandra.class, "vivek", "personName");
         assertFindByNameAndAge(em, "PersonLuceneCassandra", PersonLuceneCassandra.class, "vivek", "10", "personName");
         assertFindByNameAndAgeGTAndLT(em, "PersonLuceneCassandra", PersonLuceneCassandra.class, "vivek", "10", "20",
@@ -155,11 +157,6 @@ public class PersonCassandraLuceneTest extends BaseTest
             person.setPersonName("after merge");
             em.merge(person);
         }
-
-        em.clear();
-
-        // select rowid test
-        selectIdQuery();
 
         em.clear();
 
@@ -469,7 +466,7 @@ public class PersonCassandraLuceneTest extends BaseTest
         Assert.assertNull(results.get(0).getPersonName());
         Assert.assertNull(results.get(0).getAge());
 
-        q = em.createQuery("Select p.personId from PersonLuceneCassandra p where p.personName = vivek and p.age > " + 10);
+        q = em.createQuery("Select p.personId from PersonLuceneCassandra p where p.personName = vivek and p.age >10");
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertFalse(results.isEmpty());
