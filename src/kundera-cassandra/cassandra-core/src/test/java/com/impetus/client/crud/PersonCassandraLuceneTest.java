@@ -97,8 +97,7 @@ public class PersonCassandraLuceneTest extends BaseTest
         CassandraCli.createKeySpace("KunderaExamples");
         // loadData();
         Map propertyMap = new HashMap();
-         propertyMap.put(CassandraConstants.CQL_VERSION,
-         CassandraConstants.CQL_VERSION_3_0);
+        //propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
         emf = Persistence.createEntityManagerFactory(LUCENE_IDX_CASSANDRA_TEST, propertyMap);
         em = emf.createEntityManager();
         col = new java.util.HashMap<Object, Object>();
@@ -365,7 +364,7 @@ public class PersonCassandraLuceneTest extends BaseTest
      * @throws TimedOutException
      * @throws SchemaDisagreementException
      */
-    @Test
+ //   @Test
     public void onGenericTypedQuery() throws TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException
     {
@@ -449,30 +448,31 @@ public class PersonCassandraLuceneTest extends BaseTest
 
     private void selectIdQuery()
     {
-        String query = "select p.personId from PersonLuceneCassandra p";
+        String query = "select p from PersonLuceneCassandra p";
         Query q = em.createQuery(query);
         List<PersonLuceneCassandra> results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(3, results.size());
         Assert.assertNotNull(results.get(0).getPersonId());
-        Assert.assertNull(results.get(0).getPersonName());
-
-        query = "Select p.personId from PersonLuceneCassandra p where p.personName = vivek"; 
-        q.getResultList();
+        Assert.assertEquals("vivek", results.get(0).getPersonName());
+        
+        query = "Select p.personName from PersonLuceneCassandra p where p.personName = vivek";
+        q = em.createQuery(query);
+        results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertFalse(results.isEmpty());
         Assert.assertEquals(3, results.size());
         Assert.assertNotNull(results.get(0).getPersonId());
-        Assert.assertNull(results.get(0).getPersonName());
+        Assert.assertEquals("vivek", results.get(0).getPersonName());
         Assert.assertNull(results.get(0).getAge());
 
-        q = em.createQuery("Select p.personId from PersonLuceneCassandra p where p.personName = vivek and p.age >10");
+        q = em.createQuery("Select p.personId,p.personName from PersonLuceneCassandra p where p.personName = vivek and p.age >10");
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertFalse(results.isEmpty());
         Assert.assertEquals(2, results.size());
         Assert.assertNotNull(results.get(0).getPersonId());
-        Assert.assertNull(results.get(0).getPersonName());
+        Assert.assertNotNull(results.get(0).getPersonName());
         Assert.assertNull(results.get(0).getAge());
 
     }

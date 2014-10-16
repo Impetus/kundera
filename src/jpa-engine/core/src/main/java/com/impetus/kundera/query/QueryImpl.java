@@ -228,6 +228,13 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
         return findUsingLucene(m, client, compositeIds.toArray());
     }
 
+    /**
+     * find data using lucene
+     * @param m
+     * @param client
+     * @param primaryKeys
+     * @return
+     */
     private List<Object> findUsingLucene(EntityMetadata m, Client client, Object[] primaryKeys)
     {
         String idField = m.getIdAttribute().getName();
@@ -243,6 +250,7 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
         for (Object primaryKey : primaryKeys)
         {
             FilterClause filterClause = kunderaQuery.new FilterClause(columnName, equals, primaryKey);
+            kunderaQuery.setFilter(kunderaQuery.getEntityAlias()+"."+columnName +" = "+primaryKey);
             queue.clear();
             queue.add(filterClause);
             List<Object> object = findUsingLucene(m, client);

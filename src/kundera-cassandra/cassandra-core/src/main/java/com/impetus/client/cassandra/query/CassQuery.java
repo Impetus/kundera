@@ -186,8 +186,22 @@ public class CassQuery extends QueryImpl
     {
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
-        return ((CassandraClientBase) client).executeQuery(m.getEntityClazz(), null, false,
-                onQueryOverCQL3(m, client, metaModel, null));
+        boolean useInvertedIndex = CassandraIndexHelper.isInvertedIndexingApplicable(m,
+                MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()));
+        Map<Boolean, List<IndexClause>> ixClause = prepareIndexClause(m, useInvertedIndex);
+        List<Object> result = new ArrayList<Object>();
+        if (((CassandraClientBase) client).isCql3Enabled(m))
+        {
+            result = ((CassandraClientBase) client).executeQuery(m.getEntityClazz(), null, false,
+                    onQueryOverCQL3(m, client, metaModel, null));
+        }
+        else
+        {
+            result = ((CassandraEntityReader) getReader()).handleFindByRange(m, client, result, ixClause, true,
+                    getColumnList(m, metaModel, getKunderaQuery().getResult(), null), isSingleResult ? 1
+                            : this.maxResult);
+        }
+        return result;
     }
 
     /**
