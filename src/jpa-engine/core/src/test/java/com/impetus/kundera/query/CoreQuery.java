@@ -133,7 +133,7 @@ public class CoreQuery<E> extends QueryImpl<E>
     @Override
     protected List findUsingLucene(EntityMetadata m, Client client)
     {
-        return null;
+        return populateEntities(m, client);
     }
 
 
