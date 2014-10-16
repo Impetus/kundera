@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.client.hbase.crud;
 
-
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -94,12 +93,11 @@ public class PersonHBaseTest extends BaseTest
         init();
         em.clear();
         PersonHBase personHBase = findById(PersonHBase.class, "1", em);
-        
+
         Assert.assertNotNull(personHBase);
         Assert.assertEquals("vivek", personHBase.getPersonName());
         Assert.assertEquals(Day.MONDAY, personHBase.getDay());
         Assert.assertEquals(Month.MARCH, personHBase.getMonth());
-       
 
         assertFindByName(em, "PersonHBase", PersonHBase.class, "vivek", "personName");
         assertFindByNameAndAge(em, "PersonHBase", PersonHBase.class, "vivek", "10", "personName");
@@ -107,21 +105,20 @@ public class PersonHBaseTest extends BaseTest
         assertFindByNameAndAgeBetween(em, "PersonHBase", PersonHBase.class, "vivek", "10", "15", "personName");
         assertFindByRange(em, "PersonHBase", PersonHBase.class, "1", "3", "personId");
         assertFindWithoutWhereClause(em, "PersonHBase", PersonHBase.class);
-        assertFindByRowIds(em, "PersonHBase", PersonHBase.class, "1,2,6","personId", 2);
-        assertFindByRowIds(em, "PersonHBase", PersonHBase.class, "1,2,3","personId", 3);
+        assertFindByRowIds(em, "PersonHBase", PersonHBase.class, "1,2,6", "personId", 2);
+        assertFindByRowIds(em, "PersonHBase", PersonHBase.class, "1,2,3", "personId", 3);
         selectIdQuery();
         personHBase.setPersonName("Bob");
         em.merge(personHBase);
-        
+
         personHBase = findById(PersonHBase.class, "2", em);
         personHBase.setPersonName("John");
         em.merge(personHBase);
-        //test case for In clause query
-        assertFindByFieldValues(em, "PersonHBase", PersonHBase.class, "Bob,vivek","personName", 2);
-        assertFindByFieldValues(em, "PersonHBase", PersonHBase.class, "John,vivek,Bob","personName", 3);
-        assertFindByFieldValues(em, "PersonHBase", PersonHBase.class, "John,xyz","personName", 1);
-        
-      
+        // test case for In clause query
+        assertFindByFieldValues(em, "PersonHBase", PersonHBase.class, "Bob,vivek", "personName", 2);
+        assertFindByFieldValues(em, "PersonHBase", PersonHBase.class, "John,vivek,Bob", "personName", 3);
+        assertFindByFieldValues(em, "PersonHBase", PersonHBase.class, "John,xyz", "personName", 1);
+
     }
 
     private void selectIdQuery()
@@ -134,25 +131,23 @@ public class PersonHBaseTest extends BaseTest
         Assert.assertNotNull(results.get(0).getPersonId());
         Assert.assertNull(results.get(0).getPersonName());
 
-        
         query = "select p from PersonHBase p";
         com.impetus.kundera.query.Query queryObject = (com.impetus.kundera.query.Query) em.createQuery(query);
         queryObject.setFetchSize(1);
-        
+
         Iterator<PersonHBase> resultIterator = queryObject.iterate();
-        PersonHBase person =null;
+        PersonHBase person = null;
         int counter = 0;
-        while(resultIterator.hasNext())
+        while (resultIterator.hasNext())
         {
             counter++;
             person = resultIterator.next();
             Assert.assertNotNull(person.getPersonId());
             Assert.assertNotNull(person.getPersonName());
         }
-        
+
         Assert.assertEquals(1, counter);
 
-        
         query = "Select p.personId from PersonHBase p where p.personName = vivek";
         // // find by name.
         q = em.createQuery(query);
@@ -171,7 +166,7 @@ public class PersonHBaseTest extends BaseTest
         Assert.assertNotNull(results.get(0).getPersonId());
         Assert.assertNull(results.get(0).getPersonName());
         Assert.assertNull(results.get(0).getAge());
-        
+
         q = em.createQuery("Select p.personId from PersonHBase p where p.personName = john OR p.age > " + 15);
         results = q.getResultList();
         Assert.assertNotNull(results);
@@ -179,8 +174,8 @@ public class PersonHBaseTest extends BaseTest
         Assert.assertEquals(1, results.size());
         Assert.assertNotNull(results.get(0).getPersonId());
         Assert.assertNull(results.get(0).getPersonName());
-        Assert.assertNull(results.get(0).getAge()); 
-        
+        Assert.assertNull(results.get(0).getAge());
+
         q = em.createQuery("Select p.personId from PersonHBase p where p.personName = xyz OR p.age = " + 15);
         results = q.getResultList();
         Assert.assertNotNull(results);
@@ -188,17 +183,14 @@ public class PersonHBaseTest extends BaseTest
         Assert.assertEquals(1, results.size());
         Assert.assertNotNull(results.get(0).getPersonId());
         Assert.assertNull(results.get(0).getPersonName());
-        Assert.assertNull(results.get(0).getAge()); 
-        
+        Assert.assertNull(results.get(0).getAge());
+
         q = em.createQuery("Select p.personId from PersonHBase p where p.personName = xyz OR p.age = " + 45);
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertTrue(results.isEmpty());
-        
-              
-       
     }
-    
+
     @Test
     public void onInsertLuceneHbase() throws Exception
     {
@@ -206,40 +198,51 @@ public class PersonHBaseTest extends BaseTest
         ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder();
         builder.put("path.data", "target/data");
         Node node = new NodeBuilder().settings(builder).node();
-//        
+        //
         Map<String, Object> puProperties = new HashMap<String, Object>();
         puProperties.put("kundera.indexer.class", "com.impetus.client.es.index.ESIndexer");
-//        puProperties.put("index.home.dir","./lucene"); // uncomment for lucene
-        
+        // puProperties.put("index.home.dir", "./lucene"); // uncomment for
+        // lucene
+
         EntityManagerFactory emfLucene = Persistence.createEntityManagerFactory("hbaseTest", puProperties);
         EntityManager emLucene = emfLucene.createEntityManager();
-        
+
         Object p1 = prepareHbaseInstance("1", 10);
         Object p2 = prepareHbaseInstance("2", 20);
         Object p3 = prepareHbaseInstance("3", 15);
         emLucene.persist(p1);
         emLucene.persist(p2);
         emLucene.persist(p3);
-        
+
         Thread.sleep(1000);
-        
+
         col.put("1", p1);
         col.put("2", p2);
         col.put("3", p3);
         emLucene.flush();
         emLucene.clear();
-       
-             
-        
-        Query q = emLucene.createQuery("Select p.personId from PersonHBase p where p.personName = vivek1 OR p.age= 10");
-        
+
+        Query q = emLucene.createQuery("Select p from PersonHBase p where p.personName = vivek1 OR p.age= 10");
+
         List<PersonHBase> results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertFalse(results.isEmpty());
         Assert.assertEquals(1, results.size());
         Assert.assertNotNull(results.get(0).getPersonId());
-        Assert.assertEquals("vivek",results.get(0).getPersonName());
-        Assert.assertEquals(10,results.get(0).getAge().intValue());
+        Assert.assertEquals("vivek", results.get(0).getPersonName());
+        Assert.assertEquals(10, results.get(0).getAge().intValue());
+
+        q = emLucene
+                .createQuery("Select p.personId, p.personName from PersonHBase p where p.personName = vivek1 OR p.age= 10");
+
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertFalse(results.isEmpty());
+        Assert.assertEquals(1, results.size());
+        Assert.assertNotNull(results.get(0).getPersonId());
+        Assert.assertNotNull(results.get(0).getPersonName());
+        Assert.assertNull(results.get(0).getAge());
+
         node.close();
         emLucene.close();
         emfLucene.close();
@@ -247,7 +250,7 @@ public class PersonHBaseTest extends BaseTest
 
     private void init()
     {
-            cli.startCluster();
+        cli.startCluster();
         // cli.createTable("PERSON");
         // cli.addColumnFamily("PERSON", "PERSON");
         Object p1 = prepareHbaseInstance("1", 10);
@@ -269,7 +272,7 @@ public class PersonHBaseTest extends BaseTest
         Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
         Client client = clients.get("hbaseTest");
 
-        Filter f/* = new QualifierFilter()*/;
+        Filter f/* = new QualifierFilter() */;
         f = new SingleColumnValueFilter("PERSON_NAME".getBytes(), "PERSON_NAME".getBytes(), CompareOp.EQUAL,
                 "vivek".getBytes());
 
@@ -319,7 +322,7 @@ public class PersonHBaseTest extends BaseTest
             em.remove(val);
         }
         em.close();
-        if (cli != null )
+        if (cli != null)
         {
             cli.dropTable("KunderaExamples");
             cli.stopCluster("KunderaExamples");
