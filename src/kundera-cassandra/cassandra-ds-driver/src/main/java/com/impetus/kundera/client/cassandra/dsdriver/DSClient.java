@@ -52,7 +52,6 @@ import com.datastax.driver.core.SimpleStatement;
 import com.datastax.driver.core.Statement;
 import com.impetus.client.cassandra.CassandraClientBase;
 import com.impetus.client.cassandra.common.CassandraConstants;
-import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.client.cassandra.query.CassQuery;
 import com.impetus.client.cassandra.thrift.CQLTranslator;
@@ -93,8 +92,6 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
     private DSClientFactory factory;
 
     private EntityReader reader;
-
-    private Session session;
 
     public DSClient(DSClientFactory factory, String persistenceUnit, Map<String, Object> externalProperties,
             KunderaMetadata kunderaMetadata, EntityReader reader, final TimestampGenerator generator)
@@ -329,7 +326,7 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
     @Override
     public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
     {
-        session = session == null ? factory.getConnection() : this.session;
+        Session session = factory.getConnection();
         String rowKeyName = null;
         CQLTranslator translator = new CQLTranslator();
         try
@@ -498,7 +495,8 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
     protected <T> T execute(final String query, Object connection)
     {
 
-        session = session == null ? factory.getConnection() : this.session;
+        Session session = factory.getConnection();
+        ;
         try
         {
             Statement queryStmt = new SimpleStatement(query);
@@ -526,7 +524,7 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
             {
                 log.info("Executing cql query {}.", cqlQuery);
             }
-            session = session == null ? factory.getConnection() : this.session;
+            session = factory.getConnection();
             KunderaCoreUtils.printQuery(cqlQuery, showQuery);
             session.execute(cqlQuery);
         }
@@ -685,10 +683,6 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
     public void close()
     {
         super.close();
-        if (this.session != null)
-        {
-            factory.releaseConnection(this.session);
-        }
     }
 
     @Override

@@ -70,6 +70,8 @@ public class DSClientFactory extends CassandraClientFactory
 
     private String keyspace;
 
+    private Session session;
+
     /*
      * (non-Javadoc)
      * 
@@ -107,7 +109,7 @@ public class DSClientFactory extends CassandraClientFactory
         }
         schemaManager = null;
         externalProperties = null;
-
+        releaseConnection(this.session);
         ((Cluster) getConnectionPoolOrConnection()).closeAsync();
     }
 
@@ -252,7 +254,7 @@ public class DSClientFactory extends CassandraClientFactory
         {
             keyspace = (String) props.get(PersistenceProperties.KUNDERA_KEYSPACE);
         }
-
+        setSessionObject(cluster);
         return cluster;
     }
 
@@ -269,10 +271,15 @@ public class DSClientFactory extends CassandraClientFactory
         return new DSClient(this, persistenceUnit, externalProperties, kunderaMetadata, reader, timestampGenerator);
     }
 
+    void setSessionObject(Cluster cluster)
+    {
+        this.session = cluster.connect("\"" + keyspace + "\"");
+    }
+
     Session getConnection()
     {
-        Session session = ((Cluster) this.getConnectionPoolOrConnection()).connect("\"" + keyspace + "\"");
-        return session;
+        return this.session != null ? this.session : ((Cluster) this.getConnectionPoolOrConnection()).connect("\""
+                + keyspace + "\"");
     }
 
     void releaseConnection(Session session)
