@@ -185,7 +185,9 @@ public class PersonCassandraTest extends BaseTest
         for (PersonCassandra person : persons)
         {
             person.setPersonName("'after merge'");
+            person.setDay(null);
             entityManager.merge(person);
+            
         }
 
         entityManager.clear();
@@ -193,6 +195,8 @@ public class PersonCassandraTest extends BaseTest
         p = findById(PersonCassandra.class, "1", entityManager);
         Assert.assertNotNull(p);
         Assert.assertEquals("'after merge'", p.getPersonName());
+        Assert.assertEquals(new Integer(10), p.getAge());
+       
 
         String updateQuery = "update PersonCassandra p set p.personName=''KK MISHRA'' where p.personId=1";
         q = entityManager.createQuery(updateQuery);
@@ -353,7 +357,7 @@ public class PersonCassandraTest extends BaseTest
         Assert.assertNotNull(persons);
         Assert.assertFalse(persons.isEmpty());
 
-        qry = "Select p.personId,p.personName from PersonCassandra p where p.personId >= 1";
+        qry = "Select p from PersonCassandra p where p.personId >= 1";
         q = entityManager.createQuery(qry);
         persons = q.getResultList();
         Assert.assertNotNull(persons);

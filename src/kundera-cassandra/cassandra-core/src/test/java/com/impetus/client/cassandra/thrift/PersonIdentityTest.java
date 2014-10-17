@@ -119,6 +119,18 @@ public class PersonIdentityTest
         Assert.assertTrue(phoneIds.contains(foundPerson.getPhones().get(0).getPhoneId().getPhoneId()));
         Assert.assertEquals("1", foundPerson.getPhones().get(1).getPhoneId().getPersonId());
         Assert.assertNotSame(foundPerson.getPhones().get(0).getPhoneId().getPhoneId(), foundPerson.getPhones().get(1).getPhoneId().getPhoneId());
+        
+        foundPerson.setPhones(null);
+        foundPerson.setPersonName(null);
+        em.merge(foundPerson);
+        
+        foundPerson = em.find(PersonIdentity.class, 1);
+
+        Assert.assertNotNull(foundPerson);
+        Assert.assertNull(foundPerson.getPhones());
+        Assert.assertNull(foundPerson.getPersonName());
+        Assert.assertEquals("1",foundPerson.getPersonId());
+       
 
     }
 

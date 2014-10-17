@@ -53,6 +53,7 @@ import org.apache.cassandra.db.marshal.SetType;
 import org.apache.cassandra.db.marshal.TimestampType;
 import org.apache.cassandra.db.marshal.UTF8Type;
 import org.apache.cassandra.db.marshal.UUIDType;
+import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.commons.codec.binary.Hex;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
@@ -593,7 +594,7 @@ public final class CQLTranslator
         {
             isPresent = appendMap(builder, value != null ? value : new HashMap());
         }
-        else if (value != null)
+        else 
         {
             isPresent = true;
             appendValue(builder, fieldClazz, value, useToken);
@@ -694,8 +695,10 @@ public final class CQLTranslator
     private void appendValue(StringBuilder builder, Class fieldClazz, Object value, boolean useToken)
     {
         // To allow handle byte array class object by converting it to string
-        if (value != null && fieldClazz.isAssignableFrom(byte[].class))
+       
+        if (fieldClazz != null && fieldClazz.isAssignableFrom(byte[].class))
         {
+            value = value != null ? value : ByteBufferUtil.EMPTY_BYTE_BUFFER.array();
             StringBuilder hexstr = new StringBuilder("0x");
             builder.append(hexstr.append((Hex.encodeHex((byte[]) value))));
         }
@@ -706,7 +709,7 @@ public final class CQLTranslator
                 builder.append(TOKEN);
             }
 
-            if (value != null
+            if (fieldClazz != null && value != null
                     && (fieldClazz.isAssignableFrom(String.class) || isDate(fieldClazz)
                             || fieldClazz.isAssignableFrom(char.class) || fieldClazz.isAssignableFrom(Character.class) || value instanceof Enum))
             {

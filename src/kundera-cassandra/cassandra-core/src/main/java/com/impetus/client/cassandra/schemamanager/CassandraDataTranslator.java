@@ -224,7 +224,7 @@ public final class CassandraDataTranslator
     public static byte[] compose(Class<?> dataTypeClazz, Object dataValue, boolean isCql3Enabled)
     {
 
-        if (dataValue != null)
+        if (isCql3Enabled || (!isCql3Enabled && dataValue != null))
         {
 
             switch (getCassandraDataTypeClass(dataTypeClazz))
@@ -290,7 +290,7 @@ public final class CassandraDataTranslator
     public static byte[] compose(Class<?> dataTypeClazz, Object dataValue, List<Class<?>> mapGenericClassses,
             boolean isCql3Enabled)
     {
-        if (dataValue != null)
+        if (isCql3Enabled || (!isCql3Enabled && dataValue != null))
         {
             if (dataTypeClazz.isAssignableFrom(Map.class))
             {
@@ -312,7 +312,7 @@ public final class CassandraDataTranslator
     public static byte[] compose(Class<?> dataTypeClazz, Object dataValue, Class<?> mapGenericClassses,
             boolean isCql3Enabled)
     {
-        if (dataValue != null)
+        if (isCql3Enabled || (!isCql3Enabled && dataValue != null))
         {
             switch (getCassandraDataTypeClass(dataTypeClazz))
             {
@@ -336,7 +336,7 @@ public final class CassandraDataTranslator
     public static Object decompose(Class<?> dataTypeClazz, Object dataValue, boolean isCql3Enabled)
     {
 
-        if (dataValue != null)
+        if (isCql3Enabled || (!isCql3Enabled && dataValue != null))
         {
 
             switch (getCassandraDataTypeClass(dataTypeClazz))
@@ -423,7 +423,8 @@ public final class CassandraDataTranslator
     public static Object decompose(Class<?> dataTypeClazz, Object dataValue, List<Class<?>> mapGenericClassses,
             boolean isCql3Enabled)
     {
-        if (dataValue != null)
+        
+        if (isCql3Enabled || (!isCql3Enabled && dataValue != null))
         {
             switch (getCassandraDataTypeClass(dataTypeClazz))
             {
@@ -446,7 +447,7 @@ public final class CassandraDataTranslator
     public static Object decompose(Class<?> dataTypeClazz, Object dataValue, Class<?> mapGenericClassses,
             boolean isCql3Enabled)
     {
-        if (dataValue != null)
+        if (isCql3Enabled || (!isCql3Enabled && dataValue != null))
         {
             switch (getCassandraDataTypeClass(dataTypeClazz))
             {

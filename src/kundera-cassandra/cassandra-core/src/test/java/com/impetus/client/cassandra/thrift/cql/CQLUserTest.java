@@ -82,7 +82,7 @@ public class CQLUserTest
         Assert.assertEquals(24, foundUser.getAge());
         Assert.assertEquals("Kuldeep", foundUser.getName());
 
-        foundUser.setName("KK");
+        foundUser.setName(null);
 
         em.merge(foundUser);
 
@@ -92,7 +92,7 @@ public class CQLUserTest
         Assert.assertNotNull(mergedUser);
         Assert.assertEquals(1, mergedUser.getId());
         Assert.assertEquals(24, mergedUser.getAge());
-        Assert.assertEquals("KK", mergedUser.getName());
+        Assert.assertEquals(null, mergedUser.getName());
 
         em.remove(mergedUser);
 
