@@ -57,10 +57,16 @@ Currently Supported Datasources
 
 Recent Releases
 ================================
-####Please Note: trunk is current development branch. kundera-2.13 is released tag.
+####Please Note: trunk is current development branch. kundera-2.14 is released tag.
+
+#### 17-October-2014 - Kundera 2.14 released
+This release includes [bug fixes] (https://github.com/impetus-opensource/Kundera/wiki/Bug-Fixes), additional  improvements and the following new features compared to version 2.13:
+
+ * Or clause and in query support enabled in Hbase
+
 
 #### 4-July-2014 - Kundera 2.13 released
-This release includes [bug fixes] (https://github.com/impetus-opensource/Kundera/wiki/Bug-Fixes), additional  improvements and the following new features compared to version 2.13:
+This release includes [bug fixes] (https://github.com/impetus-opensource/Kundera/wiki/Bug-Fixes), additional  improvements and the following new features compared to version 2.12:
 
 * Support added for Hbase-0.96
 * Support for composite keys over Lucene and  Hbase enabled
