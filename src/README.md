@@ -62,7 +62,7 @@ Recent Releases
 #### 17-October-2014 - Kundera 2.14 released
 This release includes [bug fixes] (https://github.com/impetus-opensource/Kundera/wiki/Bug-Fixes), additional  improvements and the following new features compared to version 2.13:
 
- * Or clause and in query support enabled in Hbase
+ * Or clause and in query support enabled for Hbase
 
 
 #### 4-July-2014 - Kundera 2.13 released
