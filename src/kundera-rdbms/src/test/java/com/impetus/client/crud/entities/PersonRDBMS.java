@@ -20,12 +20,16 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
+
 // TODO: Auto-generated Javadoc
 /**
  * The Class Person.
  */
 @Entity
 @Table(name = "PERSON", schema = "TESTDB")
+@IndexCollection(columns = { @Index(name = "personName"),@Index(name = "age") })
 public class PersonRDBMS
 {
 
