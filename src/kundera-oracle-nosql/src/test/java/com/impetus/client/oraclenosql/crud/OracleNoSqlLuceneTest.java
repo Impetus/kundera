@@ -100,6 +100,14 @@ public class OracleNoSqlLuceneTest
         Assert.assertEquals("person4", results.get(0).getPersonName());
         Assert.assertEquals(40, results.get(0).getAge().intValue());
 
+        String findMultipleColumns = "Select p.personId,p.age from PersonOracleNoSql p where p.personName='person3'";
+        results = executeSelectQuery(findMultipleColumns);
+        Assert.assertEquals(1, results.size());
+        Assert.assertEquals("3", results.get(0).getPersonId());
+        Assert.assertNull(results.get(0).getPersonName());
+        Assert.assertEquals(30, results.get(0).getAge().intValue());
+        
+        
         // Delete by query.
         String deleteQuery = "Delete from PersonOracleNoSql p";
         Query query = em.createQuery(deleteQuery);
