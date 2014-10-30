@@ -340,7 +340,6 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
             {
                 // here pk is join column name and it's values would become
                 // inverse join columns
-                //
 
                 NoSqlDBUtils.add(schemaTable.getField(joinColumnName), row, pk, joinColumnName);
                 Set<Object> values = joinTableRecords.get(pk);
@@ -504,27 +503,20 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         }
         else if (interpreter.isFindById() && interpreter.getClauseQueue().size() == 1)
         {
-
-            // finally, find by id.
             Object value = null;
-            for (Object clause : interpreter.getClauseQueue())
+            Object clause = interpreter.getClauseQueue().peek();
+            if (clause.getClass().isAssignableFrom(FilterClause.class))
             {
-
-                if (clause.getClass().isAssignableFrom(FilterClause.class))
-                {
-                    value = ((FilterClause) clause).getValue();
-
-                }
-                else
-                {
-                    throw new QueryHandlerException(
-                            "Query with id in where clause and multiple AND/OR clause is not supported with oracle nosql db");
-                }
+                value = ((FilterClause) clause).getValue().get(0);
             }
-
+            else
+            {
+                throw new QueryHandlerException(
+                        "Query with multiple AND/OR clause is not supported with oracle nosql db");
+            }
             if (value != null)
             {
-                Object output = find(entityClass, value);
+                Object output = find(entityClass, value, Arrays.asList(interpreter.getSelectColumns()));
                 if (output != null)
                 {
                     results.add((E) output);

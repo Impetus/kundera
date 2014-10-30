@@ -72,22 +72,6 @@ public class OracleNoSQLQuery extends QueryImpl
 
         OracleNoSQLQueryInterpreter interpreter = translateQuery(getKunderaQuery().getFilterClauseQueue(), m);
 
-        Set<Object> resultsFromIdSearch = new HashSet<Object>();
-
-        // Find By ID queries
-        if (interpreter.isFindById())
-        {
-            Object entity = client.find(m.getEntityClazz(), interpreter.getRowKey());
-            resultsFromIdSearch.add(entity);
-
-            if (interpreter.getOperatorWithRowKey() == null)
-            {
-                List<Object> output = new ArrayList<Object>();
-                output.addAll(resultsFromIdSearch);
-                return output;
-            }
-        }
-
         ClientMetadata clientMetadata = ((ClientBase) client).getClientMetadata();
 
         if (!MetadataUtils.useSecondryIndex(clientMetadata)
@@ -98,7 +82,6 @@ public class OracleNoSQLQuery extends QueryImpl
         }
         else
         {
-
             results.addAll((List<Object>) ((OracleNoSQLClient) client).executeQuery(m.getEntityClazz(), interpreter,
                     null));
         }
