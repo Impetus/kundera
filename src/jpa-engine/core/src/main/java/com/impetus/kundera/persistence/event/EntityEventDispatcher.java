@@ -52,7 +52,7 @@ public class EntityEventDispatcher
         // handle external listeners first
         List<? extends CallbackMethod> callBackMethods = metadata.getCallbackMethods(event);
 
-        if (null != callBackMethods && !callBackMethods.isEmpty())
+        if (null != callBackMethods && !callBackMethods.isEmpty() && null != entity)
         {
             log.debug("Callback >> " + event.getSimpleName() + " on " + metadata.getEntityClazz().getName());
             for (CallbackMethod callback : callBackMethods)
