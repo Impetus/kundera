@@ -37,7 +37,7 @@ public class PersonHandler
     @PostLoad
     public void handledPostLoad(PersonEventDispatch user)
     {
-        if(user != null)
+        //if(user != null)
         {
             user.setLastName("Post Load");
         }

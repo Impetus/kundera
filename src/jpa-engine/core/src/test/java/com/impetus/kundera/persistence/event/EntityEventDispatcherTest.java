@@ -95,6 +95,7 @@ public class EntityEventDispatcherTest
         Assert.assertEquals("Singh", person.getLastName());
 
         eventDispatcher.fireEventListeners(m, person, PostLoad.class);
+        eventDispatcher.fireEventListeners(m, null, PostLoad.class);
         Assert.assertEquals("Amresh", person.getFirstName());
         Assert.assertEquals("Post Load", person.getLastName());
 
@@ -133,6 +134,7 @@ public class EntityEventDispatcherTest
 
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, address.getClass());
         eventDispatcher.fireEventListeners(m, address, PrePersist.class);
+        eventDispatcher.fireEventListeners(m, null, PrePersist.class);
         Assert.assertEquals("addr1", address.getAddressId());
         Assert.assertEquals("noida", address.getCity());
         Assert.assertEquals("street,noida", address.getFullAddress());
