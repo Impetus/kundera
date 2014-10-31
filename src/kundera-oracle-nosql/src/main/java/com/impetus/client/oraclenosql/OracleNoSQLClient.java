@@ -507,7 +507,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
             Object clause = interpreter.getClauseQueue().peek();
             if (clause.getClass().isAssignableFrom(FilterClause.class))
             {
-                value = ((FilterClause) clause).getValue().get(0);
+                value = interpreter.getRowKey();
             }
             else
             {
