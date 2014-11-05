@@ -1420,10 +1420,12 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             Set<String> rowKeys = new HashSet<String>();
             EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClazz);
             String printQuery = null;
+            
             if (showQuery)
             {
                 printQuery = "Fetching primary key from " + entityMetadata.getTableName() + " corresponding to ";
             }
+            
             if (queryParameter.getClause() != null && !queryParameter.isByRange())
             {
                 String destStore = entityClazz.getSimpleName() + System.currentTimeMillis();
@@ -1442,10 +1444,12 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                         printQuery = printQuery + key + " and ";
                     }
                 }
+                
                 if (showQuery)
                 {
                     printQuery = printQuery.substring(0, printQuery.lastIndexOf(" and "));
                 }
+
                 if (queryParameter.getClause().equals(Clause.INTERSECT))
                 {
                     KunderaCoreUtils.printQuery(printQuery, showQuery);
@@ -1474,7 +1478,6 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                     {
                         ((Jedis) connection).zunionstore(destStore, keySets.toArray(new String[] {}));
                     }
-
                 }
 
                 if (resource != null && resource.isActive())
@@ -1517,7 +1520,6 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
                     rowKeys = (Set<String>) response.get();
                     // connection = reInitialize(connection, rowKeys);
-
                 }
                 else
                 {
@@ -1557,10 +1559,8 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                     {
                         rowKeys = ((Jedis) connection).zrangeByScore(getHashKey(entityMetadata.getTableName(), column),
                                 value, value);
-
                     }
                 }
-
             }
             else
             {
