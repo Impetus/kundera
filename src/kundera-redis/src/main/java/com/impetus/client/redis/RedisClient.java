@@ -143,9 +143,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             else
             {
                 onPersist(entityMetadata, entity, id, rlHolders, connection);
-
             }
-
         }
         finally
         {
@@ -234,7 +232,8 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         }
 
         String hashKey = getHashKey(entityMetadata.getTableName(), rowKey);
-
+        KunderaCoreUtils
+                .printQuery("Fetch data from " + entityMetadata.getTableName() + " for PK " + rowKey, showQuery);
         try
         {
             Map<byte[], byte[]> columns = new HashMap<byte[], byte[]>();
@@ -524,7 +523,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                 }
 
             }
-
+            KunderaCoreUtils.printQuery("Persist Join Table:" + tableName, showQuery);
         }
         finally
         {
@@ -574,7 +573,6 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             }
             else
             {
-
                 resultKeys = ((Jedis) connection).zrangeByScore(getHashKey(tableName, valueAsStr), score, score);
             }
 
@@ -582,6 +580,8 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
             // return connection.hmget(getEncodedBytes(redisKey),
             // getEncodedBytes(columnName));
+            KunderaCoreUtils.printQuery("Get columns by id from:" + tableName + " for column:" + columnName
+                    + " where value:" + pKeyColumnValue, showQuery);
             return results;
         }
         finally
@@ -1174,7 +1174,6 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
      */
     private AttributeWrapper wrap(EntityMetadata entityMetadata, Object entity)
     {
-
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 entityMetadata.getPersistenceUnit());
 
@@ -1410,7 +1409,6 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
     List onExecuteQuery(RedisQueryInterpreter queryParameter, Class entityClazz)
     {
-
         /**
          * Find a list of id's and then call findById for each!
          */
@@ -1421,6 +1419,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             connection = getConnection();
             Set<String> rowKeys = new HashSet<String>();
             EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClazz);
+            String printQuery = "Fetching primary key from " + entityMetadata.getTableName() + " corresponding to ";
             if (queryParameter.getClause() != null && !queryParameter.isByRange())
             {
                 String destStore = entityClazz.getSimpleName() + System.currentTimeMillis();
@@ -1434,14 +1433,16 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                     String valueAsStr = PropertyAccessorHelper.getString(fieldSets.get(column));
                     String key = getHashKey(entityMetadata.getTableName(), getHashKey(column, valueAsStr));
                     keySets.add(key);
+                    printQuery = printQuery + key + " and ";
                 }
+                printQuery = printQuery.substring(0, printQuery.lastIndexOf(" and "));
 
                 if (queryParameter.getClause().equals(Clause.INTERSECT))
                 {
+                    KunderaCoreUtils.printQuery(printQuery, showQuery);
                     if (resource != null && resource.isActive())
                     {
                         ((Transaction) connection).zinterstore(destStore, keySets.toArray(new String[] {}));
-
                     }
                     else
                     {
@@ -1450,6 +1451,8 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                 }
                 else
                 {
+                    KunderaCoreUtils.printQuery(printQuery.replaceAll("and", "or"), showQuery);
+
                     if (resource != null && resource.isActive())
                     {
                         ((Transaction) connection).zunionstore(destStore, keySets.toArray(new String[] {}));
@@ -1475,7 +1478,6 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                 }
                 else
                 {
-
                     rowKeys = ((Jedis) connection).zrange(destStore, 0, -1);
                     ((Jedis) connection).del(destStore);
                 }
@@ -1491,7 +1493,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                 Map<String, Double> maximum = queryParameter.getMax();
 
                 String column = minimum.keySet().iterator().next();
-
+                KunderaCoreUtils.printQuery(printQuery + column + " between " + minimum + " and " + maximum, showQuery);
                 if (resource != null && resource.isActive())
                 {
                     Response response = ((Transaction) connection)
@@ -1508,9 +1510,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                 {
                     rowKeys = ((Jedis) connection).zrangeByScore(getHashKey(entityMetadata.getTableName(), column),
                             minimum.get(column), maximum.get(column));
-
                 }
-
             }
             else if (queryParameter.isById())
             {
@@ -1570,7 +1570,6 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                 }
             }
 
-            // fetch fr
             for (String k : rowKeys)
             {
                 connection = reInitialize(connection, rowKeys);
@@ -1867,7 +1866,9 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         // getHashKey(((AbstractAttribute)
         // entityMetadata.getIdAttribute()).getJPAColumnName(), rowKey)),
         // getDouble(rowKey));
-
+        KunderaCoreUtils.printQuery(
+                "Persist data into " + entityMetadata.getSchema() + "." + entityMetadata.getTableName()
+                        + " for primary key " + rowKey, showQuery);
         addIndex(connection, wrapper, rowKey, entityMetadata);
 
     }
@@ -1930,6 +1931,8 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                             ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName()), rowKey);
 
         }
+        KunderaCoreUtils.printQuery("Delete data from:" + entityMetadata.getTableName() + "for primary key: " + rowKey,
+                showQuery);
     }
 
     @Override
@@ -1956,7 +1959,8 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
     private void initializeIndexer()
     {
-        if (this.indexManager.getIndexer() != null)
+        if (this.indexManager.getIndexer() != null
+                && !this.indexManager.getIndexer().getClass().getSimpleName().equals("LuceneIndexer"))
         {
             ((RedisIndexer) this.indexManager.getIndexer()).assignConnection(getConnection());
         }
