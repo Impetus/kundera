@@ -1419,7 +1419,11 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             connection = getConnection();
             Set<String> rowKeys = new HashSet<String>();
             EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClazz);
-            String printQuery = "Fetching primary key from " + entityMetadata.getTableName() + " corresponding to ";
+            String printQuery = null;
+            if (showQuery)
+            {
+                printQuery = "Fetching primary key from " + entityMetadata.getTableName() + " corresponding to ";
+            }
             if (queryParameter.getClause() != null && !queryParameter.isByRange())
             {
                 String destStore = entityClazz.getSimpleName() + System.currentTimeMillis();
@@ -1433,7 +1437,10 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                     String valueAsStr = PropertyAccessorHelper.getString(fieldSets.get(column));
                     String key = getHashKey(entityMetadata.getTableName(), getHashKey(column, valueAsStr));
                     keySets.add(key);
-                    printQuery = printQuery + key + " and ";
+                    if (showQuery)
+                    {
+                        printQuery = printQuery + key + " and ";
+                    }
                 }
                 printQuery = printQuery.substring(0, printQuery.lastIndexOf(" and "));
 
