@@ -1442,11 +1442,14 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                         printQuery = printQuery + key + " and ";
                     }
                 }
-                printQuery = printQuery.substring(0, printQuery.lastIndexOf(" and "));
-
+                if (showQuery)
+                {
+                    printQuery = printQuery.substring(0, printQuery.lastIndexOf(" and "));
+                }
                 if (queryParameter.getClause().equals(Clause.INTERSECT))
                 {
                     KunderaCoreUtils.printQuery(printQuery, showQuery);
+
                     if (resource != null && resource.isActive())
                     {
                         ((Transaction) connection).zinterstore(destStore, keySets.toArray(new String[] {}));
@@ -1458,7 +1461,10 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                 }
                 else
                 {
-                    KunderaCoreUtils.printQuery(printQuery.replaceAll("and", "or"), showQuery);
+                    if (showQuery)
+                    {
+                        KunderaCoreUtils.printQuery(printQuery.replaceAll("and", "or"), showQuery);
+                    }
 
                     if (resource != null && resource.isActive())
                     {
