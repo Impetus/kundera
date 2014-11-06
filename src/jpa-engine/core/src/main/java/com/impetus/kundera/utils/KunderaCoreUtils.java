@@ -402,13 +402,13 @@ public class KunderaCoreUtils
         {
             if (clause instanceof FilterClause)
             {
-                printQuery.append(((FilterClause) clause).getProperty());
-                printQuery.append(" " + ((FilterClause) clause).getCondition() + " ");
-                printQuery.append(((FilterClause) clause).getValue());
+                printQuery.append(((FilterClause) clause).getProperty()).append(" ")
+                        .append(((FilterClause) clause).getCondition()).append(" ")
+                        .append(((FilterClause) clause).getValue());
             }
             else
             {
-                printQuery.append(" " + clause.toString() + " ");
+                printQuery.append(" ").append(clause.toString()).append(" ");
             }
         }
         KunderaCoreUtils.printQuery(printQuery.toString(), true);
