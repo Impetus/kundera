@@ -20,6 +20,7 @@ package com.impetus.kundera.utils;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Queue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,7 +35,6 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.EnhanceEntity;
-import com.impetus.kundera.index.IndexingConstants;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -393,6 +393,25 @@ public class KunderaCoreUtils
         {
             System.out.println(query);
         }
+    }
+
+    public static void printQueryWithFilterClause(Queue filterClausequeue, String tableName)
+    {
+        StringBuilder printQuery = new StringBuilder("Fetch data from " + tableName + " for ");
+        for (Object clause : filterClausequeue)
+        {
+            if (clause instanceof FilterClause)
+            {
+                printQuery.append(((FilterClause) clause).getProperty());
+                printQuery.append(" " + ((FilterClause) clause).getCondition() + " ");
+                printQuery.append(((FilterClause) clause).getValue());
+            }
+            else
+            {
+                printQuery.append(" " + clause.toString() + " ");
+            }
+        }
+        KunderaCoreUtils.printQuery(printQuery.toString(), true);
     }
 
     public static Object getEntity(Object e)

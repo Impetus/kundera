@@ -116,8 +116,8 @@ public interface DataHandler
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    void writeData(String tableName, EntityMetadata m, Object entity, Object rowId, List<RelationHolder> relations)
-            throws IOException;
+    void writeData(String tableName, EntityMetadata m, Object entity, Object rowId, List<RelationHolder> relations,
+            boolean showQuery) throws IOException;
 
     /**
      * Writes data into Join Table.
@@ -147,7 +147,8 @@ public interface DataHandler
      *            the inverse join column name
      * @return the foreign keys from join table
      */
-    <E> List<E> getForeignKeysFromJoinTable(String schemaName,String joinTableName, Object rowKey, String inverseJoinColumnName);
+    <E> List<E> getForeignKeysFromJoinTable(String schemaName, String joinTableName, Object rowKey,
+            String inverseJoinColumnName);
 
     /**
      * Retrieves a list of parent entity from join table..

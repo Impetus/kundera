@@ -162,8 +162,9 @@ public class HBaseQuery extends QueryImpl
         }
         if (filter == null && columns != null)
         {
-            return ((HBaseClient) client).findByRange(m.getEntityClazz(), m, translator.getStartRow(),
-                    translator.getEndRow(), columns.toArray(new String[columns.size()]), null);
+            return ((HBaseClient) client).findByRange(m.getEntityClazz(), m, translator.getStartRow(), translator
+                    .getEndRow(), columns.toArray(new String[columns.size()]), null, getKunderaQuery()
+                    .getFilterClauseQueue());
         }
 
         if (MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
@@ -176,12 +177,15 @@ public class HBaseQuery extends QueryImpl
                 if (translator.isRangeScan())
                 {
                     return ((HBaseClient) client).findByRange(m.getEntityClazz(), m, translator.getStartRow(),
-                            translator.getEndRow(), columns.toArray(new String[columns.size()]), null);
+                            translator.getEndRow(), columns.toArray(new String[columns.size()]), null,
+                            getKunderaQuery().getFilterClauseQueue());
                 }
                 else
                 {
-                    return ((HBaseClient) client).findByRange(m.getEntityClazz(), m, null, null,
-                            columns.toArray(new String[columns.size()]), null);
+                    return ((HBaseClient) client)
+                            .findByRange(m.getEntityClazz(), m, null, null,
+                                    columns.toArray(new String[columns.size()]), null, getKunderaQuery()
+                                            .getFilterClauseQueue());
                 }
             }
             else
@@ -191,7 +195,8 @@ public class HBaseQuery extends QueryImpl
                 if (translator.isRangeScan())
                 {
                     return ((HBaseClient) client).findByRange(m.getEntityClazz(), m, translator.getStartRow(),
-                            translator.getEndRow(), columns.toArray(new String[columns.size()]), filter);
+                            translator.getEndRow(), columns.toArray(new String[columns.size()]), filter,
+                            getKunderaQuery().getFilterClauseQueue());
                 }
                 else
                 {
@@ -200,8 +205,8 @@ public class HBaseQuery extends QueryImpl
 
                     // else setFilter to client and invoke new method. find by
                     // query if isFindById is false! else invoke findById
-                    return ((HBaseClient) client).findByQuery(m.getEntityClazz(), m, filter,
-                            columns.toArray(new String[columns.size()]));
+                    return ((HBaseClient) client).findByQuery(m.getEntityClazz(), m, filter, getKunderaQuery()
+                            .getFilterClauseQueue(), columns.toArray(new String[columns.size()]));
                 }
             }
         }
@@ -706,9 +711,10 @@ public class HBaseQuery extends QueryImpl
         QueryTranslator translator = new QueryTranslator();
         translator.translate(getKunderaQuery(), m, ((ClientBase) client).getClientMetadata());
         List<String> columns = getTranslatedColumns(m, getKunderaQuery().getResult(), 1);
-        
-        return ((HBaseClient) client).findByRange(m.getEntityClazz(), m, translator.getStartRow(),
-                translator.getEndRow(), columns.toArray(new String[columns.size()]), null);
+
+        return ((HBaseClient) client).findByRange(m.getEntityClazz(), m, translator.getStartRow(), translator
+                .getEndRow(), columns.toArray(new String[columns.size()]), null, getKunderaQuery()
+                .getFilterClauseQueue());
     }
 
 }

@@ -13,7 +13,7 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.client;
+package com.impetus.client.hbase.crud;
 
 import static org.junit.Assert.fail;
 
@@ -21,6 +21,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,12 +41,11 @@ import org.slf4j.LoggerFactory;
 /**
  * 
  * @author shaheed.hussain
- *
+ * 
  */
-public class RedisShowQueryTest
+public class HbaseShowQueryTest
 {
-
-    private static final String REDIS_PU = "redis_pu";
+    private static final String HBASE_PU = "hbaseTest";
 
     private EntityManagerFactory emf;
 
@@ -53,7 +53,7 @@ public class RedisShowQueryTest
 
     private Map<String, String> puProperties = new HashMap<String, String>();
 
-    private Logger logger = LoggerFactory.getLogger(RedisShowQueryTest.class);
+    private Logger logger = LoggerFactory.getLogger(HbaseShowQueryTest.class);
 
     private File file = null;
 
@@ -70,30 +70,29 @@ public class RedisShowQueryTest
      * testing show.query property when it is disabled
      */
     @Test
-    public void testShowQueryDisabled()
+    public void testShowQueryDisabled() throws IOException
     {
-        emf = Persistence.createEntityManagerFactory(REDIS_PU);
+        emf = Persistence.createEntityManagerFactory(HBASE_PU);
         em = emf.createEntityManager();
+        BufferedReader br = null;
 
         try
         {
             boolean isFileEmpty = false;
-            BufferedReader br = null;
             file = new File("showQuery.log");
             PrintStream printStream;
 
             printStream = new PrintStream(new FileOutputStream(file));
             System.setOut(printStream);
-            Query findQuery = em.createQuery("Select s from UserInformation s");
+            Query findQuery = em.createQuery("Select s from UserInfo s");
             findQuery.getResultList();
             System.setOut(printStream);
 
-            findQuery = em.createQuery("Select p from UserInformation p where p.id=\"PK_1\"");
+            findQuery = em.createQuery("Select p from UserInfo p where p.userId=\"PK_1\"");
             findQuery.getResultList();
             System.setOut(printStream);
 
-            // and query is not supported in oracle nosql
-            findQuery = em.createQuery("Select p from UserInformation p where p.id=\"Shahid\"");
+            findQuery = em.createQuery("Select p from UserInfo p where p.userId=\"Shahid\"");
             findQuery.getResultList();
             System.setOut(printStream);
 
@@ -106,56 +105,58 @@ public class RedisShowQueryTest
         {
             logger.info(e.getMessage());
         }
-
+        finally
+        {
+            br.close();
+        }
     }
 
     /*
      * testing kunera.show.query property when it is enabled
      */
     @Test
-    public void testShowQueryEnabled()
+    public void testShowQueryEnabled() throws IOException
     {
         puProperties.put("kundera.show.query", "true");
-        emf = Persistence.createEntityManagerFactory(REDIS_PU, puProperties);
+        emf = Persistence.createEntityManagerFactory(HBASE_PU, puProperties);
         em = emf.createEntityManager();
+        BufferedReader br = null;
         try
         {
-
             int i = 0;
             String expectedQuery[] = new String[5];
             String actualQuery = null;
-            BufferedReader br = null;
             file = new File("showQuery.log");
             PrintStream printStream;
 
             printStream = new PrintStream(new FileOutputStream(file));
             System.setOut(printStream);
 
-            Query findQuery = em.createQuery("Select p from UserInformation p where p.id=\"PK_1\"");
+            Query findQuery = em.createQuery("Select p from UserInfo p where p.userId=\"PK_1\"");
             findQuery.getResultList();
-            expectedQuery[0] = "Fetch data from UserInformation for PK \"PK_1\"";
+            expectedQuery[0] = "Fetch data from user_info for userId = [\"PK_1\"]";
             System.setOut(printStream);
 
-            findQuery = em.createQuery("Select p from UserInformation p where p.id=\"Shahid\"");
+            findQuery = em.createQuery("Select p from UserInfo p where p.userId=\"Shahid\"");
             findQuery.getResultList();
-            expectedQuery[1] = "Fetch data from UserInformation for PK \"Shahid\"";
+            expectedQuery[1] = "Fetch data from user_info for userId = [\"Shahid\"]";
             System.setOut(printStream);
 
-            findQuery = em.createQuery("Select p from UserInformation p where p.age between 32 and 35");
+            findQuery = em.createQuery("Select p from UserInfo p where p.age between 32 and 35");
             findQuery.getResultList();
             System.setOut(printStream);
-            expectedQuery[2] = "Fetching primary key from UserInformation corresponding to age between {age=32.0} and {age=35.0}";
+            expectedQuery[2] = "Fetch data from user_info for age >= [32] AND age <= [35]";
 
-            findQuery = em.createQuery("Select p from UserInformation p where p.id=1 OR p.age=29");
+            findQuery = em.createQuery("Select p from UserInfo p where p.userId=1 OR p.age=29");
             findQuery.getResultList();
-            expectedQuery[3] = "Fetching primary key from UserInformation corresponding to UserInformation:id:1 or UserInformation:age:29";
+            expectedQuery[3] = "Fetch data from user_info for userId = [1] OR age = [29]";
             System.setOut(printStream);
-            
-            findQuery = em.createQuery("Select p from UserInformation p where p.id=1 AND p.age=32");
+
+            findQuery = em.createQuery("Select p from UserInfo p where p.userId=1 AND p.age=32");
             findQuery.getResultList();
             System.setOut(printStream);
-            expectedQuery[4] = "Fetching primary key from UserInformation corresponding to UserInformation:id:1 and UserInformation:age:32";
-           
+            expectedQuery[4] = "Fetch data from user_info for userId = [1] AND age = [32]";
+
             br = new BufferedReader(new FileReader("showQuery.log"));
             actualQuery = br.readLine();
             if (actualQuery == null)
@@ -171,7 +172,10 @@ public class RedisShowQueryTest
         {
             logger.info(e.getMessage());
         }
+        finally
+        {
+            br.close();
+        }
 
     }
-
 }

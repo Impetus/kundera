@@ -343,7 +343,7 @@ public class HBaseDataHandler implements DataHandler
      */
     @Override
     public void writeData(String tableName, EntityMetadata m, Object entity, Object rowId,
-            List<RelationHolder> relations) throws IOException
+            List<RelationHolder> relations, boolean showQuery) throws IOException
     {
         HTableInterface hTable = gethTable(tableName);
 
@@ -364,7 +364,7 @@ public class HBaseDataHandler implements DataHandler
         List<HBaseDataWrapper> persistentData = new ArrayList<HBaseDataHandler.HBaseDataWrapper>(attributes.size());
 
         Map<String, HBaseDataWrapper> columnWrappers = preparePersistentData(tableName, m.getTableName(), entity,
-                rowId, metaModel, attributes, columnWrapper, persistentData);
+                rowId, metaModel, attributes, columnWrapper, persistentData, showQuery);
 
         writeColumnData(hTable, entity, columnWrappers);
 
@@ -437,7 +437,8 @@ public class HBaseDataHandler implements DataHandler
      * (java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
-    public <E> List<E> getForeignKeysFromJoinTable(String schemaName,String joinTableName, Object rowKey, String inverseJoinColumnName)
+    public <E> List<E> getForeignKeysFromJoinTable(String schemaName, String joinTableName, Object rowKey,
+            String inverseJoinColumnName)
     {
         List<E> foreignKeys = new ArrayList<E>();
 
@@ -1133,11 +1134,17 @@ public class HBaseDataHandler implements DataHandler
      */
     public Map<String, HBaseDataWrapper> preparePersistentData(String tableName, String columnFamily, Object entity,
             Object rowId, MetamodelImpl metaModel, Set<Attribute> attributes, HBaseDataWrapper columnWrapper,
-            List<HBaseDataWrapper> persistentData) throws IOException
+            List<HBaseDataWrapper> persistentData, boolean showQuery) throws IOException
     {
 
         Map<String, HBaseDataWrapper> persistentDataWrappers = new HashMap<String, HBaseDataWrapper>();
         persistentDataWrappers.put(columnFamily, columnWrapper);
+        StringBuilder printQuery = null;
+        if (showQuery)
+        {
+            printQuery = new StringBuilder("Persist data into " + columnFamily + " with PK=" + rowId.toString() + " , ");
+        }
+
         for (Attribute column : attributes)
         {
             String fieldName = ((AbstractAttribute) column).getJPAColumnName();
@@ -1294,11 +1301,19 @@ public class HBaseDataHandler implements DataHandler
             }
             else if (!column.isAssociation())
             {
-
-                columnWrapper.addColumn(((AbstractAttribute) column).getJPAColumnName(), column);
-                columnWrapper.addValue(((AbstractAttribute) column).getJPAColumnName(),
-                        PropertyAccessorHelper.getObject(entity, (Field) column.getJavaMember()));
+                Object fieldValue = PropertyAccessorHelper.getObject(entity, (Field) column.getJavaMember());
+                columnWrapper.addColumn(fieldName, column);
+                columnWrapper.addValue(fieldName, fieldValue);
+                if (showQuery)
+                {
+                    printQuery.append(fieldName).append("=").append(fieldValue.toString()).append(" , ");
+                }
             }
+        }
+
+        if (showQuery)
+        {
+            KunderaCoreUtils.printQuery(printQuery.substring(0, printQuery.lastIndexOf(" , ")).toString(), showQuery);
         }
 
         return persistentDataWrappers;

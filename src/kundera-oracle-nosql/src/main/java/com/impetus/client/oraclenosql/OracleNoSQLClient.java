@@ -52,6 +52,7 @@ import oracle.kv.table.TableAPI;
 import oracle.kv.table.TableOperation;
 
 import org.apache.commons.lang.StringUtils;
+import org.omg.PortableInterceptor.INACTIVE;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1161,7 +1162,6 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
 
         for (Object clause : interpreter.getClauseQueue())
         {
-
             if (clause.getClass().isAssignableFrom(FilterClause.class))
             {
                 String fieldName = null;
@@ -1212,6 +1212,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         {
             results = scrollAndPopulate(null, entityMetadata, metamodel, schemaTable, rowsIter, relationMap,
                     columnsToSelect);
+            KunderaCoreUtils.printQueryWithFilterClause(interpreter.getClauseQueue(), entityMetadata.getTableName());
         }
         catch (Exception e)
         {
