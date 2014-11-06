@@ -1142,7 +1142,8 @@ public class HBaseDataHandler implements DataHandler
         StringBuilder printQuery = null;
         if (showQuery)
         {
-            printQuery = new StringBuilder("Persist data into " + columnFamily + " with PK=" + rowId.toString() + " , ");
+            printQuery = new StringBuilder("Persist data into ").append(columnFamily).append(" with PK=")
+                    .append(rowId.toString()).append(" , ");
         }
 
         for (Attribute column : attributes)

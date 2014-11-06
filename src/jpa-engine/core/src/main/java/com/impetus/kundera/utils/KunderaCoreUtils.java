@@ -397,7 +397,7 @@ public class KunderaCoreUtils
 
     public static void printQueryWithFilterClause(Queue filterClausequeue, String tableName)
     {
-        StringBuilder printQuery = new StringBuilder("Fetch data from " + tableName + " for ");
+        StringBuilder printQuery = new StringBuilder("Fetch data from ").append(tableName).append(" for ");
         for (Object clause : filterClausequeue)
         {
             if (clause instanceof FilterClause)
