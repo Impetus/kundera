@@ -2,29 +2,41 @@ Overview
 =========
 The idea behind Kundera is to make working with NoSQL Databases drop-dead simple and fun. Kundera is being developed with following objectives:
 
-*  To make working with NoSQL as simple as working with SQL
-*  To serve as JPA Compliant mapping solution for NoSQL Datastores.
+* To make working with NoSQL as simple as working with SQL
+* To serve as JPA Compliant mapping solution for NoSQL Datastores.
 *	To help developers, forget the complexity of NoSQL stores and focus on Domain Model.
 *	To make switching across data-stores as easy as changing a configuration.
 
-
-[Downloads] (https://github.com/impetus-opensource/Kundera/wiki/Stable-Release "Downloads")
+Supported Datastores 
+=====================
+Kundera currently supports following data stores :
+*  Cassandra
+*  MongoDB
+*  HBase
+*  Redis
+*  OracleNoSQL
+*  Neo4j
+*  Elastic-search
+*  Couchdb
+*  Relational databases
+  
+You can find the list of data stores(specific versions) supported by Kundera [here] (https://github.com/impetus-opensource/Kundera/wiki/Datastores-Supported)
 
 
 Structure
 =========
 Current project structure contains:
 * "src" folder contains Kundera source code.
-* "benchmark" folder contains YCSB based Kundera benchmark module.
-* "container" contains deployable web container modules.
+* "test" folder contains YCSB based Kundera benchmark module.
+* "examples" folder contains deployable web container modules.
 
 How to build
 ============
-Each module is a maven based project. To build a specific module(for example src). You need to execute a command as 
+In order to start using Kundera , just go through our [getting started guide] (https://github.com/impetus-opensource/Kundera/wiki/Getting-Started-in-5-minutes) .Each module is a maven based project. To build a specific module(for example root folder src itself). You need to execute a command as 
 
 <b>mvn clean install -Dfile src/pom.xml </b>
 
-More details about Kundera source code structure and build process are available at => 
+More details about Kundera's source code structure and build process are available at => 
 https://github.com/impetus-opensource/Kundera/blob/trunk/src/README.md
 
 
