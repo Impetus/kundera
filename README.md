@@ -61,10 +61,10 @@ It is a maven based project . You can either download it directly from github an
   
   ```
     <dependency>
-            <groupId>com.impetus.kundera.client</groupId>
-            <artifactId>kundera-cassandra</artifactId>
-            <version>${kundera.version}</version>
-        </dependency>
+          <groupId>com.impetus.kundera.client</groupId>
+          <artifactId>kundera-cassandra</artifactId>
+          <version>${kundera.version}</version>
+    </dependency>
   ```
 
 Build your project with the above changes to your pom.xml and start using Kundera !
