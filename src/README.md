@@ -8,8 +8,6 @@ The idea behind Kundera is to make working with NoSQL Databases drop-dead simple
 *	To make switching across data-stores as easy as changing a configuration.
 
 
-[Downloads] (https://github.com/impetus-opensource/Kundera/wiki/Stable-Release "Downloads")
-
 Note
 ====
 With 2.9.1 release onwards artifact group id has been changed from
