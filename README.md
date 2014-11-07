@@ -25,11 +25,11 @@ You can find the list of data stores(specific versions) supported by Kundera [he
 Getting Started
 ===============
 The latest stable release of Kundera is <b>2.14</b> .
-Kundera is a maven based project . You can either download it directly from github and build using following command :
+It is a maven based project . You can either download it directly from github and build using following command :
 
 <b>mvn clean install -Dfile src/pom.xml </b>
 
-<b>Or</b> it can be directly added as dependency in your project in the following manner :
+<b>Or</b> it can be directly added as maven dependency in your project in the following manner :
  
   * Add the following repository to pom.xml :
    
