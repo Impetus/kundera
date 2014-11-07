@@ -1,6 +1,6 @@
 Overview
 =========
-The idea behind Kundera is to make working with NoSQL Databases drop-dead simple and fun. Kundera is being developed with following objectives:
+Kundera is a "Polyglot Object Mapper" with a JPA interface. The idea behind Kundera is to make working with NoSQL Databases drop-dead simple and fun. Kundera is being developed with following objectives:
 
 * To make working with NoSQL as simple as working with SQL
 * To serve as JPA Compliant mapping solution for NoSQL Datastores.
@@ -20,24 +20,76 @@ Kundera currently supports following data stores :
 *  Couchdb
 *  Relational databases
   
-You can find the list of data stores(specific versions) supported by Kundera [here] (https://github.com/impetus-opensource/Kundera/wiki/Datastores-Supported)
+You can find the list of data stores(specific versions) supported by Kundera [here] (https://github.com/impetus-opensource/Kundera/wiki/Datastores-Supported).
 
-
-Structure
-=========
-Current project structure contains:
-* "src" folder contains Kundera source code.
-* "test" folder contains YCSB based Kundera benchmark module.
-* "examples" folder contains deployable web container modules.
-
-How to build
-============
-In order to start using Kundera , just go through our [getting started guide] (https://github.com/impetus-opensource/Kundera/wiki/Getting-Started-in-5-minutes) .Each module is a maven based project. To build a specific module(for example root folder src itself). You need to execute a command as 
+Getting Started
+===============
+The latest stable release of Kundera is <b>2.14</b> .
+Kundera is a maven based project . You can either download it directly from github and build using following command :
 
 <b>mvn clean install -Dfile src/pom.xml </b>
 
-More details about Kundera's source code structure and build process are available at => 
-https://github.com/impetus-opensource/Kundera/blob/trunk/src/README.md
+<b>Or</b> it can be directly added as dependency in your project in the following manner :
+ 
+  * Add the following repository to pom.xml :
+   
+   ```
+    <repository>
+     <id>sonatype-nexus</id>
+     <name>Kundera Public Repository</name>
+     <url>https://oss.sonatype.org/content/repositories/releases</url>
+     <releases>
+        <enabled>true</enabled>
+     </releases>
+     <snapshots>
+       <enabled>false</enabled>
+     </snapshots>
+    </repository>
+    <repository>
+      <id>kundera-missing</id>
+      <name>Kundera Public Missing Resources Repository</name>
+      <url>http://kundera.googlecode.com/svn/maven2/maven-missing-resources</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+        </snapshots>
+    </repository>
+   ```
+  
+  * Add the data store specific Kundera module as a dependency (e.g. Cassandra below) :
+  
+  ```
+    <dependency>
+            <groupId>com.impetus.kundera.client</groupId>
+            <artifactId>kundera-cassandra</artifactId>
+            <version>${kundera.version}</version>
+        </dependency>
+  ```
+
+
+
+
+
+Important Links
+===============
+* [Kundera in 5 minutes] (https://github.com/impetus-opensource/Kundera/wiki/Getting-Started-in-5-minutes)
+* [Data Store specific Configurations] (https://github.com/impetus-opensource/Kundera/wiki/Data-store-Specific-Configuration)
+* Features :
+   * [Polyglot Persistence] (https://github.com/impetus-opensource/Kundera/wiki/Polyglot-Persistence)
+   * [JPQL] (https://github.com/impetus-opensource/Kundera/wiki/JPQL) & [Native Query] (https://github.com/impetus-opensource/Kundera/wiki/Native-queries) Support
+   * [Schema Generation] (https://github.com/impetus-opensource/Kundera/wiki/Schema-Generation)
+   * [Transaction Management] (https://github.com/impetus-opensource/Kundera/wiki/Transaction-Management)
+   * [Rest Based Access] (https://github.com/impetus-opensource/Kundera/wiki/REST-Based-Access)
+* Tutorials :
+   * [Kundera with Openshift] (https://github.com/impetus-opensource/Kundera/wiki/Deploying-Polyglot-(RDBMS---NoSQL)-Applications-on-Openshift)
+   * [Kundera with Play Framework] (https://github.com/impetus-opensource/Kundera/wiki/Using-Kundera-with-Play!-Framework)
+   * [Kundera with GWT] (https://github.com/impetus-opensource/Kundera/wiki/Using-Kundera-with-GWT)
+   * [Kundera with JBoss] (https://github.com/impetus-opensource/Kundera/wiki/Using-Kundera-with-Jboss)
+   * [Kundera with Spring] (https://github.com/impetus-opensource/Kundera/wiki/Building-Applications-with-Kundera-and-Spring)
+* [Releases] (https://github.com/impetus-opensource/Kundera/blob/trunk/src/README.md)
+
 
 
 About Us
