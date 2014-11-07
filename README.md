@@ -68,7 +68,7 @@ It is a maven based project . You can either download it directly from github an
         </dependency>
   ```
 
-
+Build your project with the above changes to your pom.xml and start using Kundera !
 
 
 
