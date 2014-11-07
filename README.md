@@ -16,7 +16,6 @@ Kundera currently supports following data stores :
 *  Redis
 *  OracleNoSQL
 *  Neo4j
-*  Elastic-search
 *  Couchdb
 *  Relational databases
   
@@ -35,26 +34,26 @@ It is a maven based project . You can either download it directly from github an
    
    ```
     <repository>
-     <id>sonatype-nexus</id>
-     <name>Kundera Public Repository</name>
-     <url>https://oss.sonatype.org/content/repositories/releases</url>
-     <releases>
-        <enabled>true</enabled>
-     </releases>
-     <snapshots>
-       <enabled>false</enabled>
-     </snapshots>
+        <id>sonatype-nexus</id>
+        <name>Kundera Public Repository</name>
+        <url>https://oss.sonatype.org/content/repositories/releases</url>
+       <releases>
+           <enabled>true</enabled>
+       </releases>
+       <snapshots>
+           <enabled>false</enabled>
+       </snapshots>
     </repository>
     <repository>
-      <id>kundera-missing</id>
-      <name>Kundera Public Missing Resources Repository</name>
-      <url>http://kundera.googlecode.com/svn/maven2/maven-missing-resources</url>
-      <releases>
-        <enabled>true</enabled>
+        <id>kundera-missing</id>
+        <name>Kundera Public Missing Resources Repository</name>
+        <url>http://kundera.googlecode.com/svn/maven2/maven-missing-resources</url>
+        <releases>
+           <enabled>true</enabled>
       </releases>
       <snapshots>
-        <enabled>true</enabled>
-        </snapshots>
+          <enabled>true</enabled>
+      </snapshots>
     </repository>
    ```
   
