@@ -21,7 +21,6 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,7 +28,6 @@ import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 
-import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexNotFoundException;
@@ -59,8 +57,8 @@ import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
-import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.utils.KunderaCoreUtils;
+import com.impetus.kundera.utils.ReflectUtils;
 
 /**
  * Provides indexing functionality using lucene library.
@@ -283,7 +281,7 @@ public class LuceneIndexer extends DocumentIndexer
         String luceneQuery;
         if (isEmbeddedId)
         {
-            id = KunderaCoreUtils.prepareCompositeKey(metadata, metaModel, id);
+            id = KunderaCoreUtils.prepareCompositeKey(metadata.getIdAttribute(), metaModel, id);
             luceneQuery = "+" + IndexingConstants.ENTITY_CLASS_FIELD + ":"
                     + QueryParser.escape(metadata.getEntityClazz().getCanonicalName().toLowerCase()) + " AND +"
                     + IndexingConstants.ENTITY_ID_FIELD + ":" + QueryParser.escape(id.toString());
@@ -331,22 +329,15 @@ public class LuceneIndexer extends DocumentIndexer
         try
         {
             for (ScoreDoc sc : docs.scoreDocs)
-
             {
                 Document doc = searcher.doc(sc.doc);
                 Map<String, Object> embeddedIdFields = new HashMap<String, Object>();
                 EmbeddableType embeddableId = metaModel.embeddable(metadata.getIdAttribute().getBindableJavaType());
                 Set<Attribute> embeddedAttributes = embeddableId.getAttributes();
 
-                for (Attribute embeddedAttrib : embeddedAttributes)
-                {
-                    String columnName = ((AbstractAttribute) embeddedAttrib).getJPAColumnName();
-                    embeddedIdFields.put(columnName,
-                            doc.get(metadata.getEntityClazz().getSimpleName() + "." + columnName));
-                }
+                prepareEmbeddedIdFields(embeddedAttributes, metaModel, embeddedIdFields, doc, metadata);
 
                 String entityId = doc.get(IndexingConstants.ENTITY_ID_FIELD);
-
                 indexCol.put(entityId, embeddedIdFields);
             }
         }
@@ -354,6 +345,29 @@ public class LuceneIndexer extends DocumentIndexer
         {
             log.error("Error while parsing Lucene Query {} ", e);
             throw new LuceneIndexingException(e);
+        }
+    }
+
+    private void prepareEmbeddedIdFields(Set<Attribute> embeddedAttributes, MetamodelImpl metaModel,
+            Map<String, Object> embeddedIdFields, Document doc, EntityMetadata metadata)
+    {
+
+        for (Attribute attribute : embeddedAttributes)
+        {
+            if (!ReflectUtils.isTransientOrStatic((Field) attribute.getJavaMember()))
+            {
+                if (metaModel.isEmbeddable(attribute.getJavaType()))
+                {
+                    EmbeddableType embeddable = metaModel.embeddable(attribute.getJavaType());
+                    prepareEmbeddedIdFields(embeddable.getAttributes(), metaModel, embeddedIdFields, doc, metadata);
+                }
+                else
+                {
+                    String columnName = ((AbstractAttribute) attribute).getJPAColumnName();
+                    embeddedIdFields.put(columnName,
+                            doc.get(metadata.getEntityClazz().getSimpleName() + "." + columnName));
+                }
+            }
         }
     }
 
@@ -618,7 +632,6 @@ public class LuceneIndexer extends DocumentIndexer
         try
         {
             results = search(luceneQuery, 0, 10, false, kunderaMetadata, metadata);
-
         }
         catch (LuceneIndexingException e)
         {
@@ -739,13 +752,14 @@ public class LuceneIndexer extends DocumentIndexer
         {
             document = updateOrCreateIndexNonSuperColumnFamily(metadata, metaModel, entity, parentId, clazz, isUpdate,
                     isEmbeddedId, rowKey);
-
         }
         return document;
 
     }
 
-    /**update or Create Index for non super columnfamily
+    /**
+     * update or Create Index for non super columnfamily
+     * 
      * @param metadata
      * @param metaModel
      * @param entity
@@ -759,7 +773,7 @@ public class LuceneIndexer extends DocumentIndexer
     private Document updateOrCreateIndexNonSuperColumnFamily(EntityMetadata metadata, final MetamodelImpl metaModel,
             Object entity, String parentId, Class<?> clazz, boolean isUpdate, boolean isEmbeddedId, Object rowKey)
     {
-        
+
         Document document = new Document();
 
         // Add entity class, PK info into document
@@ -775,19 +789,13 @@ public class LuceneIndexer extends DocumentIndexer
             if (isEmbeddedId)
             {
                 // updating delimited composite key
-                String compositeId = KunderaCoreUtils.prepareCompositeKey(metadata, metaModel, rowKey);
+                String compositeId = KunderaCoreUtils.prepareCompositeKey(metadata.getIdAttribute(), metaModel, rowKey);
                 updateDocument(compositeId, document, null);
                 // updating sub parts of composite key
                 EmbeddableType embeddableId = metaModel.embeddable(metadata.getIdAttribute().getBindableJavaType());
                 Set<Attribute> embeddedAttributes = embeddableId.getAttributes();
 
-                for (Attribute embeddedAttrib : embeddedAttributes)
-                {
-                    String columnName = ((AbstractAttribute) embeddedAttrib).getJPAColumnName();
-                    Object embeddedColumn = PropertyAccessorHelper.getObject(rowKey,
-                            (Field) embeddedAttrib.getJavaMember());
-                    updateDocument(embeddedColumn.toString(), document, columnName);
-                }
+                updateOrCreateIndexEmbeddedIdFields(embeddedAttributes, metaModel, document, metadata, rowKey);
             }
             else
             {
@@ -801,7 +809,40 @@ public class LuceneIndexer extends DocumentIndexer
         return document;
     }
 
-    /**update or create indexes when embedded object is of collection type
+    private void updateOrCreateIndexEmbeddedIdFields(Set<Attribute> embeddedAttributes, MetamodelImpl metaModel,
+            Document document, EntityMetadata metadata, Object rowKey)
+    {
+        try
+        {
+            for (Attribute attribute : embeddedAttributes)
+            {
+                if (!ReflectUtils.isTransientOrStatic((Field) attribute.getJavaMember()))
+                {
+                    if (metaModel.isEmbeddable(attribute.getJavaType()))
+                    {
+                        EmbeddableType embeddable = metaModel.embeddable(attribute.getJavaType());
+                        updateOrCreateIndexEmbeddedIdFields(embeddable.getAttributes(), metaModel, document, metadata,
+                                ((Field) attribute.getJavaMember()).get(rowKey));
+                    }
+                    else
+                    {
+                        String columnName = ((AbstractAttribute) attribute).getJPAColumnName();
+                        Object embeddedColumn = PropertyAccessorHelper.getObject(rowKey,
+                                (Field) attribute.getJavaMember());
+                        updateDocument(embeddedColumn.toString(), document, columnName);
+                    }
+                }
+            }
+        }
+        catch (IllegalAccessException e)
+        {
+            log.error(e.getMessage());
+        }
+    }
+
+    /**
+     * update or create indexes when embedded object is of collection type
+     * 
      * @param metadata
      * @param metaModel
      * @param entity
@@ -835,7 +876,6 @@ public class LuceneIndexer extends DocumentIndexer
                 if (isUpdate)
                 {
                     updateDocument(parentId, document, null);
-
                 }
                 else
                 {

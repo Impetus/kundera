@@ -19,14 +19,18 @@ package com.impetus.kundera.utils;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.persistence.PersistenceException;
+import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.SingularAttribute;
 
 import org.apache.commons.configuration.EnvironmentConfiguration;
 import org.apache.commons.configuration.SystemConfiguration;
@@ -45,6 +49,7 @@ import com.impetus.kundera.proxy.ProxyHelper;
 import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.LuceneQueryBuilder;
+import com.impetus.kundera.query.QueryHandlerException;
 
 public class KunderaCoreUtils
 {
@@ -149,8 +154,7 @@ public class KunderaCoreUtils
             {
                 try
                 {
-                    String fieldValue = PropertyAccessorHelper.getString(compositeKey, f); // field
-                    // value
+                    String fieldValue = PropertyAccessorHelper.getString(compositeKey, f);
 
                     // what if field value is null????
                     stringBuilder.append(fieldValue);
@@ -182,38 +186,46 @@ public class KunderaCoreUtils
      *            composite key instance
      * @return redis key
      */
-    public static String prepareCompositeKey(final EntityMetadata m, final MetamodelImpl metaModel,
+    public static String prepareCompositeKey(final SingularAttribute attribute, final MetamodelImpl metaModel,
             final Object compositeKey)
     {
-        Field[] fields = m.getIdAttribute().getBindableJavaType().getDeclaredFields();
-        EmbeddableType embeddable = metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
-
+        Field[] fields = attribute.getBindableJavaType().getDeclaredFields();
+        EmbeddableType embeddable = metaModel.embeddable(attribute.getBindableJavaType());
         StringBuilder stringBuilder = new StringBuilder();
-        for (Field f : fields)
+
+        try
         {
-            if (!ReflectUtils.isTransientOrStatic(f))
+            for (Field f : fields)
             {
-                try
+                if (!ReflectUtils.isTransientOrStatic(f))
                 {
                     if (metaModel.isEmbeddable(((AbstractAttribute) embeddable.getAttribute(f.getName()))
                             .getBindableJavaType()))
                     {
-                        throw new UnsupportedOperationException("composite partition key is not supported in lucene");
+                        f.setAccessible(true);
+                        stringBuilder.append(
+                                prepareCompositeKey((SingularAttribute) embeddable.getAttribute(f.getName()),
+                                        metaModel, f.get(compositeKey))).append(LUCENE_COMPOSITE_KEY_SEPERATOR);
                     }
+                    else
+                    {
+                        String fieldValue = PropertyAccessorHelper.getString(compositeKey, f);
+                        fieldValue = fieldValue.replaceAll("[^a-zA-Z0-9]", "_");
 
-                    String fieldValue = PropertyAccessorHelper.getString(compositeKey, f); // field
-                    fieldValue = fieldValue.replaceAll("[^a-zA-Z0-9]", "_"); // value
-
-                    // what if field value is null????
-                    stringBuilder.append(fieldValue);
-                    stringBuilder.append(LUCENE_COMPOSITE_KEY_SEPERATOR);
-                }
-                catch (IllegalArgumentException e)
-                {
-                    logger.error("Error during prepare composite key, Caused by {}.", e);
-                    throw new PersistenceException(e);
+                        stringBuilder.append(fieldValue);
+                        stringBuilder.append(LUCENE_COMPOSITE_KEY_SEPERATOR);
+                    }
                 }
             }
+        }
+        catch (IllegalAccessException e)
+        {
+            logger.error(e.getMessage());
+        }
+        catch (IllegalArgumentException e)
+        {
+            logger.error("Error during prepare composite key, Caused by {}.", e);
+            throw new PersistenceException(e);
         }
 
         if (stringBuilder.length() > 0)
@@ -303,6 +315,7 @@ public class KunderaCoreUtils
                 metadata.getPersistenceUnit());
         Class valueClazz = null;
         EntityType entity = metaModel.entity(metadata.getEntityClazz());
+        boolean partitionKeyCheck = true;
 
         for (Object object : kunderaQuery.getFilterClauseQueue())
         {
@@ -321,17 +334,33 @@ public class KunderaCoreUtils
                 {
                     if (idColumn.equals(property))
                     {
-                        valueAsString = prepareCompositeKey(metadata, metaModel, filter.getValue().get(0));
+                        valueAsString = prepareCompositeKey(metadata.getIdAttribute(), metaModel, filter.getValue()
+                                .get(0));
                         queryBuilder.appendIndexName(metadata.getIndexName()).appendPropertyName(idColumn)
                                 .buildQuery(condition, valueAsString, valueClazz);
                     }
                     else
                     {
                         valueClazz = metadata.getIdAttribute().getBindableJavaType();
-                        property = property.substring(property.indexOf(".") + 1);
-                        queryBuilder.appendIndexName(metadata.getIndexName())
-                                .appendPropertyName(getPropertyName(metadata, property, kunderaMetadata))
-                                .buildQuery(condition, valueAsString, valueClazz);
+                        if (property.lastIndexOf('.') != property.indexOf('.') && partitionKeyCheck)
+                        {
+                            isCompletePartitionKeyPresentInQuery(kunderaQuery.getFilterClauseQueue(), metaModel,
+                                    metadata);
+                            partitionKeyCheck = false;
+                        }
+
+                        if (metaModel.isEmbeddable(filter.getValue().get(0).getClass()))
+                        {
+                            prepareLuceneQueryForPartitionKey(queryBuilder, filter.getValue().get(0), metaModel,
+                                    metadata.getIndexName(), valueClazz);
+                        }
+                        else
+                        {
+                            property = property.substring(property.lastIndexOf(".") + 1);
+                            queryBuilder.appendIndexName(metadata.getIndexName())
+                                    .appendPropertyName(getPropertyName(metadata, property, kunderaMetadata))
+                                    .buildQuery(condition, valueAsString, valueClazz);
+                        }
                     }
                 }
                 else
@@ -349,6 +378,114 @@ public class KunderaCoreUtils
 
         queryBuilder.appendEntityName(kunderaQuery.getEntityClass().getCanonicalName().toLowerCase());
         return queryBuilder.getQuery();
+    }
+
+    private static void isCompletePartitionKeyPresentInQuery(Queue filterQueue, MetamodelImpl metaModel,
+            EntityMetadata metadata)
+    {
+        Set<String> partitionKeyFields = new HashSet<String>();
+        populateEmbeddedIdFields(metaModel.embeddable(metadata.getIdAttribute().getBindableJavaType()).getAttributes(),
+                metaModel, partitionKeyFields);
+
+        Set<String> queryAttributes = new HashSet<String>();
+        for (Object object : filterQueue)
+        {
+            if (object instanceof FilterClause)
+            {
+                FilterClause filter = (FilterClause) object;
+                String property = filter.getProperty();
+                String filterAttr[] = property.split("\\.");
+                for (String s : filterAttr)
+                {
+                    queryAttributes.add(s);
+                }
+            }
+        }
+        if (!queryAttributes.containsAll(partitionKeyFields))
+        {
+            throw new QueryHandlerException("Incomplete partition key fields in query");
+        }
+    }
+
+    private static void populateEmbeddedIdFields(Set<Attribute> embeddedAttributes, MetamodelImpl metaModel,
+            Set<String> embeddedIdFields)
+    {
+        for (Attribute attribute : embeddedAttributes)
+        {
+            if (!ReflectUtils.isTransientOrStatic((Field) attribute.getJavaMember()))
+            {
+                if (metaModel.isEmbeddable(attribute.getJavaType()))
+                {
+                    EmbeddableType embeddable = metaModel.embeddable(attribute.getJavaType());
+                    populateEmbeddedIdFieldsUtil(embeddable.getAttributes(), metaModel, embeddedIdFields);
+                }
+            }
+        }
+    }
+
+    private static void populateEmbeddedIdFieldsUtil(Set<Attribute> embeddedAttributes, MetamodelImpl metaModel,
+            Set<String> embeddedIdFields)
+    {
+        for (Attribute attribute : embeddedAttributes)
+        {
+            if (!ReflectUtils.isTransientOrStatic((Field) attribute.getJavaMember()))
+            {
+                if (metaModel.isEmbeddable(attribute.getJavaType()))
+                {
+                    EmbeddableType embeddable = metaModel.embeddable(attribute.getJavaType());
+                    populateEmbeddedIdFieldsUtil(embeddable.getAttributes(), metaModel, embeddedIdFields);
+                }
+                else
+                {
+                    String columnName = ((AbstractAttribute) attribute).getJPAColumnName();
+                    embeddedIdFields.add(columnName);
+                }
+            }
+        }
+    }
+
+    private static void prepareLuceneQueryForPartitionKey(LuceneQueryBuilder queryBuilder, Object key,
+            MetamodelImpl metaModel, String indexName, Class valueClazz)
+    {
+        Field[] fields = key.getClass().getDeclaredFields();
+        EmbeddableType embeddable = metaModel.embeddable(key.getClass());
+
+        try
+        {
+            for (int i = 0; i < fields.length; i++)
+            {
+                if (!ReflectUtils.isTransientOrStatic(fields[i]))
+                {
+                    if (metaModel.isEmbeddable(((AbstractAttribute) embeddable.getAttribute(fields[i].getName()))
+                            .getBindableJavaType()))
+                    {
+                        fields[i].setAccessible(true);
+                        prepareLuceneQueryForPartitionKey(queryBuilder, fields[i].get(key), metaModel, indexName,
+                                valueClazz);
+                    }
+                    else
+                    {
+                        String fieldValue = PropertyAccessorHelper.getString(key, fields[i]);
+                        fieldValue = fieldValue.replaceAll("[^a-zA-Z0-9]", "_");
+                        queryBuilder.appendIndexName(indexName).appendPropertyName(fields[i].getName())
+                                .buildQuery("=", fieldValue, valueClazz);
+                        if (i < (fields.length - 1))
+                        {
+                            queryBuilder.buildQuery("AND", "AND", String.class);
+                        }
+                    }
+                }
+            }
+        }
+        catch (IllegalArgumentException e)
+        {
+            logger.error("Error during prepare composite key, Caused by {}.", e);
+            throw new PersistenceException(e);
+        }
+        catch (IllegalAccessException e)
+        {
+            logger.error(e.getMessage());
+        }
     }
 
     private static Class getValueType(EntityType entity, String fieldName)

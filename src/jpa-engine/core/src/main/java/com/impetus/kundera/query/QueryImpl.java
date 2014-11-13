@@ -38,7 +38,9 @@ import javax.persistence.PostLoad;
 import javax.persistence.Query;
 import javax.persistence.TemporalType;
 import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.SingularAttribute;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -202,7 +204,7 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
      * @return
      */
     private List<Object> populateEmbeddedIdUsingLucene(EntityMetadata m, Client client, List<Object> result,
-            Map<String, Object> searchFilter, String[] columnsToSelect)
+            Map<String, Object> searchFilter, MetamodelImpl metaModel)
     {
         List<Object> compositeIds = new ArrayList<Object>();
 
@@ -212,9 +214,41 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
             Map<String, String> uniquePKs = (Map<String, String>) searchFilter.get(compositeIdName);
             compositeId = KunderaCoreUtils.initialize(m.getIdAttribute().getBindableJavaType(), compositeId);
 
-            for (Field field : m.getIdAttribute().getBindableJavaType().getDeclaredFields())
+            prepareCompositeIdObject(m.getIdAttribute(), compositeId, uniquePKs, metaModel);
+            compositeIds.add(compositeId);
+        }
+        return findUsingLucene(m, client, compositeIds.toArray());
+    }
+
+    private Object prepareCompositeIdObject(final SingularAttribute attribute, Object compositeId,
+            Map<String, String> uniquePKs, MetamodelImpl metaModel)
+    {
+        Field[] fields = attribute.getBindableJavaType().getDeclaredFields();
+        EmbeddableType embeddable = metaModel.embeddable(attribute.getBindableJavaType());
+
+        for (Field field : attribute.getBindableJavaType().getDeclaredFields())
+        {
+            if (!ReflectUtils.isTransientOrStatic(field))
             {
-                if (!ReflectUtils.isTransientOrStatic(field))
+                if (metaModel.isEmbeddable(((AbstractAttribute) embeddable.getAttribute(field.getName()))
+                        .getBindableJavaType()))
+                {
+                    try
+                    {
+                        field.setAccessible(true);
+                        Object embeddedObject = prepareCompositeIdObject(
+                                (SingularAttribute) embeddable.getAttribute(field.getName()),
+                                KunderaCoreUtils.initialize(((AbstractAttribute) embeddable.getAttribute(field
+                                        .getName())).getBindableJavaType(), field.get(compositeId)), uniquePKs,
+                                metaModel);
+                        PropertyAccessorHelper.set(compositeId, field, embeddedObject);
+                    }
+                    catch (IllegalAccessException e)
+                    {
+                        log.error(e.getMessage());
+                    }
+                }
+                else
                 {
                     PropertyAccessorHelper.set(
                             compositeId,
@@ -223,13 +257,13 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
                                     uniquePKs.get(field.getName())));
                 }
             }
-            compositeIds.add(compositeId);
         }
-        return findUsingLucene(m, client, compositeIds.toArray());
+        return compositeId;
     }
 
     /**
      * find data using lucene
+     * 
      * @param m
      * @param client
      * @param primaryKeys
@@ -250,7 +284,7 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
         for (Object primaryKey : primaryKeys)
         {
             FilterClause filterClause = kunderaQuery.new FilterClause(columnName, equals, primaryKey);
-            kunderaQuery.setFilter(kunderaQuery.getEntityAlias()+"."+columnName +" = "+primaryKey);
+            kunderaQuery.setFilter(kunderaQuery.getEntityAlias() + "." + columnName + " = " + primaryKey);
             queue.clear();
             queue.add(filterClause);
             List<Object> object = findUsingLucene(m, client);
@@ -287,7 +321,7 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
 
         if (isEmbeddedId)
         {
-            return populateEmbeddedIdUsingLucene(m, client, result, searchFilter, columnsToSelect);
+            return populateEmbeddedIdUsingLucene(m, client, result, searchFilter, metaModel);
         }
 
         String[] primaryKeys = searchFilter.values().toArray(new String[] {});

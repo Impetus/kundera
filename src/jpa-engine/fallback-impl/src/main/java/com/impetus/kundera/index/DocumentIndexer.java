@@ -22,6 +22,7 @@ import java.util.Set;
 
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
+import javax.persistence.metamodel.SingularAttribute;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.Tokenizer;
@@ -41,6 +42,7 @@ import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.utils.KunderaCoreUtils;
+import com.impetus.kundera.utils.ReflectUtils;
 
 /**
  * The Class KunderaIndexer.
@@ -171,7 +173,6 @@ public abstract class DocumentIndexer implements com.impetus.kundera.index.lucen
             String colName = field.getName();
             String indexName = metadata.getIndexName();
             addFieldToDocument(embeddedObject, currentDoc, field, colName, indexName);
-
         }
 
         // Add all entity fields to document
@@ -208,7 +209,6 @@ public abstract class DocumentIndexer implements com.impetus.kundera.index.lucen
             String colName = field.getName();
             String indexName = metadata.getIndexName();
             addFieldToDocument(embeddedObject, currentDoc, field, colName, indexName);
-
         }
 
         // Add all entity fields to document
@@ -260,7 +260,9 @@ public abstract class DocumentIndexer implements com.impetus.kundera.index.lucen
         if (metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
         {
             Object id = PropertyAccessorHelper.getId(entity, metadata);
-            indexCompositeKey(metadata, id, document, metaModel);
+            EmbeddableType embeddableId = metaModel.embeddable(metadata.getIdAttribute().getBindableJavaType());
+            Set<Attribute> embeddedAttributes = embeddableId.getAttributes();
+            indexCompositeKey(embeddedAttributes, metadata, id, document, metaModel);
         }
     }
 
@@ -272,18 +274,34 @@ public abstract class DocumentIndexer implements com.impetus.kundera.index.lucen
      * @param document
      * @param metaModel
      */
-    protected void indexCompositeKey(EntityMetadata metadata, Object id, Document document,
-            final MetamodelImpl metaModel)
+    protected void indexCompositeKey(Set<Attribute> embeddedAttributes, EntityMetadata metadata, Object id,
+            Document document, final MetamodelImpl metaModel)
     {
         // indexing individual fields of the composite key
-        EmbeddableType embeddableId = metaModel.embeddable(metadata.getIdAttribute().getBindableJavaType());
-        Set<Attribute> embeddedAttributes = embeddableId.getAttributes();
-
-        for (Attribute embeddedAttrib : embeddedAttributes)
+        try
         {
-            String columnName = ((AbstractAttribute) embeddedAttrib).getJPAColumnName();
-            addFieldToDocument(id, document, (java.lang.reflect.Field) embeddedAttrib.getJavaMember(), columnName,
-                    metadata.getEntityClazz().getSimpleName());
+            for (Attribute attribute : embeddedAttributes)
+            {
+                if (!ReflectUtils.isTransientOrStatic((java.lang.reflect.Field) attribute.getJavaMember()))
+                {
+                    if (metaModel.isEmbeddable(attribute.getJavaType()))
+                    {
+                        EmbeddableType embeddable = metaModel.embeddable(attribute.getJavaType());
+                        indexCompositeKey(embeddable.getAttributes(), metadata,
+                                ((java.lang.reflect.Field) attribute.getJavaMember()).get(id), document, metaModel);
+                    }
+                    else
+                    {
+                        String columnName = ((AbstractAttribute) attribute).getJPAColumnName();
+                        addFieldToDocument(id, document, (java.lang.reflect.Field) attribute.getJavaMember(),
+                                columnName, metadata.getEntityClazz().getSimpleName());
+                    }
+                }
+            }
+        }
+        catch (IllegalAccessException e)
+        {
+            LOG.error(e.getMessage());
         }
     }
 
@@ -309,7 +327,7 @@ public abstract class DocumentIndexer implements com.impetus.kundera.index.lucen
             // Indexing composite keys
             if (metaModel != null && metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
             {
-                id = KunderaCoreUtils.prepareCompositeKey(metadata, metaModel, id);
+                id = KunderaCoreUtils.prepareCompositeKey(metadata.getIdAttribute(), metaModel, id);
             }
 
             luceneField = new Field(IndexingConstants.ENTITY_ID_FIELD, id.toString(), Field.Store.YES,
@@ -373,6 +391,7 @@ public abstract class DocumentIndexer implements com.impetus.kundera.index.lucen
         try
         {
             Object obj = PropertyAccessorHelper.getObject(object, field);
+
             // String value = (obj == null) ? null : obj.toString();
             if (obj != null)
             {
