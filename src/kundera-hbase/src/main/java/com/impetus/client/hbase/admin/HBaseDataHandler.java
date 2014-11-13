@@ -1307,7 +1307,8 @@ public class HBaseDataHandler implements DataHandler
                 columnWrapper.addValue(fieldName, fieldValue);
                 if (showQuery)
                 {
-                    printQuery.append(fieldName).append("=").append(fieldValue.toString()).append(" , ");
+                    fieldValue = fieldValue != null ? fieldValue.toString() : fieldValue;
+                    printQuery.append(fieldName).append("=").append(fieldValue).append(" , ");
                 }
             }
         }
