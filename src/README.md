@@ -7,7 +7,6 @@ The idea behind Kundera is to make working with NoSQL Databases drop-dead simple
 *	To help developers, forget the complexity of NoSQL stores and focus on Domain Model.
 *	To make switching across data-stores as easy as changing a configuration.
 
-
 [Downloads] (https://github.com/impetus-opensource/Kundera/wiki/Stable-Release "Downloads")
 
 Note
