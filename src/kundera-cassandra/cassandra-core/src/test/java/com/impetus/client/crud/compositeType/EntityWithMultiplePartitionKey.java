@@ -26,7 +26,7 @@ import javax.persistence.Table;
  * 
  */
 @Entity
-@Table(name = "EntityWithMultiplePartitionKey", schema = "CompositeCassandra@compositedatatype")
+@Table(name = "EntityWithMultiplePartitionKey")
 public class EntityWithMultiplePartitionKey
 {
     @EmbeddedId
