@@ -278,28 +278,23 @@ public class LuceneIndexer extends DocumentIndexer
      */
     private String getLuceneQuery(EntityMetadata metadata, Object id, boolean isEmbeddedId, MetamodelImpl metaModel)
     {
-        String luceneQuery;
+        StringBuilder luceneQuery = new StringBuilder("+").append(IndexingConstants.ENTITY_CLASS_FIELD).append(":")
+                .append(QueryParser.escape(metadata.getEntityClazz().getCanonicalName().toLowerCase()))
+                .append(" AND +");
         if (isEmbeddedId)
         {
             id = KunderaCoreUtils.prepareCompositeKey(metadata.getIdAttribute(), metaModel, id);
-            luceneQuery = "+" + IndexingConstants.ENTITY_CLASS_FIELD + ":"
-                    + QueryParser.escape(metadata.getEntityClazz().getCanonicalName().toLowerCase()) + " AND +"
-                    + IndexingConstants.ENTITY_ID_FIELD + ":" + QueryParser.escape(id.toString());
-
+            luceneQuery.append(IndexingConstants.ENTITY_ID_FIELD).append(":").append(QueryParser.escape(id.toString()));
         }
         else
         {
-            luceneQuery = "+"
-                    + IndexingConstants.ENTITY_CLASS_FIELD
-                    + ":"
-                    + QueryParser.escape(metadata.getEntityClazz().getCanonicalName().toLowerCase())
-                    + " AND +"
-                    + getCannonicalPropertyName(QueryParser.escape(metadata.getEntityClazz().getSimpleName()),
-                            QueryParser.escape(((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName()))
-                    + ":" + QueryParser.escape(id.toString());
+            luceneQuery
+                    .append(getCannonicalPropertyName(QueryParser.escape(metadata.getEntityClazz().getSimpleName()),
+                            QueryParser.escape(((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName())))
+                    .append(":").append(QueryParser.escape(id.toString()));
 
         }
-        return luceneQuery;
+        return luceneQuery.toString();
     }
 
     @Override

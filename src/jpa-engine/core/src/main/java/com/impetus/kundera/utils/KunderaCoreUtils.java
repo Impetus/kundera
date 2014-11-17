@@ -380,6 +380,12 @@ public class KunderaCoreUtils
         return queryBuilder.getQuery();
     }
 
+    /**
+     * cheking whether all the fields of partition key are present in the jpa query 
+     * @param filterQueue
+     * @param metaModel
+     * @param metadata
+     */
     private static void isCompletePartitionKeyPresentInQuery(Queue filterQueue, MetamodelImpl metaModel,
             EntityMetadata metadata)
     {
@@ -407,6 +413,12 @@ public class KunderaCoreUtils
         }
     }
 
+    /**
+     * recursively populate all the fields present in partition key
+     * @param embeddedAttributes
+     * @param metaModel
+     * @param embeddedIdFields
+     */
     private static void populateEmbeddedIdFields(Set<Attribute> embeddedAttributes, MetamodelImpl metaModel,
             Set<String> embeddedIdFields)
     {
@@ -449,6 +461,7 @@ public class KunderaCoreUtils
     {
         Field[] fields = key.getClass().getDeclaredFields();
         EmbeddableType embeddable = metaModel.embeddable(key.getClass());
+        boolean appendAnd = false;
 
         try
         {
@@ -465,14 +478,15 @@ public class KunderaCoreUtils
                     }
                     else
                     {
+                        if (appendAnd)
+                        {
+                            queryBuilder.buildQuery("AND", "AND", String.class);
+                        }
+                        appendAnd = true;
                         String fieldValue = PropertyAccessorHelper.getString(key, fields[i]);
                         fieldValue = fieldValue.replaceAll("[^a-zA-Z0-9]", "_");
                         queryBuilder.appendIndexName(indexName).appendPropertyName(fields[i].getName())
                                 .buildQuery("=", fieldValue, valueClazz);
-                        if (i < (fields.length - 1))
-                        {
-                            queryBuilder.buildQuery("AND", "AND", String.class);
-                        }
                     }
                 }
             }
