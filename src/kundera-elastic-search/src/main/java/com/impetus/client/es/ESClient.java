@@ -292,7 +292,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
 
                 key = onId(key, attribute, fieldValue);
 
-                if (!isIdSet)
+                if (!isIdSet && key!=null)
                 {
                     PropertyAccessorHelper.setId(result, metadata, key);
                 }
