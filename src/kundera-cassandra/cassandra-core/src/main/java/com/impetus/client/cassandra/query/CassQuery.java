@@ -129,8 +129,12 @@ public class CassQuery extends QueryImpl
 
         String query = appMetadata.getQuery(getJPAQuery());
         boolean isNative = kunderaQuery.isNative();
+        if (!isNative && !MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
+        {
+             result = populateUsingLucene(m, client, result, getKunderaQuery().getResult());
+        }
 
-        if (!isNative && ((CassandraClientBase) client).isCql3Enabled(m)
+        else if (!isNative && ((CassandraClientBase) client).isCql3Enabled(m)
                 && MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
         {
             result = ((CassandraClientBase) client).executeQuery(m.getEntityClazz(), null, isNative,
@@ -173,10 +177,7 @@ public class CassQuery extends QueryImpl
                         }
                     }
                 }
-                else
-                {
-                    result = populateUsingLucene(m, client, result, getKunderaQuery().getResult());
-                }
+
             }
         }
         return result;
@@ -192,8 +193,8 @@ public class CassQuery extends QueryImpl
         List<Object> result = new ArrayList<Object>();
         if (((CassandraClientBase) client).isCql3Enabled(m))
         {
-            result = ((CassandraClientBase) client).executeQuery(m.getEntityClazz(), null, false,
-                    onQueryOverCQL3(m, client, metaModel, null));
+            result = ((CassandraClientBase) client).executeQuery(m.getEntityClazz(), m.getRelationNames(), false,
+                    onQueryOverCQL3(m, client, metaModel, m.getRelationNames()));
         }
         else
         {
@@ -231,8 +232,17 @@ public class CassQuery extends QueryImpl
         }
         else if (!isNative && ((CassandraClientBase) client).isCql3Enabled(m))
         {
-            ls = ((CassandraClientBase) client).executeQuery(m.getEntityClazz(), m.getRelationNames(), isNative,
-                    onQueryOverCQL3(m, client, metaModel, m.getRelationNames()));
+            //edited
+            //check if lucene or indexer are enabled then populate
+             if (MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
+             {
+                 ls = ((CassandraClientBase) client).executeQuery(m.getEntityClazz(), m.getRelationNames(), isNative,
+                            
+                         onQueryOverCQL3(m, client, metaModel, m.getRelationNames()));
+             }
+             else{
+                 ls = populateUsingLucene(m, client, null, getKunderaQuery().getResult());
+             }
         }
         else
         {

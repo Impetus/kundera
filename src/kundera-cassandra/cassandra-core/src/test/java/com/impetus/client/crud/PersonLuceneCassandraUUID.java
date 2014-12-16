@@ -1,5 +1,5 @@
 /*******************************************************************************
- * * Copyright 2012 Impetus Infotech.
+ * * Copyright 2014 Impetus Infotech.
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -13,9 +13,10 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.client.esindexer;
+package com.impetus.client.crud;
 
 import java.sql.Timestamp;
+import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -27,11 +28,10 @@ import javax.persistence.Table;
 import com.impetus.kundera.index.IndexCollection;
 
 @Entity
-@Table(name = "PERSON_ESINDEXER", schema = "KunderaExamples@esIndexerTest")
+@Table(name = "PERSONUUID", schema = "KunderaExamples@luceneCassandraTest")
 @IndexCollection(columns = { @com.impetus.kundera.index.Index(name = "personName"),
-        @com.impetus.kundera.index.Index(name = "age"), @com.impetus.kundera.index.Index(name = "date") })
-public class PersonESIndexerCassandra
-{
+    @com.impetus.kundera.index.Index(name = "age"), @com.impetus.kundera.index.Index(name = "date") })
+public class PersonLuceneCassandraUUID {
 
     private static final long serialVersionUID = 6068131491098913126L;
 
@@ -52,7 +52,8 @@ public class PersonESIndexerCassandra
     /** The person id. */
     @Id
     // @Column(name = "PERSON_ID")
-    private String personId;
+    // private String personId;
+    private UUID personId;
 
     /** The person name. */
     @Column(name = "PERSON_NAME")
@@ -61,20 +62,20 @@ public class PersonESIndexerCassandra
     /** The age. */
     @Column(name = "AGE")
     private String age;
-    
+
     @Column(name = "DATE")
     private Timestamp date;
 
     public Timestamp getDate() {
-		return date;
-	}
+        return date;
+    }
 
-	public void setDate(Timestamp date) {
-		this.date = date;
-	}
+    public void setDate(Timestamp date) {
+        this.date = date;
+    }
 
-//	@Column(name = "AGEss")
-//    private byte[] a;
+    @Column(name = "AGEss")
+    private byte[] a;
 
     @Column(name = "ENUM")
     @Enumerated(EnumType.STRING)
@@ -83,27 +84,24 @@ public class PersonESIndexerCassandra
     /**
      * @return the a
      */
-//    public byte[] getA()
-//    {
-//        return a;
-//    }
-//
-//    /**
-//     * @param a
-//     *            the a to set
-//     */
-//    public void setA(byte[] a)
-//    {
-//        this.a = a;
-//    }
+    public byte[] getA() {
+        return a;
+    }
+
+    /**
+     * @param a
+     *            the a to set
+     */
+    public void setA(byte[] a) {
+        this.a = a;
+    }
 
     /**
      * Gets the person id.
      * 
      * @return the person id
      */
-    public String getPersonId()
-    {
+    public UUID getPersonId() {
         return personId;
     }
 
@@ -112,8 +110,7 @@ public class PersonESIndexerCassandra
      * 
      * @return the person name
      */
-    public String getPersonName()
-    {
+    public String getPersonName() {
         return personName;
     }
 
@@ -123,8 +120,7 @@ public class PersonESIndexerCassandra
      * @param personName
      *            the new person name
      */
-    public void setPersonName(String personName)
-    {
+    public void setPersonName(String personName) {
         this.personName = personName;
     }
 
@@ -134,16 +130,14 @@ public class PersonESIndexerCassandra
      * @param personId
      *            the new person id
      */
-    public void setPersonId(String personId)
-    {
+    public void setPersonId(UUID personId) {
         this.personId = personId;
     }
 
     /**
      * @return the age
      */
-    public String getAge()
-    {
+    public String getAge() {
         return age;
     }
 
@@ -151,16 +145,14 @@ public class PersonESIndexerCassandra
      * @param age
      *            the age to set
      */
-    public void setAge(String age)
-    {
+    public void setAge(String age) {
         this.age = age;
     }
 
     /**
      * @return the day
      */
-    public Day getDay()
-    {
+    public Day getDay() {
         return day;
     }
 
@@ -168,13 +160,11 @@ public class PersonESIndexerCassandra
      * @param day
      *            the day to set
      */
-    public void setDay(Day day)
-    {
+    public void setDay(Day day) {
         this.day = day;
     }
 
-    enum Day
-    {
+    enum Day {
         MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
     }
 

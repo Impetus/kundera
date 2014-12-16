@@ -324,8 +324,8 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
             return populateEmbeddedIdUsingLucene(m, client, result, searchFilter, metaModel);
         }
 
-        String[] primaryKeys = searchFilter.values().toArray(new String[] {});
-        Set<String> uniquePKs = new HashSet<String>(Arrays.asList(primaryKeys));
+        Object[] primaryKeys = searchFilter.values().toArray(new Object[] {});
+        Set<Object> uniquePKs = new HashSet<Object>(Arrays.asList(primaryKeys));
         return findUsingLucene(m, client, uniquePKs.toArray());
     }
 

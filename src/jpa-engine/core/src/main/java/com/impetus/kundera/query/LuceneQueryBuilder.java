@@ -16,6 +16,7 @@
 package com.impetus.kundera.query;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -76,8 +77,10 @@ public final class LuceneQueryBuilder
                 
             case LIKE:
                 builder.append(":");
-                builder.append("*");
-                builder.append(lucenevalue);
+                matchMode(lucenevalue);
+//                builder.append("*");
+//                builder.append(lucenevalue);
+//                builder.append("*");
                 break;
 
             case GT:
@@ -163,6 +166,7 @@ public final class LuceneQueryBuilder
         //composite key over lucene is not working issue #491
         if (clazz != null  && (clazz.isAssignableFrom(int.class) || clazz.isAssignableFrom(Integer.class)
                 || clazz.isAssignableFrom(short.class) || clazz.isAssignableFrom(long.class)
+                || clazz.isAssignableFrom(Timestamp.class)
                 || clazz.isAssignableFrom(Long.class) || clazz.isAssignableFrom(float.class)
                 || clazz.isAssignableFrom(Float.class) || clazz.isAssignableFrom(BigDecimal.class)
                 || clazz.isAssignableFrom(Double.class) || clazz.isAssignableFrom(double.class)))
@@ -172,6 +176,7 @@ public final class LuceneQueryBuilder
         }
         else
         {
+ 
             sb.append(isGreaterThan ? "null" : value);
         }
 
@@ -179,6 +184,38 @@ public final class LuceneQueryBuilder
 
         sb.append(inclusive ? "]" : "}");
         return sb.toString();
+    }
+    
+    /**
+     * @param value
+     * checks if value contains % and replaces with *
+     * default: if no % is found.. replaces both sides
+     */
+    private void matchMode(String value){
+        boolean left = false;
+        boolean right = false;
+        if(value.charAt(0) == '%'){
+            value = value.substring(1);
+            left = true;
+        }
+        if(value.charAt(value.length()-1)=='%'){
+            value = value.substring(0, value.length()-1);
+            right = true;
+        }
+        if((left && right) || (!left && !right)){
+            builder.append("*");
+            builder.append(value);
+            builder.append("*");
+        }
+        else if(left){
+            builder.append("*");
+            builder.append(value);
+        }
+        else if(right){
+            builder.append(value);
+            builder.append("*");
+        }
+  
     }
 
 }

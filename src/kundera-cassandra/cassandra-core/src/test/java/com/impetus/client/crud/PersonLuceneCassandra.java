@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.impetus.client.crud;
 
+import java.sql.Timestamp;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -27,9 +29,8 @@ import com.impetus.kundera.index.IndexCollection;
 @Entity
 @Table(name = "PERSON", schema = "KunderaExamples@luceneCassandraTest")
 @IndexCollection(columns = { @com.impetus.kundera.index.Index(name = "personName"),
-        @com.impetus.kundera.index.Index(name = "age") })
-public class PersonLuceneCassandra
-{
+    @com.impetus.kundera.index.Index(name = "age"), @com.impetus.kundera.index.Index(name = "date") })
+public class PersonLuceneCassandra {
 
     private static final long serialVersionUID = 6068131491098913126L;
 
@@ -60,6 +61,17 @@ public class PersonLuceneCassandra
     @Column(name = "AGE")
     private String age;
 
+    @Column(name = "DATE")
+    private Timestamp date;
+
+    public Timestamp getDate() {
+        return date;
+    }
+
+    public void setDate(Timestamp date) {
+        this.date = date;
+    }
+
     @Column(name = "AGEss")
     private byte[] a;
 
@@ -70,8 +82,7 @@ public class PersonLuceneCassandra
     /**
      * @return the a
      */
-    public byte[] getA()
-    {
+    public byte[] getA() {
         return a;
     }
 
@@ -79,8 +90,7 @@ public class PersonLuceneCassandra
      * @param a
      *            the a to set
      */
-    public void setA(byte[] a)
-    {
+    public void setA(byte[] a) {
         this.a = a;
     }
 
@@ -89,8 +99,7 @@ public class PersonLuceneCassandra
      * 
      * @return the person id
      */
-    public String getPersonId()
-    {
+    public String getPersonId() {
         return personId;
     }
 
@@ -99,8 +108,7 @@ public class PersonLuceneCassandra
      * 
      * @return the person name
      */
-    public String getPersonName()
-    {
+    public String getPersonName() {
         return personName;
     }
 
@@ -110,8 +118,7 @@ public class PersonLuceneCassandra
      * @param personName
      *            the new person name
      */
-    public void setPersonName(String personName)
-    {
+    public void setPersonName(String personName) {
         this.personName = personName;
     }
 
@@ -121,16 +128,14 @@ public class PersonLuceneCassandra
      * @param personId
      *            the new person id
      */
-    public void setPersonId(String personId)
-    {
+    public void setPersonId(String personId) {
         this.personId = personId;
     }
 
     /**
      * @return the age
      */
-    public String getAge()
-    {
+    public String getAge() {
         return age;
     }
 
@@ -138,16 +143,14 @@ public class PersonLuceneCassandra
      * @param age
      *            the age to set
      */
-    public void setAge(String age)
-    {
+    public void setAge(String age) {
         this.age = age;
     }
 
     /**
      * @return the day
      */
-    public Day getDay()
-    {
+    public Day getDay() {
         return day;
     }
 
@@ -155,13 +158,11 @@ public class PersonLuceneCassandra
      * @param day
      *            the day to set
      */
-    public void setDay(Day day)
-    {
+    public void setDay(Day day) {
         this.day = day;
     }
 
-    enum Day
-    {
+    enum Day {
         MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
     }
 
