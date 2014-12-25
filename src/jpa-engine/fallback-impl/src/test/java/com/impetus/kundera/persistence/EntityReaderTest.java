@@ -410,7 +410,7 @@ public class EntityReaderTest
         CoreTestEntityReader reader = new CoreTestEntityReader(kunderaMetadata);
 
         p1.setAddresses(null);
-        System.out.println(p1.getAddresses());
+        
         reader.recursivelyFindEntities(p1, relationMap, metadata, delegator, false);
 
         Assert.assertNotNull(p1.getAddresses());
