@@ -41,25 +41,22 @@ import com.impetus.kundera.utils.LuceneCleanupUtilities;
  * @author Shaheed.Hussain
  * 
  */
-public class HBaseLuceneTest extends BaseTest
-{
+public class HBaseLuceneTest extends BaseTest {
     /** The emf. */
     private static EntityManagerFactory emf;
 
     /** The em. */
     private static EntityManager em;
 
-    protected Map<String,String> propertyMap = new HashMap<String, String>();
-
+    protected Map<String, String> propertyMap = new HashMap<String, String>();
 
     /**
      * @throws java.lang.Exception
      */
     @Before
-    public void setUp() throws Exception
-    {
-        propertyMap.put("index.home.dir", "lucene");    
-        emf = Persistence.createEntityManagerFactory("hbaseTest",propertyMap);
+    public void setUp() throws Exception {
+        propertyMap.put("index.home.dir", "lucene");
+        emf = Persistence.createEntityManagerFactory("hbaseTest", propertyMap);
         em = emf.createEntityManager();
     }
 
@@ -67,22 +64,40 @@ public class HBaseLuceneTest extends BaseTest
      * @throws java.lang.Exception
      */
     @After
-    public void tearDown() throws Exception
-    {
+    public void tearDown() throws Exception {
         LuceneCleanupUtilities.cleanLuceneDirectory(((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance()
-                .getApplicationMetadata().getPersistenceUnitMetadata("hbaseTest"));
+            .getApplicationMetadata().getPersistenceUnitMetadata("hbaseTest"));
+        LuceneCleanupUtilities.cleanDir("./lucene");
         emf.close();
     }
 
     @Test
-    public void test()
-    {
+    public void test() {
         init();
         em.clear();
 
-        String qry = "Select p.personName, p.age from PersonHBase p where p.personId = 1 and p.age = 10";
+        String qry = "Select p from PersonHBase p where p.personName like :name";
         Query q = em.createQuery(qry);
+        q.setParameter("name", "vi");
         List<PersonHBase> persons = q.getResultList();
+        assertNotNull(persons);
+        Assert.assertEquals(3, persons.size());
+
+        qry = "Select p from PersonHBase p where p.personName = :name";
+        q = em.createQuery(qry);
+        q.setParameter("name", "vivek");
+        persons = q.getResultList();
+        Assert.assertEquals(3, persons.size());
+
+        qry = "Select p from PersonHBase p where p.personName like :name";
+        q = em.createQuery(qry);
+        q.setParameter("name", "pragalbh");
+        persons = q.getResultList();
+        assertEquals(0, persons.size());
+
+        qry = "Select p.personName, p.age from PersonHBase p where p.personId = 1 and p.age = 10";
+        q = em.createQuery(qry);
+        persons = q.getResultList();
         assertNotNull(persons);
         assertEquals(1, persons.size());
         assertNull(persons.get(0).getMonth());
@@ -115,10 +130,10 @@ public class HBaseLuceneTest extends BaseTest
         persons = q.getResultList();
         Assert.assertNotNull(persons);
         Assert.assertEquals(3, persons.size());
+
     }
 
-    private void init()
-    {
+    private void init() {
         Object p1 = prepareHbaseInstance("1", 10);
         Object p2 = prepareHbaseInstance("2", 20);
         Object p3 = prepareHbaseInstance("3", 15);

@@ -292,7 +292,13 @@ public class HBaseDataHandler implements DataHandler
         List<HBaseData> results = new ArrayList<HBaseData>();
         for (String colTableName : secondaryTables)
         {
-            results.addAll(((HBaseReader) hbaseReader).loadAll(hTable, rowKey, colTableName, columns));
+            List table = ((HBaseReader) hbaseReader).loadAll(hTable, rowKey, colTableName, columns);
+            // null check for 'table'. addAll method throws exception if table
+            // is null
+            if (table != null)
+            {
+                results.addAll(table);
+            }
         }
 
         output = onRead(tableName, clazz, m, output, hTable, entity, relationNames, results);

@@ -29,7 +29,6 @@ import junit.framework.Assert;
 
 import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp;
 import org.apache.hadoop.hbase.filter.Filter;
-import org.apache.hadoop.hbase.filter.QualifierFilter;
 import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.node.Node;
@@ -329,6 +328,7 @@ public class PersonHBaseTest extends BaseTest
         }
         LuceneCleanupUtilities.cleanLuceneDirectory(((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance()
                 .getApplicationMetadata().getPersistenceUnitMetadata("hbaseTest"));
+        LuceneCleanupUtilities.cleanDir("./lucene");
         emf.close();
         // if (cli.isStarted)
 
