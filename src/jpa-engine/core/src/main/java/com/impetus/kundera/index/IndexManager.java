@@ -88,7 +88,7 @@ public class IndexManager
         {
             if (indexer.getClass().getName().equals(IndexingConstants.LUCENE_INDEXER))
             {
-                ((com.impetus.kundera.index.lucene.Indexer) indexer).unindex(metadata, key, kunderaMetadata);
+                ((com.impetus.kundera.index.lucene.Indexer) indexer).unindex(metadata, key, kunderaMetadata,null);
             }
             else
             {
@@ -120,7 +120,7 @@ public class IndexManager
                     boolean isEmbeddedId = metamodel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType());
                     
                     boolean documentExistsInIndex = ((com.impetus.kundera.index.lucene.Indexer) indexer)
-                            .documentExistsInIndex(metadata, id, kunderaMetadata, isEmbeddedId);
+                            .documentExistsInIndex(metadata, id, kunderaMetadata, isEmbeddedId,clazz);
 
                     if (documentExistsInIndex)
                     {
@@ -134,7 +134,7 @@ public class IndexManager
                                 .entityExistsInIndex(entity.getClass(), kunderaMetadata, metadata);
                         if (documentExists)
                         {
-                            ((com.impetus.kundera.index.lucene.Indexer) indexer).unindex(metadata, id, kunderaMetadata);
+                            ((com.impetus.kundera.index.lucene.Indexer) indexer).unindex(metadata, id, kunderaMetadata,clazz);
                             ((com.impetus.kundera.index.lucene.Indexer) indexer).flush();
                         }
                         ((com.impetus.kundera.index.lucene.Indexer) indexer).index(metadata, metamodel, entity,

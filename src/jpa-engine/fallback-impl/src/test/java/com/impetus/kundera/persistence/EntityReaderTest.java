@@ -32,6 +32,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.kundera.CoreTestUtilities;
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
@@ -409,14 +410,14 @@ public class EntityReaderTest
         CoreTestEntityReader reader = new CoreTestEntityReader(kunderaMetadata);
 
         p1.setAddresses(null);
-
+        System.out.println(p1.getAddresses());
         reader.recursivelyFindEntities(p1, relationMap, metadata, delegator, false);
 
         Assert.assertNotNull(p1.getAddresses());
 
         Assert.assertTrue(ProxyHelper.isKunderaProxyCollection(p1.getAddresses()));
 
-        // p1.setAddresses(null);
+         p1.setAddresses(null);
 
         reader.recursivelyFindEntities(p1, relationMap, metadata, delegator, true);
 
@@ -497,8 +498,8 @@ public class EntityReaderTest
             em.close();
         }
 
-        LuceneCleanupUtilities.cleanLuceneDirectory(((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance()
-                .getApplicationMetadata().getPersistenceUnitMetadata(PU));
+
+        LuceneCleanupUtilities.cleanDir((String) propertyMap.get(PersistenceProperties.KUNDERA_INDEX_HOME_DIR));
     }
 
 }

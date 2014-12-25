@@ -1044,7 +1044,7 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
     {
         EntityMetadata metadata = getEntityMetadata();
         Client client = persistenceDelegeator.getClient(metadata);
-        List results = isRelational(metadata) ? recursivelyPopulateEntities(metadata, client) : populateEntities(
+        List results = isRelational(metadata) && !kunderaQuery.isNative() ? recursivelyPopulateEntities(metadata, client) : populateEntities(
                 metadata, client);
         return results;
     }

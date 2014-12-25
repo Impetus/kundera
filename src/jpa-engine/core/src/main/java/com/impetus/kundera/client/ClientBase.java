@@ -199,8 +199,7 @@ public abstract class ClientBase
                     {
                         if (childNodeLink.getMultiplicity().equals(ForeignKey.MANY_TO_ONE))
                         {
-                            indexManager.update(entityMetadata, node.getData(), childNodeLink
-                                    .getLinkProperty(LinkProperty.LINK_VALUE), children.get(childNodeLink)
+                            indexManager.update(entityMetadata, node.getData(), children.get(childNodeLink).getEntityId(),children.get(childNodeLink)
                                     .getDataClass());
                         }
                         else

@@ -38,8 +38,7 @@ import com.impetus.kundera.utils.KunderaCoreUtils;
  * 
  * @author animesh.kumar
  */
-public class LuceneQuery extends QueryImpl
-{
+public class LuceneQuery extends QueryImpl {
 
     /** the log used by this class. */
     private static Logger log = LoggerFactory.getLogger(MetadataBuilder.class);
@@ -62,9 +61,8 @@ public class LuceneQuery extends QueryImpl
      * @param persistenceUnits
      *            the persistence units
      */
-    public LuceneQuery(KunderaQuery kunderaQuery, PersistenceDelegator pd, final KunderaMetadata kunderaMetadata)
-    {
-        super(kunderaQuery,pd, kunderaMetadata);
+    public LuceneQuery(KunderaQuery kunderaQuery, PersistenceDelegator pd, final KunderaMetadata kunderaMetadata) {
+        super(kunderaQuery, pd, kunderaMetadata);
     }
 
     // @see com.impetus.kundera.query.QueryImpl#getResultList()
@@ -74,15 +72,13 @@ public class LuceneQuery extends QueryImpl
      * @see com.impetus.kundera.query.QueryImpl#getResultList()
      */
     @Override
-    public List<?> getResultList()
-    {
+    public List<?> getResultList() {
         if (log.isDebugEnabled())
             log.debug("JPA Query: " + getJPAQuery());
 
         // get luence query
         String q = luceneQuery;
-        if (null == q)
-        {
+        if (null == q) {
             q = KunderaCoreUtils.getLuceneQueryFromJPAQuery(kunderaQuery, kunderaMetadata);
         }
 
@@ -95,13 +91,10 @@ public class LuceneQuery extends QueryImpl
         handlePostEvent();
         Map<String, Object> searchFilter = client.getIndexManager().search(m.getEntityClazz(), q, -1, maxResult);
 
-        if (kunderaQuery.isAliasOnly())
-        {
+        if (kunderaQuery.isAliasOnly()) {
             String[] primaryKeys = searchFilter.values().toArray(new String[] {});
             return persistenceDelegeator.find(m.getEntityClazz(), primaryKeys);
-        }
-        else
-        {
+        } else {
             return persistenceDelegeator.find(m.getEntityClazz(), searchFilter);
 
         }
@@ -115,8 +108,7 @@ public class LuceneQuery extends QueryImpl
      * @see com.impetus.kundera.query.QueryImpl#setMaxResults(int)
      */
     @Override
-    public Query setMaxResults(int maxResult)
-    {
+    public Query setMaxResults(int maxResult) {
         this.maxResult = maxResult;
         return this;
     }
@@ -124,25 +116,21 @@ public class LuceneQuery extends QueryImpl
     /*
      * (non-Javadoc)
      * 
-     * @see
-     * com.impetus.kundera.query.QueryImpl#populateEntities(com.impetus.kundera
-     * .metadata.model.EntityMetadata, com.impetus.kundera.client.Client)
+     * @see com.impetus.kundera.query.QueryImpl#populateEntities(com.impetus.kundera .metadata.model.EntityMetadata,
+     * com.impetus.kundera.client.Client)
      */
     @Override
-    protected List<Object> populateEntities(EntityMetadata m, Client client)
-    {
+    protected List<Object> populateEntities(EntityMetadata m, Client client) {
         throw new UnsupportedOperationException("Method not supported for Lucene indexing");
     }
 
     @Override
-    protected EntityReader getReader()
-    {
+    protected EntityReader getReader() {
         throw new UnsupportedOperationException("Method not supported for Lucene indexing");
     }
 
     @Override
-    protected List<Object> recursivelyPopulateEntities(EntityMetadata m, Client client)
-    {
+    protected List<Object> recursivelyPopulateEntities(EntityMetadata m, Client client) {
         throw new UnsupportedOperationException("Method not supported for Lucene indexing");
     }
 
@@ -152,10 +140,8 @@ public class LuceneQuery extends QueryImpl
      * @see com.impetus.kundera.query.QueryImpl#onExecuteUpdate()
      */
     @Override
-    protected int onExecuteUpdate()
-    {
-        if (kunderaQuery.isDeleteUpdate())
-        {
+    protected int onExecuteUpdate() {
+        if (kunderaQuery.isDeleteUpdate()) {
             List result = getResultList();
             return result != null ? result.size() : 0;
         }
@@ -165,21 +151,18 @@ public class LuceneQuery extends QueryImpl
     }
 
     @Override
-    public void close()
-    {
+    public void close() {
         // TODO Auto-generated method stub
 
     }
 
     @Override
-    public Iterator iterate()
-    {
+    public Iterator iterate() {
         // TODO Auto-generated method stub
         return null;
     }
-    
-    protected List findUsingLucene(EntityMetadata m, Client client)
-    {
+
+    protected List findUsingLucene(EntityMetadata m, Client client) {
         throw new UnsupportedOperationException("Method supported in native clients");
     }
 }

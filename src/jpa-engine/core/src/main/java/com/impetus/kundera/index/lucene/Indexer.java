@@ -40,7 +40,7 @@ public interface Indexer extends com.impetus.kundera.index.Indexer
      *            the id
      */
 
-    void unindex(EntityMetadata metadata, Object id,KunderaMetadata kunderaMetadata);
+    void unindex(EntityMetadata metadata, Object id,KunderaMetadata kunderaMetadata, Class<?> parentClazz);
 
     /**
      * Indexes and object.
@@ -117,10 +117,24 @@ public interface Indexer extends com.impetus.kundera.index.Indexer
      */
     void update(EntityMetadata metadata, final MetamodelImpl metaModel, Object entity, Object id, String parentId);
 
+    /**
+     * @param entityClass
+     * @param kunderaMetadata
+     * @param metadata
+     * @return
+     */
     boolean entityExistsInIndex(Class<?> entityClass, KunderaMetadata kunderaMetadata, EntityMetadata metadata);
 
+    /**
+     * @param metadata
+     * @param id
+     * @param kunderaMetadata
+     * @param isEmbeddedId
+     * @param parentClazz
+     * @return
+     */
     boolean documentExistsInIndex(EntityMetadata metadata, Object id, KunderaMetadata kunderaMetadata,
-            boolean isEmbeddedId);
+            boolean isEmbeddedId, Class<?> parentClazz);
 
     
 }

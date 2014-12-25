@@ -16,12 +16,16 @@
 package com.impetus.kundera.index;
 
 import java.io.CharArrayReader;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.Id;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
+import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.SingularAttribute;
 
 import org.apache.lucene.analysis.Analyzer;
@@ -35,10 +39,15 @@ import org.apache.lucene.util.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.kundera.client.ClientBase;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PropertyIndex;
+import com.impetus.kundera.metadata.model.Relation;
+import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.utils.KunderaCoreUtils;
@@ -50,8 +59,7 @@ import com.impetus.kundera.utils.ReflectUtils;
  * @author animesh.kumar
  */
 @SuppressWarnings(value = { "all" })
-public abstract class DocumentIndexer implements com.impetus.kundera.index.lucene.Indexer
-{
+public abstract class DocumentIndexer implements com.impetus.kundera.index.lucene.Indexer {
 
     /** log for this class. */
     private static final Logger LOG = LoggerFactory.getLogger(DocumentIndexer.class);
@@ -83,8 +91,7 @@ public abstract class DocumentIndexer implements com.impetus.kundera.index.lucen
      * @param analyzer
      *            the analyzer
      */
-    public DocumentIndexer()
-    {
+    public DocumentIndexer() {
         final String empty = "";
         this.analyzer = new StandardAnalyzer(Version.LUCENE_CURRENT);
         tokenizer = new LetterTokenizer(Version.LUCENE_34, new CharArrayReader(empty.toCharArray()));
@@ -106,8 +113,7 @@ public abstract class DocumentIndexer implements com.impetus.kundera.index.lucen
      * @return the document
      */
     protected Document prepareDocumentForSuperColumn(EntityMetadata metadata, Object object, String embeddedColumnName,
-            String parentId, Class<?> clazz)
-    {
+        String parentId, Class<?> clazz) {
         Document currentDoc;
         currentDoc = new Document();
 
@@ -131,15 +137,15 @@ public abstract class DocumentIndexer implements com.impetus.kundera.index.lucen
      * @param clazz
      *            the clazz
      */
-    protected void addParentKeyToDocument(String parentId, Document currentDoc, Class<?> clazz)
-    {
-        if (parentId != null)
-        {
-            Field luceneField = new Field(IndexingConstants.PARENT_ID_FIELD, parentId, Field.Store.YES,
-                    Field.Index.ANALYZED_NO_NORMS);
+    protected void addParentKeyToDocument(String parentId, Document currentDoc, Class<?> clazz) {
+        // if (parentId != null)
+        if (clazz != null && parentId != null) {
+            Field luceneField =
+                new Field(IndexingConstants.PARENT_ID_FIELD, parentId, Field.Store.YES, Field.Index.ANALYZED_NO_NORMS);
             currentDoc.add(luceneField);
-            Field fieldClass = new Field(IndexingConstants.PARENT_ID_CLASS, clazz.getCanonicalName().toLowerCase(),
-                    Field.Store.YES, Field.Index.ANALYZED);
+            Field fieldClass =
+                new Field(IndexingConstants.PARENT_ID_CLASS, clazz.getCanonicalName().toLowerCase(), Field.Store.YES,
+                    Field.Index.ANALYZED);
             currentDoc.add(fieldClass);
         }
     }
@@ -160,14 +166,12 @@ public abstract class DocumentIndexer implements com.impetus.kundera.index.lucen
      * @param metamodel
      */
     protected void createSuperColumnDocument(EntityMetadata metadata, Object object, Document currentDoc,
-            Object embeddedObject, EmbeddableType superColumn, MetamodelImpl metamodel)
-    {
+        Object embeddedObject, EmbeddableType superColumn, MetamodelImpl metamodel) {
 
         // Add all super column fields into document
         Set<Attribute> attributes = superColumn.getAttributes();
         Iterator<Attribute> iter = attributes.iterator();
-        while (iter.hasNext())
-        {
+        while (iter.hasNext()) {
             Attribute attr = iter.next();
             java.lang.reflect.Field field = (java.lang.reflect.Field) attr.getJavaMember();
             String colName = field.getName();
@@ -196,14 +200,12 @@ public abstract class DocumentIndexer implements com.impetus.kundera.index.lucen
      * @param metamodel
      */
     protected void indexSuperColumn(EntityMetadata metadata, Object object, Document currentDoc, Object embeddedObject,
-            EmbeddableType superColumn, MetamodelImpl metamodel)
-    {
+        EmbeddableType superColumn, MetamodelImpl metamodel) {
 
         // Add all super column fields into document
         Set<Attribute> attributes = superColumn.getAttributes();
         Iterator<Attribute> iter = attributes.iterator();
-        while (iter.hasNext())
-        {
+        while (iter.hasNext()) {
             Attribute attr = iter.next();
             java.lang.reflect.Field field = (java.lang.reflect.Field) attr.getJavaMember();
             String colName = field.getName();
@@ -227,8 +229,7 @@ public abstract class DocumentIndexer implements com.impetus.kundera.index.lucen
      * @param currentDoc
      *            the current doc
      */
-    private void addSuperColumnNameToDocument(String superColumnName, Document currentDoc)
-    {
+    private void addSuperColumnNameToDocument(String superColumnName, Document currentDoc) {
         Field luceneField = new Field(SUPERCOLUMN_INDEX, superColumnName, Store.YES, Field.Index.NO);
         currentDoc.add(luceneField);
     }
@@ -245,24 +246,72 @@ public abstract class DocumentIndexer implements com.impetus.kundera.index.lucen
      * @param metaModel
      */
     protected void addEntityFieldsToDocument(EntityMetadata metadata, Object entity, Document document,
-            MetamodelImpl metaModel)
-    {
+        MetamodelImpl metaModel) {
         String indexName = metadata.getIndexName();
         Map<String, PropertyIndex> indexProperties = metadata.getIndexProperties();
-        for (String columnName : indexProperties.keySet())
-        {
+        for (String columnName : indexProperties.keySet()) {
             PropertyIndex index = indexProperties.get(columnName);
             java.lang.reflect.Field property = index.getProperty();
             String propertyName = index.getName();
             addFieldToDocument(entity, document, property, propertyName, indexName);
         }
 
-        if (metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
-        {
+        if (metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType())) {
             Object id = PropertyAccessorHelper.getId(entity, metadata);
             EmbeddableType embeddableId = metaModel.embeddable(metadata.getIdAttribute().getBindableJavaType());
             Set<Attribute> embeddedAttributes = embeddableId.getAttributes();
             indexCompositeKey(embeddedAttributes, metadata, id, document, metaModel);
+        }
+    }
+
+    /**
+     * @param metadata
+     * @param entity
+     * @param document
+     * @param metaModel
+     * 
+     *            Add indexes for associated columns
+     */
+    protected void addAssociatedEntitiesToDocument(EntityMetadata metadata, Object entity, Document document,
+        MetamodelImpl metaModel) {
+        try {
+            IndexCollection indexes = metadata.getEntityClazz().getAnnotation(IndexCollection.class);
+            if (indexes != null) {
+                List<String> columnsNameToBeIndexed = new ArrayList<String>();
+                for (com.impetus.kundera.index.Index indexedColumn : indexes.columns()) {
+                    Attribute attrib = metaModel.getEntityAttribute(entity.getClass(), indexedColumn.name());
+                    columnsNameToBeIndexed.add(((AbstractAttribute) attrib).getJPAColumnName());
+                }
+
+                String indexName = metadata.getIndexName();
+                List<Relation> relations = metadata.getRelations();
+                for (Relation relation : relations) {
+                    if (relation.getType().equals(ForeignKey.MANY_TO_ONE)
+                        || relation.getType().equals(ForeignKey.ONE_TO_ONE)) {
+                        String propertyName = relation.getJoinColumnName(null);
+                        if (propertyName != null && columnsNameToBeIndexed.contains(propertyName)) {
+                            java.lang.reflect.Field property = relation.getProperty();
+                            Object obj = PropertyAccessorHelper.getObject(entity, property);
+                            if (obj != null) {
+                                EntityMetadata relMetaData = metaModel.getEntityMetadata(obj.getClass());
+                                Object id = PropertyAccessorHelper.getId(obj, relMetaData);
+                                if (id != null) {
+                                    Field luceneField =
+                                        new Field(getCannonicalPropertyName(indexName, propertyName), id.toString(),
+                                            Field.Store.YES, Field.Index.ANALYZED_NO_NORMS);
+
+                                    document.add(luceneField);
+                                } else {
+                                    LOG.warn("value is null for field" + property.getName());
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (PropertyAccessException e) {
+            LOG.error("Error in accessing field, Caused by:" + e.getMessage());
+            throw new LuceneIndexingException("Error in creating indexes on associated columns", e);
         }
     }
 
@@ -275,32 +324,23 @@ public abstract class DocumentIndexer implements com.impetus.kundera.index.lucen
      * @param metaModel
      */
     protected void indexCompositeKey(Set<Attribute> embeddedAttributes, EntityMetadata metadata, Object id,
-            Document document, final MetamodelImpl metaModel)
-    {
+        Document document, final MetamodelImpl metaModel) {
         // indexing individual fields of the composite key
-        try
-        {
-            for (Attribute attribute : embeddedAttributes)
-            {
-                if (!ReflectUtils.isTransientOrStatic((java.lang.reflect.Field) attribute.getJavaMember()))
-                {
-                    if (metaModel.isEmbeddable(attribute.getJavaType()))
-                    {
+        try {
+            for (Attribute attribute : embeddedAttributes) {
+                if (!ReflectUtils.isTransientOrStatic((java.lang.reflect.Field) attribute.getJavaMember())) {
+                    if (metaModel.isEmbeddable(attribute.getJavaType())) {
                         EmbeddableType embeddable = metaModel.embeddable(attribute.getJavaType());
                         indexCompositeKey(embeddable.getAttributes(), metadata,
-                                ((java.lang.reflect.Field) attribute.getJavaMember()).get(id), document, metaModel);
-                    }
-                    else
-                    {
+                            ((java.lang.reflect.Field) attribute.getJavaMember()).get(id), document, metaModel);
+                    } else {
                         String columnName = ((AbstractAttribute) attribute).getJPAColumnName();
                         addFieldToDocument(id, document, (java.lang.reflect.Field) attribute.getJavaMember(),
-                                columnName, metadata.getEntityClazz().getSimpleName());
+                            columnName, metadata.getEntityClazz().getSimpleName());
                     }
                 }
             }
-        }
-        catch (IllegalAccessException e)
-        {
+        } catch (IllegalAccessException e) {
             LOG.error(e.getMessage());
         }
     }
@@ -316,22 +356,19 @@ public abstract class DocumentIndexer implements com.impetus.kundera.index.lucen
      *            the document
      */
     protected void addEntityClassToDocument(EntityMetadata metadata, Object entity, Document document,
-            final MetamodelImpl metaModel)
-    {
-        try
-        {
+        final MetamodelImpl metaModel) {
+        try {
             Field luceneField;
             Object id;
             id = PropertyAccessorHelper.getId(entity, metadata);
 
             // Indexing composite keys
-            if (metaModel != null && metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
-            {
+            if (metaModel != null && metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType())) {
                 id = KunderaCoreUtils.prepareCompositeKey(metadata.getIdAttribute(), metaModel, id);
             }
 
-            luceneField = new Field(IndexingConstants.ENTITY_ID_FIELD, id.toString(), Field.Store.YES,
-                    Field.Index.ANALYZED);
+            luceneField =
+                new Field(IndexingConstants.ENTITY_ID_FIELD, id.toString(), Field.Store.YES, Field.Index.ANALYZED);
 
             // luceneField.set
             // adding class
@@ -340,7 +377,8 @@ public abstract class DocumentIndexer implements com.impetus.kundera.index.lucen
             document.add(luceneField);
 
             // index namespace for unique deletion
-            luceneField = new Field(IndexingConstants.KUNDERA_ID_FIELD, getKunderaId(metadata, id), Field.Store.YES,
+            luceneField =
+                new Field(IndexingConstants.KUNDERA_ID_FIELD, getKunderaId(metadata, id), Field.Store.YES,
                     Field.Index.ANALYZED); // adding
             // class
             // namespace
@@ -348,7 +386,8 @@ public abstract class DocumentIndexer implements com.impetus.kundera.index.lucen
             document.add(luceneField);
 
             // index entity class
-            luceneField = new Field(IndexingConstants.ENTITY_CLASS_FIELD, metadata.getEntityClazz().getCanonicalName()
+            luceneField =
+                new Field(IndexingConstants.ENTITY_CLASS_FIELD, metadata.getEntityClazz().getCanonicalName()
                     .toLowerCase(), Field.Store.YES, Field.Index.ANALYZED);
             document.add(luceneField);
             //
@@ -356,17 +395,17 @@ public abstract class DocumentIndexer implements com.impetus.kundera.index.lucen
             document.add(luceneField);
 
             // index index name
-            luceneField = new Field(IndexingConstants.ENTITY_INDEXNAME_FIELD, metadata.getIndexName(), Field.Store.NO,
+            luceneField =
+                new Field(IndexingConstants.ENTITY_INDEXNAME_FIELD, metadata.getIndexName(), Field.Store.NO,
                     Field.Index.ANALYZED_NO_NORMS);
             document.add(luceneField);
 
-            luceneField = new Field(getCannonicalPropertyName(metadata.getEntityClazz().getSimpleName(),
+            luceneField =
+                new Field(getCannonicalPropertyName(metadata.getEntityClazz().getSimpleName(),
                     ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName()), id.toString(),
                     Field.Store.YES, Field.Index.ANALYZED_NO_NORMS);
             document.add(luceneField);
-        }
-        catch (PropertyAccessException e)
-        {
+        } catch (PropertyAccessException e) {
             throw new IllegalArgumentException("Id could not be read from object " + entity);
         }
     }
@@ -386,27 +425,21 @@ public abstract class DocumentIndexer implements com.impetus.kundera.index.lucen
      *            the index name
      */
     private void addFieldToDocument(Object object, Document document, java.lang.reflect.Field field, String colName,
-            String indexName)
-    {
-        try
-        {
+        String indexName) {
+        try {
             Object obj = PropertyAccessorHelper.getObject(object, field);
-
+            // String str =
             // String value = (obj == null) ? null : obj.toString();
-            if (obj != null)
-            {
-                Field luceneField = new Field(getCannonicalPropertyName(indexName, colName), obj.toString(),
-                        Field.Store.YES, Field.Index.ANALYZED_NO_NORMS);
+            if (obj != null) {
+                Field luceneField =
+                    new Field(getCannonicalPropertyName(indexName, colName), obj.toString(), Field.Store.YES,
+                        Field.Index.ANALYZED_NO_NORMS);
 
                 document.add(luceneField);
-            }
-            else
-            {
+            } else {
                 LOG.warn("value is null for field" + field.getName());
             }
-        }
-        catch (PropertyAccessException e)
-        {
+        } catch (PropertyAccessException e) {
             LOG.error("Error in accessing field, Caused by:" + e.getMessage());
             throw new LuceneIndexingException("Error in accessing field:" + field.getName(), e);
         }
@@ -414,8 +447,7 @@ public abstract class DocumentIndexer implements com.impetus.kundera.index.lucen
 
     @Override
     public Map<String, Object> search(String query, Class<?> parentClass, EntityMetadata parentMetadata,
-            Class<?> childClass, EntityMetadata childMetadata, Object entityId, int start, int count)
-    {
+        Class<?> childClass, EntityMetadata childMetadata, Object entityId, int start, int count) {
         return null;
     }
 
@@ -429,8 +461,7 @@ public abstract class DocumentIndexer implements com.impetus.kundera.index.lucen
      * 
      * @return the kundera id
      */
-    protected String getKunderaId(EntityMetadata metadata, Object id)
-    {
+    protected String getKunderaId(EntityMetadata metadata, Object id) {
         return metadata.getEntityClazz().getCanonicalName() + IndexingConstants.DELIMETER + id;
     }
 
@@ -444,8 +475,7 @@ public abstract class DocumentIndexer implements com.impetus.kundera.index.lucen
      * 
      * @return the cannonical property name
      */
-    protected String getCannonicalPropertyName(String indexName, String propertyName)
-    {
+    protected String getCannonicalPropertyName(String indexName, String propertyName) {
         return indexName + "." + propertyName;
     }
 
