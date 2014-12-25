@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * * Copyright 2012 Impetus Infotech.
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *      http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ ******************************************************************************/
 package com.impetus.client.hbase.generatedId;
 
 import java.util.List;
@@ -25,9 +40,15 @@ import com.impetus.client.hbase.generatedId.entites.HBaseGeneratedIdWithOutSeque
 import com.impetus.client.hbase.generatedId.entites.HBaseGeneratedIdWithOutTableGenerator;
 import com.impetus.client.hbase.generatedId.entites.HBaseGeneratedIdWithSequenceGenerator;
 import com.impetus.client.hbase.generatedId.entites.HBaseGeneratedIdWithTableGenerator;
+import com.impetus.client.hbase.generatedId.entites.HBaseGeneratedIdWithTableGeneratorWihtoutInit;
 import com.impetus.client.hbase.junits.HBaseCli;
 import com.impetus.kundera.KunderaException;
 
+
+/**
+ * @author Kuldeep Mishra
+ *
+ */
 public class HBaseGeneratedIdTest
 {
     private EntityManagerFactory emf;
@@ -146,11 +167,10 @@ public class HBaseGeneratedIdTest
                     .getResultList();
             Assert.assertNotNull(list);
             Assert.assertEquals(4, list.size());
-
             for (HBaseGeneratedIdStrategyTable entity : list)
             {
-                Assert.assertTrue(entity.getId() == 1 || entity.getId() == 50 || entity.getId() == 100
-                        || entity.getId() == 150);
+                Assert.assertTrue(entity.getId() == 1 || entity.getId() == 51 || entity.getId() == 101
+                        || entity.getId() == 151);
             }
 
             em.clear();
@@ -214,6 +234,7 @@ public class HBaseGeneratedIdTest
         }
         try
         {
+          //Test with initValue paramater = 100 allocationsize = 30
             HBaseGeneratedIdWithTableGenerator withTableGenerator = new HBaseGeneratedIdWithTableGenerator();
             withTableGenerator.setName("Kumar Mishra");
             em.persist(withTableGenerator);
@@ -223,10 +244,35 @@ public class HBaseGeneratedIdTest
             Assert.assertEquals(1, list.size());
             Assert.assertEquals("Kumar Mishra", list.get(0).getName());
             Object id = list.get(0).getId();
+
+            Assert.assertEquals(100, id);
+            HBaseGeneratedIdWithTableGenerator withTableGenerator2 = new HBaseGeneratedIdWithTableGenerator();
+            withTableGenerator2.setName("Kumar Mishra2");
+            em.persist(withTableGenerator2);
+            list = em.createQuery("Select c from HBaseGeneratedIdWithTableGenerator c").getResultList();
+            Assert.assertEquals(2, list.size());
+            id = list.get(1).getId();
+            Assert.assertEquals(100, list.get(0).getId());
+            Assert.assertEquals(130, list.get(1).getId());
+
             em.clear();
             withTableGenerator = em.find(HBaseGeneratedIdWithTableGenerator.class, id);
             Assert.assertNotNull(withTableGenerator);
-            Assert.assertEquals("Kumar Mishra", withTableGenerator.getName());
+            Assert.assertEquals("Kumar Mishra2", withTableGenerator.getName());
+            
+            //Test without initValue paramater allocationsize = 30
+            HBaseGeneratedIdWithTableGeneratorWihtoutInit person1 = new HBaseGeneratedIdWithTableGeneratorWihtoutInit();
+            person1.setName("pragalbh");
+            em.persist(person1);
+
+            HBaseGeneratedIdWithTableGeneratorWihtoutInit person2 = new HBaseGeneratedIdWithTableGeneratorWihtoutInit();
+            person2.setName("pragalbh2");
+            em.persist(person2);
+
+            List<HBaseGeneratedIdWithTableGeneratorWihtoutInit> results = em.createQuery(
+                    "Select c from HBaseGeneratedIdWithTableGeneratorWihtoutInit c").getResultList();
+            Assert.assertTrue(results.get(0).getId() == 1 || results.get(0).getId() == 51);
+            Assert.assertTrue(results.get(1).getId() == 1 || results.get(1).getId() == 51);
         }
         catch (KunderaException e)
         {
