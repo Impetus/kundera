@@ -905,11 +905,11 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
             }
             else if (discriptor.getAllocationSize() == 1)
             {
-                return latestCount;
+                return latestCount + discriptor.getInitialValue();
             }
             else
             {
-                return (latestCount - 1) * discriptor.getAllocationSize();
+                return (latestCount - 1) * discriptor.getAllocationSize() + discriptor.getInitialValue();
             }
         }
         catch (IOException ioex)
