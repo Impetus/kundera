@@ -21,6 +21,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -121,6 +122,42 @@ public class SessionResource {
 		return Response.ok(new String(ResponseCode.PUT_ST_SUCCESS), mediaType)
 				.build();
 	}
+	
+	/**
+     * Handler for POST method requests for this resource clears em
+     * 
+     * @param sessionToken
+     * @return
+     */
+    @POST
+    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    public Response clear(
+            @HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken,
+            @Context HttpHeaders headers) {
+        if (log.isDebugEnabled())
+            log.debug("PUT: Session Token:" + sessionToken);
+        String mediaType = headers != null && headers.getRequestHeaders().containsKey("Content-type")? headers.getRequestHeader("Content-type").get(0) : MediaType.APPLICATION_JSON;
+        mediaType = mediaType.equalsIgnoreCase(MediaType.APPLICATION_XML) ? MediaType.APPLICATION_XML : MediaType.APPLICATION_JSON;
+        EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
+
+        if (em == null) {
+            if (log.isDebugEnabled())
+                log.warn("PUT: Session Token:" + sessionToken
+                        + " doesn't exist and hence can't be cleared");
+            return Response.serverError().build();
+        }
+
+        try {
+            em.clear();
+        } catch (Exception e) {
+            log.error("PUT: Failed: " + e.getMessage());
+            Response.serverError().build();
+        }
+
+        return Response.ok(new String(ResponseCode.CLEAR_ST_SUCCESS), mediaType)
+                .build();
+    }
 
 	/**
 	 * Handler for DELETE method requests for this resource Closes EM and

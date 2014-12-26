@@ -22,19 +22,19 @@ package com.impetus.kundera.rest.common;
  */
 public interface ResponseCode
 {
-    public static final String DELETE_AT_SUCCESS = "APPLICATION_TOKEN_ DELETE_SUCCESS";
+    public static final String DELETE_AT_SUCCESS = "APPLICATION_TOKEN_DELETE_SUCCESS";
 
-    public static final String DELETE_AT_FAILED = "APPLICATION_TOKEN_ DELETE_FAILED";
+    public static final String DELETE_AT_FAILED = "APPLICATION_TOKEN_DELETE_FAILED";
 
-    public static final String DELETE_ST_SUCCESS = "SESSION_TOKEN_ DELETE_SUCCESS";
+    public static final String DELETE_ST_SUCCESS = "SESSION_TOKEN_DELETE_SUCCESS";
 
-    public static final String DELETE_ST_FAILED = "SESSION_TOKEN_ DELETE_FAILED";
+    public static final String DELETE_ST_FAILED = "SESSION_TOKEN_DELETE_FAILED";
 
     public static final String GET_ST_FAILED = "SESSION_TOKEN_ GET_FAILED";
 
-    public static final String PUT_ST_FAILED = "SESSION_TOKEN_ PUT_FAILED";
+    public static final String PUT_ST_FAILED = "SESSION_TOKEN_PUT_FAILED";
 
-    public static final String PUT_ST_SUCCESS = "SESSION_TOKEN_ PUT_SUCCESS";
+    public static final String PUT_ST_SUCCESS = "SESSION_TOKEN_PUT_SUCCESS";
 
     public static final String GET_TX_SUCCESS = "GET_TX_SUCCESS";
 
@@ -47,4 +47,6 @@ public interface ResponseCode
     public static final String DELETE_TX_SUCCESS = "DELETE_TX_SUCCESS";
 
     public static final String DELETE_TX_FAILED = "DELETE_TX_FAILED";
+    
+    public static final String CLEAR_ST_SUCCESS = "SESSION_TOKEN_CLEAR_SUCCESS";
 }
