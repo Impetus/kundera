@@ -276,7 +276,8 @@ public class HBaseWriter implements Writer
         {
             byte[] rowBytes = HBaseUtils.getBytes(rowKey);
             Delete delete = new Delete(rowBytes);
-
+            byte[] family = HBaseUtils.getBytes(columnFamily);
+            delete.deleteFamily(family);
             hTable.delete(delete);
         }
         catch (IOException e)

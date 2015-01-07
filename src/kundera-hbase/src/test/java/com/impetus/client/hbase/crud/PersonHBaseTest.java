@@ -246,6 +246,34 @@ public class PersonHBaseTest extends BaseTest
         emLucene.close();
         emfLucene.close();
     }
+    
+    @Test
+    public void deleteTest() throws Exception{
+        String id = "commonId";
+       
+        PersonHBase p = new PersonHBase();
+        p.setPersonId(id);
+        p.setAge(20);
+        p.setDay(Day.MONDAY);
+        p.setMonth(Month.JAN);
+        p.setPersonName("pragalbh");
+        em.persist(p);
+        
+        Categories cat = new Categories();
+        cat.setCategoryId(id);
+        cat.setCategoryName("category");
+        em.persist(cat);
+        em.remove(p);
+        
+        Categories catTest = em.find(Categories.class, id);
+        Assert.assertNotNull(catTest);
+        PersonHBase pTest = em.find(PersonHBase.class, id);
+        Assert.assertNull(pTest);
+        
+        em.remove(cat);
+        catTest = em.find(Categories.class, id);
+        Assert.assertNull(catTest);
+    }
 
     private void init()
     {
