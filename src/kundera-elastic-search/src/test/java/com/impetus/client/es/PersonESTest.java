@@ -15,6 +15,10 @@
  ******************************************************************************/
 package com.impetus.client.es;
 
+import java.io.IOException;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,11 +59,35 @@ public class PersonESTest
     @BeforeClass
     public static void setUpBeforeClass() throws Exception
     {
+         if (!checkIfServerRunning())
+         {
         ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder();
         builder.put("path.data", "target/data");
         node = new NodeBuilder().settings(builder).node();
+         }
     }
 
+    /**
+     * Check if server running.
+     * 
+     * @return true, if successful
+     */
+    private static boolean checkIfServerRunning()
+    {
+        try
+        {
+            Socket socket = new Socket("127.0.0.1", 9300);
+            return socket.getInetAddress() != null;
+        }
+        catch (UnknownHostException e)
+        {
+            return false;
+        }
+        catch (IOException e)
+        {
+            return false;
+        }
+    }
     @Before
     public void setup()
     {
@@ -173,6 +201,39 @@ public class PersonESTest
         em.close();
         emf.close();
     }
+    
+    @Test
+    public void testSpecificFieldRetrieval() throws InterruptedException
+    {
+        PersonES person = new PersonES();
+        person.setAge(22);
+        person.setDay(Day.FRIDAY);
+        person.setPersonId("1");
+        person.setPersonName("karthik");
+        em.persist(person);
+
+        person = new PersonES();
+        person.setAge(22);
+        person.setDay(Day.FRIDAY);
+        person.setPersonId("2");
+        person.setPersonName("pragalbh");
+        em.persist(person);
+
+        waitThread();
+        String queryWithOutAndClause = "Select p.personName,p.age from PersonES p where p.personName = 'karthik' OR p.personName = 'pragalbh'";
+        Query nameQuery = em.createNamedQuery(queryWithOutAndClause);
+
+        List persons = nameQuery.getResultList();
+
+        Assert.assertFalse(persons.isEmpty());
+        Assert.assertEquals(2, persons.size());
+        Assert.assertEquals("karthik", ((ArrayList) persons.get(0)).get(0));
+        Assert.assertEquals(22, ((ArrayList) persons.get(0)).get(1));
+        Assert.assertEquals("pragalbh", ((ArrayList) persons.get(1)).get(0));
+        Assert.assertEquals(22, ((ArrayList) persons.get(0)).get(1));
+
+        
+    }
 
     @Test
     public void testFindJPQL() throws InterruptedException
@@ -196,18 +257,18 @@ public class PersonESTest
         Query nameQuery = em.createNamedQuery(queryWithOutAndClause);
 
         List<PersonES> persons = nameQuery.getResultList();
-
+       
         Assert.assertFalse(persons.isEmpty());
         Assert.assertEquals(1, persons.size());
         Assert.assertEquals("vivek", persons.get(0).getPersonName());
 
-        String queryWithOutClause = "Select p from PersonES p";
+        String queryWithOutClause = "Select p.personName from PersonES p";
         nameQuery = em.createNamedQuery(queryWithOutClause);
 
-        persons = nameQuery.getResultList();
+        List personsNames = nameQuery.getResultList();
 
-        Assert.assertFalse(persons.isEmpty());
-        Assert.assertEquals(2, persons.size());
+        Assert.assertFalse(personsNames.isEmpty());
+        Assert.assertEquals(2, personsNames.size());
 
         String invalidQueryWithAndClause = "Select p from PersonES p where p.personName = 'vivek' AND p.age = 34";
         nameQuery = em.createNamedQuery(invalidQueryWithAndClause);
@@ -258,7 +319,6 @@ public class PersonESTest
         emf.close();
         
 
-//        node.close();
     }
 
     private void waitThread() throws InterruptedException

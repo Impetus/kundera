@@ -38,6 +38,7 @@ import org.elasticsearch.action.deletebyquery.DeleteByQueryRequestBuilder;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.transport.TransportClient;
@@ -246,31 +247,54 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
         return result;
     }
 
-    List executeQuery(FilterBuilder filter, final EntityMetadata entityMetadata)
+    List executeQuery(FilterBuilder filter, final EntityMetadata entityMetadata, String[] fieldsToSelect)
     {
 
         Class clazz = entityMetadata.getEntityClazz();
 
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 entityMetadata.getPersistenceUnit());
-
+        
         EntityType entityType = metaModel.entity(clazz);
 
         List results = new ArrayList();
-
-        SearchResponse response = txClient.prepareSearch(entityMetadata.getSchema().toLowerCase())
-                .setTypes(entityMetadata.getTableName()).setFilter(filter).execute().actionGet();
-        SearchHits hits = response.getHits();
-
-        Object entity = null;
-
-        for (SearchHit hit : hits.getHits())
+        
+        SearchRequestBuilder builder = txClient.prepareSearch(entityMetadata.getSchema().toLowerCase())
+                .setTypes(entityMetadata.getTableName());
+        
+        //adding fields to retrieve dynamically by converting to jpa column name
+        if(!(fieldsToSelect[1]==null))
         {
-            entity = getInstance(clazz, entity);
-            Map<String, Object> hitResult = hit.sourceAsMap();
-            results.add(wrap(hitResult, entityType, entity, entityMetadata, false));
+            for(int i = 1; i < fieldsToSelect.length; i++){
+                builder = builder.addField(((AbstractAttribute)metaModel.entity(clazz).getAttribute(fieldsToSelect[i])).getJPAColumnName());
+            }
         }
+        
+        SearchResponse response = builder.setPostFilter(filter).execute().actionGet();
+        
+        SearchHits hits = response.getHits();
+        if(!(fieldsToSelect[1]==null)){
+            for (SearchHit hit : hits.getHits()){
+                List temp = new ArrayList();
+                for(int i = 1; i < fieldsToSelect.length; i++){
+                    temp.add(hit.getFields().get(((AbstractAttribute)metaModel.entity(clazz).getAttribute(fieldsToSelect[i])).getJPAColumnName()).getValue());
+                }
+                results.add(temp);
+            }
+        }
+        
+        
+        else{
+            Object entity = null;
 
+            for (SearchHit hit : hits.getHits())
+            {
+                entity = getInstance(clazz, entity);
+                Map<String, Object> hitResult = hit.sourceAsMap();
+                results.add(wrap(hitResult, entityType, entity, entityMetadata, false));
+            }
+        }
+        
         return results;
     }
 
@@ -438,7 +462,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
         FilterBuilder filterBuilder = new TermFilterBuilder(pKeyColumnName, pKeyColumnValue);
 
         SearchResponse response = txClient.prepareSearch(schemaName.toLowerCase()).setTypes(tableName)
-                .setFilter(filterBuilder).addField(columnName).execute().actionGet();
+                .setPostFilter(filterBuilder).addField(columnName).execute().actionGet();
 
         SearchHits hits = response.getHits();
 
@@ -460,7 +484,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
         TermFilterBuilder filter = FilterBuilders.termFilter(columnName, columnValue);
 
         SearchResponse response = txClient.prepareSearch(schemaName.toLowerCase()).setTypes(tableName)
-                .addField(pKeyName).setFilter(filter).execute().actionGet();
+                .addField(pKeyName).setPostFilter(filter).execute().actionGet();
 
         SearchHits hits = response.getHits();
 
@@ -485,7 +509,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
         querySource.put(columnName, columnValue);
 
         DeleteByQueryRequestBuilder deleteQueryBuilder = txClient.prepareDeleteByQuery(schemaName.toLowerCase())
-                .setQuery(querySource).setTypes(tableName);
+                .setSource(querySource).setTypes(tableName);
 
         deleteQueryBuilder.execute().actionGet();
     }

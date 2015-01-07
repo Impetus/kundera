@@ -24,7 +24,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
-import org.elasticsearch.common.UUID;
+import java.util.UUID;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -152,7 +152,7 @@ public class ResultIteratorTest extends BaseTest
     
     public void OnScrollForNativeQuery()
     {
-    	Object p = prepareData(UUID.randomBase64UUID(), 99);
+    	Object p = prepareData(UUID.randomUUID().toString(), 99);
     	
         em.persist(p);
     	em.flush();

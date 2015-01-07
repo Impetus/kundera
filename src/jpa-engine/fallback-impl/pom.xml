@@ -12,6 +12,10 @@
 	<packaging>jar</packaging>
 	<name>kundera-fallback-impl</name>
 	<url>http://maven.apache.org</url>
+	
+	<properties>
+		<lucene.version>4.10.2</lucene.version>
+	</properties>
 
 	<dependencies>
 		<dependency>
@@ -44,18 +48,18 @@
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-core</artifactId>
-			<version>4.4.0</version>
+			<version>${lucene.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-analyzers-common</artifactId>
-			<version>4.4.0</version>
+			<version>${lucene.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-queryparser</artifactId>
-			<version>4.4.0</version>
+			<version>${lucene.version}</version>
 			<scope>compile</scope>
 			<exclusions>
 				<exclusion>

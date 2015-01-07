@@ -64,6 +64,7 @@ public class ESQuery<E> extends QueryImpl
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
         EntityType entity = metaModel.entity(m.getEntityClazz());
+        
 
         FilterBuilder preIntraFilter = null;
         FilterBuilder preInterFilter = null;
@@ -98,7 +99,7 @@ public class ESQuery<E> extends QueryImpl
             }
         }
 
-        return ((ESClient) client).executeQuery(preInterFilter != null ? preInterFilter : preIntraFilter, m);
+        return ((ESClient) client).executeQuery(preInterFilter != null ? preInterFilter : preIntraFilter, m, getKunderaQuery().getResult());
 
         // return null;
     }
