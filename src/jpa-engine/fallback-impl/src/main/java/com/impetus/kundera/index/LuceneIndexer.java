@@ -365,11 +365,12 @@ public class LuceneIndexer extends DocumentIndexer {
         qp = new QueryParser(Version.LUCENE_34, DEFAULT_SEARCHABLE_FIELD, new StandardAnalyzer(Version.LUCENE_34));
 
         try {
-            qp.setLowercaseExpandedTerms(false);
+            //to make like query case insensitive
+//            qp.setLowercaseExpandedTerms(true);
             qp.setAllowLeadingWildcard(true);
             // qp.set
             Query q = qp.parse(luceneQuery);
-
+            
             TopDocs docs = searcher.search(q, count);
 
             int nullCount = 0;

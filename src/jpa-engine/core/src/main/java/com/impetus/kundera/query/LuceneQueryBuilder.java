@@ -72,15 +72,16 @@ public final class LuceneQueryBuilder
             {
             case EQ:
                 builder.append(":");
+                builder.append("\"");
                 builder.append(lucenevalue);
+                builder.append("\"");
                 break;
                 
             case LIKE:
                 builder.append(":");
-                matchMode(lucenevalue);
-//                builder.append("*");
-//                builder.append(lucenevalue);
-//                builder.append("*");
+                builder.append("(");
+                matchMode(lucenevalue.trim());
+                builder.append(")");
                 break;
 
             case GT:
@@ -194,6 +195,9 @@ public final class LuceneQueryBuilder
     private void matchMode(String value){
         boolean left = false;
         boolean right = false;
+        
+        
+
         if(value.charAt(0) == '%'){
             value = value.substring(1);
             left = true;

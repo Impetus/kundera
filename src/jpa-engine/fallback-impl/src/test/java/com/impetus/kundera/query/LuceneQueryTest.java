@@ -15,6 +15,9 @@
  ******************************************************************************/
 package com.impetus.kundera.query;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +32,7 @@ import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 
 import com.impetus.kundera.metadata.entities.EmbeddableEntity;
 import com.impetus.kundera.metadata.entities.EmbeddableEntityTwo;
@@ -293,7 +297,94 @@ public class LuceneQueryTest
         
     }
     
-    
+    @Test
+    public void likeQueryTest()
+    {
+        Person p1 = new Person();
+        p1.setAge(32);
+        p1.setDay(Day.TUESDAY);
+        p1.setPersonId("p1");
+        p1.setSalary(6000.345);
+        p1.setPersonName("vivek");
+        em.persist(p1);
+        em.clear();
+        
+        Person p2 = new Person();
+        p2.setAge(24);
+        p2.setDay(Day.MONDAY);
+        p2.setPersonId("p2");
+        p2.setSalary(8000.345);
+        p2.setPersonName("vivek");
+        em.persist(p2);
+        em.clear();
+        
+        Person p3 = new Person();
+        p3.setAge(24);
+        p3.setDay(Day.MONDAY);
+        p3.setPersonId("p3");
+        p3.setSalary(8000.345);
+        p3.setPersonName("vivek");
+        em.persist(p3);
+        em.clear();
+
+        String qry = "Select p from Person p where p.personName like :name";
+        Query q = em.createQuery(qry);
+        q.setParameter("name", "vi");
+        List<Person> persons = q.getResultList();
+        assertNotNull(persons);
+        Assert.assertEquals(3, persons.size());
+
+        qry = "Select p from Person p where p.personName like :name";
+        q = em.createQuery(qry);
+        q.setParameter("name", "pragalbh");
+        persons = q.getResultList();
+        assertEquals(0, persons.size());
+        
+        Person p = new Person();
+        p.setAge(20);
+        p.setDay(Day.MONDAY);
+        p.setPersonId("4");
+        p.setPersonName("pragalbh garg");
+        
+        Person g = new Person();
+        g.setAge(20);
+        g.setDay(Day.MONDAY);
+        g.setPersonId("5");
+        g.setPersonName("karthik prasad");
+        
+        em.persist(p);
+        em.persist(g);
+        
+        qry = "Select p from Person p where p.personName like :name";
+        q = em.createQuery(qry);
+        q.setParameter("name", "garg");
+        persons = q.getResultList();
+        assertEquals(1, persons.size());
+        
+        qry = "Select p from Person p where p.personName like :name";
+        q = em.createQuery(qry);
+        q.setParameter("name", "karthik ");
+        persons = q.getResultList();
+        assertEquals(1, persons.size());
+        
+        qry = "Select p from Person p where p.personName like :name";
+        q = em.createQuery(qry);
+        q.setParameter("name", "%garg");
+        persons = q.getResultList();
+        assertEquals(1, persons.size());
+        
+        qry = "Select p from Person p where p.personName like :name";
+        q = em.createQuery(qry);
+        q.setParameter("name", "karthik%");
+        persons = q.getResultList();
+        assertEquals(1, persons.size());
+        
+        qry = "Select p from Person p where p.personName like :name";
+        q = em.createQuery(qry);
+        q.setParameter("name", "%kar");
+        persons = q.getResultList();
+        assertEquals(0, persons.size());
+    }
    
     
     /**
