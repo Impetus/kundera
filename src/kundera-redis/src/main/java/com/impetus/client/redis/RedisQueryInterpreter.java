@@ -182,5 +182,10 @@ class RedisQueryInterpreter
 
         return null;
     }
+    
+    String[] getSelectedColumns(){
+    
+    return columns;
+    }
 
 }

@@ -29,7 +29,7 @@ import com.impetus.kundera.index.IndexCollection;
  * The Class Person.
  */
 @Entity
-@Table(name = "PERSON", schema = "RedisK@redis_pu")
+@Table(name = "PERSON")
 @IndexCollection(columns={@Index(name="personName"),@Index(name="age")})
 public class PersonRedis
 {

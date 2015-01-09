@@ -104,6 +104,8 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     private static final String COMPOSITE_KEY_SEPERATOR = "\001";
 
     private Jedis connection;
+    
+    private RedisIndexer redisIndexer;
 
     RedisClient(final RedisClientFactory factory, final Map<String, Object> puProperties, final String persistenceUnit,
             final KunderaMetadata kunderaMetadata)
@@ -1059,9 +1061,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             final EntityMetadata metadata)
     {
 
-        Indexer indexer = indexManager.getIndexer();
-
-        if (indexer != null)
+        if (redisIndexer != null)
         {
             // Add row key to list(Required for wild search over table).
             wrapper.addIndex(
@@ -1075,11 +1075,12 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                             getHashKey(((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName(), rowKey)),
                     getDouble(rowKey));
 
-            indexer.index(metadata.getEntityClazz(), metadata, wrapper.getIndexes(), rowKey, null);
+            redisIndexer.index(metadata.getEntityClazz(), metadata, wrapper.getIndexes(), rowKey, null);
         }
     }
 
     /**
+     * 
      * Deletes inverted indexes from redis.
      * 
      * @param connection
@@ -1414,8 +1415,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
          */
         Object connection = null;
         List<Object> results = new ArrayList<Object>();
-        try
-        {
+        try {
             connection = getConnection();
             Set<String> rowKeys = new HashSet<String>();
             EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClazz);
@@ -1531,8 +1531,8 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             {
                 Map<String, Object> fieldSets = queryParameter.getFields();
 
-                results = findAllColumns(entityClazz, (byte[][]) (queryParameter.getColumns() != null ? queryParameter
-                        .getColumns().toArray() : null), fieldSets.values().toArray());
+                results = findAllColumns(entityClazz, (queryParameter.getColumns() != null ? queryParameter
+                        .getColumns().toArray(new byte[][] {}) : null), fieldSets.values().toArray());
                 return results;
             }
             else if (queryParameter.getFields() != null)
@@ -1968,18 +1968,22 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     protected void indexNode(Node node, EntityMetadata entityMetadata)
     {
         // Do nothing as
+        if (this.indexManager.getIndexer() != null
+            && !this.indexManager.getIndexer().getClass().getSimpleName().equals("RedisIndexer"))
+        {
+            super.indexNode(node, entityMetadata);
+        }
     }
 
     private void initializeIndexer()
     {
-        if (this.indexManager.getIndexer() != null
-                && !this.indexManager.getIndexer().getClass().getSimpleName().equals("LuceneIndexer"))
-        {
-            ((RedisIndexer) this.indexManager.getIndexer()).assignConnection(getConnection());
-        }
+        redisIndexer = new RedisIndexer();
+        redisIndexer.assignConnection(getConnection());
+
+      
     }
 
-    private boolean isBoundTransaction()
+    private boolean isBoundTransaction() 
     {
         return resource == null || (resource != null && !resource.isActive());
     }

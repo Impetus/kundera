@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<indexerProperties>
+	<nodes>
+		<node>
+			<properties>
+				<property name="host" value="localhost" />
+				<property name="port" value="9300" />
+			</properties>
+		</node>
+	</nodes>
+</indexerProperties>

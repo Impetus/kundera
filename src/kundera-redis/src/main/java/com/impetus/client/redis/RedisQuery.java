@@ -16,15 +16,20 @@
 package com.impetus.client.redis;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
+import java.util.Set;
 
 import javax.persistence.Query;
 
 import com.impetus.client.redis.RedisQueryInterpreter.Clause;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.EnhanceEntity;
+import com.impetus.kundera.metadata.MetadataUtils;
+import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
@@ -71,8 +76,30 @@ public class RedisQuery extends QueryImpl
          * clause possible with AND/OR clause.
          * 
          */
+     
+
+        Set<Object> results = new HashSet<Object>();
+
         RedisQueryInterpreter interpreter = onTranslation(getKunderaQuery().getFilterClauseQueue(), entityMetadata);
-        return ((RedisClient) client).onExecuteQuery(interpreter, entityMetadata.getEntityClazz());
+
+        ClientMetadata clientMetadata = ((ClientBase) client).getClientMetadata();
+
+        if (!MetadataUtils.useSecondryIndex(clientMetadata)
+                && !(clientMetadata.getIndexImplementor() != null && clientMetadata.getIndexImplementor().equals(
+                        RedisIndexer.class.getName())))
+        {
+            results.addAll(populateUsingLucene(entityMetadata, client, null, interpreter.getSelectedColumns()));
+        }
+        else
+        {
+            results.addAll((List<Object>) ((RedisClient) client).onExecuteQuery(interpreter,
+                    entityMetadata.getEntityClazz()));
+        }
+
+        List<Object> output = new ArrayList<Object>();
+        output.addAll(results);
+
+        return output;
     }
 
     /*
@@ -256,11 +283,14 @@ public class RedisQuery extends QueryImpl
         // TODO Auto-generated method stub
         return null;
     }
-    
+
     @Override
     protected List findUsingLucene(EntityMetadata m, Client client)
     {
-       throw new UnsupportedOperationException("select colummn via lucene is unsupported in couchdb");
+
+        RedisQueryInterpreter interpreter = onTranslation(getKunderaQuery().getFilterClauseQueue(), m);
+        return ((RedisClient) client).onExecuteQuery(interpreter, m.getEntityClazz());
+
     }
 
 }
