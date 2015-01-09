@@ -17,8 +17,6 @@
 package com.impetus.client;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,11 +33,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-
 import com.impetus.client.redis.RedisClient;
 import com.impetus.client.redis.RedisClientFactory;
-import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.loader.ClientFactory;

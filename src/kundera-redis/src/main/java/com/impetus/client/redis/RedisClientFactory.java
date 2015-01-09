@@ -355,11 +355,10 @@ public class RedisClientFactory extends GenericClientFactory
 
             JedisPoolConfig poolConfig = new JedisPoolConfig();
 
-            if (maxActivePerNode != null && StringUtils.isNumeric(maxActivePerNode))
+            if (maxTotal != null && StringUtils.isNumeric(maxTotal))
             {
-                poolConfig.setMaxActive(Integer.valueOf(maxActivePerNode));
+                poolConfig.setMaxTotal(Integer.valueOf(maxTotal));
             }
-
             if (maxIdlePerNode != null && StringUtils.isNumeric(maxIdlePerNode))
             {
                 poolConfig.setMaxIdle(Integer.valueOf(maxIdlePerNode));
@@ -370,7 +369,8 @@ public class RedisClientFactory extends GenericClientFactory
             }
             if (maxActivePerNode != null && StringUtils.isNumeric(maxActivePerNode))
             {
-                poolConfig.setWhenExhaustedAction(WHEN_EXHAUSTED_FAIL);
+                //poolConfig.setWhenExhaustedAction(WHEN_EXHAUSTED_FAIL);
+                poolConfig.setBlockWhenExhausted(true);
             }
             return poolConfig;
         }

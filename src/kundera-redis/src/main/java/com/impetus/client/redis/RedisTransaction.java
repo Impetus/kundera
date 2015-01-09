@@ -19,7 +19,6 @@ package com.impetus.client.redis;
 import java.util.ArrayList;
 import java.util.List;
 
-import redis.clients.jedis.BinaryTransaction;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Transaction;
 
@@ -67,7 +66,7 @@ public class RedisTransaction implements TransactionResource
     @Override
     public void onCommit()
     {
-        for (BinaryTransaction resource : resources)
+        for (Transaction resource : resources)
         {
             resource.exec();
         }
@@ -82,7 +81,7 @@ public class RedisTransaction implements TransactionResource
     @Override
     public void onRollback()
     {
-        for (BinaryTransaction resource : resources)
+        for (Transaction resource : resources)
         {
             resource.discard();
         }
@@ -130,31 +129,28 @@ public class RedisTransaction implements TransactionResource
     {
         Transaction tx = null;
         // Multi not supported.
-        
-      /*if (resources.isEmpty())
-        {*/
-            tx = resource.multi();
-            resources.add(tx);
-/*        }
-        else
-        {
-//            tx = resource.multi();
-//            resources.add(tx);
-            tx = resources.get(0);
-        }
-*/        return tx;
+
+        /*
+         * if (resources.isEmpty()) {
+         */
+        tx = resource.multi();
+        resources.add(tx);
+        /*
+         * } else { // tx = resource.multi(); // resources.add(tx); tx =
+         * resources.get(0); }
+         */return tx;
     }
-    
+
     Transaction getResource()
     {
         return resources.get(0);
     }
-    
+
     boolean isResourceBound()
     {
         return !resources.isEmpty();
     }
-    
+
     synchronized void onExecute(Transaction tx)
     {
         tx.exec();
