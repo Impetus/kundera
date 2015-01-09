@@ -15,6 +15,12 @@
  ******************************************************************************/
 package com.impetus.client.crud;
 
+import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -26,84 +32,190 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.kundera.loader.KunderaAuthenticationException;
+import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
-import com.mongodb.Mongo;
+import com.mongodb.MongoClient;
+import com.mongodb.MongoCredential;
+import com.mongodb.ServerAddress;
 
 /**
  * The Class MongoAuthenticationTest.
  * 
  * @author vivek.mishra
  */
-public class MongoAuthenticationTest extends BaseTest
-{
+public class MongoAuthenticationTest extends BaseTest {
+
     private EntityManagerFactory emf;
 
     private String pu;
 
     /**
-     * Sets the up.
+     * Creating users.
      * 
-     * @throws Exception
-     *             the exception
      */
     @Before
-    public void setUp() throws Exception
-    {
+    public void setUp() throws Exception {
 
+        String dbname = "KunderaAuthTests";
+        String adminDb = "admin";
+        MongoClient m = new MongoClient(new ServerAddress("localhost", 27017));
+
+        DB db = m.getDB(dbname);
+        DB db_admin = m.getDB(adminDb);
+
+        // adding user to "KunderaAuthTests" database
+        Map<String, Object> commandArguments = new BasicDBObject();
+        commandArguments.put("createUser", "kunderaUser");
+        commandArguments.put("pwd", "kunderapassword");
+        String[] roles = { "readWrite" };
+        commandArguments.put("roles", roles);
+        BasicDBObject command = new BasicDBObject(commandArguments);
+        db.command(command);
+   
+        
+        // adding user to "admin" database
+        commandArguments = new BasicDBObject();
+        commandArguments.put("createUser", "admin");
+        commandArguments.put("pwd", "password");
+        String[] admin_roles = { "readWriteAnyDatabase" };
+        commandArguments.put("roles", admin_roles);
+        command = new BasicDBObject(commandArguments);
+        db_admin.command(command);
     }
 
+    
     /**
-     * Authenticate with valid credentials.
+     * Authenticate with valid credentials
+     * 
+     * 
      */
     @Test
-    public void authenticateWithValidCredentials()
-    {
-        try
-        {
+    public void authenticateWithValidCredentials() {
+
+        try {
+
             pu = "validAuthenticationMongoPu";
-            Mongo m = new Mongo();
             String dbname = "KunderaAuthTests";
             String username = "kunderaUser";
-            String password  = "kunderapassword";
+            String password = "kunderapassword";
+
+            MongoCredential credential =
+                MongoCredential.createMongoCRCredential(username, dbname, password.toCharArray());
+
+            MongoClient m = new MongoClient(new ServerAddress("localhost", 27017), Arrays.asList(credential));
+
             DB db = m.getDB(dbname);
-            db.addUser(username, password.toCharArray());
-            db.requestDone();
-            if (db.authenticate(username, password.toCharArray()))
-            {
-                m.close();
-                emf = Persistence.createEntityManagerFactory(pu);
-                Assert.assertNotNull(emf);
-                EntityManager em = emf.createEntityManager();
-                Assert.assertNotNull(em);
-            }
-        }
-        catch (Exception e)
-        {
+
+            Assert.assertNotNull(db.getCollectionNames());
+
+            m.close();
+            emf = Persistence.createEntityManagerFactory(pu);
+            Assert.assertNotNull(emf);
+            EntityManager em = emf.createEntityManager();
+            Assert.assertNotNull(em);
+
+        } catch (Exception e) {
             Assert.fail(e.getMessage());
         }
 
     }
 
     /**
-     * Authenticate with invalid credentials.
+     * Authenticate with valid credentials in case of multiple DBs
+     * 
+     * Here user is in "admin" database assigned a role readWriteAnyDatabase.
+     * So it can access "KunderaAuthTests" database too.
      */
     @Test
-    public void authenticateWithInValidCredentials()
-    {
-        EntityManager em = null;
-        try
-        {
-            pu = "invalidAuthenticationMongoPu";
+    public void authenticateWithValidCredentialsMultipleDbs() {
+
+        try {
+
+            pu = "validAuthenticationMongoPuAdminDb";
+            String adminDb = "admin";
+            String dbname = "KunderaAuthTests";
+            String username = "admin";
+            String password = "password";
+
+            MongoCredential credential =
+                MongoCredential.createMongoCRCredential(username, adminDb, password.toCharArray());
+            MongoClient m = new MongoClient(new ServerAddress("localhost", 27017), Arrays.asList(credential));
+
+            DB db = m.getDB(dbname);
+            DB db_admin = m.getDB(adminDb);
+           
+            Assert.assertNotNull(db.getCollectionNames());
+            Assert.assertNotNull(db_admin.getCollectionNames());
+            
+            m.close();
             emf = Persistence.createEntityManagerFactory(pu);
-            em = emf.createEntityManager();
+            Assert.assertNotNull(emf);
+            EntityManager em = emf.createEntityManager();
+            Assert.assertNotNull(em);
+
+        } catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+
+    }
+
+    
+    /**
+     * Authenticate with invalid credentials.
+     * 
+     */
+     @Test
+    public void authenticateWithInValidCredentials()  {
+         Set<String> collectionList = new HashSet<String>();
+         try {
+
+             pu = "validAuthenticationMongoPu";
+             String dbname = "KunderaAuthTests";
+             String username = "kunderaUser";
+             String password = "wrongPassword";
+             
+             MongoCredential credential =
+                 MongoCredential.createMongoCRCredential(username, dbname, password.toCharArray());
+
+             MongoClient m = new MongoClient(new ServerAddress("localhost", 27017), Arrays.asList(credential));
+
+             DB db = m.getDB(dbname);
+            collectionList =  db.getCollectionNames();
+            
             Assert.fail("Shouldn't be called");
-        }
-        catch (KunderaAuthenticationException e)
-        {
-            // Moved authentication at client level.
-//            Assert.assertNull(emf);
-            Assert.assertNull(em);
-        }
+
+             m.close();
+             emf = Persistence.createEntityManagerFactory(pu);
+             Assert.assertNotNull(emf);
+             EntityManager em = emf.createEntityManager();
+             Assert.assertNotNull(em);
+
+         } catch (Exception e) {
+             Assert.assertEquals(true,collectionList.isEmpty());
+         }
+    }
+    
+    
+    
+    /**
+     * Authenticate with invalid credentials in Persistence Unit.
+     */
+     @Test
+    public void authenticateWithInValidCredentialsPu() {
+         EntityManager em = null;
+         try
+         {
+             pu = "invalidAuthenticationMongoPu";
+             emf = Persistence.createEntityManagerFactory(pu);
+             em = emf.createEntityManager();
+             Assert.fail("Shouldn't be called");
+         }
+         catch (KunderaAuthenticationException e)
+         {
+             // Moved authentication at client level.
+//             Assert.assertNull(emf);
+             Assert.assertNull(em);
+         }
 
     }
 
@@ -111,20 +223,22 @@ public class MongoAuthenticationTest extends BaseTest
      * No authentication test.
      * 
      */
-    @Test
-    public void noAuthenticationTest()
-    {
-        try
-        {
+     @Test
+    public void noAuthenticationTest() {
+        try {
             pu = "mongoTest";
+            String dbname = "KunderaAuthTests";
+            MongoClient m = new MongoClient(new ServerAddress("localhost", 27017));
+            DB db = m.getDB(dbname);   
+            
+            Assert.assertNotNull(db.getCollectionNames());
+            
             emf = Persistence.createEntityManagerFactory(pu);
             Assert.assertNotNull(emf);
             EntityManager em = emf.createEntityManager();
             Assert.assertNotNull(em);
-        }
-        catch (Exception e)
-        {
-            
+        } catch (Exception e) {
+
             Assert.fail(e.getMessage());
         }
 
@@ -137,8 +251,7 @@ public class MongoAuthenticationTest extends BaseTest
      *             the exception
      */
     @After
-    public void tearDown() throws Exception
-    {
+    public void tearDown() throws Exception {
         // MongoUtils.dropDatabase(emf, pu);
     }
 }
