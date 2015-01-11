@@ -83,6 +83,11 @@ public class RedisLuceneTest
         LuceneCleanupUtilities.cleanDir("./lucene");
         LuceneCleanupUtilities.cleanLuceneDirectory(((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance()
                 .getApplicationMetadata().getPersistenceUnitMetadata("redisLucene_pu"));
+        // Delete by query.
+        String deleteQuery = "Delete from PersonRedis p";
+        Query query = em.createQuery(deleteQuery);
+        int updateCount = query.executeUpdate();
+        em.close();
         emf.close();
     }
 

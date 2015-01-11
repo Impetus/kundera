@@ -184,7 +184,7 @@ public class RedisTransactionTest
         }
         catch (Exception ex)
         {
-
+            em.clear();
             p = em.find(PersonRedis.class, "1");
             Assert.assertNull(p);
 
