@@ -135,6 +135,9 @@
 	<persistence-unit name="mongoShowQueryDisabledPU">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<class>com.impetus.client.crud.entities.UserInformation</class>
+		<class>com.impetus.kundera.client.crud.associations.MobileHandset</class>
+		<class>com.impetus.kundera.client.crud.associations.MobileManufacturer</class>
+		<class>com.impetus.kundera.client.crud.associations.MobileOperatingSystem</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<property name="kundera.nodes" value="localhost" />
@@ -149,4 +152,3 @@
 	
 	
 </persistence>
-

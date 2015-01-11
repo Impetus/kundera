@@ -15,6 +15,9 @@
  ******************************************************************************/
 package com.impetus.kundera.lifecycle.states;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.persistence.PersistenceContextType;
 
 import com.impetus.kundera.client.Client;
@@ -24,6 +27,7 @@ import com.impetus.kundera.lifecycle.NodeStateContext;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityReader;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
  * @author amresh
@@ -147,8 +151,10 @@ public class ManagedState extends NodeState
             else
             {
                 // This entity has associated entities, find them recursively.
+                Map<Object, Object> relationStack = new HashMap<Object, Object>();
+                relationStack.put(nodeDataClass.getCanonicalName()+"@"+PropertyAccessorHelper.getId(entity, entityMetadata), entity);
                 nodeData = reader.recursivelyFindEntities(ee.getEntity(), ee.getRelations(), entityMetadata,
-                        nodeStateContext.getPersistenceDelegator(), false);
+                        nodeStateContext.getPersistenceDelegator(), false,relationStack);
             }
         }
 

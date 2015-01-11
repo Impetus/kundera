@@ -16,6 +16,7 @@
 package com.impetus.client.hbase.query;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -139,7 +140,7 @@ class ResultIterator<E> implements IResultIterator<E>
             EnhanceEntity ee = (EnhanceEntity) enhanceEntity;
 
             result = (E) client.getReader().recursivelyFindEntities(ee.getEntity(), ee.getRelations(), m,
-                    persistenceDelegator, false);
+                    persistenceDelegator, false,new HashMap<Object,Object>());
         }
 
         return result;

@@ -73,6 +73,8 @@ public class EntityReaderTest
     private KunderaMetadata kunderaMetadata;
     
     Map propertyMap=null;
+    
+    Map<Object,Object> relationStack;
 
     /**
      * @throws java.lang.Exception
@@ -86,7 +88,9 @@ public class EntityReaderTest
         emf = Persistence.createEntityManagerFactory(PU,propertyMap);
         kunderaMetadata = ((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance();
         em = emf.createEntityManager();
+        relationStack = new HashMap<Object, Object>();
 
+        
     }
 
     @Test
@@ -116,7 +120,7 @@ public class EntityReaderTest
 
         CoreTestEntityReader reader = new CoreTestEntityReader(kunderaMetadata);
 
-        reader.recursivelyFindEntities(p1, relationMap, metadata, delegator, false);
+        reader.recursivelyFindEntities(p1, relationMap, metadata, delegator, false, relationStack);
 
         Assert.assertNotNull(p1.getAddress());
 
@@ -124,7 +128,7 @@ public class EntityReaderTest
 
         p1.setAddress(null);
 
-        reader.recursivelyFindEntities(p1, relationMap, metadata, delegator, true);
+        reader.recursivelyFindEntities(p1, relationMap, metadata, delegator, true, relationStack);
 
         Assert.assertNotNull(p1.getAddress());
 
@@ -159,7 +163,7 @@ public class EntityReaderTest
 
         CoreTestEntityReader reader = new CoreTestEntityReader(kunderaMetadata);
 
-        reader.recursivelyFindEntities(p1, relationMap, metadata, delegator, false);
+        reader.recursivelyFindEntities(p1, relationMap, metadata, delegator, false, relationStack);
 
         Assert.assertNotNull(p1.getAddress());
 
@@ -167,7 +171,7 @@ public class EntityReaderTest
 
         p1.setAddress(null);
 
-        reader.recursivelyFindEntities(p1, relationMap, metadata, delegator, true);
+        reader.recursivelyFindEntities(p1, relationMap, metadata, delegator, true,relationStack);
 
         Assert.assertNotNull(p1.getAddress());
 
@@ -211,7 +215,7 @@ public class EntityReaderTest
 
         person1.setAddress(null);
 
-        reader.recursivelyFindEntities(person1, relationMap, metadata, delegator, false);
+        reader.recursivelyFindEntities(person1, relationMap, metadata, delegator, false,relationStack);
 
         Assert.assertNotNull(person1.getAddress());
 
@@ -219,7 +223,7 @@ public class EntityReaderTest
 
         person1.setAddress(null);
 
-        reader.recursivelyFindEntities(person1, relationMap, metadata, delegator, true);
+        reader.recursivelyFindEntities(person1, relationMap, metadata, delegator, true,relationStack);
 
         Assert.assertNotNull(person1.getAddress());
 
@@ -261,7 +265,7 @@ public class EntityReaderTest
 
         person1.setAddress(null);
 
-        reader.recursivelyFindEntities(person1, relationMap, metadata, delegator, false);
+        reader.recursivelyFindEntities(person1, relationMap, metadata, delegator, false,relationStack);
 
         Assert.assertNotNull(person1.getAddress());
 
@@ -271,7 +275,7 @@ public class EntityReaderTest
 
         person1.setAddress(null);
 
-        reader.recursivelyFindEntities(person1, relationMap, metadata, delegator, true);
+        reader.recursivelyFindEntities(person1, relationMap, metadata, delegator, true,relationStack);
 
         Assert.assertNotNull(person1.getAddress());
 
@@ -310,13 +314,13 @@ public class EntityReaderTest
 
         person.setAddresses(null);
 
-        reader.recursivelyFindEntities(person, relationMap, metadata, delegator, false);
+        reader.recursivelyFindEntities(person, relationMap, metadata, delegator, false,relationStack);
 
         Assert.assertNotNull(person.getAddresses());
 
         Assert.assertTrue(ProxyHelper.isKunderaProxyCollection(person.getAddresses()));
 
-        reader.recursivelyFindEntities(person, relationMap, metadata, delegator, true);
+        reader.recursivelyFindEntities(person, relationMap, metadata, delegator, true,relationStack);
 
         Assert.assertTrue(person.getAddresses().isEmpty()); // code to fetch
                                                             // from join table
@@ -359,13 +363,13 @@ public class EntityReaderTest
 
         person.setAddresses(null);
 
-        reader.recursivelyFindEntities(person, relationMap, metadata, delegator, false);
+        reader.recursivelyFindEntities(person, relationMap, metadata, delegator, false,relationStack);
 
         Assert.assertNotNull(person.getAddresses());
 
         Assert.assertTrue(ProxyHelper.isKunderaProxyCollection(person.getAddresses()));
 
-        reader.recursivelyFindEntities(person, relationMap, metadata, delegator, true);
+        reader.recursivelyFindEntities(person, relationMap, metadata, delegator, true,relationStack);
 
         Assert.assertTrue(person.getAddresses().isEmpty()); // code to fetch
                                                             // from join table
@@ -411,7 +415,7 @@ public class EntityReaderTest
 
         p1.setAddresses(null);
         
-        reader.recursivelyFindEntities(p1, relationMap, metadata, delegator, false);
+        reader.recursivelyFindEntities(p1, relationMap, metadata, delegator, false,relationStack);
 
         Assert.assertNotNull(p1.getAddresses());
 
@@ -419,7 +423,7 @@ public class EntityReaderTest
 
          p1.setAddresses(null);
 
-        reader.recursivelyFindEntities(p1, relationMap, metadata, delegator, true);
+        reader.recursivelyFindEntities(p1, relationMap, metadata, delegator, true,relationStack);
 
         Assert.assertNotNull(p1.getAddresses());
 
@@ -461,7 +465,7 @@ public class EntityReaderTest
 
         p1.setAddresses(null);
 
-        reader.recursivelyFindEntities(p1, relationMap, metadata, delegator, false);
+        reader.recursivelyFindEntities(p1, relationMap, metadata, delegator, false,relationStack);
 
         Assert.assertNotNull(p1.getAddresses());
 
@@ -473,7 +477,7 @@ public class EntityReaderTest
 
         p1.setAddresses(null);
 
-        reader.recursivelyFindEntities(p1, relationMap, metadata, delegator, true);
+        reader.recursivelyFindEntities(p1, relationMap, metadata, delegator, true,relationStack);
 
         Assert.assertNotNull(p1.getAddresses());
 

@@ -16,6 +16,7 @@
 package com.impetus.client.couchdb;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -191,7 +192,7 @@ class ResultIterator<E> implements IResultIterator<E>
             EnhanceEntity ee = (EnhanceEntity) enhanceEntity;
 
             result = (E) client.getReader().recursivelyFindEntities(ee.getEntity(), ee.getRelations(), m,
-                    persistenceDelegator, false);
+                    persistenceDelegator, false, new HashMap<Object,Object>());
         }
         return result;
     }

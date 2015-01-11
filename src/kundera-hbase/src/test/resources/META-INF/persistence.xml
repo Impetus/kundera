@@ -30,14 +30,17 @@
 			<property name="kundera.keyspace" value="KunderaHbaseTests" />
 			<property name="kundera.dialect" value="hbase" />
 			<property name="kundera.client.lookup.class" value="com.impetus.client.hbase.HBaseClientFactory" />
-			<property name="kundera.ddl.auto.prepare" value="create"/>
+			<property name="kundera.ddl.auto.prepare" value="create" />
 			<property name="kundera.client.property" value="kundera-hbase.properties" />
 		</properties>
 	</persistence-unit>
-	
+
 	<persistence-unit name="hbase">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<class>com.impetus.client.hbase.schemaManager.HBaseEntitySimple</class>
+		<class>com.impetus.kundera.client.crud.associations.MobileHandset</class>
+		<class>com.impetus.kundera.client.crud.associations.MobileManufacturer</class>
+		<class>com.impetus.kundera.client.crud.associations.MobileOperatingSystem</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<property name="kundera.nodes" value="localhost" />
@@ -45,7 +48,7 @@
 			<property name="kundera.keyspace" value="KunderaHbaseExamples" />
 			<property name="kundera.dialect" value="hbase" />
 			<property name="kundera.client.lookup.class" value="com.impetus.client.hbase.HBaseClientFactory" />
-			<property name="kundera.ddl.auto.prepare" value="create"/>
+			<property name="kundera.ddl.auto.prepare" value="create" />
 			<property name="kundera.client.property" value="kundera-hbase.properties" />
 		</properties>
 	</persistence-unit>
@@ -127,4 +130,3 @@
 	</persistence-unit>
 
 </persistence>
-

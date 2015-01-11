@@ -104,10 +104,12 @@ public class AbstractEntityReader
      * @param client
      * @param m
      * @param pd
+     * @param relationStack
      * @return
      */
     private Object handleAssociation(final Object entity, final Map<String, Object> relationsMap,
-            final EntityMetadata m, final PersistenceDelegator pd, boolean lazilyloaded)
+            final EntityMetadata m, final PersistenceDelegator pd, boolean lazilyloaded,
+            Map<Object, Object> relationStack)
     {
 
         for (Relation relation : m.getRelations())
@@ -121,7 +123,7 @@ public class AbstractEntityReader
                 if (KunderaCoreUtils.isEmptyOrNull(relationalObject)
                         || ProxyHelper.isProxyOrCollection(relationalObject))
                 {
-                    onRelation(entity, relationsMap, m, pd, relation, relationType, lazilyloaded);
+                    onRelation(entity, relationsMap, m, pd, relation, relationType, lazilyloaded, relationStack);
                 } // a bit of hack for neo4j only
                 else if (!ProxyHelper.isProxyOrCollection(relationalObject)
                         && Map.class.isAssignableFrom(relationalObject.getClass()))
@@ -154,9 +156,11 @@ public class AbstractEntityReader
      * @param relation
      * @param relationType
      * @param lazilyloaded
+     * @param relationStack
      */
     private void onRelation(final Object entity, final Map<String, Object> relationsMap, final EntityMetadata m,
-            final PersistenceDelegator pd, Relation relation, ForeignKey relationType, boolean lazilyloaded)
+            final PersistenceDelegator pd, Relation relation, ForeignKey relationType, boolean lazilyloaded,
+            Map<Object, Object> relationStack)
     {
 
         FetchType fetchType = relation.getFetchType();
@@ -179,7 +183,7 @@ public class AbstractEntityReader
             }
             else
             {
-                onRelation(entity, relationsMap, relation, m, pd, lazilyloaded);
+                onRelation(entity, relationsMap, relation, m, pd, lazilyloaded, relationStack);
             }
         }
     }
@@ -193,11 +197,13 @@ public class AbstractEntityReader
      *            entity id of relation owning entity.
      * @param relationsMap
      *            contains relation name and it's value.
+     * @param relationStack
      * @param m
      *            entity metadata.
      */
     private void onRelation(Object entity, Map<String, Object> relationsMap, final Relation relation,
-            final EntityMetadata metadata, final PersistenceDelegator pd, boolean lazilyloaded)
+            final EntityMetadata metadata, final PersistenceDelegator pd, boolean lazilyloaded,
+            Map<Object, Object> relationStack)
     {
         final Object entityId = PropertyAccessorHelper.getId(entity, metadata);
 
@@ -213,15 +219,22 @@ public class AbstractEntityReader
 
         List relationalEntities = fetchRelations(relation, metadata, pd, entityId, relationValue, targetEntityMetadata);
 
-        // parse for associated relation.
-
         if (relationalEntities != null)
         {
+
             for (Object relationEntity : relationalEntities)
             {
                 if (relationEntity != null)
                 {
-                    onParseRelation(entity, pd, targetEntityMetadata, relationEntity, relation, lazilyloaded);
+                    addToRelationStack(relationStack, relationEntity, targetEntityMetadata);
+                }
+            }
+            for (Object relationEntity : relationalEntities)
+            {
+                if (relationEntity != null)
+                {
+                    onParseRelation(entity, pd, targetEntityMetadata, relationEntity, relation, lazilyloaded,
+                            relationStack);
                     PersistenceCacheManager.addEntityToPersistenceCache(getEntity(relationEntity), pd,
                             PropertyAccessorHelper.getId(relationEntity, targetEntityMetadata));
                 }
@@ -240,12 +253,13 @@ public class AbstractEntityReader
      * @param relationEntity
      * @param relation
      * @param lazilyloaded
+     * @param relationStack
      */
     private void onParseRelation(Object entity, final PersistenceDelegator pd, EntityMetadata targetEntityMetadata,
-            Object relationEntity, Relation relation, boolean lazilyloaded)
+            Object relationEntity, Relation relation, boolean lazilyloaded, Map<Object, Object> relationStack)
     {
         parseRelations(entity, getEntity(relationEntity), getPersistedRelations(relationEntity), pd,
-                targetEntityMetadata, lazilyloaded);
+                targetEntityMetadata, lazilyloaded, relationStack);
 
         // if relation ship is unary, no problem else we need to add
         setRelationToEntity(entity, relationEntity, relation);
@@ -291,10 +305,11 @@ public class AbstractEntityReader
      * @param pd
      * @param metadata
      * @param lazilyloaded
+     * @param relationStack
      */
     private void parseRelations(final Object originalEntity, final Object relationEntity,
             final Map<String, Object> relationsMap, final PersistenceDelegator pd, final EntityMetadata metadata,
-            boolean lazilyloaded)
+            boolean lazilyloaded, Map<Object, Object> relationStack)
     {
 
         for (Relation relation : metadata.getRelations())
@@ -348,28 +363,89 @@ public class AbstractEntityReader
                         // relation as it
                         if (immediateRelations != null && !immediateRelations.isEmpty())
                         {
-                            // As it
-                            // is
-                            // already
-                            // in process.
-
                             for (Object immediateRelation : immediateRelations)
                             {
                                 if (immediateRelation != null
                                         && !compareTo(getEntity(immediateRelation), originalEntity))
                                 {
-                                    onParseRelation(relationEntity, pd, targetEntityMetadata, immediateRelation,
-                                            relation, lazilyloaded);
+                                    if (existsInRelationStack(relationStack, immediateRelation, targetEntityMetadata))
+                                    {
+                                        setRelationToEntity(
+                                                relationEntity,
+                                                fetchFromRelationStack(relationStack, immediateRelation,
+                                                        targetEntityMetadata), relation);
+
+                                    }
+                                    else
+                                    {
+                                        addToRelationStack(relationStack, immediateRelation, targetEntityMetadata);
+                                        onParseRelation(relationEntity, pd, targetEntityMetadata, immediateRelation,
+                                                relation, lazilyloaded, relationStack);
+                                        setRelationToEntity(relationEntity, originalEntity, relation);
+
+                                    }
+                                    PersistenceCacheManager.addEntityToPersistenceCache(getEntity(relationEntity), pd,
+                                            PropertyAccessorHelper.getId(relationEntity, metadata));
                                 }
                             }
-                            setRelationToEntity(relationEntity, originalEntity, relation);
-                            PersistenceCacheManager.addEntityToPersistenceCache(getEntity(relationEntity), pd,
-                                    PropertyAccessorHelper.getId(relationEntity, metadata));
+
                         }
                     }
                 }
             }
         }
+    }
+
+    // Adds an object to the stack for referring
+    /**
+     * @param relationStack
+     * @param entity
+     * @param m
+     */
+    private void addToRelationStack(Map<Object, Object> relationStack, Object entity, EntityMetadata m)
+    {
+        Object obj = entity;
+        if (entity instanceof EnhanceEntity)
+        {
+            obj = ((EnhanceEntity) entity).getEntity();
+        }
+        relationStack.put(obj.getClass().getCanonicalName() + "@" + PropertyAccessorHelper.getId(obj, m), obj);
+
+    }
+
+    // Checks whether the object already exists in stack
+    /**
+     * @param relationStack
+     * @param entity
+     * @param m
+     * @return
+     */
+    private Boolean existsInRelationStack(Map<Object, Object> relationStack, Object entity, EntityMetadata m)
+    {
+        Object obj = entity;
+        if (entity instanceof EnhanceEntity)
+        {
+            obj = ((EnhanceEntity) entity).getEntity();
+        }
+        return relationStack
+                .containsKey(obj.getClass().getCanonicalName() + "@" + PropertyAccessorHelper.getId(obj, m));
+    }
+
+    // Fetches the object from stack
+    /**
+     * @param relationStack
+     * @param entity
+     * @param m
+     * @return
+     */
+    private Object fetchFromRelationStack(Map<Object, Object> relationStack, Object entity, EntityMetadata m)
+    {
+        Object obj = entity;
+        if (entity instanceof EnhanceEntity)
+        {
+            obj = ((EnhanceEntity) entity).getEntity();
+        }
+        return relationStack.get(obj.getClass().getCanonicalName() + "@" + PropertyAccessorHelper.getId(obj, m));
     }
 
     /**
@@ -441,9 +517,9 @@ public class AbstractEntityReader
      * @return
      */
     public Object recursivelyFindEntities(Object entity, Map<String, Object> relationsMap, EntityMetadata m,
-            PersistenceDelegator pd, boolean lazilyLoaded)
+            PersistenceDelegator pd, boolean lazilyLoaded, Map<Object, Object> relationStack)
     {
-        return handleAssociation(entity, relationsMap, m, pd, lazilyLoaded);
+        return handleAssociation(entity, relationsMap, m, pd, lazilyLoaded, relationStack);
 
     }
 

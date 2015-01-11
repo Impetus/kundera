@@ -17,6 +17,7 @@ package com.impetus.kundera.proxy.collection;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -96,8 +97,8 @@ public abstract class AbstractProxyBase implements ProxyCollection
     }
 
     /**
-	 * 
-	 */
+ * 
+ */
     protected void eagerlyLoadDataCollection()
     {
         if (getDataCollection() == null || getDataCollection() instanceof ProxyCollection)
@@ -111,9 +112,10 @@ public abstract class AbstractProxyBase implements ProxyCollection
                         "Unable to load Proxy Collection."
                                 + " This happens when you access a lazily loaded proxy collection in an entity after entity manager has been closed.");
             }
-
+            
+            Map<Object, Object> relationStack = new HashMap<Object, Object>();
             getPersistenceDelegator().getClient(m).getReader()
-                    .recursivelyFindEntities(getOwner(), relationsMap, m, getPersistenceDelegator(), true);
+                    .recursivelyFindEntities(getOwner(), relationsMap, m, getPersistenceDelegator(), true,relationStack);
 
             if (getRelation().getProperty().getType().isAssignableFrom(Map.class))
             {

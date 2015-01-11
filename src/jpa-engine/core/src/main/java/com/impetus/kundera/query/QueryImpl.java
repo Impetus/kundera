@@ -170,12 +170,32 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
         return results != null ? results : new ArrayList();
     }
 
+    /**
+     * @param enhanceEntities
+     * @param client
+     * @param m
+     * @return
+     */
     protected List<Object> setRelationEntities(List enhanceEntities, Client client, EntityMetadata m)
     {
         // Enhance entities can contain or may not contain relation.
         // if it contain a relation means it is a child
         // if it does not then it means it is a parent.
         List<Object> result = new ArrayList<Object>();
+        // Stack of objects. To be used for referring any similar object found
+        // later.
+        // This prevents infinite recursive loop and hence prevents stack
+        // overflow.
+        Map<Object, Object> relationStack = new HashMap<Object, Object>();
+
+        if (enhanceEntities != null)
+        {
+            for (Object e : enhanceEntities)
+            {
+                addToRelationStack(relationStack, e, m);
+            }
+        }
+
         if (enhanceEntities != null)
         {
             for (Object e : enhanceEntities)
@@ -186,11 +206,29 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
                 }
                 EnhanceEntity ee = (EnhanceEntity) e;
                 result.add(getReader().recursivelyFindEntities(ee.getEntity(), ee.getRelations(), m,
-                        persistenceDelegeator, false));
+                        persistenceDelegeator, false, relationStack));
+
             }
         }
 
         return result;
+    }
+
+    // Adds an object to the stack for referring
+    /**
+     * @param relationStack
+     * @param entity
+     * @param m
+     */
+    protected void addToRelationStack(Map<Object, Object> relationStack, Object entity, EntityMetadata m)
+    {
+        Object obj = entity;
+        if (entity instanceof EnhanceEntity)
+        {
+            obj = ((EnhanceEntity) entity).getEntity();
+        }
+        relationStack.put(obj.getClass().getCanonicalName() + "@" + PropertyAccessorHelper.getId(obj, m), obj);
+
     }
 
     /**
@@ -718,6 +756,10 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
         if (parameters == null)
         {
             parameters = kunderaQuery.getParameters();
+            if (parameters == null)
+            {
+                parameters = new HashSet<Parameter<?>>();
+            }
         }
 
         return parameters;
@@ -1044,8 +1086,8 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
     {
         EntityMetadata metadata = getEntityMetadata();
         Client client = persistenceDelegeator.getClient(metadata);
-        List results = isRelational(metadata) && !kunderaQuery.isNative() ? recursivelyPopulateEntities(metadata, client) : populateEntities(
-                metadata, client);
+        List results = isRelational(metadata) && !kunderaQuery.isNative() ? recursivelyPopulateEntities(metadata,
+                client) : populateEntities(metadata, client);
         return results;
     }
 
