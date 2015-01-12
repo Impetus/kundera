@@ -35,9 +35,11 @@ import org.junit.Test;
 import com.impetus.client.crud.entities.Day;
 import com.impetus.client.crud.entities.PersonBatchMongoEntity;
 import com.impetus.client.crud.entities.PersonMongo;
+import com.impetus.client.crud.entities.PersonMongoMTO;
 import com.impetus.client.crud.entities.PersonMongo.Month;
 import com.impetus.client.utils.MongoUtils;
 import com.impetus.kundera.client.Client;
+import com.mongodb.BasicDBList;
 
 public class PersonMongoTest extends BaseTest
 {
@@ -151,8 +153,8 @@ public class PersonMongoTest extends BaseTest
         }
 
         selectIdQuery();
-
         onExecuteScript();
+        onExecuteNativeQuery();
 
     }
 
@@ -311,95 +313,308 @@ public class PersonMongoTest extends BaseTest
         }
         MongoUtils.dropDatabase(emf, _PU);
         emf.close();
-        
+
     }
 
     private void onExecuteScript()
     {
+
         Map<String, Client<Query>> clients = (Map<String, Client<Query>>) em.getDelegate();
         Client client = clients.get(_PU);
 
-        String jScript = "db.system.js.save({ _id: \"echoFunction\",value : function(x) { return x; }})";
-        Object result = ( client).executeScript(jScript);
+        String script = "db.system.js.save({ _id: \"echoFunction\",value : function(x) { return x; }})";
+        Object result = (client).executeScript(script);
         Assert.assertNull(result);
-        String findOneJScript = "db.PERSON.findOne()";
-        result = ( client).executeScript(findOneJScript);
+
+        /*
+         * To find a single document from DB
+         */
+        script = "db.PERSON.findOne()";
+        result = (client).executeScript(script);
         Assert.assertNotNull(result);
 
-        String findAllJScript = "db.PERSON.find( { \"PERSON_NAME\" : \"vivek\" } )";
-        result = (client).executeScript(findAllJScript);
+        /*
+         * Aggregation in mongoDB match query on PERSON_NAME is done and JSON
+         * list of type BasicDBList is returned this JSON object can be easily
+         * converted to java PersonMongo Object using GSON, etc.
+         */
+        script = "db.PERSON.aggregate([{ $match: { \"PERSON_NAME\": \"vivek\" } } ]).toArray()";
+        result = (client).executeScript(script);
+        BasicDBList resultList = (BasicDBList) result;
+        Assert.assertEquals(3, resultList.size());
         Assert.assertNotNull(result);
 
-        try
-        {
-            em.createNativeQuery(findAllJScript, PersonMongo.class).getResultList();
-            Assert.fail();
-        }
-        catch (Exception e)
-        {
-            Assert.assertEquals(
-                    "java.lang.UnsupportedOperationException: Native query support is not enabled in mongoDB",
-                    e.getMessage());
-        }
+        /*
+         * To count number of documents in an collection
+         */
+
+        script = "db.PERSON.count()";
+        result = (client).executeScript(script);
+        long totalDocuments = ((Double) result).longValue();
+        Assert.assertEquals(3, totalDocuments);
+
+        /*
+         * 
+         * To get an array of distinct values
+         */
+
+        script = "db.PERSON.distinct(\"PERSON_NAME\")";
+        result = (client).executeScript(script);
+        resultList = (BasicDBList) result;
+        Assert.assertEquals("vivek", resultList.get(0));
+        Assert.assertEquals(1, resultList.size());
+
+        /*
+         * 
+         * Native Query on the Key of Map<String, Month> map
+         */
+        script = "db.PERSON.find({'map.first month':'JAN'}).toArray()";
+        result = (client).executeScript(script);
+        resultList = (BasicDBList) result;
+        Assert.assertEquals(3, resultList.size());
+
+        /*
+         * 
+         * Native Query to find a person with age > 15
+         */
+        script = "db.PERSON.find({ \"AGE\": { $gt: 15 } }).toArray()";
+        result = (client).executeScript(script);
+        resultList = (BasicDBList) result;
+        Assert.assertEquals(1, resultList.size());
 
     }
-    
+
+    private void onExecuteNativeQuery()
+    {
+
+        /**
+         * 
+         * In case of Native Find Queries, Criteria can be written directly
+         * 
+         */
+
+        String test = "{\"AGE\":10}";
+        List<PersonMongo> list = em.createNativeQuery(test, PersonMongo.class).getResultList();
+        Assert.assertEquals(1, list.size());
+        Assert.assertEquals(new Integer(10), list.get(0).getAge());
+
+        test = "{ \"PERSON_NAME\":\"vivek\"}";
+        list = em.createNativeQuery(test, PersonMongo.class).getResultList();
+        Assert.assertEquals(3, list.size());
+        Assert.assertEquals("vivek", list.get(0).getPersonName());
+        Assert.assertEquals("vivek", list.get(1).getPersonName());
+        Assert.assertEquals("vivek", list.get(2).getPersonName());
+
+        /**
+         * 
+         * Matches values that are greater than the value specified in the
+         * query.
+         * 
+         */
+        test = "{ \"AGE\": { $gt: 12 } }";
+        list = em.createNativeQuery(test, PersonMongo.class).getResultList();
+        Assert.assertEquals(2, list.size());
+        Assert.assertEquals(new Integer(20), list.get(0).getAge());
+        Assert.assertEquals(new Integer(15), list.get(1).getAge());
+
+        /**
+         * 
+         * Matches values that are greater than or equal to the value specified
+         * in the query.
+         * 
+         */
+        test = "{ \"AGE\": { $gte: 15 } }";
+        list = em.createNativeQuery(test, PersonMongo.class).getResultList();
+        Assert.assertEquals(2, list.size());
+        Assert.assertEquals(new Integer(20), list.get(0).getAge());
+        Assert.assertEquals(new Integer(15), list.get(1).getAge());
+
+        /**
+         * 
+         * Matches values that are less than the value specified in the query.
+         * 
+         */
+        test = "{ \"AGE\": { $lt: 15 } }";
+        list = em.createNativeQuery(test, PersonMongo.class).getResultList();
+        Assert.assertEquals(1, list.size());
+        Assert.assertEquals(new Integer(10), list.get(0).getAge());
+
+        /**
+         * 
+         * Matches values that are less than or equal to the value specified in
+         * the query.
+         * 
+         */
+        test = "{ \"AGE\": { $lte: 15 } }";
+        list = em.createNativeQuery(test, PersonMongo.class).getResultList();
+        Assert.assertEquals(2, list.size());
+        Assert.assertEquals(new Integer(10), list.get(0).getAge());
+        Assert.assertEquals(new Integer(15), list.get(1).getAge());
+
+        /**
+         * 
+         * Matches all values that are not equal to the value specified in the
+         * query.
+         * 
+         */
+        test = "{ \"AGE\": { $ne: 10 } }";
+        list = em.createNativeQuery(test, PersonMongo.class).getResultList();
+        Assert.assertEquals(2, list.size());
+        Assert.assertEquals(new Integer(20), list.get(0).getAge());
+        Assert.assertEquals(new Integer(15), list.get(1).getAge());
+
+        /**
+         * 
+         * Matches any of the values that exist in an array specified in the
+         * query.
+         * 
+         */
+        test = "{ \"AGE\": { $in: [10,15] } }";
+        list = em.createNativeQuery(test, PersonMongo.class).getResultList();
+        Assert.assertEquals(2, list.size());
+        Assert.assertEquals(new Integer(10), list.get(0).getAge());
+        Assert.assertEquals(new Integer(15), list.get(1).getAge());
+
+        /**
+         * 
+         * Joins query clauses with a logical AND returns all documents that
+         * match the conditions of both clauses.
+         * 
+         */
+        test = "{ $and : [{\"_id\":\"1\"},{ \"AGE\": 10 }]}";
+        list = em.createNativeQuery(test, PersonMongo.class).getResultList();
+        Assert.assertEquals(1, list.size());
+        Assert.assertEquals(new Integer(10), list.get(0).getAge());
+        Assert.assertEquals("1", list.get(0).getPersonId());
+
+        /**
+         * 
+         * Joins query clauses with a logical OR returns all documents that
+         * match the conditions of either clause.
+         * 
+         */
+        test = "{ $or : [{\"_id\":\"1\"},{ \"AGE\": 20 }]}";
+        list = em.createNativeQuery(test, PersonMongo.class).getResultList();
+        Assert.assertEquals(2, list.size());
+        Assert.assertEquals(new Integer(10), list.get(0).getAge());
+        Assert.assertEquals(new Integer(20), list.get(1).getAge());
+
+        test = "db.PERSON.findOne()";
+        list = em.createNativeQuery(test, PersonMongo.class).getResultList();
+        Assert.assertEquals(1, list.size());
+
+        test = "db.PERSON.find({ \"PERSON_NAME\":\"vivek\"})";
+        list = em.createNativeQuery(test, PersonMongo.class).getResultList();
+        Assert.assertEquals(3, list.size());
+        Assert.assertEquals("vivek", list.get(0).getPersonName());
+        Assert.assertEquals("vivek", list.get(1).getPersonName());
+        Assert.assertEquals("vivek", list.get(2).getPersonName());
+
+        test = "db.PERSON.aggregate([{ $match: { \"PERSON_NAME\": \"vivek\" } } ])";
+        list = em.createNativeQuery(test, PersonMongo.class).getResultList();
+        Assert.assertEquals(3, list.size());
+        Assert.assertEquals("vivek", list.get(0).getPersonName());
+        Assert.assertEquals("vivek", list.get(1).getPersonName());
+        Assert.assertEquals("vivek", list.get(2).getPersonName());
+
+        test = "db.PERSON.count()";
+        List count = em.createNativeQuery(test, PersonMongo.class).getResultList();
+        Assert.assertEquals((long) 3, count.get(0));
+
+        test = "db.PERSON.dataSize()";
+        count = em.createNativeQuery(test, PersonMongo.class).getResultList();
+        Assert.assertNotNull(count);
+
+        /**
+         * total allocated size to a collection
+         */
+        test = "db.PERSON.storageSize()";
+        count = em.createNativeQuery(test, PersonMongo.class).getResultList();
+        Assert.assertNotNull(count);
+
+        test = "db.PERSON.totalIndexSize()";
+        count = em.createNativeQuery(test, PersonMongo.class).getResultList();
+        Assert.assertNotNull(count);
+
+        /**
+         * Total size of Collection (documents+indexes)
+         * 
+         */
+        test = "db.PERSON.totalSize()";
+        count = em.createNativeQuery(test, PersonMongo.class).getResultList();
+        Assert.assertNotNull(count);
+
+        test = "db.PERSON.distinct(\"PERSON_NAME\")";
+        List distinctList = em.createNativeQuery(test, PersonMongo.class).getResultList();
+        Assert.assertEquals("vivek", distinctList.get(0));
+
+        test = "db.PERSON.findAndModify({query: { \"AGE\": 10},update: { $set: { \"PERSON_NAME\": \"dev\" } },new:true,upsert:true })";
+        list = em.createNativeQuery(test, PersonMongo.class).getResultList();
+        Assert.assertEquals("dev", list.get(0).getPersonName());
+    }
+
     @Test
     public void incrementFunctionTest()
     {
-    	Object p1 = prepareMongoInstance("1", 10);
+        Object p1 = prepareMongoInstance("1", 10);
         em.persist(p1);
-        
+
         String updateFunc = "UPDATE PersonMongo set age = INCREMENT(1) where personId = :personId";
         Query q = em.createQuery(updateFunc);
         q.setParameter("personId", "1");
         Assert.assertEquals(1, q.executeUpdate());
-        
+
         updateFunc = "UPDATE PersonMongo set age = DECREMENT(1) where personId = :personId";
         q = em.createQuery(updateFunc);
         q.setParameter("personId", "1");
         Assert.assertEquals(1, q.executeUpdate());
-        
+
         updateFunc = "UPDATE PersonMongo set age = DECREMENT(2)";
         q = em.createQuery(updateFunc);
         Assert.assertEquals(1, q.executeUpdate());
-        
+
         em.clear();
-        
+
         String query = "Select p from PersonMongo p ";
         q = em.createQuery(query);
         List<PersonMongo> results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(new Integer(8), results.get(0).getAge());
-        
+
         updateFunc = "UPDATE PersonMongo set age = INCREMENT(5)";
         q = em.createQuery(updateFunc);
         Assert.assertEquals(1, q.executeUpdate());
-        
+
         em.clear();
-        
+
         query = "Select p from PersonMongo p ";
         q = em.createQuery(query);
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(new Integer(13), results.get(0).getAge());
     }
-    
+
     @Test
     public void subQueryTest()
     {
-    	Object p1 = prepareMongoInstance("1", 10);
+        Object p1 = prepareMongoInstance("1", 10);
         Object p2 = prepareMongoInstance("2", 20);
         Object p3 = prepareMongoInstance("3", 15);
         em.persist(p1);
         em.persist(p2);
         em.persist(p3);
-    	
-    	String query = "Select p from PersonMongo p where p.personName <> :name and p.age NOT IN :ageList" +
-        		" and (personId = :personId)";
+
+        String query = "Select p from PersonMongo p where p.personName <> :name and p.age NOT IN :ageList"
+                + " and (personId = :personId)";
         Query q = em.createQuery(query);
         q.setParameter("name", "vivek");
-        q.setParameter("ageList", new ArrayList<Integer>(){{add(20);add(21);}});
+        q.setParameter("ageList", new ArrayList<Integer>()
+        {
+            {
+                add(20);
+                add(21);
+            }
+        });
         q.setParameter("personId", "1");
         List<PersonMongo> results = q.getResultList();
         Assert.assertNotNull(results);

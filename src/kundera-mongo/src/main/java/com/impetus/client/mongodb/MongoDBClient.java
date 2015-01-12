@@ -54,6 +54,7 @@ import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.utils.KunderaCoreUtils;
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -63,6 +64,8 @@ import com.mongodb.DBObject;
 import com.mongodb.DefaultDBEncoder;
 import com.mongodb.WriteConcern;
 import com.mongodb.WriteResult;
+import com.mongodb.util.JSON;
+import com.mongodb.util.JSONParseException;
 
 /**
  * Client class for MongoDB database.
@@ -961,6 +964,86 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         return result;
     }
 
+    /**
+     * @param jsonClause
+     * @param entityMetadata
+     * @return
+     */
+    public List executeQuery(String jsonClause, EntityMetadata entityMetadata) {
+        List entities = new ArrayList();
+        try {
+            DBCursor cursor = parseAndScroll(jsonClause, entityMetadata.getTableName());
+
+            while (cursor.hasNext()) {
+                DBObject fetchedDocument = cursor.next();
+
+                populateEntity(entityMetadata, entities, fetchedDocument);
+            }
+
+            return entities;
+        } catch (JSONParseException jex) {
+            return executeNativeQuery(jsonClause, entityMetadata);
+        }
+    }
+
+    public List executeNativeQuery(String jsonClause, EntityMetadata entityMetadata) {
+        List entities = new ArrayList();
+        String[] tempArray = jsonClause.split("\\.");
+        String tempClause = tempArray[tempArray.length - 1];
+
+        if (tempClause.contains("findOne(") || tempClause.contains("findAndModify(")) {
+            DBObject obj = (BasicDBObject) executeScript(jsonClause);
+            populateEntity(entityMetadata, entities, obj);
+            return entities;
+
+        } else if (tempClause.contains("find(") || jsonClause.contains("aggregate(")) {
+            jsonClause = jsonClause.concat(".toArray()");
+            BasicDBList list = (BasicDBList) executeScript(jsonClause);
+            for (int i = 0; i < list.size(); i++) {
+                populateEntity(entityMetadata, entities, (DBObject) list.get(i));
+            }
+            return entities;
+
+        } else if (tempClause.contains("count(") || tempClause.contains("dataSize(")
+            || tempClause.contains("storageSize(") || tempClause.contains("totalIndexSize(")
+            || tempClause.contains("totalSize(")) {
+            Long count = ((Double) executeScript(jsonClause)).longValue();
+            entities.add(count);
+            return entities;
+
+        } else if (tempClause.contains("distinct(")) {
+            BasicDBList list = (BasicDBList) executeScript(jsonClause);
+            for (int i = 0; i < list.size(); i++) {
+                entities.add(list.get(i));
+            }
+            return entities;
+
+        } else {
+            BasicDBList list = (BasicDBList) executeScript(jsonClause);
+            for (int i = 0; i < list.size(); i++) {
+                entities.add(list.get(i));
+            }
+            return entities;
+        }
+    }
+
+    /**
+     * @param jsonClause
+     * @param collectionName
+     * @return
+     * @throws JSONParseException
+     */
+    private DBCursor parseAndScroll(String jsonClause, String collectionName) throws JSONParseException {
+        BasicDBObject clause = (BasicDBObject) JSON.parse(jsonClause);
+        DBCursor cursor = mongoDb.getCollection(collectionName).find(clause);
+        return cursor;
+    }
+    
+    /**
+     * @param entityMetadata
+     * @param entities
+     * @param fetchedDocument
+     */
     private void populateEntity(EntityMetadata entityMetadata, List entities, DBObject fetchedDocument)
     {
         Map<String, Object> relationValue = null;
