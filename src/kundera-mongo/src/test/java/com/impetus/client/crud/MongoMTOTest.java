@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.impetus.client.crud;
 
+import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -23,6 +25,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
 
 import com.impetus.client.crud.entities.PersonMongoMTO;
 
@@ -75,6 +78,26 @@ public class MongoMTOTest
 
         em = getNewEM();
 
+        /**
+         * 
+         * Native Queries in case of Entities having Relations
+         * 
+         */
+        
+        String test = "db.PersonMongoMTO.findOne()";
+        List<PersonMongoMTO> list = em.createNativeQuery(test, PersonMongoMTO.class).getResultList();
+        Assert.assertEquals(1, list.size());
+        Assert.assertEquals("1", list.get(0).getPersonId());
+        
+        test = "db.PersonMongoMTO.find({ \"PERSON_NAME\":\"vivek\"})";
+        list = em.createNativeQuery(test, PersonMongoMTO.class).getResultList();
+        Assert.assertEquals(1, list.size());
+        Assert.assertEquals("vivek", list.get(0).getPersonName());
+        
+        test = "db.PersonMongoMTO.count()";
+        List count = em.createNativeQuery(test, PersonMongoMTO.class).getResultList();
+        Assert.assertEquals((long) 2, count.get(0));
+        
         PersonMongoMTO foundPerson1 = em.find(PersonMongoMTO.class, "1");
         Assert.assertNotNull(foundPerson1);
         Assert.assertNotNull(foundPerson1.getAddress());

@@ -979,10 +979,19 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
                 populateEntity(entityMetadata, entities, fetchedDocument);
             }
-
             return entities;
+            
         } catch (JSONParseException jex) {
-            return executeNativeQuery(jsonClause, entityMetadata);
+            entities = executeNativeQuery(jsonClause, entityMetadata);
+            List result= new ArrayList();
+            if (entities.get(0) instanceof EnhanceEntity)
+            {
+                for(int i =0;i<entities.size();i++){
+                   result.add(((EnhanceEntity) entities.get(i)).getEntity()) ;
+                }
+               return result;
+            }
+            return entities;
         }
     }
 
