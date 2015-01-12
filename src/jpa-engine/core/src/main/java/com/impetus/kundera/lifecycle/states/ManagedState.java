@@ -152,7 +152,7 @@ public class ManagedState extends NodeState
             {
                 // This entity has associated entities, find them recursively.
                 Map<Object, Object> relationStack = new HashMap<Object, Object>();
-                relationStack.put(nodeDataClass.getCanonicalName()+"@"+PropertyAccessorHelper.getId(entity, entityMetadata), entity);
+                relationStack.put(nodeDataClass.getCanonicalName()+"#"+PropertyAccessorHelper.getId(entity, entityMetadata), entity);
                 nodeData = reader.recursivelyFindEntities(ee.getEntity(), ee.getRelations(), entityMetadata,
                         nodeStateContext.getPersistenceDelegator(), false,relationStack);
             }

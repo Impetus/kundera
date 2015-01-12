@@ -227,7 +227,7 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
         {
             obj = ((EnhanceEntity) entity).getEntity();
         }
-        relationStack.put(obj.getClass().getCanonicalName() + "@" + PropertyAccessorHelper.getId(obj, m), obj);
+        relationStack.put(obj.getClass().getCanonicalName() + "#" + PropertyAccessorHelper.getId(obj, m), obj);
 
     }
 

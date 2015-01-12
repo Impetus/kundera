@@ -409,7 +409,7 @@ public class AbstractEntityReader
         {
             obj = ((EnhanceEntity) entity).getEntity();
         }
-        relationStack.put(obj.getClass().getCanonicalName() + "@" + PropertyAccessorHelper.getId(obj, m), obj);
+        relationStack.put(obj.getClass().getCanonicalName() + "#" + PropertyAccessorHelper.getId(obj, m), obj);
 
     }
 
@@ -428,7 +428,7 @@ public class AbstractEntityReader
             obj = ((EnhanceEntity) entity).getEntity();
         }
         return relationStack
-                .containsKey(obj.getClass().getCanonicalName() + "@" + PropertyAccessorHelper.getId(obj, m));
+                .containsKey(obj.getClass().getCanonicalName() + "#" + PropertyAccessorHelper.getId(obj, m));
     }
 
     // Fetches the object from stack
@@ -445,7 +445,7 @@ public class AbstractEntityReader
         {
             obj = ((EnhanceEntity) entity).getEntity();
         }
-        return relationStack.get(obj.getClass().getCanonicalName() + "@" + PropertyAccessorHelper.getId(obj, m));
+        return relationStack.get(obj.getClass().getCanonicalName() + "#" + PropertyAccessorHelper.getId(obj, m));
     }
 
     /**
