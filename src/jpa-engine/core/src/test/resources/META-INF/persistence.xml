@@ -64,6 +64,9 @@
 		<class>com.impetus.kundera.entity.photo.PhotoBi_M_M_1_1</class>
 		<class>com.impetus.kundera.entity.photo.PhotoBi_M_M_M_M</class>
 		<class>com.impetus.kundera.metadata.entities.SampleEntity</class>
+		<class>com.impetus.kundera.client.crud.associations.MobileHandset</class>
+		<class>com.impetus.kundera.client.crud.associations.MobileManufacturer</class>
+		<class>com.impetus.kundera.client.crud.associations.MobileOperatingSystem</class>
 		<!-- <class>com.impetus.kundera.metadata.entities.bi.AssociationBiEntity</class> 
 			<class>com.impetus.kundera.metadata.entities.bi.OToOOwnerBiEntity</class> -->
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
@@ -273,6 +276,8 @@
 		<class>com.impetus.kundera.metadata.processor.Circle</class>
 		<class>com.impetus.kundera.metadata.processor.Geometry</class>
 		<class>com.impetus.kundera.metadata.processor.Shape</class>
+		<class>com.impetus.kundera.metadata.mappedsuperclass.Person</class>
+		<class>com.impetus.kundera.metadata.mappedsuperclass.PersonChild</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<property name="kundera.nodes" value="localhost" />
@@ -289,7 +294,8 @@
 		<properties>
 		</properties>
 	</persistence-unit>
-
+	
+	
 </persistence>
 
 

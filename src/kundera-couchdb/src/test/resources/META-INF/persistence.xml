@@ -50,4 +50,20 @@
 				value="com.impetus.client.couchdb.CouchDBClientFactory" />
 		</properties>
 	</persistence-unit>
+	<persistence-unit name="couchdbMappedSuperClass_pu">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.kundera.metadata.mappedsuperclass.Person</class>
+		<class>com.impetus.kundera.metadata.mappedsuperclass.PersonChild</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="5984" />
+			<property name="kundera.keyspace" value="couchdatabase" />
+			<property name="kundera.dialect" value="couchdb" />
+			<property name="kundera.client" value="couchdb" />
+			<property name="kundera.ddl.auto.prepare" value="create" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.couchdb.CouchDBClientFactory" />
+		</properties>
+	</persistence-unit>
 </persistence>

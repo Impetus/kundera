@@ -76,5 +76,28 @@
 
 		</properties>
 	</persistence-unit>
+	<persistence-unit name="redisMappedSuperClass_pu">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.kundera.metadata.mappedsuperclass.Person</class>
+		<class>com.impetus.kundera.metadata.mappedsuperclass.PersonChild</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<!-- <property name="kundera.nodes" value="192.168.145.168" /> -->
+			<property name="kundera.port" value="6379" />
+			<property name="kundera.keyspace" value="RedisK" />
+			<property name="kundera.dialect" value="redis" />
+			<property name="kundera.client" value="redis" />
+			<property name="kundera.client.lookup.class" value="com.impetus.client.redis.RedisClientFactory" />
+			<property name="kundera.password" value="Kundera@123" />
+			<!-- <property name="kundera.transaction.timeout" value="30" /> -->
+			<!-- <property name="kundera.pool.size.max.active" value="10" /> -->
+			<!-- <property name="kundera.client.property" value="RedisTest.xml" /> -->
+			<property name="kundera.transaction.resource.class" value="com.impetus.client.redis.RedisTransaction" />
+			<property name="kundera.indexer.class" value="com.impetus.client.redis.RedisIndexer" />
+		
+
+		</properties>
+	</persistence-unit>
 
 </persistence>

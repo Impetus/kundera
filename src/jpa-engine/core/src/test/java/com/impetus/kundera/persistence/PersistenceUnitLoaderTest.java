@@ -97,7 +97,7 @@ public class PersistenceUnitLoaderTest
                 // Assert.assertEquals(2,
                 // metadatas.get(0).getJarFiles().size());
 
-                Assert.assertEquals(53, metadatas.get(0).getClasses().size());
+                Assert.assertEquals(56, metadatas.get(0).getClasses().size());
                 Assert.assertNotNull(metadatas.get(0).getPersistenceUnitRootUrl());
                 Assert.assertTrue(metadatas.get(0).getPersistenceUnitRootUrl().getPath().endsWith(_pattern));
             }

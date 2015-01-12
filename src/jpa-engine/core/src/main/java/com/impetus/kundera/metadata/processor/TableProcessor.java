@@ -145,6 +145,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
             EntityType entityType = (EntityType) metaModelBuilder.getManagedTypes().get(metadata.getEntityClazz());
 
             validateAndSetId(metadata, clazz, metaModelBuilder);
+            validateandSetEntityType(metadata, clazz, metaModelBuilder);
             MetadataUtils.onJPAColumnMapping(entityType, metadata);
 
             /* Scan for Relationship field */
@@ -369,6 +370,32 @@ public class TableProcessor extends AbstractEntityFieldProcessor
         }
 
         validateIdAttribute(metadata.getIdAttribute(), clazz);
+    }
+    
+    /**
+     * 
+     * @param metadata
+     * @param clazz
+     * @param metaModelBuilder
+     */
+    private <X, T> void validateandSetEntityType(EntityMetadata metadata, Class<X> clazz,
+            MetaModelBuilder<X, T> metaModelBuilder)
+    {
+        if (metadata.getType() == null && clazz != null && !clazz.equals(Object.class) 
+                            && clazz.isAnnotationPresent(javax.persistence.Entity.class))
+        {
+            EntityType entityType = (EntityType) metaModelBuilder.getManagedTypes().get(clazz);
+
+            if (entityType.getSupertype() != null)
+            {
+                for (Field f : clazz.getSuperclass().getDeclaredFields())
+                {
+                    onFamilyType(metadata, clazz, f);
+                }
+            }
+            validateandSetEntityType(metadata, (Class<X>) clazz.getSuperclass(), metaModelBuilder);
+        }
+
     }
 
     /**
