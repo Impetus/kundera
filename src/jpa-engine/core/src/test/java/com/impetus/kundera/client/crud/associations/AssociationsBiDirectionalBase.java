@@ -26,12 +26,12 @@ import junit.framework.Assert;
 
 /**
  * @author Pragalbh Garg
- *
+ * 
  */
-public abstract class AssociationsBiDirectionalBase
+public class AssociationsBiDirectionalBase
 {
 
-    protected String _PU = "corePu";
+    protected String _PU = "kunderatest";
 
     /** The emf. */
     protected static EntityManagerFactory emf;
@@ -44,9 +44,14 @@ public abstract class AssociationsBiDirectionalBase
         emf = Persistence.createEntityManagerFactory(_PU);
         em = emf.createEntityManager();
     }
-    
-    protected void assertBegin(){
+
+    protected void assertBegin()
+    {
         init();
+
+        MobileHandset mobile = em.find(MobileHandset.class, "m1");
+        Assert.assertNotNull(mobile);
+        Assert.assertEquals("manufacturer1", mobile.getManufacturer().getName());
         
         String qry = "select m from MobileHandset m";
         Query query = em.createQuery(qry);
@@ -55,13 +60,85 @@ public abstract class AssociationsBiDirectionalBase
         Assert.assertNotNull(result.get(0));
         Assert.assertNotNull(result.get(0).getManufacturer());
         Assert.assertNotNull(result.get(0).getOs());
-        
+
         Assert.assertNotNull(result.get(0).getManufacturer().getHandsets());
         Assert.assertNotNull(result.get(0).getOs().getHandsets());
 
+       
+
+        qry = "select m from MobileHandset m where m.id = :id";
+        query = em.createQuery(qry);
+        query.setParameter("id", "m1");
+        result = query.getResultList();
+        Assert.assertNotNull(result);
+        Assert.assertEquals(1, result.size());
+        Assert.assertEquals("os1", result.get(0).getOs().getName());
+
+        qry = "select o from MobileOperatingSystem o";
+        query = em.createQuery(qry);
+        List<MobileOperatingSystem> result2 = query.getResultList();
+        Assert.assertNotNull(result2);
+        Assert.assertEquals(2, result2.size());
+
+        qry = "select o from MobileOperatingSystem o where o.id = :id";
+        query = em.createQuery(qry);
+        query.setParameter("id", "o1");
+        result2 = query.getResultList();
+        Assert.assertNotNull(result2);
+        Assert.assertEquals(1, result2.size());
+        Assert.assertEquals(3, result2.get(0).getHandsets().size());
+        Assert.assertEquals("os1", result2.get(0).getName());
+
+        qry = "select m from MobileManufacturer m";
+        query = em.createQuery(qry);
+        List<MobileManufacturer> result3 = query.getResultList();
+        Assert.assertNotNull(result3);
+        Assert.assertEquals(2, result3.size());
+
+        qry = "select m from MobileManufacturer m where m.id = :id";
+        query = em.createQuery(qry);
+        query.setParameter("id", "ma1");
+        result3 = query.getResultList();
+        Assert.assertNotNull(result3);
+        Assert.assertEquals(1, result3.size());
+        Assert.assertEquals(3, result3.get(0).getHandsets().size());
+        Assert.assertEquals("manufacturer1", result3.get(0).getName());
+    }
+    
+    protected void assertCRUD(){
+        init();
+        
         MobileHandset mobile = em.find(MobileHandset.class, "m1");
         Assert.assertNotNull(mobile);
-        Assert.assertEquals("manufacturer1",mobile.getManufacturer().getName());
+        Assert.assertEquals("manufacturer1", mobile.getManufacturer().getName());
+        
+        mobile = em.find(MobileHandset.class, "m4");
+        Assert.assertNotNull(mobile);
+        Assert.assertEquals("manufacturer2", mobile.getManufacturer().getName());
+        
+        mobile = em.find(MobileHandset.class, "m2");
+        Assert.assertNotNull(mobile);
+        Assert.assertEquals("os1", mobile.getOs().getName());
+        
+        mobile = em.find(MobileHandset.class, "m3");
+        Assert.assertNotNull(mobile);
+        Assert.assertEquals("os2", mobile.getOs().getName());
+        
+        MobileOperatingSystem os = em.find(MobileOperatingSystem.class, "o1");
+        Assert.assertNotNull(os);
+        Assert.assertEquals("os1", os.getName());
+        
+        os = em.find(MobileOperatingSystem.class, "o2");
+        Assert.assertNotNull(os);
+        Assert.assertEquals("os2", os.getName());
+        
+        MobileManufacturer manu = em.find(MobileManufacturer.class, "ma1");
+        Assert.assertNotNull(manu);
+        Assert.assertEquals("manufacturer1", manu.getName());
+
+        manu = em.find(MobileManufacturer.class, "ma2");
+        Assert.assertNotNull(manu);
+        Assert.assertEquals("manufacturer2", manu.getName());
     }
 
     protected void init()
