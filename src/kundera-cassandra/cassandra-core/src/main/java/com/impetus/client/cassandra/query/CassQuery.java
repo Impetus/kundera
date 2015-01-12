@@ -796,12 +796,24 @@ public class CassQuery extends QueryImpl
                 }
                 else
                 {
-                    Metamodel metamodel = KunderaMetadataManager.getMetamodel(kunderaMetadata, m.getPersistenceUnit());
-                    Attribute attribute = ((MetamodelImpl) metamodel).getEntityAttribute(m.getEntityClazz(),
-                            m.getFieldName(fieldName));
+                    EntityType entity = metaModel.entity(m.getEntityClazz());
+//                    Metamodel metamodel = KunderaMetadataManager.getMetamodel(kunderaMetadata, m.getPersistenceUnit());
+                    String discriminatorColumn = ((AbstractManagedType) entity).getDiscriminatorColumn();
+                    if(fieldName.equals(discriminatorColumn))
+                    {
+                    translator.buildWhereClause(builder, String.class, fieldName,
+                                value.isEmpty() ? null : value.get(0), condition, false);
+                    isPresent = true;
+                    
+                    } else
+                    {
+                        Metamodel metamodel = KunderaMetadataManager.getMetamodel(kunderaMetadata, m.getPersistenceUnit());
+                        Attribute attribute = ((MetamodelImpl) metamodel).getEntityAttribute(m.getEntityClazz(),
+                                m.getFieldName(fieldName));
 
-                    isPresent = buildWhereClause(builder, isPresent, translator, condition, value, useInClause,
-                            ((AbstractAttribute) attribute), fieldName, false);
+                        isPresent = buildWhereClause(builder, isPresent, translator, condition, value, useInClause,
+                                ((AbstractAttribute) attribute), fieldName, false);
+                    }
 
                     allowFiltering = true;
                 }
