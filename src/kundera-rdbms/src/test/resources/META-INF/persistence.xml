@@ -102,5 +102,19 @@
 			<!-- <property name="kundera.keyspace" value="KunderaTests" /> -->
 		</properties>
 	</persistence-unit>
+	
+	<persistence-unit name="RdbmsMappedSUTest">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.kundera.metadata.mappedsuperclass.Person</class>
+		<class>com.impetus.kundera.metadata.mappedsuperclass.PersonChild</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.client.lookup.class" value="com.impetus.client.rdbms.RDBMSClientFactory" />
+			<property name="hibernate.hbm2ddl.auto" value="create-drop" />
+			<!-- <property name="hibernate.max_fetch_depth" value="0" /> -->
+			<property name="kundera.client.property" value="hibernate.properties" />
+			<!-- <property name="kundera.keyspace" value="KunderaTests" /> -->
+		</properties>
+	</persistence-unit>
 
 </persistence>
