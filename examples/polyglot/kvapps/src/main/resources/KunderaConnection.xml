@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<clientProperties>
+    <datastores>
+        <dataStore>
+        <name>cassandra</name>
+            <connection>
+            <properties>
+            <property name="cql.version" value="3.0.0"></property>                  
+        </properties>
+        </connection>
+
+    </dataStore>
+    </datastores>
+</clientProperties>
