@@ -32,7 +32,6 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.impetus.kundera.annotations.Index;
 import com.impetus.kundera.index.IndexCollection;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.PropertyIndex;
@@ -61,7 +60,7 @@ public class IndexProcessor extends AbstractEntityFieldProcessor
         {
             metadata.setIndexName(clazz.getSimpleName());
         }
-        Index idx = clazz.getAnnotation(Index.class);
+        
 
         IndexCollection indexes = clazz.getAnnotation(IndexCollection.class);
 
@@ -90,29 +89,6 @@ public class IndexProcessor extends AbstractEntityFieldProcessor
                     else
                     {
                         indexedColumnsMap.put(indexedColumn.name(), indexedColumn);
-                    }
-                }
-            }
-        }
-        else if (null != idx)
-        {
-            boolean isIndexable = idx.index();
-
-            if (isIndexable)
-            {
-                metadata.setIndexable(isIndexable);
-
-                String indexName = idx.name();
-                if (indexName != null && !indexName.isEmpty())
-                {
-                    metadata.setIndexName(indexName);
-                }
-
-                if (idx.columns() != null && idx.columns().length != 0)
-                {
-                    for (String indexedColumn : idx.columns())
-                    {
-                        columnsNameToBeIndexed.add(indexedColumn);
                     }
                 }
             }
@@ -182,7 +158,7 @@ public class IndexProcessor extends AbstractEntityFieldProcessor
     public static Map<String, PropertyIndex> getIndexesOnEmbeddable(Class<?> entityClazz)
     {
         Map<String, PropertyIndex> pis = new HashMap<String, PropertyIndex>();
-        Index idx = entityClazz.getAnnotation(Index.class);
+       
         IndexCollection indexes = entityClazz.getAnnotation(IndexCollection.class);
         List<String> columnsNameToBeIndexed = null;
         Map<String, com.impetus.kundera.index.Index> columnsToBeIndexed = null;
@@ -197,17 +173,7 @@ public class IndexProcessor extends AbstractEntityFieldProcessor
                 }
             }
         }
-        if (null != idx)
-        {
-            columnsNameToBeIndexed = new ArrayList<String>();
-            if (idx.columns() != null && idx.columns().length != 0)
-            {
-                for (String indexedColumn : idx.columns())
-                {
-                    columnsNameToBeIndexed.add(indexedColumn);
-                }
-            }
-        }
+       
         getPropertyIndexes(entityClazz, pis, columnsNameToBeIndexed, columnsToBeIndexed);
         return pis;
     }

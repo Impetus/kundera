@@ -51,7 +51,6 @@ import org.apache.commons.lang.StringUtils;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.annotations.Index;
 import com.impetus.kundera.index.IndexCollection;
 import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -521,26 +520,20 @@ public class MetadataUtils
     public static boolean isEmbeddedAtributeIndexable(Field embeddedField)
     {
         Class<?> embeddableClass = PropertyAccessorHelper.getGenericClass(embeddedField);
-        Index indexAnn = embeddableClass.getAnnotation(Index.class);
+    
         IndexCollection indexCollection = embeddableClass.getAnnotation(IndexCollection.class);
         if (indexCollection != null && indexCollection.columns() != null)
         {
             return true;
         }
-        else if (indexAnn != null)
-        {
-            if (indexAnn.index())
-            {
-                return true;
-            }
-        }
+      
         return false;
     }
 
     public static boolean isColumnInEmbeddableIndexable(Field embeddedField, String columnFieldName)
     {
         Class<?> embeddableClass = PropertyAccessorHelper.getGenericClass(embeddedField);
-        Index indexAnn = embeddableClass.getAnnotation(Index.class);
+       
         IndexCollection indexCollection = embeddableClass.getAnnotation(IndexCollection.class);
         if (indexCollection != null && indexCollection.columns() != null)
         {
@@ -553,14 +546,7 @@ public class MetadataUtils
                 }
             }
         }
-        else if (indexAnn != null && indexAnn.index())
-        {
-            String[] columnsToBeIndexed = indexAnn.columns();
-            if (columnFieldName != null && Arrays.asList(columnsToBeIndexed).contains(columnFieldName))
-            {
-                return true;
-            }
-        }
+     
         return false;
     }
 

@@ -24,7 +24,10 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import com.impetus.kundera.annotations.Index;
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
+
+
 
 /**
  * @author vivek.mishra
@@ -38,7 +41,7 @@ import com.impetus.kundera.annotations.Index;
  */
 @Entity
 @Table(name = "tweets", schema = "KunderaTests@secIdxAddCassandra")
-@Index(columns = { "body", "tweeted_at","user_id"}, index = true)
+@IndexCollection(columns = { @Index(name = "body"),  @Index(name = "tweetDate")})
 public class Tweets
 {
 

@@ -21,7 +21,8 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import com.impetus.kundera.annotations.Index;
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
 
 /**
  * @author Kuldeep Mishra
@@ -29,7 +30,7 @@ import com.impetus.kundera.annotations.Index;
  */
 @Entity
 @Table(name = "EMPLOYE", schema = "KunderaMetaDataTest@metaDataTest")
-@Index(index = true, columns = { "empName", "age" })
+@IndexCollection(columns = { @Index(name = "empName"), @Index(name = "age")})
 public class Employe
 {
 

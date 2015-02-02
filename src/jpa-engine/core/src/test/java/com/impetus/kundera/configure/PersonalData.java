@@ -18,13 +18,14 @@ package com.impetus.kundera.configure;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
-import com.impetus.kundera.annotations.Index;
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
 
 /**
  * The Class CorePersonalData.
  */
 @Embeddable
-@Index(index = true, columns = { "email", "yahooId" })
+@IndexCollection(columns = { @Index(name = "email"), @Index(name = "yahooId")})
 public class PersonalData
 {
 
