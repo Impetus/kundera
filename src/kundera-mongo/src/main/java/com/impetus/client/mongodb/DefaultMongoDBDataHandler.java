@@ -74,7 +74,8 @@ public final class DefaultMongoDBDataHandler implements MongoDBDataHandler
      * @return the entity from document
      */
     public Map<String, Object> getEntityFromDocument(Class<?> entityClass, Object entity, EntityMetadata m,
-            DBObject document, List<String> relations, Map<String, Object> relationValue, final KunderaMetadata kunderaMetadata)
+            DBObject document, List<String> relations, Map<String, Object> relationValue,
+            final KunderaMetadata kunderaMetadata)
     {
         // Map to hold property-name=>foreign-entity relations
         try
@@ -141,12 +142,14 @@ public final class DefaultMongoDBDataHandler implements MongoDBDataHandler
                             if (colValue != null)
                             {
                                 String colFieldName = m.getFieldName(jpaColumnName);
-                                Attribute attribute = colFieldName != null ? entityType.getAttribute(colFieldName)
-                                        : null;
-                                EntityMetadata relationMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, attribute
-                                        .getJavaType());
+
+                                EntityMetadata relationMetadata = KunderaMetadataManager.getEntityMetadata(
+                                        kunderaMetadata, ((AbstractAttribute) entityType.getAttribute(colFieldName))
+                                                .getBindableJavaType());
+
                                 colValue = MongoDBUtils.getTranslatedObject(colValue, colValue.getClass(),
                                         relationMetadata.getIdAttribute().getJavaType());
+
                             }
                             relationValue.put(jpaColumnName, colValue);
                         }
@@ -185,8 +188,8 @@ public final class DefaultMongoDBDataHandler implements MongoDBDataHandler
      * @throws PropertyAccessException
      *             the property access exception
      */
-    public Map<String, DBObject> getDocumentFromEntity(EntityMetadata m, Object entity, List<RelationHolder> relations, final KunderaMetadata kunderaMetadata)
-            throws PropertyAccessException
+    public Map<String, DBObject> getDocumentFromEntity(EntityMetadata m, Object entity, List<RelationHolder> relations,
+            final KunderaMetadata kunderaMetadata) throws PropertyAccessException
     {
         Map<String, DBObject> dbObjects = new HashMap<String, DBObject>();
 
@@ -298,8 +301,9 @@ public final class DefaultMongoDBDataHandler implements MongoDBDataHandler
      * @throws InstantiationException
      */
     public List getEmbeddedObjectList(DBCollection dbCollection, EntityMetadata m, String documentName,
-            BasicDBObject mongoQuery, String result, BasicDBObject orderBy, int maxResult, int firstResult, BasicDBObject keys, final KunderaMetadata kunderaMetadata)
-            throws PropertyAccessException, InstantiationException, IllegalAccessException
+            BasicDBObject mongoQuery, String result, BasicDBObject orderBy, int maxResult, int firstResult,
+            BasicDBObject keys, final KunderaMetadata kunderaMetadata) throws PropertyAccessException,
+            InstantiationException, IllegalAccessException
     {
         List list = new ArrayList();// List of embedded object to be returned
 
@@ -346,8 +350,9 @@ public final class DefaultMongoDBDataHandler implements MongoDBDataHandler
         }
 
         // Query for fetching entities based on user specified criteria
-        DBCursor cursor = orderBy != null ? dbCollection.find(mongoQuery, keys).sort(orderBy) : dbCollection.find(
-                mongoQuery, keys).limit(maxResult).skip(firstResult);;
+        DBCursor cursor = orderBy != null ? dbCollection.find(mongoQuery, keys).sort(orderBy) : dbCollection
+                .find(mongoQuery, keys).limit(maxResult).skip(firstResult);
+        ;
 
         if (superColumn != null)
         {

@@ -365,8 +365,7 @@ public class AbstractEntityReader
                         {
                             for (Object immediateRelation : immediateRelations)
                             {
-                                if (immediateRelation != null
-                                        && !compareTo(getEntity(immediateRelation), originalEntity))
+                                if (immediateRelation != null )
                                 {
                                     if (existsInRelationStack(relationStack, immediateRelation, targetEntityMetadata))
                                     {
@@ -381,7 +380,7 @@ public class AbstractEntityReader
                                         addToRelationStack(relationStack, immediateRelation, targetEntityMetadata);
                                         onParseRelation(relationEntity, pd, targetEntityMetadata, immediateRelation,
                                                 relation, lazilyloaded, relationStack);
-                                        setRelationToEntity(relationEntity, originalEntity, relation);
+                                      
 
                                     }
                                     PersistenceCacheManager.addEntityToPersistenceCache(getEntity(relationEntity), pd,
