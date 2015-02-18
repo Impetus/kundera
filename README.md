@@ -1,4 +1,4 @@
-Coming soon...<b>Kundera Meetup ! </b>
+Coming soon...<b>Kundera Meetup ! </b>            
 Please cast your vote at https://www.surveymonkey.com/s/QJQBNGV
 
 Overview
