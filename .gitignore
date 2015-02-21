@@ -2,6 +2,7 @@
 *.iws
 *.iml
 *.ipr
+.idea
 target/
 test-output/
 
