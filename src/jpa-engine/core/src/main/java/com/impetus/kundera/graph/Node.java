@@ -428,7 +428,7 @@ public class Node implements NodeStateContext
     @Override
     public int hashCode()
     {
-        return HashCodeBuilder.reflectionHashCode(this);
+        return HashCodeBuilder.reflectionHashCode(this.nodeId);
     }
 
     // ////////////////////////////////////////
