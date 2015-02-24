@@ -15,6 +15,9 @@
  ******************************************************************************/
 package com.impetus.kundera.validation.rules;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
+
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.MappedSuperclass;
@@ -22,8 +25,7 @@ import javax.persistence.MappedSuperclass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EntityAnnotationRule extends AbstractEntityRule implements EntityRule
-{
+public class EntityAnnotationRule extends AbstractEntityRule implements EntityRule {
 
     /** The Constant log. */
     private static final Logger log = LoggerFactory.getLogger(EntityAnnotationRule.class);
@@ -31,36 +33,38 @@ public class EntityAnnotationRule extends AbstractEntityRule implements EntityRu
     /*
      * (non-Javadoc)
      * 
-     * @see
-     * com.impetus.kundera.validation.rules.AbstractEntityRule#validate(java
-     * .lang.Class)
+     * @see com.impetus.kundera.validation.rules.AbstractEntityRule#validate(java .lang.Class)
      */
     @Override
-    public void validate(Class<?> clazz)
-    {
+    public void validate(Class<?> clazz) {
 
         if (log.isDebugEnabled())
             log.debug("Validating " + clazz.getName());
 
         // Is Entity?
-        if (!checkValidClass(clazz))
-        {
+        if (!checkValidClass(clazz)) {
 
             throw new RuleValidationException(clazz.getName() + " is not a valid jpa entity.");
         }
 
         // must have a default no-argument constructor
-        try
-        {
-            clazz.getConstructor();
+        boolean flag = false;
+        try {
+            Constructor[] constructors = clazz.getDeclaredConstructors();
+            for (Constructor constructor : constructors) {
+                if ((Modifier.isPublic(constructor.getModifiers()) || Modifier.isProtected(constructor.getModifiers()))
+                    && constructor.getParameterTypes().length == 0) {
+                    flag = true;
+                    break;
+                }
+            }
+            if (!flag) {
+                throw new Exception();
+            }
+        } catch (Exception e) {
+            throw new RuleValidationException(clazz.getName()
+                + " must have a default public or protected no-argument constructor.");
         }
-        catch (NoSuchMethodException nsme)
-        {
-
-            throw new RuleValidationException(clazz.getName() + " must have a default no-argument constructor.");
-
-        }
-
     }
 
     /**
@@ -69,10 +73,9 @@ public class EntityAnnotationRule extends AbstractEntityRule implements EntityRu
      * @param clazz
      * @return
      */
-    private boolean checkValidClass(Class<?> clazz)
-    {
+    private boolean checkValidClass(Class<?> clazz) {
         return clazz.isAnnotationPresent(Entity.class) || clazz.isAnnotationPresent(MappedSuperclass.class)
-                || clazz.isAnnotationPresent(Embeddable.class);
+            || clazz.isAnnotationPresent(Embeddable.class);
 
     }
 
