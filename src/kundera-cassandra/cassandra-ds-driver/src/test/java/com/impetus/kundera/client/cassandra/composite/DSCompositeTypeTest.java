@@ -690,7 +690,7 @@ public class DSCompositeTypeTest
         client = clients.get(PERSISTENCE_UNIT);
         ((CassandraClientBase) client).setCqlVersion("3.0.0");
 
-        String updateQuery = "Update PrimeUser u SET u.tweetBody=after merge where u.key= :beforeUpdate";
+        String updateQuery = "Update PrimeUser u SET u.tweetBody='after merge' where u.key= :beforeUpdate";
         Query q = em.createQuery(updateQuery);
         q.setParameter("beforeUpdate", key);
         q.executeUpdate();
