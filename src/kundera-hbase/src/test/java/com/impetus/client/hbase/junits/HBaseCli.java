@@ -197,7 +197,7 @@ public class HBaseCli
             utility.getHBaseAdmin().disableTable(tableName);
             utility.getHBaseAdmin().addColumn(tableName, new HColumnDescriptor(columnFamily));
             utility.getHBaseAdmin().enableTable(tableName);
-            while (utility.getHBaseAdmin().isTableEnabled(columnFamily))
+            while (utility.getHBaseAdmin().isTableEnabled(tableName))
             {
                 return;
             }
