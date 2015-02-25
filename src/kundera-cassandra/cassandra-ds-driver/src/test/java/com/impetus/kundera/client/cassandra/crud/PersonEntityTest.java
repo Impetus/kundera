@@ -172,14 +172,14 @@ public class PersonEntityTest extends BaseTest
         Assert.assertNotNull(p);
         Assert.assertEquals("'after merge'", p.getPersonName());
 
-        String updateQuery = "update PersonCassandra p set p.personName=''KK MISHRA'' where p.personId=1";
+        String updateQuery = "update PersonCassandra p set p.personName='KK MISHRA' where p.personId=1";
         q = entityManager.createQuery(updateQuery);
         q.executeUpdate();
 
         entityManager.clear();
         p = findById(PersonCassandra.class, "1", entityManager);
         Assert.assertNotNull(p);
-        Assert.assertEquals("'KK MISHRA'", p.getPersonName());
+        Assert.assertEquals("KK MISHRA", p.getPersonName());
 
         testCountResult();
         // Delete without WHERE clause.
