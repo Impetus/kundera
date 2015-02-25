@@ -455,7 +455,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             BasicDBObject keys, String documentName, boolean isCountQuery)
     {
         DBCollection dbCollection = mongoDb.getCollection(documentName);
-       
+
         DBCursor cursor = null;
         if (isCountQuery)
             return dbCollection.count(mongoQuery);
@@ -504,7 +504,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             DBCollection dbCollection = mongoDb.getCollection(collectionName);
             dbCollection.remove(query, getWriteConcern(), encoder);
         }
-        
+
         getIndexManager().remove(entityMetadata, entity, pKey);
     }
 
@@ -969,68 +969,87 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      * @param entityMetadata
      * @return
      */
-    public List executeQuery(String jsonClause, EntityMetadata entityMetadata) {
+    public List executeQuery(String jsonClause, EntityMetadata entityMetadata)
+    {
         List entities = new ArrayList();
-        try {
+        try
+        {
             DBCursor cursor = parseAndScroll(jsonClause, entityMetadata.getTableName());
 
-            while (cursor.hasNext()) {
+            while (cursor.hasNext())
+            {
                 DBObject fetchedDocument = cursor.next();
 
                 populateEntity(entityMetadata, entities, fetchedDocument);
             }
             return entities;
-            
-        } catch (JSONParseException jex) {
+
+        }
+        catch (JSONParseException jex)
+        {
             entities = executeNativeQuery(jsonClause, entityMetadata);
-            List result= new ArrayList();
+            List result = new ArrayList();
             if (entities.get(0) instanceof EnhanceEntity)
             {
-                for(int i =0;i<entities.size();i++){
-                   result.add(((EnhanceEntity) entities.get(i)).getEntity()) ;
+                for (Object obj : entities)
+                {
+                    result.add(((EnhanceEntity) obj).getEntity());
                 }
-               return result;
+                return result;
             }
             return entities;
         }
     }
 
-    public List executeNativeQuery(String jsonClause, EntityMetadata entityMetadata) {
+    public List executeNativeQuery(String jsonClause, EntityMetadata entityMetadata)
+    {
         List entities = new ArrayList();
         String[] tempArray = jsonClause.split("\\.");
         String tempClause = tempArray[tempArray.length - 1];
 
-        if (tempClause.contains("findOne(") || tempClause.contains("findAndModify(")) {
+        if (tempClause.contains("findOne(") || tempClause.contains("findAndModify("))
+        {
             DBObject obj = (BasicDBObject) executeScript(jsonClause);
             populateEntity(entityMetadata, entities, obj);
             return entities;
 
-        } else if (tempClause.contains("find(") || jsonClause.contains("aggregate(")) {
+        }
+        else if (tempClause.contains("find(") || jsonClause.contains("aggregate("))
+        {
             jsonClause = jsonClause.concat(".toArray()");
             BasicDBList list = (BasicDBList) executeScript(jsonClause);
-            for (int i = 0; i < list.size(); i++) {
-                populateEntity(entityMetadata, entities, (DBObject) list.get(i));
+            for (Object obj : list)
+            {
+                populateEntity(entityMetadata, entities, (DBObject) obj);
             }
             return entities;
 
-        } else if (tempClause.contains("count(") || tempClause.contains("dataSize(")
-            || tempClause.contains("storageSize(") || tempClause.contains("totalIndexSize(")
-            || tempClause.contains("totalSize(")) {
+        }
+        else if (tempClause.contains("count(") || tempClause.contains("dataSize(")
+                || tempClause.contains("storageSize(") || tempClause.contains("totalIndexSize(")
+                || tempClause.contains("totalSize("))
+        {
             Long count = ((Double) executeScript(jsonClause)).longValue();
             entities.add(count);
             return entities;
 
-        } else if (tempClause.contains("distinct(")) {
+        }
+        else if (tempClause.contains("distinct("))
+        {
             BasicDBList list = (BasicDBList) executeScript(jsonClause);
-            for (int i = 0; i < list.size(); i++) {
-                entities.add(list.get(i));
+            for (Object obj : list)
+            {
+                entities.add(obj);
             }
             return entities;
 
-        } else {
+        }
+        else
+        {
             BasicDBList list = (BasicDBList) executeScript(jsonClause);
-            for (int i = 0; i < list.size(); i++) {
-                entities.add(list.get(i));
+            for (Object obj : list)
+            {
+                entities.add(obj);
             }
             return entities;
         }
@@ -1042,12 +1061,13 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      * @return
      * @throws JSONParseException
      */
-    private DBCursor parseAndScroll(String jsonClause, String collectionName) throws JSONParseException {
+    private DBCursor parseAndScroll(String jsonClause, String collectionName) throws JSONParseException
+    {
         BasicDBObject clause = (BasicDBObject) JSON.parse(jsonClause);
         DBCursor cursor = mongoDb.getCollection(collectionName).find(clause);
         return cursor;
     }
-    
+
     /**
      * @param entityMetadata
      * @param entities
