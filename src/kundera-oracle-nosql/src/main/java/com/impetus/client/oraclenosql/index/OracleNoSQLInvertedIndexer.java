@@ -37,13 +37,17 @@ import oracle.kv.Value;
 import com.impetus.client.oraclenosql.OracleNOSQLConstants;
 import com.impetus.client.oraclenosql.OracleNoSQLDataHandler;
 import com.impetus.client.oraclenosql.query.OracleNoSQLQueryInterpreter;
+import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.index.Indexer;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
+import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 
 /**
@@ -336,4 +340,11 @@ public class OracleNoSQLInvertedIndexer implements Indexer
     {
         return entityMetadata.getIndexName() + OracleNOSQLConstants.SECONDARY_INDEX_SUFFIX;
     }
+
+	@Override
+	public Map<String, Object> search(KunderaMetadata kunderaMetadata,
+			KunderaQuery kunderaQuery,
+			PersistenceDelegator persistenceDelegator, EntityMetadata m) {
+		throw new KunderaException("Unsupported Method");
+	}
 }

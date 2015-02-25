@@ -31,6 +31,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PropertyIndex;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -371,6 +372,11 @@ public class IndexManager
             }
         }
         return new HashMap<String, Object>();
+    }
+    
+    public final Map<String, Object> search(KunderaMetadata kunderaMetadata, KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator, EntityMetadata m)
+    {
+    	return indexer.search(kunderaMetadata, kunderaQuery, persistenceDelegator, m);
     }
 
     /**

@@ -49,7 +49,7 @@ public class EntityTransactionTest
         em = emf.createEntityManager();
     }
 
-    @Test
+//    @Test
     public void testRollback()
     {
 

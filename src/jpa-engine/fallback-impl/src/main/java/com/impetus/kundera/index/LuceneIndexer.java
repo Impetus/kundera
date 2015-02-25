@@ -21,7 +21,6 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -56,8 +55,10 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
+import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.utils.KunderaCoreUtils;
 import com.impetus.kundera.utils.ReflectUtils;
 
@@ -858,5 +859,13 @@ public class LuceneIndexer extends DocumentIndexer {
         updateOrCreateIndex(metadata, metaModel, entity, parentId, entity.getClass(), true);
         onCommit();
     }
+
+	@Override
+	public Map<String, Object> search(KunderaMetadata kunderaMetadata,
+			KunderaQuery kunderaQuery,
+			PersistenceDelegator persistenceDelegator, EntityMetadata m) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }

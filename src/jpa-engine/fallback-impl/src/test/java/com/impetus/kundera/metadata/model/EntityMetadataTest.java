@@ -108,7 +108,7 @@ public class EntityMetadataTest
 
     private void onFindCallBack(EntityManager em)
     {
-        String query = "Selcet p from PersonEventDispatch p";
+        String query = "Select p from PersonEventDispatch p";
 
         Query q = em.createQuery(query);
 

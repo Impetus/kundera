@@ -29,9 +29,11 @@ public class PersonES
     @Column(name = "ENUM")
     @Enumerated(EnumType.STRING)
     private Day day;
+    
+    @Column(name = "SALARY")
+    private Double salary;   
 
-
-    /**
+	/**
      * Gets the person id.
      * 
      * @return the person id
@@ -106,6 +108,14 @@ public class PersonES
     {
         this.day = day;
     }
+    
+    public Double getSalary() {
+		return salary;
+	}
+
+	public void setSalary(Double salary) {
+		this.salary = salary;
+	}
 
 
     enum Day

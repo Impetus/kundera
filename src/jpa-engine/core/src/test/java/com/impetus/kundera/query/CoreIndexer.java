@@ -19,6 +19,8 @@ import java.util.Map;
 import com.impetus.kundera.index.Indexer;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
+import com.impetus.kundera.persistence.PersistenceDelegator;
 
 /**
  * @author vivek.mishra
@@ -58,5 +60,13 @@ public class CoreIndexer implements Indexer
     public void close()
     {
     }
+
+	@Override
+	public Map<String, Object> search(KunderaMetadata kunderaMetadata,
+			KunderaQuery kunderaQuery,
+			PersistenceDelegator persistenceDelegator, EntityMetadata m) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }

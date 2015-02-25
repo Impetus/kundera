@@ -15,13 +15,11 @@
  ******************************************************************************/
 package com.impetus.kundera.index.lucene;
 
-import java.util.List;
 import java.util.Map;
 
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
-import com.impetus.kundera.query.KunderaQuery;
 
 /**
  * Interface to define the behavior of an Indexer.

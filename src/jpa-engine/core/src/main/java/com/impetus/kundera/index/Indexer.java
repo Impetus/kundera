@@ -19,6 +19,7 @@ import java.util.Map;
 
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.query.KunderaQuery;
 
@@ -71,6 +72,9 @@ public interface Indexer
      */
     Map<String, Object> search(String query, Class<?> parentClass,  EntityMetadata parentMetadata, Class<?> childClass, EntityMetadata childMetadata, Object entityId,
             int start, int count);
+    
+    
+    Map<String, Object> search(KunderaMetadata kunderaMetadata, KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator, EntityMetadata m);
 
     /**
      * Deletes index for given entity class.
