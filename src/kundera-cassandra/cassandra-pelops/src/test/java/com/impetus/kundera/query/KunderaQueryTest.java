@@ -143,7 +143,9 @@ public class KunderaQueryTest
         }
         catch (JPQLParseException e)
         {
-            Assert.fail();
+            Assert.assertEquals(
+                "Bad query format FROM clause is mandatory for SELECT queries. For details, see: http://openjpa.apache.org/builds/1.0.4/apache-openjpa-1.0.4/docs/manual/jpa_langref.html#jpa_langref_bnf",
+                e.getMessage());
         }
         try
         {
