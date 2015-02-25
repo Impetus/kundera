@@ -282,7 +282,7 @@ public class MongoCompositeTypeTest
 
         em = emf.createEntityManager();
 
-        String updateQuery = "Update MongoPrimeUser u SET u.tweetBody=after merge where u.tweetBody= :beforeUpdate";
+        String updateQuery = "Update MongoPrimeUser u SET u.tweetBody= 'after merge' where u.tweetBody= :beforeUpdate";
         Query q = em.createQuery(updateQuery);
         q.setParameter("beforeUpdate", "my first tweet");
         q.executeUpdate();
