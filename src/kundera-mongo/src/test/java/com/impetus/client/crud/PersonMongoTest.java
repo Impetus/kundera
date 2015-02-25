@@ -35,7 +35,6 @@ import org.junit.Test;
 import com.impetus.client.crud.entities.Day;
 import com.impetus.client.crud.entities.PersonBatchMongoEntity;
 import com.impetus.client.crud.entities.PersonMongo;
-import com.impetus.client.crud.entities.PersonMongoMTO;
 import com.impetus.client.crud.entities.PersonMongo.Month;
 import com.impetus.client.utils.MongoUtils;
 import com.impetus.kundera.client.Client;
@@ -135,19 +134,20 @@ public class PersonMongoTest extends BaseTest
         Assert.assertNotNull(results);
         Assert.assertEquals(2, results.size());
         Assert.assertEquals(Month.JAN, results.get(0).getMonth());
-        
+
         query = em.createQuery("select p from PersonMongo p");
         query.setMaxResults(1);
-        PersonMongo result = (PersonMongo)(query.getSingleResult());
+        PersonMongo result = (PersonMongo) (query.getSingleResult());
         Assert.assertNotNull(result);
         Assert.assertEquals(Month.JAN, result.getMonth());
-        
+
         query = em.createQuery("select p from PersonMongo p where p.personName = kuldeep");
         try
         {
-            result = (PersonMongo)(query.getSingleResult());
+            result = (PersonMongo) (query.getSingleResult());
             Assert.fail("Should have gone to catch block!");
-        } catch(NoResultException nrex)
+        }
+        catch (NoResultException nrex)
         {
             Assert.assertNotNull(nrex.getMessage());
         }
@@ -414,8 +414,17 @@ public class PersonMongoTest extends BaseTest
         test = "{ \"AGE\": { $gt: 12 } }";
         list = em.createNativeQuery(test, PersonMongo.class).getResultList();
         Assert.assertEquals(2, list.size());
-        Assert.assertEquals(new Integer(20), list.get(0).getAge());
-        Assert.assertEquals(new Integer(15), list.get(1).getAge());
+        for (PersonMongo person : list)
+        {
+            if (person.getPersonId().equals("2"))
+            {
+                Assert.assertEquals(new Integer(20), person.getAge());
+            }
+            else
+            {
+                Assert.assertEquals(new Integer(15), person.getAge());
+            }
+        }
 
         /**
          * 
@@ -426,8 +435,17 @@ public class PersonMongoTest extends BaseTest
         test = "{ \"AGE\": { $gte: 15 } }";
         list = em.createNativeQuery(test, PersonMongo.class).getResultList();
         Assert.assertEquals(2, list.size());
-        Assert.assertEquals(new Integer(20), list.get(0).getAge());
-        Assert.assertEquals(new Integer(15), list.get(1).getAge());
+        for (PersonMongo person : list)
+        {
+            if (person.getPersonId().equals("2"))
+            {
+                Assert.assertEquals(new Integer(20), person.getAge());
+            }
+            else
+            {
+                Assert.assertEquals(new Integer(15), person.getAge());
+            }
+        }
 
         /**
          * 
@@ -448,8 +466,17 @@ public class PersonMongoTest extends BaseTest
         test = "{ \"AGE\": { $lte: 15 } }";
         list = em.createNativeQuery(test, PersonMongo.class).getResultList();
         Assert.assertEquals(2, list.size());
-        Assert.assertEquals(new Integer(10), list.get(0).getAge());
-        Assert.assertEquals(new Integer(15), list.get(1).getAge());
+        for (PersonMongo person : list)
+        {
+            if (person.getPersonId().equals("1"))
+            {
+                Assert.assertEquals(new Integer(10), person.getAge());
+            }
+            else
+            {
+                Assert.assertEquals(new Integer(15), person.getAge());
+            }
+        }
 
         /**
          * 
@@ -460,8 +487,17 @@ public class PersonMongoTest extends BaseTest
         test = "{ \"AGE\": { $ne: 10 } }";
         list = em.createNativeQuery(test, PersonMongo.class).getResultList();
         Assert.assertEquals(2, list.size());
-        Assert.assertEquals(new Integer(20), list.get(0).getAge());
-        Assert.assertEquals(new Integer(15), list.get(1).getAge());
+        for (PersonMongo person : list)
+        {
+            if (person.getPersonId().equals("2"))
+            {
+                Assert.assertEquals(new Integer(20), person.getAge());
+            }
+            else
+            {
+                Assert.assertEquals(new Integer(15), person.getAge());
+            }
+        }
 
         /**
          * 
@@ -472,8 +508,17 @@ public class PersonMongoTest extends BaseTest
         test = "{ \"AGE\": { $in: [10,15] } }";
         list = em.createNativeQuery(test, PersonMongo.class).getResultList();
         Assert.assertEquals(2, list.size());
-        Assert.assertEquals(new Integer(10), list.get(0).getAge());
-        Assert.assertEquals(new Integer(15), list.get(1).getAge());
+        for (PersonMongo person : list)
+        {
+            if (person.getPersonId().equals("1"))
+            {
+                Assert.assertEquals(new Integer(10), person.getAge());
+            }
+            else
+            {
+                Assert.assertEquals(new Integer(15), person.getAge());
+            }
+        }
 
         /**
          * 
@@ -496,8 +541,17 @@ public class PersonMongoTest extends BaseTest
         test = "{ $or : [{\"_id\":\"1\"},{ \"AGE\": 20 }]}";
         list = em.createNativeQuery(test, PersonMongo.class).getResultList();
         Assert.assertEquals(2, list.size());
-        Assert.assertEquals(new Integer(10), list.get(0).getAge());
-        Assert.assertEquals(new Integer(20), list.get(1).getAge());
+        for (PersonMongo person : list)
+        {
+            if (person.getPersonId().equals("1"))
+            {
+                Assert.assertEquals(new Integer(10), person.getAge());
+            }
+            else
+            {
+                Assert.assertEquals(new Integer(20), person.getAge());
+            }
+        }
 
         test = "db.PERSON.findOne()";
         list = em.createNativeQuery(test, PersonMongo.class).getResultList();
@@ -619,12 +673,18 @@ public class PersonMongoTest extends BaseTest
         List<PersonMongo> results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(0, results.size());
-        
-        query = "Select p from PersonMongo p where (p.personName = :name and p.age NOT IN :ageList)" +
-        		" and (personId = :personId)";
+
+        query = "Select p from PersonMongo p where (p.personName = :name and p.age NOT IN :ageList)"
+                + " and (personId = :personId)";
         q = em.createQuery(query);
         q.setParameter("name", "vivek");
-        q.setParameter("ageList", new ArrayList<Integer>(){{add(20);add(21);}});
+        q.setParameter("ageList", new ArrayList<Integer>()
+        {
+            {
+                add(20);
+                add(21);
+            }
+        });
         q.setParameter("personId", "1");
         results = q.getResultList();
         Assert.assertNotNull(results);
@@ -632,47 +692,62 @@ public class PersonMongoTest extends BaseTest
         Assert.assertNotNull(results.get(0).getPersonId());
         Assert.assertNotNull(results.get(0).getPersonName());
         Assert.assertNotNull(results.get(0).getAge());
-        
- 
 
     }
-    
+
     @Test
     public void interClauseOperatorTest()
     {
-    	Object p1 = prepareMongoInstance("1", 10);
+        Object p1 = prepareMongoInstance("1", 10);
         Object p2 = prepareMongoInstance("2", 20);
         Object p3 = prepareMongoInstance("3", 15);
         em.persist(p1);
         em.persist(p2);
         em.persist(p3);
-    	        
-        String query = "Select p from PersonMongo p where (p.personName = :name OR p.age NOT IN :ageList)" +
-        		" AND (personId = :personId)";
+
+        String query = "Select p from PersonMongo p where (p.personName = :name OR p.age NOT IN :ageList)"
+                + " AND (personId = :personId)";
         Query q = em.createQuery(query);
         q.setParameter("name", "vivek");
-        q.setParameter("ageList", new ArrayList<Integer>(){{add(10);add(20);}});
+        q.setParameter("ageList", new ArrayList<Integer>()
+        {
+            {
+                add(10);
+                add(20);
+            }
+        });
         q.setParameter("personId", "1");
         List<PersonMongo> results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(0, results.size());
-        
-        query = "Select p from PersonMongo p where (p.personName = :name AND p.age NOT IN :ageList)" +
-        		" OR (personId = :personId)";
+
+        query = "Select p from PersonMongo p where (p.personName = :name AND p.age NOT IN :ageList)"
+                + " OR (personId = :personId)";
         q = em.createQuery(query);
         q.setParameter("name", "vivek");
-        q.setParameter("ageList", new ArrayList<Integer>(){{add(10);add(21);}});
+        q.setParameter("ageList", new ArrayList<Integer>()
+        {
+            {
+                add(10);
+                add(21);
+            }
+        });
         q.setParameter("personId", "1");
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(3, results.size());
-        
-        
-        query = "Select p from PersonMongo p where (p.personName = :name OR p.age NOT IN :ageList)" +
-        		" OR (personId = :personId) ORDER BY p.age";
+
+        query = "Select p from PersonMongo p where (p.personName = :name OR p.age NOT IN :ageList)"
+                + " OR (personId = :personId) ORDER BY p.age";
         q = em.createQuery(query);
         q.setParameter("name", "vivek");
-        q.setParameter("ageList", new ArrayList<Integer>(){{add(10);add(21);}});
+        q.setParameter("ageList", new ArrayList<Integer>()
+        {
+            {
+                add(10);
+                add(21);
+            }
+        });
         q.setParameter("personId", "1");
         results = q.getResultList();
         Assert.assertNotNull(results);
@@ -680,37 +755,43 @@ public class PersonMongoTest extends BaseTest
         Assert.assertNotNull(results.get(0).getPersonId());
         Assert.assertNotNull(results.get(0).getPersonName());
         Assert.assertNotNull(results.get(0).getAge());
-        
+
         Assert.assertEquals("1", results.get(0).getPersonId());
         Assert.assertEquals("2", results.get(2).getPersonId());
 
     }
-    
+
     @Test
     public void paginationQueryTest()
     {
-    	Object p1 = prepareMongoInstance("1", 10);
+        Object p1 = prepareMongoInstance("1", 10);
         Object p2 = prepareMongoInstance("2", 20);
         Object p3 = prepareMongoInstance("3", 15);
         em.persist(p1);
         em.persist(p2);
         em.persist(p3);
-    	
-    	String query = "Select p from PersonMongo p ";
+
+        String query = "Select p from PersonMongo p ";
         Query q = em.createQuery(query);
         q.setFirstResult(1);
         q.setMaxResults(3);
         List<PersonMongo> results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(2, results.size());
-        
-        query = "Select p from PersonMongo p where (p.personName = :name and p.age NOT IN :ageList)" +
-        		" and (personId = :personId)";
+
+        query = "Select p from PersonMongo p where (p.personName = :name and p.age NOT IN :ageList)"
+                + " and (personId = :personId)";
         q = em.createQuery(query);
         q.setFirstResult(0);
         q.setMaxResults(3);
         q.setParameter("name", "vivek");
-        q.setParameter("ageList", new ArrayList<Integer>(){{add(20);add(21);}});
+        q.setParameter("ageList", new ArrayList<Integer>()
+        {
+            {
+                add(20);
+                add(21);
+            }
+        });
         q.setParameter("personId", "1");
         results = q.getResultList();
         Assert.assertNotNull(results);
@@ -720,6 +801,4 @@ public class PersonMongoTest extends BaseTest
         Assert.assertNotNull(results.get(0).getAge());
 
     }
-    
-    
 }

@@ -444,7 +444,6 @@ public class CassandraCompositeTypeTest
                     "javax.persistence.PersistenceException: com.impetus.kundera.KunderaException: InvalidRequestException(why:Order by is currently only supported on the clustered columns of the PRIMARY KEY, got userId)",
                     e.getMessage());
         }
-
     }
 
     @Test
@@ -519,8 +518,9 @@ public class CassandraCompositeTypeTest
         catch (Exception e)
         {
             Assert.assertEquals(
-                    "javax.persistence.PersistenceException: com.impetus.kundera.KunderaException: InvalidRequestException(why:Clustering column \"tweetId\" cannot be restricted by an IN relation)",
+                    "javax.persistence.PersistenceException: com.impetus.kundera.KunderaException: InvalidRequestException(why:PRIMARY KEY part tweetId cannot be restricted by IN relation)",
                     e.getMessage());
+
         }
 
         // In Query.
@@ -588,7 +588,7 @@ public class CassandraCompositeTypeTest
         catch (Exception e)
         {
             Assert.assertEquals(
-                    "javax.persistence.PersistenceException: com.impetus.kundera.KunderaException: InvalidRequestException(why:Clustering column \"tweetId\" cannot be restricted by an IN relation)",
+                    "javax.persistence.PersistenceException: com.impetus.kundera.KunderaException: InvalidRequestException(why:PRIMARY KEY part tweetId cannot be restricted by IN relation)",
                     e.getMessage());
         }
     }
@@ -772,6 +772,5 @@ public class CassandraCompositeTypeTest
         Assert.assertNull(result);
         em.close();
     }
-    
-    
+
 }
