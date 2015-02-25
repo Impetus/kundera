@@ -341,7 +341,7 @@ public class PersonCassandraTTLTest extends BaseTest
         em.setProperty("ttl.per.request", true);
         em.setProperty("ttl.values", ttlValues);
 
-        Query q = em.createQuery("update PersonCassandra p set p.personName=''KK MISHRA'' where p.personId=2");
+        Query q = em.createQuery("update PersonCassandra p set p.personName='''KK MISHRA''' where p.personId=2");
         q.executeUpdate();
 
         cqlResult = CassandraCli.client.execute_cql3_query(ByteBuffer

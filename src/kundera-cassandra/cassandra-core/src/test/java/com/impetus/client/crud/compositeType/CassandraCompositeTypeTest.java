@@ -519,7 +519,7 @@ public class CassandraCompositeTypeTest
         catch (Exception e)
         {
             Assert.assertEquals(
-                    "javax.persistence.PersistenceException: com.impetus.kundera.KunderaException: InvalidRequestException(why:PRIMARY KEY part tweetId cannot be restricted by IN relation)",
+                    "javax.persistence.PersistenceException: com.impetus.kundera.KunderaException: InvalidRequestException(why:Clustering column \"tweetId\" cannot be restricted by an IN relation)",
                     e.getMessage());
         }
 
@@ -588,7 +588,7 @@ public class CassandraCompositeTypeTest
         catch (Exception e)
         {
             Assert.assertEquals(
-                    "javax.persistence.PersistenceException: com.impetus.kundera.KunderaException: InvalidRequestException(why:PRIMARY KEY part tweetId cannot be restricted by IN relation)",
+                    "javax.persistence.PersistenceException: com.impetus.kundera.KunderaException: InvalidRequestException(why:Clustering column \"tweetId\" cannot be restricted by an IN relation)",
                     e.getMessage());
         }
     }
@@ -729,7 +729,7 @@ public class CassandraCompositeTypeTest
         client = clients.get(PERSISTENCE_UNIT);
         ((CassandraClientBase) client).setCqlVersion("3.0.0");
 
-        String updateQuery = "Update CassandraPrimeUser u SET u.tweetBody=after merge where u.key= :beforeUpdate";
+        String updateQuery = "Update CassandraPrimeUser u SET u.tweetBody='after merge' where u.key= :beforeUpdate";
         Query q = em.createQuery(updateQuery);
         q.setParameter("beforeUpdate", key);
         q.executeUpdate();

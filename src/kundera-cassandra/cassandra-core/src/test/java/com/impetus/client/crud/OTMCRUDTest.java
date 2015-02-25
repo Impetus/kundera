@@ -49,7 +49,7 @@ public class OTMCRUDTest
     @After
     public void tearDown() throws Exception
     {
-        String query = "Delete t from Token t";
+        String query = "Delete from Token t";
         Query q = em.createQuery(query);
         q.executeUpdate();
 

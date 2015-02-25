@@ -198,14 +198,14 @@ public class PersonCassandraTest extends BaseTest
         Assert.assertEquals(new Integer(10), p.getAge());
        
 
-        String updateQuery = "update PersonCassandra p set p.personName=''KK MISHRA'' where p.personId=1";
+        String updateQuery = "update PersonCassandra p set p.personName='KK MISHRA' where p.personId=1";
         q = entityManager.createQuery(updateQuery);
         q.executeUpdate();
 
         entityManager.clear();
         p = findById(PersonCassandra.class, "1", entityManager);
         Assert.assertNotNull(p);
-        Assert.assertEquals("'KK MISHRA'", p.getPersonName());
+        Assert.assertEquals("KK MISHRA", p.getPersonName());
 
         // Test single result.
         Query query = entityManager.createQuery("select p from PersonCassandra p");

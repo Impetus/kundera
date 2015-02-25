@@ -107,7 +107,7 @@ public class UpdateDeleteJPQLLiteralTest
         Assert.assertEquals("firstUpdate", found.getUrl());
 
         // Static where clause with update parameter
-        jpql = "update MyTestEntity c set c.url = :url where c.key =" + key.toString();
+        jpql = "update MyTestEntity c set c.url = :url where c.key ='" + key.toString()+"'";
         query = em.createQuery(jpql);
         query.setParameter("url", "secondUpdate");
         query.executeUpdate();
@@ -181,7 +181,7 @@ public class UpdateDeleteJPQLLiteralTest
 
         // Update by query
         // With JPA where clause and update parameter.
-        String jpql = "update MyTestEntity c set c.url = :url where c.key =" + key.toString();
+        String jpql = "update MyTestEntity c set c.url = :url where c.key ='" + key.toString()+"'";
         query = em.createQuery(jpql);
         query.setParameter("url", "updateUrl");
         query.executeUpdate();
@@ -215,7 +215,7 @@ public class UpdateDeleteJPQLLiteralTest
 
         // Delete by non column.
 
-        jpql = "Delete c from MyTestEntity c where c.url = :url";
+        jpql = "Delete from MyTestEntity c where c.url = :url";
         query = em.createQuery(jpql);
         query.setParameter("url", "enclosedUrl's");
         query.executeUpdate();
