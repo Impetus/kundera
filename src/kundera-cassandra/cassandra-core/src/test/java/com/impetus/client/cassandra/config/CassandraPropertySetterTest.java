@@ -24,7 +24,6 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
 import org.apache.cassandra.thrift.ConsistencyLevel;
-import org.apache.log4j.config.PropertySetter;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -35,9 +34,7 @@ import org.slf4j.LoggerFactory;
 import com.impetus.client.cassandra.CassandraClientBase;
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.service.CassandraHostConfiguration;
-import com.impetus.client.cassandra.thrift.ThriftClientFactory;
 import com.impetus.kundera.client.Client;
-import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 import com.impetus.kundera.service.HostConfiguration;

@@ -28,7 +28,8 @@ import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.ColumnDef;
 import org.apache.cassandra.thrift.IndexType;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,7 +42,7 @@ import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
 public class TestCassandra
 {
     /** The logger. */
-    private static Logger logger = Logger.getLogger(TestCassandra.class);
+    private static Logger logger = LoggerFactory.getLogger(TestCassandra.class);
 
     /**
      * Sets the up.
