@@ -39,6 +39,10 @@ import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.query.KunderaQuery;
 
+/**
+ * @author amitkumar
+ * 
+ */
 public class ESResponseReader {
 
 	/**
@@ -105,6 +109,13 @@ public class ESResponseReader {
 		return AggregateFunction.class.isAssignableFrom(expression.getClass()) ? true : false;
 	}
 
+	/**
+	 * @param internalAggs
+	 * @param identifier
+	 * @param field
+	 * @param exp
+	 * @return result value of aggregation
+	 */
 	private Double getAggregatedResult(InternalAggregations internalAggs, String identifier, String field, Expression exp)
 	{
 		switch (identifier) 
