@@ -206,8 +206,8 @@ public class StudentHBaseTimestampTest extends Base
         Query q;
         List<StudentHBaseTimestamp> students;
         em = emf.createEntityManager();
-        query = "Select s From StudentHBaseTimestamp s where s.id between " + getMinValue(Timestamp.class) + " and "
-                + getMaxValue(Timestamp.class);
+        query = "Select s From StudentHBaseTimestamp s where s.id between '" + getMinValue(Timestamp.class) + "' and '"
+                + getMaxValue(Timestamp.class)+"'";
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);

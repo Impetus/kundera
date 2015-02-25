@@ -43,122 +43,138 @@ import com.impetus.kundera.query.KunderaQuery;
  * @author amitkumar
  * 
  */
-public class ESResponseReader {
+public class ESResponseReader
+{
 
-	/**
-	 * @param response
-	 * @param query
-	 * @param metaModel
-	 * @param clazz
-	 * @return
-	 */
-	public List parseAggregatedResponse(SearchResponse response, KunderaQuery query, MetamodelImpl metaModel, Class clazz) 
-	{
-		List temp = new ArrayList<>(), results = new ArrayList<>();
-		InternalAggregations internalAggs = ((InternalFilter)response.getAggregations().getAsMap().get("whereClause")).getAggregations();	
-		Iterator<Expression> itr = getSelectExpressionOrder(query);
+    /**
+     * @param response
+     * @param query
+     * @param metaModel
+     * @param clazz
+     * @return
+     */
+    public List parseAggregatedResponse(SearchResponse response, KunderaQuery query, MetamodelImpl metaModel,
+            Class clazz)
+    {
+        List temp = new ArrayList<>(), results = new ArrayList<>();
+        InternalAggregations internalAggs = ((InternalFilter) response.getAggregations().getAsMap().get("whereClause"))
+                .getAggregations();
+        Iterator<Expression> itr = getSelectExpressionOrder(query);
 
-		while (itr.hasNext()) {
+        while (itr.hasNext())
+        {
 
-			Expression exp = itr.next();
-			String text = exp.toActualText();
-			String field = isAggregated(exp) ? text.substring(text.indexOf('.') + 1, text.indexOf(')')) : text.substring(text.indexOf('.') + 1, text.length()) ;
+            Expression exp = itr.next();
+            String text = exp.toActualText();
+            String field = isAggregated(exp) ? text.substring(text.indexOf('.') + 1, text.indexOf(')')) : text
+                    .substring(text.indexOf('.') + 1, text.length());
 
-			temp.add(isAggregated(exp) ? getAggregatedResult(internalAggs,((AggregateFunction)exp).getIdentifier(), text, exp) : 
-				response.getHits().getAt(0).getFields().get(((AbstractAttribute)metaModel.entity(clazz).getAttribute(field)).getJPAColumnName()).getValue());
+            temp.add(isAggregated(exp) ? getAggregatedResult(internalAggs, ((AggregateFunction) exp).getIdentifier(),
+                    text, exp) : response.getHits().getAt(0).getFields()
+                    .get(((AbstractAttribute) metaModel.entity(clazz).getAttribute(field)).getJPAColumnName())
+                    .getValue());
 
-		}
-		for(Object value : temp)
-		{
-			if(!value.toString().equalsIgnoreCase("INFINITY"))
-			{
-				results.add(value);
-			}
-		}
-		return results;
-	}
+        }
+        for (Object value : temp)
+        {
+            if (!value.toString().equalsIgnoreCase("INFINITY"))
+            {
+                results.add(value);
+            }
+        }
+        return results;
+    }
 
-	/**
-	 * @param query
-	 * @return
-	 */
-	public Iterator<Expression> getSelectExpressionOrder(KunderaQuery query)
-	{
-		Expression selectExpression = ((SelectClause)(query.getSelectStatement()).getSelectClause()).getSelectExpression();				
-		 
-		List<Expression> list ;
+    /**
+     * @param query
+     * @return
+     */
+    public Iterator<Expression> getSelectExpressionOrder(KunderaQuery query)
+    {
+        Expression selectExpression = ((SelectClause) (query.getSelectStatement()).getSelectClause())
+                .getSelectExpression();
 
-		if(!(selectExpression instanceof CollectionExpression))
-		{
-			list = new LinkedList<Expression>();
-			list.add(selectExpression);
-			return new SnapshotCloneListIterable<Expression>(list).iterator();
-		}
-		else
-		{
-			return selectExpression.children().iterator();
-		}
-	}
+        List<Expression> list;
 
-	/**
-	 * @param expression
-	 * @return
-	 */
-	private boolean isAggregated(Expression expression)
-	{	
-		return AggregateFunction.class.isAssignableFrom(expression.getClass()) ? true : false;
-	}
+        if (!(selectExpression instanceof CollectionExpression))
+        {
+            list = new LinkedList<Expression>();
+            list.add(selectExpression);
+            return new SnapshotCloneListIterable<Expression>(list).iterator();
+        }
+        else
+        {
+            return selectExpression.children().iterator();
+        }
+    }
 
-	/**
-	 * @param internalAggs
-	 * @param identifier
-	 * @param field
-	 * @param exp
-	 * @return result value of aggregation
-	 */
-	private Double getAggregatedResult(InternalAggregations internalAggs, String identifier, String field, Expression exp)
-	{
-		switch (identifier) 
-		{
-		case Expression.MIN:
-			return (((InternalMin)internalAggs.get(exp.toParsedText())).getValue());
+    /**
+     * @param expression
+     * @return
+     */
+    private boolean isAggregated(Expression expression)
+    {
+        return AggregateFunction.class.isAssignableFrom(expression.getClass()) ? true : false;
+    }
 
-		case Expression.MAX:
-			return (((InternalMax)internalAggs.get(exp.toParsedText())).getValue());
+    /**
+     * @param internalAggs
+     * @param identifier
+     * @param field
+     * @param exp
+     * @return result value of aggregation
+     */
+    private Double getAggregatedResult(InternalAggregations internalAggs, String identifier, String field,
+            Expression exp)
+    {
+        switch (identifier)
+        {
+        case Expression.MIN:
+            return (((InternalMin) internalAggs.get(exp.toParsedText())).getValue());
 
-		case Expression.AVG:
-			return (((InternalAvg)internalAggs.get(exp.toParsedText())).getValue());
+        case Expression.MAX:
+            return (((InternalMax) internalAggs.get(exp.toParsedText())).getValue());
 
-		case Expression.SUM:
-			return (((InternalSum)internalAggs.get(exp.toParsedText())).getValue());
-		}
-		return null;
-	}
+        case Expression.AVG:
+            return (((InternalAvg) internalAggs.get(exp.toParsedText())).getValue());
 
-	/**
-	 * @param response
-	 * @param query
-	 * @param metaModel
-	 * @param clazz
-	 * @return
-	 */
-	public Map<String, Object> parseAggregations(SearchResponse response, KunderaQuery query, MetamodelImpl metaModel, Class clazz) 
-	{
-		Map<String, Object> aggMap = new HashMap<String, Object>();
-		InternalAggregations internalAggs = ((InternalFilter)response.getAggregations().getAsMap().get("whereClause")).getAggregations();
-		Iterator<Expression> itr = getSelectExpressionOrder(query);
-		
-		while (itr.hasNext()) {
-			Expression exp = itr.next();			
-			if(AggregateFunction.class.isAssignableFrom(exp.getClass()))
-			{
-				Object value = getAggregatedResult(internalAggs,((AggregateFunction)exp).getIdentifier(), exp.toParsedText(), exp);
-				if(!value.toString().equalsIgnoreCase("INFINITY"))
-				{
-					aggMap.put(exp.toParsedText(), Double.valueOf(value.toString()));
-				}
-			}
-		}
-		return aggMap;
-	}
+        case Expression.SUM:
+            return (((InternalSum) internalAggs.get(exp.toParsedText())).getValue());
+        }
+        return null;
+    }
+
+    /**
+     * @param response
+     * @param query
+     * @param metaModel
+     * @param clazz
+     * @return
+     */
+    public Map<String, Object> parseAggregations(SearchResponse response, KunderaQuery query, MetamodelImpl metaModel,
+            Class clazz)
+    {
+        Map<String, Object> aggMap = new HashMap<String, Object>();
+        if (response.getAggregations() != null)
+        {
+            InternalAggregations internalAggs = ((InternalFilter) response.getAggregations().getAsMap()
+                    .get("whereClause")).getAggregations();
+            Iterator<Expression> itr = getSelectExpressionOrder(query);
+
+            while (itr.hasNext())
+            {
+                Expression exp = itr.next();
+                if (AggregateFunction.class.isAssignableFrom(exp.getClass()))
+                {
+                    Object value = getAggregatedResult(internalAggs, ((AggregateFunction) exp).getIdentifier(),
+                            exp.toParsedText(), exp);
+                    if (!value.toString().equalsIgnoreCase("INFINITY"))
+                    {
+                        aggMap.put(exp.toParsedText(), Double.valueOf(value.toString()));
+                    }
+                }
+            }
+        }
+        return aggMap;
+    }
 }
