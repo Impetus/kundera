@@ -17,7 +17,9 @@
 
 package com.impetus.kundera.utils;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -641,5 +643,39 @@ public class KunderaCoreUtils
             throw new PersistenceException("Error occured while instantiating entity.", e);
         }
     }
+    /**
+     * @param clazz
+     * @return
+     */
+    public static Object createNewInstance(Class clazz) {
+        Object target = null;
+        try {
+            Constructor[] constructors = clazz.getDeclaredConstructors();
+            for (Constructor constructor : constructors) {
+                if ((Modifier.isProtected(constructor.getModifiers()) || Modifier.isPublic(constructor.getModifiers()))
+                    && constructor.getParameterTypes().length == 0) {
+                    constructor.setAccessible(true);
+                    target = constructor.newInstance();
+                    constructor.setAccessible(false);
+                    break;
+                }
+            }
+            return target;
 
+        } catch (InstantiationException iex) {
+            logger.error("Error while creating an instance of {} .", clazz);
+            throw new PersistenceException(iex);
+        }
+
+        catch (IllegalAccessException iaex) {
+            logger.error("Illegal Access while reading data from {}, Caused by: .", clazz, iaex);
+            throw new PersistenceException(iaex);
+        }
+
+        catch (Exception e) {
+            logger.error("Error while creating an instance of {}, Caused by: .", clazz, e);
+            throw new PersistenceException(e);
+        }
+    }
+    
 }

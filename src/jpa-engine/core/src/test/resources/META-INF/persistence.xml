@@ -213,6 +213,7 @@
 		<class>com.impetus.kundera.metadata.entities.Article</class>
 		<class>com.impetus.kundera.query.PersonEntityNameAnnotation</class>
 		<class>com.impetus.kundera.persistence.PersonnelEmbedded</class>
+		<class>com.impetus.kundera.validator.BookEntity</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<property name="kundera.nodes" value="localhost" />
@@ -225,6 +226,21 @@
 				/> <property name="kundera.cache.config.resource" value="/ehcache-test.xml" 
 				/> -->
 			<!-- <property name="index.home.dir" value="./lucene" /> -->
+			<property name="kundera.batch.size" value="5" />
+		</properties>
+	</persistence-unit>
+	
+	<persistence-unit name="invalidJpaEntityPU">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.kundera.validator.InvalidBookEntity</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="9160" />
+			<property name="kundera.keyspace" value="KunderaTests" />
+			<property name="kundera.dialect" value="rdbms" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.kundera.client.CoreTestClientFactory" />
 			<property name="kundera.batch.size" value="5" />
 		</properties>
 	</persistence-unit>

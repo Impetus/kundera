@@ -145,7 +145,10 @@ public class KunderaQueryTest
         }
         catch (JPQLParseException e)
         {
-            Assert.fail();
+            // Assert.fail();
+            Assert.assertEquals(
+                    "Bad query format FROM clause is mandatory for SELECT queries. For details, see: http://openjpa.apache.org/builds/1.0.4/apache-openjpa-1.0.4/docs/manual/jpa_langref.html#jpa_langref_bnf",
+                    e.getMessage());
         }
         try
         {
@@ -231,7 +234,7 @@ public class KunderaQueryTest
         List<String> nameList = new ArrayList<String>();
         List<Integer> ageList = new ArrayList<Integer>();
         ageList.add(32);
-        
+
         Object value = kunderaQuery.getClauseValue("?1");
         nameList.add(value.toString());
         Assert.assertNotNull(value);
@@ -287,12 +290,10 @@ public class KunderaQueryTest
         value = kunderaQuery.getClauseValue("?1");
         Assert.assertNotNull(value);
         Assert.assertEquals(ageList, value);
-        
+
         ageList = new ArrayList<Integer>();
         ageList.add(35);
-        
 
-        
         value = kunderaQuery.getClauseValue("?2");
         Assert.assertNotNull(value);
         Assert.assertEquals(ageList, value);
@@ -319,7 +320,7 @@ public class KunderaQueryTest
         {
             Assert.assertTrue(kunderaQuery.isBound(parameters.next()));
         }
-        
+
         List<String> nameList = new ArrayList<String>();
         nameList.add("pname");
         List<Integer> ageList = new ArrayList<Integer>();
@@ -382,7 +383,7 @@ public class KunderaQueryTest
     @Test
     public void testUpdateClause()
     {
-        String query = "Update Person p set p.age= ?1 where p.personName = ?2 and p.age = ?3";
+        String query = "Update Person p set p.age= ?1, p.personId = ?5 where p.personName = ?2 and p.age = ?3";
         KunderaQuery kunderaQuery = new KunderaQuery(query, kunderaMetadata);
         KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery);
         queryParser.parse();
@@ -391,7 +392,7 @@ public class KunderaQueryTest
         kunderaQuery.setParameter(2, "pname");
         kunderaQuery.setParameter(3, 32);
 
-        Assert.assertEquals(3, kunderaQuery.getParameters().size());
+        Assert.assertEquals(4, kunderaQuery.getParameters().size());
 
         Iterator<Parameter<?>> parameters = kunderaQuery.getParameters().iterator();
 
@@ -438,8 +439,7 @@ public class KunderaQueryTest
         }
 
     }
-    
-    
+
     @Test
     public void testWithInClause()
     {
@@ -453,15 +453,27 @@ public class KunderaQueryTest
     @Test
     public void testInNotInNotEquals()
     {
-        String query = "Select p from Person p where p.personName <> :name and p.age IN :ageList" +
-        		" and salary NOT IN :salaryList and (personId = :personId)";
+        String query = "Select p from Person p where p.personName <> :name and p.age IN :ageList"
+                + " and salary NOT IN :salaryList and (personId = :personId)";
         KunderaQuery kunderaQuery = new KunderaQuery(query, kunderaMetadata);
         KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery);
         queryParser.parse();
         kunderaQuery.postParsingInit();
         kunderaQuery.setParameter("name", "pname");
-        kunderaQuery.setParameter("ageList", new ArrayList<Integer>(){{add(20);add(21);}});
-        kunderaQuery.setParameter("salaryList", new ArrayList<Double>(){{add(2000D);add(3000D);}});
+        kunderaQuery.setParameter("ageList", new ArrayList<Integer>()
+        {
+            {
+                add(20);
+                add(21);
+            }
+        });
+        kunderaQuery.setParameter("salaryList", new ArrayList<Double>()
+        {
+            {
+                add(2000D);
+                add(3000D);
+            }
+        });
         kunderaQuery.setParameter("personId", "personId");
 
         assertSubQuery(kunderaQuery);
@@ -471,49 +483,72 @@ public class KunderaQueryTest
     @Test
     public void testWithSubQueryInMid()
     {
-        String query = "Select p from Person p where p.personName <> :name and p.age IN :ageList" +
-        " and (personId = :personId) and salary NOT IN :salaryList";
+        String query = "Select p from Person p where p.personName <> :name and p.age IN :ageList"
+                + " and (personId = :personId) and salary NOT IN :salaryList";
         KunderaQuery kunderaQuery = new KunderaQuery(query, kunderaMetadata);
         KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery);
         queryParser.parse();
         kunderaQuery.postParsingInit();
         kunderaQuery.setParameter("name", "pname");
-        kunderaQuery.setParameter("ageList", new ArrayList<Integer>(){{add(20);add(21);}});
-        kunderaQuery.setParameter("salaryList", new ArrayList<Double>(){{add(2000D);add(3000D);}});
+        kunderaQuery.setParameter("ageList", new ArrayList<Integer>()
+        {
+            {
+                add(20);
+                add(21);
+            }
+        });
+        kunderaQuery.setParameter("salaryList", new ArrayList<Double>()
+        {
+            {
+                add(2000D);
+                add(3000D);
+            }
+        });
         kunderaQuery.setParameter("personId", "personId");
 
         assertSubQuery(kunderaQuery);
 
     }
-    
+
     @Test
     public void testWithSubQueryInMidWithoutSetParam()
     {
-        String query = "Select p from Person p where p.personName <> pname and p.age IN (20,21,32)" +
-        " and (personId = :personId) and salary NOT IN :salaryList";
+        String query = "Select p from Person p where p.personName <> pname and p.age IN (20,21,32)"
+                + " and (personId = :personId) and salary NOT IN :salaryList";
         KunderaQuery kunderaQuery = new KunderaQuery(query, kunderaMetadata);
         KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery);
         queryParser.parse();
         kunderaQuery.postParsingInit();
-        kunderaQuery.setParameter("salaryList", new ArrayList<Double>(){{add(2000D);add(3000D);}});
+        kunderaQuery.setParameter("salaryList", new ArrayList<Double>()
+        {
+            {
+                add(2000D);
+                add(3000D);
+            }
+        });
         kunderaQuery.setParameter("personId", "personId");
 
         assertMixSubQuery(kunderaQuery, 2);
-        
-        query = "Select p from Person p where p.personName <> in and p.age IN (20,21,32)" +
-                " and (personId = :personId) and salary NOT IN :salaryList";
+
+        query = "Select p from Person p where p.personName <> in and p.age IN (20,21,32)"
+                + " and (personId = :personId) and salary NOT IN :salaryList";
         kunderaQuery = new KunderaQuery(query, kunderaMetadata);
         queryParser = new KunderaQueryParser(kunderaQuery);
         queryParser.parse();
         kunderaQuery.postParsingInit();
-        kunderaQuery.setParameter("salaryList", new ArrayList<Double>(){{add(2000D);add(3000D);}});
+        kunderaQuery.setParameter("salaryList", new ArrayList<Double>()
+        {
+            {
+                add(2000D);
+                add(3000D);
+            }
+        });
         kunderaQuery.setParameter("personId", "personId");
         assertMixSubQuery(kunderaQuery, 2);
 
     }
-    
-    
-    private void assertMixSubQuery(KunderaQuery kunderaQuery , int paramSize)
+
+    private void assertMixSubQuery(KunderaQuery kunderaQuery, int paramSize)
     {
         Assert.assertEquals(paramSize, kunderaQuery.getParameters().size());
 
@@ -523,11 +558,23 @@ public class KunderaQueryTest
         {
             Assert.assertTrue(kunderaQuery.isBound(parameters.next()));
         }
-        
+
         List<String> nameList = new ArrayList<String>();
         nameList.add("pname");
-        List<Integer> ageList = new ArrayList<Integer>(){{add(20);add(21);}};
-        List<Double> salaryList = new ArrayList<Double>(){{add(2000D);add(3000D);}};
+        List<Integer> ageList = new ArrayList<Integer>()
+        {
+            {
+                add(20);
+                add(21);
+            }
+        };
+        List<Double> salaryList = new ArrayList<Double>()
+        {
+            {
+                add(2000D);
+                add(3000D);
+            }
+        };
         List<String> personIdList = new ArrayList<String>();
         personIdList.add("personId");
 
@@ -540,7 +587,6 @@ public class KunderaQueryTest
         Assert.assertEquals(paramSize, kunderaQuery.getParameters().size());
     }
 
-
     private void assertSubQuery(KunderaQuery kunderaQuery)
     {
         Assert.assertEquals(4, kunderaQuery.getParameters().size());
@@ -551,11 +597,23 @@ public class KunderaQueryTest
         {
             Assert.assertTrue(kunderaQuery.isBound(parameters.next()));
         }
-        
+
         List<String> nameList = new ArrayList<String>();
         nameList.add("pname");
-        List<Integer> ageList = new ArrayList<Integer>(){{add(20);add(21);}};
-        List<Double> salaryList = new ArrayList<Double>(){{add(2000D);add(3000D);}};
+        List<Integer> ageList = new ArrayList<Integer>()
+        {
+            {
+                add(20);
+                add(21);
+            }
+        };
+        List<Double> salaryList = new ArrayList<Double>()
+        {
+            {
+                add(2000D);
+                add(3000D);
+            }
+        };
         List<String> personIdList = new ArrayList<String>();
         personIdList.add("personId");
 

@@ -1,3 +1,6 @@
+Coming soon...<b>Kundera Meetup ! </b>            
+Please cast your vote at https://www.surveymonkey.com/s/QJQBNGV
+
 Overview
 =========
 Kundera is a "Polyglot Object Mapper" with a JPA interface. The idea behind Kundera is to make working with NoSQL Databases drop-dead simple and fun. Kundera is being developed with following objectives:
@@ -94,3 +97,5 @@ Important Links
 About Us
 ========
 Kundera is backed by Impetus Labs - iLabs. iLabs is a R&D consulting division of Impetus Technologies (http://www.impetus.com). iLabs focuses on innovations with next generation technologies and creates practice areas and new products around them. iLabs is actively involved working on High Performance computing technologies, ranging from distributed/parallel computing, Erlang, grid softwares, GPU based software, Hadoop, Hbase, Cassandra, CouchDB and related technologies. iLabs is also working on various other Open Source initiatives.
+
+Follow us on [Twitter] (https://twitter.com/kundera_impetus).

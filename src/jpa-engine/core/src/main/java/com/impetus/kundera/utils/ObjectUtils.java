@@ -117,7 +117,7 @@ public class ObjectUtils
             }
             // Copy Columns (in a table that doesn't have any embedded objects
 
-            target = sourceObjectClass.newInstance();
+            target = KunderaCoreUtils.createNewInstance(sourceObjectClass);
 
             Iterator<Attribute> iter = entityType.getAttributes().iterator();
             while (iter.hasNext())
