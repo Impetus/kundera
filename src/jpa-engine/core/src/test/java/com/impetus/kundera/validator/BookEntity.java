@@ -23,8 +23,9 @@ import javax.persistence.Id;
  * @author Devender Yadav
  * 
  */
-@Entity(name = "BOOK_ENTITY")
-public class BookEntity {
+@Entity
+public class BookEntity
+{
 
     @Id
     @Column(name = "ID")
@@ -39,38 +40,47 @@ public class BookEntity {
     @Column(name = "PAGES")
     private int pages;
 
-    protected BookEntity() {
+    public BookEntity()
+    {
     }
 
-    public int getBookId() {
+    public int getBookId()
+    {
         return bookId;
     }
 
-    public void setBookId(int bookId) {
+    public void setBookId(int bookId)
+    {
         this.bookId = bookId;
     }
 
-    public String getTitle() {
+    public String getTitle()
+    {
         return title;
     }
 
-    public void setTitle(String title) {
+    public void setTitle(String title)
+    {
         this.title = title;
     }
 
-    public String getAuthor() {
+    public String getAuthor()
+    {
         return author;
     }
 
-    public void setAuthor(String author) {
+    public void setAuthor(String author)
+    {
         this.author = author;
     }
 
-    public int getPages() {
+    public int getPages()
+    {
         return pages;
     }
 
-    public void setPages(int pages) {
+    public void setPages(int pages)
+    {
         this.pages = pages;
     }
 

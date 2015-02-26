@@ -14,7 +14,6 @@ import org.junit.Before;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
-import com.impetus.kundera.query.JPQLParseException;
 
 public class EntityWithClauseTest
 {
@@ -86,48 +85,53 @@ public class EntityWithClauseTest
         Assert.assertNotNull(entityWithClauses);
         Assert.assertEquals(3, entityWithClauses.size());
 
-        entityWithClauses = em.createQuery("select t from EntityWithClause t where t.settlementDate=12/12/12")
+        entityWithClauses = em.createQuery("select t from EntityWithClause t where t.settlementDate='12/12/12'")
                 .getResultList();
         Assert.assertNotNull(entityWithClauses);
         Assert.assertEquals(2, entityWithClauses.size());
 
-//        entityWithClauses = em.createQuery("select t from EntityWithClause t where t.or=or").getResultList();
-//        Assert.assertNotNull(entityWithClauses);
-//        Assert.assertEquals(3, entityWithClauses.size());
+        // entityWithClauses =
+        // em.createQuery("select t from EntityWithClause t where t.or=or").getResultList();
+        // Assert.assertNotNull(entityWithClauses);
+        // Assert.assertEquals(3, entityWithClauses.size());
 
-//        entityWithClauses = em.createQuery("select t from EntityWithClause t where t.between=between").getResultList();
-//        Assert.assertNotNull(entityWithClauses);
-//        Assert.assertEquals(3, entityWithClauses.size());
-//
-//        entityWithClauses = em.createQuery("select t from EntityWithClause t where t.and=and").getResultList();
-//        Assert.assertNotNull(entityWithClauses);
-//        Assert.assertEquals(3, entityWithClauses.size());
+        // entityWithClauses =
+        // em.createQuery("select t from EntityWithClause t where t.between=between").getResultList();
+        // Assert.assertNotNull(entityWithClauses);
+        // Assert.assertEquals(3, entityWithClauses.size());
+        //
+        // entityWithClauses =
+        // em.createQuery("select t from EntityWithClause t where t.and=and").getResultList();
+        // Assert.assertNotNull(entityWithClauses);
+        // Assert.assertEquals(3, entityWithClauses.size());
 
-        try
-        {
-            entityWithClauses = em.createQuery("select set from EntityWithClause set where set.set=set")
-                    .getResultList();
-            Assert.fail();
-        }
-        catch (JPQLParseException e)
-        {
-            Assert.assertEquals(
-                    "Out of order keyword set, entity alias must not be any reserved keyword.. For details, see: http://openjpa.apache.org/builds/1.0.4/apache-openjpa-1.0.4/docs/manual/jpa_langref.html#jpa_langref_bnf",
-                    e.getMessage());
-        }
-
-        try
-        {
-            entityWithClauses = em.createQuery("select from from EntityWithClause from where from.set=set")
-                    .getResultList();
-            Assert.fail();
-        }
-        catch (JPQLParseException e)
-        {
-            Assert.assertEquals(
-                    "Out of order keyword from, entity alias must not be any reserved keyword.. For details, see: http://openjpa.apache.org/builds/1.0.4/apache-openjpa-1.0.4/docs/manual/jpa_langref.html#jpa_langref_bnf",
-                    e.getMessage());
-        }
+        // try
+        // {
+        // entityWithClauses =
+        // em.createQuery("select set from EntityWithClause set where set.set=set")
+        // .getResultList();
+        // Assert.fail();
+        // }
+        // catch (JPQLParseException e)
+        // {
+        // Assert.assertEquals(
+        // "Out of order keyword set, entity alias must not be any reserved keyword.. For details, see: http://openjpa.apache.org/builds/1.0.4/apache-openjpa-1.0.4/docs/manual/jpa_langref.html#jpa_langref_bnf",
+        // e.getMessage());
+        // }
+        //
+        // try
+        // {
+        // entityWithClauses =
+        // em.createQuery("select from from EntityWithClause from where from.set=set")
+        // .getResultList();
+        // Assert.fail();
+        // }
+        // catch (JPQLParseException e)
+        // {
+        // Assert.assertEquals(
+        // "Out of order keyword from, entity alias must not be any reserved keyword.. For details, see: http://openjpa.apache.org/builds/1.0.4/apache-openjpa-1.0.4/docs/manual/jpa_langref.html#jpa_langref_bnf",
+        // e.getMessage());
+        // }
 
         // Update query.
         int affectedRecord = em.createQuery("Update EntityWithClause t SET t.or=newor where t.id = 1").executeUpdate();
@@ -164,50 +168,54 @@ public class EntityWithClauseTest
         Assert.assertNotNull(result);
         Assert.assertEquals("newKK", result.getLikedBy());
 
-        try
-        {
-            affectedRecord = em.createQuery("Update EntityWithClause set SET set.likedBy=newKK where set.id = 1")
-                    .executeUpdate();
-            Assert.fail();
-        }
-        catch (JPQLParseException e)
-        {
-            Assert.assertEquals(
-                    "Out of order keyword SET, entity alias must not be any reserved keyword.. For details, see: http://openjpa.apache.org/builds/1.0.4/apache-openjpa-1.0.4/docs/manual/jpa_langref.html#jpa_langref_bnf",
-                    e.getMessage());
-        }
-
-        try
-        {
-            affectedRecord = em.createQuery("Update EntityWithClause from SET from.likedBy=newKK where from.id = 1")
-                    .executeUpdate();
-            Assert.fail();
-        }
-        catch (JPQLParseException e)
-        {
-            Assert.assertEquals(
-                    "Out of order keyword from, entity alias must not be any reserved keyword.. For details, see: http://openjpa.apache.org/builds/1.0.4/apache-openjpa-1.0.4/docs/manual/jpa_langref.html#jpa_langref_bnf",
-                    e.getMessage());
-        }
+        // try
+        // {
+        // affectedRecord =
+        // em.createQuery("Update EntityWithClause set SET set.likedBy=newKK where set.id = 1")
+        // .executeUpdate();
+        // Assert.fail();
+        // }
+        // catch (JPQLParseException e)
+        // {
+        // Assert.assertEquals(
+        // "Out of order keyword SET, entity alias must not be any reserved keyword.. For details, see: http://openjpa.apache.org/builds/1.0.4/apache-openjpa-1.0.4/docs/manual/jpa_langref.html#jpa_langref_bnf",
+        // e.getMessage());
+        // }
+        //
+        // try
+        // {
+        // affectedRecord =
+        // em.createQuery("Update EntityWithClause from SET from.likedBy=newKK where from.id = 1")
+        // .executeUpdate();
+        // Assert.fail();
+        // }
+        // catch (JPQLParseException e)
+        // {
+        // Assert.assertEquals(
+        // "Out of order keyword from, entity alias must not be any reserved keyword.. For details, see: http://openjpa.apache.org/builds/1.0.4/apache-openjpa-1.0.4/docs/manual/jpa_langref.html#jpa_langref_bnf",
+        // e.getMessage());
+        // }
 
         // Delete query.
 
-//        affectedRecord = em.createQuery("Delete From EntityWithClause t where t.or=newor").executeUpdate();
-//        result = em.find(EntityWithClause.class, "1");
-//        Assert.assertNull(result);
+        // affectedRecord =
+        // em.createQuery("Delete From EntityWithClause t where t.or=newor").executeUpdate();
+        // result = em.find(EntityWithClause.class, "1");
+        // Assert.assertNull(result);
 
-//        try
-//        {
-//            affectedRecord = em.createQuery("Delete From EntityWithClause t where t.and=and").executeUpdate();
-//            result = em.find(EntityWithClause.class, "2");
-//            Assert.assertNull(result);
-//        }
-//        catch (JPQLParseException e)
-//        {
-//            Assert.assertEquals(
-//                    "Out of order keyword from, entity alias must not be any reserver keyword.. For details, see: http://openjpa.apache.org/builds/1.0.4/apache-openjpa-1.0.4/docs/manual/jpa_langref.html#jpa_langref_bnf",
-//                    e.getMessage());
-//        }
+        // try
+        // {
+        // affectedRecord =
+        // em.createQuery("Delete From EntityWithClause t where t.and=and").executeUpdate();
+        // result = em.find(EntityWithClause.class, "2");
+        // Assert.assertNull(result);
+        // }
+        // catch (JPQLParseException e)
+        // {
+        // Assert.assertEquals(
+        // "Out of order keyword from, entity alias must not be any reserver keyword.. For details, see: http://openjpa.apache.org/builds/1.0.4/apache-openjpa-1.0.4/docs/manual/jpa_langref.html#jpa_langref_bnf",
+        // e.getMessage());
+        // }
 
     }
 }
