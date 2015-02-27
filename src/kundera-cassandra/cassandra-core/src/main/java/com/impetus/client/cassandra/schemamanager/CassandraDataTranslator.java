@@ -598,18 +598,18 @@ public final class CassandraDataTranslator
      *            the clazz
      * @return the collection
      */
-    public static Collection marshalCollection(Class cassandraTypeClazz, Collection result, Class clazz)
+    public static Collection marshalCollection(Class cassandraTypeClazz, Collection result, Class clazz, Class resultTypeClass)
     {
         Collection mappedCollection = result;
 
         if (cassandraTypeClazz.isAssignableFrom(BytesType.class))
         {
-            mappedCollection = (Collection) PropertyAccessorHelper.getObject(result.getClass());
+            mappedCollection = (Collection) PropertyAccessorHelper.getObject(resultTypeClass);
             for (Object value : result)
             {
                 byte[] valueAsBytes = new byte[((ByteBuffer) value).remaining()];
                 ((ByteBuffer) value).get(valueAsBytes);
-                mappedCollection.add(PropertyAccessorHelper.getObject(clazz, valueAsBytes));
+                 mappedCollection.add(PropertyAccessorHelper.getObject(clazz, valueAsBytes));
             }
         }
         return mappedCollection;
@@ -1079,7 +1079,7 @@ public final class CassandraDataTranslator
                 outputCollection = new HashSet();
                 SetSerializer setSerializer = SetSerializer.getInstance(valueClassInstance);
                 outputCollection.addAll((Collection) setSerializer.deserializeForNativeProtocol((ByteBuffer) value, 2));
-                return marshalCollection(valueValidationClass, outputCollection, genericClass);
+                return marshalCollection(valueValidationClass, outputCollection, genericClass, outputCollection.getClass());
             }
             catch (SecurityException e)
             {
@@ -1267,7 +1267,7 @@ public final class CassandraDataTranslator
                 outputCollection
                         .addAll((Collection) listSerializer.deserializeForNativeProtocol((ByteBuffer) value, 2));
 
-                return marshalCollection(valueValidationClass, outputCollection, genericClass);
+                return marshalCollection(valueValidationClass, outputCollection, genericClass, outputCollection.getClass());
             }
             catch (SecurityException e)
             {

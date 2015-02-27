@@ -208,7 +208,7 @@ public final class DSClientUtilities
                     entity,
                     member,
                     listAttributeTypeClass.isAssignableFrom(byte[].class) ? CassandraDataTranslator.marshalCollection(
-                            BytesType.class, (Collection) retVal, listAttributeTypeClass) : retVal);
+                            BytesType.class, (Collection) retVal, listAttributeTypeClass, ArrayList.class) : retVal);
             break;
 
         case SET:
@@ -221,7 +221,7 @@ public final class DSClientUtilities
                     entity,
                     member,
                     setAttributeTypeClass.isAssignableFrom(byte[].class) ? CassandraDataTranslator.marshalCollection(
-                            BytesType.class, (Collection) retVal, setAttributeTypeClass) : retVal);
+                            BytesType.class, (Collection) retVal, setAttributeTypeClass, HashSet.class) : retVal);
 //            PropertyAccessorHelper.set(entity, member, retVal);
             break;
         /*
