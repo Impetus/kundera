@@ -122,7 +122,7 @@ public class ESClientTest
     @After
     public void tearDown() throws Exception
     {
-        if (checkIfServerRunning())
+        if (checkIfServerRunning() && node != null)
         {
             node.close();
         }

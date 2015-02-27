@@ -23,7 +23,6 @@ import junit.framework.Assert;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -31,7 +30,8 @@ import org.junit.Test;
 
 import com.impetus.client.es.PersonES.Day;
 
-public class ESAggregationTest {
+public class ESAggregationTest
+{
 
     /** The emf. */
     private EntityManagerFactory emf;
@@ -44,8 +44,10 @@ public class ESAggregationTest {
     private PersonES person;
 
     @BeforeClass
-    public static void setUpBeforeClass() throws Exception {
-        if (!checkIfServerRunning()) {
+    public static void setUpBeforeClass() throws Exception
+    {
+        if (!checkIfServerRunning())
+        {
             ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder();
             builder.put("path.data", "target/data");
             node = new NodeBuilder().settings(builder).node();
@@ -57,19 +59,26 @@ public class ESAggregationTest {
      * 
      * @return true, if successful
      */
-    private static boolean checkIfServerRunning() {
-        try {
+    private static boolean checkIfServerRunning()
+    {
+        try
+        {
             Socket socket = new Socket("127.0.0.1", 9300);
             return socket.getInetAddress() != null;
-        } catch (UnknownHostException e) {
+        }
+        catch (UnknownHostException e)
+        {
             return false;
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             return false;
         }
     }
 
     @Before
-    public void setup() throws InterruptedException {
+    public void setup() throws InterruptedException
+    {
 
         emf = Persistence.createEntityManagerFactory("es-pu");
         em = emf.createEntityManager();
@@ -79,7 +88,8 @@ public class ESAggregationTest {
     /**
      * @throws InterruptedException
      */
-    private void init() throws InterruptedException {
+    private void init() throws InterruptedException
+    {
 
         createPerson("1", 20, "Amit", 100.0);
         createPerson("2", 10, "Dev", 200.0);
@@ -88,14 +98,14 @@ public class ESAggregationTest {
         waitThread();
     }
 
-
     /**
      * @param id
      * @param age
      * @param name
      * @param salary
      */
-    private void createPerson(String id, int age, String name, Double salary) {
+    private void createPerson(String id, int age, String name, Double salary)
+    {
         person = new PersonES();
         person.setAge(age);
         person.setDay(Day.FRIDAY);
@@ -106,7 +116,8 @@ public class ESAggregationTest {
     }
 
     @Test
-    public void testMinAggregation() {
+    public void testMinAggregation()
+    {
         String queryString = "Select min(p.salary) from PersonES p";
         Query query = em.createQuery(queryString);
         List resultList = query.getResultList();
@@ -116,7 +127,8 @@ public class ESAggregationTest {
     }
 
     @Test
-    public void testMultiMinAggregation() {
+    public void testMultiMinAggregation()
+    {
 
         String queryString = "Select min(p.salary), min(p.age) from PersonES p where p.age > 20";
         Query query = em.createQuery(queryString);
@@ -128,7 +140,8 @@ public class ESAggregationTest {
     }
 
     @Test
-    public void testMaxAggregation() {
+    public void testMaxAggregation()
+    {
         String queryString = "Select max(p.age) from PersonES p";
         Query query = em.createQuery(queryString);
         List resultList = query.getResultList();
@@ -151,7 +164,8 @@ public class ESAggregationTest {
     }
 
     @Test
-    public void testSumAggregation() {
+    public void testSumAggregation()
+    {
         String queryString = "Select sum(p.salary) from PersonES p";
         Query query = em.createQuery(queryString);
         List resultList = query.getResultList();
@@ -161,7 +175,8 @@ public class ESAggregationTest {
     }
 
     @Test
-    public void testMultiSumAggregation() {
+    public void testMultiSumAggregation()
+    {
         String queryString = "Select sum(p.salary), sum(p.age) from PersonES p";
         Query query = em.createQuery(queryString);
         List resultList = query.getResultList();
@@ -172,7 +187,8 @@ public class ESAggregationTest {
     }
 
     @Test
-    public void testAvgAggregation() {
+    public void testAvgAggregation()
+    {
         String queryString = "Select avg(p.salary) from PersonES p";
         Query query = em.createQuery(queryString);
         List resultList = query.getResultList();
@@ -182,7 +198,8 @@ public class ESAggregationTest {
     }
 
     @Test
-    public void testMultiAvgAggregation() {
+    public void testMultiAvgAggregation()
+    {
         String avgQuery = "Select avg(p.salary), avg(p.age) from PersonES p";
         Query query = em.createQuery(avgQuery);
         List resultList = query.getResultList();
@@ -193,7 +210,8 @@ public class ESAggregationTest {
     }
 
     @Test
-    public void testMaxMinSameFieldAggregation() {
+    public void testMaxMinSameFieldAggregation()
+    {
         String queryString = "Select max(p.age), min(p.age) from PersonES p";
         Query query = em.createQuery(queryString);
         List resultList = query.getResultList();
@@ -204,7 +222,8 @@ public class ESAggregationTest {
     }
 
     @Test
-    public void testMultiAggregation() {
+    public void testMultiAggregation()
+    {
         String queryString = "Select min(p.age), min(p.salary), max(p.age), max(p.salary) from PersonES p";
         Query query = em.createQuery(queryString);
         List resultList = query.getResultList();
@@ -217,7 +236,8 @@ public class ESAggregationTest {
     }
 
     @Test
-    public void testMinMaxSumAvgAggregation() {
+    public void testMinMaxSumAvgAggregation()
+    {
         String queryString = "Select min(p.salary), max(p.salary), sum(p.salary), avg(p.salary) from PersonES p";
         Query query = em.createQuery(queryString);
         List resultList = query.getResultList();
@@ -230,7 +250,8 @@ public class ESAggregationTest {
     }
 
     @Test
-    public void testAttributeWithMinAggregation() {
+    public void testAttributeWithMinAggregation()
+    {
         String queryString = "Select p.age, min(p.salary) from PersonES p";
         Query query = em.createQuery(queryString);
         List resultList = query.getResultList();
@@ -241,7 +262,8 @@ public class ESAggregationTest {
     }
 
     @Test
-    public void testMinWithAttributeAggregation() {
+    public void testMinWithAttributeAggregation()
+    {
         String queryString = "Select min(p.salary), p.age from PersonES p";
         Query query = em.createQuery(queryString);
         List resultList = query.getResultList();
@@ -252,7 +274,8 @@ public class ESAggregationTest {
     }
 
     @Test
-    public void testMaxWithAttributeAggregation() {
+    public void testMaxWithAttributeAggregation()
+    {
         String queryString = "Select max(p.salary), p.salary from PersonES p";
         Query query = em.createQuery(queryString);
         List resultList = query.getResultList();
@@ -263,7 +286,8 @@ public class ESAggregationTest {
     }
 
     @Test
-    public void testAttributeWithSumAggregation() {
+    public void testAttributeWithSumAggregation()
+    {
         String queryString = "Select p.age, sum(p.salary) from PersonES p";
         Query query = em.createQuery(queryString);
         List resultList = query.getResultList();
@@ -274,7 +298,8 @@ public class ESAggregationTest {
     }
 
     @Test
-    public void testSumWithAttributeSameFieldAggregation() {
+    public void testSumWithAttributeSameFieldAggregation()
+    {
         String queryString = "Select sum(p.salary), p.salary from PersonES p";
         Query query = em.createQuery(queryString);
         List resultList = query.getResultList();
@@ -285,7 +310,8 @@ public class ESAggregationTest {
     }
 
     @Test
-    public void testAttributeWithAvgAggregation() {
+    public void testAttributeWithAvgAggregation()
+    {
         String queryString = "Select p.age, avg(p.salary) from PersonES p";
         Query query = em.createQuery(queryString);
         List resultList = query.getResultList();
@@ -296,7 +322,8 @@ public class ESAggregationTest {
     }
 
     @Test
-    public void testAvgWithAttributeSameFieldAggregation() {
+    public void testAvgWithAttributeSameFieldAggregation()
+    {
         String queryString = "Select avg(p.salary), p.salary from PersonES p";
         Query query = em.createQuery(queryString);
         List resultList = query.getResultList();
@@ -307,9 +334,9 @@ public class ESAggregationTest {
     }
 
     @Test
-    public void testMultiFieldAggregation() {
-        String queryString =
-            "Select p.age, min(p.salary), p.salary, max(p.salary), p.personId, sum(p.salary), p.personName, avg(p.salary) from PersonES p";
+    public void testMultiFieldAggregation()
+    {
+        String queryString = "Select p.age, min(p.salary), p.salary, max(p.salary), p.personId, sum(p.salary), p.personName, avg(p.salary) from PersonES p";
         Query query = em.createQuery(queryString);
         List resultList = query.getResultList();
 
@@ -325,11 +352,11 @@ public class ESAggregationTest {
     }
 
     @Test
-    public void testAggregationWithWhereClause() throws InterruptedException {
+    public void testAggregationWithWhereClause() throws InterruptedException
+    {
         waitThread();
 
-        String invalidQueryWithAndClause =
-            "Select min(p.age) from PersonES p where p.personName = 'amit' AND p.age = 34";
+        String invalidQueryWithAndClause = "Select min(p.age) from PersonES p where p.personName = 'amit' AND p.age = 34";
         Query nameQuery = em.createNamedQuery(invalidQueryWithAndClause);
         List persons = nameQuery.getResultList();
 
@@ -343,8 +370,7 @@ public class ESAggregationTest {
         Assert.assertEquals(1, persons.size());
         Assert.assertEquals(20.0, persons.get(0));
 
-        String queryWithORClause =
-            "Select max(p.salary) from PersonES p where p.personName = 'amit' OR p.personName = 'dev'";
+        String queryWithORClause = "Select max(p.salary) from PersonES p where p.personName = 'amit' OR p.personName = 'dev'";
         nameQuery = em.createNamedQuery(queryWithORClause);
         persons = nameQuery.getResultList();
 
@@ -352,8 +378,7 @@ public class ESAggregationTest {
         Assert.assertEquals(1, persons.size());
         Assert.assertEquals(200.0, persons.get(0));
 
-        String queryMinMaxWithORClause =
-            "Select max(p.salary), min(p.age) from PersonES p where p.personName = 'amit' OR p.personName = 'karthik'";
+        String queryMinMaxWithORClause = "Select max(p.salary), min(p.age) from PersonES p where p.personName = 'amit' OR p.personName = 'karthik'";
         nameQuery = em.createNamedQuery(queryMinMaxWithORClause);
         persons = nameQuery.getResultList();
 
@@ -362,8 +387,7 @@ public class ESAggregationTest {
         Assert.assertEquals(300.0, persons.get(0));
         Assert.assertEquals(20.0, persons.get(1));
 
-        String invalidQueryWithORClause =
-            "Select sum(p.age) from PersonES p where p.personName = 'amit' OR p.personName = 'lkl'";
+        String invalidQueryWithORClause = "Select sum(p.age) from PersonES p where p.personName = 'amit' OR p.personName = 'lkl'";
         nameQuery = em.createNamedQuery(invalidQueryWithORClause);
         persons = nameQuery.getResultList();
 
@@ -381,14 +405,82 @@ public class ESAggregationTest {
         waitThread();
     }
 
+    @Test
+    public void testPositionalQuery()
+    {
+        String queryString = "Select min(p.salary) from PersonES p where p.personName = ?1";
+        Query query = em.createQuery(queryString);
+        query.setParameter(1, "amit");
+        List resultList = query.getResultList();
+
+        Assert.assertEquals(1, resultList.size());
+        Assert.assertEquals(100.0, resultList.get(0));
+    }
+
+    @Test
+    public void testParameterQuery()
+    {
+        String queryString = "Select p from PersonES p where p.personName = :personName";
+        Query query = em.createQuery(queryString);
+        query.setParameter("personName", "amit");
+        List resultList = query.getResultList();
+
+        Assert.assertEquals(1, resultList.size());
+        Assert.assertEquals(100.0, ((PersonES) resultList.get(0)).getSalary());
+    }
+
+    @Test
+    public void testBetween()
+    {
+        String queryString = "Select p from PersonES p where p.age between 20 and 34";
+        Query query = em.createQuery(queryString);
+        List resultList = query.getResultList();
+
+        Assert.assertEquals(2, resultList.size());
+    }
+
+    @Test
+    public void testBetweenWithExpression()
+    {
+        String queryString = "Select p from PersonES p where p.age between 15+5 and 40-6";
+        Query query = em.createQuery(queryString);
+        List resultList = query.getResultList();
+
+        Assert.assertEquals(2, resultList.size());
+    }
+
+    @Test
+    public void testBetweenMin()
+    {
+        String queryString = "Select min(p.age) from PersonES p where p.age between 18 and 34";
+        Query query = em.createQuery(queryString);
+        List resultList = query.getResultList();
+
+        Assert.assertEquals(1, resultList.size());
+        Assert.assertEquals(20.0, resultList.get(0));
+    }
+
+    @Test
+    public void testLikeQuery()
+    {
+        String queryString = "Select min(p.age) from PersonES p where p.personName like '%mit'";
+        Query query = em.createQuery(queryString);
+        List resultList = query.getResultList();
+
+        Assert.assertEquals(1, resultList.size());
+        Assert.assertEquals(20.0, resultList.get(0));
+    }
+
     @AfterClass
-    public static void tearDownAfterClass() throws Exception {
+    public static void tearDownAfterClass() throws Exception
+    {
         if (node != null)
             node.close();
     }
 
-    @After
-    public void tearDown() {
+    // @After
+    public void tearDown()
+    {
         em.remove(em.find(PersonES.class, "1"));
         em.remove(em.find(PersonES.class, "2"));
         em.remove(em.find(PersonES.class, "3"));
@@ -400,7 +492,8 @@ public class ESAggregationTest {
     /**
      * @throws InterruptedException
      */
-    private void waitThread() throws InterruptedException {
+    private void waitThread() throws InterruptedException
+    {
         Thread.sleep(2000);
     }
 }

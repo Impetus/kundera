@@ -27,7 +27,7 @@ public class ESEntityWithoutFieldsTest extends EntityWithoutFieldsBase
     @Before
     public void setup()
     {
-        
+
         if (!checkIfServerRunning())
         {
             ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder();
@@ -53,9 +53,9 @@ public class ESEntityWithoutFieldsTest extends EntityWithoutFieldsBase
     @After
     public void tearDown()
     {
-        if (checkIfServerRunning())
+        if (checkIfServerRunning() && node != null)
         {
-          node.close();
+            node.close();
         }
         tearDownInternal();
     }

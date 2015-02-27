@@ -37,10 +37,11 @@ import org.elasticsearch.search.aggregations.metrics.sum.InternalSum;
 
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.proxy.KunderaQueryUtils;
 import com.impetus.kundera.query.KunderaQuery;
 
 /**
- * @author amitkumar
+ * @author Amit Kumar
  * 
  */
 public class ESResponseReader
@@ -91,6 +92,10 @@ public class ESResponseReader
      */
     public Iterator<Expression> getSelectExpressionOrder(KunderaQuery query)
     {
+        if (!KunderaQueryUtils.isSelectStatement(query.getJpqlExpression()))
+        {
+            return null;
+        }
         Expression selectExpression = ((SelectClause) (query.getSelectStatement()).getSelectClause())
                 .getSelectExpression();
 
@@ -155,7 +160,7 @@ public class ESResponseReader
             Class clazz)
     {
         Map<String, Object> aggMap = new HashMap<String, Object>();
-        if (response.getAggregations() != null)
+        if (query.isAggregated() == true && response.getAggregations() != null)
         {
             InternalAggregations internalAggs = ((InternalFilter) response.getAggregations().getAsMap()
                     .get("whereClause")).getAggregations();

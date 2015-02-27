@@ -53,18 +53,18 @@ public class PersonESTest
 
     /** The em. */
     private EntityManager em;
-    
+
     private static Node node = null;
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception
     {
-         if (!checkIfServerRunning())
-         {
-        ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder();
-        builder.put("path.data", "target/data");
-        node = new NodeBuilder().settings(builder).node();
-         }
+        if (!checkIfServerRunning())
+        {
+            ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder();
+            builder.put("path.data", "target/data");
+            node = new NodeBuilder().settings(builder).node();
+        }
     }
 
     /**
@@ -88,10 +88,11 @@ public class PersonESTest
             return false;
         }
     }
+
     @Before
     public void setup()
     {
-        
+
         emf = Persistence.createEntityManagerFactory("es-pu");
         em = emf.createEntityManager();
     }
@@ -201,7 +202,7 @@ public class PersonESTest
         em.close();
         emf.close();
     }
-    
+
     @Test
     public void testSpecificFieldRetrieval() throws InterruptedException
     {
@@ -232,7 +233,6 @@ public class PersonESTest
         Assert.assertEquals("pragalbh", ((ArrayList) persons.get(1)).get(0));
         Assert.assertEquals(22, ((ArrayList) persons.get(0)).get(1));
 
-        
     }
 
     @Test
@@ -257,7 +257,7 @@ public class PersonESTest
         Query nameQuery = em.createNamedQuery(queryWithOutAndClause);
 
         List<PersonES> persons = nameQuery.getResultList();
-       
+
         Assert.assertFalse(persons.isEmpty());
         Assert.assertEquals(1, persons.size());
         Assert.assertEquals("vivek", persons.get(0).getPersonName());
@@ -308,16 +308,15 @@ public class PersonESTest
     @AfterClass
     public static void tearDownAfterClass() throws Exception
     {
-        node.close();
+        if (node != null)
+            node.close();
     }
 
-    
     @After
     public void tearDown()
     {
         em.close();
         emf.close();
-        
 
     }
 

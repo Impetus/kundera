@@ -23,33 +23,31 @@ public class ESMappedSuperClassTest extends MappedSuperClassBase
     {
         if (!checkIfServerRunning())
         {
-          ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder();
-          builder.put("path.data", "target/data");
-          node = new NodeBuilder().settings(builder).node();
+            ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder();
+            builder.put("path.data", "target/data");
+            node = new NodeBuilder().settings(builder).node();
         }
         _PU = "es-pu";
         setUpInternal();
     }
-    
+
     @Test
     public void test()
     {
         assertInternal(true);
     }
 
-    
     @After
     public void tearDown() throws Exception
     {
-        if (checkIfServerRunning())
+        if (checkIfServerRunning() && node != null)
         {
-          node.close();
+            node.close();
         }
         tearDownInternal();
-        
 
     }
-    
+
     /**
      * Check if server running.
      * 

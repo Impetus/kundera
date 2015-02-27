@@ -22,26 +22,18 @@ import javax.persistence.Query;
 import javax.persistence.metamodel.EntityType;
 
 import org.eclipse.persistence.jpa.jpql.parser.AggregateFunction;
-import org.eclipse.persistence.jpa.jpql.parser.AndExpression;
 import org.eclipse.persistence.jpa.jpql.parser.CollectionExpression;
-import org.eclipse.persistence.jpa.jpql.parser.ComparisonExpression;
 import org.eclipse.persistence.jpa.jpql.parser.Expression;
 import org.eclipse.persistence.jpa.jpql.parser.IdentificationVariable;
-import org.eclipse.persistence.jpa.jpql.parser.LogicalExpression;
 import org.eclipse.persistence.jpa.jpql.parser.NullExpression;
-import org.eclipse.persistence.jpa.jpql.parser.OrExpression;
 import org.eclipse.persistence.jpa.jpql.parser.SelectClause;
 import org.eclipse.persistence.jpa.jpql.parser.SelectStatement;
 import org.eclipse.persistence.jpa.jpql.parser.StateFieldPathExpression;
-import org.eclipse.persistence.jpa.jpql.parser.SubExpression;
 import org.eclipse.persistence.jpa.jpql.parser.WhereClause;
 import org.eclipse.persistence.jpa.jpql.utility.iterable.ListIterable;
-import org.elasticsearch.index.query.AndFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
-import org.elasticsearch.index.query.OrFilterBuilder;
-import org.elasticsearch.index.query.RangeFilterBuilder;
-import org.elasticsearch.index.query.TermFilterBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
 import org.elasticsearch.search.aggregations.metrics.MetricsAggregationBuilder;
@@ -54,311 +46,280 @@ import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.query.KunderaQuery;
-import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.QueryImpl;
 
 /**
+ * The Class ESQuery.
+ * 
  * @author vivek.mishra Implementation of query interface {@link Query}.
+ * @param <E>
+ *            the element type
  */
 
 public class ESQuery<E> extends QueryImpl
 {
 
+    /** The es filter builder. */
+    private ESFilterBuilder esFilterBuilder;
 
-	public ESQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator, final KunderaMetadata kunderaMetadata)
-	{
-		super(kunderaQuery, persistenceDelegator, kunderaMetadata);
-	}
+    /**
+     * Instantiates a new ES query.
+     * 
+     * @param kunderaQuery
+     *            the kundera query
+     * @param persistenceDelegator
+     *            the persistence delegator
+     * @param kunderaMetadata
+     *            the kundera metadata
+     */
+    public ESQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator,
+            final KunderaMetadata kunderaMetadata)
+    {
+        super(kunderaQuery, persistenceDelegator, kunderaMetadata);
+        this.esFilterBuilder = new ESFilterBuilder(getKunderaQuery(), kunderaMetadata);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.impetus.kundera.query.QueryImpl#populateEntities(com.impetus.kundera
-	 * .metadata.model.EntityMetadata, com.impetus.kundera.client.Client)
-	 */
-	@Override
-	protected List<Object> populateEntities(EntityMetadata m, Client client)
-	{
-		MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
-				m.getPersistenceUnit());
-		EntityType entity = metaModel.entity(m.getEntityClazz());
-		Expression whereExpression = getKunderaQuery().getSelectStatement().getWhereClause();
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.query.QueryImpl#populateEntities(com.impetus.kundera
+     * .metadata.model.EntityMetadata, com.impetus.kundera.client.Client)
+     */
+    @Override
+    protected List<Object> populateEntities(EntityMetadata m, Client client)
+    {
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                m.getPersistenceUnit());
+        EntityType entity = metaModel.entity(m.getEntityClazz());
+        Expression whereExpression = getKunderaQuery().getSelectStatement().getWhereClause();
+        QueryBuilder queryBuilder = null;
 
-		FilterBuilder filter = whereExpression instanceof NullExpression ? null : populateFilterBuilder(((WhereClause)whereExpression).getConditionalExpression(), m, entity); 
-		return ((ESClient) client).executeQuery(filter, useAggregation(kunderaQuery, m, filter), m, getKunderaQuery());
-	}
+        FilterBuilder filter = whereExpression instanceof NullExpression ? null : esFilterBuilder
+                .populateFilterBuilder(((WhereClause) whereExpression).getConditionalExpression(), m);
+        return ((ESClient) client).executeQuery(filter, useAggregation(kunderaQuery, m, filter), queryBuilder, m,
+                getKunderaQuery());
+    }
 
-	/**
-	 * @param condtionalExp
-	 * @param m
-	 * @param entity
-	 * @return
-	 */
-	public FilterBuilder populateFilterBuilder(Expression condtionalExp, EntityMetadata m, EntityType entity) 
-	{	
-		FilterBuilder filter = null;
-		condtionalExp = (condtionalExp instanceof SubExpression) ? ((SubExpression)condtionalExp).getExpression() : condtionalExp ;
-		filter = (condtionalExp instanceof ComparisonExpression) ? getFilter(populateFilterClause((ComparisonExpression)condtionalExp), m, entity) : filter ;
-		filter = (condtionalExp instanceof LogicalExpression) ? populateLogicalFilterBuilder(condtionalExp, m , entity) : filter ;
-		
-		return filter;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.query.QueryImpl#recursivelyPopulateEntities(com.impetus
+     * .kundera.metadata.model.EntityMetadata,
+     * com.impetus.kundera.client.Client)
+     */
+    @Override
+    protected List<Object> recursivelyPopulateEntities(EntityMetadata m, Client client)
+    {
+        List result = populateEntities(m, client);
+        return setRelationEntities(result, client, m);
+        // return null;
+    }
 
-	/**
-	 * @param logicalExp
-	 * @param m
-	 * @param entity
-	 * @return
-	 */
-	private FilterBuilder populateLogicalFilterBuilder(Expression logicalExp, EntityMetadata m, EntityType entity)
-	{
-		String identifier = ((LogicalExpression)logicalExp).getIdentifier(); 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.query.QueryImpl#getReader()
+     */
+    @Override
+    protected EntityReader getReader()
+    {
+        return new ESEntityReader(kunderaQuery, kunderaMetadata);
+    }
 
-		return (identifier.equalsIgnoreCase(LogicalExpression.AND)) ? getAndFilterBuilder(logicalExp, m, entity) : 
-			(identifier.equalsIgnoreCase(LogicalExpression.OR)) ? getOrFilterBuilder(logicalExp, m, entity) : null ;  
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.query.QueryImpl#onExecuteUpdate()
+     */
+    @Override
+    protected int onExecuteUpdate()
+    {
+        return onUpdateDeleteEvent();
+    }
 
-	/**
-	 * @param logicalExp
-	 * @param m
-	 * @param entity
-	 * @return
-	 */
-	private AndFilterBuilder getAndFilterBuilder(Expression logicalExp, EntityMetadata m, EntityType entity)
-	{
-		AndExpression andExp = (AndExpression)logicalExp;
-		Expression leftExpression = andExp.getLeftExpression();
-		Expression rightExpression = andExp.getRightExpression();
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.query.QueryImpl#close()
+     */
+    @Override
+    public void close()
+    {
 
-		return new AndFilterBuilder(populateFilterBuilder(leftExpression, m, entity), populateFilterBuilder(rightExpression, m, entity));
-	}
+    }
 
-	/**
-	 * @param logicalExp
-	 * @param m
-	 * @param entity
-	 * @return
-	 */
-	private OrFilterBuilder getOrFilterBuilder(Expression logicalExp, EntityMetadata m, EntityType entity)
-	{
-		OrExpression orExp = (OrExpression)logicalExp;
-		Expression leftExpression = orExp.getLeftExpression();
-		Expression rightExpression = orExp.getRightExpression();
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.query.QueryImpl#iterate()
+     */
+    @Override
+    public Iterator<E> iterate()
+    {
+        return null;
+    }
 
-		return new OrFilterBuilder(populateFilterBuilder(leftExpression, m, entity), populateFilterBuilder(rightExpression, m, entity));
-	}
+    /**
+     * Gets the es filter builder.
+     *
+     * @return ES Filter Builder
+     */
+    public ESFilterBuilder getEsFilterBuilder()
+    {
+        return esFilterBuilder;
+    }
 
-	/**
-	 * @param conditionalExpression
-	 * @return
-	 */
-	private FilterClause populateFilterClause(ComparisonExpression conditionalExpression)
-	{
-		String property = ((StateFieldPathExpression)conditionalExpression.getLeftExpression()).getPath(1);
-		String condition = conditionalExpression.getComparisonOperator();
-		Object value = conditionalExpression.getRightExpression().toParsedText();
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.query.QueryImpl#findUsingLucene(com.impetus.kundera
+     * .metadata.model.EntityMetadata, com.impetus.kundera.client.Client)
+     */
+    @Override
+    protected List findUsingLucene(EntityMetadata m, Client client)
+    {
+        throw new UnsupportedOperationException("select colummn via lucene is unsupported in couchdb");
+    }
 
-		return (condition != null && property != null)? getKunderaQuery().new FilterClause(property, condition, value) : null;
-	}
+    /**
+     * Use aggregation.
+     * 
+     * @param query
+     *            the query
+     * @param entityMetadata
+     *            the entity metadata
+     * @param filter
+     *            the filter
+     * @return the filter aggregation builder
+     */
+    public FilterAggregationBuilder useAggregation(KunderaQuery query, EntityMetadata entityMetadata,
+            FilterBuilder filter)
+    {
+        return (query.getSelectStatement() != null) ? query.isAggregated() ? buildSelectAggregations(
+                query.getSelectStatement(), entityMetadata, filter) : null : null;
+    }
 
+    /**
+     * Builds the where aggregations.
+     * 
+     * @param entityMetadata
+     *            the entity metadata
+     * @param filter
+     *            the filter
+     * @return the filter aggregation builder
+     */
+    private FilterAggregationBuilder buildWhereAggregations(EntityMetadata entityMetadata, FilterBuilder filter)
+    {
+        filter = filter != null ? filter : FilterBuilders.matchAllFilter();
+        FilterAggregationBuilder filteragg = AggregationBuilders.filter("whereClause").filter(filter);
+        return filteragg;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.impetus.kundera.query.QueryImpl#recursivelyPopulateEntities(com.impetus
-	 * .kundera.metadata.model.EntityMetadata,
-	 * com.impetus.kundera.client.Client)
-	 */
-	@Override
-	protected List<Object> recursivelyPopulateEntities(EntityMetadata m, Client client)
-	{
-		List result = populateEntities(m, client);
-		return setRelationEntities(result, client, m);
-		// return null;
-	}
+    /**
+     * Builds the select aggregations.
+     * 
+     * @param selectStatement
+     *            the select statement
+     * @param entityMetadata
+     *            the entity metadata
+     * @param filter
+     *            the filter
+     * @return the filter aggregation builder
+     */
+    private FilterAggregationBuilder buildSelectAggregations(SelectStatement selectStatement,
+            EntityMetadata entityMetadata, FilterBuilder filter)
+    {
+        FilterAggregationBuilder filteredAggregation = buildWhereAggregations(entityMetadata, filter);
+        Expression expression = ((SelectClause) selectStatement.getSelectClause()).getSelectExpression();
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.impetus.kundera.query.QueryImpl#getReader()
-	 */
-	@Override
-	protected EntityReader getReader()
-	{
-		return new ESEntityReader(kunderaQuery, kunderaMetadata);
-	}
+        if (expression instanceof CollectionExpression)
+        {
+            filteredAggregation = appendAggregation((CollectionExpression) expression, entityMetadata,
+                    filteredAggregation);
+        }
+        else
+        {
+            if (checkExpression(expression))
+                filteredAggregation.subAggregation(getAggregation(expression, entityMetadata));
+        }
+        return filteredAggregation;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.impetus.kundera.query.QueryImpl#onExecuteUpdate()
-	 */
-	@Override
-	protected int onExecuteUpdate()
-	{
-		return onUpdateDeleteEvent();
-	}
+    /**
+     * Append aggregation.
+     * 
+     * @param collectionExpression
+     *            the collection expression
+     * @param entityMetadata
+     *            the entity metadata
+     * @param aggregationBuilder
+     *            the aggregation builder
+     * @return the filter aggregation builder
+     */
+    private FilterAggregationBuilder appendAggregation(CollectionExpression collectionExpression,
+            EntityMetadata entityMetadata, FilterAggregationBuilder aggregationBuilder)
+    {
 
-	@Override
-	public void close()
-	{
+        ListIterable<Expression> functionlist = collectionExpression.children();
+        for (Expression function : functionlist)
+        {
+            if (checkExpression(function))
+                aggregationBuilder.subAggregation(getAggregation(function, entityMetadata));
+        }
+        return aggregationBuilder;
+    }
 
-	}
+    /**
+     * Gets the aggregation.
+     * 
+     * @param expression
+     *            the expression
+     * @param entityMetadata
+     *            the entity metadata
+     * @return the aggregation
+     */
+    private MetricsAggregationBuilder getAggregation(Expression expression, EntityMetadata entityMetadata)
+    {
+        AggregateFunction function = (AggregateFunction) expression;
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                entityMetadata.getPersistenceUnit());
 
-	@Override
-	public Iterator<E> iterate()
-	{
-		return null;
-	}
+        String field = function.toParsedText().substring(function.toParsedText().indexOf('.') + 1,
+                function.toParsedText().indexOf(')'));
+        String jPAColumnName = ((AbstractAttribute) metaModel.entity(entityMetadata.getEntityClazz()).getAttribute(
+                field)).getJPAColumnName();
+        MetricsAggregationBuilder aggregationBuilder = null;
 
-	/**
-	 * @param clause
-	 * @param metadata
-	 * @param entityType
-	 * @return
-	 */
-	private FilterBuilder getFilter(FilterClause clause, final EntityMetadata metadata, final EntityType entityType)
-	{
-		String condition = clause.getCondition();
-		Object value = clause.getValue().get(0);
-		String name = ((AbstractAttribute)((MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
-				metadata.getPersistenceUnit())).entity(metadata.getEntityClazz()).getAttribute(clause.getProperty())).getJPAColumnName();
+        switch (function.getIdentifier())
+        {
+        case Expression.MIN:
+            aggregationBuilder = AggregationBuilders.min(function.toParsedText()).field(jPAColumnName); // AggregationBuilders.min("minimum").field(jPAColumnName);
+            break;
+        case Expression.MAX:
+            aggregationBuilder = AggregationBuilders.max(function.toParsedText()).field(jPAColumnName);
+            break;
+        case Expression.SUM:
+            aggregationBuilder = AggregationBuilders.sum(function.toParsedText()).field(jPAColumnName);
+            break;
+        case Expression.AVG:
+            aggregationBuilder = AggregationBuilders.avg(function.toParsedText()).field(jPAColumnName);
+            break;
+        }
+        return aggregationBuilder;
+    }
 
-		FilterBuilder filterBuilder = null;
-		if (condition.equals("="))
-		{
-			filterBuilder = new TermFilterBuilder(name, value);
-		}
-		else if (condition.equals(">"))
-		{
-			filterBuilder = new RangeFilterBuilder(name).gt(value);
-		}
-		else if (condition.equals("<"))
-		{
-			filterBuilder = new RangeFilterBuilder(name).lt(value);
-		}
-		else if (condition.equals(">="))
-		{
-			filterBuilder = new RangeFilterBuilder(name).gte(value);
-		}
-		else if (condition.equals("<="))
-		{
-			filterBuilder = new RangeFilterBuilder(name).lte(value);
-		}
-
-		return filterBuilder;
-	}
-
-	@Override
-	protected List findUsingLucene(EntityMetadata m, Client client)
-	{
-		throw new UnsupportedOperationException("select colummn via lucene is unsupported in couchdb");
-	}
-
-	/**
-	 * @param query
-	 * @param entityMetadata
-	 * @param filter
-	 * @return
-	 */
-	public FilterAggregationBuilder useAggregation(KunderaQuery query, EntityMetadata entityMetadata, FilterBuilder filter)
-	{
-		return (query.getSelectStatement() != null ) ? query.isAggregated() ? buildSelectAggregations(query.getSelectStatement(), entityMetadata, filter) : null : null;
-	}
-
-	/**
-	 * @param entityMetadata
-	 * @param filter
-	 * @return
-	 */
-	private FilterAggregationBuilder buildWhereAggregations(EntityMetadata entityMetadata, FilterBuilder filter)
-	{
-		filter = filter != null ? filter : FilterBuilders.matchAllFilter();
-		FilterAggregationBuilder filteragg = AggregationBuilders.filter("whereClause").filter(filter);
-		return filteragg;
-	}
-
-	/**
-	 * @param selectStatement
-	 * @param entityMetadata
-	 * @param filter
-	 * @return
-	 */
-	private FilterAggregationBuilder buildSelectAggregations(SelectStatement selectStatement, EntityMetadata entityMetadata, FilterBuilder filter)
-	{
-		FilterAggregationBuilder filteredAggregation = buildWhereAggregations(entityMetadata, filter); 
-		Expression expression = ((SelectClause) selectStatement.getSelectClause()).getSelectExpression();
-
-		if(expression instanceof CollectionExpression)
-		{
-			filteredAggregation = appendAggregation((CollectionExpression)expression, entityMetadata, filteredAggregation);
-		}
-		else 
-		{
-			if(checkExpression(expression))
-				filteredAggregation.subAggregation(getAggregation(expression, entityMetadata));
-		}
-		return filteredAggregation;
-	}
-
-	/**
-	 * @param collectionExpression
-	 * @param entityMetadata
-	 * @param aggregationBuilder
-	 * @return
-	 */
-	private FilterAggregationBuilder appendAggregation(CollectionExpression collectionExpression, EntityMetadata entityMetadata, FilterAggregationBuilder aggregationBuilder) {
-
-		ListIterable<Expression> functionlist = collectionExpression.children();
-		for(Expression function : functionlist)
-		{
-			if(checkExpression(function))
-				aggregationBuilder.subAggregation(getAggregation(function, entityMetadata));
-		}
-		return aggregationBuilder;
-	}
-
-	/**
-	 * @param expression
-	 * @param entityMetadata
-	 * @return
-	 */
-	private MetricsAggregationBuilder getAggregation(Expression expression, EntityMetadata entityMetadata) 
-	{		
-		AggregateFunction function = (AggregateFunction)expression;
-		MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
-				entityMetadata.getPersistenceUnit());
-
-		String field = function.toParsedText().substring(function.toParsedText().indexOf('.') + 1, function.toParsedText().indexOf(')'));
-		String jPAColumnName = ((AbstractAttribute)metaModel.entity(entityMetadata.getEntityClazz()).getAttribute(field)).getJPAColumnName();
-
-		MetricsAggregationBuilder aggregationBuilder = null ;
-
-		switch(function.getIdentifier()){
-		case Expression.MIN:
-			aggregationBuilder = AggregationBuilders.min(function.toParsedText()).field(jPAColumnName); //AggregationBuilders.min("minimum").field(jPAColumnName);
-			break;
-		case Expression.MAX:
-			aggregationBuilder = AggregationBuilders.max(function.toParsedText()).field(jPAColumnName);
-			break;
-		case Expression.SUM:
-			aggregationBuilder = AggregationBuilders.sum(function.toParsedText()).field(jPAColumnName);
-			break;
-		case Expression.AVG:
-			aggregationBuilder = AggregationBuilders.avg(function.toParsedText()).field(jPAColumnName);
-			break;
-		}
-		return aggregationBuilder;
-	}
-
-	/**
-	 * @param expression
-	 * @return
-	 */
-	private boolean checkExpression(Expression expression)
-	{
-		return (expression instanceof StateFieldPathExpression || expression instanceof IdentificationVariable) ? false : true ;
-	}
+    /**
+     * Check expression.
+     * 
+     * @param expression
+     *            the expression
+     * @return true, if successful
+     */
+    private boolean checkExpression(Expression expression)
+    {
+        return !(expression instanceof StateFieldPathExpression || expression instanceof IdentificationVariable);
+    }
 }
