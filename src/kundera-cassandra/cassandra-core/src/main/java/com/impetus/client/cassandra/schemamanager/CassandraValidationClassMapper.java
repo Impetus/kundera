@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.cassandra.db.marshal.AbstractType;
 import org.apache.cassandra.db.marshal.AsciiType;
 import org.apache.cassandra.db.marshal.BooleanType;
 import org.apache.cassandra.db.marshal.BytesType;
@@ -45,7 +46,9 @@ import org.apache.cassandra.exceptions.ConfigurationException;
 import org.apache.cassandra.exceptions.SyntaxException;
 import org.apache.cassandra.locator.NetworkTopologyStrategy;
 import org.apache.cassandra.locator.SimpleStrategy;
+import org.apache.cassandra.serializers.*;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class CassandraValidationClassMapper holds the map of validation
  * class(e.g. wrapper for default_validation_class property) mapper.
@@ -57,9 +60,14 @@ public final class CassandraValidationClassMapper
 
     /** The Constant validationClassMapper. */
     private final static HashMap<Class<?>, Class<?>> validationClassMapper = new HashMap<Class<?>, Class<?>>();
+    
+    /** The Constant validationSerializerClassMapper. */
+    private final static HashMap<Class<?>, TypeSerializer<?>> validationSerializerClassMapper = new HashMap<Class<?>, TypeSerializer<?>>();
 
+    /** The Constant replication_strategies. */
     private final static List<String> replication_strategies = new ArrayList<String>();
 
+    /** The validators and comparators. */
     private static List<String> validatorsAndComparators = new ArrayList<String>();
     static
     {
@@ -120,13 +128,51 @@ public final class CassandraValidationClassMapper
         validationClassMapper.put(List.class, ListType.class);
         validationClassMapper.put(Set.class, SetType.class);
         validationClassMapper.put(Map.class, MapType.class);
+        
+        
+        //validation serializer class mappers
+        validationSerializerClassMapper.put(java.lang.String.class, UTF8Serializer.instance);
+        validationSerializerClassMapper.put(Character.class, UTF8Serializer.instance);
+        validationSerializerClassMapper.put(char.class, UTF8Serializer.instance);
+
+        validationSerializerClassMapper.put(java.sql.Time.class, TimestampSerializer.instance);
+        validationSerializerClassMapper.put(java.lang.Integer.class, Int32Serializer.instance);
+        validationSerializerClassMapper.put(int.class, Int32Serializer.instance);
+        validationSerializerClassMapper.put(java.sql.Timestamp.class, TimestampSerializer.instance);
+        validationSerializerClassMapper.put(Short.class, IntegerSerializer.instance);
+        validationSerializerClassMapper.put(short.class, IntegerSerializer.instance);
+        validationSerializerClassMapper.put(java.math.BigDecimal.class, DecimalSerializer.instance);
+        validationSerializerClassMapper.put(java.sql.Date.class, TimestampSerializer.instance);
+        validationSerializerClassMapper.put(java.util.Date.class, TimestampSerializer.instance);
+        validationSerializerClassMapper.put(java.math.BigInteger.class, IntegerSerializer.instance);
+
+        validationSerializerClassMapper.put(java.lang.Double.class, DoubleSerializer.instance);
+        validationSerializerClassMapper.put(double.class, DoubleSerializer.instance);
+
+        validationSerializerClassMapper.put(boolean.class, BooleanSerializer.instance);
+        validationSerializerClassMapper.put(Boolean.class, BooleanSerializer.instance);
+
+        validationSerializerClassMapper.put(java.lang.Long.class, LongSerializer.instance);
+        validationSerializerClassMapper.put(long.class, LongSerializer.instance);
+
+        validationSerializerClassMapper.put(Byte.class, BytesSerializer.instance);
+        validationSerializerClassMapper.put(byte.class, BytesSerializer.instance);
+
+        validationSerializerClassMapper.put(Float.class, FloatSerializer.instance);
+        validationSerializerClassMapper.put(float.class, FloatSerializer.instance);
+
+        validationSerializerClassMapper.put(UUID.class, UUIDSerializer.instance);
+
+        validationSerializerClassMapper.put(Calendar.class, TimestampSerializer.instance);
+
+        
     }
 
     /**
      * Gets the validation class.
-     * 
-     * @param dataType
-     *            the data type
+     *
+     * @param dataType            the data type
+     * @param isCql3Enabled the is cql3 enabled
      * @return the validation class
      */
     public static String getValidationClass(Class<?> dataType, boolean isCql3Enabled)
@@ -134,6 +180,13 @@ public final class CassandraValidationClassMapper
         return getValidationClassInstance(dataType, isCql3Enabled).getSimpleName();
     }
 
+    /**
+     * Gets the validation class instance.
+     *
+     * @param dataType the data type
+     * @param isCql3Enabled the is cql3 enabled
+     * @return the validation class instance
+     */
     public static Class<?> getValidationClassInstance(Class<?> dataType, boolean isCql3Enabled)
     {
         resetMapperForCQL3(isCql3Enabled);
@@ -146,9 +199,43 @@ public final class CassandraValidationClassMapper
         resetMapperForThrift(isCql3Enabled);
         return validation_class;
     }
+    
+    /**
+     * Gets the validation serializer class instance.
+     *
+     * @param dataType the data type
+     * @param isCql3Enabled the is cql3 enabled
+     * @return the validation serializer class instance
+     */
+    public static TypeSerializer<?> getValidationSerializerClassInstance(Class<?> dataType, boolean isCql3Enabled)
+    {
+        resetMapperForCQL3(isCql3Enabled);
+        TypeSerializer<?> validation_class;
+        validation_class = validationSerializerClassMapper.get(dataType);
+        if (!(validation_class != null))
+        {
+            validation_class = BytesSerializer.instance;
+        }
+        resetMapperForThrift(isCql3Enabled);
+        return validation_class;
+    }
 
+    /**
+     * Gets the value type name.
+     *
+     * @param dataType the data type
+     * @param genericClasses the generic classes
+     * @param isCql3Enabled the is cql3 enabled
+     * @return the value type name
+     * @throws SyntaxException the syntax exception
+     * @throws ConfigurationException the configuration exception
+     * @throws IllegalArgumentException the illegal argument exception
+     * @throws IllegalAccessException the illegal access exception
+     * @throws NoSuchFieldException the no such field exception
+     * @throws SecurityException the security exception
+     */
     public static String getValueTypeName(Class<?> dataType, List<Class<?>> genericClasses, boolean isCql3Enabled)
-            throws SyntaxException, ConfigurationException
+            throws SyntaxException, ConfigurationException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException
     {
         String valueType;
 
@@ -158,28 +245,44 @@ public final class CassandraValidationClassMapper
         if (validation_class.equals(ListType.class))
         {
             TypeParser parser = new TypeParser(getValidationClass(genericClasses.get(0), isCql3Enabled));
-            valueType = ListType.getInstance(parser.parse()).toString();
+            valueType = ListType.getInstance(parser.parse(), true).toString();
         }
         else if (validation_class.equals(SetType.class))
         {
             TypeParser parser = new TypeParser(getValidationClass(genericClasses.get(0), isCql3Enabled));
-            valueType = SetType.getInstance(parser.parse()).toString();
+            valueType = SetType.getInstance(parser.parse(), true).toString();
         }
         else if (validation_class.equals(MapType.class))
         {
-            TypeParser keyParser = new TypeParser(getValidationClass(genericClasses.get(0), isCql3Enabled));
-            TypeParser valueParser = new TypeParser(getValidationClass(genericClasses.get(1), isCql3Enabled));
-            valueType = MapType.getInstance(keyParser.parse(), valueParser.parse()).toString();
+            Class keyClass = CassandraValidationClassMapper.getValidationClassInstance(genericClasses.get(0), true);
+            Class valueClass = CassandraValidationClassMapper
+                    .getValidationClassInstance(genericClasses.get(1), true);
+
+            Object keyClassInstance = keyClass.getDeclaredField("instance").get(null);
+            Object valueClassInstance = valueClass.getDeclaredField("instance").get(null);
+
+           valueType = MapType.getInstance((AbstractType) keyClassInstance,
+                    (AbstractType) valueClassInstance, true).toString();
+//            TypeParser keyParser = new TypeParser(getValidationClass(genericClasses.get(0), isCql3Enabled));
+//            TypeParser valueParser = new TypeParser(getValidationClass(genericClasses.get(1), isCql3Enabled));
+//            valueType = MapType.getInstance(keyParser, valueParser).toString();
         }
         return valueType;
     }
 
+    /**
+     * Gets the replication strategies.
+     *
+     * @return the replication strategies
+     */
     public static List<String> getReplicationStrategies()
     {
         return replication_strategies;
     }
 
     /**
+     * Gets the validators and comparators.
+     *
      * @return the validatorsAndComparators
      */
     public static List<String> getValidatorsAndComparators()
@@ -187,6 +290,11 @@ public final class CassandraValidationClassMapper
         return validatorsAndComparators;
     }
 
+    /**
+     * Reset mapper for cq l3.
+     *
+     * @param isCql3Enabled the is cql3 enabled
+     */
     private static void resetMapperForCQL3(boolean isCql3Enabled)
     {
         if (isCql3Enabled)
@@ -203,6 +311,11 @@ public final class CassandraValidationClassMapper
         }
     }
 
+    /**
+     * Reset mapper for thrift.
+     *
+     * @param isCql3Enabled the is cql3 enabled
+     */
     private static void resetMapperForThrift(boolean isCql3Enabled)
     {
         if (isCql3Enabled)

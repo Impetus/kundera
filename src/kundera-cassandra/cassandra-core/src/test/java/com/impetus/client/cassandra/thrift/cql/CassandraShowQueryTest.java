@@ -51,6 +51,7 @@ import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
 public class CassandraShowQueryTest
 {
     private static final String SHOW_QUERY_ENABLED_PU = "CassandraShowQueryEnabledPu";
+
     private static final String SHOW_QUERY_DISABLED_PU = "CassandraShowQueryDisabledPu";
 
     private EntityManagerFactory emf;
@@ -66,27 +67,27 @@ public class CassandraShowQueryTest
     {
         CassandraCli.cassandraSetUp();
         puProperties.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
-        
+
     }
 
     @After
     public void tearDownAfterClass() throws Exception
     {
         puProperties = null;
-       
+
     }
 
     /*
-     * testing  show.query when it is enabled in persistence unit
+     * testing show.query when it is enabled in persistence unit
      */
     @Test
-    public void testShowQuerySetInPU() 
+    public void testShowQuerySetInPU()
     {
         emf = Persistence.createEntityManagerFactory(SHOW_QUERY_ENABLED_PU, puProperties);
         em = emf.createEntityManager();
         try
         {
-            int i = 0;
+            
             String expectedQuery[] = new String[3];
             String actualQuery = null;
             BufferedReader br = null;
@@ -112,14 +113,15 @@ public class CassandraShowQueryTest
 
             br = new BufferedReader(new FileReader("showQuery.log"));
             actualQuery = br.readLine();
-            if(actualQuery==null)
+            if (actualQuery == null)
                 fail("failed as file is empty");
-           
-            while (actualQuery  != null)
+
+            while (actualQuery != null)
             {
-                Assert.assertEquals(expectedQuery[i++], actualQuery);
-                actualQuery = br.readLine();
+                actualQuery.concat(br.readLine());
             }
+            Assert.assertTrue(actualQuery.indexOf(expectedQuery[0]) != -1
+                    && actualQuery.indexOf(expectedQuery[1]) != -1 && actualQuery.indexOf(expectedQuery[2]) != -1);
             em.close();
             emf.close();
         }
@@ -128,40 +130,52 @@ public class CassandraShowQueryTest
             logger.info(e.getMessage());
         }
     }
-    
+
     /*
-     *testing show.query property when it is disabled
+     * testing show.query property when it is disabled
      */
     @Test
-    public void testShowQueryDisabled() 
+    public void testShowQueryDisabled()
     {
         emf = Persistence.createEntityManagerFactory(SHOW_QUERY_DISABLED_PU, puProperties);
         em = emf.createEntityManager();
         try
         {
-           
-            boolean isFileEmpty=false;
+            String expectedQuery[] = new String[3];
+            String actualQuery = null;
+            boolean isFileEmpty = false;
             BufferedReader br = null;
             File file = new File("showQuery.log");
             PrintStream printStream;
 
             printStream = new PrintStream(new FileOutputStream(file));
+            
             System.setOut(printStream);
             Query findQuery = em.createQuery("Select s from UserInformation s", UserInformation.class);
             findQuery.getResultList();
+            expectedQuery[0] = "SELECT * FROM \"USER\" LIMIT 100";
             System.setOut(printStream);
 
             findQuery = em.createQuery("Select s from UserInformation s where s.name = vivek");
             findQuery.getResultList();
+            expectedQuery[1] = "SELECT * FROM \"USER\" WHERE \"name\" = 'vivek' LIMIT 100  ALLOW FILTERING";
             System.setOut(printStream);
 
             findQuery = em.createQuery("Select s.age from UserInformation s where s.name = vivek");
             findQuery.getResultList();
+            expectedQuery[2] = "SELECT \"age\" FROM \"USER\" WHERE \"name\" = 'vivek' LIMIT 100  ALLOW FILTERING";
             System.setOut(printStream);
-
+            
             br = new BufferedReader(new FileReader("showQuery.log"));
-            isFileEmpty=br.readLine() == null;
-            Assert.assertEquals(isFileEmpty, true);
+            isFileEmpty = br.readLine() == null;
+            
+            while (actualQuery != null)
+            {
+                actualQuery.concat(br.readLine());
+            }
+            Assert.assertTrue(actualQuery.indexOf(expectedQuery[0]) == -1
+                    && actualQuery.indexOf(expectedQuery[1]) == -1 && actualQuery.indexOf(expectedQuery[2]) == -1);
+            
         }
         catch (Exception e)
         {
@@ -170,20 +184,21 @@ public class CassandraShowQueryTest
         em.close();
         emf.close();
     }
-    
+
     /*
-     * testing kunera.show.query property when it is enabled at external properties level
+     * testing kunera.show.query property when it is enabled at external
+     * properties level
      */
-    
+
     @Test
-    public void testShowQueryPropertySetInPropertyMap() 
+    public void testShowQueryPropertySetInPropertyMap()
     {
-        puProperties.put("kundera.show.query","true");
+        puProperties.put("kundera.show.query", "true");
         emf = Persistence.createEntityManagerFactory(SHOW_QUERY_DISABLED_PU, puProperties);
         em = emf.createEntityManager();
         try
         {
-            int i = 0;
+            
             String expectedQuery[] = new String[3];
             String actualQuery = null;
             BufferedReader br = null;
@@ -209,14 +224,15 @@ public class CassandraShowQueryTest
 
             br = new BufferedReader(new FileReader("showQuery.log"));
             actualQuery = br.readLine();
-            if(actualQuery==null)
+            if (actualQuery == null)
                 fail("failed as file is empty");
-           
-            while (actualQuery  != null)
+
+            while (actualQuery != null)
             {
-                Assert.assertEquals(expectedQuery[i++], actualQuery);
-                actualQuery = br.readLine();
+                actualQuery.concat(br.readLine());
             }
+            Assert.assertTrue(actualQuery.indexOf(expectedQuery[0]) != -1
+                    && actualQuery.indexOf(expectedQuery[1]) != -1 && actualQuery.indexOf(expectedQuery[2]) != -1);
             em.close();
             emf.close();
         }
@@ -225,7 +241,5 @@ public class CassandraShowQueryTest
             logger.info(e.getMessage());
         }
     }
-    
-    
 
 }

@@ -69,12 +69,14 @@ public class CollectionTest
         
         ObjectAccessor accessor = new ObjectAccessor();
         accessor.toBytes(10);
+        accessor.toBytes(100);
         
         byteCollection.put("key1", accessor.toBytes(10));
         byteCollection.put("key2", accessor.toBytes(11));
         EntityWithCollection entity = new EntityWithCollection();
         entity.setId("entityId1");
         entity.setDataMap(byteCollection);
+        entity.setByteData(accessor.toBytes(100));
         em.persist(entity); // persist entity.
         
         em.clear();
@@ -82,6 +84,7 @@ public class CollectionTest
         Assert.assertNotNull(result);
         
         byte[] bytes = result.getDataMap().get("key1");
+        byte[] newdata = result.getByteData();
         Object value = PropertyAccessorHelper.getObject(Object.class, bytes);
 
         Assert.assertEquals(10, value);

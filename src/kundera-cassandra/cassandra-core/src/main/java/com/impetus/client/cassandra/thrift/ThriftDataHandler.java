@@ -43,9 +43,10 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.utils.KunderaCoreUtils;
 import com.impetus.kundera.utils.TimestampGenerator;
 
+
 /**
- * Data handler for Thrift Clients
- * 
+ * Data handler for Thrift Clients.
+ *
  * @author amresh.singh
  */
 /**
@@ -54,8 +55,17 @@ import com.impetus.kundera.utils.TimestampGenerator;
  */
 public final class ThriftDataHandler extends CassandraDataHandlerBase implements CassandraDataHandler
 {
+    
+    /** The thrift client. */
     private final ThriftClient thriftClient;
 
+    /**
+     * Instantiates a new thrift data handler.
+     *
+     * @param thriftClient the thrift client
+     * @param kunderaMetadata the kundera metadata
+     * @param generator the generator
+     */
     public ThriftDataHandler(final ThriftClient thriftClient, final KunderaMetadata kunderaMetadata,
             final TimestampGenerator generator)
     {
@@ -115,6 +125,9 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
         }
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.client.cassandra.datahandler.CassandraDataHandlerBase#fromThriftRow(java.lang.Class, com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.db.DataRow)
+     */
     @Override
     public <E> E fromThriftRow(Class<E> clazz, EntityMetadata m, DataRow<SuperColumn> tr) throws Exception
     {
@@ -122,13 +135,15 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
     }
 
     /**
-     * @param m
-     * @param relationNames
-     * @param isWrapReq
-     * @param e
-     * @param columnOrSuperColumnsFromRow
-     * @return
-     * @throws CharacterCodingException
+     * Populate entity from slice.
+     *
+     * @param m the m
+     * @param relationNames the relation names
+     * @param isWrapReq the is wrap req
+     * @param e the e
+     * @param columnOrSuperColumnsFromRow the column or super columns from row
+     * @return the object
+     * @throws CharacterCodingException the character coding exception
      */
     private Object populateEntityFromSlice(EntityMetadata m, List<String> relationNames, boolean isWrapReq, Object e,
             Map<ByteBuffer, List<ColumnOrSuperColumn>> columnOrSuperColumnsFromRow) throws CharacterCodingException

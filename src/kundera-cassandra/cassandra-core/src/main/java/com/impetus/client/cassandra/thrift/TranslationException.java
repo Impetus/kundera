@@ -25,20 +25,21 @@ import com.impetus.kundera.KunderaException;
  */
 public class TranslationException extends KunderaException
 {
-    /**
-     * 
-     */
+    
+    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 2557677206649004876L;
 
     /**
-     * 
+     * Instantiates a new translation exception.
      */
     public TranslationException()
     {
     }
 
     /**
-     * @param arg0
+     * Instantiates a new translation exception.
+     *
+     * @param arg0 the arg0
      */
     public TranslationException(String arg0)
     {
@@ -47,7 +48,9 @@ public class TranslationException extends KunderaException
     }
 
     /**
-     * @param arg0
+     * Instantiates a new translation exception.
+     *
+     * @param arg0 the arg0
      */
     public TranslationException(Throwable arg0)
     {
@@ -56,8 +59,10 @@ public class TranslationException extends KunderaException
     }
 
     /**
-     * @param arg0
-     * @param arg1
+     * Instantiates a new translation exception.
+     *
+     * @param arg0 the arg0
+     * @param arg1 the arg1
      */
     public TranslationException(String arg0, Throwable arg1)
     {

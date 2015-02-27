@@ -443,6 +443,17 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
                     cci.setGenericClasses(PropertyAccessorHelper.getGenericClasses((Field) attr.getJavaMember()));
 
                     tableInfo.addCollectionColumnMetadata(cci);
+                    //add if collection column is indexed
+                    String jpaName = ((AbstractAttribute) attr).getJPAColumnName();
+                    PropertyIndex indexedColumn = columns.get(jpaName);
+                    if (indexedColumn != null && indexedColumn.getName() != null)
+                    {
+                        IndexInfo indexInfo = new IndexInfo(jpaName,
+                                indexedColumn.getMax(), indexedColumn.getMin(), indexedColumn.getIndexType(),
+                                indexedColumn.getName());
+                        tableInfo.addToIndexedColumnList(indexInfo);
+//                         Add more if required
+                    }
                 }
             }
         }

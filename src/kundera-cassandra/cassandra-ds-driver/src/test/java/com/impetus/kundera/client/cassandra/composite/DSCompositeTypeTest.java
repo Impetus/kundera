@@ -540,7 +540,7 @@ public class DSCompositeTypeTest
         catch (Exception e)
         {
             Assert.assertEquals(
-                    "com.datastax.driver.core.exceptions.InvalidQueryException: PRIMARY KEY part tweetId cannot be restricted by IN relation",
+                    "com.datastax.driver.core.exceptions.InvalidQueryException: Clustering column \"tweetId\" cannot be restricted by an IN relation",
                     e.getMessage());
         }
 

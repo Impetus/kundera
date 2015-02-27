@@ -55,55 +55,76 @@ import com.impetus.kundera.query.QueryImpl;
 import com.impetus.kundera.utils.ReflectUtils;
 
 /**
+ * The Class ResultIterator.
+ *
  * @author vivek.mishra .
  * 
  *         Implementation of Cassandra result iteration.
  * 
  *         TODO::: Need to add support for relational entities and a junit for
  *         Composite key test
+ * @param <E> the element type
  */
 class ResultIterator<E> implements IResultIterator<E>
 {
+    
+    /** The log. */
     private static Logger log = LoggerFactory.getLogger(ResultIterator.class);
 
+    /** The query. */
     private final CassQuery query;
 
+    /** The entity metadata. */
     private final EntityMetadata entityMetadata;
 
+    /** The client. */
     private final Client client;
 
+    /** The reader. */
     private final EntityReader reader;
 
+    /** The max result. */
     private int maxResult = 1;
 
+    /** The results. */
     private List<E> results;
 
+    /** The start. */
     private byte[] start;
 
+    /** The Constant MIN_. */
     private static final String MIN_ = "min";
 
+    /** The Constant MAX_. */
     private static final String MAX_ = "max";
 
+    /** The fetch size. */
     private int fetchSize;
 
+    /** The count. */
     private int count;
 
+    /** The scroll complete. */
     private boolean scrollComplete;
 
+    /** The external properties. */
     private Map<String, Object> externalProperties;
 
+    /** The current. */
     private E current;
 
+    /** The kundera metadata. */
     private final KunderaMetadata kunderaMetadata;
 
     /**
-     * Constructor with parameters
-     * 
-     * @param query
-     * @param m
-     * @param client
-     * @param reader
-     * @param fetchSize
+     * Constructor with parameters.
+     *
+     * @param query the query
+     * @param m the m
+     * @param client the client
+     * @param reader the reader
+     * @param fetchSize the fetch size
+     * @param kunderaMetadata the kundera metadata
      */
     ResultIterator(final Query query, final EntityMetadata m, final Client client, final EntityReader reader,
             final int fetchSize, final KunderaMetadata kunderaMetadata)
@@ -117,6 +138,9 @@ class ResultIterator<E> implements IResultIterator<E>
         this.kunderaMetadata = kunderaMetadata;
     }
 
+    /* (non-Javadoc)
+     * @see java.util.Iterator#hasNext()
+     */
     @Override
     public boolean hasNext()
     {
@@ -133,6 +157,9 @@ class ResultIterator<E> implements IResultIterator<E>
         return false;
     }
 
+    /* (non-Javadoc)
+     * @see java.util.Iterator#next()
+     */
     @Override
     public E next()
     {
@@ -153,12 +180,18 @@ class ResultIterator<E> implements IResultIterator<E>
         return current;
     }
 
+    /* (non-Javadoc)
+     * @see java.util.Iterator#remove()
+     */
     @Override
     public void remove()
     {
         throw new UnsupportedOperationException("remove method is not supported over pagination");
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.query.IResultIterator#next(int)
+     */
     @Override
     public List<E> next(int chunkSize)
     {
@@ -168,8 +201,8 @@ class ResultIterator<E> implements IResultIterator<E>
     /**
      * Check on fetch size. returns true, if count on fetched rows is less than
      * fetch size.
-     * 
-     * @return
+     *
+     * @return true, if successful
      */
     private boolean checkOnFetchSize()
     {
@@ -363,10 +396,9 @@ class ResultIterator<E> implements IResultIterator<E>
 
     /**
      * Parse and append cql3 token function for iter.next() call.
-     * 
-     * @param translator
-     *            cql translator.
-     * 
+     *
+     * @param translator            cql translator.
+     * @param query the query
      * @return parsed/append cql3 query.
      */
     private String prepareNext(CQLTranslator translator, String query)
@@ -438,9 +470,10 @@ class ResultIterator<E> implements IResultIterator<E>
     }
 
     /**
-     * 
-     * @param idColumn
-     * @return
+     * Gets the condition on id column.
+     *
+     * @param idColumn the id column
+     * @return the condition on id column
      */
     private Map<Boolean, String> getConditionOnIdColumn(String idColumn)
     {
@@ -475,6 +508,11 @@ class ResultIterator<E> implements IResultIterator<E>
         return filterIdResult;
     }
 
+    /**
+     * Id value in byte arr.
+     *
+     * @return the byte[]
+     */
     private byte[] idValueInByteArr()
     {
         Object entity = results.get(results.size() - 1);
@@ -505,8 +543,8 @@ class ResultIterator<E> implements IResultIterator<E>
 
     /**
      * Will return partition key part of composite id.
-     * 
-     * @return
+     *
+     * @return the partition key field
      */
     private Field getPartitionKeyField()
     {
@@ -550,6 +588,12 @@ class ResultIterator<E> implements IResultIterator<E>
                 : entity);
     }
 
+    /**
+     * Replace applied token.
+     *
+     * @param query the query
+     * @return the string
+     */
     private String replaceAppliedToken(String query)
     {
         final String tokenRegex = "\\btoken\\(";

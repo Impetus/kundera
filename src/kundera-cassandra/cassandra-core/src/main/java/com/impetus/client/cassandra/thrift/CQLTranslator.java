@@ -79,88 +79,147 @@ import com.impetus.kundera.utils.ReflectUtils;
  */
 public final class CQLTranslator
 {
+
+    /** The Constant CREATE_COLUMNFAMILY_QUERY. */
     public static final String CREATE_COLUMNFAMILY_QUERY = "CREATE COLUMNFAMILY $COLUMNFAMILY ($COLUMNS";
 
+    /** The Constant ADD_PRIMARYKEY_CLAUSE. */
     public static final String ADD_PRIMARYKEY_CLAUSE = " , PRIMARY KEY($COLUMNS))";
 
+    /** The Constant SELECTALL_QUERY. */
     public static final String SELECTALL_QUERY = "SELECT * FROM $COLUMNFAMILY";
 
+    /** The Constant ADD_WHERE_CLAUSE. */
     public static final String ADD_WHERE_CLAUSE = " WHERE ";
 
+    /** The Constant SELECT_QUERY. */
     public static final String SELECT_QUERY = "SELECT $COLUMNS FROM $COLUMNFAMILY";
 
+    /** The Constant INSERT_QUERY. */
     public static final String INSERT_QUERY = " INSERT INTO $COLUMNFAMILY($COLUMNS) VALUES($COLUMNVALUES) ";
 
+    /** The Constant DELETE_QUERY. */
     public static final String DELETE_QUERY = "DELETE FROM $COLUMNFAMILY";
 
+    /** The Constant COLUMN_FAMILY. */
     public static final String COLUMN_FAMILY = "$COLUMNFAMILY";
 
+    /** The Constant COLUMNS. */
     public static final String COLUMNS = "$COLUMNS";
 
+    /** The Constant COLUMN_VALUES. */
     public static final String COLUMN_VALUES = "$COLUMNVALUES";
 
+    /** The Constant AND_CLAUSE. */
     public static final String AND_CLAUSE = " AND ";
 
+    /** The Constant SORT_CLAUSE. */
     public static final String SORT_CLAUSE = " ORDER BY ";
 
+    /** The Constant EQ_CLAUSE. */
     public static final String EQ_CLAUSE = "=";
 
+    /** The Constant WITH_CLAUSE. */
     public static final String WITH_CLAUSE = " WITH ";
 
+    /** The Constant QUOTE_STR. */
     public static final String QUOTE_STR = "'";
 
+    /** The Constant LIMIT. */
     public static final String LIMIT = " LIMIT ";
 
+    /** The Constant CREATE_INDEX_QUERY. */
     public static final String CREATE_INDEX_QUERY = "CREATE INDEX ON $COLUMNFAMILY ($COLUMNS)";
 
+    /** The Constant BATCH_QUERY. */
     public static final String BATCH_QUERY = "BEGIN BATCH $STATEMENT ";
 
+    /** The Constant STATEMENT. */
     public static final String STATEMENT = "$STATEMENT";
 
+    /** The Constant APPLY_BATCH. */
     public static final String APPLY_BATCH = " APPLY BATCH";
 
+    /** The Constant USING_CONSISTENCY. */
     public static final String USING_CONSISTENCY = "$USING CONSISTENCY";
 
+    /** The Constant CONSISTENCY_LEVEL. */
     public static final String CONSISTENCY_LEVEL = "$CONSISTENCYLEVEL";
 
+    /** The Constant DROP_TABLE. */
     public static final String DROP_TABLE = "drop columnfamily $COLUMN_FAMILY";
 
+    /** The Constant UPDATE_QUERY. */
     public static final String UPDATE_QUERY = "UPDATE $COLUMNFAMILY ";
 
+    /** The Constant ADD_SET_CLAUSE. */
     public static final String ADD_SET_CLAUSE = "SET ";
 
+    /** The Constant COMMA_STR. */
     public static final String COMMA_STR = ", ";
 
+    /** The Constant INCR_COUNTER. */
     public static final String INCR_COUNTER = "+";
 
+    /** The Constant TOKEN. */
     public static final String TOKEN = "token(";
 
+    /** The Constant CLOSE_BRACKET. */
     public static final String CLOSE_BRACKET = ")";
 
+    /** The Constant SPACE_STRING. */
     public static final String SPACE_STRING = " ";
 
+    /** The Constant IN_CLAUSE. */
     public static final String IN_CLAUSE = "IN";
 
+    /** The Constant OPEN_BRACKET. */
     public static final String OPEN_BRACKET = "(";
 
+    /** The Constant CREATE_COLUMNFAMILY_CLUSTER_ORDER. */
     public static final String CREATE_COLUMNFAMILY_CLUSTER_ORDER = " WITH CLUSTERING ORDER BY ($COLUMNS";
 
+    /** The Constant DEFAULT_KEY_NAME. */
     public static final String DEFAULT_KEY_NAME = "key";
 
+    /** The Constant CREATE_KEYSPACE. */
     public static final String CREATE_KEYSPACE = "CREATE KEYSPACE IF NOT EXISTS $KEYSPACE WITH REPLICATION = { 'class':'$CLASS',$REPLICATION} and durable_writes = '$DURABLE_WRITES'";
 
+    /** The Constant SIMPLE_REPLICATION. */
     public static final String SIMPLE_REPLICATION = "'replication_factor':$REPLICATION_FACTOR";
 
+    /** The Constant DURABLE_WRITES. */
     public static final String DURABLE_WRITES = "durable_writes=$DURABLE_WRITES";
 
+    /** The Constant CREATE_TYPE. */
+    public static final String CREATE_TYPE = "CREATE TYPE IF NOT EXISTS $TYPE ($COLUMNS";
+
+    /** The Constant TYPE. */
+    public static final String TYPE = "$TYPE";
+
+    /** The Constant FROZEN. */
+    public static final String FROZEN = "frozen";
+
+    /**
+     * Instantiates a new CQL translator.
+     */
     public CQLTranslator()
     {
 
     }
 
+    /**
+     * The Enum TranslationType.
+     */
     public static enum TranslationType
     {
-        COLUMN, VALUE, ALL;
+
+        /** The column. */
+        COLUMN,
+        /** The value. */
+        VALUE,
+        /** The all. */
+        ALL;
     }
 
     /**
@@ -173,6 +232,9 @@ public final class CQLTranslator
      * @param type
      *            translation type.
      * @param externalProperties
+     *            the external properties
+     * @param kunderaMetadata
+     *            the kundera metadata
      * @return Map containing translation type as key and string as translated
      *         CQL string.
      */
@@ -218,16 +280,54 @@ public final class CQLTranslator
         return parsedColumnOrColumnValue;
     }
 
+    /**
+     * Gets the CQL type.
+     * 
+     * @param internalClazz
+     *            the internal clazz
+     * @return the CQL type
+     */
     public static String getCQLType(String internalClazz)
     {
         return InternalToCQLMapper.getType(internalClazz);
     }
 
+    /**
+     * Gets the keyword.
+     * 
+     * @param property
+     *            the property
+     * @return the keyword
+     */
     public static String getKeyword(String property)
     {
         return CQLKeywordMapper.getType(property);
     }
 
+    /**
+     * On translation.
+     * 
+     * @param record
+     *            the record
+     * @param m
+     *            the m
+     * @param type
+     *            the type
+     * @param metaModel
+     *            the meta model
+     * @param entityClazz
+     *            the entity clazz
+     * @param entityType
+     *            the entity type
+     * @param builders
+     *            the builders
+     * @param columnBuilders
+     *            the column builders
+     * @param externalProperties
+     *            the external properties
+     * @param kunderaMetadata
+     *            the kundera metadata
+     */
     private void onTranslation(final Object record, final EntityMetadata m, TranslationType type,
             MetamodelImpl metaModel, Class entityClazz, EntityType entityType, Map<String, StringBuilder> builders,
             Map<String, StringBuilder> columnBuilders, Map<String, Object> externalProperties,
@@ -263,8 +363,55 @@ public final class CQLTranslator
             {
                 if (metaModel.isEmbeddable(((AbstractAttribute) attribute).getBindableJavaType()))
                 {
-                    throw new PersistenceException(
-                            "Super columns are not supported via cql for compound/composite keys!");
+                    // create embedded entity persisting format
+
+                    EmbeddableType embeddableKey = metaModel.embeddable(field.getType());
+                    Object embeddableKeyObj = PropertyAccessorHelper.getObject(record, field);
+                    if (embeddableKeyObj != null)
+                    {
+
+                        StringBuilder embeddedValueBuilder = new StringBuilder();
+                        embeddedValueBuilder.append("{ ");
+
+                        for (Field embeddableColumn : field.getType().getDeclaredFields())
+                        {
+                            if (!ReflectUtils.isTransientOrStatic(embeddableColumn))
+                            {
+                                Attribute subAttribute = (SingularAttribute) embeddableKey
+                                        .getAttribute(embeddableColumn.getName());
+                                if (metaModel.isEmbeddable(((AbstractAttribute) subAttribute).getBindableJavaType()))
+                                {
+                                    // construct map; recursive
+                                    // send attribute
+                                    buildEmbeddedValue(embeddableKeyObj, metaModel, embeddedValueBuilder,
+                                            (SingularAttribute) subAttribute);
+                                }
+                                else
+                                {
+                                    // append key value
+                                    appendColumnName(
+                                            embeddedValueBuilder,
+                                            ((AbstractAttribute) (embeddableKey.getAttribute(embeddableColumn.getName())))
+                                                    .getJPAColumnName());
+                                    embeddedValueBuilder.append(":");
+                                    appendColumnValue(embeddedValueBuilder, embeddableKeyObj, embeddableColumn);
+
+                                }
+                            }
+                            embeddedValueBuilder.append(" ,");
+                        }
+                        // strip last char and append '}'
+                        embeddedValueBuilder.deleteCharAt(embeddedValueBuilder.length() - 1);
+                        embeddedValueBuilder.append(" }");
+                        // add to columnbuilder and builder
+                        columnBuilder.append("\"");
+                        columnBuilder.append(((AbstractAttribute) attribute).getJPAColumnName());
+                        columnBuilder.append("\"");
+                        columnBuilder.append(" ,");
+                        builder.append(embeddedValueBuilder);
+                        builder.append(" ,");
+                        // end if
+                    }
                 }
                 else if (!ReflectUtils.isTransientOrStatic(field) && !attribute.isAssociation())
                 {
@@ -284,6 +431,90 @@ public final class CQLTranslator
         onDiscriminatorColumn(builders.get(m.getTableName()), columnBuilders.get(m.getTableName()), entityType);
     }
 
+    /**
+     * Builds the embedded value.
+     * 
+     * @param record
+     *            the record
+     * @param metaModel
+     *            the meta model
+     * @param embeddedValueBuilder
+     *            the embedded value builder
+     * @param attribute
+     *            the attribute
+     */
+    private void buildEmbeddedValue(final Object record, MetamodelImpl metaModel, StringBuilder embeddedValueBuilder,
+            SingularAttribute attribute)
+    {
+        // TODO Auto-generated method stub
+        Field field = (Field) attribute.getJavaMember();
+
+        EmbeddableType embeddableKey = metaModel.embeddable(field.getType());
+        Object embeddableKeyObj = PropertyAccessorHelper.getObject(record, field);
+        if (embeddableKeyObj != null)
+        {
+            StringBuilder tempBuilder = new StringBuilder();
+            tempBuilder.append("{ ");
+
+            for (Field embeddableColumn : field.getType().getDeclaredFields())
+            {
+                if (!ReflectUtils.isTransientOrStatic(embeddableColumn))
+                {
+                    Attribute subAttribute = (SingularAttribute) embeddableKey.getAttribute(embeddableColumn.getName());
+                    if (metaModel.isEmbeddable(((AbstractAttribute) subAttribute).getBindableJavaType()))
+                    {
+                        // construct map; recursive
+                        // send attribute
+                        buildEmbeddedValue(embeddableKeyObj, metaModel, tempBuilder, (SingularAttribute) subAttribute);
+                    }
+                    else
+                    {
+                        // append key value
+                        appendColumnName(tempBuilder, ((AbstractAttribute) (embeddableKey.getAttribute(embeddableColumn
+                                .getName()))).getJPAColumnName());
+                        tempBuilder.append(":");
+                        appendColumnValue(tempBuilder, embeddableKeyObj, embeddableColumn);
+                    }
+                }
+                tempBuilder.append(" ,");
+            }
+            // strip last char and append '}'
+            tempBuilder.deleteCharAt(tempBuilder.length() - 1);
+            tempBuilder.append(" }");
+            appendColumnName(embeddedValueBuilder, ((AbstractAttribute) attribute).getJPAColumnName());
+            embeddedValueBuilder.append(":");
+            embeddedValueBuilder.append(tempBuilder);
+        }
+        else
+        {
+            embeddedValueBuilder.deleteCharAt(embeddedValueBuilder.length() - 1);
+        }
+    }
+
+    /**
+     * Translate composite id.
+     * 
+     * @param record
+     *            the record
+     * @param m
+     *            the m
+     * @param type
+     *            the type
+     * @param metaModel
+     *            the meta model
+     * @param builders
+     *            the builders
+     * @param columnBuilders
+     *            the column builders
+     * @param externalProperties
+     *            the external properties
+     * @param kunderaMetadata
+     *            the kundera metadata
+     * @param tableName
+     *            the table name
+     * @param attribute
+     *            the attribute
+     */
     private void translateCompositeId(final Object record, final EntityMetadata m, TranslationType type,
             MetamodelImpl metaModel, Map<String, StringBuilder> builders, Map<String, StringBuilder> columnBuilders,
             Map<String, Object> externalProperties, final KunderaMetadata kunderaMetadata, String tableName,
@@ -326,6 +557,16 @@ public final class CQLTranslator
         }
     }
 
+    /**
+     * On discriminator column.
+     * 
+     * @param builder
+     *            the builder
+     * @param columnBuilder
+     *            the column builder
+     * @param entityType
+     *            the entity type
+     */
     private void onDiscriminatorColumn(StringBuilder builder, StringBuilder columnBuilder, EntityType entityType)
     {
         String discrColumn = ((AbstractManagedType) entityType).getDiscriminatorColumn();
@@ -347,9 +588,13 @@ public final class CQLTranslator
      * Build where clause with @ EQ_CLAUSE} clause.
      * 
      * @param builder
+     *            the builder
      * @param field
+     *            the field
      * @param member
+     *            the member
      * @param entity
+     *            the entity
      */
     public void buildWhereClause(StringBuilder builder, String field, Field member, Object entity)
     {
@@ -365,9 +610,17 @@ public final class CQLTranslator
      * Build where clause with given clause.
      * 
      * @param builder
+     *            the builder
+     * @param fieldClazz
+     *            the field clazz
      * @param field
+     *            the field
      * @param value
+     *            the value
      * @param clause
+     *            the clause
+     * @param useToken
+     *            the use token
      */
     public void buildWhereClause(StringBuilder builder, Class fieldClazz, String field, Object value, String clause,
             boolean useToken)
@@ -381,10 +634,18 @@ public final class CQLTranslator
      * Build where clause with given clause.
      * 
      * @param builder
+     *            the builder
+     * @param fieldClazz
+     *            the field clazz
      * @param field
+     *            the field
      * @param value
+     *            the value
      * @param clause
-     * @return
+     *            the clause
+     * @param useToken
+     *            the use token
+     * @return the string builder
      */
     public StringBuilder onWhereClause(StringBuilder builder, Class fieldClazz, String field, Object value,
             String clause, boolean useToken)
@@ -397,7 +658,15 @@ public final class CQLTranslator
 
         builder = ensureCase(builder, field, useToken);
         builder.append(SPACE_STRING);
-        builder.append(clause);
+        if (fieldClazz.isAssignableFrom(List.class) || fieldClazz.isAssignableFrom(Map.class)
+                || fieldClazz.isAssignableFrom(Set.class))
+        {
+            builder.append("CONTAINS");
+        }
+        else
+        {
+            builder.append(clause);
+        }
         builder.append(SPACE_STRING);
 
         if (clause.trim().equals(IN_CLAUSE))
@@ -434,8 +703,11 @@ public final class CQLTranslator
      * Builds set clause for a given counter field.
      * 
      * @param builder
+     *            the builder
      * @param field
+     *            the field
      * @param value
+     *            the value
      */
     public void buildSetClauseForCounters(StringBuilder builder, String field, Object value)
     {
@@ -450,9 +722,14 @@ public final class CQLTranslator
     /**
      * Builds set clause for a given field.
      * 
+     * @param m
+     *            the m
      * @param builder
+     *            the builder
      * @param property
+     *            the property
      * @param value
+     *            the value
      */
     public void buildSetClause(EntityMetadata m, StringBuilder builder, String property, Object value)
     {
@@ -480,6 +757,8 @@ public final class CQLTranslator
      *            column name builder.
      * @param fieldName
      *            column name.
+     * @param useToken
+     *            the use token
      * @return builder object with appended column name.
      */
     public StringBuilder ensureCase(StringBuilder builder, String fieldName, boolean useToken)
@@ -552,8 +831,11 @@ public final class CQLTranslator
      * value is present.
      * 
      * @param builder
+     *            the builder
      * @param valueObj
+     *            the value obj
      * @param column
+     *            the column
      * @return true if value is not null,else false.
      */
     private boolean appendColumnValue(StringBuilder builder, Object valueObj, Field column)
@@ -565,7 +847,7 @@ public final class CQLTranslator
     }
 
     /**
-     * Appends value to builder object for given class type
+     * Appends value to builder object for given class type.
      * 
      * @param builder
      *            string builder.
@@ -575,6 +857,8 @@ public final class CQLTranslator
      *            value to be appended.
      * @param isPresent
      *            if field is present.
+     * @param useToken
+     *            the use token
      * @return true, if value is not null else false.
      */
     public boolean appendValue(StringBuilder builder, Class fieldClazz, Object value, boolean isPresent,
@@ -594,7 +878,7 @@ public final class CQLTranslator
         {
             isPresent = appendMap(builder, value != null ? value : new HashMap());
         }
-        else 
+        else
         {
             isPresent = true;
             appendValue(builder, fieldClazz, value, useToken);
@@ -606,26 +890,36 @@ public final class CQLTranslator
      * Appends a object of type {@link java.util.List}
      * 
      * @param builder
+     *            the builder
      * @param value
-     * @return
+     *            the value
+     * @return true, if successful
      */
     private boolean appendList(StringBuilder builder, Object value)
     {
         boolean isPresent = false;
-        Collection collection = ((Collection) value);
-        isPresent = true;
-        builder.append("[");
-        for (Object o : collection)
+        if (value instanceof Collection)
         {
-            // Allowing null values.
-            appendValue(builder, o != null ? o.getClass() : null, o, false);
-            builder.append(",");
+            Collection collection = ((Collection) value);
+            isPresent = true;
+            builder.append("[");
+            for (Object o : collection)
+            {
+                // Allowing null values.
+                appendValue(builder, o != null ? o.getClass() : null, o, false);
+                builder.append(",");
+            }
+            if (!collection.isEmpty())
+            {
+                builder.deleteCharAt(builder.length() - 1);
+            }
+            builder.append("]");
+
         }
-        if (!collection.isEmpty())
+        else
         {
-            builder.deleteCharAt(builder.length() - 1);
+            appendValue(builder, value.getClass(), value, false);
         }
-        builder.append("]");
         return isPresent;
     }
 
@@ -633,26 +927,35 @@ public final class CQLTranslator
      * Appends a object of type {@link java.util.Map}
      * 
      * @param builder
+     *            the builder
      * @param value
-     * @return
+     *            the value
+     * @return true, if successful
      */
     private boolean appendSet(StringBuilder builder, Object value)
     {
         boolean isPresent = false;
-        Collection collection = ((Collection) value);
-        isPresent = true;
-        builder.append("{");
-        for (Object o : collection)
+        if (value instanceof Collection)
         {
-            // Allowing null values.
-            appendValue(builder, o != null ? o.getClass() : null, o, false);
-            builder.append(",");
+            Collection collection = ((Collection) value);
+            isPresent = true;
+            builder.append("{");
+            for (Object o : collection)
+            {
+                // Allowing null values.
+                appendValue(builder, o != null ? o.getClass() : null, o, false);
+                builder.append(",");
+            }
+            if (!collection.isEmpty())
+            {
+                builder.deleteCharAt(builder.length() - 1);
+            }
+            builder.append("}");
         }
-        if (!collection.isEmpty())
+        else
         {
-            builder.deleteCharAt(builder.length() - 1);
+            appendValue(builder, value.getClass(), value, false);
         }
-        builder.append("}");
         return isPresent;
     }
 
@@ -660,42 +963,59 @@ public final class CQLTranslator
      * Appends a object of type {@link java.util.List}
      * 
      * @param builder
+     *            the builder
      * @param value
-     * @return
+     *            the value
+     * @return true, if successful
      */
     private boolean appendMap(StringBuilder builder, Object value)
     {
         boolean isPresent = false;
-        Map map = ((Map) value);
-        isPresent = true;
-        builder.append("{");
-        for (Object mapKey : map.keySet())
+        if (value instanceof Map)
         {
-            Object mapValue = map.get(mapKey);
-            // Allowing null keys.
-            appendValue(builder, mapKey != null ? mapKey.getClass() : null, mapKey, false);
-            builder.append(":");
-            // Allowing null values.
-            appendValue(builder, mapValue != null ? mapValue.getClass() : null, mapValue, false);
-            builder.append(",");
+            Map map = ((Map) value);
+            isPresent = true;
+            builder.append("{");
+            for (Object mapKey : map.keySet())
+            {
+                Object mapValue = map.get(mapKey);
+                // Allowing null keys.
+                appendValue(builder, mapKey != null ? mapKey.getClass() : null, mapKey, false);
+                builder.append(":");
+                // Allowing null values.
+                appendValue(builder, mapValue != null ? mapValue.getClass() : null, mapValue, false);
+                builder.append(",");
+            }
+            if (!map.isEmpty())
+            {
+                builder.deleteCharAt(builder.length() - 1);
+            }
+
+            builder.append("}");
         }
-        if (!map.isEmpty())
+        else
         {
-            builder.deleteCharAt(builder.length() - 1);
+            appendValue(builder, value.getClass(), value, false);
         }
-        builder.append("}");
         return isPresent;
     }
 
     /**
+     * Append value.
+     * 
      * @param builder
+     *            the builder
      * @param fieldClazz
+     *            the field clazz
      * @param value
+     *            the value
+     * @param useToken
+     *            the use token
      */
     private void appendValue(StringBuilder builder, Class fieldClazz, Object value, boolean useToken)
     {
         // To allow handle byte array class object by converting it to string
-       
+
         if (fieldClazz != null && fieldClazz.isAssignableFrom(byte[].class))
         {
             value = value != null ? value : ByteBufferUtil.EMPTY_BYTE_BUFFER.array();
@@ -709,7 +1029,8 @@ public final class CQLTranslator
                 builder.append(TOKEN);
             }
 
-            if (fieldClazz != null && value != null
+            if (fieldClazz != null
+                    && value != null
                     && (fieldClazz.isAssignableFrom(String.class) || isDate(fieldClazz)
                             || fieldClazz.isAssignableFrom(char.class) || fieldClazz.isAssignableFrom(Character.class) || value instanceof Enum))
             {
@@ -845,12 +1166,22 @@ public final class CQLTranslator
             mapper = Collections.synchronizedMap(validationClassMapper);
         }
 
+        /**
+         * Gets the type.
+         * 
+         * @param internalClassName
+         *            the internal class name
+         * @return the type
+         */
         private static final String getType(final String internalClassName)
         {
             return mapper.get(internalClassName);
         }
     }
 
+    /**
+     * The Class CQLKeywordMapper.
+     */
     private static class CQLKeywordMapper
     {
         /** The Mapper. */
@@ -879,6 +1210,13 @@ public final class CQLTranslator
             mapper.put(CassandraConstants.GC_GRACE_SECONDS, "gc_grace_seconds");
         }
 
+        /**
+         * Gets the type.
+         * 
+         * @param propertyName
+         *            the property name
+         * @return the type
+         */
         private static final String getType(final String propertyName)
         {
             return mapper.get(propertyName);
@@ -886,7 +1224,10 @@ public final class CQLTranslator
     }
 
     /**
+     * Builds the filtering clause.
+     * 
      * @param builder
+     *            the builder
      */
     public void buildFilteringClause(StringBuilder builder)
     {
@@ -894,7 +1235,16 @@ public final class CQLTranslator
     }
 
     /**
+     * Builds the order by clause.
+     * 
      * @param builder
+     *            the builder
+     * @param field
+     *            the field
+     * @param orderType
+     *            the order type
+     * @param useToken
+     *            the use token
      */
     public void buildOrderByClause(StringBuilder builder, String field, Object orderType, boolean useToken)
     {
@@ -905,6 +1255,13 @@ public final class CQLTranslator
         builder.append(orderType);
     }
 
+    /**
+     * Builds the select query.
+     * 
+     * @param descriptor
+     *            the descriptor
+     * @return the string builder
+     */
     public StringBuilder buildSelectQuery(TableGeneratorDiscriptor descriptor)
     {
         StringBuilder builder = new StringBuilder("Select ");
@@ -916,6 +1273,13 @@ public final class CQLTranslator
         return builder;
     }
 
+    /**
+     * Builds the update query.
+     * 
+     * @param descriptor
+     *            the descriptor
+     * @return the string builder
+     */
     public StringBuilder buildUpdateQuery(TableGeneratorDiscriptor descriptor)
     {
         StringBuilder builder = new StringBuilder("Update ");

@@ -129,7 +129,7 @@ public class DSClientExternalPropertyTest
         Assert.assertEquals(configuration.getPoolingOptions().getCoreConnectionsPerHost(distance), 5);
         Assert.assertEquals(configuration.getPoolingOptions().getMaxConnectionsPerHost(distance), 12);
         Assert.assertEquals(configuration.getPoolingOptions()
-                .getMaxSimultaneousRequestsPerConnectionThreshold(distance), 200);
+                .getMaxSimultaneousRequestsPerConnectionThreshold(distance), 128);
         Assert.assertEquals(configuration.getPoolingOptions()
                 .getMinSimultaneousRequestsPerConnectionThreshold(distance), 65);
 
@@ -222,7 +222,7 @@ public class DSClientExternalPropertyTest
         Assert.assertEquals(configuration.getPoolingOptions().getCoreConnectionsPerHost(distance), 5);
         Assert.assertEquals(configuration.getPoolingOptions().getMaxConnectionsPerHost(distance), 12);
         Assert.assertEquals(configuration.getPoolingOptions()
-                .getMaxSimultaneousRequestsPerConnectionThreshold(distance), 200);
+                .getMaxSimultaneousRequestsPerConnectionThreshold(distance), 128);
         Assert.assertEquals(configuration.getPoolingOptions()
                 .getMinSimultaneousRequestsPerConnectionThreshold(distance), 65);
         Assert.assertEquals(configuration.getPolicies().getLoadBalancingPolicy().getClass().getName(), TAP);
@@ -285,7 +285,7 @@ public class DSClientExternalPropertyTest
         Assert.assertEquals(configuration.getPoolingOptions().getCoreConnectionsPerHost(distance), 5);
         Assert.assertEquals(configuration.getPoolingOptions().getMaxConnectionsPerHost(distance), 12);
         Assert.assertEquals(configuration.getPoolingOptions()
-                .getMaxSimultaneousRequestsPerConnectionThreshold(distance), 200);
+                .getMaxSimultaneousRequestsPerConnectionThreshold(distance), 128);
         Assert.assertEquals(configuration.getPoolingOptions()
                 .getMinSimultaneousRequestsPerConnectionThreshold(distance), 65);
         Assert.assertEquals(configuration.getPolicies().getLoadBalancingPolicy().getClass().getName(),
@@ -348,7 +348,7 @@ public class DSClientExternalPropertyTest
         Assert.assertEquals(configuration.getPoolingOptions().getCoreConnectionsPerHost(distance), 5);
         Assert.assertEquals(configuration.getPoolingOptions().getMaxConnectionsPerHost(distance), 12);
         Assert.assertEquals(configuration.getPoolingOptions()
-                .getMaxSimultaneousRequestsPerConnectionThreshold(distance), 200);
+                .getMaxSimultaneousRequestsPerConnectionThreshold(distance), 128);
         Assert.assertEquals(configuration.getPoolingOptions()
                 .getMinSimultaneousRequestsPerConnectionThreshold(distance), 65);
 
@@ -409,7 +409,7 @@ public class DSClientExternalPropertyTest
         Assert.assertEquals(configuration.getPoolingOptions().getCoreConnectionsPerHost(distance), 5);
         Assert.assertEquals(configuration.getPoolingOptions().getMaxConnectionsPerHost(distance), 12);
         Assert.assertEquals(configuration.getPoolingOptions()
-                .getMaxSimultaneousRequestsPerConnectionThreshold(distance), 200);
+                .getMaxSimultaneousRequestsPerConnectionThreshold(distance), 128);
         Assert.assertEquals(configuration.getPoolingOptions()
                 .getMinSimultaneousRequestsPerConnectionThreshold(distance), 65);
 

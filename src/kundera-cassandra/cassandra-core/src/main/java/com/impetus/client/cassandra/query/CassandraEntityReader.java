@@ -49,8 +49,11 @@ import com.impetus.kundera.query.QueryHandlerException;
  */
 public class CassandraEntityReader extends AbstractEntityReader implements EntityReader
 {
+    
+    /** The Constant MIN_. */
     private static final String MIN_ = "min";
 
+    /** The Constant MAX_. */
     private static final String MAX_ = "max";
 
     /** The conditions. */
@@ -61,9 +64,9 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
 
     /**
      * Instantiates a new cassandra entity reader.
-     * 
-     * @param luceneQuery
-     *            the lucene query
+     *
+     * @param kunderaQuery the kundera query
+     * @param kunderaMetadata the kundera metadata
      */
     public CassandraEntityReader(KunderaQuery kunderaQuery, final KunderaMetadata kunderaMetadata)
     {
@@ -73,12 +76,17 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
 
     /**
      * Instantiates a new cassandra entity reader.
+     *
+     * @param kunderaMetadata the kundera metadata
      */
     public CassandraEntityReader(final KunderaMetadata kunderaMetadata)
     {
         super(kunderaMetadata);
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.persistence.AbstractEntityReader#findById(java.lang.Object, com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.client.Client)
+     */
     @Override
     public EnhanceEntity findById(Object primaryKey, EntityMetadata m, Client client)
     {
@@ -88,15 +96,10 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
     /**
      * Method responsible for reading back entity and relations using secondary
      * indexes(if it holds any relation), else retrieve row keys using lucene.
-     * 
-     * @param m
-     *            entity meta data
-     * @param relationNames
-     *            relation names
-     * @param isParent
-     *            if entity is not holding any relation.
-     * @param client
-     *            client instance
+     *
+     * @param m            entity meta data
+     * @param client            client instance
+     * @param maxResults the max results
      * @return list of wrapped enhance entities.
      */
 
@@ -167,18 +170,14 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
 
     /**
      * Handle find by range.
-     * 
-     * @param m
-     *            the m
-     * @param client
-     *            the client
-     * @param result
-     *            the result
-     * @param ixClause
-     *            the ix clause
-     * @param isRowKeyQuery
-     *            the is row key query
-     * @param columns
+     *
+     * @param m            the m
+     * @param client            the client
+     * @param result            the result
+     * @param ixClause            the ix clause
+     * @param isRowKeyQuery            the is row key query
+     * @param columns the columns
+     * @param maxResults the max results
      * @return the list
      */
     public List handleFindByRange(EntityMetadata m, Client client, List result,
@@ -210,6 +209,14 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
         return result;
     }
 
+    /**
+     * Read from index table.
+     *
+     * @param m the m
+     * @param client the client
+     * @param indexClauseMap the index clause map
+     * @return the list
+     */
     public List<EnhanceEntity> readFromIndexTable(EntityMetadata m, Client client,
             Map<Boolean, List<IndexClause>> indexClauseMap)
     {
@@ -268,10 +275,10 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
     /**
      * Returns list of row keys. First element will be min value and second will
      * be major value.
-     * 
-     * @param expressions
-     * @param primaryKeyName
-     * @return
+     *
+     * @param expressions the expressions
+     * @param primaryKeyName the primary key name
+     * @return the row key value
      */
     Map<String, byte[]> getRowKeyValue(List<IndexExpression> expressions, String primaryKeyName)
     {

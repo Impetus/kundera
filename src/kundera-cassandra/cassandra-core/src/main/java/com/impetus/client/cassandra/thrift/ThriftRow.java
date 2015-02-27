@@ -23,6 +23,7 @@ import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.cassandra.thrift.CounterSuperColumn;
 import org.apache.cassandra.thrift.SuperColumn;
 
+// TODO: Auto-generated Javadoc
 /**
  * Utility class that represents a row in Cassandra DB.
  * 
@@ -62,15 +63,13 @@ public class ThriftRow
 
     /**
      * The Constructor.
-     * 
-     * @param id
-     *            the id
-     * @param columnFamilyName
-     *            the column family name
-     * @param columns
-     *            the columns
-     * @param superColumns
-     *            the super columns
+     *
+     * @param id            the id
+     * @param columnFamilyName            the column family name
+     * @param columns            the columns
+     * @param superColumns            the super columns
+     * @param counterColumns the counter columns
+     * @param counterSuperColumns the counter super columns
      */
     public ThriftRow(Object id, String columnFamilyName, List<Column> columns, List<SuperColumn> superColumns,
             List<CounterColumn> counterColumns, List<CounterSuperColumn> counterSuperColumns)
@@ -109,6 +108,8 @@ public class ThriftRow
     }
 
     /**
+     * Gets the id.
+     *
      * @return the id
      */
     public Object getId()
@@ -117,8 +118,9 @@ public class ThriftRow
     }
 
     /**
-     * @param id
-     *            the id to set
+     * Sets the id.
+     *
+     * @param id            the id to set
      */
     public void setId(Object id)
     {
@@ -126,6 +128,8 @@ public class ThriftRow
     }
 
     /**
+     * Gets the column family name.
+     *
      * @return the columnFamilyName
      */
     public String getColumnFamilyName()
@@ -134,8 +138,9 @@ public class ThriftRow
     }
 
     /**
-     * @param columnFamilyName
-     *            the columnFamilyName to set
+     * Sets the column family name.
+     *
+     * @param columnFamilyName            the columnFamilyName to set
      */
     public void setColumnFamilyName(String columnFamilyName)
     {
@@ -143,6 +148,8 @@ public class ThriftRow
     }
 
     /**
+     * Gets the columns.
+     *
      * @return the columns
      */
     public List<Column> getColumns()
@@ -151,8 +158,9 @@ public class ThriftRow
     }
 
     /**
-     * @param columns
-     *            the columns to set
+     * Sets the columns.
+     *
+     * @param columns            the columns to set
      */
     public void setColumns(List<Column> columns)
     {
@@ -160,6 +168,8 @@ public class ThriftRow
     }
 
     /**
+     * Gets the super columns.
+     *
      * @return the superColumns
      */
     public List<SuperColumn> getSuperColumns()
@@ -168,8 +178,9 @@ public class ThriftRow
     }
 
     /**
-     * @param superColumns
-     *            the superColumns to set
+     * Sets the super columns.
+     *
+     * @param superColumns            the superColumns to set
      */
     public void setSuperColumns(List<SuperColumn> superColumns)
     {
@@ -188,6 +199,8 @@ public class ThriftRow
     }
 
     /**
+     * Gets the counter columns.
+     *
      * @return the counterColumns
      */
     public List<CounterColumn> getCounterColumns()
@@ -196,8 +209,9 @@ public class ThriftRow
     }
 
     /**
-     * @param counterColumns
-     *            the counterColumns to set
+     * Sets the counter columns.
+     *
+     * @param counterColumns            the counterColumns to set
      */
     public void setCounterColumns(List<CounterColumn> counterColumns)
     {
@@ -206,9 +220,8 @@ public class ThriftRow
 
     /**
      * Adds the counter column.
-     * 
-     * @param counter
-     *            column the column
+     *
+     * @param column the column
      */
     public void addCounterColumn(CounterColumn column)
     {
@@ -216,6 +229,8 @@ public class ThriftRow
     }
 
     /**
+     * Gets the counter super columns.
+     *
      * @return the counterSuperColumns
      */
     public List<CounterSuperColumn> getCounterSuperColumns()
@@ -224,8 +239,9 @@ public class ThriftRow
     }
 
     /**
-     * @param counterSuperColumns
-     *            the counterSuperColumns to set
+     * Sets the counter super columns.
+     *
+     * @param counterSuperColumns            the counterSuperColumns to set
      */
     public void setCounterSuperColumns(List<CounterSuperColumn> counterSuperColumns)
     {
@@ -234,9 +250,8 @@ public class ThriftRow
 
     /**
      * Adds the counter super column.
-     * 
-     * @param countersuperColumn
-     *            the super column
+     *
+     * @param superColumn the super column
      */
     public void addCounterSuperColumn(CounterSuperColumn superColumn)
     {

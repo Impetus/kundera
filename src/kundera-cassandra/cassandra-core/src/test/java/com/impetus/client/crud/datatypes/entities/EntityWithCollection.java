@@ -44,6 +44,19 @@ public class EntityWithCollection
 
     @Column
     private List<byte[]> listAsBytes;
+    
+    @Column
+    private byte[] byteData;
+
+    public byte[] getByteData()
+    {
+        return byteData;
+    }
+
+    public void setByteData(byte[] byteData)
+    {
+        this.byteData = byteData;
+    }
 
     public EntityWithCollection()
     {

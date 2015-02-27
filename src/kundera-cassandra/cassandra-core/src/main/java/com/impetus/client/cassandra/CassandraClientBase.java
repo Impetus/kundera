@@ -30,6 +30,7 @@ import java.util.UUID;
 
 import javassist.Modifier;
 
+import javax.persistence.Embedded;
 import javax.persistence.PersistenceException;
 import javax.persistence.Transient;
 import javax.persistence.metamodel.Attribute;
@@ -49,6 +50,7 @@ import org.apache.cassandra.thrift.Compression;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.cassandra.thrift.CounterSuperColumn;
+import org.apache.cassandra.thrift.CqlMetadata;
 import org.apache.cassandra.thrift.CqlResult;
 import org.apache.cassandra.thrift.CqlRow;
 import org.apache.cassandra.thrift.IndexClause;
@@ -111,6 +113,7 @@ import com.impetus.kundera.property.accessor.StringAccessor;
 import com.impetus.kundera.utils.KunderaCoreUtils;
 import com.impetus.kundera.utils.TimestampGenerator;
 
+// TODO: Auto-generated Javadoc
 /**
  * Base Class for all Cassandra Clients Contains methods that are applicable to (but not specific to) different
  * Cassandra clients.
@@ -128,10 +131,13 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     /** The consistency level. */
     protected ConsistencyLevel consistencyLevel = ConsistencyLevel.ONE;
 
+    /** The ttl per request. */
     private boolean ttlPerRequest = false;
 
+    /** The ttl per session. */
     private boolean ttlPerSession = false;
 
+    /** The ttl values. */
     private Map<String, Object> ttlValues = new HashMap<String, Object>();
 
     /** The closed. */
@@ -143,16 +149,22 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     /** batch size. */
     private int batchSize;
 
+    /** The cql client. */
     protected final CQLClient cqlClient;
 
+    /** The generator. */
     protected final TimestampGenerator generator;
+    
+    /** The cql metadata. */
+    private CqlMetadata cqlMetadata;
 
     /**
      * constructor using fields.
-     * 
-     * @param persistenceUnit
-     *            the persistence unit
-     * @param externalProperties
+     *
+     * @param persistenceUnit            the persistence unit
+     * @param externalProperties the external properties
+     * @param kunderaMetadata the kundera metadata
+     * @param generator the generator
      */
     protected CassandraClientBase(String persistenceUnit, Map<String, Object> externalProperties,
         final KunderaMetadata kunderaMetadata, final TimestampGenerator generator) {
@@ -297,6 +309,17 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
     }
 
+    /**
+     * On column.
+     *
+     * @param m the m
+     * @param isRelation the is relation
+     * @param relations the relations
+     * @param entities the entities
+     * @param columns the columns
+     * @param subManagedType the sub managed type
+     * @param key the key
+     */
     protected void onColumn(EntityMetadata m, boolean isRelation, List<String> relations, List<Object> entities,
         List<Column> columns, List<AbstractManagedType> subManagedType, ByteBuffer key) {
         if (!columns.isEmpty()) {
@@ -353,6 +376,16 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
     }
 
+    /**
+     * On super column.
+     *
+     * @param m the m
+     * @param isRelation the is relation
+     * @param relations the relations
+     * @param entities the entities
+     * @param superColumns the super columns
+     * @param key the key
+     */
     protected void onSuperColumn(EntityMetadata m, boolean isRelation, List<String> relations, List<Object> entities,
         List<SuperColumn> superColumns, ByteBuffer key) {
         Object e = null;
@@ -440,13 +473,11 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /**
      * Deletes record for given primary key from counter column family.
-     * 
-     * @param pKey
-     *            the key
-     * @param metadata
-     *            the metadata
-     * @param consistencyLevel
-     *            the consistency level
+     *
+     * @param pKey            the key
+     * @param tableName the table name
+     * @param metadata            the metadata
+     * @param consistencyLevel            the consistency level
      */
     protected void deleteRecordFromCounterColumnFamily(Object pKey, String tableName, EntityMetadata metadata,
         ConsistencyLevel consistencyLevel) {
@@ -475,14 +506,11 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /**
      * Creates secondary indexes on columns if not already created.
-     * 
-     * @param tableName
-     *            Column family name
-     * @param poolName
-     *            Pool Name
-     * @param columns
-     *            List of columns
-     * @param columnType
+     *
+     * @param m the m
+     * @param tableName            Column family name
+     * @param columns            List of columns
+     * @param columnType the column type
      */
     protected void createIndexesOnColumns(EntityMetadata m, String tableName, List<Column> columns, Class columnType) {
         Object pooledConnection = null;
@@ -640,6 +668,16 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         return result != null && !result.isEmpty() ? result.get(0) : null;
     }
 
+    /**
+     * Populate.
+     *
+     * @param clazz the clazz
+     * @param metadata the metadata
+     * @param rowId the row id
+     * @param relationNames the relation names
+     * @param metaModel the meta model
+     * @return the list
+     */
     private List<Object> populate(Class<?> clazz, EntityMetadata metadata, Object rowId, List<String> relationNames,
         MetamodelImpl metaModel) {
         List<Object> result;
@@ -653,10 +691,9 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /**
      * Returns true in case of, composite Id and if cql3 opted and not a embedded entity.
-     * 
-     * @param metadata
-     * @param metaModel
-     * @return
+     *
+     * @param metadata the metadata
+     * @return true, if is cql3 enabled
      */
     public boolean isCql3Enabled(EntityMetadata metadata) {
         if (metadata != null) {
@@ -666,8 +703,17 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
             if (metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType())) {
                 return true;
-            } else if (getCqlVersion().equalsIgnoreCase(CassandraConstants.CQL_VERSION_3_0)
-                && metadata.getType().equals(Type.SUPER_COLUMN_FAMILY)) {
+            } 
+         // added for embeddables support on cql3
+            for(Field field : metadata.getEntityClazz().getDeclaredFields()){
+                if(field.isAnnotationPresent(Embedded.class)){                    
+                    return getCqlVersion().equalsIgnoreCase(CassandraConstants.CQL_VERSION_3_0);
+                }
+            }
+         
+            if (getCqlVersion().equalsIgnoreCase(CassandraConstants.CQL_VERSION_3_0)
+                && metadata.getType().equals(Type.SUPER_COLUMN_FAMILY))  
+            		{
                 log.warn("Super Columns not supported by cql, Any operation on supercolumn family will be executed using thrift, returning false.");
                 return false;
             }
@@ -678,10 +724,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /**
      * Returns true in case of, composite Id and if cql3 opted and not a embedded entity.
-     * 
-     * @param metadata
-     * @param metaModel
-     * @return
+     *
+     * @return true, if is cql3 enabled
      */
     private boolean isCql3Enabled() {
         return isCql3Enabled(null);
@@ -729,15 +773,12 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /**
      * Executes Select CQL Query.
-     * 
-     * @param cqlQuery
-     *            the cql query
-     * @param clazz
-     *            the clazz
-     * @param relationalField
-     *            the relational field
-     * @param dataHandler
-     *            the data handler
+     *
+     * @param clazz            the clazz
+     * @param relationalField            the relational field
+     * @param dataHandler            the data handler
+     * @param isNative the is native
+     * @param cqlQuery            the cql query
      * @return the list
      */
     public List executeSelectQuery(Class clazz, List<String> relationalField, CassandraDataHandler dataHandler,
@@ -772,10 +813,10 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     }
 
     /**
-     * Executes Update/ Delete CQL query
-     * 
-     * @param cqlQuery
-     * @return
+     * Executes Update/ Delete CQL query.
+     *
+     * @param cqlQuery the cql query
+     * @return the int
      */
     public int executeUpdateDeleteQuery(String cqlQuery) {
         if (log.isInfoEnabled()) {
@@ -791,6 +832,11 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     }
 
+    /**
+     * Gets the external properties.
+     *
+     * @return the external properties
+     */
     public Map<String, Object> getExternalProperties() {
         return externalProperties;
     }
@@ -848,14 +894,13 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /**
      * Return insert query string for given entity.
-     * 
-     * @param entityMetadata
-     * @param entity
-     * @param cassandra_client
-     * @param rlHolders
-     * @param ttlColumns
-     *            TTL values for each columns
-     * @return
+     *
+     * @param entityMetadata the entity metadata
+     * @param entity the entity
+     * @param cassandra_client the cassandra_client
+     * @param rlHolders the rl holders
+     * @param ttlColumns            TTL values for each columns
+     * @return the list
      */
     protected List<String> createInsertQuery(EntityMetadata entityMetadata, Object entity,
         Cassandra.Client cassandra_client, List<RelationHolder> rlHolders, Object ttlColumns) {
@@ -912,14 +957,14 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     }
 
     /**
-     * @param columnNames
-     * @param columnValues
-     * @param columnNameBuilder
-     * @param columnValueBuilder
-     * @param rl
-     * @return
-     * 
-     * To remove redundant columns in insert query
+     * On relation columns.
+     *
+     * @param columnNames the column names
+     * @param columnValues the column values
+     * @param columnNameBuilder the column name builder
+     * @param columnValueBuilder the column value builder
+     * @param rl the rl
+     * @return To remove redundant columns in insert query
      */
     private StringBuilder onRelationColumns(String columnNames, String columnValues, StringBuilder columnNameBuilder,
         StringBuilder columnValueBuilder, RelationHolder rl) {
@@ -944,12 +989,12 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /**
      * Return update query string for given entity intended for counter column family.
-     * 
-     * @param entityMetadata
-     * @param entity
-     * @param cassandra_client
-     * @param rlHolders
-     * @return
+     *
+     * @param entityMetadata the entity metadata
+     * @param entity the entity
+     * @param cassandra_client the cassandra_client
+     * @param rlHolders the rl holders
+     * @return the list
      */
     protected List<String> createUpdateQueryForCounter(EntityMetadata entityMetadata, Object entity,
         Cassandra.Client cassandra_client, List<RelationHolder> rlHolders) {
@@ -1083,17 +1128,12 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /**
      * On delete query.
-     * 
-     * @param metadata
-     *            the metadata
-     * @param tableName
-     *            TODO
-     * @param metaModel
-     *            the meta model
-     * @param keyObject
-     *            the compound key object
-     * @param compoundKey
-     *            the compound key
+     *
+     * @param metadata            the metadata
+     * @param tableName            TODO
+     * @param metaModel            the meta model
+     * @param keyObject            the compound key object
+     * @return the string
      */
     protected String onDeleteQuery(EntityMetadata metadata, String tableName, MetamodelImpl metaModel, Object keyObject) {
         CQLTranslator translator = new CQLTranslator();
@@ -1120,17 +1160,13 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /**
      * On where clause.
-     * 
-     * @param metadata
-     *            the metadata
-     * @param key
-     *            the compound key object
-     * @param translator
-     *            the translator
-     * @param queryBuilder
-     *            the query builder
-     * @param compoundKey
-     *            the compound key
+     *
+     * @param metadata            the metadata
+     * @param key            the compound key object
+     * @param translator            the translator
+     * @param queryBuilder            the query builder
+     * @param metaModel the meta model
+     * @param attribute the attribute
      */
     protected void onWhereClause(EntityMetadata metadata, Object key, CQLTranslator translator,
         StringBuilder queryBuilder, MetamodelImpl metaModel, SingularAttribute attribute) {
@@ -1196,13 +1232,11 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /**
      * Query related methods.
-     * 
-     * @param cqlQuery
-     *            the cql query
-     * @param clazz
-     *            the clazz
-     * @param relationalField
-     *            the relational field
+     *
+     * @param clazz            the clazz
+     * @param relationalField            the relational field
+     * @param isNative the is native
+     * @param cqlQuery            the cql query
      * @return the list
      */
     public abstract List executeQuery(Class clazz, List<String> relationalField, boolean isNative, String cqlQuery);
@@ -1229,24 +1263,17 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /**
      * Find by range.
-     * 
-     * @param muinVal
-     *            the muin val
-     * @param maxVal
-     *            the max val
-     * @param m
-     *            the m
-     * @param isWrapReq
-     *            the is wrap req
-     * @param relations
-     *            the relations
-     * @param columns
-     *            the columns
-     * @param conditions
-     *            the conditions
+     *
+     * @param muinVal            the muin val
+     * @param maxVal            the max val
+     * @param m            the m
+     * @param isWrapReq            the is wrap req
+     * @param relations            the relations
+     * @param columns            the columns
+     * @param conditions            the conditions
+     * @param maxResults the max results
      * @return the list
-     * @throws Exception
-     *             the exception
+     * @throws Exception             the exception
      */
     public abstract List findByRange(byte[] muinVal, byte[] maxVal, EntityMetadata m, boolean isWrapReq,
         List<String> relations, List<String> columns, List<IndexExpression> conditions, int maxResults)
@@ -1339,6 +1366,9 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      * (non-Javadoc)
      * 
      * @see com.impetus.kundera.persistence.api.Batcher#clear()
+     */
+    /**
+     * Clear.
      */
     public void clear() {
         if (nodes != null) {
@@ -1590,11 +1620,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /**
      * Returns raw cassandra client from thrift connection pool.
-     * 
-     * @param persistenceUnit
-     *            persistence unit.
-     * @param schema
-     *            schema or keyspace.
+     *
+     * @param schema            schema or keyspace.
      * @return raw cassandra client.
      */
     protected Cassandra.Client getRawClient(final String schema) {
@@ -1616,10 +1643,10 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /**
      * Return the generated value of id.
-     * 
-     * @param descriptor
-     * @param pu
-     * @return
+     *
+     * @param descriptor the descriptor
+     * @param pu the pu
+     * @return the generated value
      */
     public Long getGeneratedValue(TableGeneratorDiscriptor descriptor, String pu) {
         Cassandra.Client conn = getRawClient(descriptor.getSchema());
@@ -1689,14 +1716,10 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /**
      * Executes query string using cql3.
-     * 
-     * @param cqlQuery
-     * @return
-     * @throws InvalidRequestException
-     * @throws UnavailableException
-     * @throws TimedOutException
-     * @throws SchemaDisagreementException
-     * @throws TException
+     *
+     * @param cqlQuery the cql query
+     * @param isCql3Enabled the is cql3 enabled
+     * @return the object
      */
     protected Object executeCQLQuery(String cqlQuery, boolean isCql3Enabled) {
         Cassandra.Client conn = null;
@@ -1723,20 +1746,26 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     }
 
     /**
-     * Find List of objects based on value {@columnValue} of column {@columnName}
-     * 
-     * @param m
-     * @param columnName
-     * @param columnValue
-     * @param clazz
-     * @param dataHandler
-     * @return
+     * Find List of objects based on value {@columnValue} of column {@columnName}.
+     *
+     * @param m the m
+     * @param columnName the column name
+     * @param columnValue the column value
+     * @param clazz the clazz
+     * @param dataHandler the data handler
+     * @return the list
      */
     protected List<Object> findByRelationQuery(EntityMetadata m, String columnName, Object columnValue, Class clazz,
         CassandraDataHandler dataHandler) {
         return cqlClient.findByRelationQuery(m, columnName, columnValue, clazz, dataHandler);
     }
 
+    /**
+     * Sets the batch size.
+     *
+     * @param persistenceUnit the persistence unit
+     * @param puProperties the pu properties
+     */
     private void setBatchSize(String persistenceUnit, Map<String, Object> puProperties) {
         String batch_Size = null;
 
@@ -1756,6 +1785,11 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         setBatchSize(batch_Size);
     }
 
+    /**
+     * Sets the batch size.
+     *
+     * @param batch_Size the new batch size
+     */
     void setBatchSize(String batch_Size) {
         if (!StringUtils.isBlank(batch_Size)) {
             batchSize = Integer.valueOf(batch_Size);
@@ -1765,6 +1799,11 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
     }
 
+    /**
+     * Populate cql version.
+     *
+     * @param externalProperties the external properties
+     */
     private void populateCqlVersion(Map<String, Object> externalProperties) {
         String cqlVersion =
             externalProperties != null ? (String) externalProperties.get(CassandraConstants.CQL_VERSION) : null;
@@ -1783,10 +1822,26 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
     }
 
+    /**
+     * Gets the connection.
+     *
+     * @return the connection
+     */
     protected abstract Object getConnection();
 
+    /**
+     * Gets the connection.
+     *
+     * @param connection the connection
+     * @return the connection
+     */
     protected abstract Object getConnection(Object connection);
 
+    /**
+     * Release connection.
+     *
+     * @param conn the conn
+     */
     protected abstract void releaseConnection(Object conn);
 
     /**
@@ -1797,19 +1852,21 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      * 
      */
     protected class CQLClient {
+        
         /**
-         * 
-         * @param entityMetadata
-         * @param entity
-         * @param conn
-         * @param rlHolders
-         * @param ttlColumns
-         * @throws UnsupportedEncodingException
-         * @throws InvalidRequestException
-         * @throws TException
-         * @throws UnavailableException
-         * @throws TimedOutException
-         * @throws SchemaDisagreementException
+         * Persist.
+         *
+         * @param entityMetadata the entity metadata
+         * @param entity the entity
+         * @param conn the conn
+         * @param rlHolders the rl holders
+         * @param ttlColumns the ttl columns
+         * @throws UnsupportedEncodingException the unsupported encoding exception
+         * @throws InvalidRequestException the invalid request exception
+         * @throws TException the t exception
+         * @throws UnavailableException the unavailable exception
+         * @throws TimedOutException the timed out exception
+         * @throws SchemaDisagreementException the schema disagreement exception
          */
         public void persist(EntityMetadata entityMetadata, Object entity,
             org.apache.cassandra.thrift.Cassandra.Client conn, List<RelationHolder> rlHolders, Object ttlColumns)
@@ -1830,12 +1887,14 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
         /**
          * Execute query and Return list of Objects.
-         * 
-         * @param cqlQuery
-         * @param clazz
-         * @param relationalField
-         * @param dataHandler
-         * @return
+         *
+         * @param clazz the clazz
+         * @param relationalField the relational field
+         * @param dataHandler the data handler
+         * @param isCql3Enabled the is cql3 enabled
+         * @param isNative the is native
+         * @param cqlQuery the cql query
+         * @return the list
          */
         public List executeQuery(Class clazz, List<String> relationalField, CassandraDataHandler dataHandler,
             boolean isCql3Enabled, boolean isNative, String cqlQuery) {
@@ -1849,6 +1908,9 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                     log.info("Executing query {}.", cqlQuery);
                 }
                 result = (CqlResult) executeCQLQuery(cqlQuery, isCql3Enabled);
+                
+                setCqlMetadata(result.getSchema());
+                
                 if (result != null && (result.getRows() != null || result.getRowsSize() > 0)) {
                     returnedEntities = new ArrayList<Object>(result.getRowsSize());
                     Iterator<CqlRow> iter = result.getRowsIterator();
@@ -1863,6 +1925,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                             new ThriftRow(rowKey, entityMetadata.getTableName(), row.getColumns(),
                                 new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0),
                                 new ArrayList<CounterSuperColumn>(0));
+                        //send cqlmetadata
 
                         e =
                             dataHandler.populateEntity(thriftRow, entityMetadata, KunderaCoreUtils.getEntity(e),
@@ -1885,15 +1948,14 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
 
         /**
-         * 
-         * @param relationalField
-         * @param dataHandler
-         * @param isCql3Enabled
-         * @param cqlQuery
-         * @param entityMetadata
-         * @param iter
-         * @param e
-         * @return
+         * Populate secondary table data.
+         *
+         * @param relationalField the relational field
+         * @param dataHandler the data handler
+         * @param isCql3Enabled the is cql3 enabled
+         * @param entityMetadata the entity metadata
+         * @param e the e
+         * @return the object
          */
         private Object populateSecondaryTableData(List<String> relationalField, CassandraDataHandler dataHandler,
             boolean isCql3Enabled, EntityMetadata entityMetadata, Object e) {
@@ -1948,12 +2010,12 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
         /**
          * Finds entity on the basis of rowid and return list of objects.
-         * 
-         * @param metaModel
-         * @param metadata
-         * @param rowId
-         * @param relationNames
-         * @return
+         *
+         * @param metaModel the meta model
+         * @param metadata the metadata
+         * @param rowId the row id
+         * @param relationNames the relation names
+         * @return the list
          */
         public List<Object> find(MetamodelImpl metaModel, EntityMetadata metadata, Object rowId,
             List<String> relationNames) {
@@ -1975,14 +2037,14 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
 
         /**
-         * Find List of objects based on value {@columnValue} of column {@columnName}
-         * 
-         * @param m
-         * @param columnName
-         * @param columnValue
-         * @param clazz
-         * @param dataHandler
-         * @return
+         * Find List of objects based on value {@columnValue} of column {@columnName}.
+         *
+         * @param m the m
+         * @param columnName the column name
+         * @param columnValue the column value
+         * @param clazz the clazz
+         * @param dataHandler the data handler
+         * @return the list
          */
         protected List<Object> findByRelationQuery(EntityMetadata m, String columnName, Object columnValue,
             Class clazz, CassandraDataHandler dataHandler) {
@@ -2005,6 +2067,8 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     }
 
     /**
+     * Checks if is ttl per request.
+     *
      * @return the ttlPerRequest
      */
     public boolean isTtlPerRequest() {
@@ -2012,14 +2076,17 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     }
 
     /**
-     * @param ttlPerRequest
-     *            the ttlPerRequest to set
+     * Sets the ttl per request.
+     *
+     * @param ttlPerRequest            the ttlPerRequest to set
      */
     public void setTtlPerRequest(boolean ttlPerRequest) {
         this.ttlPerRequest = ttlPerRequest;
     }
 
     /**
+     * Checks if is ttl per session.
+     *
      * @return the ttlPerSession
      */
     public boolean isTtlPerSession() {
@@ -2027,14 +2094,17 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     }
 
     /**
-     * @param ttlPerSession
-     *            the ttlPerSession to set
+     * Sets the ttl per session.
+     *
+     * @param ttlPerSession            the ttlPerSession to set
      */
     public void setTtlPerSession(boolean ttlPerSession) {
         this.ttlPerSession = ttlPerSession;
     }
 
     /**
+     * Gets the ttl values.
+     *
      * @return the ttlValues
      */
     public Map<String, Object> getTtlValues() {
@@ -2042,15 +2112,23 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     }
 
     /**
-     * @param ttlValues
-     *            the ttlValues to set
+     * Sets the ttl values.
+     *
+     * @param ttlValues            the ttlValues to set
      */
     public void setTtlValues(Map<String, Object> ttlValues) {
         this.ttlValues = ttlValues;
     }
 
     /**
-     * Finds a {@link List} of entities from database
+     * Finds a {@link List} of entities from database.
+     *
+     * @param entityClass the entity class
+     * @param relationNames the relation names
+     * @param isWrapReq the is wrap req
+     * @param metadata the metadata
+     * @param rowIds the row ids
+     * @return the list
      */
     public final List findByRowKeys(Class entityClass, List<String> relationNames, boolean isWrapReq,
         EntityMetadata metadata, Object... rowIds) {
@@ -2088,6 +2166,14 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         return entities;
     }
 
+    /**
+     * Execute.
+     *
+     * @param <T> the generic type
+     * @param query the query
+     * @param connection the connection
+     * @return the t
+     */
     protected <T> T execute(final String query, Object connection) {
         try {
             org.apache.cassandra.thrift.Cassandra.Client conn =
@@ -2102,6 +2188,12 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
     }
 
+    /**
+     * Persist join table by cql.
+     *
+     * @param joinTableData the join table data
+     * @param conn the conn
+     */
     protected void persistJoinTableByCql(JoinTableData joinTableData, Cassandra.Client conn) {
         String joinTableName = joinTableData.getJoinTableName();
         String invJoinColumnName = joinTableData.getInverseJoinColumnName();
@@ -2174,16 +2266,16 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     }
 
     /**
-     * 
      * Find inverse join column values for join column.
-     * 
-     * @param schemaName
-     * @param tableName
-     * @param pKeyColumnName
-     * @param columnName
-     * @param pKeyColumnValue
-     * @param columnJavaType
-     * @return
+     *
+     * @param <E> the element type
+     * @param schemaName the schema name
+     * @param tableName the table name
+     * @param pKeyColumnName the key column name
+     * @param columnName the column name
+     * @param pKeyColumnValue the key column value
+     * @param columnJavaType the column java type
+     * @return the columns by id using cql
      */
     protected <E> List<E> getColumnsByIdUsingCql(String schemaName, String tableName, String pKeyColumnName,
         String columnName, Object pKeyColumnValue, Class columnJavaType) {
@@ -2225,14 +2317,15 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
 
     /**
      * Find join column values for inverse join column.
-     * 
-     * @param schemaName
-     * @param tableName
-     * @param pKeyName
-     * @param columnName
-     * @param columnValue
-     * @param entityClazz
-     * @return
+     *
+     * @param <E> the element type
+     * @param schemaName the schema name
+     * @param tableName the table name
+     * @param pKeyName the key name
+     * @param columnName the column name
+     * @param columnValue the column value
+     * @param entityClazz the entity clazz
+     * @return the list
      */
     protected <E> List<E> findIdsByColumnUsingCql(String schemaName, String tableName, String pKeyName,
         String columnName, Object columnValue, Class entityClazz) {
@@ -2242,4 +2335,22 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName(), columnValue, metadata.getIdAttribute()
                 .getBindableJavaType());
     }
+
+	/**
+	 * Gets the cql metadata.
+	 *
+	 * @return the cql metadata
+	 */
+	public CqlMetadata getCqlMetadata() {
+		return cqlMetadata;
+	}
+
+	/**
+	 * Sets the cql metadata.
+	 *
+	 * @param cqlMetadata the new cql metadata
+	 */
+	public void setCqlMetadata(CqlMetadata cqlMetadata) {
+		this.cqlMetadata = cqlMetadata;
+	}
 }

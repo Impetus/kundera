@@ -338,6 +338,57 @@ public class BlogPostTest
         }
 
     }
+    
+    @Test
+    public void testCollectionIndexes()
+    {
+        // Insert records
+        BlogPost p1 = prepareBlogPost1();
+        BlogPost p2 = prepareBlogPost2();
+
+        em.persist(p1);
+        em.persist(p2);
+        
+        em.clear();
+
+        // Select All query
+        Query q = em.createQuery("Select p from BlogPost p");
+        List<BlogPost> allPosts = q.getResultList();
+        Assert.assertNotNull(allPosts);
+        Assert.assertFalse(allPosts.isEmpty());
+        Assert.assertEquals(2, allPosts.size());
+        assertPost1(allPosts.get(0));
+        assertPost2(allPosts.get(1));
+
+        // Search over tags Set
+        q = em.createQuery("Select p from BlogPost p where p.tags = :tags");
+        q.setParameter("tags", "nosql");
+        allPosts = q.getResultList();
+        Assert.assertNotNull(allPosts);
+        Assert.assertFalse(allPosts.isEmpty());
+        Assert.assertEquals(2, allPosts.size());
+        assertPost1(allPosts.get(0));
+        assertPost2(allPosts.get(1));
+
+        // Search over likedBy List
+        q = em.createQuery("Select p from BlogPost p where p.likedBy = :likedBy");
+        q.setParameter("likedBy", 555);
+        allPosts = q.getResultList();
+        Assert.assertNotNull(allPosts);
+        Assert.assertFalse(allPosts.isEmpty());
+        Assert.assertEquals(1, allPosts.size());
+        assertPost2(allPosts.get(0));
+
+     // Search over comments Map
+        q = em.createQuery("Select p from BlogPost p where p.comments = :comments");
+        q.setParameter("comments", "Great work");
+        allPosts = q.getResultList();
+        Assert.assertNotNull(allPosts);
+        Assert.assertFalse(allPosts.isEmpty());
+        Assert.assertEquals(1, allPosts.size());
+        assertPost2(allPosts.get(0));
+
+    }
 
     private BlogPost prepareBlogPost1()
     {
@@ -571,6 +622,9 @@ public class BlogPostTest
                             "CREATE TABLE blog_posts (post_id int PRIMARY KEY, body text, tags set<text>, liked_by list<int>, comments map<int, text>)",
                             "KunderaExamples");
             CassandraCli.executeCqlQuery("CREATE INDEX ON blog_posts(body)", "KunderaExamples");
+            CassandraCli.executeCqlQuery("CREATE INDEX ON blog_posts(tags)", "KunderaExamples");
+            CassandraCli.executeCqlQuery("CREATE INDEX ON blog_posts(comments)", "KunderaExamples");
+            CassandraCli.executeCqlQuery("CREATE INDEX ON blog_posts(liked_by)", "KunderaExamples");
         }
         catch (Exception e)
         {

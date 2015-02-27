@@ -23,7 +23,7 @@
 					
 					<property name="hostDistance" value="LOCAL"></property>
 					<property name="minSimultaneousRequests" value="65"></property>
-					<property name="maxSimultaneousRequests" value="200"></property>
+					<property name="maxSimultaneousRequests" value="128"></property>
 					<property name="coreConnections" value="5"></property>
 					<property name="maxConnections" value="12"></property>
 					

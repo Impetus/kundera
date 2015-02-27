@@ -518,7 +518,7 @@ public class CassandraCompositeTypeTest
         catch (Exception e)
         {
             Assert.assertEquals(
-                    "javax.persistence.PersistenceException: com.impetus.kundera.KunderaException: InvalidRequestException(why:PRIMARY KEY part tweetId cannot be restricted by IN relation)",
+                    "javax.persistence.PersistenceException: com.impetus.kundera.KunderaException: InvalidRequestException(why:Clustering column \"tweetId\" cannot be restricted by an IN relation)",
                     e.getMessage());
 
         }

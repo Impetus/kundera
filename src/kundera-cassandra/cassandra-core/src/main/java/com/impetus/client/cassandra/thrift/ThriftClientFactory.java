@@ -65,8 +65,12 @@ public class ThriftClientFactory extends CassandraClientFactory
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(ThriftClientFactory.class);
 
+    /** The configuration. */
     protected HostConfiguration configuration;
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.loader.ClientFactory#getSchemaManager(java.util.Map)
+     */
     @Override
     public SchemaManager getSchemaManager(Map<String, Object> externalProperty)
     {
@@ -80,7 +84,7 @@ public class ThriftClientFactory extends CassandraClientFactory
     }
 
     /**
-     * 
+     * Initialize property reader.
      */
     private void initializePropertyReader()
     {
@@ -92,6 +96,9 @@ public class ThriftClientFactory extends CassandraClientFactory
         }
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.loader.ClientLifeCycleManager#destroy()
+     */
     @Override
     public void destroy()
     {
@@ -116,6 +123,9 @@ public class ThriftClientFactory extends CassandraClientFactory
         ((CassandraRetryService) hostRetryService).shutdown();
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.loader.GenericClientFactory#initialize(java.util.Map)
+     */
     @Override
     public void initialize(Map<String, Object> externalProperty)
     {
@@ -133,6 +143,9 @@ public class ThriftClientFactory extends CassandraClientFactory
         initializeTimestampGenerator(externalProperty);
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.loader.GenericClientFactory#createPoolOrConnection()
+     */
     @Override
     protected Object createPoolOrConnection()
     {
@@ -178,6 +191,9 @@ public class ThriftClientFactory extends CassandraClientFactory
         return null;
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.loader.GenericClientFactory#instantiateClient(java.lang.String)
+     */
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
@@ -186,7 +202,8 @@ public class ThriftClientFactory extends CassandraClientFactory
     }
 
     /**
-     * 
+     * Gets the pool using policy.
+     *
      * @return pool an the basis of LoadBalancing policy.
      */
     private ConnectionPool getPoolUsingPolicy()
@@ -198,6 +215,9 @@ public class ThriftClientFactory extends CassandraClientFactory
         throw new KunderaException("All hosts are down. please check servers manully.");
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.loader.GenericClientFactory#isThreadSafe()
+     */
     @Override
     public boolean isThreadSafe()
     {
@@ -205,10 +225,11 @@ public class ThriftClientFactory extends CassandraClientFactory
     }
 
     /**
-     * 
-     * @param host
-     * @param port
-     * @return
+     * Gets the new pool.
+     *
+     * @param host the host
+     * @param port the port
+     * @return the new pool
      */
     private ConnectionPool getNewPool(String host, int port)
     {
@@ -224,6 +245,9 @@ public class ThriftClientFactory extends CassandraClientFactory
         return getPoolUsingPolicy();
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.loader.GenericClientFactory#initializeLoadBalancer(java.lang.String)
+     */
     @Override
     protected void initializeLoadBalancer(String loadBalancingPolicyName)
     {
@@ -245,6 +269,12 @@ public class ThriftClientFactory extends CassandraClientFactory
         loadBalancingPolicy = new RoundRobinBalancingPolicy();
     }
 
+    /**
+     * Gets the connection.
+     *
+     * @param pool the pool
+     * @return the connection
+     */
     Connection getConnection(ConnectionPool pool)
     {
         ConnectionPool connectionPool = pool;
@@ -276,6 +306,12 @@ public class ThriftClientFactory extends CassandraClientFactory
         throw new KunderaException("All hosts are down. please check servers manully.");
     }
 
+    /**
+     * Release connection.
+     *
+     * @param pool the pool
+     * @param conn the conn
+     */
     void releaseConnection(ConnectionPool pool, Cassandra.Client conn)
     {
         if (pool != null && conn != null)
@@ -286,8 +322,8 @@ public class ThriftClientFactory extends CassandraClientFactory
 
     /**
      * Adds a pool in hostPools map for given host.
-     * 
-     * @param cassandraHost
+     *
+     * @param cassandraHost the cassandra host
      * @return true id added successfully.
      */
     public boolean addCassandraHost(CassandraHost cassandraHost)
@@ -329,10 +365,11 @@ public class ThriftClientFactory extends CassandraClientFactory
     {
 
         /**
-         * 
+         * Gets the pool.
+         *
+         * @param pools the pools
          * @return pool object for host which has least active connections
          *         determined by maxActive connection.
-         * 
          */
         @Override
         public Object getPool(Collection<Object> pools)
@@ -354,6 +391,10 @@ public class ThriftClientFactory extends CassandraClientFactory
          */
         private final class ShufflingCompare implements Comparator<Object>
         {
+            
+            /* (non-Javadoc)
+             * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+             */
             public int compare(Object o1, Object o2)
             {
                 PoolConfiguration props1 = ((ConnectionPool) o1).getPoolProperties();
@@ -375,21 +416,40 @@ public class ThriftClientFactory extends CassandraClientFactory
      */
     public class Connection
     {
+        
+        /** The client. */
         private Cassandra.Client client;
 
+        /** The pool. */
         private ConnectionPool pool;
 
+        /**
+         * Instantiates a new connection.
+         *
+         * @param client the client
+         * @param pool the pool
+         */
         public Connection(org.apache.cassandra.thrift.Cassandra.Client client, ConnectionPool pool)
         {
             this.client = client;
             this.pool = pool;
         }
 
+        /**
+         * Gets the client.
+         *
+         * @return the client
+         */
         public Cassandra.Client getClient()
         {
             return client;
         }
 
+        /**
+         * Gets the pool.
+         *
+         * @return the pool
+         */
         public ConnectionPool getPool()
         {
             return pool;

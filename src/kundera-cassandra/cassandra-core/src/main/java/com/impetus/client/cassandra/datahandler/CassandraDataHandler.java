@@ -110,13 +110,15 @@ public interface CassandraDataHandler
     Object populateEntity(ThriftRow tr, EntityMetadata m, Object entity, List<String> relationNames, boolean isWrapReq);
 
     /**
-     * @param e
-     * @param id
-     * @param m
-     * @param columnFamily
+     * To thrift row.
+     *
+     * @param e the e
+     * @param id the id
+     * @param m the m
+     * @param columnFamily the column family
      * @param columnTTLs TODO
-     * @return
-     * @throws Exception
+     * @return the collection
+     * @throws Exception the exception
      */
     Collection<ThriftRow> toThriftRow(Object e, Object id, EntityMetadata m, String columnFamily, Object columnTTLs) throws Exception;
 }

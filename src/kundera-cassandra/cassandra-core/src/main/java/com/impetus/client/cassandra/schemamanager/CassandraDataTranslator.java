@@ -53,6 +53,10 @@ import org.apache.cassandra.db.marshal.MapType;
 import org.apache.cassandra.db.marshal.SetType;
 import org.apache.cassandra.db.marshal.UTF8Type;
 import org.apache.cassandra.db.marshal.UUIDType;
+import org.apache.cassandra.serializers.ListSerializer;
+import org.apache.cassandra.serializers.MapSerializer;
+import org.apache.cassandra.serializers.SetSerializer;
+import org.apache.cassandra.serializers.TypeSerializer;
 import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.cassandra.utils.ByteBufferUtil;
 import org.slf4j.Logger;
@@ -70,8 +74,9 @@ import com.impetus.kundera.property.accessor.SQLTimeAccessor;
 import com.impetus.kundera.property.accessor.SQLTimestampAccessor;
 import com.impetus.kundera.property.accessor.ShortAccessor;
 
+
 /**
- * Class to decompose and compose Cassandra data type objects
+ * Class to decompose and compose Cassandra data type objects.
  * 
  * @author chhavi.gangwal
  */
@@ -86,26 +91,66 @@ public final class CassandraDataTranslator
     private static Map<Class<?>, CassandraType> typeToClazz = new HashMap<Class<?>, CassandraDataTranslator.CassandraType>();
 
     /**
-     * CassandradataType enum
-     * 
+     * CassandradataType enum.
      */
     static enum CassandraType
     {
 
-        INT32(Int32Type.class.getSimpleName()), DOUBLE(DoubleType.class.getSimpleName()), FLOAT(FloatType.class
-                .getSimpleName()), LONG(LongType.class.getSimpleName()), STRING(UTF8Type.class.getSimpleName()), UUID(
-                UUIDType.class.getSimpleName()), BYTES(BytesType.class.getSimpleName()), ASCII(AsciiType.class
-                .getSimpleName()), BOOLEAN(BooleanType.class.getSimpleName()), DATE(DateType.class.getSimpleName()), INT(
-                IntegerType.class.getSimpleName()), DECIMAL(DecimalType.class.getSimpleName()), COUNTER(
-                CounterColumnType.class.getSimpleName()), LIST(ListType.class.getSimpleName()), MAP(MapType.class
-                .getSimpleName()), SET(SetType.class.getSimpleName()), INET(InetAddressType.class.getSimpleName()), SHORT(
-                Short.class.getSimpleName()), ENUM(Enum.class.getSimpleName()), CHARACTER(UTF8Type.class
-                .getSimpleName()), BIGINT(IntegerType.class.getSimpleName()), TIMESTAMP(DateType.class.getSimpleName()), SQL_DATE(
-                DateType.class.getSimpleName()), SQL_TIME(DateType.class.getSimpleName()), SQL_TIMESTAMP(DateType.class
-                .getSimpleName()), CALENDAR(DateType.class.getSimpleName());
+        /** The IN t32. */
+        INT32(Int32Type.class.getSimpleName()), /** The double. */
+        DOUBLE(DoubleType.class.getSimpleName()), /** The float. */
+        FLOAT(FloatType.class.getSimpleName()),
+        /** The long. */
+        LONG(LongType.class.getSimpleName()),
+        /** The string. */
+        STRING(UTF8Type.class.getSimpleName()),
+        /** The uuid. */
+        UUID(UUIDType.class.getSimpleName()),
+        /** The bytes. */
+        BYTES(BytesType.class.getSimpleName()),
+        /** The ascii. */
+        ASCII(AsciiType.class.getSimpleName()),
+        /** The boolean. */
+        BOOLEAN(BooleanType.class.getSimpleName()),
+        /** The date. */
+        DATE(DateType.class.getSimpleName()),
+        /** The int. */
+        INT(IntegerType.class.getSimpleName()),
+        /** The decimal. */
+        DECIMAL(DecimalType.class.getSimpleName()),
+        /** The counter. */
+        COUNTER(CounterColumnType.class.getSimpleName()),
+        /** The list. */
+        LIST(ListType.class.getSimpleName()),
+        /** The map. */
+        MAP(MapType.class.getSimpleName()),
+        /** The set. */
+        SET(SetType.class.getSimpleName()),
+        /** The inet. */
+        INET(InetAddressType.class.getSimpleName()),
+        /** The short. */
+        SHORT(Short.class.getSimpleName()),
+        /** The enum. */
+        ENUM(Enum.class.getSimpleName()),
+        /** The character. */
+        CHARACTER(UTF8Type.class.getSimpleName()),
+        /** The bigint. */
+        BIGINT(IntegerType.class.getSimpleName()),
+        /** The timestamp. */
+        TIMESTAMP(DateType.class.getSimpleName()),
+        /** The sql date. */
+        SQL_DATE(DateType.class.getSimpleName()),
+        /** The sql time. */
+        SQL_TIME(DateType.class.getSimpleName()),
+        /** The sql timestamp. */
+        SQL_TIMESTAMP(DateType.class.getSimpleName()),
+        /** The calendar. */
+        CALENDAR(DateType.class.getSimpleName());
 
+        /** The clazz. */
         private String clazz;
 
+        /** The Constant lookup. */
         private static final Map<String, CassandraType> lookup = new HashMap<String, CassandraType>();
 
         static
@@ -115,7 +160,10 @@ public final class CassandraDataTranslator
         }
 
         /**
+         * Instantiates a new cassandra type.
+         * 
          * @param clazz
+         *            the clazz
          */
         private CassandraType(String clazz)
         {
@@ -123,7 +171,9 @@ public final class CassandraDataTranslator
         }
 
         /**
-         * @return
+         * Gets the clazz.
+         * 
+         * @return the clazz
          */
         public String getClazz()
         {
@@ -131,8 +181,11 @@ public final class CassandraDataTranslator
         }
 
         /**
+         * Gets the.
+         * 
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the cassandra type
          */
         public static CassandraType get(String clazz)
         {
@@ -188,8 +241,11 @@ public final class CassandraDataTranslator
     }
 
     /**
+     * Gets the cassandra data type class.
+     * 
      * @param clazz
-     * @return
+     *            the clazz
+     * @return the cassandra data type class
      */
     public static CassandraType getCassandraDataTypeClass(Class clazz)
     {
@@ -198,10 +254,11 @@ public final class CassandraDataTranslator
     }
 
     /**
-     * Checks whether the data type object is that of cassandra
+     * Checks whether the data type object is that of cassandra.
      * 
      * @param clazz
-     * @return
+     *            the clazz
+     * @return true, if is cassandra data type class
      */
     public static boolean isCassandraDataTypeClass(Class clazz)
     {
@@ -214,12 +271,15 @@ public final class CassandraDataTranslator
     }
 
     /**
-     * Calls compose function of respective data type of object
+     * Calls compose function of respective data type of object.
      * 
      * @param dataTypeClazz
+     *            the data type clazz
      * @param dataValue
+     *            the data value
      * @param isCql3Enabled
-     * @return
+     *            the is cql3 enabled
+     * @return the byte[]
      */
     public static byte[] compose(Class<?> dataTypeClazz, Object dataValue, boolean isCql3Enabled)
     {
@@ -279,13 +339,17 @@ public final class CassandraDataTranslator
     }
 
     /**
-     * Calls compose function of respective data type of object
+     * Calls compose function of respective data type of object.
      * 
      * @param dataTypeClazz
+     *            the data type clazz
      * @param dataValue
+     *            the data value
      * @param mapGenericClassses
+     *            the map generic classses
      * @param isCql3Enabled
-     * @return
+     *            the is cql3 enabled
+     * @return the byte[]
      */
     public static byte[] compose(Class<?> dataTypeClazz, Object dataValue, List<Class<?>> mapGenericClassses,
             boolean isCql3Enabled)
@@ -301,13 +365,17 @@ public final class CassandraDataTranslator
     }
 
     /**
-     * Calls compose function of respective data type of object
+     * Calls compose function of respective data type of object.
      * 
      * @param dataTypeClazz
+     *            the data type clazz
      * @param dataValue
+     *            the data value
      * @param mapGenericClassses
+     *            the map generic classses
      * @param isCql3Enabled
-     * @return
+     *            the is cql3 enabled
+     * @return the byte[]
      */
     public static byte[] compose(Class<?> dataTypeClazz, Object dataValue, Class<?> mapGenericClassses,
             boolean isCql3Enabled)
@@ -326,12 +394,15 @@ public final class CassandraDataTranslator
     }
 
     /**
-     * Calls decompose function of respective data type of object
+     * Calls decompose function of respective data type of object.
      * 
      * @param dataTypeClazz
+     *            the data type clazz
      * @param dataValue
+     *            the data value
      * @param isCql3Enabled
-     * @return
+     *            the is cql3 enabled
+     * @return the object
      */
     public static Object decompose(Class<?> dataTypeClazz, Object dataValue, boolean isCql3Enabled)
     {
@@ -412,18 +483,22 @@ public final class CassandraDataTranslator
     }
 
     /**
-     * Calls decompose function of respective data type of object
+     * Calls decompose function of respective data type of object.
      * 
      * @param dataTypeClazz
+     *            the data type clazz
      * @param dataValue
+     *            the data value
      * @param mapGenericClassses
+     *            the map generic classses
      * @param isCql3Enabled
-     * @return
+     *            the is cql3 enabled
+     * @return the object
      */
     public static Object decompose(Class<?> dataTypeClazz, Object dataValue, List<Class<?>> mapGenericClassses,
             boolean isCql3Enabled)
     {
-        
+
         if (isCql3Enabled || (!isCql3Enabled && dataValue != null))
         {
             switch (getCassandraDataTypeClass(dataTypeClazz))
@@ -436,13 +511,17 @@ public final class CassandraDataTranslator
     }
 
     /**
-     * Calls decompose function of respective data type of object
+     * Calls decompose function of respective data type of object.
      * 
      * @param dataTypeClazz
+     *            the data type clazz
      * @param dataValue
+     *            the data value
      * @param mapGenericClassses
+     *            the map generic classses
      * @param isCql3Enabled
-     * @return
+     *            the is cql3 enabled
+     * @return the object
      */
     public static Object decompose(Class<?> dataTypeClazz, Object dataValue, Class<?> mapGenericClassses,
             boolean isCql3Enabled)
@@ -465,12 +544,16 @@ public final class CassandraDataTranslator
      * corresponding byte[]
      * 
      * @param mapGenericClasses
+     *            the map generic classes
      * @param keyClass
+     *            the key class
      * @param valueClass
+     *            the value class
      * @param rawMap
-     * @return
+     *            the raw map
+     * @return the map
      */
-    public static Map marshalMap(List<Class<?>> mapGenericClasses, Class keyClass, Class valueClass, Map rawMap)
+    private static Map marshalMap(List<Class<?>> mapGenericClasses, Class keyClass, Class valueClass, Map rawMap)
     {
         Map dataCollection = new HashMap();
 
@@ -486,12 +569,16 @@ public final class CassandraDataTranslator
 
                 if (keyClass.isAssignableFrom(BytesType.class))
                 {
-                    key = PropertyAccessorHelper.getObject(mapGenericClasses.get(0), ((ByteBuffer) key).array());
+                    byte[] keyAsBytes = new byte[((ByteBuffer) value).remaining()];
+                    ((ByteBuffer) key).get(keyAsBytes);
+                    key = PropertyAccessorHelper.getObject(mapGenericClasses.get(0), keyAsBytes);
                 }
 
                 if (valueClass.isAssignableFrom(BytesType.class))
                 {
-                    value = PropertyAccessorHelper.getObject(mapGenericClasses.get(1), ((ByteBuffer) value).array());
+                    byte[] valueAsBytes = new byte[((ByteBuffer) value).remaining()];
+                    ((ByteBuffer) value).get(valueAsBytes);
+                    value = PropertyAccessorHelper.getObject(mapGenericClasses.get(1), valueAsBytes);
                 }
 
                 dataCollection.put(key, value);
@@ -501,40 +588,47 @@ public final class CassandraDataTranslator
     }
 
     /**
-     * marshal collection objects if its value is of type byte
+     * Marshal collection.
      * 
      * @param cassandraTypeClazz
+     *            the cassandra type clazz
      * @param result
+     *            the result
      * @param clazz
-     * @return
+     *            the clazz
+     * @return the collection
      */
-    public static Collection marshalCollection(Class cassandraTypeClazz, Collection result, Class clazz,
-            Class collectionTypeClazz)
+    private static Collection marshalCollection(Class cassandraTypeClazz, Collection result, Class clazz)
     {
         Collection mappedCollection = result;
 
         if (cassandraTypeClazz.isAssignableFrom(BytesType.class))
         {
-            mappedCollection = (Collection) PropertyAccessorHelper.getObject(collectionTypeClazz);
-
+            mappedCollection = (Collection) PropertyAccessorHelper.getObject(result.getClass());
             for (Object value : result)
             {
-                mappedCollection.add(PropertyAccessorHelper.getObject(clazz, ((ByteBuffer) value).array()));
+                byte[] valueAsBytes = new byte[((ByteBuffer) value).remaining()];
+                ((ByteBuffer) value).get(valueAsBytes);
+                mappedCollection.add(PropertyAccessorHelper.getObject(clazz, valueAsBytes));
             }
         }
         return mappedCollection;
     }
 
     /**
-     * Used to decompose and compose long type data objects
-     * 
+     * Used to decompose and compose long type data objects.
      */
     private static class LongTypeBuilder
     {
+
         /**
+         * Compose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the byte[]
          */
         private static byte[] compose(Object value, Class clazz)
         {
@@ -542,9 +636,13 @@ public final class CassandraDataTranslator
         }
 
         /**
+         * Decompose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the object
          */
         private static Object decompose(Object value, Class clazz)
         {
@@ -554,15 +652,19 @@ public final class CassandraDataTranslator
     }
 
     /**
-     * Used to decompose and compose float type data objects
-     * 
+     * Used to decompose and compose float type data objects.
      */
     private static class FloatTypeBuilder
     {
+
         /**
+         * Compose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the byte[]
          */
         private static byte[] compose(Object value, Class clazz)
         {
@@ -570,9 +672,13 @@ public final class CassandraDataTranslator
         }
 
         /**
+         * Decompose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the object
          */
         private static Object decompose(Object value, Class clazz)
         {
@@ -582,15 +688,19 @@ public final class CassandraDataTranslator
     }
 
     /**
-     * Used to decompose and compose double type data objects
-     * 
+     * Used to decompose and compose double type data objects.
      */
     private static class DoubleTypeBuilder
     {
+
         /**
+         * Compose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the byte[]
          */
         private static byte[] compose(Object value, Class clazz)
         {
@@ -598,9 +708,13 @@ public final class CassandraDataTranslator
         }
 
         /**
+         * Decompose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the object
          */
         private static Object decompose(Object value, Class clazz)
         {
@@ -610,15 +724,19 @@ public final class CassandraDataTranslator
     }
 
     /**
-     * Used to decompose and compose string type data objects
-     * 
+     * Used to decompose and compose string type data objects.
      */
     private static class StringTypeBuilder
     {
+
         /**
+         * Compose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the byte[]
          */
         private static byte[] compose(Object value, Class clazz)
         {
@@ -627,9 +745,13 @@ public final class CassandraDataTranslator
         }
 
         /**
+         * Decompose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the object
          */
         private static Object decompose(Object value, Class clazz)
         {
@@ -648,15 +770,19 @@ public final class CassandraDataTranslator
     }
 
     /**
-     * Used to decompose and compose bytes type data objects
-     * 
+     * Used to decompose and compose bytes type data objects.
      */
     private static class BytesTypeBuilder
     {
+
         /**
+         * Compose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the byte[]
          */
         private static byte[] compose(Object value, Class clazz)
         {
@@ -665,9 +791,13 @@ public final class CassandraDataTranslator
         }
 
         /**
+         * Decompose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the object
          */
         private static Object decompose(Object value, Class clazz)
         {
@@ -678,9 +808,13 @@ public final class CassandraDataTranslator
         }
 
         /**
+         * Decompose cq l2.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the object
          */
         private static Object decomposeCQL2(Object value, Class clazz)
         {
@@ -691,15 +825,19 @@ public final class CassandraDataTranslator
     }
 
     /**
-     * Used to decompose and compose decimal type data objects
-     * 
+     * Used to decompose and compose decimal type data objects.
      */
     private static class DecimalTypeBuilder
     {
+
         /**
+         * Compose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the byte[]
          */
         private static byte[] compose(Object value, Class clazz)
         {
@@ -707,9 +845,13 @@ public final class CassandraDataTranslator
         }
 
         /**
+         * Decompose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the object
          */
         private static Object decompose(Object value, Class clazz)
         {
@@ -719,15 +861,19 @@ public final class CassandraDataTranslator
     }
 
     /**
-     * Used to decompose and compose boolean type data objects
-     * 
+     * Used to decompose and compose boolean type data objects.
      */
     private static class BooleanTypeBuilder
     {
+
         /**
+         * Compose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the byte[]
          */
         private static byte[] compose(Object value, Class clazz)
         {
@@ -735,9 +881,13 @@ public final class CassandraDataTranslator
         }
 
         /**
+         * Decompose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the object
          */
         private static Object decompose(Object value, Class clazz)
         {
@@ -747,15 +897,19 @@ public final class CassandraDataTranslator
     }
 
     /**
-     * Used to decompose and compose UUID type data objects
-     * 
+     * Used to decompose and compose UUID type data objects.
      */
     private static class UUIDTypeBuilder
     {
+
         /**
+         * Compose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the byte[]
          */
         private static byte[] compose(Object value, Class clazz)
         {
@@ -763,9 +917,13 @@ public final class CassandraDataTranslator
         }
 
         /**
+         * Decompose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the object
          */
         private static Object decompose(Object value, Class clazz)
         {
@@ -775,15 +933,19 @@ public final class CassandraDataTranslator
     }
 
     /**
-     * Used to decompose and compose ascii type data objects
-     * 
+     * Used to decompose and compose ascii type data objects.
      */
     private static class AsciiTypeBuilder
     {
+
         /**
+         * Compose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the byte[]
          */
         private static byte[] compose(Object value, Class clazz)
         {
@@ -791,9 +953,13 @@ public final class CassandraDataTranslator
         }
 
         /**
+         * Decompose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the object
          */
         private static Object decompose(Object value, Class clazz)
         {
@@ -803,15 +969,19 @@ public final class CassandraDataTranslator
     }
 
     /**
-     * Used to decompose and compose integer type data objects
-     * 
+     * Used to decompose and compose integer type data objects.
      */
     private static class IntegerTypeBuilder
     {
+
         /**
+         * Compose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the byte[]
          */
         private static byte[] compose(Object value, Class clazz)
         {
@@ -819,9 +989,13 @@ public final class CassandraDataTranslator
         }
 
         /**
+         * Decompose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the object
          */
         private static Object decompose(Object value, Class clazz)
         {
@@ -831,16 +1005,21 @@ public final class CassandraDataTranslator
     }
 
     /**
-     * Used to decompose and compose set type data objects
-     * 
+     * Used to decompose and compose set type data objects.
      */
     private static class SetTypeBuilder
     {
+
         /**
+         * Compose.
+         * 
          * @param value
+         *            the value
          * @param clazz
+         *            the clazz
          * @param mapGenericClassses
-         * @return
+         *            the map generic classses
+         * @return the byte[]
          */
         private static byte[] compose(Object value, Class clazz, Class<?> mapGenericClassses)
         {
@@ -851,7 +1030,8 @@ public final class CassandraDataTranslator
             try
             {
                 valueClassInstance = valueValidationClass.getDeclaredField("instance").get(null);
-                SetType setType = SetType.getInstance((AbstractType) valueClassInstance);
+                // false added after 2.1.3 upgrade (isMulticell check)
+                SetType setType = SetType.getInstance((AbstractType) valueClassInstance, false);
                 return setType.decompose((Set) value).array();
             }
             catch (NoSuchFieldException e)
@@ -877,31 +1057,29 @@ public final class CassandraDataTranslator
         }
 
         /**
+         * Decompose.
+         * 
          * @param value
+         *            the value
          * @param clazz
+         *            the clazz
          * @param mapGenericClassses
-         * @return
+         *            the map generic classses
+         * @return the object
          */
-        private static Object decompose(Object value, Class clazz, Class<?> mapGenericClassses)
+        private static Object decompose(Object value, Class clazz, Class<?> genericClass)
         {
-            ByteBuffer buf = ByteBuffer.wrap((byte[]) value, 0, ((byte[]) value).length);
-            Class<?> valueValidationClass = CassandraValidationClassMapper.getValidationClassInstance(
-                    mapGenericClassses, true);
-
-            Object valueClassInstance;
+            Class<?> valueValidationClass = CassandraValidationClassMapper.getValidationClassInstance(genericClass,
+                    true);
+            TypeSerializer valueClassInstance = CassandraValidationClassMapper.getValidationSerializerClassInstance(
+                    genericClass, true);
+            Collection outputCollection = new HashSet();
             try
             {
-                valueClassInstance = valueValidationClass.getDeclaredField("instance").get(null);
-                SetType setType = SetType.getInstance((AbstractType) valueClassInstance);
-                Collection outputCollection = new HashSet();
-                outputCollection.addAll((Collection) setType.compose(buf));
-                return marshalCollection(valueValidationClass, outputCollection, mapGenericClassses,
-                        outputCollection.getClass());
-            }
-            catch (NoSuchFieldException e)
-            {
-                log.error("Error while retrieving field{} value via CQL, Caused by: .", clazz.getSimpleName(), e);
-                throw new PersistenceException(e);
+                outputCollection = new HashSet();
+                SetSerializer setSerializer = SetSerializer.getInstance(valueClassInstance);
+                outputCollection.addAll((Collection) setSerializer.deserializeForNativeProtocol((ByteBuffer) value, 2));
+                return marshalCollection(valueValidationClass, outputCollection, genericClass);
             }
             catch (SecurityException e)
             {
@@ -913,24 +1091,23 @@ public final class CassandraDataTranslator
                 log.error("Error while retrieving field{} value via CQL, Caused by: .", clazz.getSimpleName(), e);
                 throw new PersistenceException(e);
             }
-            catch (IllegalAccessException e)
-            {
-                log.error("Error while retrieving field{} value via CQL, Caused by: .", clazz.getSimpleName(), e);
-                throw new PersistenceException(e);
-            }
         }
     }
 
     /**
-     * Used to decompose and compose map type data objects
-     * 
+     * Used to decompose and compose map type data objects.
      */
     private static class MapTypeBuilder
     {
+
         /**
+         * Compose.
+         * 
          * @param value
+         *            the value
          * @param mapGenericClasses
-         * @return
+         *            the map generic classes
+         * @return the byte[]
          */
         private static byte[] compose(Object value, List<Class<?>> mapGenericClasses)
         {
@@ -944,7 +1121,7 @@ public final class CassandraDataTranslator
                 Object valueClassInstance = valueClass.getDeclaredField("instance").get(null);
 
                 MapType mapType = MapType.getInstance((AbstractType) keyClassInstance,
-                        (AbstractType) valueClassInstance);
+                        (AbstractType) valueClassInstance, false);
 
                 return mapType.decompose((Map) value).array();
             }
@@ -971,35 +1148,36 @@ public final class CassandraDataTranslator
         }
 
         /**
+         * Decompose.
+         * 
          * @param value
+         *            the value
          * @param mapGenericClasses
-         * @return
+         *            the map generic classes
+         * @return the object
          */
         private static Object decompose(Object value, List<Class<?>> mapGenericClasses)
         {
-            Class keyClass = CassandraValidationClassMapper.getValidationClassInstance(mapGenericClasses.get(0), true);
-            Class valueClass = CassandraValidationClassMapper
-                    .getValidationClassInstance(mapGenericClasses.get(1), true);
-
+            Class keyClass = null;
+            Class valueClass = null;
             try
             {
-                ByteBuffer valueByteBuffer = ByteBuffer.wrap((byte[]) value, 0, ((byte[]) value).length);
 
-                Object keyClassInstance = keyClass.getDeclaredField("instance").get(null);
-                Object valueClassInstance = valueClass.getDeclaredField("instance").get(null);
+                keyClass = CassandraValidationClassMapper.getValidationClassInstance(mapGenericClasses.get(0), true);
+                valueClass = CassandraValidationClassMapper.getValidationClassInstance(mapGenericClasses.get(1), true);
 
-                MapType mapType = MapType.getInstance((AbstractType) keyClassInstance,
-                        (AbstractType) valueClassInstance);
+                TypeSerializer keyClassInstance = CassandraValidationClassMapper.getValidationSerializerClassInstance(
+                        mapGenericClasses.get(0), true);
+                TypeSerializer valueClassInstance = CassandraValidationClassMapper
+                        .getValidationSerializerClassInstance(mapGenericClasses.get(1), true);
+
                 Map rawMap = new HashMap();
-                rawMap.putAll((Map) mapType.compose(valueByteBuffer));
+                MapSerializer mapSerializer = MapSerializer.getInstance(keyClassInstance, valueClassInstance);
+
+                rawMap.putAll(mapSerializer.deserializeForNativeProtocol((ByteBuffer) value, 2));
 
                 Map dataCollection = marshalMap(mapGenericClasses, keyClass, valueClass, rawMap);
                 return dataCollection.isEmpty() ? rawMap : dataCollection;
-            }
-            catch (NoSuchFieldException e)
-            {
-                log.error("Error while retrieving field{} value via CQL, Caused by: .", keyClass.getSimpleName(), e);
-                throw new PersistenceException(e);
             }
             catch (SecurityException e)
             {
@@ -1011,25 +1189,25 @@ public final class CassandraDataTranslator
                 log.error("Error while retrieving field{} value via CQL, Caused by: .", keyClass.getSimpleName(), e);
                 throw new PersistenceException(e);
             }
-            catch (IllegalAccessException e)
-            {
-                log.error("Error while retrieving field{} value via CQL, Caused by: .", keyClass.getSimpleName(), e);
-                throw new PersistenceException(e);
-            }
         }
     }
 
     /**
-     * Used to decompose and compose list type data objects
-     * 
+     * Used to decompose and compose list type data objects.
      */
     private static class ListTypeBuilder
     {
+
         /**
+         * Compose.
+         * 
          * @param value
+         *            the value
          * @param clazz
+         *            the clazz
          * @param mapGenericClassses
-         * @return
+         *            the map generic classses
+         * @return the byte[]
          */
         private static byte[] compose(Object value, Class clazz, Class<?> mapGenericClassses)
         {
@@ -1040,7 +1218,7 @@ public final class CassandraDataTranslator
             try
             {
                 valueClassInstance = valueValidationClass.getDeclaredField("instance").get(null);
-                ListType listType = ListType.getInstance((AbstractType) valueClassInstance);
+                ListType listType = ListType.getInstance((AbstractType) valueClassInstance, false);
                 return listType.decompose((List) value).array();
             }
             catch (NoSuchFieldException e)
@@ -1066,30 +1244,30 @@ public final class CassandraDataTranslator
         }
 
         /**
+         * Decompose.
+         * 
          * @param value
+         *            the value
          * @param clazz
+         *            the clazz
          * @param mapGenericClassses
-         * @return
+         *            the map generic classses
+         * @return the object
          */
-        private static Object decompose(Object value, Class clazz, Class<?> mapGenericClassses)
+        private static Object decompose(Object value, Class clazz, Class<?> genericClass)
         {
-            ByteBuffer buf = ByteBuffer.wrap((byte[]) value, 0, ((byte[]) value).length);
-            Class<?> valueValidationClass = CassandraValidationClassMapper.getValidationClassInstance(
-                    mapGenericClassses, true);
-            Object valueClassInstance;
+            Class<?> valueValidationClass = CassandraValidationClassMapper.getValidationClassInstance(genericClass,
+                    true);
+            TypeSerializer valueClassInstance = CassandraValidationClassMapper.getValidationSerializerClassInstance(
+                    genericClass, true);
+            Collection outputCollection = new ArrayList();
             try
             {
-                valueClassInstance = valueValidationClass.getDeclaredField("instance").get(null);
-                ListType listType = ListType.getInstance((AbstractType) valueClassInstance);
-                Collection outputCollection = new ArrayList();
-                outputCollection.addAll((Collection) listType.compose(buf));
-                return marshalCollection(valueValidationClass, outputCollection, mapGenericClassses,
-                        outputCollection.getClass());
-            }
-            catch (NoSuchFieldException e)
-            {
-                log.error("Error while retrieving field{} value via CQL, Caused by: .", clazz.getSimpleName(), e);
-                throw new PersistenceException(e);
+                ListSerializer listSerializer = ListSerializer.getInstance(valueClassInstance);
+                outputCollection
+                        .addAll((Collection) listSerializer.deserializeForNativeProtocol((ByteBuffer) value, 2));
+
+                return marshalCollection(valueValidationClass, outputCollection, genericClass);
             }
             catch (SecurityException e)
             {
@@ -1101,24 +1279,23 @@ public final class CassandraDataTranslator
                 log.error("Error while retrieving field{} value via CQL, Caused by: .", clazz.getSimpleName(), e);
                 throw new PersistenceException(e);
             }
-            catch (IllegalAccessException e)
-            {
-                log.error("Error while retrieving field{} value via CQL, Caused by: .", clazz.getSimpleName(), e);
-                throw new PersistenceException(e);
-            }
         }
     }
 
     /**
-     * Used to decompose and compose counter type data objects
-     * 
+     * Used to decompose and compose counter type data objects.
      */
     private static class CounterTypeBuilder
     {
+
         /**
+         * Compose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the byte[]
          */
         private static byte[] compose(Object value, Class clazz)
         {
@@ -1126,9 +1303,13 @@ public final class CassandraDataTranslator
         }
 
         /**
+         * Decompose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the object
          */
         private static Object decompose(Object value, Class clazz)
         {
@@ -1138,15 +1319,19 @@ public final class CassandraDataTranslator
     }
 
     /**
-     * Used to decompose and compose date type data objects
-     * 
+     * Used to decompose and compose date type data objects.
      */
     private static class DateTypeBuilder
     {
+
         /**
+         * Compose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the byte[]
          */
         private static byte[] compose(Object value, Class clazz)
         {
@@ -1154,9 +1339,13 @@ public final class CassandraDataTranslator
         }
 
         /**
+         * Decompose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the object
          */
         private static Object decompose(Object value, Class clazz)
         {
@@ -1167,15 +1356,19 @@ public final class CassandraDataTranslator
     }
 
     /**
-     * Used to decompose and compose enum type data objects
-     * 
+     * Used to decompose and compose enum type data objects.
      */
     private static class EnumTypeBuilder
     {
+
         /**
+         * Compose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the byte[]
          */
         private static byte[] compose(Object value, Class clazz)
         {
@@ -1184,9 +1377,13 @@ public final class CassandraDataTranslator
         }
 
         /**
+         * Decompose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the object
          */
         private static Object decompose(Object value, Class clazz)
         {
@@ -1196,15 +1393,19 @@ public final class CassandraDataTranslator
     }
 
     /**
-     * Used to decompose and compose character type data objects
-     * 
+     * Used to decompose and compose character type data objects.
      */
     private static class CharacterTypeBuilder
     {
+
         /**
+         * Compose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the byte[]
          */
         private static byte[] compose(Object value, Class clazz)
         {
@@ -1213,9 +1414,13 @@ public final class CassandraDataTranslator
         }
 
         /**
+         * Decompose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the object
          */
         private static Object decompose(Object value, Class clazz)
         {
@@ -1224,9 +1429,13 @@ public final class CassandraDataTranslator
         }
 
         /**
+         * Decompose cq l2.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the object
          */
         private static Object decomposeCQL2(Object value, Class clazz)
         {
@@ -1236,15 +1445,19 @@ public final class CassandraDataTranslator
     }
 
     /**
-     * Used to decompose and compose short type data objects
-     * 
+     * Used to decompose and compose short type data objects.
      */
     private static class ShortTypeBuilder
     {
+
         /**
+         * Compose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the byte[]
          */
         private static byte[] compose(Object value, Class clazz)
         {
@@ -1253,9 +1466,13 @@ public final class CassandraDataTranslator
         }
 
         /**
+         * Decompose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the object
          */
         private static Object decompose(Object value, Class clazz)
         {
@@ -1266,9 +1483,13 @@ public final class CassandraDataTranslator
         }
 
         /**
+         * Decompose cq l2.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the object
          */
         private static Object decomposeCQL2(Object value, Class clazz)
         {
@@ -1278,15 +1499,19 @@ public final class CassandraDataTranslator
     }
 
     /**
-     * Used to decompose and compose big integer type data objects
-     * 
+     * Used to decompose and compose big integer type data objects.
      */
     private static class BigIntegerTypeBuilder
     {
+
         /**
+         * Compose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the byte[]
          */
         private static byte[] compose(Object value, Class clazz)
         {
@@ -1294,9 +1519,13 @@ public final class CassandraDataTranslator
         }
 
         /**
+         * Decompose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the object
          */
         private static Object decompose(Object value, Class clazz)
         {
@@ -1307,15 +1536,19 @@ public final class CassandraDataTranslator
     }
 
     /**
-     * Used to decompose and compose timestamp type data objects
-     * 
+     * Used to decompose and compose timestamp type data objects.
      */
     private static class TimeStampTypeBuilder
     {
+
         /**
+         * Compose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the byte[]
          */
         private static byte[] compose(Object value, Class clazz)
         {
@@ -1324,9 +1557,13 @@ public final class CassandraDataTranslator
         }
 
         /**
+         * Decompose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the object
          */
         private static Object decompose(Object value, Class clazz)
         {
@@ -1336,15 +1573,19 @@ public final class CassandraDataTranslator
     }
 
     /**
-     * Used to decompose and compose sql date type data objects
-     * 
+     * Used to decompose and compose sql date type data objects.
      */
     private static class SQLDateTypeBuilder
     {
+
         /**
+         * Compose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the byte[]
          */
         private static byte[] compose(Object value, Class clazz)
         {
@@ -1353,9 +1594,13 @@ public final class CassandraDataTranslator
         }
 
         /**
+         * Decompose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the object
          */
         private static Object decompose(Object value, Class clazz)
         {
@@ -1365,15 +1610,19 @@ public final class CassandraDataTranslator
     }
 
     /**
-     * Used to decompose and compose sql time type data objects
-     * 
+     * Used to decompose and compose sql time type data objects.
      */
     private static class SQLTimeTypeBuilder
     {
+
         /**
+         * Compose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the byte[]
          */
         private static byte[] compose(Object value, Class clazz)
         {
@@ -1382,9 +1631,13 @@ public final class CassandraDataTranslator
         }
 
         /**
+         * Decompose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the object
          */
         private static Object decompose(Object value, Class clazz)
         {
@@ -1394,15 +1647,19 @@ public final class CassandraDataTranslator
     }
 
     /**
-     * Used to decompose and compose sql timestamp type data objects
-     * 
+     * Used to decompose and compose sql timestamp type data objects.
      */
     private static class SQLTimeStampTypeBuilder
     {
+
         /**
+         * Compose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the byte[]
          */
         private static byte[] compose(Object value, Class clazz)
         {
@@ -1411,9 +1668,13 @@ public final class CassandraDataTranslator
         }
 
         /**
+         * Decompose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the object
          */
         private static Object decompose(Object value, Class clazz)
         {
@@ -1423,15 +1684,19 @@ public final class CassandraDataTranslator
     }
 
     /**
-     * Used to decompose and compose calendar type data objects
-     * 
+     * Used to decompose and compose calendar type data objects.
      */
     private static class CalendarTypeBuilder
     {
+
         /**
+         * Compose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the byte[]
          */
         private static byte[] compose(Object value, Class clazz)
         {
@@ -1440,9 +1705,13 @@ public final class CassandraDataTranslator
         }
 
         /**
+         * Decompose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the object
          */
         private static Object decompose(Object value, Class clazz)
         {
@@ -1452,15 +1721,19 @@ public final class CassandraDataTranslator
     }
 
     /**
-     * Used to decompose and compose bytes array type data objects
-     * 
+     * Used to decompose and compose bytes array type data objects.
      */
     private static class BytesArrayTypeBuilder
     {
+
         /**
+         * Compose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the byte[]
          */
         private static byte[] compose(Object value, Class clazz)
         {
@@ -1469,9 +1742,13 @@ public final class CassandraDataTranslator
         }
 
         /**
+         * Decompose.
+         * 
          * @param value
+         *            the value
          * @param clazz
-         * @return
+         *            the clazz
+         * @return the object
          */
         private static Object decompose(Object value, Class clazz)
         {

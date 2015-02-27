@@ -91,8 +91,8 @@ import com.impetus.kundera.utils.KunderaCoreUtils;
 import com.impetus.kundera.utils.TimestampGenerator;
 
 /**
- * Kundera Client implementation for Cassandra using Thrift library
- * 
+ * Kundera Client implementation for Cassandra using Thrift library.
+ *
  * @author amresh.singh
  */
 public class ThriftClient extends CassandraClientBase implements Client<CassQuery>, Batcher, TableGenerator,
@@ -105,16 +105,30 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     /** The data handler. */
     private final ThriftDataHandler dataHandler;
 
-    /** Handler for Inverted indexing */
+    /**  Handler for Inverted indexing. */
     private final InvertedIndexHandler invertedIndexHandler;
 
     /** The reader. */
     private final EntityReader reader;
 
+    /** The client factory. */
     private final ThriftClientFactory clientFactory;
 
+    /** The pool. */
     private final ConnectionPool pool;
 
+    /**
+     * Instantiates a new thrift client.
+     *
+     * @param clientFactory the client factory
+     * @param indexManager the index manager
+     * @param reader the reader
+     * @param persistenceUnit the persistence unit
+     * @param pool the pool
+     * @param externalProperties the external properties
+     * @param kunderaMetadata the kundera metadata
+     * @param generator the generator
+     */
     public ThriftClient(ThriftClientFactory clientFactory, IndexManager indexManager, EntityReader reader,
             String persistenceUnit, ConnectionPool pool, Map<String, Object> externalProperties,
             final KunderaMetadata kunderaMetadata, final TimestampGenerator generator)
@@ -131,7 +145,9 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     }
 
     /**
-     * Persists and indexes a {@link Node} to database
+     * Persists and indexes a {@link Node} to database.
+     *
+     * @param node the node
      */
     @Override
     public void persist(Node node)
@@ -140,7 +156,12 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     }
 
     /**
-     * Persists a {@link Node} to database
+     * Persists a {@link Node} to database.
+     *
+     * @param entityMetadata the entity metadata
+     * @param entity the entity
+     * @param id the id
+     * @param rlHolders the rl holders
      */
     @Override
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
@@ -195,7 +216,9 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     }
 
     /**
-     * Persists a Join table record set into database
+     * Persists a Join table record set into database.
+     *
+     * @param joinTableData the join table data
      */
     @Override
     public void persistJoinTable(JoinTableData joinTableData)
@@ -279,7 +302,10 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     }
 
     /**
-     * Indexes a {@link Node} to database
+     * Indexes a {@link Node} to database.
+     *
+     * @param node the node
+     * @param entityMetadata the entity metadata
      */
     @Override
     protected void indexNode(Node node, EntityMetadata entityMetadata)
@@ -291,7 +317,11 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     }
 
     /**
-     * Finds an entity from database
+     * Finds an entity from database.
+     *
+     * @param entityClass the entity class
+     * @param key the key
+     * @return the object
      */
     @Override
     public Object find(Class entityClass, Object key)
@@ -300,7 +330,13 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     }
 
     /**
-     * Finds a {@link List} of entities from database
+     * Finds a {@link List} of entities from database.
+     *
+     * @param <E> the element type
+     * @param entityClass the entity class
+     * @param columnsToSelect the columns to select
+     * @param keys the keys
+     * @return the list
      */
     @Override
     public <E> List<E> findAll(Class<E> entityClass, String[] columnsToSelect, Object... keys)
@@ -309,7 +345,14 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     }
 
     /**
-     * Finds a {@link List} of entities from database
+     * Finds a {@link List} of entities from database.
+     *
+     * @param entityClass the entity class
+     * @param relationNames the relation names
+     * @param isWrapReq the is wrap req
+     * @param metadata the metadata
+     * @param rowIds the row ids
+     * @return the list
      */
     @Override
     public final List find(Class entityClass, List<String> relationNames, boolean isWrapReq, EntityMetadata metadata,
@@ -323,7 +366,12 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     }
 
     /**
-     * Finds a {@link List} of entities from database for given super columns
+     * Finds a {@link List} of entities from database for given super columns.
+     *
+     * @param <E> the element type
+     * @param entityClass the entity class
+     * @param embeddedColumnMap the embedded column map
+     * @return the list
      */
     @Override
     public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap)
@@ -332,7 +380,13 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     }
 
     /**
-     * Loads super columns from database
+     * Loads super columns from database.
+     *
+     * @param keyspace the keyspace
+     * @param columnFamily the column family
+     * @param rowId the row id
+     * @param superColumnNames the super column names
+     * @return the list
      */
     @Override
     protected final List<SuperColumn> loadSuperColumns(String keyspace, String columnFamily, String rowId,
@@ -396,7 +450,16 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     }
 
     /**
-     * Retrieves column for a given primary key
+     * Retrieves column for a given primary key.
+     *
+     * @param <E> the element type
+     * @param schemaName the schema name
+     * @param tableName the table name
+     * @param pKeyColumnName the key column name
+     * @param columnName the column name
+     * @param pKeyColumnValue the key column value
+     * @param columnJavaType the column java type
+     * @return the columns by id
      */
     @Override
     public <E> List<E> getColumnsById(String schemaName, String tableName, String pKeyColumnName, String columnName,
@@ -465,7 +528,15 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     }
 
     /**
-     * Retrieves IDs for a given column
+     * Retrieves IDs for a given column.
+     *
+     * @param schemaName the schema name
+     * @param tableName the table name
+     * @param pKeyName the key name
+     * @param columnName the column name
+     * @param columnValue the column value
+     * @param entityClazz the entity clazz
+     * @return the object[]
      */
     @Override
     public Object[] findIdsByColumn(String schemaName, String tableName, String pKeyName, String columnName,
@@ -549,6 +620,9 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         return null;
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#findByRelation(java.lang.String, java.lang.Object, java.lang.Class)
+     */
     @Override
     public List<Object> findByRelation(String colName, Object colValue, Class entityClazz)
     {
@@ -673,6 +747,9 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         return entities;
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.client.cassandra.CassandraClientBase#delete(java.lang.Object, java.lang.Object)
+     */
     @Override
     public void delete(Object entity, Object pKey)
     {
@@ -742,6 +819,9 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         }
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String, java.lang.String, java.lang.String, java.lang.Object)
+     */
     @Override
     public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
     {
@@ -778,30 +858,45 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
 
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#getReader()
+     */
     @Override
     public EntityReader getReader()
     {
         return reader;
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#getQueryImplementor()
+     */
     @Override
     public Class<CassQuery> getQueryImplementor()
     {
         return CassQuery.class;
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.ClientBase#getPersistenceUnit()
+     */
     @Override
     public String getPersistenceUnit()
     {
         return super.getPersistenceUnit();
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.ClientBase#getRelationHolders(com.impetus.kundera.graph.Node)
+     */
     @Override
     protected List<RelationHolder> getRelationHolders(Node node)
     {
         return super.getRelationHolders(node);
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.client.cassandra.CassandraClientBase#close()
+     */
     @Override
     public void close()
     {
@@ -811,6 +906,16 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         super.close();
     }
 
+    /**
+     * Populate data.
+     *
+     * @param m the m
+     * @param keySlices the key slices
+     * @param entities the entities
+     * @param isRelational the is relational
+     * @param relationNames the relation names
+     * @return the list
+     */
     private List populateData(EntityMetadata m, List<KeySlice> keySlices, List<Object> entities, boolean isRelational,
             List<String> relationNames)
     {
@@ -852,7 +957,15 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         return entities;
     }
 
-    /** Query related methods */
+    /**
+     *  Query related methods.
+     *
+     * @param clazz the clazz
+     * @param relationalField the relational field
+     * @param isNative the is native
+     * @param cqlQuery the cql query
+     * @return the list
+     */
 
     @Override
     public List executeQuery(Class clazz, List<String> relationalField, boolean isNative, String cqlQuery)
@@ -860,6 +973,9 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         return super.executeSelectQuery(clazz, relationalField, dataHandler, isNative, cqlQuery);
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.client.cassandra.CassandraClientBase#find(java.util.List, com.impetus.kundera.metadata.model.EntityMetadata, boolean, java.util.List, int, java.util.List)
+     */
     @Override
     public List find(List<IndexClause> ixClause, EntityMetadata m, boolean isRelation, List<String> relations,
             int maxResult, List<String> columns)
@@ -971,6 +1087,9 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         return entities;
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.client.cassandra.CassandraClientBase#find(com.impetus.kundera.metadata.model.EntityMetadata, java.util.List, java.util.List, int, java.util.List)
+     */
     @Override
     public List<EnhanceEntity> find(EntityMetadata m, List<String> relationNames, List<IndexClause> conditions,
             int maxResult, List<String> columns)
@@ -978,6 +1097,9 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         return (List<EnhanceEntity>) find(conditions, m, true, relationNames, maxResult, columns);
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.client.cassandra.CassandraClientBase#findByRange(byte[], byte[], com.impetus.kundera.metadata.model.EntityMetadata, boolean, java.util.List, java.util.List, java.util.List, int)
+     */
     @Override
     public List findByRange(byte[] minVal, byte[] maxVal, EntityMetadata m, boolean isWrapReq, List<String> relations,
             List<String> columns, List<IndexExpression> conditions, int maxResults) throws Exception
@@ -1029,6 +1151,9 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         return results;
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.client.cassandra.CassandraClientBase#searchInInvertedIndex(java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata, java.util.Map)
+     */
     @Override
     public List<SearchResult> searchInInvertedIndex(String columnFamilyName, EntityMetadata m,
             Map<Boolean, List<IndexClause>> indexClauseMap)
@@ -1047,6 +1172,9 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         return dataHandler;
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.client.cassandra.CassandraClientBase#getConnection()
+     */
     protected Connection getConnection()
     {
         Connection connection = clientFactory.getConnection(pool);
@@ -1055,9 +1183,9 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
 
     /**
      * Return cassandra client instance.
-     * 
-     * @param connection
-     * @return
+     *
+     * @param connection the connection
+     * @return the connection
      */
     protected Cassandra.Client getConnection(Object connection)
     {
@@ -1070,17 +1198,26 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                 + this.getClass().getSimpleName());
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.client.cassandra.CassandraClientBase#releaseConnection(java.lang.Object)
+     */
     protected void releaseConnection(Object conn)
     {
         clientFactory.releaseConnection(((Connection) conn).getPool(), ((Connection) conn).getClient());
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.generator.TableGenerator#generate(com.impetus.kundera.metadata.model.TableGeneratorDiscriptor)
+     */
     @Override
     public Long generate(TableGeneratorDiscriptor discriptor)
     {
         return getGeneratedValue(discriptor, getPersistenceUnit());
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.generator.AutoGenerator#generate()
+     */
     @Override
     public Object generate()
     {

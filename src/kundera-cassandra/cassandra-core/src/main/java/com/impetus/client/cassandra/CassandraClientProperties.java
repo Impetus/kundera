@@ -26,24 +26,37 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientPropertiesSetter;
 
 /**
- * Cassandra implementation of {@link ClientPropertiesSetter}
- * 
+ * Cassandra implementation of {@link ClientPropertiesSetter}.
+ *
  * @author amresh.singh
  */
 class CassandraClientProperties
 {
+    
+    /** The Constant TTL_VALUES. */
     private static final String TTL_VALUES = "ttl.values";
 
+    /** The Constant TTL_PER_REQUEST. */
     private static final String TTL_PER_REQUEST = "ttl.per.request";
 
+    /** The Constant TTL_PER_SESSION. */
     private static final String TTL_PER_SESSION = "ttl.per.session";
 
+    /** The Constant CONSISTENCY_LEVEL. */
     private static final String CONSISTENCY_LEVEL = "consistency.level";
 
+    /** The Constant CQL_VERSION. */
     private static final String CQL_VERSION = CassandraConstants.CQL_VERSION;
 
+    /** The cassandra client base. */
     private CassandraClientBase cassandraClientBase;
 
+    /**
+     * Populate client properties.
+     *
+     * @param client the client
+     * @param properties the properties
+     */
     public void populateClientProperties(Client client, Map<String, Object> properties)
     {
         this.cassandraClientBase = (CassandraClientBase) client;
@@ -91,7 +104,9 @@ class CassandraClientProperties
     }
 
     /**
-     * set ttl per request
+     * set ttl per request.
+     *
+     * @param value the new TTL per request
      */
     private void setTTLPerRequest(Object value)
     {
@@ -118,7 +133,9 @@ class CassandraClientProperties
     }
 
     /**
-     * set ttl per session
+     * set ttl per session.
+     *
+     * @param value the new TTL per session
      */
     private void setTTLPerSession(Object value)
     {
@@ -145,7 +162,9 @@ class CassandraClientProperties
     }
 
     /**
-     * set consistency level
+     * set consistency level.
+     *
+     * @param value the new consistencylevel
      */
     private void setConsistencylevel(Object value)
     {
@@ -161,7 +180,11 @@ class CassandraClientProperties
     }
 
     /**
-     * check key value map not null
+     * check key value map not null.
+     *
+     * @param key the key
+     * @param value the value
+     * @return true, if successful
      */
     private boolean checkNull(String key, Object value)
     {

@@ -35,9 +35,12 @@ import javax.persistence.metamodel.PluralAttribute;
 
 import org.apache.cassandra.db.marshal.AbstractType;
 import org.apache.cassandra.db.marshal.BytesType;
-import org.apache.cassandra.db.marshal.ListType;
-import org.apache.cassandra.db.marshal.MapType;
-import org.apache.cassandra.db.marshal.SetType;
+import org.apache.cassandra.db.marshal.TypeParser;
+import org.apache.cassandra.db.marshal.UserType;
+import org.apache.cassandra.exceptions.ConfigurationException;
+import org.apache.cassandra.exceptions.SyntaxException;
+import org.apache.cassandra.serializers.TypeSerializer;
+import org.apache.cassandra.serializers.UTF8Serializer;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.CounterColumn;
@@ -49,9 +52,7 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.client.cassandra.CassandraClientBase;
 import com.impetus.client.cassandra.common.CassandraConstants;
-import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.schemamanager.CassandraDataTranslator;
-import com.impetus.client.cassandra.schemamanager.CassandraValidationClassMapper;
 import com.impetus.client.cassandra.thrift.ThriftDataResultHelper;
 import com.impetus.client.cassandra.thrift.ThriftRow;
 import com.impetus.kundera.Constants;
@@ -64,7 +65,6 @@ import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata.Type;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
-import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
@@ -76,6 +76,7 @@ import com.impetus.kundera.property.accessor.LongAccessor;
 import com.impetus.kundera.utils.KunderaCoreUtils;
 import com.impetus.kundera.utils.TimestampGenerator;
 
+// TODO: Auto-generated Javadoc
 /**
  * Base class for all Cassandra Data Handlers.
  * 
@@ -90,12 +91,25 @@ public abstract class CassandraDataHandlerBase
     /** The thrift translator. */
     protected final ThriftDataResultHelper thriftTranslator = new ThriftDataResultHelper();
 
+    /** The client base. */
     private final CassandraClientBase clientBase;
 
+    /** The kundera metadata. */
     protected final KunderaMetadata kunderaMetadata;
 
+    /** The generator. */
     protected final TimestampGenerator generator;
 
+    /**
+     * Instantiates a new cassandra data handler base.
+     * 
+     * @param clientBase
+     *            the client base
+     * @param kunderaMetadata
+     *            the kundera metadata
+     * @param generator
+     *            the generator
+     */
     public CassandraDataHandlerBase(final CassandraClientBase clientBase, final KunderaMetadata kunderaMetadata,
             final TimestampGenerator generator)
     {
@@ -371,6 +385,17 @@ public abstract class CassandraDataHandlerBase
         return onColumnOrSuperColumnThriftRow(/* tr, */m, e, id, timestamp, columnTTLs);
     }
 
+    /**
+     * Gets the thrift row.
+     * 
+     * @param id
+     *            the id
+     * @param columnFamily
+     *            the column family
+     * @param thriftRows
+     *            the thrift rows
+     * @return the thrift row
+     */
     private ThriftRow getThriftRow(Object id, String columnFamily, Map<String, ThriftRow> thriftRows)
     {
         ThriftRow tr = thriftRows.get(columnFamily);
@@ -539,6 +564,7 @@ public abstract class CassandraDataHandlerBase
      * @param columns
      *            the columns
      * @param columnJavaType
+     *            the column java type
      * @return the foreign keys from join table
      */
     public <E> List<Object> getForeignKeysFromJoinTable(String inverseJoinColumnName, List<Column> columns,
@@ -587,6 +613,8 @@ public abstract class CassandraDataHandlerBase
      *            the tr
      * @param m
      *            the m
+     * @param entity
+     *            the entity
      * @param relationNames
      *            the relation names
      * @param isWrapReq
@@ -808,6 +836,18 @@ public abstract class CassandraDataHandlerBase
                 PropertyAccessorHelper.getId(entity, m), relations) : entity;
     }
 
+    /**
+     * Sets the id.
+     * 
+     * @param m
+     *            the m
+     * @param entity
+     *            the entity
+     * @param columnValue
+     *            the column value
+     * @param isCql3Enabled
+     *            the is cql3 enabled
+     */
     private void setId(EntityMetadata m, Object entity, Object columnValue, boolean isCql3Enabled)
     {
         if (isCql3Enabled && !m.getType().equals(Type.SUPER_COLUMN_FAMILY))
@@ -838,8 +878,11 @@ public abstract class CassandraDataHandlerBase
      * @param embeddedObject
      *            the embedded object
      * @param isCql3Enabled
-     * @throws IllegalAccessException
+     *            the is cql3 enabled
      * @throws InstantiationException
+     *             the instantiation exception
+     * @throws IllegalAccessException
+     *             the illegal access exception
      */
     private void scrollOverSuperColumn(EntityMetadata m, List<String> relationNames, boolean isWrapReq,
             Map<String, Object> relations, EntityType entityType, SuperColumn superColumn, Object embeddedObject,
@@ -869,8 +912,12 @@ public abstract class CassandraDataHandlerBase
      *            the super column
      * @param embeddedObject
      *            the embedded object
-     * @throws IllegalAccessException
+     * @param isCql3Enabled
+     *            the is cql3 enabled
      * @throws InstantiationException
+     *             the instantiation exception
+     * @throws IllegalAccessException
+     *             the illegal access exception
      */
     private void scrollOverCounterSuperColumn(EntityMetadata m, List<String> relationNames, boolean isWrapReq,
             Map<String, Object> relations, EntityType entityType, CounterSuperColumn superColumn,
@@ -964,8 +1011,12 @@ public abstract class CassandraDataHandlerBase
      * @param relations
      *            the relations
      * @param isCql3Enabled
-     * @throws IllegalAccessException
+     *            the is cql3 enabled
+     * @return the object
      * @throws InstantiationException
+     *             the instantiation exception
+     * @throws IllegalAccessException
+     *             the illegal access exception
      */
     private Object onColumn(Column column, EntityMetadata m, Object entity, EntityType entityType,
             List<String> relationNames, boolean isWrapReq, Map<String, Object> relations, boolean isCql3Enabled)
@@ -1018,8 +1069,12 @@ public abstract class CassandraDataHandlerBase
      *            the is wrap req
      * @param relations
      *            the relations
-     * @throws IllegalAccessException
+     * @param isCql3Enabled
+     *            the is cql3 enabled
      * @throws InstantiationException
+     *             the instantiation exception
+     * @throws IllegalAccessException
+     *             the illegal access exception
      */
     private void onCounterColumn(CounterColumn column, EntityMetadata m, Object entity, EntityType entityType,
             List<String> relationNames, boolean isWrapReq, Map<String, Object> relations, boolean isCql3Enabled)
@@ -1049,8 +1104,12 @@ public abstract class CassandraDataHandlerBase
      * @param thriftColumnValue
      *            the thrift column value
      * @param isCql3Enabled
-     * @throws IllegalAccessException
+     *            the is cql3 enabled
+     * @return the object
      * @throws InstantiationException
+     *             the instantiation exception
+     * @throws IllegalAccessException
+     *             the illegal access exception
      */
     private Object populateViaThrift(EntityMetadata m, Object entity, EntityType entityType,
             List<String> relationNames, Map<String, Object> relations, String thriftColumnName,
@@ -1077,9 +1136,19 @@ public abstract class CassandraDataHandlerBase
                             setId(m, entity, thriftColumnValue, isCql3Enabled);
                             PropertyAccessorHelper.setId(entity, m, (byte[]) thriftColumnValue);
                         }
-                        if (isCql3Enabled && !m.getType().equals(Type.SUPER_COLUMN_FAMILY) && !m.isCounterColumnType())
+                        // remove super column family check and populate
+                        // embedded
+                 
+                        if (isCql3Enabled && !m.isCounterColumnType())
                         {
-                            setFieldValueViaCQL(entity, thriftColumnValue, attribute);
+                            if (metaModel.isEmbeddable(attribute.getJavaType()))
+                            {
+                                entity = setUdtValue(entity, thriftColumnValue, metaModel, attribute);
+                            }
+                            else
+                            {
+                                setFieldValueViaCQL(entity, thriftColumnValue, attribute);
+                            }
                         }
                         else
                         {
@@ -1128,6 +1197,187 @@ public abstract class CassandraDataHandlerBase
         return entity;
     }
 
+    /**
+     * Sets the udt value.
+     * 
+     * @param entity
+     *            the entity
+     * @param thriftColumnValue
+     *            the thrift column value
+     * @param metaModel
+     *            the meta model
+     * @param attribute
+     *            the attribute
+     * @return the object
+     */
+    private Object setUdtValue(Object entity, Object thriftColumnValue, MetamodelImpl metaModel, Attribute attribute)
+    {
+        // TODO Auto-generated method stub
+
+        List<ByteBuffer> fieldNames = new ArrayList<ByteBuffer>();
+        List<AbstractType<?>> fieldTypes = new ArrayList<AbstractType<?>>();
+
+        String val = null;
+
+        // get from cqlMetadata, details of types and names (for maintaining
+        // order)
+        Map<ByteBuffer, String> schemaTypes = this.clientBase.getCqlMetadata().getValue_types();
+        for (Map.Entry<ByteBuffer, String> schemaType : schemaTypes.entrySet())
+        {
+            UTF8Serializer utf8Serializer = UTF8Serializer.instance;
+            String key = utf8Serializer.deserialize((schemaType.getKey()));
+            if (key.equals(((AbstractAttribute) attribute).getJavaMember().getName()))
+            {
+                val = schemaType.getValue();
+            }
+        }
+
+        UserType test = null;
+
+        try
+        {
+            test = UserType.getInstance(new TypeParser(val.substring(val.indexOf("("), val.length())));
+        }
+        catch (ConfigurationException e3)
+        {
+            // TODO Auto-generated catch block
+            log.error(e3.getMessage());
+        }
+        catch (SyntaxException e3)
+        {
+            // TODO Auto-generated catch block
+            log.error(e3.getMessage());
+        }
+        fieldNames = test.fieldNames();
+        fieldTypes = test.allTypes();
+
+        Field field = (Field) ((AbstractAttribute) attribute).getJavaMember();
+        Class embeddedClass = ((AbstractAttribute) attribute).getBindableJavaType();
+
+        Object embeddedObject = null;
+        try
+        {
+            embeddedObject = embeddedClass.newInstance();
+        }
+        catch (InstantiationException e1)
+        {
+             log.error(e1.getMessage());
+        }
+        catch (IllegalAccessException e1)
+        {
+              log.error(e1.getMessage());
+        }
+
+        Object finalValue = populateEmbeddedRecursive((ByteBuffer.wrap((byte[]) thriftColumnValue)), fieldTypes,
+                fieldNames, embeddedObject, metaModel);
+
+        PropertyAccessorHelper.set(entity, field, finalValue);
+
+        return entity;
+    }
+
+    /**
+     * Populate embedded recursive.
+     * 
+     * @param value
+     *            the value
+     * @param types
+     *            the types
+     * @param fieldNames
+     *            the field names
+     * @param entity
+     *            the entity
+     * @param metaModel
+     *            the meta model
+     * @return the object
+     */
+    public Object populateEmbeddedRecursive(ByteBuffer value, List<AbstractType<?>> types, List<ByteBuffer> fieldNames,
+            Object entity, MetamodelImpl metaModel)
+    {
+        ByteBuffer input = value.duplicate();
+        EmbeddableType emb = metaModel.embeddable(entity.getClass());
+
+        for (int i = 0; i < types.size(); i++)
+        {
+
+            if (!input.hasRemaining())
+                return entity;
+
+            AbstractType<?> type = types.get(i);
+            String name = new String(fieldNames.get(i).array()); // JPA name,
+                                                                 // convert to
+                                                                 // column name
+
+            Field fieldToSet = null;
+            // change this if possible
+            for (Object attr : emb.getAttributes())
+            {
+                if (((AbstractAttribute) attr).getJPAColumnName().equals(name))
+                {
+                    fieldToSet = (Field) ((AbstractAttribute) attr).getJavaMember();
+                }
+            }
+
+            int size = input.getInt();
+            if (size < 0)
+            {
+                continue;
+            }
+
+            ByteBuffer field = ByteBufferUtil.readBytes(input, size);
+
+            if (type.getClass().getSimpleName().equals("UserType"))
+            {
+                List<ByteBuffer> subFieldNames = ((UserType) type).fieldNames();// ok
+                List<AbstractType<?>> subfieldTypes = ((UserType) type).fieldTypes();
+
+                // create entity with type_name and populate fields, set entity
+                // in parent object after exit
+                Class embeddedClass = fieldToSet.getType();
+
+                Object embeddedObjectChild = null;
+                try
+                {
+                    embeddedObjectChild = embeddedClass.newInstance();
+                }
+                catch (InstantiationException e1)
+                {
+                    // TODO Auto-generated catch block
+                    log.error(e1.getMessage());
+                }
+                catch (IllegalAccessException e1)
+                {
+                    // TODO Auto-generated catch block
+                    log.error(e1.getMessage());
+                }
+
+                Object processedEntity = populateEmbeddedRecursive(field, subfieldTypes, subFieldNames,
+                        embeddedObjectChild, metaModel);
+                PropertyAccessorHelper.set(entity, fieldToSet, processedEntity);
+            }
+            else
+            {
+                TypeSerializer serializer = type.getSerializer();
+                serializer.validate(field);
+
+                Object finalValue = serializer.deserialize(field);
+                PropertyAccessorHelper.set(entity, fieldToSet, finalValue);
+            }
+
+        }
+        return entity;
+    }
+
+    /**
+     * Sets the field value.
+     * 
+     * @param entity
+     *            the entity
+     * @param thriftColumnValue
+     *            the thrift column value
+     * @param attribute
+     *            the attribute
+     */
     private void setFieldValue(Object entity, Object thriftColumnValue, Attribute attribute)
     {
         if (attribute != null)
@@ -1171,6 +1421,16 @@ public abstract class CassandraDataHandlerBase
         }
     }
 
+    /**
+     * Sets the field value via cql.
+     * 
+     * @param entity
+     *            the entity
+     * @param thriftColumnValue
+     *            the thrift column value
+     * @param attribute
+     *            the attribute
+     */
     private void setFieldValueViaCQL(Object entity, Object thriftColumnValue, Attribute attribute)
     {
         if (attribute != null)
@@ -1199,6 +1459,15 @@ public abstract class CassandraDataHandlerBase
         }
     }
 
+    /**
+     * Gets the field value via cql.
+     * 
+     * @param thriftColumnValue
+     *            the thrift column value
+     * @param attribute
+     *            the attribute
+     * @return the field value via cql
+     */
     private Object getFieldValueViaCQL(Object thriftColumnValue, Attribute attribute)
     {
         PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor((Field) attribute.getJavaMember());
@@ -1228,8 +1497,6 @@ public abstract class CassandraDataHandlerBase
     /**
      * On column or super column thrift row.
      * 
-     * @param tr
-     *            the tr
      * @param m
      *            the m
      * @param e
@@ -1240,6 +1507,7 @@ public abstract class CassandraDataHandlerBase
      *            the timestamp2
      * @param columnTTLs
      *            TODO
+     * @return the collection
      */
 
     private Collection<ThriftRow> onColumnOrSuperColumnThriftRow(EntityMetadata m, Object e, Object id, long timestamp,
@@ -1310,6 +1578,16 @@ public abstract class CassandraDataHandlerBase
         return thriftRows.values();
     }
 
+    /**
+     * On discriminator column.
+     * 
+     * @param tr
+     *            the tr
+     * @param timestamp
+     *            the timestamp
+     * @param entityType
+     *            the entity type
+     */
     private void onDiscriminatorColumn(ThriftRow tr, long timestamp, EntityType entityType)
     {
         String discrColumn = ((AbstractManagedType) entityType).getDiscriminatorColumn();
@@ -1326,7 +1604,13 @@ public abstract class CassandraDataHandlerBase
     }
 
     /**
-     * Determined TTL for a given column
+     * Determined TTL for a given column.
+     * 
+     * @param columnTTLs
+     *            the column tt ls
+     * @param attribute
+     *            the attribute
+     * @return the TTL for column
      */
     private int getTTLForColumn(Object columnTTLs, Attribute attribute)
     {
@@ -1346,6 +1630,17 @@ public abstract class CassandraDataHandlerBase
         return ttl == null ? 0 : ttl;
     }
 
+    /**
+     * Gets the column value.
+     * 
+     * @param m
+     *            the m
+     * @param e
+     *            the e
+     * @param attribute
+     *            the attribute
+     * @return the column value
+     */
     private Object getColumnValue(EntityMetadata m, Object e, Attribute attribute)
     {
         Field field = (Field) ((Attribute) attribute).getJavaMember();
@@ -1361,6 +1656,15 @@ public abstract class CassandraDataHandlerBase
         return value;
     }
 
+    /**
+     * Gets the thrift column value.
+     * 
+     * @param e
+     *            the e
+     * @param attribute
+     *            the attribute
+     * @return the thrift column value
+     */
     protected byte[] getThriftColumnValue(Object e, Attribute attribute)
     {
         byte[] value = null;
@@ -1513,7 +1817,6 @@ public abstract class CassandraDataHandlerBase
     }
 
     /**
-     * 
      * On embeddable.
      * 
      * @param timestamp2
@@ -1528,6 +1831,7 @@ public abstract class CassandraDataHandlerBase
      *            the id
      * @param embeddableAttrib
      *            the embeddable attrib
+     * @return the map
      */
     private Map<String, Object> onEmbeddable(long timestamp2, ThriftRow tr, EntityMetadata m, Object e, Object id,
             Attribute embeddableAttrib)
@@ -1621,8 +1925,6 @@ public abstract class CassandraDataHandlerBase
      * 
      * @param timestamp2
      *            the timestamp2
-     * @param tr
-     *            the tr
      * @param m
      *            the m
      * @param id
@@ -1633,6 +1935,7 @@ public abstract class CassandraDataHandlerBase
      *            the super column name
      * @param obj
      *            the obj
+     * @return the map
      */
     private Map<String, Object> buildThriftSuperColumn(long timestamp2, EntityMetadata m, Object id,
             EmbeddableType superColumn, String superColumnName, Object obj)
@@ -1652,6 +1955,8 @@ public abstract class CassandraDataHandlerBase
     /**
      * Builds the thrift counter super column.
      * 
+     * @param tableName
+     *            the table name
      * @param superColumnName
      *            the super column name
      * @param superColumn
@@ -1727,6 +2032,8 @@ public abstract class CassandraDataHandlerBase
     /**
      * Builds the thrift super column.
      * 
+     * @param tableName
+     *            the table name
      * @param superColumnName
      *            the super column name
      * @param timestamp
@@ -1793,6 +2100,29 @@ public abstract class CassandraDataHandlerBase
         return tableToSuperColumns;
     }
 
+    /**
+     * Populate composite id.
+     * 
+     * @param m
+     *            the m
+     * @param entity
+     *            the entity
+     * @param thriftColumnName
+     *            the thrift column name
+     * @param thriftColumnValue
+     *            the thrift column value
+     * @param metaModel
+     *            the meta model
+     * @param attribute
+     *            the attribute
+     * @param entityClazz
+     *            the entity clazz
+     * @return the object
+     * @throws InstantiationException
+     *             the instantiation exception
+     * @throws IllegalAccessException
+     *             the illegal access exception
+     */
     private Object populateCompositeId(EntityMetadata m, Object entity, String thriftColumnName,
             Object thriftColumnValue, MetamodelImpl metaModel, Attribute attribute, Class entityClazz)
             throws InstantiationException, IllegalAccessException
@@ -1841,6 +2171,19 @@ public abstract class CassandraDataHandlerBase
         return entity;
     }
 
+    /**
+     * Gets the compound key.
+     * 
+     * @param attribute
+     *            the attribute
+     * @param entity
+     *            the entity
+     * @return the compound key
+     * @throws InstantiationException
+     *             the instantiation exception
+     * @throws IllegalAccessException
+     *             the illegal access exception
+     */
     private Object getCompoundKey(Attribute attribute, Object entity) throws InstantiationException,
             IllegalAccessException
     {
@@ -1857,66 +2200,38 @@ public abstract class CassandraDataHandlerBase
     }
 
     /**
-     * Populates collection field(s) into entity
+     * Populates collection field(s) into entity.
      * 
      * @param entity
+     *            the entity
      * @param thriftColumnValue
+     *            the thrift column value
      * @param attribute
+     *            the attribute
      */
     private void setCollectionValue(Object entity, Object thriftColumnValue, Attribute attribute)
     {
         try
         {
+            ByteBuffer valueByteBuffer = ByteBuffer.wrap((byte[]) thriftColumnValue);
             if (Collection.class.isAssignableFrom(((Field) attribute.getJavaMember()).getType()))
             {
-                Collection outputCollection = null;
-                ByteBuffer valueByteBuffer = ByteBuffer.wrap((byte[]) thriftColumnValue);
+
                 Class<?> genericClass = PropertyAccessorHelper.getGenericClass((Field) attribute.getJavaMember());
-                Class<?> valueValidationClass = CassandraValidationClassMapper.getValidationClassInstance(genericClass,
-                        true);
-                Object valueClassInstance = valueValidationClass.getDeclaredField("instance").get(null);
 
-                if (((Field) attribute.getJavaMember()).getType().isAssignableFrom(List.class))
-                {
-                    ListType listType = ListType.getInstance((AbstractType) valueClassInstance);
-                    outputCollection = new ArrayList();
-                    outputCollection.addAll((Collection) listType.compose(valueByteBuffer));
-                }
-
-                else if (((Field) attribute.getJavaMember()).getType().isAssignableFrom(Set.class))
-                {
-                    SetType setType = SetType.getInstance((AbstractType) valueClassInstance);
-                    outputCollection = new HashSet();
-                    outputCollection.addAll((Collection) setType.compose(valueByteBuffer));
-                }
-
-                PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(),
-                        marshalCollection(valueValidationClass, outputCollection, genericClass));
+                PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), CassandraDataTranslator
+                        .decompose(((Field) attribute.getJavaMember()).getType(), valueByteBuffer, genericClass, true));
             }
 
             else if (((Field) attribute.getJavaMember()).getType().isAssignableFrom(Map.class))
             {
-                ByteBuffer valueByteBuffer = ByteBuffer.wrap((byte[]) thriftColumnValue);
+
                 List<Class<?>> mapGenericClasses = PropertyAccessorHelper.getGenericClasses((Field) attribute
                         .getJavaMember());
 
-                Class keyClass = CassandraValidationClassMapper.getValidationClassInstance(mapGenericClasses.get(0),
-                        true);
-                Class valueClass = CassandraValidationClassMapper.getValidationClassInstance(mapGenericClasses.get(1),
-                        true);
-
-                Object keyClassInstance = keyClass.getDeclaredField("instance").get(null);
-                Object valueClassInstance = valueClass.getDeclaredField("instance").get(null);
-
-                MapType mapType = MapType.getInstance((AbstractType) keyClassInstance,
-                        (AbstractType) valueClassInstance);
-
-                Map rawMap = new HashMap();
-                rawMap.putAll((Map) mapType.compose(valueByteBuffer));
-
-                Map dataCollection = marshalMap(mapGenericClasses, keyClass, valueClass, rawMap);
-                PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), dataCollection.isEmpty() ? rawMap
-                        : dataCollection);
+                PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), CassandraDataTranslator
+                        .decompose(((Field) attribute.getJavaMember()).getType(), valueByteBuffer, mapGenericClasses,
+                                true));
             }
         }
         catch (Exception e)
@@ -1926,60 +2241,6 @@ public abstract class CassandraDataHandlerBase
         }
     }
 
-    private Collection marshalCollection(Class cassandraTypeClazz, Collection result, Class clazz)
-    {
-        Collection mappedCollection = result;
+  
 
-        if (cassandraTypeClazz.isAssignableFrom(BytesType.class))
-        {
-            mappedCollection = (Collection) PropertyAccessorHelper.getObject(result.getClass());
-            for (Object value : result)
-            {
-                mappedCollection.add(PropertyAccessorHelper.getObject(clazz, ((ByteBuffer) value).array()));
-            }
-        }
-        return mappedCollection;
-    }
-
-    /**
-     * In case, key or value class is of type blob. Iterate and populate
-     * corresponding byte[]
-     * 
-     * @param mapGenericClasses
-     * @param keyClass
-     * @param valueClass
-     * @param rawMap
-     * @return
-     */
-    private Map marshalMap(List<Class<?>> mapGenericClasses, Class keyClass, Class valueClass, Map rawMap)
-    {
-        Map dataCollection = new HashMap();
-
-        if (keyClass.isAssignableFrom(BytesType.class) || valueClass.isAssignableFrom(BytesType.class))
-        {
-            Iterator iter = rawMap.keySet().iterator();
-
-            while (iter.hasNext())
-            {
-
-                Object key = iter.next();
-                Object value = rawMap.get(key);
-
-                if (keyClass.isAssignableFrom(BytesType.class))
-                {
-                    key = PropertyAccessorHelper.getObject(mapGenericClasses.get(0), ((ByteBuffer) key).array());
-                }
-
-                if (valueClass.isAssignableFrom(BytesType.class))
-                {
-                    value = PropertyAccessorHelper.getObject(mapGenericClasses.get(1), ((ByteBuffer) value).array());
-                }
-
-                dataCollection.put(key, value);
-            }
-        }
-        return dataCollection;
-    }
-    
 }
-

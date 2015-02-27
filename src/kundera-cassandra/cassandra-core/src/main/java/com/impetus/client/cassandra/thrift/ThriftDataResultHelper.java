@@ -30,26 +30,42 @@ import com.impetus.kundera.metadata.model.EntityMetadata.Type;
 import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 
+
 /**
  * Provides utility methods for extracting useful data from Thrift result
- * retrieved from database (usually in the form of {@link ColumnOrSuperColumn}
- * 
+ * retrieved from database (usually in the form of {@link ColumnOrSuperColumn}.
+ *
  * @author amresh.singh
  */
 public class ThriftDataResultHelper
 {
+    
+    /**
+     * The Enum ColumnFamilyType.
+     */
     public enum ColumnFamilyType
     {
+        
+        /** The column. */
         COLUMN, /* Column family */
+        /** The super column. */
         SUPER_COLUMN, /* Super Column family */
+        /** The counter column. */
         COUNTER_COLUMN, /* Counter Column family */
+        /** The counter super column. */
         COUNTER_SUPER_COLUMN
         /* Super Counter Column family */
     }
 
     /**
      * Transforms data retrieved as result via thrift to a List whose content
-     * type is determined by {@link ColumnFamilyType}
+     * type is determined by {@link ColumnFamilyType}.
+     *
+     * @param <T> the generic type
+     * @param coscList the cosc list
+     * @param columnFamilyType the column family type
+     * @param row the row
+     * @return the list
      */
     public static <T> List<T> transformThriftResult(List<ColumnOrSuperColumn> coscList,
             ColumnFamilyType columnFamilyType, ThriftRow row)
@@ -62,6 +78,15 @@ public class ThriftDataResultHelper
         return result;
     }
 
+    /**
+     * Transform thrift result.
+     *
+     * @param <T> the generic type
+     * @param cosc the cosc
+     * @param columnFamilyType the column family type
+     * @param row the row
+     * @return the t
+     */
     public static <T> T transformThriftResult(ColumnOrSuperColumn cosc, ColumnFamilyType columnFamilyType, ThriftRow row)
     {
         Object output = null;
@@ -107,7 +132,13 @@ public class ThriftDataResultHelper
 
     /**
      * Transforms data retrieved as result via thrift to a Map whose content
-     * type is determined by {@link ColumnFamilyType}
+     * type is determined by {@link ColumnFamilyType}.
+     *
+     * @param <T> the generic type
+     * @param coscResultMap the cosc result map
+     * @param columnFamilyType the column family type
+     * @param row the row
+     * @return the map
      */
     public static <T> Map<ByteBuffer, List<T>> transformThriftResult(
             Map<ByteBuffer, List<ColumnOrSuperColumn>> coscResultMap, ColumnFamilyType columnFamilyType, ThriftRow row)
@@ -123,6 +154,15 @@ public class ThriftDataResultHelper
         return output;
     }
 
+    /**
+     * Transform thrift result.
+     *
+     * @param <T> the generic type
+     * @param columnFamilyType the column family type
+     * @param keySlices the key slices
+     * @param row the row
+     * @return the map
+     */
     public static <T> Map<ByteBuffer, List<T>> transformThriftResult(ColumnFamilyType columnFamilyType,
             List<KeySlice> keySlices, ThriftRow row)
     {
@@ -140,7 +180,13 @@ public class ThriftDataResultHelper
 
     /**
      * Transforms data retrieved as result via thrift to a List whose content
-     * type is determined by {@link ColumnFamilyType}
+     * type is determined by {@link ColumnFamilyType}.
+     *
+     * @param <T> the generic type
+     * @param coscResultMap the cosc result map
+     * @param columnFamilyType the column family type
+     * @param row the row
+     * @return the list
      */
     public <T> List<T> transformThriftResultAndAddToList(Map<ByteBuffer, List<ColumnOrSuperColumn>> coscResultMap,
             ColumnFamilyType columnFamilyType, ThriftRow row)
@@ -158,12 +204,12 @@ public class ThriftDataResultHelper
 
     /**
      * Translates into thrift row.
-     * 
-     * @param coscResultMap
-     * @param isCounterType
-     * @param columnFamilyType
-     * @param row
-     * @return
+     *
+     * @param coscResultMap the cosc result map
+     * @param isCounterType the is counter type
+     * @param columnFamilyType the column family type
+     * @param row the row
+     * @return the thrift row
      */
     public ThriftRow translateToThriftRow(Map<ByteBuffer, List<ColumnOrSuperColumn>> coscResultMap,
             boolean isCounterType, Type columnFamilyType, ThriftRow row)
@@ -190,7 +236,11 @@ public class ThriftDataResultHelper
     }
 
     /**
-     * Fetches Row keys from a {@link List} of {@link KeySlice}
+     * Fetches Row keys from a {@link List} of {@link KeySlice}.
+     *
+     * @param keySlices the key slices
+     * @param metadata the metadata
+     * @return the row keys
      */
     public static List<Object> getRowKeys(List<KeySlice> keySlices, EntityMetadata metadata)
     {

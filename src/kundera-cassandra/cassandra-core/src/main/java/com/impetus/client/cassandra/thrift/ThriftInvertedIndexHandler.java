@@ -53,9 +53,10 @@ import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.utils.TimestampGenerator;
 
+
 /**
- * Thrift implementation of {@link InvertedIndexHandler}
- * 
+ * Thrift implementation of {@link InvertedIndexHandler}.
+ *
  * @author amresh.singh
  */
 public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase implements InvertedIndexHandler
@@ -63,8 +64,16 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
     /** log for this class. */
     private static Logger log = LoggerFactory.getLogger(ThriftInvertedIndexHandler.class);
 
+    /** The thrift client. */
     private final ThriftClient thriftClient;
 
+    /**
+     * Instantiates a new thrift inverted index handler.
+     *
+     * @param thriftClient the thrift client
+     * @param useSecondryIndex the use secondry index
+     * @param generator the generator
+     */
     public ThriftInvertedIndexHandler(final ThriftClient thriftClient, final boolean useSecondryIndex, final TimestampGenerator generator)
     {
         super(generator);
@@ -72,6 +81,9 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
         this.useSecondryIndex = useSecondryIndex;
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.client.cassandra.index.InvertedIndexHandler#write(com.impetus.kundera.graph.Node, com.impetus.kundera.metadata.model.EntityMetadata, java.lang.String, org.apache.cassandra.thrift.ConsistencyLevel, com.impetus.client.cassandra.datahandler.CassandraDataHandler)
+     */
     @Override
     public void write(Node node, EntityMetadata entityMetadata, String persistenceUnit,
             ConsistencyLevel consistencyLevel, CassandraDataHandler cdHandler)
@@ -151,6 +163,9 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
         }
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.client.cassandra.index.InvertedIndexHandlerBase#search(com.impetus.kundera.metadata.model.EntityMetadata, java.lang.String, org.apache.cassandra.thrift.ConsistencyLevel, java.util.Map)
+     */
     @Override
     public List<SearchResult> search(EntityMetadata m, String persistenceUnit, ConsistencyLevel consistencyLevel,
             Map<Boolean, List<IndexClause>> indexClauseMap)
@@ -159,6 +174,9 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
         return super.search(m, persistenceUnit, consistencyLevel, indexClauseMap);
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.client.cassandra.index.InvertedIndexHandlerBase#searchSuperColumnsInRange(java.lang.String, org.apache.cassandra.thrift.ConsistencyLevel, java.lang.String, java.lang.String, byte[], java.util.List, byte[], byte[])
+     */
     @Override
     protected void searchSuperColumnsInRange(String columnFamilyName, ConsistencyLevel consistencyLevel,
             String persistenceUnit, String rowKey, byte[] searchSuperColumnName, List<SuperColumn> thriftSuperColumns,
@@ -216,6 +234,9 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
         }
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.client.cassandra.index.InvertedIndexHandlerBase#getSuperColumnForRow(org.apache.cassandra.thrift.ConsistencyLevel, java.lang.String, java.lang.String, byte[], java.lang.String)
+     */
     @Override
     protected SuperColumn getSuperColumnForRow(ConsistencyLevel consistencyLevel, String columnFamilyName,
             String rowKey, byte[] superColumnName, String persistenceUnit)
@@ -262,6 +283,9 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
         return thriftSuperColumn;
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.client.cassandra.index.InvertedIndexHandlerBase#delete(java.lang.Object, com.impetus.kundera.metadata.model.EntityMetadata, org.apache.cassandra.thrift.ConsistencyLevel, com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata)
+     */
     @Override
     public void delete(Object entity, EntityMetadata metadata, ConsistencyLevel consistencyLevel, final KunderaMetadata kunderaMetadata)
     {
@@ -270,6 +294,9 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
 
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.client.cassandra.index.InvertedIndexHandlerBase#deleteColumn(java.lang.String, java.lang.String, byte[], java.lang.String, org.apache.cassandra.thrift.ConsistencyLevel, byte[])
+     */
     @Override
     protected void deleteColumn(String indexColumnFamily, String rowKey, byte[] superColumnName,
             String persistenceUnit, ConsistencyLevel consistencyLevel, byte[] columnName)
