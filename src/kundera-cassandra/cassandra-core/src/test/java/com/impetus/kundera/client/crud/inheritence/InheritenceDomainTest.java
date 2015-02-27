@@ -122,6 +122,7 @@ public class InheritenceDomainTest
     {
         CassandraCli.dropColumnFamily("user_account", "KunderaExamples");
         CassandraCli.dropColumnFamily("social_profile", "KunderaExamples");
+        CassandraCli.dropKeySpace("KunderaExamples");
     }
 
     @AfterClass
@@ -132,11 +133,7 @@ public class InheritenceDomainTest
             emThrift.close();
             emThrift = null;
         }
-        if (emfThrift != null)
-        {
-            emfThrift.close();
-            emfThrift = null;
-        }
+      
     }
 
     private void createEmf(String auto_ddl_proeprty)

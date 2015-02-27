@@ -36,6 +36,7 @@ import javax.persistence.Query;
 import junit.framework.Assert;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -49,18 +50,15 @@ import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
  */
 public class UdtAsEmbeddablesCRUDTest
 {
-    
+
     /** The Constant PU. */
     private static final String PU = "cassandra_udt";
 
     /** The emf. */
-    private EntityManagerFactory emf;
+    private static EntityManagerFactory emf;
 
     /** The em. */
-    private EntityManager entityManager;
-
-    /** The col. */
-    private Map<Object, Object> col;
+    private static EntityManager entityManager;
 
     /** The property map. */
     protected Map propertyMap = null;
@@ -79,23 +77,15 @@ public class UdtAsEmbeddablesCRUDTest
     {
 
         CassandraCli.cassandraSetUp();
-        CassandraCli.createKeySpace("UdtTest");
+        // CassandraCli.createKeySpace("UdtTest");
 
-        if (propertyMap == null)
-        {
-            propertyMap = new HashMap();
-            // propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE,
-            // "create");
-            propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
-        }
+        propertyMap = new HashMap();
+        propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create");
+        propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
 
-        if (AUTO_MANAGE_SCHEMA)
-        {
-            // loadData();
-        }
         emf = Persistence.createEntityManagerFactory(PU, propertyMap);
         entityManager = emf.createEntityManager();
-        col = new java.util.HashMap<Object, Object>();
+      
     }
 
     /**
@@ -133,8 +123,9 @@ public class UdtAsEmbeddablesCRUDTest
 
     /**
      * On delete.
-     *
-     * @throws Exception the exception
+     * 
+     * @throws Exception
+     *             the exception
      */
     @Test
     // working
@@ -170,8 +161,9 @@ public class UdtAsEmbeddablesCRUDTest
 
     /**
      * On merge.
-     *
-     * @throws Exception the exception
+     * 
+     * @throws Exception
+     *             the exception
      */
     @Test
     // issues with embeddable merging (deleted embeddable)
@@ -207,8 +199,9 @@ public class UdtAsEmbeddablesCRUDTest
 
     /**
      * On find.
-     *
-     * @throws Exception the exception
+     * 
+     * @throws Exception
+     *             the exception
      */
     @Test
     public void onFind() throws Exception
@@ -243,8 +236,9 @@ public class UdtAsEmbeddablesCRUDTest
 
     /**
      * On embeddable merge.
-     *
-     * @throws Exception the exception
+     * 
+     * @throws Exception
+     *             the exception
      */
     @Test
     // issues with embeddable merging (deleted embeddable)
@@ -278,8 +272,9 @@ public class UdtAsEmbeddablesCRUDTest
 
     /**
      * On select all query.
-     *
-     * @throws Exception the exception
+     * 
+     * @throws Exception
+     *             the exception
      */
     @Test
     public void onSelectAllQuery() throws Exception
@@ -339,8 +334,9 @@ public class UdtAsEmbeddablesCRUDTest
 
     /**
      * On select by id query.
-     *
-     * @throws Exception the exception
+     * 
+     * @throws Exception
+     *             the exception
      */
     @Test
     public void onSelectByIdQuery() throws Exception
@@ -366,8 +362,9 @@ public class UdtAsEmbeddablesCRUDTest
 
     /**
      * On collection indexes.
-     *
-     * @throws Exception the exception
+     * 
+     * @throws Exception
+     *             the exception
      */
     @Test
     public void onCollectionIndexes() throws Exception
@@ -393,9 +390,11 @@ public class UdtAsEmbeddablesCRUDTest
 
     /**
      * Assert entity.
-     *
-     * @param expected the expected entity
-     * @param actual the actual entity
+     * 
+     * @param expected
+     *            the expected entity
+     * @param actual
+     *            the actual entity
      */
     private void assertEntity(PersonUDT expected, PersonUDT actual)
     {
@@ -404,21 +403,23 @@ public class UdtAsEmbeddablesCRUDTest
         Assert.assertEquals(expected.getPassword(), actual.getPassword());
         Assert.assertEquals(expected.getPersonId(), actual.getPersonId());
         Assert.assertEquals(expected.getNicknames(), actual.getNicknames());
-        Assert.assertEquals(expected.getPersonalDetails().getFullname().getFirstName(), actual.getPersonalDetails().getFullname()
-                .getFirstName());
-        Assert.assertEquals(expected.getPersonalDetails().getFullname().getLastName(), actual.getPersonalDetails().getFullname()
-                .getLastName());
-        Assert.assertEquals(expected.getPersonalDetails().getPhone().getNumber(), actual.getPersonalDetails().getPhone()
-                .getNumber());
-        Assert.assertEquals(expected.getPersonalDetails().getAddresses().getPin(), actual.getPersonalDetails().getAddresses()
-                .getPin());
-        Assert.assertEquals(expected.getPersonalDetails().getSpouse().getMaidenName(), actual.getPersonalDetails().getSpouse()
-                .getMaidenName());
-        Assert.assertEquals(expected.getPersonalDetails().getSpouse().getFullname().getFirstName(), actual.getPersonalDetails()
-                .getSpouse().getFullname().getFirstName());
-        Assert.assertEquals(expected.getProfessionalDetails().getCompany(), actual.getProfessionalDetails().getCompany());
+        Assert.assertEquals(expected.getPersonalDetails().getFullname().getFirstName(), actual.getPersonalDetails()
+                .getFullname().getFirstName());
+        Assert.assertEquals(expected.getPersonalDetails().getFullname().getLastName(), actual.getPersonalDetails()
+                .getFullname().getLastName());
+        Assert.assertEquals(expected.getPersonalDetails().getPhone().getNumber(), actual.getPersonalDetails()
+                .getPhone().getNumber());
+        Assert.assertEquals(expected.getPersonalDetails().getAddresses().getPin(), actual.getPersonalDetails()
+                .getAddresses().getPin());
+        Assert.assertEquals(expected.getPersonalDetails().getSpouse().getMaidenName(), actual.getPersonalDetails()
+                .getSpouse().getMaidenName());
+        Assert.assertEquals(expected.getPersonalDetails().getSpouse().getFullname().getFirstName(), actual
+                .getPersonalDetails().getSpouse().getFullname().getFirstName());
+        Assert.assertEquals(expected.getProfessionalDetails().getCompany(), actual.getProfessionalDetails()
+                .getCompany());
         Assert.assertEquals(expected.getProfessionalDetails().getGrade(), actual.getProfessionalDetails().getGrade());
-        Assert.assertEquals(expected.getProfessionalDetails().getProject(), actual.getProfessionalDetails().getProject());
+        Assert.assertEquals(expected.getProfessionalDetails().getProject(), actual.getProfessionalDetails()
+                .getProject());
         Assert.assertEquals(expected.getProfessionalDetails().getMonthlySalary(), actual.getProfessionalDetails()
                 .getMonthlySalary());
 
@@ -426,7 +427,7 @@ public class UdtAsEmbeddablesCRUDTest
 
     /**
      * Prepare data level3.
-     *
+     * 
      * @return the object
      */
     private Object prepareDataLevel3()
@@ -449,7 +450,7 @@ public class UdtAsEmbeddablesCRUDTest
 
     /**
      * Prepare data level4.
-     *
+     * 
      * @return the object
      */
     private Object prepareDataLevel4()
@@ -472,7 +473,7 @@ public class UdtAsEmbeddablesCRUDTest
 
     /**
      * Prepare data level2.
-     *
+     * 
      * @return the object
      */
     private Object prepareDataLevel2()
@@ -496,7 +497,7 @@ public class UdtAsEmbeddablesCRUDTest
 
     /**
      * Prepare data level1.
-     *
+     * 
      * @return the object
      */
     private Object prepareDataLevel1()
@@ -520,7 +521,7 @@ public class UdtAsEmbeddablesCRUDTest
 
     /**
      * Load professional details.
-     *
+     * 
      * @return the professional details udt
      */
     private ProfessionalDetailsUDT loadProfessionalDetails()
@@ -537,9 +538,11 @@ public class UdtAsEmbeddablesCRUDTest
 
     /**
      * Load personal details.
-     *
-     * @param firstname the firstname
-     * @param lastname the lastname
+     * 
+     * @param firstname
+     *            the firstname
+     * @param lastname
+     *            the lastname
      * @return the personal details udt
      */
     private PersonalDetailsUDT loadPersonalDetails(String firstname, String lastname)
@@ -580,9 +583,22 @@ public class UdtAsEmbeddablesCRUDTest
     @After
     public void tearDown() throws Exception
     {
-        entityManager.close();
-        emf.close();
-        // CassandraCli.dropKeySpace("UdtTest");
+        CassandraCli.dropKeySpace("UdtTest");
+       // CassandraCli.truncateColumnFamily("UdtTest", "person_udt");
     }
+    
+    @AfterClass
+    public static void tearDownAfterClass()
+    {
+        if (entityManager != null)
+        {
+            entityManager.close();
+            entityManager = null;
+            emf.close();
+            emf = null;
+        }
+       
+    }
+
 
 }
