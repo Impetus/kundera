@@ -60,14 +60,14 @@ public class UserCassandra
     private List<TweetCassandra> tweets;
 
     // One to many, will be persisted separately
-    @OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
-    @JoinColumn(name = "FRIEND_ID")
-    private List<UserCassandra> friends; // List of users whom I follow
-
-    // One to many, will be persisted separately
-    @OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
-    @JoinColumn(name = "FOLLOWER_ID")
-    private List<UserCassandra> followers; // List of users who are following me
+//    @OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
+//    @JoinColumn(name = "FRIEND_ID")
+//    private List<UserCassandra> friends; // List of users whom I follow
+//
+//    // One to many, will be persisted separately
+//    @OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
+//    @JoinColumn(name = "FOLLOWER_ID")
+//    private List<UserCassandra> followers; // List of users who are following me
 
     // One-to-one, will be persisted separately
     @OneToOne(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY)
@@ -201,48 +201,49 @@ public class UserCassandra
 
         this.externalLinks.add(externalLink);
     }
-
-   /**
-     * @return the friends
-     */
-    public List<UserCassandra> getFriends()
-    {
-        return friends;
-    }
-
-    /**
-     * @param friends
-     *            the friends to set
-     */
-    public void addFriend(UserCassandra friend)
-    {
-        if (this.friends == null || this.friends.isEmpty())
-        {
-            this.friends = new ArrayList<UserCassandra>();
-        }
-        this.friends.add(friend);
-    }
+    //To do : Need to add support for self referential structures
+//
+//   /**
+//     * @return the friends
+//     */
+//    public List<UserCassandra> getFriends()
+//    {
+//        return friends;
+//    }
+//
+//    /**
+//     * @param friends
+//     *            the friends to set
+//     */
+//    public void addFriend(UserCassandra friend)
+//    {
+//        if (this.friends == null || this.friends.isEmpty())
+//        {
+//            this.friends = new ArrayList<UserCassandra>();
+//        }
+//        this.friends.add(friend);
+//    }
 
     /**
      * @return the followers
      */
-    public List<UserCassandra> getFollowers()
-    {
-        return followers;
-    }
-
-    /**
-     * @param followers
-     *            the followers to set
-     */
-    public void addFollower(UserCassandra follower)
-    {
-        if (this.followers == null || this.followers.isEmpty())
-        {
-            this.followers = new ArrayList<UserCassandra>();
-        }
-
-        this.followers.add(follower);
-    }
+//    public List<UserCassandra> getFollowers()
+//    {
+//        return followers;
+//    }
+//
+//    /**
+//     * @param followers
+//     *            the followers to set
+//     */
+//    public void addFollower(UserCassandra follower)
+//    {
+//        if (this.followers == null || this.followers.isEmpty())
+//        {
+//            this.followers = new ArrayList<UserCassandra>();
+//        }
+//
+//        this.followers.add(follower);
+//    }
 
 }
