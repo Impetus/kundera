@@ -553,7 +553,7 @@ public final class CassandraDataTranslator
      *            the raw map
      * @return the map
      */
-    private static Map marshalMap(List<Class<?>> mapGenericClasses, Class keyClass, Class valueClass, Map rawMap)
+    public static Map marshalMap(List<Class<?>> mapGenericClasses, Class keyClass, Class valueClass, Map rawMap)
     {
         Map dataCollection = new HashMap();
 
@@ -598,7 +598,7 @@ public final class CassandraDataTranslator
      *            the clazz
      * @return the collection
      */
-    private static Collection marshalCollection(Class cassandraTypeClazz, Collection result, Class clazz)
+    public static Collection marshalCollection(Class cassandraTypeClazz, Collection result, Class clazz)
     {
         Collection mappedCollection = result;
 
