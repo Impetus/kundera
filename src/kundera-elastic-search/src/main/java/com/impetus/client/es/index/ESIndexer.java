@@ -48,7 +48,7 @@ import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.property.PropertyAccessorHelper;
-import com.impetus.kundera.proxy.KunderaQueryUtils;
+import com.impetus.kundera.query.KunderaQueryUtils;
 import com.impetus.kundera.query.KunderaQuery;
 import com.thoughtworks.xstream.XStream;
 

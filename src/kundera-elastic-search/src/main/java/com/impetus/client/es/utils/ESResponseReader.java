@@ -37,7 +37,7 @@ import org.elasticsearch.search.aggregations.metrics.sum.InternalSum;
 
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
-import com.impetus.kundera.proxy.KunderaQueryUtils;
+import com.impetus.kundera.query.KunderaQueryUtils;
 import com.impetus.kundera.query.KunderaQuery;
 
 /**
