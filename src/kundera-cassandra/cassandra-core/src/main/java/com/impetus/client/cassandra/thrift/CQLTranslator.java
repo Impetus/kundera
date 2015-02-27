@@ -370,8 +370,8 @@ public final class CQLTranslator
                     if (embeddableKeyObj != null)
                     {
 
-                        StringBuilder embeddedValueBuilder = new StringBuilder();
-                        embeddedValueBuilder.append("{ ");
+                        StringBuilder embeddedValueBuilder = new StringBuilder("{");
+                    
 
                         for (Field embeddableColumn : field.getType().getDeclaredFields())
                         {
@@ -397,19 +397,20 @@ public final class CQLTranslator
                                     appendColumnValue(embeddedValueBuilder, embeddableKeyObj, embeddableColumn);
 
                                 }
+                                embeddedValueBuilder.append(",");
                             }
-                            embeddedValueBuilder.append(" ,");
+                            
                         }
                         // strip last char and append '}'
                         embeddedValueBuilder.deleteCharAt(embeddedValueBuilder.length() - 1);
-                        embeddedValueBuilder.append(" }");
+                        embeddedValueBuilder.append("}");
                         // add to columnbuilder and builder
                         columnBuilder.append("\"");
                         columnBuilder.append(((AbstractAttribute) attribute).getJPAColumnName());
                         columnBuilder.append("\"");
-                        columnBuilder.append(" ,");
+                        columnBuilder.append(",");
                         builder.append(embeddedValueBuilder);
-                        builder.append(" ,");
+                        builder.append(",");
                         // end if
                     }
                 }
@@ -454,7 +455,7 @@ public final class CQLTranslator
         if (embeddableKeyObj != null)
         {
             StringBuilder tempBuilder = new StringBuilder();
-            tempBuilder.append("{ ");
+            tempBuilder.append("{");
 
             for (Field embeddableColumn : field.getType().getDeclaredFields())
             {
@@ -475,12 +476,13 @@ public final class CQLTranslator
                         tempBuilder.append(":");
                         appendColumnValue(tempBuilder, embeddableKeyObj, embeddableColumn);
                     }
+                    tempBuilder.append(",");
                 }
-                tempBuilder.append(" ,");
+                
             }
             // strip last char and append '}'
             tempBuilder.deleteCharAt(tempBuilder.length() - 1);
-            tempBuilder.append(" }");
+            tempBuilder.append("}");
             appendColumnName(embeddedValueBuilder, ((AbstractAttribute) attribute).getJPAColumnName());
             embeddedValueBuilder.append(":");
             embeddedValueBuilder.append(tempBuilder);
