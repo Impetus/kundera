@@ -1,5 +1,5 @@
 /*******************************************************************************
- * * Copyright 2015 Impetus Infotech.
+ *  * Copyright 2015 Impetus Infotech.
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import junit.framework.Assert;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -40,7 +41,6 @@ import org.junit.Test;
 
 import com.impetus.client.esindexer.PersonESIndexerCassandra.Day;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class CassandraESAggregationTest.
  */
@@ -321,132 +321,6 @@ public class CassandraESAggregationTest
     }
 
     /**
-     * Test attribute with min aggregation.
-     */
-    @Test
-    public void testAttributeWithMinAggregation()
-    {
-        String queryString = "Select p.age, min(p.salary) from PersonESIndexerCassandra p";
-        Query query = em.createQuery(queryString);
-        List resultList = query.getResultList();
-
-        Assert.assertEquals(2, resultList.size());
-        Assert.assertEquals(40, resultList.get(0));
-        Assert.assertEquals(100.0, resultList.get(1));
-    }
-
-    /**
-     * Test min with attribute aggregation.
-     */
-    @Test
-    public void testMinWithAttributeAggregation()
-    {
-        String queryString = "Select min(p.salary), p.age from PersonESIndexerCassandra p";
-        Query query = em.createQuery(queryString);
-        List resultList = query.getResultList();
-
-        Assert.assertEquals(2, resultList.size());
-        Assert.assertEquals(100.0, resultList.get(0));
-        Assert.assertEquals(40, resultList.get(1));
-    }
-
-    /**
-     * Test max with attribute aggregation.
-     */
-    @Test
-    public void testMaxWithAttributeAggregation()
-    {
-        String queryString = "Select max(p.salary), p.salary from PersonESIndexerCassandra p";
-        Query query = em.createQuery(queryString);
-        List resultList = query.getResultList();
-
-        Assert.assertEquals(2, resultList.size());
-        Assert.assertEquals(400.0, resultList.get(0));
-        Assert.assertEquals(400.0, resultList.get(1));
-    }
-
-    /**
-     * Test attribute with sum aggregation.
-     */
-    @Test
-    public void testAttributeWithSumAggregation()
-    {
-        String queryString = "Select p.age, sum(p.salary) from PersonESIndexerCassandra p";
-        Query query = em.createQuery(queryString);
-        List resultList = query.getResultList();
-
-        Assert.assertEquals(2, resultList.size());
-        Assert.assertEquals(40, resultList.get(0));
-        Assert.assertEquals(1000.0, resultList.get(1));
-    }
-
-    /**
-     * Test sum with attribute same field aggregation.
-     */
-    @Test
-    public void testSumWithAttributeSameFieldAggregation()
-    {
-        String queryString = "Select sum(p.salary), p.salary from PersonESIndexerCassandra p";
-        Query query = em.createQuery(queryString);
-        List resultList = query.getResultList();
-
-        Assert.assertEquals(2, resultList.size());
-        Assert.assertEquals(1000.0, resultList.get(0));
-        Assert.assertEquals(400.0, resultList.get(1));
-    }
-
-    /**
-     * Test attribute with avg aggregation.
-     */
-    @Test
-    public void testAttributeWithAvgAggregation()
-    {
-        String queryString = "Select p.age, avg(p.salary) from PersonESIndexerCassandra p";
-        Query query = em.createQuery(queryString);
-        List resultList = query.getResultList();
-
-        Assert.assertEquals(2, resultList.size());
-        Assert.assertEquals(40, resultList.get(0));
-        Assert.assertEquals(250.0, resultList.get(1));
-    }
-
-    /**
-     * Test avg with attribute same field aggregation.
-     */
-    @Test
-    public void testAvgWithAttributeSameFieldAggregation()
-    {
-        String queryString = "Select avg(p.salary), p.salary from PersonESIndexerCassandra p";
-        Query query = em.createQuery(queryString);
-        List resultList = query.getResultList();
-
-        Assert.assertEquals(2, resultList.size());
-        Assert.assertEquals(250.0, resultList.get(0));
-        Assert.assertEquals(400.0, resultList.get(1));
-    }
-
-    /**
-     * Test multi field aggregation.
-     */
-    @Test
-    public void testMultiFieldAggregation()
-    {
-        String queryString = "Select p.age, min(p.salary), p.salary, max(p.salary), p.personId, sum(p.salary), p.personName, avg(p.salary) from PersonESIndexerCassandra p";
-        Query query = em.createQuery(queryString);
-        List resultList = query.getResultList();
-
-        Assert.assertEquals(8, resultList.size());
-        Assert.assertEquals(40, resultList.get(0));
-        Assert.assertEquals(100.0, resultList.get(1));
-        Assert.assertEquals(400.0, resultList.get(2));
-        Assert.assertEquals(400.0, resultList.get(3));
-        Assert.assertEquals("4", resultList.get(4));
-        Assert.assertEquals(1000.0, resultList.get(5));
-        Assert.assertEquals("Pragalbh", resultList.get(6));
-        Assert.assertEquals(250.0, resultList.get(7));
-    }
-
-    /**
      * Test aggregation with where clause.
      * 
      * @throws InterruptedException
@@ -603,10 +477,10 @@ public class CassandraESAggregationTest
             node.close();
     }
 
-    // @After
     /**
      * Tear down.
      */
+    @After
     public void tearDown()
     {
         em.remove(em.find(PersonESIndexerCassandra.class, "1"));
