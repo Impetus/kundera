@@ -49,7 +49,8 @@ import com.impetus.kundera.query.QueryImpl;
 public class RedisQuery extends QueryImpl
 {
 
-    public RedisQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator, final KunderaMetadata kunderaMetadata)
+    public RedisQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator,
+            final KunderaMetadata kunderaMetadata)
     {
         super(kunderaQuery, persistenceDelegator, kunderaMetadata);
     }
@@ -76,11 +77,8 @@ public class RedisQuery extends QueryImpl
          * clause possible with AND/OR clause.
          * 
          */
-     
 
         Set<Object> results = new HashSet<Object>();
-
-        RedisQueryInterpreter interpreter = onTranslation(getKunderaQuery().getFilterClauseQueue(), entityMetadata);
 
         ClientMetadata clientMetadata = ((ClientBase) client).getClientMetadata();
 
@@ -88,10 +86,12 @@ public class RedisQuery extends QueryImpl
                 && !(clientMetadata.getIndexImplementor() != null && clientMetadata.getIndexImplementor().equals(
                         RedisIndexer.class.getName())))
         {
-            results.addAll(populateUsingLucene(entityMetadata, client, null, interpreter.getSelectedColumns()));
+            results.addAll(populateUsingLucene(entityMetadata, client, null,
+                    getColumns(getKunderaQuery().getResult(), entityMetadata)));
         }
         else
         {
+            RedisQueryInterpreter interpreter = onTranslation(getKunderaQuery().getFilterClauseQueue(), entityMetadata);
             results.addAll((List<Object>) ((RedisClient) client).onExecuteQuery(interpreter,
                     entityMetadata.getEntityClazz()));
         }

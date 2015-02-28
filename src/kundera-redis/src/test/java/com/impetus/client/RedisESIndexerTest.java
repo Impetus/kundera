@@ -117,7 +117,7 @@ public class RedisESIndexerTest
     public void tearDown() throws Exception
     {
 
-        // purge();
+         purge();
         emf.close();
     }
 
@@ -129,7 +129,7 @@ public class RedisESIndexerTest
     {
 
         logger.info("Crud tests for ES");
-        PersonRedis person2 = preparePerson("2", 40);
+        PersonRedis person2 = preparePerson("Amit","2", 40);
 
         // Persist records
         em.persist(person2);
@@ -163,11 +163,12 @@ public class RedisESIndexerTest
      * Test like.
      */
     @Test
+    //Need to enable the support
     public void testLike()
     {
-        PersonRedis person = preparePerson(ROW_KEY, 32);
+        PersonRedis person = preparePerson("Amit",ROW_KEY, 32);
         em.persist(person);
-        person = preparePerson(ROW_KEY + 1, 34);
+        person = preparePerson("Devender",ROW_KEY + 1, 34);
         em.persist(person);
         waitThread(5);
 
@@ -194,11 +195,11 @@ public class RedisESIndexerTest
         List<PersonRedis> results;
 
         // persist record.
-        PersonRedis person = preparePerson(ROW_KEY, 32);
+        PersonRedis person = preparePerson("Amit",ROW_KEY, 32);
         em.persist(person);
-        person = preparePerson(ROW_KEY + 1, 34);
+        person = preparePerson("Amit",ROW_KEY + 1, 34);
         em.persist(person);
-        person = preparePerson(ROW_KEY + 3, 29);
+        person = preparePerson("Amit",ROW_KEY + 3, 29);
         em.persist(person);
 
         waitThread(10);
@@ -320,21 +321,17 @@ public class RedisESIndexerTest
     private void testInvalidDifferentClause()
     {
         Query query;
-        // Invalid scenario.
-        try
-        {
-            String invalidDifferentClause = "Select p from PersonRedis p where p.personId=:personId AND p.age >=:age";
-            query = em.createQuery(invalidDifferentClause);
-            query.setParameter("personId", ROW_KEY);
-            query.setParameter("age", 32);
-            query.getResultList();
-            Assert.fail("Must have thrown query handler exception!");
-        }
-
-        catch (QueryHandlerException qhex)
-        {
-            Assert.assertNotNull(qhex);
-        }
+        String invalidDifferentClause = "Select p from PersonRedis p where p.personId=:personId AND p.age >=:age";
+        query = em.createQuery(invalidDifferentClause);
+        query.setParameter("personId", ROW_KEY);
+        query.setParameter("age", 32);
+        List<PersonRedis> results = query.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(1, results.size());
+        Assert.assertNotNull(results.get(0).getPersonId());
+        Assert.assertNotNull(results.get(0).getPersonName());
+        Assert.assertNotNull(results.get(0).getAge());
+      
     }
 
     /**
@@ -536,12 +533,12 @@ public class RedisESIndexerTest
      *            the age
      * @return the person redis
      */
-    private PersonRedis preparePerson(String rowId, int age)
+    private PersonRedis preparePerson(String pname , String rowId, int age)
     {
 
         PersonRedis o = new PersonRedis();
         o.setPersonId(rowId);
-        o.setPersonName("Amit");
+        o.setPersonName(pname);
         o.setAge(age);
         o.setDay(Day.MONDAY);
         o.setMonth(Month.MARCH);
