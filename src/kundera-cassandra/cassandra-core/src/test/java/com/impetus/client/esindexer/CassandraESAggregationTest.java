@@ -248,7 +248,7 @@ public class CassandraESAggregationTest
     @Test
     public void testAvgAggregation()
     {
-        String queryString = "Select avg(p.salary) from PersonESIndexerCassandraIndexerCassandra p";
+        String queryString = "Select avg(p.salary) from PersonESIndexerCassandra p";
         Query query = em.createQuery(queryString);
         List resultList = query.getResultList();
 
@@ -262,7 +262,7 @@ public class CassandraESAggregationTest
     @Test
     public void testMultiAvgAggregation()
     {
-        String avgQuery = "Select avg(p.salary), avg(p.age) from PersonESIndexerCassandraIndexerCassandra p";
+        String avgQuery = "Select avg(p.salary), avg(p.age) from PersonESIndexerCassandra p";
         Query query = em.createQuery(avgQuery);
         List resultList = query.getResultList();
 
@@ -277,7 +277,7 @@ public class CassandraESAggregationTest
     @Test
     public void testMaxMinSameFieldAggregation()
     {
-        String queryString = "Select max(p.age), min(p.age) from PersonESIndexerCassandraIndexerCassandra p";
+        String queryString = "Select max(p.age), min(p.age) from PersonESIndexerCassandra p";
         Query query = em.createQuery(queryString);
         List resultList = query.getResultList();
 
@@ -292,7 +292,7 @@ public class CassandraESAggregationTest
     @Test
     public void testMultiAggregation()
     {
-        String queryString = "Select min(p.age), min(p.salary), max(p.age), max(p.salary) from PersonESIndexerCassandraIndexerCassandra p";
+        String queryString = "Select min(p.age), min(p.salary), max(p.age), max(p.salary) from PersonESIndexerCassandra p";
         Query query = em.createQuery(queryString);
         List resultList = query.getResultList();
 
@@ -309,7 +309,7 @@ public class CassandraESAggregationTest
     @Test
     public void testMinMaxSumAvgAggregation()
     {
-        String queryString = "Select min(p.salary), max(p.salary), sum(p.salary), avg(p.salary) from PersonESIndexerCassandraIndexerCassandra p";
+        String queryString = "Select min(p.salary), max(p.salary), sum(p.salary), avg(p.salary) from PersonESIndexerCassandra p";
         Query query = em.createQuery(queryString);
         List resultList = query.getResultList();
 
@@ -326,7 +326,7 @@ public class CassandraESAggregationTest
     @Test
     public void testAttributeWithMinAggregation()
     {
-        String queryString = "Select p.age, min(p.salary) from PersonESIndexerCassandraIndexerCassandra p";
+        String queryString = "Select p.age, min(p.salary) from PersonESIndexerCassandra p";
         Query query = em.createQuery(queryString);
         List resultList = query.getResultList();
 
@@ -341,7 +341,7 @@ public class CassandraESAggregationTest
     @Test
     public void testMinWithAttributeAggregation()
     {
-        String queryString = "Select min(p.salary), p.age from PersonESIndexerCassandraIndexerCassandra p";
+        String queryString = "Select min(p.salary), p.age from PersonESIndexerCassandra p";
         Query query = em.createQuery(queryString);
         List resultList = query.getResultList();
 
@@ -356,7 +356,7 @@ public class CassandraESAggregationTest
     @Test
     public void testMaxWithAttributeAggregation()
     {
-        String queryString = "Select max(p.salary), p.salary from PersonESIndexerCassandraIndexerCassandra p";
+        String queryString = "Select max(p.salary), p.salary from PersonESIndexerCassandra p";
         Query query = em.createQuery(queryString);
         List resultList = query.getResultList();
 
@@ -371,7 +371,7 @@ public class CassandraESAggregationTest
     @Test
     public void testAttributeWithSumAggregation()
     {
-        String queryString = "Select p.age, sum(p.salary) from PersonESIndexerCassandraIndexerCassandra p";
+        String queryString = "Select p.age, sum(p.salary) from PersonESIndexerCassandra p";
         Query query = em.createQuery(queryString);
         List resultList = query.getResultList();
 
@@ -386,7 +386,7 @@ public class CassandraESAggregationTest
     @Test
     public void testSumWithAttributeSameFieldAggregation()
     {
-        String queryString = "Select sum(p.salary), p.salary from PersonESIndexerCassandraIndexerCassandra p";
+        String queryString = "Select sum(p.salary), p.salary from PersonESIndexerCassandra p";
         Query query = em.createQuery(queryString);
         List resultList = query.getResultList();
 
