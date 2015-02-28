@@ -53,6 +53,7 @@ import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.utils.KunderaCoreUtils;
 import com.impetus.kundera.utils.ReflectUtils;
 
 /**
@@ -545,24 +546,7 @@ public final class GraphEntityMapper
             return null;
         }
         Class<?> embeddableClass = m.getIdAttribute().getBindableJavaType();
-        Object embeddedObject = null;
-        try
-        {
-            embeddedObject = embeddableClass.newInstance();
-        }
-        catch (InstantiationException e)
-        {
-            log.error("Error while instantiating " + embeddableClass
-                    + ". Did you define no argument constructor? Details {}.", e);
-            throw new IllegalArgumentException("Error while instantiating " + embeddableClass
-                    + ". Did you define no argument constructor?", e);
-        }
-        catch (IllegalAccessException e)
-        {
-            log.error("Error while instantiating " + embeddableClass + ".? Details {}.", e);
-            throw new IllegalArgumentException("Error while instantiating " + embeddableClass, e);
-        }
-
+        Object embeddedObject = embeddedObject = KunderaCoreUtils.createNewInstance(embeddableClass);
         List<String> tokens = new ArrayList<String>();
         StringTokenizer st = new StringTokenizer((String) idValue, COMPOSITE_KEY_SEPARATOR);
         while (st.hasMoreTokens())
@@ -775,7 +759,7 @@ public final class GraphEntityMapper
         {
             if (entity == null)
             {
-                entity = m.getEntityClazz().newInstance();
+                entity = KunderaCoreUtils.createNewInstance(m.getEntityClazz());
             }
 
             return entity;
