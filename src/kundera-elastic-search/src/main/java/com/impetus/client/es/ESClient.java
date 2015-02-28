@@ -284,39 +284,11 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
 
         if (get.isExists())
         {
-            result = getInstance(entityClass, result);
+            result = KunderaCoreUtils.createNewInstance(entityClass);
             PropertyAccessorHelper.setId(result, metadata, key);
             result = wrap(results, entityType, result, metadata, true);
         }
 
-        return result;
-    }
-
-    /**
-     * Gets the single instance of ESClient.
-     * 
-     * @param entityClass
-     *            the entity class
-     * @param result
-     *            the result
-     * @return single instance of ESClient
-     */
-    private Object getInstance(Class entityClass, Object result)
-    {
-        try
-        {
-            result = entityClass.newInstance();
-        }
-        catch (InstantiationException iex)
-        {
-            log.error("Error while find record of {}, Caused by :.", entityClass.getSimpleName(), iex);
-            throw new PersistenceException(iex);
-        }
-        catch (IllegalAccessException iaex)
-        {
-            log.error("Error while find record of {}, Caused by :.", entityClass.getSimpleName(), iaex);
-            throw new PersistenceException(iaex);
-        }
         return result;
     }
 
@@ -405,7 +377,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
 
                 for (SearchHit hit : hits.getHits())
                 {
-                    entity = getInstance(clazz, entity);
+                    entity=KunderaCoreUtils.createNewInstance(clazz);
                     Map<String, Object> hitResult = hit.sourceAsMap();
                     results.add(wrap(hitResult, entityType, entity, entityMetadata, false));
                 }
@@ -735,7 +707,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
                 Map<String, Object> searchResults = hit.getSource();
                 // hit
                 Object result = null;
-                result = getInstance(entityClazz, result);
+                result= KunderaCoreUtils.createNewInstance(entityClazz);
                 result = wrap(searchResults, entityType, result, metadata, false);
                 if (result != null)
                 {

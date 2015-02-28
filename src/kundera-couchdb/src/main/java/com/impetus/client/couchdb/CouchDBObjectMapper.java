@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.naming.OperationNotSupportedException;
-import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
@@ -47,6 +46,7 @@ import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.utils.KunderaCoreUtils;
 import com.impetus.kundera.utils.ReflectUtils;
 
 /**
@@ -216,7 +216,7 @@ public class CouchDBObjectMapper
         // Map to hold property-name=>foreign-entity relations
         try
         {
-            entity = entityClass.newInstance();
+            entity = KunderaCoreUtils.createNewInstance(entityClass);
 
             // Populate primary key column
             JsonElement rowKey = jsonObj.get(((AbstractAttribute) m.getIdAttribute()).getJPAColumnName());
@@ -359,24 +359,13 @@ public class CouchDBObjectMapper
      */
     static Object getObjectFromJson(JsonObject jsonObj, Class clazz, Set<Attribute> columns)
     {
-        try
+        Object obj = KunderaCoreUtils.createNewInstance(clazz);
+        for (Attribute column : columns)
         {
-            Object obj = clazz.newInstance();
-            for (Attribute column : columns)
-            {
-                JsonElement value = jsonObj.get(((AbstractAttribute) column).getJPAColumnName());
-                setFieldValue(obj, column, value);
-            }
-            return obj;
+            JsonElement value = jsonObj.get(((AbstractAttribute) column).getJPAColumnName());
+            setFieldValue(obj, column, value);
         }
-        catch (InstantiationException e)
-        {
-            throw new PersistenceException(e);
-        }
-        catch (IllegalAccessException e)
-        {
-            throw new PersistenceException(e);
-        }
+        return obj;
     }
 
     /**
