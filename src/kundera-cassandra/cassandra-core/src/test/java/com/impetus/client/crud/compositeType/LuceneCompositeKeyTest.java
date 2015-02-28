@@ -47,9 +47,9 @@ import com.impetus.kundera.utils.LuceneCleanupUtilities;
  */
 public class LuceneCompositeKeyTest
 {
-    private static final String PERSISTENCE_UNIT = "luceneCassandraTest";
+    private static final String PERSISTENCE_UNIT = "cassandra_cql";
 
-    private static final String _keyspace = "KunderaExamples";
+    private static final String _keyspace = "CqlKeyspace";
 
     private static final String LUCENE_DIR_PATH = "./lucene";
 
@@ -70,6 +70,7 @@ public class LuceneCompositeKeyTest
     public void setUp() throws Exception
     {
         puProperties.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
+        puProperties.put("index.home.dir", "lucene");
         CassandraCli.cassandraSetUp();
         CassandraCli.initClient();
         CassandraCli.createKeySpace(_keyspace);
