@@ -29,7 +29,7 @@ import com.impetus.kundera.index.IndexCollection;
 @Entity
 @Table(name = "PERSON_ESINDEXER", schema = "KunderaExamples@esIndexerTest")
 @IndexCollection(columns = { @com.impetus.kundera.index.Index(name = "personName"),
-        @com.impetus.kundera.index.Index(name = "age"), @com.impetus.kundera.index.Index(name = "date") })
+        @com.impetus.kundera.index.Index(name = "age"), @com.impetus.kundera.index.Index(name = "date"),@com.impetus.kundera.index.Index(name = "salary") })
 public class PersonESIndexerCassandra
 {
 
@@ -57,10 +57,23 @@ public class PersonESIndexerCassandra
     /** The person name. */
     @Column(name = "PERSON_NAME")
     private String personName;
+    
+    @Column
+    private Double salary;
+
+    public Double getSalary()
+    {
+        return salary;
+    }
+
+    public void setSalary(Double salary)
+    {
+        this.salary = salary;
+    }
 
     /** The age. */
     @Column(name = "AGE")
-    private String age;
+    private Integer age;
     
     @Column(name = "DATE")
     private Timestamp date;
@@ -142,7 +155,7 @@ public class PersonESIndexerCassandra
     /**
      * @return the age
      */
-    public String getAge()
+    public Integer getAge()
     {
         return age;
     }
@@ -151,7 +164,7 @@ public class PersonESIndexerCassandra
      * @param age
      *            the age to set
      */
-    public void setAge(String age)
+    public void setAge(Integer age)
     {
         this.age = age;
     }

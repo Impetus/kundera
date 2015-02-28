@@ -655,7 +655,7 @@ public class PersonCassandraESIndexerTest extends BaseTest {
         PersonESIndexerCassandra o = new PersonESIndexerCassandra();
         o.setPersonId(rowKey);
         o.setPersonName("vivek");
-        o.setAge(age + "");
+        o.setAge(age);
         o.setDay(PersonESIndexerCassandra.Day.MONDAY);
         return o;
     }
