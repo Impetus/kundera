@@ -35,7 +35,6 @@ import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.MasterNotRunningException;
@@ -893,7 +892,7 @@ public class HBaseDataHandler implements DataHandler
 
                 for (HBaseData data : results)
                 {
-                    entity = clazz.newInstance(); // Entity Object
+                    entity = KunderaCoreUtils.createNewInstance(clazz);
                     /* Set Row Key */
 
                     MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
@@ -926,16 +925,6 @@ public class HBaseDataHandler implements DataHandler
                     output.add(obj);
                 }
             }
-        }
-        catch (InstantiationException iex)
-        {
-            log.error("Error while creating an instance of {} .", clazz);
-            throw new PersistenceException(iex);
-        }
-        catch (IllegalAccessException iaex)
-        {
-            log.error("Illegal Access while reading data from {}, Caused by: .", tableName, iaex);
-            throw new PersistenceException(iaex);
         }
         catch (Exception e)
         {

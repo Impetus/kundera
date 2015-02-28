@@ -312,23 +312,11 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
     private Object instantiateEntity(Class entityClass, Object entity)
     {
-        try
+        if (entity == null)
         {
-            if (entity == null)
-            {
-                return entityClass.newInstance();
-            }
-            return entity;
+            return KunderaCoreUtils.createNewInstance(entityClass);
         }
-        catch (InstantiationException e)
-        {
-            log.error("Error while instantiating " + entityClass + ", Caused by: ", e);
-        }
-        catch (IllegalAccessException e)
-        {
-            log.error("Error while instantiating " + entityClass + ", Caused by: ", e);
-        }
-        return null;
+        return entity;
     }
 
     /*
