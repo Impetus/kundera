@@ -73,17 +73,7 @@ public class LuceneCompositeKeyTest
         CassandraCli.cassandraSetUp();
         CassandraCli.initClient();
         CassandraCli.createKeySpace(_keyspace);
-        try
-        {
-            CassandraCli
-                    .executeCqlQuery(
-                            "create table \"EntityWithMultiplePartitionKey\"(\"partitionKey1\" text, \"partitionKey2\" int, \"clusterkey1\" text, \"clusterkey2\" int, \"entityDiscription\" text, action text, PRIMARY KEY((\"partitionKey1\", \"partitionKey2\"), \"clusterkey1\", \"clusterkey2\"))",
-                            _keyspace);
-        }
-        catch (Exception e)
-        {
-            log.warn(e.getMessage());
-        }
+        
     }
 
     @After
@@ -217,6 +207,7 @@ public class LuceneCompositeKeyTest
     @Test
     public void lucenePartitionKeyTest()
     {
+        createMultiplePatitionKeyTable();
         puProperties.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "");
         emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT, puProperties);
         em = emf.createEntityManager();
@@ -441,5 +432,19 @@ public class LuceneCompositeKeyTest
             Assert.assertEquals("Incomplete partition key fields in query", e.getMessage());
         }
 
+    }
+    
+    private void createMultiplePatitionKeyTable() {
+        try
+        {
+            CassandraCli
+                    .executeCqlQuery(
+                            "create table \"EntityWithMultiplePartitionKey\"(\"partitionKey1\" text, \"partitionKey2\" int, \"clusterkey1\" text, \"clusterkey2\" int, \"entityDiscription\" text, action text, PRIMARY KEY((\"partitionKey1\", \"partitionKey2\"), \"clusterkey1\", \"clusterkey2\"))",
+                            _keyspace);
+        }
+        catch (Exception e)
+        {
+            log.warn(e.getMessage());
+        }
     }
 }

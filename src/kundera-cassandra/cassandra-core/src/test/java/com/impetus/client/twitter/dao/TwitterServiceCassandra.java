@@ -140,10 +140,10 @@ public class TwitterServiceCassandra extends SuperDaoCassandra implements Twitte
         UserCassandra user = em.find(UserCassandra.class, userId);
         UserCassandra friend = em.find(UserCassandra.class, friendUserId);
 
- //       user.addFriend(friend);
+        user.addFriend(friend);
         em.persist(user);
 
-   //     friend.addFollower(user);
+        friend.addFollower(user);
         em.persist(friend);
     }
 
@@ -153,7 +153,7 @@ public class TwitterServiceCassandra extends SuperDaoCassandra implements Twitte
         UserCassandra user = em.find(UserCassandra.class, userId);
         UserCassandra follower = em.find(UserCassandra.class, followerUserId);
 
-     //   user.addFollower(follower);
+        user.addFollower(follower);
         em.persist(user);
     }
 
