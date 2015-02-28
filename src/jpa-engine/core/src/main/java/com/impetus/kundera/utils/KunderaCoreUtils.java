@@ -383,7 +383,9 @@ public class KunderaCoreUtils
     }
 
     /**
-     * cheking whether all the fields of partition key are present in the jpa query 
+     * cheking whether all the fields of partition key are present in the jpa
+     * query
+     * 
      * @param filterQueue
      * @param metaModel
      * @param metadata
@@ -417,6 +419,7 @@ public class KunderaCoreUtils
 
     /**
      * recursively populate all the fields present in partition key
+     * 
      * @param embeddedAttributes
      * @param metaModel
      * @param embeddedIdFields
@@ -598,7 +601,7 @@ public class KunderaCoreUtils
         {
             if (entity == null)
             {
-                entity = m.getEntityClazz().newInstance();
+                entity = createNewInstance(m.getEntityClazz());
             }
             if (id != null)
             {
@@ -634,7 +637,7 @@ public class KunderaCoreUtils
         {
             if (record == null)
             {
-                record = clazz.newInstance();
+                record = createNewInstance(clazz);
             }
             return record;
         }
@@ -643,17 +646,22 @@ public class KunderaCoreUtils
             throw new PersistenceException("Error occured while instantiating entity.", e);
         }
     }
+
     /**
      * @param clazz
      * @return
      */
-    public static Object createNewInstance(Class clazz) {
+    public static Object createNewInstance(Class clazz)
+    {
         Object target = null;
-        try {
+        try
+        {
             Constructor[] constructors = clazz.getDeclaredConstructors();
-            for (Constructor constructor : constructors) {
+            for (Constructor constructor : constructors)
+            {
                 if ((Modifier.isProtected(constructor.getModifiers()) || Modifier.isPublic(constructor.getModifiers()))
-                    && constructor.getParameterTypes().length == 0) {
+                        && constructor.getParameterTypes().length == 0)
+                {
                     constructor.setAccessible(true);
                     target = constructor.newInstance();
                     constructor.setAccessible(false);
@@ -662,20 +670,24 @@ public class KunderaCoreUtils
             }
             return target;
 
-        } catch (InstantiationException iex) {
+        }
+        catch (InstantiationException iex)
+        {
             logger.error("Error while creating an instance of {} .", clazz);
             throw new PersistenceException(iex);
         }
 
-        catch (IllegalAccessException iaex) {
+        catch (IllegalAccessException iaex)
+        {
             logger.error("Illegal Access while reading data from {}, Caused by: .", clazz, iaex);
             throw new PersistenceException(iaex);
         }
 
-        catch (Exception e) {
+        catch (Exception e)
+        {
             logger.error("Error while creating an instance of {}, Caused by: .", clazz, e);
             throw new PersistenceException(e);
         }
     }
-    
+
 }
