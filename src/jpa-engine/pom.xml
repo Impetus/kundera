@@ -5,12 +5,12 @@
   <parent>
         <groupId>com.impetus</groupId>
         <artifactId>kundera</artifactId>
-	<version> 2.15.1</version>
+	<version> 2.16-SNAPSHOT</version>
   </parent>
 
   <groupId>com.impetus.kundera.core</groupId>
   <artifactId>core-parent</artifactId>
-  <version> 2.15.1</version>
+  <version> 2.16-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>kundera-core-parent</name>
