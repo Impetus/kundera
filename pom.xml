@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -37,9 +38,29 @@
 			<email>vivek.mishra@impetus.co.in</email>
 		</developer>
 		<developer>
-			<id>chhavi.gangwal</id>
+			<id>chhavigangwal</id>
 			<name>Chhavi Gangwal</name>
 			<email>chhavi.gangwal@impetus.co.in</email>
+		</developer>
+		<developer>
+			<id>amit-kr</id>
+			<name>Amit Kumar</name>
+			<email>amitr.kumar@impetus.co.in</email>
+		</developer>
+		<developer>
+			<id>devender-yadav</id>
+			<name>Devender Yadav</name>
+			<email>devdner.yadav@impetus.co.in</email>
+		</developer>
+		<developer>
+			<id>karthikprasad13</id>
+			<name>Karthik Prasad Machala</name>
+			<email>karthikp.manchala@impetus.co.in</email>
+		</developer>
+		<developer>
+			<id>pragalbhgarg</id>
+			<name>Pragalbh Garg</name>
+			<email>pragalbh.garg@impetus.co.in</email>
 		</developer>
 		<developer>
 			<id>Kuldeep.mishra</id>
@@ -108,24 +129,24 @@
 			</modules>
 		</profile>
 
-	        <profile>
+		<profile>
 			<id>benchmark</id>
 			<modules>
-                                <module>test</module>
+				<module>test</module>
 			</modules>
 		</profile>
 
-	        <profile>
+		<profile>
 			<id>examples</id>
 			<modules>
-                                <module>examples</module>
+				<module>examples</module>
 			</modules>
 		</profile>
 
 	</profiles>
 
 	<build>
-		
+
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

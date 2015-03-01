@@ -41,6 +41,31 @@
       <email>amresh1002@gmail.com</email>
     </developer>
     <developer>
+			<id>chhavigangwal</id>
+			<name>Chhavi Gangwal</name>
+			<email>chhavi.gangwal@impetus.co.in</email>
+		</developer>
+		<developer>
+			<id>amit-kr</id>
+			<name>Amit Kumar</name>
+			<email>amitr.kumar@impetus.co.in</email>
+		</developer>
+		<developer>
+			<id>devender-yadav</id>
+			<name>Devender Yadav</name>
+			<email>devdner.yadav@impetus.co.in</email>
+		</developer>
+		<developer>
+			<id>karthikprasad13</id>
+			<name>Karthik Prasad Machala</name>
+			<email>karthikp.manchala@impetus.co.in</email>
+		</developer>
+		<developer>
+			<id>pragalbhgarg</id>
+			<name>Pragalbh Garg</name>
+			<email>pragalbh.garg@impetus.co.in</email>
+		</developer>
+    <developer>
       <id>Kuldeep.mishra</id>
       <name>Kuldeep Kumar Mishra</name>
       <email>kuld.cs.mishra@gmail.com</email>
