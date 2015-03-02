@@ -94,8 +94,13 @@ public class HBaseQuery extends QueryImpl
     @Override
     protected List<Object> populateEntities(EntityMetadata m, Client client)
     {
-        List results = onQuery(m, client);
-        return results;
+        if(!kunderaQuery.isAggregated()){
+            List results = onQuery(m, client);
+            return results;
+        }
+        else{
+            return populateUsingLucene(m, client, null, kunderaQuery.getResult());
+        }
     }
 
     /*
