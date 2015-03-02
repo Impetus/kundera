@@ -56,7 +56,14 @@ Currently Supported Datasources
 
 Recent Releases
 ================================
-####Please Note: trunk is current development branch. kundera-2.15 is released tag.
+####Please Note: trunk is current development branch. kundera-2.15.1 is released tag.
+
+#### 2-March-2015 - Kundera 2.15.1 released
+This release includes [bug fixes] (https://github.com/impetus-opensource/Kundera/wiki/Bug-Fixes), additional  improvements and the following new features compared to version 2.15:
+   * Support added for Cassandra-2.1.x version.
+   * Support for Cassandra User Defined Types as embeddables.
+   * Aggregation support available with elastic search is also enabled in Kundera 
+  (Support for aggregate functions is also extended for other Kundera clients' by using Elastic search as indexing store.)
 
 #### 12-January-2015 - Kundera 2.15 released
 This release includes [bug fixes] (https://github.com/impetus-opensource/Kundera/wiki/Bug-Fixes), additional  improvements and the following new features compared to version 2.14:
