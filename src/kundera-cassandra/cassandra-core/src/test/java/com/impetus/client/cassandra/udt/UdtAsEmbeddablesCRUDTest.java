@@ -597,8 +597,7 @@ public class UdtAsEmbeddablesCRUDTest
     @After
     public void tearDown() throws Exception
     {
-        // CassandraCli.dropKeySpace("UdtTest");
-        // CassandraCli.truncateColumnFamily("UdtTest", "person_udt");
+         CassandraCli.dropKeySpace("UdtTest");
     }
 
     /**
