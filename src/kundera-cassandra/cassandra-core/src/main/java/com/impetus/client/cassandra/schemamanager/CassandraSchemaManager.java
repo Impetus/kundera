@@ -753,6 +753,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 if (!compositeColumns.isEmpty())
                 {
                     // embedded create udts
+                    // check for multiple embedded and collections in embedded entity
+                    createTypeforEmbeddables();
                     onEmbeddedColumns(translator, tableInfo, queryBuilder, ksDef);
 
                 }
@@ -840,10 +842,6 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                     translator.ensureCase(new StringBuilder(),
                             embColInfo.getEmbeddable().getJavaType().getSimpleName(), false).toString());
             StringBuilder typeQueryBuilder = new StringBuilder();
-
-            // check for multiple embedded and collections in embedded entity
-
-            createTypeforEmbeddables();
 
             String cqlType = CQLTranslator.FROZEN + "<\"" + embColInfo.getEmbeddable().getJavaType().getSimpleName()
                     + "\">, ";
