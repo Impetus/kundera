@@ -13,15 +13,18 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
- /*
+/*
  * author: karthikp.manchala
  */
 package com.impetus.client.cassandra.udt;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class ProfessionalDetailsUDT.
  */
@@ -35,7 +38,15 @@ public class ProfessionalDetailsUDT
 
     /** The project. */
     @Column
-    private String project;
+    private List<Integer> extentions;
+
+    /** The colleagues. */
+    @Column
+    private Set<String> colleagues;
+
+    /** The projects. */
+    @Column
+    private Map<Integer, String> projects;
 
     /** The grade. */
     @Column
@@ -47,7 +58,7 @@ public class ProfessionalDetailsUDT
 
     /**
      * Gets the company.
-     *
+     * 
      * @return the company
      */
     public String getCompany()
@@ -57,8 +68,9 @@ public class ProfessionalDetailsUDT
 
     /**
      * Sets the company.
-     *
-     * @param company the new company
+     * 
+     * @param company
+     *            the new company
      */
     public void setCompany(String company)
     {
@@ -66,28 +78,71 @@ public class ProfessionalDetailsUDT
     }
 
     /**
-     * Gets the project.
-     *
-     * @return the project
+     * Gets the extentions.
+     * 
+     * @return the extentions
      */
-    public String getProject()
+    public List<Integer> getExtentions()
     {
-        return project;
+        return extentions;
     }
 
     /**
-     * Sets the project.
-     *
-     * @param project the new project
+     * Sets the extentions.
+     * 
+     * @param extentions
+     *            the new extentions
      */
-    public void setProject(String project)
+    public void setExtentions(List<Integer> extentions)
     {
-        this.project = project;
+        this.extentions = extentions;
+    }
+
+    /**
+     * Gets the colleagues.
+     * 
+     * @return the colleagues
+     */
+    public Set<String> getColleagues()
+    {
+        return colleagues;
+    }
+
+    /**
+     * Sets the colleagues.
+     * 
+     * @param colleagues
+     *            the new colleagues
+     */
+    public void setColleagues(Set<String> colleagues)
+    {
+        this.colleagues = colleagues;
+    }
+
+    /**
+     * Gets the projects.
+     * 
+     * @return the projects
+     */
+    public Map<Integer, String> getProjects()
+    {
+        return projects;
+    }
+
+    /**
+     * Sets the projects.
+     * 
+     * @param projects
+     *            the projects
+     */
+    public void setProjects(Map<Integer, String> projects)
+    {
+        this.projects = projects;
     }
 
     /**
      * Gets the grade.
-     *
+     * 
      * @return the grade
      */
     public String getGrade()
@@ -97,8 +152,9 @@ public class ProfessionalDetailsUDT
 
     /**
      * Sets the grade.
-     *
-     * @param grade the new grade
+     * 
+     * @param grade
+     *            the new grade
      */
     public void setGrade(String grade)
     {
@@ -107,7 +163,7 @@ public class ProfessionalDetailsUDT
 
     /**
      * Gets the monthly salary.
-     *
+     * 
      * @return the monthly salary
      */
     public Double getMonthlySalary()
@@ -117,8 +173,9 @@ public class ProfessionalDetailsUDT
 
     /**
      * Sets the monthly salary.
-     *
-     * @param monthlySalary the new monthly salary
+     * 
+     * @param monthlySalary
+     *            the new monthly salary
      */
     public void setMonthlySalary(Double monthlySalary)
     {

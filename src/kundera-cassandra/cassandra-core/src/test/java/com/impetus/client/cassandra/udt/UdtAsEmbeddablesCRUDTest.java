@@ -44,7 +44,6 @@ import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class UdtAsEmbeddablesCRUDTest.
  */
@@ -85,7 +84,7 @@ public class UdtAsEmbeddablesCRUDTest
 
         emf = Persistence.createEntityManagerFactory(PU, propertyMap);
         entityManager = emf.createEntityManager();
-      
+
     }
 
     /**
@@ -398,7 +397,6 @@ public class UdtAsEmbeddablesCRUDTest
      */
     private void assertEntity(PersonUDT expected, PersonUDT actual)
     {
-        // TODO Auto-generated method stub
         Assert.assertEquals(expected.getEmail(), actual.getEmail());
         Assert.assertEquals(expected.getPassword(), actual.getPassword());
         Assert.assertEquals(expected.getPersonId(), actual.getPersonId());
@@ -418,10 +416,21 @@ public class UdtAsEmbeddablesCRUDTest
         Assert.assertEquals(expected.getProfessionalDetails().getCompany(), actual.getProfessionalDetails()
                 .getCompany());
         Assert.assertEquals(expected.getProfessionalDetails().getGrade(), actual.getProfessionalDetails().getGrade());
-        Assert.assertEquals(expected.getProfessionalDetails().getProject(), actual.getProfessionalDetails()
-                .getProject());
         Assert.assertEquals(expected.getProfessionalDetails().getMonthlySalary(), actual.getProfessionalDetails()
                 .getMonthlySalary());
+        // assert collection data
+        Assert.assertEquals(expected.getProfessionalDetails().getProjects().get(0), actual.getProfessionalDetails()
+                .getProjects().get(0));
+        Assert.assertEquals(expected.getProfessionalDetails().getProjects().get(1), actual.getProfessionalDetails()
+                .getProjects().get(1));
+        Assert.assertEquals(
+                true,
+                expected.getProfessionalDetails().getColleagues()
+                        .containsAll(actual.getProfessionalDetails().getColleagues()));
+        Assert.assertEquals(expected.getProfessionalDetails().getExtentions().get(0), actual.getProfessionalDetails()
+                .getExtentions().get(0));
+        Assert.assertEquals(expected.getProfessionalDetails().getExtentions().get(1), actual.getProfessionalDetails()
+                .getExtentions().get(1));
 
     }
 
@@ -432,7 +441,6 @@ public class UdtAsEmbeddablesCRUDTest
      */
     private Object prepareDataLevel3()
     {
-        // TODO Auto-generated method stub
         PersonUDT personUDT = new PersonUDT();
         personUDT.setPersonId("3");
         personUDT.setEmail("devender@impetus.com");
@@ -455,7 +463,6 @@ public class UdtAsEmbeddablesCRUDTest
      */
     private Object prepareDataLevel4()
     {
-        // TODO Auto-generated method stub
         PersonUDT personUDT = new PersonUDT();
         personUDT.setPersonId("4");
         personUDT.setEmail("devender@impetus.com");
@@ -478,7 +485,6 @@ public class UdtAsEmbeddablesCRUDTest
      */
     private Object prepareDataLevel2()
     {
-        // TODO Auto-generated method stub
         PersonUDT personUDT = new PersonUDT();
         personUDT.setPersonId("2");
         personUDT.setEmail("pragalbh@impetus.com");
@@ -502,7 +508,6 @@ public class UdtAsEmbeddablesCRUDTest
      */
     private Object prepareDataLevel1()
     {
-        // TODO Auto-generated method stub
         PersonUDT personUDT = new PersonUDT();
         personUDT.setPersonId("1");
         personUDT.setEmail("karthik@impetus.com");
@@ -526,12 +531,22 @@ public class UdtAsEmbeddablesCRUDTest
      */
     private ProfessionalDetailsUDT loadProfessionalDetails()
     {
-        // TODO Auto-generated method stub
+        Map<Integer, String> projects = new HashMap<Integer, String>();
+        projects.put(1111, "iLabs");
+        projects.put(2222, "Kundera");
+        List<Integer> extns = new ArrayList<Integer>();
+        extns.add(4526);
+        extns.add(2810);
+        Set<String> colleagues = new HashSet<String>();
+        colleagues.add("Pavan");
+        colleagues.add("Gautam");
         ProfessionalDetailsUDT profDetails = new ProfessionalDetailsUDT();
         profDetails.setCompany("impetus");
         profDetails.setGrade("g4");
         profDetails.setMonthlySalary((double) 12345);
-        profDetails.setProject("iLabs");
+        profDetails.setProjects(projects);
+        profDetails.setColleagues(colleagues);
+        profDetails.setExtentions(extns);
 
         return profDetails;
     }
@@ -547,7 +562,6 @@ public class UdtAsEmbeddablesCRUDTest
      */
     private PersonalDetailsUDT loadPersonalDetails(String firstname, String lastname)
     {
-        // TODO Auto-generated method stub
         PersonalDetailsUDT personalDetails = new PersonalDetailsUDT();
         Address addresses = new Address();
         addresses.setCity("indore");
@@ -583,10 +597,13 @@ public class UdtAsEmbeddablesCRUDTest
     @After
     public void tearDown() throws Exception
     {
-        CassandraCli.dropKeySpace("UdtTest");
-       // CassandraCli.truncateColumnFamily("UdtTest", "person_udt");
+        // CassandraCli.dropKeySpace("UdtTest");
+        // CassandraCli.truncateColumnFamily("UdtTest", "person_udt");
     }
-    
+
+    /**
+     * Tear down after class.
+     */
     @AfterClass
     public static void tearDownAfterClass()
     {
@@ -597,8 +614,7 @@ public class UdtAsEmbeddablesCRUDTest
             emf.close();
             emf = null;
         }
-       
-    }
 
+    }
 
 }

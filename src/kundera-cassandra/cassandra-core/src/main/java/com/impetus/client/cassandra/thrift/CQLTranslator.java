@@ -371,15 +371,14 @@ public final class CQLTranslator
                     {
 
                         StringBuilder embeddedValueBuilder = new StringBuilder("{");
-                    
 
                         for (Field embeddableColumn : field.getType().getDeclaredFields())
                         {
                             if (!ReflectUtils.isTransientOrStatic(embeddableColumn))
                             {
-                                Attribute subAttribute = (SingularAttribute) embeddableKey
+                                AbstractAttribute subAttribute = (AbstractAttribute) embeddableKey
                                         .getAttribute(embeddableColumn.getName());
-                                if (metaModel.isEmbeddable(((AbstractAttribute) subAttribute).getBindableJavaType()))
+                                if (metaModel.isEmbeddable(subAttribute.getBindableJavaType()))
                                 {
                                     // construct map; recursive
                                     // send attribute
@@ -399,7 +398,7 @@ public final class CQLTranslator
                                 }
                                 embeddedValueBuilder.append(",");
                             }
-                            
+
                         }
                         // strip last char and append '}'
                         embeddedValueBuilder.deleteCharAt(embeddedValueBuilder.length() - 1);
@@ -478,7 +477,7 @@ public final class CQLTranslator
                     }
                     tempBuilder.append(",");
                 }
-                
+
             }
             // strip last char and append '}'
             tempBuilder.deleteCharAt(tempBuilder.length() - 1);
