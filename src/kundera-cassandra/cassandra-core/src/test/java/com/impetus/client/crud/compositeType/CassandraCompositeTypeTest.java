@@ -18,6 +18,7 @@ package com.impetus.client.crud.compositeType;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -52,17 +53,24 @@ import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
 
 public class CassandraCompositeTypeTest
 {
+
+    /** The Constant PERSISTENCE_UNIT. */
     private static final String PERSISTENCE_UNIT = "composite_pu";
 
+    /** The emf. */
     private EntityManagerFactory emf;
 
     /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(CassandraCompositeTypeTest.class);
 
+    /** The current date. */
     private Date currentDate = new Date();
 
     /**
-     * @throws java.lang.Exception
+     * Sets the up.
+     * 
+     * @throws Exception
+     *             the exception
      */
     @Before
     public void setUp() throws Exception
@@ -72,6 +80,12 @@ public class CassandraCompositeTypeTest
 
     }
 
+    /**
+     * On add column.
+     * 
+     * @throws Exception
+     *             the exception
+     */
     @Test
     public void onAddColumn() throws Exception
     {
@@ -114,6 +128,12 @@ public class CassandraCompositeTypeTest
     }
 
     // @Test
+    /**
+     * On alter column type.
+     * 
+     * @throws Exception
+     *             the exception
+     */
     public void onAlterColumnType() throws Exception
     {
         // Here tweetDate is of type "int". On update will be changed to
@@ -151,6 +171,9 @@ public class CassandraCompositeTypeTest
         em.close();
     }
 
+    /**
+     * On query.
+     */
     @Test
     public void onQuery()
     {
@@ -300,6 +323,9 @@ public class CassandraCompositeTypeTest
         em.clear();// optional,just to clear persistence cache.
     }
 
+    /**
+     * On named query test.
+     */
     @Test
     public void onNamedQueryTest()
     {
@@ -308,6 +334,22 @@ public class CassandraCompositeTypeTest
         deleteNamed();
     }
 
+    /**
+     * On named query batch test.
+     */
+    @Test
+    public void onNamedQueryBatchTest()
+    {
+        Map propertyMap = new HashMap();
+        propertyMap.put("kundera.batch.size", "5");
+        emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT, propertyMap);
+        insertUpdateBatch();
+        deleteBatch();
+    }
+
+    /**
+     * On limit.
+     */
     @Test
     public void onLimit()
     {
@@ -360,6 +402,9 @@ public class CassandraCompositeTypeTest
         Assert.assertNull(results.get(0).getKey().getFullName());
     }
 
+    /**
+     * On order by clause.
+     */
     @Test
     public void onOrderBYClause()
     {
@@ -446,6 +491,9 @@ public class CassandraCompositeTypeTest
         }
     }
 
+    /**
+     * On in clause.
+     */
     @Test
     public void onInClause()
     {
@@ -588,11 +636,14 @@ public class CassandraCompositeTypeTest
         catch (Exception e)
         {
             Assert.assertEquals(
-"javax.persistence.PersistenceException: com.impetus.kundera.KunderaException: InvalidRequestException(why:Clustering column \"tweetId\" cannot be restricted by an IN relation)",
+                    "javax.persistence.PersistenceException: com.impetus.kundera.KunderaException: InvalidRequestException(why:Clustering column \"tweetId\" cannot be restricted by an IN relation)",
                     e.getMessage());
         }
     }
 
+    /**
+     * On batch insert.
+     */
     @Test
     public void onBatchInsert()
     {
@@ -619,9 +670,10 @@ public class CassandraCompositeTypeTest
     }
 
     /**
-     * CompositeUserDataType
+     * CompositeUserDataType.
      * 
-     * @throws java.lang.Exception
+     * @throws Exception
+     *             the exception
      */
     @After
     public void tearDown() throws Exception
@@ -637,6 +689,9 @@ public class CassandraCompositeTypeTest
     // DO NOT DELETE IT!! though it is automated with schema creation option.
     /**
      * create column family script for compound key.
+     * 
+     * @param cql
+     *            the cql
      */
     private void executeScript(final String cql)
     {
@@ -646,6 +701,11 @@ public class CassandraCompositeTypeTest
 
     /**
      * CRUD over Compound primary Key.
+     * 
+     * @param em
+     *            the em
+     * @param key
+     *            the key
      */
 
     private void onCRUD(final EntityManager em, CassandraCompoundKey key)
@@ -704,8 +764,6 @@ public class CassandraCompositeTypeTest
 
     /**
      * Update by Named Query.
-     * 
-     * @return
      */
     private void updateNamed()
     {
@@ -766,6 +824,86 @@ public class CassandraCompositeTypeTest
 
         Query q = em.createQuery(deleteQuery);
         q.setParameter("key", key);
+        q.executeUpdate();
+
+        CassandraPrimeUser result = em.find(CassandraPrimeUser.class, key);
+        Assert.assertNull(result);
+        em.close();
+    }
+
+    /**
+     * Insert update batch.
+     */
+    private void insertUpdateBatch()
+    {
+        EntityManager em = emf.createEntityManager();
+
+        Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
+        Client client = clients.get(PERSISTENCE_UNIT);
+        ((CassandraClientBase) client).setCqlVersion("3.0.0");
+
+        UUID timeLineId = UUID.randomUUID();
+
+        CassandraCompoundKey key = new CassandraCompoundKey("mevivs", 1, timeLineId);
+        CassandraPrimeUser user = new CassandraPrimeUser(key);
+        user.setTweetBody("my first tweet");
+        user.setTweetDate(currentDate);
+        em.persist(user);
+        CassandraCompoundKey key1 = new CassandraCompoundKey("mevivs", 2, timeLineId);
+        CassandraPrimeUser user1 = new CassandraPrimeUser(key1);
+        user1.setTweetBody("my first tweet");
+        user1.setTweetDate(currentDate);
+        em.persist(user1);
+        CassandraCompoundKey key2 = new CassandraCompoundKey("mevivs", 3, timeLineId);
+        CassandraPrimeUser user2 = new CassandraPrimeUser(key2);
+        user2.setTweetBody("my first tweet");
+        user2.setTweetDate(currentDate);
+        em.persist(user2);
+
+        em.close();
+        em = emf.createEntityManager();
+        clients = (Map<String, Client>) em.getDelegate();
+        client = clients.get(PERSISTENCE_UNIT);
+        ((CassandraClientBase) client).setCqlVersion("3.0.0");
+
+        String updateQuery = "Update CassandraPrimeUser u SET u.tweetBody='after merge' where u.key= :beforeUpdate";
+        Query q = em.createQuery(updateQuery);
+        q.setParameter("beforeUpdate", key);
+        q.executeUpdate();
+
+        em.close(); // optional,just to clear persistence cache.
+
+        em = emf.createEntityManager();
+        clients = (Map<String, Client>) em.getDelegate();
+        client = clients.get(PERSISTENCE_UNIT);
+        ((CassandraClientBase) client).setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
+
+        CassandraPrimeUser result = em.find(CassandraPrimeUser.class, key);
+        Assert.assertNotNull(result);
+        Assert.assertEquals("after merge", result.getTweetBody());
+        Assert.assertEquals(timeLineId, result.getKey().getTimeLineId());
+        Assert.assertEquals(currentDate.getTime(), result.getTweetDate().getTime());
+        em.close();
+    }
+
+    /**
+     * Delete batch.
+     */
+    private void deleteBatch()
+    {
+        UUID timeLineId = UUID.randomUUID();
+
+        CassandraCompoundKey key = new CassandraCompoundKey("mevivs", 1, timeLineId);
+
+        String deleteQuery = "Delete From CassandraPrimeUser u where u.key.userId= :userId";
+        EntityManager em = emf.createEntityManager();
+        Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
+        Client client = clients.get(PERSISTENCE_UNIT);
+        ((CassandraClientBase) client).setCqlVersion("3.0.0");
+
+        Query q = em.createQuery(deleteQuery);
+        q.setParameter("userId", "mevivs");
+
         q.executeUpdate();
 
         CassandraPrimeUser result = em.find(CassandraPrimeUser.class, key);

@@ -33,10 +33,11 @@ public class CassandraCompoundKey implements Serializable
     private String userId;
 
     @Column
-    private int tweetId;
-
-    @Column
     private UUID timeLineId;
+    
+    @Column
+    private int tweetId;
+  
 
     @Column
     private transient String fullName;

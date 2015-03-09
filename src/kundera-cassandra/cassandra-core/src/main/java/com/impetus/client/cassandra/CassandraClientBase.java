@@ -1429,6 +1429,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                         if (node.isInState(RemovedState.class)) {
                             String query;
                             query = onDeleteQuery(metadata, metadata.getTableName(), metaModel, id);
+                            batchQueryBuilder.append(" ");
                             batchQueryBuilder.append(query);
                         } else {
                             List<String> insertQueries =
