@@ -142,6 +142,12 @@ public class CassandraBatchProcessorTest
         List<PersonBatchCassandraEntity> results = query.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(10, results.size());
+        
+        sql = " Delete from PersonBatchCassandraEntity p";
+        query = em.createQuery(sql);
+        results = query.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(0, results.size());
     }
 
     /**

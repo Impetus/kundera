@@ -23,6 +23,7 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.Query;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -116,8 +117,14 @@ public class CQL3BatchProcessorTest
         // flush all on close.
         // explicit flush on close
         em.clear();
+        
+        
+        String sql = " Delete from CQLUser p";
+        Query query = em.createQuery(sql);
+        List<PersonBatchCassandraEntity> results = query.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(0, results.size());
         em.close();
-
     }
 
     /**
