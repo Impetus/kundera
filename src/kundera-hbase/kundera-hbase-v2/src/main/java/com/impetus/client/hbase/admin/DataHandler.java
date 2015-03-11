@@ -28,7 +28,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 
 /**
  * @author Pragalbh Garg
- *
+ * 
  */
 public interface DataHandler
 {
@@ -67,7 +67,7 @@ public interface DataHandler
      *             Signals that an I/O exception has occurred.
      */
     List readData(String tableName, Class clazz, EntityMetadata m, Object rowKey, List<String> relatationNames,
-            FilterList f, List<Map<String,Object>> colToOutput) throws IOException;
+            FilterList f, List<Map<String, Object>> colToOutput) throws IOException;
 
     /**
      * Read all.
@@ -113,7 +113,7 @@ public interface DataHandler
      *             Signals that an I/O exception has occurred.
      */
     List readDataByRange(String tableName, Class clazz, EntityMetadata m, byte[] startRow, byte[] endRow,
-            List<Map<String,Object>> colToOutput, FilterList f) throws IOException;
+            List<Map<String, Object>> colToOutput, FilterList f) throws IOException;
 
     /**
      * Write data.

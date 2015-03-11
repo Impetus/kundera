@@ -34,7 +34,7 @@ import com.impetus.client.hbase.utils.HBaseUtils;
 
 /**
  * @author Pragalbh Garg
- *
+ * 
  */
 public class HBaseWriter implements Writer
 {
@@ -77,8 +77,12 @@ public class HBaseWriter implements Writer
         return p;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.client.hbase.Writer#writeColumns(org.apache.hadoop.hbase.client.Table, java.lang.Object, java.util.Map, java.lang.String)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.hbase.Writer#writeColumns(org.apache.hadoop.hbase.
+     * client.Table, java.lang.Object, java.util.Map, java.lang.String)
      */
     @Override
     public void writeColumns(Table htable, Object rowKey, Map<String, Object> columns, String columnFamilyName)
@@ -100,8 +104,12 @@ public class HBaseWriter implements Writer
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.client.hbase.Writer#delete(org.apache.hadoop.hbase.client.Table, java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.hbase.Writer#delete(org.apache.hadoop.hbase.client
+     * .Table, java.lang.Object)
      */
     @Override
     public void delete(Table hTable, Object rowKey)

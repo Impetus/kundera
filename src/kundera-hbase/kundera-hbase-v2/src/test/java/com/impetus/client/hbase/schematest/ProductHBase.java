@@ -23,7 +23,7 @@ import javax.persistence.Table;
 
 /**
  * @author Pragalbh Garg
- *
+ * 
  */
 @Entity
 @Table(name = "PRODUCT_HBASE", schema = "HBaseNew@schemaTest")
@@ -85,7 +85,5 @@ public class ProductHBase
     {
         this.price = price;
     }
-
-    
 
 }

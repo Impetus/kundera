@@ -123,23 +123,23 @@ public class HBaseCli
                 zkDir = new File(utility.getDataTestDir().toString()).getAbsoluteFile();
 
                 zkCluster.startup(zkDir);
-//                admin = (HBaseAdmin) connection.getAdmin();
-//               utility.getConfiguration().set(HConstants.ZOOKEEPER_ZNODE_PARENT, "/1");
-//                utility.startMiniZKCluster();
-//                utility.setZkCluster(zkCluster);
-//                utility.startMiniCluster();
-//                utility.getHBaseCluster().startMaster();
+                // admin = (HBaseAdmin) connection.getAdmin();
+                // utility.getConfiguration().set(HConstants.ZOOKEEPER_ZNODE_PARENT,
+                // "/1");
+                // utility.startMiniZKCluster();
+                // utility.setZkCluster(zkCluster);
+                // utility.startMiniCluster();
+                // utility.getHBaseCluster().startMaster();
             }
-            
+
             catch (Exception e)
             {
-                
+
                 logger.error(e.getMessage());
                 throw new RuntimeException(e);
             }
         }
     }
-    
 
     /**
      * Creates the table.
@@ -227,11 +227,12 @@ public class HBaseCli
         }
     }
 
-    public void dropSchema(String schemaName){
+    public void dropSchema(String schemaName)
+    {
         try
         {
-            utility.getHBaseAdmin().disableTables(schemaName+":.*");
-            utility.getHBaseAdmin().deleteTables(schemaName+":.*");
+            utility.getHBaseAdmin().disableTables(schemaName + ":.*");
+            utility.getHBaseAdmin().deleteTables(schemaName + ":.*");
             utility.getHBaseAdmin().deleteNamespace(schemaName);
         }
         catch (IOException e)
@@ -239,6 +240,7 @@ public class HBaseCli
             logger.error(e.getMessage());
         }
     }
+
     /**
      * Destroys cluster.
      */
@@ -277,12 +279,12 @@ public class HBaseCli
         // catch (NullPointerException e)
         // {
         // // TODO Auto-generated catch block
-        // 
+        //
         // }
         // catch (Exception e)
         // {
         // // TODO Auto-generated catch block
-        // 
+        //
         // }
         //
     }
@@ -321,12 +323,12 @@ public class HBaseCli
         catch (NullPointerException e)
         {
             // TODO Auto-generated catch block
-            
+
         }
         catch (Exception e)
         {
             // TODO Auto-generated catch block
-            
+
         }
 
     }

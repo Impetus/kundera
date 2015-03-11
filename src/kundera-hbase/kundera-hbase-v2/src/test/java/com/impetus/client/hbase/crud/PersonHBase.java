@@ -14,6 +14,7 @@
  *  * limitations under the License.
  ******************************************************************************/
 package com.impetus.client.hbase.crud;
+
 /**
  * @author Pragalbh Garg
  *
@@ -25,7 +26,6 @@ import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-
 @Entity
 @Table(name = "PERSON_HBASE", schema = "HBaseNew@crudTest")
 public class PersonHBase
@@ -33,7 +33,7 @@ public class PersonHBase
 
     /** The person id. */
     @Id
-//    @GeneratedValue(strategy = GenerationType.TABLE)
+    // @GeneratedValue(strategy = GenerationType.TABLE)
     @Column(name = "PERSON_ID")
     private String personId;
 

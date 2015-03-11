@@ -13,7 +13,7 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
- /*
+/*
  * author: karthikp.manchala
  */
 package com.impetus.client.hbase.crud.embedded;
@@ -27,7 +27,7 @@ import javax.persistence.Embedded;
 
 /**
  * @author Pragalbh Garg
- *
+ * 
  */
 @Embeddable
 public class PersonalDetails
@@ -44,7 +44,7 @@ public class PersonalDetails
 
     /**
      * Gets the fullname.
-     *
+     * 
      * @return the fullname
      */
     public Fullname getFullname()
@@ -54,8 +54,9 @@ public class PersonalDetails
 
     /**
      * Sets the fullname.
-     *
-     * @param fullname the new fullname
+     * 
+     * @param fullname
+     *            the new fullname
      */
     public void setFullname(Fullname fullname)
     {
@@ -64,7 +65,7 @@ public class PersonalDetails
 
     /**
      * Gets the addresses.
-     *
+     * 
      * @return the addresses
      */
     public List<Address> getAddresses()
@@ -74,12 +75,13 @@ public class PersonalDetails
 
     /**
      * Sets the addresses.
-     *
-     * @param addresses the new addresses
+     * 
+     * @param addresses
+     *            the new addresses
      */
     public void setAddresses(List<Address> addresses)
     {
         this.addresses = addresses;
     }
-    
+
 }

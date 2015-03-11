@@ -13,7 +13,7 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
- /*
+/*
  * author: karthikp.manchala
  */
 package com.impetus.client.hbase.crud.embedded;
@@ -23,12 +23,12 @@ import javax.persistence.Embeddable;
 
 /**
  * @author Pragalbh Garg
- *
+ * 
  */
 @Embeddable
 public class Fullname
 {
-    
+
     /** The first name. */
     @Column
     private String firstName;
@@ -51,7 +51,7 @@ public class Fullname
 
     /**
      * Gets the first name.
-     *
+     * 
      * @return the first name
      */
     public String getFirstName()
@@ -61,8 +61,9 @@ public class Fullname
 
     /**
      * Sets the first name.
-     *
-     * @param firstName the new first name
+     * 
+     * @param firstName
+     *            the new first name
      */
     public void setFirstName(String firstName)
     {
@@ -71,7 +72,7 @@ public class Fullname
 
     /**
      * Gets the middle name.
-     *
+     * 
      * @return the middle name
      */
     public String getMiddleName()
@@ -81,8 +82,9 @@ public class Fullname
 
     /**
      * Sets the middle name.
-     *
-     * @param middleName the new middle name
+     * 
+     * @param middleName
+     *            the new middle name
      */
     public void setMiddleName(String middleName)
     {
@@ -91,7 +93,7 @@ public class Fullname
 
     /**
      * Gets the last name.
-     *
+     * 
      * @return the last name
      */
     public String getLastName()
@@ -101,8 +103,9 @@ public class Fullname
 
     /**
      * Sets the last name.
-     *
-     * @param lastName the new last name
+     * 
+     * @param lastName
+     *            the new last name
      */
     public void setLastName(String lastName)
     {

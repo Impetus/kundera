@@ -28,9 +28,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.hbase.testingutil.HBaseTestingUtils;
+
 /**
  * @author Pragalbh Garg
- *
+ * 
  */
 public class EmbeddablesCrudTest extends EmbeddablesBase
 {

@@ -29,30 +29,31 @@ import org.junit.Test;
 
 import com.impetus.client.hbase.junits.HBaseCli;
 import com.impetus.client.hbase.testingutil.HBaseTestingUtils;
+
 /**
  * @author Pragalbh Garg
- *
+ * 
  */
 public class HbaseSecondaryTableTest
 {
 
     private EntityManagerFactory emf;
-    
+
     /** The em. */
     private static EntityManager em;
-    
+
     private HBaseCli cli;
 
     @Before
     public void setUp() throws Exception
     {
-        
+
         cli = new HBaseCli();
         cli.startCluster();
-      
+
         emf = Persistence.createEntityManagerFactory("secTableTest");
         em = emf.createEntityManager();
-     
+
     }
 
     @After
@@ -68,22 +69,22 @@ public class HbaseSecondaryTableTest
     public void test()
     {
         EntityManager em = emf.createEntityManager();
-        
+
         EmbeddedEntity embeddedEntity = new EmbeddedEntity();
         embeddedEntity.setEmailId("kuldeep.mishra@gmail.com");
         embeddedEntity.setPhoneNo(9512345346l);
         List<EmbeddedCollectionEntity> embeddedEntities = new ArrayList<EmbeddedCollectionEntity>();
-        
+
         EmbeddedCollectionEntity collectionEntity1 = new EmbeddedCollectionEntity();
         collectionEntity1.setCollectionId("c1");
         collectionEntity1.setCollectionName("Collection 1");
         embeddedEntities.add(collectionEntity1);
-        
+
         EmbeddedCollectionEntity collectionEntity2 = new EmbeddedCollectionEntity();
         collectionEntity2.setCollectionId("c2");
         collectionEntity2.setCollectionName("Collection 2");
         embeddedEntities.add(collectionEntity2);
-       
+
         HbaseSecondaryTableEntity entity = new HbaseSecondaryTableEntity();
         entity.setAge(24);
         entity.setObjectId("123");
@@ -91,8 +92,7 @@ public class HbaseSecondaryTableTest
         entity.setEmbeddedEntity(embeddedEntity);
         entity.setCountry("Canada");
         entity.setEmbeddedEntities(embeddedEntities);
-       
-        
+
         PersonSecondaryTableAddress address = new PersonSecondaryTableAddress(12.23);
         address.setAddress("india");
         entity.setAddress(address);
@@ -109,11 +109,11 @@ public class HbaseSecondaryTableTest
         Assert.assertEquals("kuldeep.mishra@gmail.com", foundEntity.getEmbeddedEntity().getEmailId());
         Assert.assertEquals(9512345346l, foundEntity.getEmbeddedEntity().getPhoneNo());
         Assert.assertNotNull(foundEntity.getAddress());
-        Assert.assertEquals("india",foundEntity.getAddress().getAddress());
+        Assert.assertEquals("india", foundEntity.getAddress().getAddress());
         Assert.assertEquals(2, foundEntity.getEmbeddedEntities().size());
         Assert.assertEquals("Collection 1", foundEntity.getEmbeddedEntities().get(0).getCollectionName());
         Assert.assertEquals("Collection 2", foundEntity.getEmbeddedEntities().get(1).getCollectionName());
-       
+
         foundEntity.setAge(25);
         foundEntity.setName("kk");
         foundEntity.getEmbeddedEntity().setEmailId("kuldeep.mishra@yahoo.com");
@@ -136,7 +136,5 @@ public class HbaseSecondaryTableTest
         Assert.assertNull(foundEntity);
 
     }
-    
-    
 
 }

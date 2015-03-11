@@ -36,7 +36,7 @@ import com.impetus.client.hbase.utils.HBaseUtils;
 
 /**
  * @author Pragalbh Garg
- *
+ * 
  */
 public class HBaseReader implements Reader
 {
@@ -316,14 +316,15 @@ public class HBaseReader implements Reader
         Result[] rawResult = hTable.get(getRequest);
         for (Result result : rawResult)
         {
-            if(!HBaseUtils.isAutoIdValueRow(result.getRow())){
-            List<Cell> cells = result.listCells();
-            if (cells != null)
+            if (!HBaseUtils.isAutoIdValueRow(result.getRow()))
             {
-                HBaseData data = new HBaseData(tableName, result.getRow());
-                data.setColumns(cells);
-                results.add(data);
-            }
+                List<Cell> cells = result.listCells();
+                if (cells != null)
+                {
+                    HBaseData data = new HBaseData(tableName, result.getRow());
+                    data.setColumns(cells);
+                    results.add(data);
+                }
             }
         }
         return results;

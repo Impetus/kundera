@@ -55,7 +55,7 @@ import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 
 /**
  * @author Pragalbh Garg
- *
+ * 
  */
 public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaManager
 {
@@ -465,7 +465,6 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
         operation = null;
         admin = null;
     }
-    
 
     /*
      * (non-Javadoc)
@@ -502,9 +501,9 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
             Configuration conf = HBaseConfiguration.create(hadoopConf);
             try
             {
-            	 Connection connection = ConnectionFactory.createConnection(conf);
-                 admin = (HBaseAdmin) connection.getAdmin();
-                 return true;
+                Connection connection = ConnectionFactory.createConnection(conf);
+                admin = (HBaseAdmin) connection.getAdmin();
+                return true;
             }
             catch (MasterNotRunningException mnre)
             {
@@ -525,21 +524,22 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
         throw new SchemaGenerationException("Master not running exception, Caused by:" + message);
     }
 
-     /**
+    /**
      * Vaildate host port.
-     *
-     * @param host the host
-     * @param port the port
+     * 
+     * @param host
+     *            the host
+     * @param port
+     *            the port
      */
-     private void vaildateHostPort(String host, String port)
-     {
-     if (host == null || !StringUtils.isNumeric(port) || port.isEmpty())
-     {
-     logger.error("Host or port should not be null / port should be numeric");
-     throw new
-     IllegalArgumentException("Host or port should not be null / port should be numeric");
-     }
-     }
+    private void vaildateHostPort(String host, String port)
+    {
+        if (host == null || !StringUtils.isNumeric(port) || port.isEmpty())
+        {
+            logger.error("Host or port should not be null / port should be numeric");
+            throw new IllegalArgumentException("Host or port should not be null / port should be numeric");
+        }
+    }
 
     /**
      * Gets the column descriptor.

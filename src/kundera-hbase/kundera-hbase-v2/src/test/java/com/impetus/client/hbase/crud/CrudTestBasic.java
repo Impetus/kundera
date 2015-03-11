@@ -28,9 +28,10 @@ import org.junit.Test;
 import com.impetus.client.hbase.crud.PersonHBase.Day;
 import com.impetus.client.hbase.junits.HBaseCli;
 import com.impetus.client.hbase.testingutil.HBaseTestingUtils;
+
 /**
  * @author Pragalbh Garg
- *
+ * 
  */
 public class CrudTestBasic
 {
@@ -76,7 +77,7 @@ public class CrudTestBasic
         Assert.assertNotNull(p2);
         Assert.assertEquals("1", p2.getPersonId());
         Assert.assertEquals("pragalbh", p2.getPersonName());
-        
+
     }
 
     private void testMerge()

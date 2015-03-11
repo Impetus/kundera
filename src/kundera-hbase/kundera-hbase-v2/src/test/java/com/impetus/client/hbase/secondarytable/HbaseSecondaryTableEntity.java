@@ -30,9 +30,10 @@ import javax.persistence.OneToOne;
 import javax.persistence.SecondaryTable;
 import javax.persistence.SecondaryTables;
 import javax.persistence.Table;
+
 /**
  * @author Pragalbh Garg
- *
+ * 
  */
 @Table(name = "HBASE_TABLE", schema = "HBaseNew@secTableTest")
 @SecondaryTables({ @SecondaryTable(name = "HBASE_SECONDARY_TABLE"), @SecondaryTable(name = "t_country") })

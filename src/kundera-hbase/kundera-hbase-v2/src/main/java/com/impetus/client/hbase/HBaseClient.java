@@ -74,7 +74,7 @@ import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**
  * @author Devender Yadav
- *
+ * 
  */
 public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batcher, ClientPropertiesSetter,
         TableGenerator

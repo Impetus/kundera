@@ -17,15 +17,17 @@ package com.impetus.client.hbase.admin;
 
 /**
  * @author Pragalbh Garg
- *
+ * 
  */
 public class HBaseCell
 {
 
     private String columnFamily;
+
     private String columnName;
+
     private Object value;
-    
+
     /**
      * Gets the column family.
      * 
@@ -35,7 +37,7 @@ public class HBaseCell
     {
         return columnFamily;
     }
-    
+
     /**
      * Sets the column family.
      * 
@@ -46,7 +48,7 @@ public class HBaseCell
     {
         this.columnFamily = columnFamily;
     }
-    
+
     /**
      * Gets the column name.
      * 
@@ -56,7 +58,7 @@ public class HBaseCell
     {
         return columnName;
     }
-    
+
     /**
      * Sets the column name.
      * 
@@ -67,7 +69,7 @@ public class HBaseCell
     {
         this.columnName = columnName;
     }
-    
+
     /**
      * Gets the value.
      * 
@@ -77,7 +79,7 @@ public class HBaseCell
     {
         return value;
     }
-    
+
     /**
      * Sets the value.
      * 
@@ -88,7 +90,7 @@ public class HBaseCell
     {
         this.value = value;
     }
-    
+
     /**
      * Instantiates a new h base cell.
      * 
@@ -106,6 +108,5 @@ public class HBaseCell
         this.columnName = columnName;
         this.value = value;
     }
-    
-    
+
 }

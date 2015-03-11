@@ -27,14 +27,16 @@ import com.impetus.kundera.DataWrapper;
 
 /**
  * @author Pragalbh Garg
- *
+ * 
  */
-public class HBaseData implements DataWrapper {
+public class HBaseData implements DataWrapper
+{
 
     /** The column family. */
-//    private String columnFamily;
+    // private String columnFamily;
 
     private String tableName;
+
     /** The row key. */
     private byte[] rowKey;
 
@@ -48,7 +50,8 @@ public class HBaseData implements DataWrapper {
      * @param rowKey
      *            the row key
      */
-    public HBaseData(String tableName, byte[] rowKey) {
+    public HBaseData(String tableName, byte[] rowKey)
+    {
         this.tableName = tableName;
         this.rowKey = rowKey;
     }
@@ -59,19 +62,25 @@ public class HBaseData implements DataWrapper {
      * @param rowKey
      *            the row key
      */
-    public HBaseData(byte[] rowKey) {
+    public HBaseData(byte[] rowKey)
+    {
         this.rowKey = rowKey;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.DataWrapper#getColumnFamily()
      */
     @Override
-    public String getColumnFamily() {
+    public String getColumnFamily()
+    {
         return tableName;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.DataWrapper#getRowKey()
      */
     @Override

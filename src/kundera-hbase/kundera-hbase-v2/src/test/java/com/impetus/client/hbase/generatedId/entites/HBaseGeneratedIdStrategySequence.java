@@ -22,9 +22,10 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+
 /**
  * @author Devender Yadav
- *
+ * 
  */
 @Entity
 @Table(name = "HBaseGeneratedIdStrategySequence", schema = "HBaseNew@autoIdTest")

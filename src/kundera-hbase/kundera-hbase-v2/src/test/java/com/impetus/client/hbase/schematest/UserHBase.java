@@ -23,7 +23,7 @@ import javax.persistence.Table;
 
 /**
  * @author Pragalbh Garg
- *
+ * 
  */
 @Entity
 @Table(name = "USER_HBASE", schema = "HBaseNew@schemaTest")
@@ -86,5 +86,4 @@ public class UserHBase
         this.phoneNo = phoneNo;
     }
 
-   
 }

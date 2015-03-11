@@ -78,7 +78,7 @@ import com.impetus.kundera.utils.ReflectUtils;
 
 /**
  * @author Pragalbh Garg
- *
+ * 
  */
 public class HBaseQuery extends QueryImpl
 {

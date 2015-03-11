@@ -13,7 +13,7 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
- /*
+/*
  * author: karthikp.manchala
  */
 package com.impetus.client.hbase.crud.embedded;
@@ -23,7 +23,7 @@ import javax.persistence.Embeddable;
 
 /**
  * @author Pragalbh Garg
- *
+ * 
  */
 @Embeddable
 public class ProfessionalDetails
@@ -43,7 +43,7 @@ public class ProfessionalDetails
 
     /**
      * Gets the company.
-     *
+     * 
      * @return the company
      */
     public String getCompany()
@@ -53,8 +53,9 @@ public class ProfessionalDetails
 
     /**
      * Sets the company.
-     *
-     * @param company the new company
+     * 
+     * @param company
+     *            the new company
      */
     public void setCompany(String company)
     {
@@ -63,7 +64,7 @@ public class ProfessionalDetails
 
     /**
      * Gets the project.
-     *
+     * 
      * @return the project
      */
     public String getProject()
@@ -73,8 +74,9 @@ public class ProfessionalDetails
 
     /**
      * Sets the project.
-     *
-     * @param project the new project
+     * 
+     * @param project
+     *            the new project
      */
     public void setProject(String project)
     {
@@ -83,7 +85,7 @@ public class ProfessionalDetails
 
     /**
      * Gets the monthly salary.
-     *
+     * 
      * @return the monthly salary
      */
     public Double getMonthlySalary()
@@ -93,8 +95,9 @@ public class ProfessionalDetails
 
     /**
      * Sets the monthly salary.
-     *
-     * @param monthlySalary the new monthly salary
+     * 
+     * @param monthlySalary
+     *            the new monthly salary
      */
     public void setMonthlySalary(Double monthlySalary)
     {

@@ -25,7 +25,7 @@ import com.impetus.kundera.client.crud.associations.AssociationsBiDirectionalBas
 
 /**
  * @author Pragalbh Garg
- *
+ * 
  */
 public class HBaseBiAssociationTest extends AssociationsBiDirectionalBase
 {

@@ -24,7 +24,7 @@ import com.impetus.client.hbase.admin.HBaseRow;
 
 /**
  * @author Pragalbh Garg
- *
+ * 
  */
 public interface Writer
 {
@@ -43,8 +43,9 @@ public interface Writer
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-//    void writeColumn(Table htable, String columnFamily, Object rowKey, Attribute column, Object columnObj)
-//            throws IOException;
+    // void writeColumn(Table htable, String columnFamily, Object rowKey,
+    // Attribute column, Object columnObj)
+    // throws IOException;
 
     /**
      * Writes a column family with name <code>columnFamily</code>, into a table
@@ -58,14 +59,16 @@ public interface Writer
      *            Row Key
      * @param columns
      *            Columns for a given column family
-     * @param values TODO
+     * @param values
+     *            TODO
      * @param columnFamilyObj
      *            the column family obj
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-//    void writeColumns(Table htable, String columnFamily, Object rowKey, Map<String, Attribute> columns,
-//            Map<String, Object> values, Object columnFamilyObj) throws IOException;
+    // void writeColumns(Table htable, String columnFamily, Object rowKey,
+    // Map<String, Attribute> columns,
+    // Map<String, Object> values, Object columnFamilyObj) throws IOException;
 
     /**
      * Writes Columns <code>columns</code> into a given table. Each columns is
@@ -82,8 +85,9 @@ public interface Writer
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-//    void writeColumns(Table htable, Object rowKey, Map<String, Attribute> columns, Object entity,
-//            String columnFamilyName) throws IOException;
+    // void writeColumns(Table htable, Object rowKey, Map<String, Attribute>
+    // columns, Object entity,
+    // String columnFamilyName) throws IOException;
 
     /**
      * Write relations.
@@ -99,8 +103,10 @@ public interface Writer
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-//    void writeRelations(Table htable, Object rowKey, boolean containsEmbeddedObjectsOnly,
-//            List<RelationHolder> relations, String columnFamilyName) throws IOException;
+    // void writeRelations(Table htable, Object rowKey, boolean
+    // containsEmbeddedObjectsOnly,
+    // List<RelationHolder> relations, String columnFamilyName) throws
+    // IOException;
 
     /**
      * Writes foreign keys along with a database table. They are stored into a
@@ -117,8 +123,9 @@ public interface Writer
      *             Signals that an I/O exception has occurred.
      * @deprecated
      */
-//    public void writeForeignKeys(Table hTable, String rowKey, Map<String, Set<String>> foreignKeyMap)
-//            throws IOException;
+    // public void writeForeignKeys(Table hTable, String rowKey, Map<String,
+    // Set<String>> foreignKeyMap)
+    // throws IOException;
 
     /**
      * Writes columns data to HBase table, supplied as a map in Key/ value pair;
@@ -156,7 +163,8 @@ public interface Writer
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-//    void persistRows(Map<Table, List<HBaseDataWrapper>> rows) throws IOException;
+    // void persistRows(Map<Table, List<HBaseDataWrapper>> rows) throws
+    // IOException;
 
     void writeRow(Table hTable, HBaseRow hbaseRow) throws IOException;
 }

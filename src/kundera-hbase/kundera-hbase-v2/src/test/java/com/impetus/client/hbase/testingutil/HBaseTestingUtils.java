@@ -22,9 +22,10 @@ import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 
 import com.impetus.kundera.KunderaException;
+
 /**
  * @author Pragalbh Garg
- *
+ * 
  */
 public final class HBaseTestingUtils
 {
@@ -42,7 +43,7 @@ public final class HBaseTestingUtils
             }
             catch (Exception e)
             {
-                //do nothing
+                // do nothing
             }
             finally
             {

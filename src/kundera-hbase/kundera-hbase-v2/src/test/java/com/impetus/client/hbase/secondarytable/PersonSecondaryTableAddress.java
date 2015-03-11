@@ -15,8 +15,6 @@
  ******************************************************************************/
 package com.impetus.client.hbase.secondarytable;
 
-
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -24,7 +22,7 @@ import javax.persistence.Table;
 
 /**
  * @author Pragalbh Garg
- *
+ * 
  */
 @Entity
 @Table(name = "SEC_TABLE", schema = "HBaseNew@secTableTest")

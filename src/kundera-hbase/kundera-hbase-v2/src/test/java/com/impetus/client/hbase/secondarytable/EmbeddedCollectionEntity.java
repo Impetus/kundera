@@ -17,32 +17,33 @@ package com.impetus.client.hbase.secondarytable;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+
 /**
  * @author Pragalbh Garg
- *
+ * 
  */
 @Embeddable
 public class EmbeddedCollectionEntity
 {
-//    @Id
+    // @Id
     @Column(name = "COLLECTION_ID")
     private String collectionId;
 
     @Column(name = "COLLECTION_NAME")
     private String collectionName;
 
-//    @ManyToOne(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
-//    @JoinColumn(name="SEC")
-//    private HbaseSecondaryTableEntity hbaseSec;
-//    public HbaseSecondaryTableEntity getHbaseSec()
-//    {
-//        return hbaseSec;
-//    }
-//
-//    public void setHbaseSec(HbaseSecondaryTableEntity hbaseSec)
-//    {
-//        this.hbaseSec = hbaseSec;
-//    }
+    // @ManyToOne(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
+    // @JoinColumn(name="SEC")
+    // private HbaseSecondaryTableEntity hbaseSec;
+    // public HbaseSecondaryTableEntity getHbaseSec()
+    // {
+    // return hbaseSec;
+    // }
+    //
+    // public void setHbaseSec(HbaseSecondaryTableEntity hbaseSec)
+    // {
+    // this.hbaseSec = hbaseSec;
+    // }
 
     public String getCollectionId()
     {

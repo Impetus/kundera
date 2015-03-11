@@ -27,7 +27,7 @@ import com.impetus.kundera.query.KunderaQuery;
 
 /**
  * @author Pragalbh Garg
- *
+ * 
  */
 public class HBaseEntityReader extends AbstractEntityReader implements EntityReader
 {

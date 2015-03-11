@@ -20,13 +20,14 @@ import java.util.List;
 
 /**
  * @author Pragalbh Garg
- *
+ * 
  */
 public class HBaseRow
 {
     private Object rowKey;
+
     private List<HBaseCell> rowCells = new ArrayList<HBaseCell>();
-    
+
     /**
      * Instantiates a new h base row.
      * 
@@ -35,11 +36,12 @@ public class HBaseRow
      * @param rowCells
      *            the row cells
      */
-    public HBaseRow(Object rowKey, List<HBaseCell> rowCells){
+    public HBaseRow(Object rowKey, List<HBaseCell> rowCells)
+    {
         this.setRowKey(rowKey);
         this.setRowCells(rowCells);
     }
-    
+
     /**
      * Instantiates a new h base row.
      */
@@ -53,7 +55,8 @@ public class HBaseRow
      * @param hbaseCell
      *            the hbase cell
      */
-    public void addCell(HBaseCell hbaseCell){
+    public void addCell(HBaseCell hbaseCell)
+    {
         this.rowCells.add(hbaseCell);
     }
 
@@ -108,9 +111,7 @@ public class HBaseRow
     public void addCells(List<HBaseCell> rowCells)
     {
         this.rowCells.addAll(rowCells);
-        
+
     }
-    
-    
 
 }

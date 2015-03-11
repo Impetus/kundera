@@ -18,7 +18,6 @@ package com.impetus.client.hbase;
 import java.io.IOException;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.ConnectionFactory;
@@ -36,14 +35,12 @@ import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
-
-
 /**
  * HBaseClientFactory, instantiates client for HBase
  */
 /**
  * @author Devender Yadav
- *
+ * 
  */
 public class HBaseClientFactory extends GenericClientFactory
 {
@@ -53,26 +50,24 @@ public class HBaseClientFactory extends GenericClientFactory
 
     /** The conf. */
     private Configuration conf;
-    
-    private org.apache.hadoop.hbase.client.Connection connection;
 
-    /** The Constant DEFAULT_POOL_SIZE. */
-    private static final int DEFAULT_POOL_SIZE = 100;
+    private org.apache.hadoop.hbase.client.Connection connection;
 
     private static final String DEFAULT_ZOOKEEPER_PORT = "2181";
 
-    /** The pool size. */
-    private int poolSize;
-
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.loader.GenericClientFactory#initialize(java.util.Map)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.loader.GenericClientFactory#initialize(java.util.Map)
      */
     @Override
     public void initialize(Map<String, Object> externalProperty)
     {
         setExternalProperties(externalProperty);
         initializePropertyReader();
-        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata, getPersistenceUnit());
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata,
+                getPersistenceUnit());
 
         String node = null;
         String port = null;
@@ -95,16 +90,6 @@ public class HBaseClientFactory extends GenericClientFactory
         {
             poolSize = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
         }
-
-        if (StringUtils.isEmpty(poolSize))
-        {
-            this.poolSize = DEFAULT_POOL_SIZE;
-        }
-        else
-        {
-            this.poolSize = Integer.parseInt(poolSize);
-        }
-
         onValidation(node, port);
 
         Configuration hadoopConf = new Configuration();
@@ -122,8 +107,6 @@ public class HBaseClientFactory extends GenericClientFactory
         }
         else
         {
-            // in case "hbase.zookeeper.property.clientPort" is not supplied, it
-            // is different than hbase master port!
             hadoopConf.set("hbase.zookeeper.quorum", node);
             hadoopConf.set("hbase.zookeeper.property.clientPort", DEFAULT_ZOOKEEPER_PORT);
         }
@@ -131,32 +114,43 @@ public class HBaseClientFactory extends GenericClientFactory
         reader = new HBaseEntityReader(kunderaMetadata);
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.loader.GenericClientFactory#createPoolOrConnection()
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.loader.GenericClientFactory#createPoolOrConnection()
      */
     @Override
     protected Object createPoolOrConnection()
     {
-//        hTablePool = new HTablePool(conf, poolSize);
-//        return hTablePool;   
-        try {
+        try
+        {
             this.connection = ConnectionFactory.createConnection(conf);
             return connection;
-        } catch (IOException e) {
-           throw new KunderaException("Connection could not be established", e);
+        }
+        catch (IOException e)
+        {
+            throw new KunderaException("Connection could not be established", e);
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.loader.GenericClientFactory#instantiateClient(java.lang.String)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.loader.GenericClientFactory#instantiateClient(java
+     * .lang.String)
      */
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
-        return new HBaseClient(indexManager, conf,connection,reader, persistenceUnit, externalProperties, clientMetadata, kunderaMetadata);
+        return new HBaseClient(indexManager, conf, connection, reader, persistenceUnit, externalProperties,
+                clientMetadata, kunderaMetadata);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.loader.GenericClientFactory#isThreadSafe()
      */
     @Override
@@ -165,35 +159,36 @@ public class HBaseClientFactory extends GenericClientFactory
         return false;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.loader.ClientLifeCycleManager#destroy()
      */
     @Override
     public void destroy()
     {
-        // TODO destroy pool
-        // hTablePool = null;
-
-        // indexManager.close();
-        
-        try {
+        try
+        {
             if (schemaManager != null)
             {
                 schemaManager.dropSchema();
             }
             externalProperties = null;
             schemaManager = null;
-            connection.close();   
-            
-        } catch (IOException e) {
-            throw new KunderaException("connection already closed",e);
+            connection.close();
+
         }
-        
-        
+        catch (IOException e)
+        {
+            throw new KunderaException("connection already closed", e);
+        }
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.loader.ClientFactory#getSchemaManager(java.util.Map)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.loader.ClientFactory#getSchemaManager(java.util.Map)
      */
     @Override
     public SchemaManager getSchemaManager(Map<String, Object> externalProperty)
@@ -202,7 +197,8 @@ public class HBaseClientFactory extends GenericClientFactory
         if (schemaManager == null)
         {
             initializePropertyReader();
-            schemaManager = new HBaseSchemaManager(HBaseClientFactory.class.getName(), externalProperty, kunderaMetadata);
+            schemaManager = new HBaseSchemaManager(HBaseClientFactory.class.getName(), externalProperty,
+                    kunderaMetadata);
         }
         return schemaManager;
     }
@@ -220,8 +216,12 @@ public class HBaseClientFactory extends GenericClientFactory
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.loader.GenericClientFactory#initializeLoadBalancer(java.lang.String)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.loader.GenericClientFactory#initializeLoadBalancer
+     * (java.lang.String)
      */
     @Override
     protected void initializeLoadBalancer(String loadBalancingPolicyName)

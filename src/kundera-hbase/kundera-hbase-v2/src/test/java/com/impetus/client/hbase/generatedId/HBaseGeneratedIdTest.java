@@ -44,7 +44,7 @@ import com.impetus.kundera.KunderaException;
 
 /**
  * @author Devender Yadav
- *
+ * 
  */
 public class HBaseGeneratedIdTest
 {

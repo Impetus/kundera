@@ -13,7 +13,7 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
- /*
+/*
  * author: karthikp.manchala
  */
 package com.impetus.client.hbase.crud.embedded;
@@ -26,7 +26,7 @@ import javax.persistence.Table;
 
 /**
  * @author Pragalbh Garg
- *
+ * 
  */
 @Entity
 @Table(name = "PERSON", schema = "HBaseNew@embeddablesTest")
@@ -35,7 +35,7 @@ public class PersonEmbed
 
     /** The person id. */
     @Id
-    @Column(name="ID")
+    @Column(name = "ID")
     private int personId;
 
     /** The personal details. */
@@ -47,12 +47,12 @@ public class PersonEmbed
     private ProfessionalDetails professional;
 
     /** The email. */
-    @Column(name="EMAIL")
+    @Column(name = "EMAIL")
     private String email;
 
     /**
      * Gets the person id.
-     *
+     * 
      * @return the person id
      */
     public int getPersonId()
@@ -62,8 +62,9 @@ public class PersonEmbed
 
     /**
      * Sets the person id.
-     *
-     * @param personId the new person id
+     * 
+     * @param personId
+     *            the new person id
      */
     public void setPersonId(int personId)
     {
@@ -72,7 +73,7 @@ public class PersonEmbed
 
     /**
      * Gets the personal details.
-     *
+     * 
      * @return the personal details
      */
     public PersonalDetails getPersonalDetails()
@@ -82,8 +83,9 @@ public class PersonEmbed
 
     /**
      * Sets the personal details.
-     *
-     * @param personalDetails the new personal details
+     * 
+     * @param personalDetails
+     *            the new personal details
      */
     public void setPersonalDetails(PersonalDetails personalDetails)
     {
@@ -92,7 +94,7 @@ public class PersonEmbed
 
     /**
      * Gets the professional details.
-     *
+     * 
      * @return the professional details
      */
     public ProfessionalDetails getProfessionalDetails()
@@ -102,8 +104,9 @@ public class PersonEmbed
 
     /**
      * Sets the professional details.
-     *
-     * @param professionalDetails the new professional details
+     * 
+     * @param professionalDetails
+     *            the new professional details
      */
     public void setProfessionalDetails(ProfessionalDetails professionalDetails)
     {
@@ -112,7 +115,7 @@ public class PersonEmbed
 
     /**
      * Gets the email.
-     *
+     * 
      * @return the email
      */
     public String getEmail()
@@ -122,8 +125,9 @@ public class PersonEmbed
 
     /**
      * Sets the email.
-     *
-     * @param email the new email
+     * 
+     * @param email
+     *            the new email
      */
     public void setEmail(String email)
     {

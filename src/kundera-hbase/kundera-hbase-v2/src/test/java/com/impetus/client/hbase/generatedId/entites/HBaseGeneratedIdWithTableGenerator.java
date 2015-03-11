@@ -22,9 +22,10 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
+
 /**
  * @author Devender Yadav
- *
+ * 
  */
 @Entity
 @Table(name = "HBaseGeneratedIdWithTableGenerator", schema = "HBaseNew@autoIdTest")

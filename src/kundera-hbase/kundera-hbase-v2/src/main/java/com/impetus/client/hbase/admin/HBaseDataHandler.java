@@ -66,7 +66,7 @@ import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**
  * @author Pragalbh Garg
- *
+ * 
  */
 public class HBaseDataHandler implements DataHandler
 {

@@ -13,7 +13,7 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
- /*
+/*
  * author: karthikp.manchala
  */
 package com.impetus.client.hbase.crud.embedded;
@@ -23,12 +23,12 @@ import javax.persistence.Embeddable;
 
 /**
  * @author Pragalbh Garg
- *
+ * 
  */
 @Embeddable
 public class Address
 {
-    
+
     /** The street. */
     @Column(name = "street")
     private String street;
@@ -51,7 +51,7 @@ public class Address
 
     /**
      * Gets the street.
-     *
+     * 
      * @return the street
      */
     public String getStreet()
@@ -61,8 +61,9 @@ public class Address
 
     /**
      * Sets the street.
-     *
-     * @param street the new street
+     * 
+     * @param street
+     *            the new street
      */
     public void setStreet(String street)
     {
@@ -71,7 +72,7 @@ public class Address
 
     /**
      * Gets the city.
-     *
+     * 
      * @return the city
      */
     public String getCity()
@@ -81,8 +82,9 @@ public class Address
 
     /**
      * Sets the city.
-     *
-     * @param city the new city
+     * 
+     * @param city
+     *            the new city
      */
     public void setCity(String city)
     {
@@ -91,7 +93,7 @@ public class Address
 
     /**
      * Gets the pin.
-     *
+     * 
      * @return the pin
      */
     public String getPin()
@@ -101,8 +103,9 @@ public class Address
 
     /**
      * Sets the pin.
-     *
-     * @param pin the new pin
+     * 
+     * @param pin
+     *            the new pin
      */
     public void setPin(String pin)
     {

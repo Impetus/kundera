@@ -20,9 +20,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+
 /**
  * @author Devender Yadav
- *
+ * 
  */
 @Entity
 @Table(name = "HBaseGeneratedIdDefault", schema = "HBaseNew@autoIdTest")

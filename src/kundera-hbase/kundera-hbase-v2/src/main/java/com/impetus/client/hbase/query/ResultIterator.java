@@ -42,7 +42,7 @@ import com.impetus.kundera.query.QueryHandlerException;
 
 /**
  * @author Pragalbh Garg
- *
+ * 
  */
 class ResultIterator<E> implements IResultIterator<E>
 {
@@ -97,7 +97,9 @@ class ResultIterator<E> implements IResultIterator<E>
         onQuery(m, client);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.Iterator#hasNext()
      */
     @Override
@@ -114,7 +116,9 @@ class ResultIterator<E> implements IResultIterator<E>
         return available;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.Iterator#next()
      */
     @Override
@@ -137,7 +141,9 @@ class ResultIterator<E> implements IResultIterator<E>
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.Iterator#remove()
      */
     @Override
@@ -242,7 +248,9 @@ class ResultIterator<E> implements IResultIterator<E>
         return this.columns;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.query.IResultIterator#next(int)
      */
     @Override

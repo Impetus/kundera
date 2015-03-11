@@ -17,7 +17,7 @@ package com.impetus.client.hbase;
 
 /**
  * @author Pragalbh Garg
- *
+ * 
  */
 public final class HBaseConstants
 {

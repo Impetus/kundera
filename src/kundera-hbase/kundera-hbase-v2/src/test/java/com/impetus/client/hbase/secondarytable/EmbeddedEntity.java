@@ -17,9 +17,10 @@ package com.impetus.client.hbase.secondarytable;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+
 /**
  * @author Pragalbh Garg
- *
+ * 
  */
 @Embeddable
 public class EmbeddedEntity

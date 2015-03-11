@@ -31,7 +31,7 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
  * @author Devender Yadav
- *
+ * 
  */
 public class HBasePropertyReader extends AbstractPropertyReader implements PropertyReader
 {

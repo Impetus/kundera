@@ -29,13 +29,13 @@ import com.impetus.kundera.property.PropertyAccessorFactory;
 
 /**
  * @author Pragalbh Garg
- *
+ * 
  */
 public final class HBaseUtils
 {
 
-    public static final String AUTO_ID_ROW = "kunderaAutoIdRow"; 
-    
+    public static final String AUTO_ID_ROW = "kunderaAutoIdRow";
+
     /**
      * Gets the bytes.
      * 

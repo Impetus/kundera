@@ -45,7 +45,7 @@ import com.impetus.kundera.configure.schema.SchemaGenerationException;
 
 /**
  * @author Pragalbh Garg
- *
+ * 
  */
 public class HBaseSchemaGenerationTest
 {
@@ -64,7 +64,6 @@ public class HBaseSchemaGenerationTest
 
     private Map propertyMap = new HashMap();
 
-//    private static Connection connection;
     /**
      * @throws java.lang.Exception
      */
@@ -75,15 +74,6 @@ public class HBaseSchemaGenerationTest
         cli.startCluster();
         Connection connection = ConnectionFactory.createConnection();
         admin = (HBaseAdmin) connection.getAdmin();
-    }
-
-    /**
-     * @throws java.lang.Exception
-     */
-    @Before
-    public void setUp() throws Exception
-    {
-
     }
 
     /**
@@ -121,15 +111,15 @@ public class HBaseSchemaGenerationTest
 
     public void testUpdate() throws IOException
     {
-        
+
         init();
-        
+
         admin.disableTable(TABLE_2);
         admin.deleteTable(TABLE_2);
         propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "update");
-        
+
         assertSchema();
-        
+
         postAssert();
     }
 
@@ -137,9 +127,9 @@ public class HBaseSchemaGenerationTest
     {
         propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "validate");
         assertSchema();
-    
+
         assertInValidate();
-    
+
     }
 
     private void assertInValidate() throws IOException
@@ -158,24 +148,26 @@ public class HBaseSchemaGenerationTest
         {
             Assert.assertTrue(true);
         }
-    
+
     }
 
     public void testCreateDrop() throws IOException
     {
         propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create-drop");
         assertSchema();
-        
+
         assertDrop();
-        
+
     }
 
     private void assertDrop()
     {
         try
         {
-            for(NamespaceDescriptor ns : admin.listNamespaceDescriptors()){
-                if(ns.getName().equals(SCHEMA)){
+            for (NamespaceDescriptor ns : admin.listNamespaceDescriptors())
+            {
+                if (ns.getName().equals(SCHEMA))
+                {
                     Assert.assertTrue(false);
                     break;
                 }
@@ -185,13 +177,14 @@ public class HBaseSchemaGenerationTest
         {
             throw new SchemaGenerationException(ioex, "Hbase");
         }
-        
+
     }
 
-    private void assertSchema() throws IOException{
+    private void assertSchema() throws IOException
+    {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory(persistenceUnit, propertyMap);
         EntityManager em = emf.createEntityManager();
-        
+
         try
         {
             admin.getNamespaceDescriptor(SCHEMA);
@@ -201,16 +194,16 @@ public class HBaseSchemaGenerationTest
         {
             Assert.assertTrue(false);
         }
-    
+
         Assert.assertTrue(admin.isTableAvailable(TABLE_1));
         Assert.assertTrue(admin.isTableAvailable(TABLE_2));
-        
+
         HTableDescriptor descriptor = admin.getTableDescriptor(TableName.valueOf(TABLE_1));
         Assert.assertTrue(descriptor.hasFamily("USER_HBASE".getBytes()));
-        
+
         descriptor = admin.getTableDescriptor(TableName.valueOf(TABLE_2));
         Assert.assertTrue(descriptor.hasFamily("PRODUCT_HBASE".getBytes()));
-        
+
         em.close();
         emf.close();
     }
@@ -227,27 +220,33 @@ public class HBaseSchemaGenerationTest
         em.persist(user);
         em.close();
         emf.close();
-        
+
     }
-    
+
     private void postAssert()
     {
         propertyMap.remove(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE);
         EntityManagerFactory emf = Persistence.createEntityManagerFactory(persistenceUnit, propertyMap);
         EntityManager em = emf.createEntityManager();
-        try{
+        try
+        {
             UserHBase user = em.find(UserHBase.class, "1");
-            if(user!=null){
-            Assert.assertTrue(true);
-            }else{
-                Assert.assertTrue(false); 
+            if (user != null)
+            {
+                Assert.assertTrue(true);
             }
-        }catch(Exception e){
+            else
+            {
+                Assert.assertTrue(false);
+            }
+        }
+        catch (Exception e)
+        {
             Assert.assertTrue(false);
         }
-        
+
         em.close();
         emf.close();
-        
+
     }
 }

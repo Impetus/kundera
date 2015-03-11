@@ -29,7 +29,7 @@ import com.impetus.kundera.client.Client;
  */
 /**
  * @author Devender Yadav
- *
+ * 
  */
 class HBaseClientProperties
 {
