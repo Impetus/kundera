@@ -22,11 +22,16 @@ import java.util.Properties;
 
 import javax.persistence.metamodel.EntityType;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
+import org.apache.hadoop.hbase.MasterNotRunningException;
 import org.apache.hadoop.hbase.NamespaceDescriptor;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.TableNotFoundException;
+import org.apache.hadoop.hbase.ZooKeeperConnectionException;
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
@@ -460,6 +465,7 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
         operation = null;
         admin = null;
     }
+    
 
     /*
      * (non-Javadoc)
@@ -471,66 +477,69 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
     @Override
     protected boolean initiateClient()
     {
-        try
+        String message = null;
+        for (String host : hosts)
         {
-            Connection connection = ConnectionFactory.createConnection();
-            admin = (HBaseAdmin) connection.getAdmin();
-            return true;
+            vaildateHostPort(host, port);
+            Configuration hadoopConf = new Configuration();
+            hadoopConf.set("hbase.master", host + ":" + port);
+            conn = HBasePropertyReader.hsmd.getDataStore() != null ? HBasePropertyReader.hsmd.getDataStore()
+                    .getConnection() : null;
+            if (conn != null && conn.getProperties() != null)
+            {
+                String zookeeperHost = conn.getProperties().getProperty("hbase.zookeeper.quorum").trim();
+                String zookeeperPort = conn.getProperties().getProperty("hbase.zookeeper.property.clientPort").trim();
+                vaildateHostPort(zookeeperHost, zookeeperPort);
+                hadoopConf.set("hbase.zookeeper.quorum", zookeeperHost != null ? zookeeperHost : host);
+                hadoopConf.set("hbase.zookeeper.property.clientPort", zookeeperPort != null ? zookeeperPort
+                        : DEFAULT_ZOOKEEPER_PORT);
+            }
+            else
+            {
+                hadoopConf.set("hbase.zookeeper.quorum", host);
+                hadoopConf.set("hbase.zookeeper.property.clientPort", DEFAULT_ZOOKEEPER_PORT);
+            }
+            Configuration conf = HBaseConfiguration.create(hadoopConf);
+            try
+            {
+            	 Connection connection = ConnectionFactory.createConnection(conf);
+                 admin = (HBaseAdmin) connection.getAdmin();
+                 return true;
+            }
+            catch (MasterNotRunningException mnre)
+            {
+                message = mnre.getMessage();
+                logger.error("Master not running exception, Caused by:", mnre);
+            }
+            catch (ZooKeeperConnectionException zkce)
+            {
+                message = zkce.getMessage();
+                logger.error("Unable to connect to zookeeper, Caused by:", zkce);
+            }
+            catch (IOException ioe)
+            {
+                message = ioe.getMessage();
+                logger.error("I/O exception, Caused by:", ioe);
+            }
         }
-        catch (IOException e)
-        {
-            throw new SchemaGenerationException("Master not running exception, Caused by:" + e.getMessage());
-        }
-
-        /*
-         * String message = null; for (String host : hosts) {
-         * vaildateHostPort(host, port);
-         * 
-         * Configuration hadoopConf = new Configuration();
-         * hadoopConf.set("hbase.master", host + ":" + port); conn =
-         * HBasePropertyReader.hsmd.getDataStore() != null ?
-         * HBasePropertyReader.hsmd.getDataStore() .getConnection() : null; if
-         * (conn != null && conn.getProperties() != null) { String zookeeperHost
-         * = conn.getProperties().getProperty("hbase.zookeeper.quorum").trim();
-         * String zookeeperPort =
-         * conn.getProperties().getProperty("hbase.zookeeper.property.clientPort"
-         * ).trim(); vaildateHostPort(zookeeperHost, zookeeperPort);
-         * hadoopConf.set("hbase.zookeeper.quorum", zookeeperHost != null ?
-         * zookeeperHost : host);
-         * hadoopConf.set("hbase.zookeeper.property.clientPort", zookeeperPort
-         * != null ? zookeeperPort : DEFAULT_ZOOKEEPER_PORT); } else {
-         * hadoopConf.set("hbase.zookeeper.quorum", host);
-         * hadoopConf.set("hbase.zookeeper.property.clientPort",
-         * DEFAULT_ZOOKEEPER_PORT); } Configuration conf =
-         * HBaseConfiguration.create(hadoopConf); try { admin = new
-         * HBaseAdmin(conf); return true; } catch (MasterNotRunningException
-         * mnre) { message = mnre.getMessage();
-         * logger.error("Master not running exception, Caused by:", mnre); }
-         * catch (ZooKeeperConnectionException zkce) { message =
-         * zkce.getMessage();
-         * logger.error("Unable to connect to zookeeper, Caused by:", zkce); }
-         * catch (IOException ioe) { message = ioe.getMessage();
-         * logger.error("I/O exception, Caused by:", ioe); } } throw new
-         * SchemaGenerationException("Master not running exception, Caused by:"
-         * + message);
-         */
+        throw new SchemaGenerationException("Master not running exception, Caused by:" + message);
     }
 
-    // /**
-    // * Vaildate host port.
-    // *
-    // * @param host the host
-    // * @param port the port
-    // */
-    // private void vaildateHostPort(String host, String port)
-    // {
-    // if (host == null || !StringUtils.isNumeric(port) || port.isEmpty())
-    // {
-    // logger.error("Host or port should not be null / port should be numeric");
-    // throw new
-    // IllegalArgumentException("Host or port should not be null / port should be numeric");
-    // }
-    // }
+     /**
+     * Vaildate host port.
+     *
+     * @param host the host
+     * @param port the port
+     */
+     private void vaildateHostPort(String host, String port)
+     {
+     if (host == null || !StringUtils.isNumeric(port) || port.isEmpty())
+     {
+     logger.error("Host or port should not be null / port should be numeric");
+     throw new
+     IllegalArgumentException("Host or port should not be null / port should be numeric");
+     }
+     }
 
     /**
      * Gets the column descriptor.
@@ -582,7 +591,6 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
     @Override
     public boolean validateEntity(Class clazz)
     {
-        // TODO Auto-generated method stub
         return true;
     }
 
