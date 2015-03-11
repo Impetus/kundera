@@ -44,17 +44,24 @@ import com.impetus.client.es.PersonES.Day;
  */
 public class ESNestedQueryTest
 {
-
     /** The emf. */
     private EntityManagerFactory emf;
 
     /** The em. */
     private EntityManager em;
 
+    /** The node. */
     private static Node node = null;
 
-    private PersonES person;
+    /** The person1. */
+    private PersonES person1, person2, person3, person4;
 
+    /**
+     * Before class setup.
+     * 
+     * @throws Exception
+     *             the exception
+     */
     @BeforeClass
     public static void setUpBeforeClass() throws Exception
     {
@@ -88,6 +95,12 @@ public class ESNestedQueryTest
         }
     }
 
+    /**
+     * Setup.
+     * 
+     * @throws InterruptedException
+     *             the interrupted exception
+     */
     @Before
     public void setup() throws InterruptedException
     {
@@ -97,115 +110,142 @@ public class ESNestedQueryTest
         init();
     }
 
+    /**
+     * Inits the test data.
+     * 
+     * @throws InterruptedException
+     *             the interrupted exception
+     */
     private void init() throws InterruptedException
     {
 
-        createPerson("1", 20, "Amit", 100.0);
-        createPerson("2", 10, "Dev", 200.0);
-        createPerson("3", 30, "Karthik", 300.0);
-        createPerson("4", 40, "Pragalbh", 400.0);
+        person1 = createPerson("1", 20, "Amit", 100.0);
+        person2 = createPerson("2", 10, "Dev", 200.0);
+        person3 = createPerson("3", 30, "Karthik", 300.0);
+        person4 = createPerson("4", 40, "Pragalbh", 400.0);
         waitThread();
     }
 
     /**
- * 
- */
-    private void createPerson(String id, int age, String name, Double salary)
+     * Creates the person and persist them.
+     * 
+     * @param id
+     *            the id
+     * @param age
+     *            the age
+     * @param name
+     *            the name
+     * @param salary
+     *            the salary
+     * @return the person es
+     */
+    private PersonES createPerson(String id, int age, String name, Double salary)
     {
-        person = new PersonES();
+        PersonES person = new PersonES();
         person.setAge(age);
         person.setDay(Day.FRIDAY);
         person.setPersonId(id);
         person.setPersonName(name);
         person.setSalary(salary);
         em.persist(person);
+
+        return person;
     }
 
     @Test
-    public void testAndAggregation()
+    public void testQueryWithAndClause()
     {
         String nestedQquery = "Select p from PersonES p where p.personName = 'karthik' AND p.personName = 'pragalbh'";
         Query query = em.createQuery(nestedQquery);
-        List resultList = query.getResultList();
+        List<PersonES> resultList = query.getResultList();
 
         Assert.assertEquals(0, resultList.size());
     }
 
     @Test
-    public void testMultiAndAggregation()
+    public void testQueryWithMultiAndClause()
     {
         String nestedQquery = "Select p from PersonES p where p.age > 0 AND p.age < 35 AND p.salary > 150";
         Query query = em.createQuery(nestedQquery);
-        List resultList = query.getResultList();
+        List<PersonES> resultList = query.getResultList();
 
-        Assert.assertEquals(2, resultList.size());
+        assertResultList(resultList, person2, person3);
     }
 
     @Test
-    public void testOrAggregation()
+    public void testQueryWithOrClause()
     {
         String nestedQquery = "Select p from PersonES p where p.personName = 'karthik' OR p.personName = 'pragalbh'";
         Query query = em.createQuery(nestedQquery);
-        List resultList = query.getResultList();
+        List<PersonES> resultList = query.getResultList();
 
-        Assert.assertEquals(2, resultList.size());
+        assertResultList(resultList, person3, person4);
     }
 
     @Test
-    public void testMultiOrAggregation()
+    public void testQueryWithMultiOrClause()
     {
         String nestedQquery = "Select p from PersonES p where p.personName = 'amit' OR p.age < 15 OR p.age > 35";
         Query query = em.createQuery(nestedQquery);
-        List resultList = query.getResultList();
+        List<PersonES> resultList = query.getResultList();
 
-        Assert.assertEquals(3, resultList.size());
+        assertResultList(resultList, person1, person2, person4);
     }
 
     @Test
-    public void testNestedAndOrAggregation()
+    public void testQueryWithNestedAndOrClause()
     {
         String nestedQuery = "Select p from PersonES p where p.age > 0 AND (p.salary > 350 and (p.personName = :name OR p.personName = 'pragalbh'))";
 
         Query query = em.createQuery(nestedQuery);
         query.setParameter("name", "karthik");
-        List resultList = query.getResultList();
-        Assert.assertEquals(1, resultList.size());
-        Assert.assertEquals("Pragalbh", ((PersonES) resultList.get(0)).getPersonName());
+        List<PersonES> resultList = query.getResultList();
+
+        assertResultList(resultList, person4);
     }
 
     @Test
-    public void testNestedAndOrMaxAggregation()
+    public void testMaxAggregationWithNestedAndOrClause()
     {
         String nestedQuery = "Select max(p.age) from PersonES p where p.age > 0 AND (p.salary > 250 and (p.personName = 'karthik' OR p.personName = 'pragalbh'))";
 
         Query query = em.createQuery(nestedQuery);
         List resultList = query.getResultList();
 
+        Assert.assertNotNull(resultList);
         Assert.assertEquals(1, resultList.size());
         Assert.assertEquals(40.0, resultList.get(0));
     }
 
     @Test
-    public void testNestedAndOrMinQuery()
+    public void testMinAggregationWithNestedAndOrClause()
     {
         String invalidQueryWithAndClause = "Select min(p.age) from PersonES p where p.age > 0 AND (p.personName = 'amit' OR p.personName = 'dev')";
         Query nameQuery = em.createNamedQuery(invalidQueryWithAndClause);
         List resultList = nameQuery.getResultList();
 
+        Assert.assertNotNull(resultList);
         Assert.assertEquals(1, resultList.size());
         Assert.assertEquals(10.0, resultList.get(0));
     }
 
     @Test
-    public void testNestedQuery()
+    public void testMinAggregationWithNestedAndOr()
     {
         String invalidQueryWithAndClause = "Select min(p.age) from PersonES p where p.age > 0 AND (p.personName = 'amit' OR p.personName = 'dev')";
         Query nameQuery = em.createNamedQuery(invalidQueryWithAndClause);
-        List persons = nameQuery.getResultList();
+        List resultList = nameQuery.getResultList();
 
-        Assert.assertEquals(1, persons.size());
+        Assert.assertNotNull(resultList);
+        Assert.assertEquals(1, resultList.size());
     }
 
+    /**
+     * After class tear down.
+     * 
+     * @throws Exception
+     *             the exception
+     */
     @AfterClass
     public static void tearDownAfterClass() throws Exception
     {
@@ -213,15 +253,89 @@ public class ESNestedQueryTest
             node.close();
     }
 
+    /**
+     * Tear down.
+     */
     @After
     public void tearDown()
     {
+        purge();
         em.close();
         emf.close();
     }
 
-    private void waitThread() throws InterruptedException
+    /**
+     * Wait thread.
+     * 
+     */
+    private void waitThread()
     {
-        Thread.sleep(2000);
+        try
+        {
+            Thread.sleep(2000);
+        }
+        catch (InterruptedException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Verify each person object of result list.
+     * 
+     * @param resultPersonList
+     *            the result person list
+     * @param persons
+     *            the persons
+     */
+    private void assertResultList(List<PersonES> resultPersonList, PersonES... persons)
+    {
+        boolean flag = false;
+
+        Assert.assertNotNull(resultPersonList);
+        Assert.assertEquals(persons.length, resultPersonList.size());
+
+        for (PersonES person : persons)
+        {
+            flag = false;
+            for (PersonES resultPerson : resultPersonList)
+            {
+                if (person.getPersonId().equals(resultPerson.getPersonId()))
+                {
+                    matchPerson(resultPerson, person);
+                    flag = true;
+                }
+            }
+            Assert.assertEquals("Person with id " + person.getPersonId() + " not found in Result list.", true, flag);
+        }
+    }
+
+    /**
+     * Match person to verify each field of both PersonES objects are same.
+     * 
+     * @param person
+     *            the person
+     * @param resultPerson
+     *            the result person
+     */
+    private void matchPerson(PersonES resultPerson, PersonES person)
+    {
+        Assert.assertNotNull(resultPerson);
+        Assert.assertEquals(person.getPersonId(), resultPerson.getPersonId());
+        Assert.assertEquals(person.getPersonName(), resultPerson.getPersonName());
+        Assert.assertEquals(person.getAge(), resultPerson.getAge());
+        Assert.assertEquals(person.getSalary(), resultPerson.getSalary());
+    }
+
+    /**
+     * Purge.
+     */
+    private void purge()
+    {
+        em.remove(em.find(PersonES.class, "1"));
+        em.remove(em.find(PersonES.class, "2"));
+        em.remove(em.find(PersonES.class, "3"));
+        em.remove(em.find(PersonES.class, "4"));
+        waitThread();
     }
 }

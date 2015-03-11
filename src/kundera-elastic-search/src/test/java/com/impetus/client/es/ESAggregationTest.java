@@ -1,10 +1,22 @@
-/**
- * 
- */
+/*******************************************************************************
+ *  * Copyright 2015 Impetus Infotech.
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *      http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ ******************************************************************************/
 package com.impetus.client.es;
 
 /**
- * @author amitkumar
+ * @author Amit Kumar
  *
  */
 
@@ -23,6 +35,7 @@ import junit.framework.Assert;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -127,9 +140,25 @@ public class ESAggregationTest
     }
 
     @Test
+    public void testMinAggregationOnString()
+    {
+        String queryString = "Select min(p.personName) from PersonES p";
+        Query query = em.createQuery(queryString);
+
+        try
+        {
+            List resultList = query.getResultList();
+            Assert.fail();
+        }
+        catch (Exception e)
+        {
+            Assert.assertEquals("Aggregations can not performed over non-numeric fields.", e.getMessage());
+        }
+    }
+
+    @Test
     public void testMultiMinAggregation()
     {
-
         String queryString = "Select min(p.salary), min(p.age) from PersonES p where p.age > 20";
         Query query = em.createQuery(queryString);
         List resultList = query.getResultList();
@@ -356,7 +385,7 @@ public class ESAggregationTest
     {
         waitThread();
 
-        String invalidQueryWithAndClause = "Select min(p.age) from PersonES p where p.personName = 'amit' AND p.age = 34";
+        String invalidQueryWithAndClause = "Select min(p.age) from PersonES p where p.personName like '%it' AND p.age = 34";
         Query nameQuery = em.createNamedQuery(invalidQueryWithAndClause);
         List persons = nameQuery.getResultList();
 
@@ -478,7 +507,7 @@ public class ESAggregationTest
             node.close();
     }
 
-    // @After
+    @After
     public void tearDown()
     {
         em.remove(em.find(PersonES.class, "1"));

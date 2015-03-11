@@ -46,6 +46,7 @@ import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.query.KunderaQuery;
+import com.impetus.kundera.query.KunderaQueryUtils;
 import com.impetus.kundera.query.QueryImpl;
 
 /**
@@ -92,11 +93,11 @@ public class ESQuery<E> extends QueryImpl
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
         EntityType entity = metaModel.entity(m.getEntityClazz());
-        Expression whereExpression = getKunderaQuery().getSelectStatement().getWhereClause();
+        Expression whereExpression = KunderaQueryUtils.getWhereClause(kunderaQuery.getJpqlExpression());
         QueryBuilder queryBuilder = null;
 
-        FilterBuilder filter = whereExpression instanceof NullExpression ? null : esFilterBuilder
-                .populateFilterBuilder(((WhereClause) whereExpression).getConditionalExpression(), m);
+        FilterBuilder filter = whereExpression == null || whereExpression instanceof NullExpression ? null
+                : esFilterBuilder.populateFilterBuilder(((WhereClause) whereExpression).getConditionalExpression(), m);
         return ((ESClient) client).executeQuery(filter, useAggregation(kunderaQuery, m, filter), queryBuilder, m,
                 getKunderaQuery());
     }
@@ -163,7 +164,7 @@ public class ESQuery<E> extends QueryImpl
 
     /**
      * Gets the es filter builder.
-     *
+     * 
      * @return ES Filter Builder
      */
     public ESFilterBuilder getEsFilterBuilder()
@@ -242,7 +243,7 @@ public class ESQuery<E> extends QueryImpl
         }
         else
         {
-            if (checkExpression(expression))
+            if (isAggregationExpression(expression))
                 filteredAggregation.subAggregation(getAggregation(expression, entityMetadata));
         }
         return filteredAggregation;
@@ -266,7 +267,7 @@ public class ESQuery<E> extends QueryImpl
         ListIterable<Expression> functionlist = collectionExpression.children();
         for (Expression function : functionlist)
         {
-            if (checkExpression(function))
+            if (isAggregationExpression(function))
                 aggregationBuilder.subAggregation(getAggregation(function, entityMetadata));
         }
         return aggregationBuilder;
@@ -286,11 +287,8 @@ public class ESQuery<E> extends QueryImpl
         AggregateFunction function = (AggregateFunction) expression;
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 entityMetadata.getPersistenceUnit());
+        String jPAColumnName = getJPACOlumnName(function.toParsedText(), entityMetadata, metaModel);
 
-        String field = function.toParsedText().substring(function.toParsedText().indexOf('.') + 1,
-                function.toParsedText().indexOf(')'));
-        String jPAColumnName = ((AbstractAttribute) metaModel.entity(entityMetadata.getEntityClazz()).getAttribute(
-                field)).getJPAColumnName();
         MetricsAggregationBuilder aggregationBuilder = null;
 
         switch (function.getIdentifier())
@@ -307,6 +305,9 @@ public class ESQuery<E> extends QueryImpl
         case Expression.AVG:
             aggregationBuilder = AggregationBuilders.avg(function.toParsedText()).field(jPAColumnName);
             break;
+        case Expression.COUNT:
+            aggregationBuilder = AggregationBuilders.count(function.toParsedText()).field(jPAColumnName);
+            break;
         }
         return aggregationBuilder;
     }
@@ -318,8 +319,35 @@ public class ESQuery<E> extends QueryImpl
      *            the expression
      * @return true, if successful
      */
-    private boolean checkExpression(Expression expression)
+    private boolean isAggregationExpression(Expression expression)
     {
         return !(expression instanceof StateFieldPathExpression || expression instanceof IdentificationVariable);
+    }
+
+    /**
+     * Gets the JPA column name.
+     * 
+     * @param field
+     *            the field
+     * @param entityMetadata
+     *            the entity metadata
+     * @param metaModel
+     *            the meta model
+     * @return the JPA column name
+     */
+    private String getJPACOlumnName(String field, EntityMetadata entityMetadata, MetamodelImpl metaModel)
+    {
+        String fieldValue = null;
+
+        if (field.indexOf('.') > 0)
+        {
+            return ((AbstractAttribute) metaModel.entity(entityMetadata.getEntityClazz()).getAttribute(
+                    field.substring(field.indexOf('.') + 1, field.indexOf(')')))).getJPAColumnName();
+        }
+        else
+        {
+            return ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName();
+        }
+
     }
 }

@@ -20,8 +20,10 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -56,6 +58,15 @@ public class PersonESTest
 
     private static Node node = null;
 
+    /** The person1. */
+    private PersonES person1, person2, person3, person4;
+
+    /**
+     * Sets the up before class.
+     * 
+     * @throws Exception
+     *             the exception
+     */
     @BeforeClass
     public static void setUpBeforeClass() throws Exception
     {
@@ -95,6 +106,7 @@ public class PersonESTest
 
         emf = Persistence.createEntityManagerFactory("es-pu");
         em = emf.createEntityManager();
+        init();
     }
 
     @Test
@@ -107,6 +119,7 @@ public class PersonESTest
         props.put(PersistenceProperties.KUNDERA_BATCH_SIZE, 10);
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("es-pu", props);
         EntityManager em = emf.createEntityManager();
+        // purge();
 
         PersonES person = new PersonES();
 
@@ -206,20 +219,6 @@ public class PersonESTest
     @Test
     public void testSpecificFieldRetrieval() throws InterruptedException
     {
-        PersonES person = new PersonES();
-        person.setAge(22);
-        person.setDay(Day.FRIDAY);
-        person.setPersonId("1");
-        person.setPersonName("karthik");
-        em.persist(person);
-
-        person = new PersonES();
-        person.setAge(22);
-        person.setDay(Day.FRIDAY);
-        person.setPersonId("2");
-        person.setPersonName("pragalbh");
-        em.persist(person);
-
         waitThread();
         String queryWithOutAndClause = "Select p.personName,p.age from PersonES p where p.personName = 'karthik' OR p.personName = 'pragalbh'";
         Query nameQuery = em.createNamedQuery(queryWithOutAndClause);
@@ -229,82 +228,446 @@ public class PersonESTest
         Assert.assertFalse(persons.isEmpty());
         Assert.assertEquals(2, persons.size());
         Assert.assertEquals("karthik", ((ArrayList) persons.get(0)).get(0));
-        Assert.assertEquals(22, ((ArrayList) persons.get(0)).get(1));
+        Assert.assertEquals(10, ((ArrayList) persons.get(0)).get(1));
         Assert.assertEquals("pragalbh", ((ArrayList) persons.get(1)).get(0));
-        Assert.assertEquals(22, ((ArrayList) persons.get(0)).get(1));
+        Assert.assertEquals(20, ((ArrayList) persons.get(1)).get(1));
 
     }
 
     @Test
     public void testFindJPQL() throws InterruptedException
     {
-        PersonES person = new PersonES();
-        person.setAge(32);
-        person.setDay(Day.FRIDAY);
-        person.setPersonId("1");
-        person.setPersonName("vivek");
-        em.persist(person);
 
-        person = new PersonES();
-        person.setAge(32);
-        person.setDay(Day.FRIDAY);
-        person.setPersonId("2");
-        person.setPersonName("kuldeep");
-        em.persist(person);
-
-        waitThread();
-        String queryWithOutAndClause = "Select p from PersonES p where p.personName = 'vivek'";
+        String queryWithOutAndClause = "Select p from PersonES p where p.personName = 'karthik'";
         Query nameQuery = em.createNamedQuery(queryWithOutAndClause);
 
         List<PersonES> persons = nameQuery.getResultList();
 
         Assert.assertFalse(persons.isEmpty());
         Assert.assertEquals(1, persons.size());
-        Assert.assertEquals("vivek", persons.get(0).getPersonName());
+        Assert.assertEquals("karthik", persons.get(0).getPersonName());
 
-        String queryWithOutClause = "Select p.personName from PersonES p";
+        String queryWithOutClause = "Select p.personName, p.personId from PersonES p";
         nameQuery = em.createNamedQuery(queryWithOutClause);
 
         List personsNames = nameQuery.getResultList();
 
         Assert.assertFalse(personsNames.isEmpty());
-        Assert.assertEquals(2, personsNames.size());
+        Assert.assertEquals(4, personsNames.size());
 
-        String invalidQueryWithAndClause = "Select p from PersonES p where p.personName = 'vivek' AND p.age = 34";
+        String invalidQueryWithAndClause = "Select p from PersonES p where p.personName = 'karthik' AND p.age = 34";
         nameQuery = em.createNamedQuery(invalidQueryWithAndClause);
         persons = nameQuery.getResultList();
 
         Assert.assertTrue(persons.isEmpty());
 
-        String queryWithAndClause = "Select p from PersonES p where p.personName = 'vivek' AND p.age = 32";
+        String queryWithAndClause = "Select p from PersonES p where p.personName = 'karthik' AND p.age = 10";
         nameQuery = em.createNamedQuery(queryWithAndClause);
         persons = nameQuery.getResultList();
 
         Assert.assertFalse(persons.isEmpty());
         Assert.assertFalse(persons.isEmpty());
         Assert.assertEquals(1, persons.size());
-        Assert.assertEquals("vivek", persons.get(0).getPersonName());
+        Assert.assertEquals("karthik", persons.get(0).getPersonName());
 
-        String queryWithORClause = "Select p from PersonES p where p.personName = 'vivek' OR p.personName = 'kuldeep'";
+        String queryWithORClause = "Select p from PersonES p where p.personName = 'karthik' OR p.personName = 'amit'";
         nameQuery = em.createNamedQuery(queryWithORClause);
         persons = nameQuery.getResultList();
 
         Assert.assertFalse(persons.isEmpty());
         Assert.assertEquals(2, persons.size());
 
-        String invalidQueryWithORClause = "Select p from PersonES p where p.personName = 'vivek' OR p.personName = 'lkl'";
+        String invalidQueryWithORClause = "Select p from PersonES p where p.personName = 'amit' OR p.personName = 'lkl'";
         nameQuery = em.createNamedQuery(invalidQueryWithORClause);
         persons = nameQuery.getResultList();
 
         Assert.assertFalse(persons.isEmpty());
         Assert.assertEquals(1, persons.size());
-
-        em.remove(em.find(PersonES.class, "1"));
-        em.remove(em.find(PersonES.class, "2"));
-        waitThread();
         // TODO: >,<,>=,<=
+
+        String notConditionOnRowKey = "Select p from PersonES p where p.personId <> '1'";
+        nameQuery = em.createNamedQuery(notConditionOnRowKey);
+        persons = nameQuery.getResultList();
+
+        assertResultList(persons, person2, person3, person4);
+
+        String notConditionOnNonRowKey = "Select p from PersonES p where p.personName <> 'amit'";
+        nameQuery = em.createNamedQuery(notConditionOnNonRowKey);
+        persons = nameQuery.getResultList();
+
+        assertResultList(persons, person1, person2, person4);
+
+        String notConditionOnNonRowKeyWithAnd = "Select p from PersonES p where p.personName <> 'amit' and p.personId > 2";
+        nameQuery = em.createNamedQuery(notConditionOnNonRowKeyWithAnd);
+        persons = nameQuery.getResultList();
+
+        assertResultList(persons, person4);
+
+        String notConditionOnNonRowKeyWithOr = "Select p from PersonES p where p.personName <> 'amit' or p.personId <> 3";
+        nameQuery = em.createNamedQuery(notConditionOnNonRowKeyWithOr);
+        persons = nameQuery.getResultList();
+
+        assertResultList(persons, person1, person2, person4);
+
     }
 
+    @Test
+    public void testNotWithDelete()
+    {
+        String queryString = "delete from PersonES p where p.personId <> 2 or p.personName <> 'amit'";
+        Query query = em.createQuery(queryString);
+        int rowUpdataCount = query.executeUpdate();
+
+        Assert.assertEquals(4, rowUpdataCount);
+
+        List resultList = em.createQuery("Select p from PersonES p").getResultList();
+        assertResultList(resultList, person1, person2, person3, person4);
+    }
+
+    @Test
+    public void testNotWithUpdate()
+    {
+        String notConditionUpdateQuery = "update PersonES p set p.age = 50 where p.personName <> 'amit'";
+        Query updateQuery = em.createQuery(notConditionUpdateQuery);
+        int updateCount = updateQuery.executeUpdate();
+
+        Assert.assertEquals(3, updateCount);
+        PersonES person = em.find(PersonES.class, "1");
+        Assert.assertEquals(50, person.getAge().intValue());
+
+        person = em.find(PersonES.class, "2");
+        Assert.assertEquals(50, person.getAge().intValue());
+
+        person = em.find(PersonES.class, "4");
+        Assert.assertEquals(50, person.getAge().intValue());
+    }
+
+    @Test
+    public void testCount()
+    {
+        String queryString = "Select count(p) from PersonES p";
+        Query query = em.createQuery(queryString);
+        List resultList = query.getResultList();
+
+        Assert.assertNotNull(resultList);
+        Assert.assertEquals(1, resultList.size());
+        Assert.assertEquals(4, ((Long) resultList.get(0)).intValue());
+    }
+
+    @Test
+    public void testCountWithField()
+    {
+        String queryString = "Select count(p.age) from PersonES p";
+        Query query = em.createQuery(queryString);
+        List resultList = query.getResultList();
+
+        Assert.assertNotNull(resultList);
+        Assert.assertEquals(1, resultList.size());
+        Assert.assertEquals(4, ((Long) resultList.get(0)).intValue());
+    }
+
+    @Test
+    public void testCountWithWhere()
+    {
+        String queryString = "Select count(p.age) from PersonES p where p.age > 25";
+        Query query = em.createQuery(queryString);
+        List resultList = query.getResultList();
+
+        Assert.assertNotNull(resultList);
+        Assert.assertEquals(1, resultList.size());
+        Assert.assertEquals(2, ((Long) resultList.get(0)).intValue());
+    }
+
+    @Test
+    public void testCountWithWhereAnd()
+    {
+        String queryString = "Select count(p.age) from PersonES p where p.age > 25 and p.personName = 'amit'";
+        Query query = em.createQuery(queryString);
+        List resultList = query.getResultList();
+
+        Assert.assertNotNull(resultList);
+        Assert.assertEquals(1, resultList.size());
+        Assert.assertEquals(1, ((Long) resultList.get(0)).intValue());
+    }
+
+    @Test
+    public void testCountWithWhereNullAnd()
+    {
+        String queryString = "Select count(p.age) from PersonES p where p.age < 25 and p.personName = 'amit'";
+        Query query = em.createQuery(queryString);
+        List resultList = query.getResultList();
+
+        Assert.assertNotNull(resultList);
+        Assert.assertEquals(1, resultList.size());
+        Assert.assertEquals(0, ((Long) resultList.get(0)).intValue());
+    }
+
+    @Test
+    public void testCountWithWhereOr()
+    {
+        String queryString = "Select count(p) from PersonES p where p.age < 25 or p.personName = 'amit'";
+        Query query = em.createQuery(queryString);
+        List resultList = query.getResultList();
+
+        Assert.assertNotNull(resultList);
+        Assert.assertEquals(1, resultList.size());
+        Assert.assertEquals(3, ((Long) resultList.get(0)).intValue());
+    }
+
+    @Test
+    public void testCountWithNot()
+    {
+        String queryString = "Select count(p.age) from PersonES p where p.personName <> 'amit'";
+        Query query = em.createQuery(queryString);
+        List resultList = query.getResultList();
+
+        Assert.assertNotNull(resultList);
+        Assert.assertEquals(1, resultList.size());
+        Assert.assertEquals(3, ((Long) resultList.get(0)).intValue());
+    }
+
+    @Test
+    public void testCountWithIn()
+    {
+        String queryString = "Select count(p.age) from PersonES p where p.age In (20, 30)";
+        Query query = em.createQuery(queryString);
+        List resultList = query.getResultList();
+
+        Assert.assertNotNull(resultList);
+        Assert.assertEquals(1, resultList.size());
+        Assert.assertEquals(2, ((Long) resultList.get(0)).intValue());
+    }
+
+    @Test
+    public void testCountWithInString()
+    {
+        String queryString = "Select count(p.age) from PersonES p where p.personName IN ('amit', 'dev', 'lilkl')";
+        Query query = em.createQuery(queryString);
+        List resultList = query.getResultList();
+
+        Assert.assertNotNull(resultList);
+        Assert.assertEquals(1, resultList.size());
+        Assert.assertEquals(2, ((Long) resultList.get(0)).intValue());
+    }
+
+    @Test
+    public void testInWithStringArray()
+    {
+        String queryString = "Select p from PersonES p where p.personId IN :values";
+        Query query = em.createQuery(queryString);
+        String values[] = { "3", "4", "1" };
+        query.setParameter("values", values);
+        List resultList = query.getResultList();
+
+        assertResultList(resultList, person1, person3, person4);
+    }
+
+    @Test
+    public void testInWithIntegerArray()
+    {
+        String queryString = "Select p from PersonES p where p.age IN :values";
+        Query query = em.createQuery(queryString);
+        Integer values[] = { 10, 20, 50 };
+        query.setParameter("values", values);
+        List resultList = query.getResultList();
+
+        assertResultList(resultList, person1, person2);
+    }
+
+    @Test
+    public void testInWithListPositionalParameter()
+    {
+        String queryString = "Select p from PersonES p where p.age IN ?1";
+        Query query = em.createQuery(queryString);
+        List<Integer> inputList = new ArrayList();
+        inputList.add(20);
+        inputList.add(30);
+        query.setParameter(1, inputList);
+        List<PersonES> resultList = query.getResultList();
+
+        assertResultList(resultList, person2, person3);
+    }
+
+    @Test
+    public void testInWithStringList()
+    {
+        String queryString = "Select p from PersonES p where p.personId IN :list";
+        Query query = em.createQuery(queryString);
+        ArrayList<String> input = new ArrayList<String>();
+        input.add("2");
+        input.add("3");
+        query.setParameter("list", input);
+        List<PersonES> resultList = query.getResultList();
+
+        assertResultList(resultList, person2, person3);
+    }
+
+    @Test
+    public void testInWithIntegerList()
+    {
+        String queryString = "Select p from PersonES p where p.age IN :list";
+        Query query = em.createQuery(queryString);
+        ArrayList<Integer> input = new ArrayList<Integer>();
+        input.add(20);
+        input.add(40);
+        query.setParameter("list", input);
+        List<PersonES> resultList = query.getResultList();
+
+        assertResultList(resultList, person2, person4);
+    }
+
+    @Test
+    public void testInWithObjectList()
+    {
+        String queryString = "Select p from PersonES p where p.personId IN :list";
+        Query query = em.createQuery(queryString);
+        List inputList = new ArrayList();
+        inputList.add("2");
+        inputList.add("3");
+        query.setParameter("list", inputList);
+        List<PersonES> resultList = query.getResultList();
+
+        assertResultList(resultList, person2, person3);
+    }
+
+    @Test
+    public void testInWithBlankList()
+    {
+        String queryString = "Select p from PersonES p where p.age IN :list";
+        Query query = em.createQuery(queryString);
+        ArrayList input = new ArrayList();
+        query.setParameter("list", input);
+        List<PersonES> resultList = query.getResultList();
+
+        assertResultList(resultList);
+    }
+
+    @Test
+    public void testInWithIntegerSet()
+    {
+        String queryString = "Select p from PersonES p where p.age IN :set";
+        Query query = em.createQuery(queryString);
+        Set<Integer> inputSet = new HashSet<Integer>();
+        inputSet.add(10);
+        inputSet.add(30);
+        query.setParameter("set", inputSet);
+        List<PersonES> resultList = query.getResultList();
+
+        assertResultList(resultList, person1, person3);
+    }
+
+    @Test
+    public void testInWithStringSet()
+    {
+        String queryString = "Select p from PersonES p where p.personId IN :set";
+        Query query = em.createQuery(queryString);
+        Set<String> input = new HashSet<String>();
+        input.add("2");
+        input.add("3");
+        query.setParameter("set", input);
+        List<PersonES> resultList = query.getResultList();
+
+        assertResultList(resultList, person2, person3);
+    }
+
+    @Test
+    public void testInWithIntegerValues()
+    {
+        String queryString = "Select p from PersonES p where p.age IN ( 10, 20)";
+        Query query = em.createQuery(queryString);
+        List resultList = query.getResultList();
+
+        assertResultList(resultList, person1, person2);
+    }
+
+    @Test
+    public void testInWithStringValues()
+    {
+        String queryString = "Select p from PersonES p where p.personId IN ( '2', '3','10')";
+        Query query = em.createQuery(queryString);
+        List resultList = query.getResultList();
+
+        assertResultList(resultList, person2, person3);
+    }
+
+    @Test
+    public void testInWithOrClause()
+    {
+        String queryString = "Select p from PersonES p where p.age IN ( 10, 20) or p.age = 40";
+        Query query = em.createQuery(queryString);
+        List resultList = query.getResultList();
+
+        assertResultList(resultList, person1, person2, person4);
+    }
+
+    @Test
+    public void testInWithAndClause()
+    {
+        String queryString = "Select p from PersonES p where p.age IN ( 10, 20) and p.personId = '2'";
+        Query query = em.createQuery(queryString);
+        List resultList = query.getResultList();
+
+        assertResultList(resultList, person2);
+    }
+
+    @Test
+    public void testFieldWithInClause()
+    {
+        String queryString = "Select p.personName from PersonES p where p.personId IN ( '1', '2') and p.age = 10";
+        Query query = em.createQuery(queryString);
+        List resultList = query.getResultList();
+
+        Assert.assertNotNull(resultList);
+        Assert.assertEquals(1, resultList.size());
+        Assert.assertEquals("karthik", resultList.get(0));
+    }
+
+    @Test
+    public void testMinWithIn()
+    {
+        String queryString = "Select sum(p.age) from PersonES p where p.personId IN ( '1', '2') or p.age = 40";
+        Query query = em.createQuery(queryString);
+        List resultList = query.getResultList();
+
+        Assert.assertNotNull(resultList);
+        Assert.assertEquals(1, resultList.size());
+        Assert.assertEquals(70.0, resultList.get(0));
+    }
+
+    @Test
+    public void testInWithBlankValues()
+    {
+        String queryString = "Select p from PersonES p where p.personId IN ( )";
+        Query query = em.createQuery(queryString);
+        List resultList = query.getResultList();
+
+        assertResultList(resultList);
+    }
+
+    @Test
+    public void testInWithDelete()
+    {
+        String queryString = "delete from PersonES p where p.personId IN ( '2', '4' )";
+        Query query = em.createQuery(queryString);
+        int deleteCount = query.executeUpdate();
+
+        Assert.assertEquals(2, deleteCount);
+
+        waitThread();
+        queryString = "Select p from PersonES p";
+        query = em.createQuery(queryString);
+        List resultList = query.getResultList();
+
+        assertResultList(resultList, person1, person3);
+
+    }
+
+    /**
+     * Tear down after class.
+     * 
+     * @throws Exception
+     *             the exception
+     */
     @AfterClass
     public static void tearDownAfterClass() throws Exception
     {
@@ -312,16 +675,125 @@ public class PersonESTest
             node.close();
     }
 
+    /**
+     * Tear down.
+     */
     @After
     public void tearDown()
     {
+        purge();
         em.close();
         emf.close();
 
     }
 
-    private void waitThread() throws InterruptedException
+    /**
+     * Wait thread.
+     */
+    private void waitThread()
     {
-        Thread.sleep(2000);
+        try
+        {
+            Thread.sleep(2000);
+        }
+        catch (InterruptedException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Inits all the records.
+     */
+    private void init()
+    {
+        person1 = createPerson("1", 10, "karthik");
+        person2 = createPerson("2", 20, "pragalbh");
+        person3 = createPerson("3", 30, "amit");
+        person4 = createPerson("4", 40, "dev");
+        waitThread();
+    }
+
+    /**
+     * Creates the person and persist them.
+     * 
+     * @param id
+     *            the id
+     * @param age
+     *            the age
+     * @param name
+     *            the name
+     * @param salary
+     *            the salary
+     * @return the person es
+     */
+    private PersonES createPerson(String id, int age, String name)
+    {
+        PersonES person = new PersonES();
+        person.setAge(age);
+        person.setDay(Day.FRIDAY);
+        person.setPersonId(id);
+        person.setPersonName(name);
+        em.persist(person);
+
+        return person;
+    }
+
+    /**
+     * Delete all the records.
+     */
+    private void purge()
+    {
+        String deleteQuery = "delete from PersonES p";
+        Query query = em.createQuery(deleteQuery);
+        query.executeUpdate();
+        waitThread();
+    }
+
+    /**
+     * Verify each person object of result list.
+     * 
+     * @param resultPersonList
+     *            the result person list
+     * @param persons
+     *            the persons
+     */
+    private void assertResultList(List<PersonES> resultPersonList, PersonES... persons)
+    {
+        boolean flag = false;
+
+        Assert.assertNotNull(resultPersonList);
+        Assert.assertEquals(persons.length, resultPersonList.size());
+
+        for (PersonES person : persons)
+        {
+            flag = false;
+            for (PersonES resultPerson : resultPersonList)
+            {
+                if (person.getPersonId().equals(resultPerson.getPersonId()))
+                {
+                    matchPerson(resultPerson, person);
+                    flag = true;
+                }
+            }
+            Assert.assertEquals("Person with id " + person.getPersonId() + " not found in Result list.", true, flag);
+        }
+    }
+
+    /**
+     * Match person to verify each field of both PersonES objects are same.
+     * 
+     * @param person
+     *            the person
+     * @param resultPerson
+     *            the result person
+     */
+    private void matchPerson(PersonES resultPerson, PersonES person)
+    {
+        Assert.assertNotNull(resultPerson);
+        Assert.assertEquals(person.getPersonId(), resultPerson.getPersonId());
+        Assert.assertEquals(person.getPersonName(), resultPerson.getPersonName());
+        Assert.assertEquals(person.getAge(), resultPerson.getAge());
+        Assert.assertEquals(person.getSalary(), resultPerson.getSalary());
     }
 }
