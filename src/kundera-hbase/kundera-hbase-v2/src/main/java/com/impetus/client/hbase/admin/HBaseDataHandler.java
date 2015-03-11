@@ -360,6 +360,7 @@ public class HBaseDataHandler implements DataHandler
     {
         Table hTable = gethTable(tableName);
         ((HBaseWriter) hbaseWriter).writeRow(hTable, hbaseRow);
+        hTable.close();
     }
 
     /**
@@ -446,7 +447,7 @@ public class HBaseDataHandler implements DataHandler
 
         hbaseWriter.writeColumns(hTable, rowId, columns, columnFamilyName);
 
-        puthTable(hTable);
+        closeHTable(hTable);
     }
 
     /*
@@ -505,7 +506,7 @@ public class HBaseDataHandler implements DataHandler
             {
                 if (hTable != null)
                 {
-                    puthTable(hTable);
+                    closeHTable(hTable);
                 }
             }
             catch (IOException e)
@@ -539,12 +540,9 @@ public class HBaseDataHandler implements DataHandler
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    private void puthTable(Table hTable) throws IOException
+    private void closeHTable(Table hTable) throws IOException
     {
-        // TODO check this........gen2
-        // connection.close();
-
-        // hTablePool.putTable(hTable);
+        hTable.close();
     }
 
     /*
@@ -730,7 +728,9 @@ public class HBaseDataHandler implements DataHandler
     @Override
     public void deleteRow(Object rowKey, String tableName) throws IOException
     {
-        hbaseWriter.delete(gethTable(tableName), rowKey);
+        Table hTable = gethTable(tableName);
+        hbaseWriter.delete(hTable, rowKey);
+        closeHTable(hTable);
     }
 
     /*
@@ -895,7 +895,7 @@ public class HBaseDataHandler implements DataHandler
         {
             if (hTable != null)
             {
-                puthTable(hTable);
+                closeHTable(hTable);
             }
         }
 
