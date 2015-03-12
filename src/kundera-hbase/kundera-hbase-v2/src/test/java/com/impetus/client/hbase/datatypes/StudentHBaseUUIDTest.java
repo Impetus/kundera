@@ -30,7 +30,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.impetus.client.hbase.datatypes.entities.StudentHBaseUUID;
-import com.impetus.client.hbase.testingutil.HBaseTestingUtils;
 
 /**
  * The Class StudentHBaseUUIDTest.
@@ -72,7 +71,7 @@ public class StudentHBaseUUIDTest extends Base
     {
         emf.close();
         emf = null;
-        HBaseTestingUtils.dropSchema(SCHEMA);
+        
     }
 
     /**

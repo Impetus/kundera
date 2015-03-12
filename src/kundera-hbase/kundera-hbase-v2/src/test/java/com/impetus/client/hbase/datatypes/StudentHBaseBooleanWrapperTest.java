@@ -29,7 +29,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.impetus.client.hbase.datatypes.entities.StudentHBaseBooleanWrapper;
-import com.impetus.client.hbase.testingutil.HBaseTestingUtils;
 import com.impetus.kundera.query.QueryHandlerException;
 
 /**
@@ -70,7 +69,7 @@ public class StudentHBaseBooleanWrapperTest extends Base
     {
         emf.close();
         emf = null;
-        HBaseTestingUtils.dropSchema(SCHEMA);
+        
     }
 
     /**

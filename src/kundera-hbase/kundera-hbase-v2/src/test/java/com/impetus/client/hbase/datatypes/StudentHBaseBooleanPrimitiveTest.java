@@ -29,7 +29,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.impetus.client.hbase.datatypes.entities.StudentHBaseBooleanPrimitive;
-import com.impetus.client.hbase.testingutil.HBaseTestingUtils;
 import com.impetus.kundera.query.QueryHandlerException;
 
 /**
@@ -70,7 +69,7 @@ public class StudentHBaseBooleanPrimitiveTest extends Base
     {
         emf.close();
         emf = null;
-        HBaseTestingUtils.dropSchema(SCHEMA);
+        
     }
 
     /**

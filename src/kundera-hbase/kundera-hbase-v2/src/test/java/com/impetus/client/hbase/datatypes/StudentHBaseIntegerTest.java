@@ -29,7 +29,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.impetus.client.hbase.datatypes.entities.StudentHBaseInteger;
-import com.impetus.client.hbase.testingutil.HBaseTestingUtils;
 
 /**
  * The Class StudentHBaseIntegerTest.
@@ -71,7 +70,7 @@ public class StudentHBaseIntegerTest extends Base
     {
         emf.close();
         emf = null;
-        HBaseTestingUtils.dropSchema(SCHEMA);
+        
     }
 
     /**

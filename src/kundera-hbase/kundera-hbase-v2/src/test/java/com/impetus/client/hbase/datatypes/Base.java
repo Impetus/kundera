@@ -23,7 +23,7 @@ import com.impetus.kundera.datatypes.datagenerator.DataGeneratorFactory;
  * 
  * @author Devender Yadav
  */
-public abstract class Base
+public class Base
 {
 
     /** The data generator. */

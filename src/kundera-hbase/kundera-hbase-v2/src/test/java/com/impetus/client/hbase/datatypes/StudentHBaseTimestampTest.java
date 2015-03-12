@@ -30,7 +30,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.impetus.client.hbase.datatypes.entities.StudentHBaseTimestamp;
-import com.impetus.client.hbase.testingutil.HBaseTestingUtils;
 
 /**
  * The Class StudentHBaseTimestampTest.
@@ -72,7 +71,7 @@ public class StudentHBaseTimestampTest extends Base
     {
         emf.close();
         emf = null;
-        HBaseTestingUtils.dropSchema(SCHEMA);
+        
     }
 
     /**

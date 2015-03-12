@@ -29,7 +29,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.impetus.client.hbase.datatypes.entities.StudentHBaseFloatWrapper;
-import com.impetus.client.hbase.testingutil.HBaseTestingUtils;
 
 /**
  * The Class StudentHBaseFloatWrapperTest.
@@ -71,7 +70,7 @@ public class StudentHBaseFloatWrapperTest extends Base
     {
         emf.close();
         emf = null;
-        HBaseTestingUtils.dropSchema(SCHEMA);
+        
     }
 
     /**
