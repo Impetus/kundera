@@ -54,7 +54,7 @@ public class LuceneQueryTest
 
     private EntityManager em;
 
-    Map propertyMap = null;
+    Map propertyMap = new HashMap<String, String>();
 
     /**
      * @throws java.lang.Exception
@@ -62,11 +62,9 @@ public class LuceneQueryTest
     @Before
     public void setUp() throws Exception
     {
-        propertyMap = new HashMap<String, String>();
         propertyMap.put("index.home.dir", "./lucene");
         emf = Persistence.createEntityManagerFactory(PU, propertyMap);
         em = emf.createEntityManager();
-
     }
 
     @Test
@@ -210,6 +208,8 @@ public class LuceneQueryTest
         Assert.assertEquals("p1", allPersons.get(0).getPersonId());
         Assert.assertEquals(new Integer(32), allPersons.get(0).getAge());
 
+        em.remove(em.find(Person.class, "p1"));
+        em.remove(em.find(Person.class, "p2"));
     }
 
     @Test
@@ -243,6 +243,7 @@ public class LuceneQueryTest
         allPersons = findQuery.getResultList();
         Assert.assertEquals(new Integer(12), allPersons.get(0).getAge());
 
+        em.remove(em.find(Person.class, "p1"));
     }
 
     @Test
@@ -275,6 +276,8 @@ public class LuceneQueryTest
         p = em.find(SingularEntityEmbeddable.class, 1);
         Assert.assertEquals("embeddedFieldChange", p.getEmbeddableEntity().getField());
 
+        em.remove(em.find(SingularEntityEmbeddable.class, 1));
+
     }
 
     @Test
@@ -306,6 +309,8 @@ public class LuceneQueryTest
 
         p = em.find(SingularEntityEmbeddable.class, 1);
         Assert.assertEquals("embeddedFieldChange", p.getEmbeddableEntity().getField());
+
+        em.remove(em.find(SingularEntityEmbeddable.class, 1));
 
     }
 
@@ -355,13 +360,13 @@ public class LuceneQueryTest
         Person p = new Person();
         p.setAge(20);
         p.setDay(Day.MONDAY);
-        p.setPersonId("4");
+        p.setPersonId("p4");
         p.setPersonName("pragalbh garg");
 
         Person g = new Person();
         g.setAge(20);
         g.setDay(Day.MONDAY);
-        g.setPersonId("5");
+        g.setPersonId("p5");
         g.setPersonName("karthik prasad");
 
         em.persist(p);
@@ -396,6 +401,12 @@ public class LuceneQueryTest
         q.setParameter("name", "%kar");
         persons = q.getResultList();
         assertEquals(0, persons.size());
+
+        em.remove(em.find(Person.class, "p1"));
+        em.remove(em.find(Person.class, "p2"));
+        em.remove(em.find(Person.class, "p3"));
+        em.remove(em.find(Person.class, "p4"));
+        em.remove(em.find(Person.class, "p5"));
     }
 
     /**
