@@ -29,11 +29,10 @@ import java.util.Properties;
 import java.util.Set;
 
 import javax.persistence.Embeddable;
-import javax.persistence.Embedded;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
-import javax.persistence.metamodel.Metamodel;
+import javax.persistence.metamodel.Type.PersistenceType;
 
 import org.apache.cassandra.db.marshal.CounterColumnType;
 import org.apache.cassandra.db.marshal.ListType;
@@ -52,7 +51,6 @@ import org.apache.cassandra.thrift.CqlMetadata;
 import org.apache.cassandra.thrift.CqlResult;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KsDef;
-import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
@@ -74,7 +72,6 @@ import com.impetus.client.cassandra.config.CassandraPropertyReader.CassandraSche
 import com.impetus.client.cassandra.index.CassandraIndexHelper;
 import com.impetus.client.cassandra.thrift.CQLTranslator;
 import com.impetus.kundera.Constants;
-import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.configure.ClientProperties.DataStore.Schema;
 import com.impetus.kundera.configure.ClientProperties.DataStore.Schema.DataCenter;
 import com.impetus.kundera.configure.ClientProperties.DataStore.Schema.Table;
@@ -87,6 +84,7 @@ import com.impetus.kundera.configure.schema.TableInfo;
 import com.impetus.kundera.configure.schema.api.AbstractSchemaManager;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata.Type;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -753,9 +751,11 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 if (!compositeColumns.isEmpty())
                 {
                     // embedded create udts
-                    // check for multiple embedded and collections in embedded entity
+                    // check for multiple embedded and collections in embedded
+                    // entity
                     createTypeforEmbeddables();
-                    onEmbeddedColumns(translator, tableInfo, queryBuilder, ksDef);
+                    onEmbeddedColumns(translator, tableInfo, queryBuilder);
+                    onElementCollectionColumns(translator, tableInfo.getElementCollectionMetadatas(), queryBuilder);
 
                 }
                 String dataType = CassandraValidationClassMapper.getValidationClass(tableInfo.getTableIdType(), true);
@@ -815,6 +815,103 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     }
 
     /**
+     * On element collection columns.
+     * 
+     * @param translator
+     *            the translator
+     * @param collectionColumnInfos
+     *            the collection column infos
+     * @param queryBuilder
+     *            the query builder
+     */
+    private void onElementCollectionColumns(CQLTranslator translator, List<CollectionColumnInfo> collectionColumnInfos,
+            StringBuilder queryBuilder)
+    {
+        for (CollectionColumnInfo cci : collectionColumnInfos)
+        {
+            String dataType = CassandraValidationClassMapper.getValidationClass(cci.getType(), true);
+
+            // CQL Type of collection column
+            String collectionCqlType = translator.getCQLType(dataType);
+
+            // Collection Column Name
+            String collectionColumnName = new String(cci.getCollectionColumnName());
+
+            // Generic Type list
+            StringBuilder genericTypesBuilder = null;
+            List<Class<?>> genericClasses = cci.getGenericClasses();
+            if (!genericClasses.isEmpty())
+            {
+                genericTypesBuilder = new StringBuilder();
+                if (MapType.class.getSimpleName().equals(dataType) && genericClasses.size() == 2)
+                {
+                    genericTypesBuilder.append("<");
+                    if (genericClasses.get(0).getAnnotation(Embeddable.class) != null)
+                    {
+                        String frozenKey = CQLTranslator.FROZEN + "<\"" + genericClasses.get(0).getSimpleName()
+                                + "\"> ";
+                        genericTypesBuilder.append(frozenKey);
+                    }
+                    else
+                    {
+                        String keyDataType = CassandraValidationClassMapper.getValidationClass(genericClasses.get(0),
+                                true);
+                        genericTypesBuilder.append(translator.getCQLType(keyDataType));
+                    }
+                    genericTypesBuilder.append(",");
+                    if (genericClasses.get(1).getAnnotation(Embeddable.class) != null)
+                    {
+                        String frozenKey = CQLTranslator.FROZEN + "<\"" + genericClasses.get(1).getSimpleName()
+                                + "\"> ";
+                        genericTypesBuilder.append(frozenKey);
+                    }
+                    else
+                    {
+                        String keyDataType = CassandraValidationClassMapper.getValidationClass(genericClasses.get(1),
+                                true);
+                        genericTypesBuilder.append(translator.getCQLType(keyDataType));
+                    }
+                    genericTypesBuilder.append(">");
+                }
+                else if ((ListType.class.getSimpleName().equals(dataType) || SetType.class.getSimpleName().equals(
+                        dataType))
+                        && genericClasses.size() == 1)
+                {
+                    genericTypesBuilder.append("<");
+                    if (genericClasses.get(0).getAnnotation(Embeddable.class) != null)
+                    {
+                        String frozenKey = CQLTranslator.FROZEN + "<\"" + genericClasses.get(0).getSimpleName()
+                                + "\"> ";
+                        genericTypesBuilder.append(frozenKey);
+                    }
+                    else
+                    {
+                        String keyDataType = CassandraValidationClassMapper.getValidationClass(genericClasses.get(0),
+                                true);
+                        genericTypesBuilder.append(translator.getCQLType(keyDataType));
+                    }
+                    genericTypesBuilder.append(">");
+                }
+                else
+                {
+                    throw new SchemaGenerationException("Incorrect collection field definition for "
+                            + cci.getCollectionColumnName() + ". Generic Types must be defined correctly.");
+                }
+            }
+
+            if (genericTypesBuilder != null)
+            {
+                collectionCqlType += genericTypesBuilder.toString();
+            }
+
+            translator.appendColumnName(queryBuilder, collectionColumnName, collectionCqlType);
+            queryBuilder.append(" ,");
+
+        }
+
+    }
+
+    /**
      * On embedded columns.
      * 
      * @param translator
@@ -823,13 +920,11 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      *            the table info
      * @param queryBuilder
      *            the query builder
-     * @param ksDef
-     *            the ks def
      * @throws Exception
      *             the exception
      */
-    private void onEmbeddedColumns(CQLTranslator translator, TableInfo tableInfo, StringBuilder queryBuilder,
-            KsDef ksDef) throws Exception
+    private void onEmbeddedColumns(CQLTranslator translator, TableInfo tableInfo, StringBuilder queryBuilder)
+            throws Exception
     {
 
         List<EmbeddedColumnInfo> embeddedColumns = tableInfo.getEmbeddedColumnMetadatas();
@@ -882,6 +977,10 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
 
             String typeQuery = CQLTranslator.CREATE_TYPE;
             EmbeddableType embeddedColumn = (EmbeddableType) iter.next();
+            if (!embeddedColumn.getPersistenceType().equals(PersistenceType.EMBEDDABLE))
+            {
+                continue;
+            }
 
             typeQuery = StringUtils.replace(typeQuery, CQLTranslator.TYPE,
                     translator.ensureCase(new StringBuilder(), embeddedColumn.getJavaType().getSimpleName(), false)
@@ -898,7 +997,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 if (columnAttribute.getJavaType().isAnnotationPresent(Embeddable.class))
                 {
 
-                    // process embeddable
+                    // handle embeddable
                     String cqlType = CQLTranslator.FROZEN + "<\"" + columnAttribute.getJavaType().getSimpleName()
                             + "\"> ";
                     translator.appendColumnName(typeQueryBuilder, columnAttribute.getName(), cqlType);
@@ -907,8 +1006,22 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 }
                 else if (columnAttribute.isCollection())
                 {
-                    handleCollectionElement(translator, columnAttribute, typeQueryBuilder);
+                    // handle element collection with embeddables
+                    handleElementCollectionAttribute(translator, columnAttribute, typeQueryBuilder);
+                    if (!MetadataUtils.isBasicElementCollectionField((Field) columnAttribute.getJavaMember()))
+                    {
+                        childEmb.add(((AbstractAttribute) columnAttribute).getBindableJavaType().getSimpleName());
+                    }
+
                 }
+                // else if (columnAttribute.isCollection()
+                // && MetadataUtils.isBasicElementCollectionField((Field)
+                // columnAttribute.getJavaMember()))
+                // {
+                // //handle basic element collection
+                // handleBasicCollectionAttribute(translator, columnAttribute,
+                // typeQueryBuilder);
+                // }
                 else
                 {
                     String cqlType = null;
@@ -934,7 +1047,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     }
 
     /**
-     * Handle collection element.
+     * Handle element collection attribute.
      * 
      * @param translator
      *            the translator
@@ -943,7 +1056,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      * @param typeQueryBuilder
      *            the type query builder
      */
-    private void handleCollectionElement(CQLTranslator translator, Attribute attribute, StringBuilder typeQueryBuilder)
+    private void handleElementCollectionAttribute(CQLTranslator translator, Attribute attribute,
+            StringBuilder typeQueryBuilder)
     {
         String dataType = CassandraValidationClassMapper.getValidationClass(attribute.getJavaType(), true);
 
@@ -962,19 +1076,43 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             if (MapType.class.getSimpleName().equals(dataType) && genericClasses.size() == 2)
             {
                 genericTypesBuilder.append("<");
-                String keyDataType = CassandraValidationClassMapper.getValidationClass(genericClasses.get(0), true);
-                genericTypesBuilder.append(translator.getCQLType(keyDataType));
+                if (genericClasses.get(0).getAnnotation(Embeddable.class) != null)
+                {
+                    String frozenKey = CQLTranslator.FROZEN + "<\"" + genericClasses.get(0).getSimpleName() + "\"> ";
+                    genericTypesBuilder.append(frozenKey);
+                }
+                else
+                {
+                    String keyDataType = CassandraValidationClassMapper.getValidationClass(genericClasses.get(0), true);
+                    genericTypesBuilder.append(translator.getCQLType(keyDataType));
+                }
                 genericTypesBuilder.append(",");
-                String valueDataType = CassandraValidationClassMapper.getValidationClass(genericClasses.get(1), true);
-                genericTypesBuilder.append(translator.getCQLType(valueDataType));
+                if (genericClasses.get(1).getAnnotation(Embeddable.class) != null)
+                {
+                    String frozenKey = CQLTranslator.FROZEN + "<\"" + genericClasses.get(1).getSimpleName() + "\"> ";
+                    genericTypesBuilder.append(frozenKey);
+                }
+                else
+                {
+                    String keyDataType = CassandraValidationClassMapper.getValidationClass(genericClasses.get(1), true);
+                    genericTypesBuilder.append(translator.getCQLType(keyDataType));
+                }
                 genericTypesBuilder.append(">");
             }
             else if ((ListType.class.getSimpleName().equals(dataType) || SetType.class.getSimpleName().equals(dataType))
                     && genericClasses.size() == 1)
             {
                 genericTypesBuilder.append("<");
-                String valueDataType = CassandraValidationClassMapper.getValidationClass(genericClasses.get(0), true);
-                genericTypesBuilder.append(translator.getCQLType(valueDataType));
+                if (genericClasses.get(0).getAnnotation(Embeddable.class) != null)
+                {
+                    String frozenKey = CQLTranslator.FROZEN + "<\"" + genericClasses.get(0).getSimpleName() + "\"> ";
+                    genericTypesBuilder.append(frozenKey);
+                }
+                else
+                {
+                    String keyDataType = CassandraValidationClassMapper.getValidationClass(genericClasses.get(0), true);
+                    genericTypesBuilder.append(translator.getCQLType(keyDataType));
+                }
                 genericTypesBuilder.append(">");
             }
             else

@@ -21,7 +21,6 @@ package com.impetus.client.cassandra.udt;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class Address.
  */

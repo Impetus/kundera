@@ -19,8 +19,11 @@
 package com.impetus.client.cassandra.udt;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -29,7 +32,6 @@ import javax.persistence.Table;
 import com.impetus.kundera.index.Index;
 import com.impetus.kundera.index.IndexCollection;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class PersonUDT.
  */
@@ -63,10 +65,107 @@ public class PersonUDT
     /** The nicknames. */
     @Column
     private List<String> nicknames;
+    
+    /** The list profs. */
+    @ElementCollection
+    private List<ProfessionalDetailsUDT> listProfs;
+    
+    /** The set profs. */
+    @ElementCollection
+    private Set<ProfessionalDetailsUDT> setProfs;
+    
+    /** The map profs key. */
+    @ElementCollection
+    private Map<String, ProfessionalDetailsUDT> mapProfsKey;
+    
+    
+    /**
+     * Gets the sets the profs.
+     *
+     * @return the sets the profs
+     */
+    public Set<ProfessionalDetailsUDT> getSetProfs()
+    {
+        return setProfs;
+    }
+
+    /**
+     * Sets the sets the profs.
+     *
+     * @param setProfs the new sets the profs
+     */
+    public void setSetProfs(Set<ProfessionalDetailsUDT> setProfs)
+    {
+        this.setProfs = setProfs;
+    }
+
+    /**
+     * Gets the map profs key.
+     *
+     * @return the map profs key
+     */
+    public Map<String, ProfessionalDetailsUDT> getMapProfsKey()
+    {
+        return mapProfsKey;
+    }
+
+    /**
+     * Sets the map profs key.
+     *
+     * @param mapProfsKey the map profs key
+     */
+    public void setMapProfsKey(Map<String, ProfessionalDetailsUDT> mapProfsKey)
+    {
+        this.mapProfsKey = mapProfsKey;
+    }
+
+//    public Map<Fullname, ProfessionalDetailsUDT> getMapProfsBoth()
+//    {
+//        return mapProfsBoth;
+//    }
+//
+//    public void setMapProfsBoth(Map<Fullname, ProfessionalDetailsUDT> mapProfsBoth)
+//    {
+//        this.mapProfsBoth = mapProfsBoth;
+//    }
+
+//    public Map<ProfessionalDetailsUDT, Integer> getMapProfsValue()
+//    {
+//        return mapProfsValue;
+//    }
+//
+//    public void setMapProfsValue(Map<ProfessionalDetailsUDT, Integer> mapProfsValue)
+//    {
+//        this.mapProfsValue = mapProfsValue;
+//    }
+//
+//    @ElementCollection
+//    private Map<ProfessionalDetailsUDT, Integer> mapProfsValue;
+
+    
+    /**
+ * Gets the list profs.
+ *
+ * @return the list profs
+ */
+public List<ProfessionalDetailsUDT> getListProfs()
+    {
+        return listProfs;
+    }
+
+    /**
+     * Sets the list profs.
+     *
+     * @param listProfs the new list profs
+     */
+    public void setListProfs(List<ProfessionalDetailsUDT> listProfs)
+    {
+        this.listProfs = listProfs;
+    }
 
     /**
      * Gets the person id.
-     *
+     * 
      * @return the person id
      */
     public String getPersonId()
@@ -76,8 +175,9 @@ public class PersonUDT
 
     /**
      * Sets the person id.
-     *
-     * @param personId the new person id
+     * 
+     * @param personId
+     *            the new person id
      */
     public void setPersonId(String personId)
     {
@@ -86,7 +186,7 @@ public class PersonUDT
 
     /**
      * Gets the personal details.
-     *
+     * 
      * @return the personal details
      */
     public PersonalDetailsUDT getPersonalDetails()
@@ -96,8 +196,9 @@ public class PersonUDT
 
     /**
      * Sets the personal details.
-     *
-     * @param personalDetails the new personal details
+     * 
+     * @param personalDetails
+     *            the new personal details
      */
     public void setPersonalDetails(PersonalDetailsUDT personalDetails)
     {
@@ -106,7 +207,7 @@ public class PersonUDT
 
     /**
      * Gets the professional details.
-     *
+     * 
      * @return the professional details
      */
     public ProfessionalDetailsUDT getProfessionalDetails()
@@ -116,8 +217,9 @@ public class PersonUDT
 
     /**
      * Sets the professional details.
-     *
-     * @param professionalDetails the new professional details
+     * 
+     * @param professionalDetails
+     *            the new professional details
      */
     public void setProfessionalDetails(ProfessionalDetailsUDT professionalDetails)
     {
@@ -126,7 +228,7 @@ public class PersonUDT
 
     /**
      * Gets the email.
-     *
+     * 
      * @return the email
      */
     public String getEmail()
@@ -136,8 +238,9 @@ public class PersonUDT
 
     /**
      * Sets the email.
-     *
-     * @param email the new email
+     * 
+     * @param email
+     *            the new email
      */
     public void setEmail(String email)
     {
@@ -146,7 +249,7 @@ public class PersonUDT
 
     /**
      * Gets the password.
-     *
+     * 
      * @return the password
      */
     public String getPassword()
@@ -156,8 +259,9 @@ public class PersonUDT
 
     /**
      * Sets the password.
-     *
-     * @param password the new password
+     * 
+     * @param password
+     *            the new password
      */
     public void setPassword(String password)
     {
@@ -166,7 +270,7 @@ public class PersonUDT
 
     /**
      * Gets the nicknames.
-     *
+     * 
      * @return the nicknames
      */
     public List<String> getNicknames()
@@ -176,8 +280,9 @@ public class PersonUDT
 
     /**
      * Sets the nicknames.
-     *
-     * @param nicknames the new nicknames
+     * 
+     * @param nicknames
+     *            the new nicknames
      */
     public void setNicknames(List<String> nicknames)
     {

@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import javax.persistence.ElementCollection;
 import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
@@ -34,11 +35,17 @@ import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.PluralAttribute;
 
 import org.apache.cassandra.db.marshal.AbstractType;
-import org.apache.cassandra.db.marshal.BytesType;
+import org.apache.cassandra.db.marshal.FrozenType;
+import org.apache.cassandra.db.marshal.ListType;
+import org.apache.cassandra.db.marshal.MapType;
+import org.apache.cassandra.db.marshal.SetType;
 import org.apache.cassandra.db.marshal.TypeParser;
 import org.apache.cassandra.db.marshal.UserType;
 import org.apache.cassandra.exceptions.ConfigurationException;
 import org.apache.cassandra.exceptions.SyntaxException;
+import org.apache.cassandra.serializers.ListSerializer;
+import org.apache.cassandra.serializers.MapSerializer;
+import org.apache.cassandra.serializers.SetSerializer;
 import org.apache.cassandra.serializers.TypeSerializer;
 import org.apache.cassandra.serializers.UTF8Serializer;
 import org.apache.cassandra.thrift.Column;
@@ -1138,12 +1145,20 @@ public abstract class CassandraDataHandlerBase
                         }
                         // remove super column family check and populate
                         // embedded
-                 
+
                         if (isCql3Enabled && !m.isCounterColumnType())
                         {
-                            if (metaModel.isEmbeddable(attribute.getJavaType()))
+                            if (metaModel.isEmbeddable(((AbstractAttribute) attribute).getBindableJavaType()))
                             {
-                                entity = setUdtValue(entity, thriftColumnValue, metaModel, attribute);
+                                if (attribute.isCollection())
+                                {
+                                    // element collection
+                                    entity = setElementCollection(entity, thriftColumnValue, metaModel, attribute);
+                                }
+                                else
+                                {
+                                    entity = setUdtValue(entity, thriftColumnValue, metaModel, attribute);
+                                }
                             }
                             else
                             {
@@ -1229,14 +1244,15 @@ public abstract class CassandraDataHandlerBase
             if (key.equals(((AbstractAttribute) attribute).getJavaMember().getName()))
             {
                 val = schemaType.getValue();
+                break;
             }
         }
 
-        UserType test = null;
+        UserType userType = null;
 
         try
         {
-            test = UserType.getInstance(new TypeParser(val.substring(val.indexOf("("), val.length())));
+            userType = UserType.getInstance(new TypeParser(val.substring(val.indexOf("("), val.length())));
         }
         catch (ConfigurationException e3)
         {
@@ -1248,8 +1264,8 @@ public abstract class CassandraDataHandlerBase
             // TODO Auto-generated catch block
             log.error(e3.getMessage());
         }
-        fieldNames = test.fieldNames();
-        fieldTypes = test.allTypes();
+        fieldNames = userType.fieldNames();
+        fieldTypes = userType.allTypes();
 
         Field field = (Field) ((AbstractAttribute) attribute).getJavaMember();
         Class embeddedClass = ((AbstractAttribute) attribute).getBindableJavaType();
@@ -1259,13 +1275,13 @@ public abstract class CassandraDataHandlerBase
         {
             embeddedObject = embeddedClass.newInstance();
         }
-        catch (InstantiationException e1)
+        catch (InstantiationException ie)
         {
-             log.error(e1.getMessage());
+            log.error(ie.getMessage());
         }
-        catch (IllegalAccessException e1)
+        catch (IllegalAccessException iae)
         {
-              log.error(e1.getMessage());
+            log.error(iae.getMessage());
         }
 
         Object finalValue = populateEmbeddedRecursive((ByteBuffer.wrap((byte[]) thriftColumnValue)), fieldTypes,
@@ -1309,14 +1325,18 @@ public abstract class CassandraDataHandlerBase
                                                                  // column name
 
             Field fieldToSet = null;
+            AbstractAttribute attribute = null;
             // change this if possible
             for (Object attr : emb.getAttributes())
             {
                 if (((AbstractAttribute) attr).getJPAColumnName().equals(name))
                 {
-                    fieldToSet = (Field) ((AbstractAttribute) attr).getJavaMember();
+                    attribute = (AbstractAttribute) attr;
+                    break;
                 }
             }
+            fieldToSet = (Field) attribute.getJavaMember();
+            Class embeddedClass = attribute.getBindableJavaType();
 
             int size = input.getInt();
             if (size < 0)
@@ -1333,22 +1353,18 @@ public abstract class CassandraDataHandlerBase
 
                 // create entity with type_name and populate fields, set entity
                 // in parent object after exit
-                Class embeddedClass = fieldToSet.getType();
-
                 Object embeddedObjectChild = null;
                 try
                 {
                     embeddedObjectChild = embeddedClass.newInstance();
                 }
-                catch (InstantiationException e1)
+                catch (InstantiationException ie)
                 {
-                    // TODO Auto-generated catch block
-                    log.error(e1.getMessage());
+                    log.error(ie.getMessage());
                 }
-                catch (IllegalAccessException e1)
+                catch (IllegalAccessException iae)
                 {
-                    // TODO Auto-generated catch block
-                    log.error(e1.getMessage());
+                    log.error(iae.getMessage());
                 }
 
                 Object processedEntity = populateEmbeddedRecursive(field, subfieldTypes, subFieldNames,
@@ -1357,11 +1373,47 @@ public abstract class CassandraDataHandlerBase
             }
             else
             {
-                TypeSerializer serializer = type.getSerializer();
-                serializer.validate(field);
+                boolean flag = true;
 
-                Object finalValue = serializer.deserialize(field);
-                PropertyAccessorHelper.set(entity, fieldToSet, finalValue);
+                if (type.getClass().getSimpleName().equals("MapType"))
+                {
+                    if (((MapType) type).getValuesType().getClass().getSimpleName().equals("UserType"))
+                    {
+                        flag = false;
+                        // create instance of embedded object (UserType)
+                        setElementCollectionMap((MapType) type, field, entity, fieldToSet, metaModel, embeddedClass,
+                                false);
+                    }
+                }
+                else if (type.getClass().getSimpleName().equals("ListType"))
+                {
+                    if (((ListType) type).getElementsType().getClass().getSimpleName().equals("UserType"))
+                    {
+                        flag = false;
+                        setElementCollectionList((ListType) type, field, entity, fieldToSet, metaModel, embeddedClass,
+                                false);
+
+                    }
+                }
+                else if (type.getClass().getSimpleName().equals("SetType"))
+                {
+                    if (((SetType) type).getElementsType().getClass().getSimpleName().equals("UserType"))
+                    {
+                        flag = false;
+                        setElementCollectionSet((SetType) type, field, entity, fieldToSet, metaModel, embeddedClass,
+                                false);
+
+                    }
+                }
+                if (flag)
+                {
+                    TypeSerializer serializer = type.getSerializer();
+                    serializer.validate(field);
+
+                    Object finalValue = serializer.deserialize(field);
+                    PropertyAccessorHelper.set(entity, fieldToSet, finalValue);
+                }
+
             }
 
         }
@@ -1457,6 +1509,275 @@ public abstract class CassandraDataHandlerBase
                 log.warn("Error while setting field{} value via CQL, Caused by: .", attribute.getName(), pae);
             }
         }
+    }
+
+    /**
+     * Sets the element collection.
+     * 
+     * @param entity
+     *            the entity
+     * @param thriftColumnValue
+     *            the thrift column value
+     * @param metaModel
+     *            the meta model
+     * @param attribute
+     *            the attribute
+     * @return the object
+     */
+    private Object setElementCollection(Object entity, Object thriftColumnValue, MetamodelImpl metaModel,
+            Attribute attribute)
+    {
+        String cqlColumnMetadata = null;
+        Map<ByteBuffer, String> schemaTypes = this.clientBase.getCqlMetadata().getValue_types();
+        for (Map.Entry<ByteBuffer, String> schemaType : schemaTypes.entrySet())
+        {
+
+            String key = UTF8Serializer.instance.deserialize((schemaType.getKey()));
+            if (key.equals(((AbstractAttribute) attribute).getJavaMember().getName()))
+            {
+                cqlColumnMetadata = schemaType.getValue();
+            }
+        }
+
+        Field field = (Field) ((AbstractAttribute) attribute).getJavaMember();
+        Class embeddedClass = ((AbstractAttribute) attribute).getBindableJavaType();
+
+        if (List.class.isAssignableFrom(((Field) attribute.getJavaMember()).getType()))
+        {
+            ListType listType = null;
+            try
+            {
+                listType = ListType.getInstance(new TypeParser(cqlColumnMetadata.substring(
+                        cqlColumnMetadata.indexOf("("), cqlColumnMetadata.length())));
+            }
+            catch (ConfigurationException e)
+            {
+                log.error(e.getMessage());
+            }
+            catch (SyntaxException e)
+            {
+                log.error(e.getMessage());
+            }
+            return setElementCollectionList(listType, ByteBuffer.wrap((byte[]) thriftColumnValue), entity, field,
+                    metaModel, embeddedClass, true);
+
+        }
+        else if (Set.class.isAssignableFrom(((Field) attribute.getJavaMember()).getType()))
+        {
+            SetType setType = null;
+            try
+            {
+                setType = SetType.getInstance(new TypeParser(cqlColumnMetadata.substring(
+                        cqlColumnMetadata.indexOf("("), cqlColumnMetadata.length())));
+            }
+            catch (ConfigurationException e)
+            {
+                log.error(e.getMessage());
+            }
+            catch (SyntaxException e)
+            {
+                log.error(e.getMessage());
+            }
+            return setElementCollectionSet(setType, ByteBuffer.wrap((byte[]) thriftColumnValue), entity, field,
+                    metaModel, embeddedClass, true);
+
+        }
+        else if (Map.class.isAssignableFrom(((Field) attribute.getJavaMember()).getType()))
+        {
+            MapType mapType = null;
+            try
+            {
+                mapType = MapType.getInstance(new TypeParser(cqlColumnMetadata.substring(
+                        cqlColumnMetadata.indexOf("("), cqlColumnMetadata.length())));
+            }
+            catch (ConfigurationException e)
+            {
+                log.error(e.getMessage());
+            }
+            catch (SyntaxException e)
+            {
+                log.error(e.getMessage());
+            }
+            return setElementCollectionMap(mapType, ByteBuffer.wrap((byte[]) thriftColumnValue), entity, field,
+                    metaModel, embeddedClass, true);
+        }
+
+        return entity;
+
+    }
+
+    /**
+     * Sets the element collection map.
+     * 
+     * @param mapType
+     *            the cql column metadata
+     * @param thriftColumnValue
+     *            the thrift column value
+     * @param entity
+     *            the entity
+     * @param field
+     *            the field
+     * @param metaModel
+     *            the meta model
+     * @param embeddedObject
+     *            the embedded object
+     * @return the object
+     */
+    private Object setElementCollectionMap(MapType mapType, ByteBuffer thriftColumnValue, Object entity, Field field,
+            MetamodelImpl metaModel, Class embeddedClass, boolean useNativeProtocol2)
+    {
+
+        Map result = new HashMap();
+        MapSerializer mapSerializer = mapType.getSerializer();
+        Map outputCollection = new HashMap();
+        if (useNativeProtocol2)
+        {
+            outputCollection.putAll(mapSerializer.deserializeForNativeProtocol(thriftColumnValue, 2));
+        }
+        else
+        {
+            outputCollection.putAll((Map) mapSerializer.deserialize(thriftColumnValue));
+        }
+
+        UserType usertype = (UserType) mapType.getValuesType();
+
+        for (Object key : outputCollection.keySet())
+        {
+            Object embeddedObject = null;
+            try
+            {
+                embeddedObject = embeddedClass.newInstance();
+            }
+            catch (InstantiationException ie)
+            {
+                log.error(ie.getMessage());
+            }
+            catch (IllegalAccessException iae)
+            {
+                log.error(iae.getMessage());
+            }
+            Object value = populateEmbeddedRecursive((ByteBuffer) outputCollection.get(key), usertype.allTypes(),
+                    usertype.fieldNames(), embeddedObject, metaModel);
+            result.put(key, value);
+        }
+        PropertyAccessorHelper.set(entity, field, result);
+        return entity;
+    }
+
+    /**
+     * Sets the element collection set.
+     * 
+     * @param setType
+     *            the cql column metadata
+     * @param thriftColumnValue
+     *            the thrift column value
+     * @param entity
+     *            the entity
+     * @param field
+     *            the field
+     * @param metaModel
+     *            the meta model
+     * @param embeddedObject
+     *            the embedded object
+     * @return the object
+     */
+    private Object setElementCollectionSet(SetType setType, ByteBuffer thriftColumnValue, Object entity, Field field,
+            MetamodelImpl metaModel, Class embeddedClass, boolean useNativeProtocol2)
+    {
+
+        SetSerializer setSerializer = setType.getSerializer();
+        Collection outputCollection = new ArrayList();
+        if (useNativeProtocol2)
+        {
+            outputCollection.addAll((Collection) setSerializer.deserializeForNativeProtocol(thriftColumnValue, 2));
+        }
+        else
+        {
+            outputCollection.addAll((Collection) setSerializer.deserialize(thriftColumnValue));
+        }
+
+        UserType usertype = (UserType) setType.getElementsType();
+        Collection result = new HashSet();
+        Iterator collectionItems = outputCollection.iterator();
+        while (collectionItems.hasNext())
+        {
+            Object embeddedObject = null;
+            try
+            {
+                embeddedObject = embeddedClass.newInstance();
+            }
+            catch (InstantiationException ie)
+            {
+                log.error(ie.getMessage());
+            }
+            catch (IllegalAccessException iae)
+            {
+                log.error(iae.getMessage());
+            }
+            Object value = populateEmbeddedRecursive((ByteBuffer) collectionItems.next(), usertype.allTypes(),
+                    usertype.fieldNames(), embeddedObject, metaModel);
+            result.add(value);
+        }
+        PropertyAccessorHelper.set(entity, field, result);
+        return entity;
+    }
+
+    /**
+     * Sets the element collection list.
+     * 
+     * @param listType
+     *            the cql column metadata
+     * @param thriftColumnValue
+     *            the thrift column value
+     * @param entity
+     *            the entity
+     * @param field
+     *            the field
+     * @param metaModel
+     *            the meta model
+     * @param embeddedObject
+     *            the embedded object
+     * @return the object
+     */
+    private Object setElementCollectionList(ListType listType, ByteBuffer thriftColumnValue, Object entity,
+            Field field, MetamodelImpl metaModel, Class embeddedClass, boolean useNativeProtocol2)
+    {
+
+        ListSerializer listSerializer = listType.getSerializer();
+        Collection outputCollection = new ArrayList();
+        if (useNativeProtocol2)
+        {
+            outputCollection.addAll((Collection) listSerializer.deserializeForNativeProtocol(thriftColumnValue, 2));
+        }
+        else
+        {
+            outputCollection.addAll((Collection) listSerializer.deserialize(thriftColumnValue));
+        }
+
+        UserType usertype = (UserType) listType.getElementsType();
+        Collection result = new ArrayList();
+        Iterator collectionItems = outputCollection.iterator();
+        while (collectionItems.hasNext())
+        {
+            Object embeddedObject = null;
+            try
+            {
+                embeddedObject = embeddedClass.newInstance();
+            }
+            catch (InstantiationException ie)
+            {
+                log.error(ie.getMessage());
+            }
+            catch (IllegalAccessException iae)
+            {
+                log.error(iae.getMessage());
+            }
+            Object value = populateEmbeddedRecursive((ByteBuffer) collectionItems.next(), usertype.allTypes(),
+                    usertype.fieldNames(), embeddedObject, metaModel);
+            result.add(value);
+        }
+        PropertyAccessorHelper.set(entity, field, result);
+        return entity;
     }
 
     /**
@@ -2240,7 +2561,5 @@ public abstract class CassandraDataHandlerBase
             throw new PersistenceException(e);
         }
     }
-
-  
 
 }

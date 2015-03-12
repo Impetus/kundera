@@ -22,7 +22,6 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class Spouse.
  */
