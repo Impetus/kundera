@@ -457,7 +457,7 @@ public class HBaseDataHandler implements DataHandler
             List<HBaseData> results = hbaseReader.LoadData(hTable, joinTableName, rowKey, getFilter(joinTableName));
 
             // assuming rowKey is not null.
-            if (results != null)
+            if (results != null && !results.isEmpty())
             {
 
                 HBaseData data = results.get(0);
