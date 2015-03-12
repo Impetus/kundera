@@ -27,26 +27,51 @@ import junit.framework.Assert;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.impetus.client.hbase.testingutil.HBaseTestingUtils;
 
 /**
- * @author Pragalbh Garg
+ * The Class EmbeddablesQueryTest.
  * 
+ * @author Pragalbh Garg
  */
 public class EmbeddablesQueryTest extends EmbeddablesBase
 {
 
+    /**
+     * Sets the up before class.
+     * 
+     * @throws Exception
+     *             the exception
+     */
+    @BeforeClass
+    public static void SetUpBeforeClass() throws Exception
+    {
+        emf = Persistence.createEntityManagerFactory(HBASE_PU);
+    }
+
+    /**
+     * Sets the up.
+     * 
+     * @throws Exception
+     *             the exception
+     */
     @Before
     public void setUp() throws Exception
     {
-        emf = Persistence.createEntityManagerFactory(PU);
         em = emf.createEntityManager();
         init();
 
     }
 
+    /**
+     * Test select queries.
+     * 
+     * @throws Exception
+     *             the exception
+     */
     @Test
     public void testSelectQueries() throws Exception
     {
@@ -57,6 +82,12 @@ public class EmbeddablesQueryTest extends EmbeddablesBase
 
     }
 
+    /**
+     * Test delete queries.
+     * 
+     * @throws Exception
+     *             the exception
+     */
     @Test
     public void testDeleteQueries() throws Exception
     {
@@ -68,18 +99,30 @@ public class EmbeddablesQueryTest extends EmbeddablesBase
 
     // update is not working on embeddables. issue in core.
     // @Test
+    /**
+     * Test update queries.
+     * 
+     * @throws Exception
+     *             the exception
+     */
     public void testUpdateQueries() throws Exception
     {
         testUpdateQuery();
 
     }
 
+    /**
+     * Test select simple.
+     */
     private void testSelectSimple()
     {
         List<PersonEmbed> results = em.createQuery("select p from PersonEmbed p").getResultList();
         assertResults(results, T, T, T, T);
     }
 
+    /**
+     * Test select with where.
+     */
     private void testSelectWithWhere()
     {
         List<PersonEmbed> results = em.createQuery("select p from PersonEmbed p where p.email = 'pg@gmail.com'")
@@ -131,6 +174,9 @@ public class EmbeddablesQueryTest extends EmbeddablesBase
         assertResults(results, F, F, T, T);
     }
 
+    /**
+     * Test select with where in.
+     */
     private void testSelectWithWhereIn()
     {
         List<PersonEmbed> results = em.createQuery(
@@ -154,6 +200,9 @@ public class EmbeddablesQueryTest extends EmbeddablesBase
 
     }
 
+    /**
+     * Test delete simple.
+     */
     private void testDeleteSimple()
     {
         persistData();
@@ -163,6 +212,9 @@ public class EmbeddablesQueryTest extends EmbeddablesBase
 
     }
 
+    /**
+     * Test delete with where.
+     */
     private void testDeleteWithWhere()
     {
         persistData();
@@ -199,6 +251,9 @@ public class EmbeddablesQueryTest extends EmbeddablesBase
 
     }
 
+    /**
+     * Test delete with where in.
+     */
     private void testDeleteWithWhereIn()
     {
         persistData();
@@ -224,6 +279,9 @@ public class EmbeddablesQueryTest extends EmbeddablesBase
 
     }
 
+    /**
+     * Test update query.
+     */
     private void testUpdateQuery()
     {
         persistData();
@@ -250,20 +308,18 @@ public class EmbeddablesQueryTest extends EmbeddablesBase
     @After
     public void tearDown() throws Exception
     {
+        em.close();
     }
 
+    /**
+     * Tear down after class.
+     */
     @AfterClass
     public static void tearDownAfterClass()
     {
-        HBaseTestingUtils.dropSchema("HBaseNew");
-        if (em != null)
-        {
-            em.close();
-            em = null;
-            emf.close();
-            emf = null;
-        }
-
+        HBaseTestingUtils.dropSchema(SCHEMA);
+        emf.close();
+        emf = null;
     }
 
 }

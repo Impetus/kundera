@@ -24,24 +24,36 @@ import javax.persistence.EntityManagerFactory;
 import junit.framework.Assert;
 
 /**
+ * The Class EmbeddablesBase.
+ *
  * @author Pragalbh Garg
- * 
  */
 public class EmbeddablesBase
 {
+    /** The Constant SCHEMA. */
+    protected static final String SCHEMA = "HBaseNew";
 
-    protected static final String PU = "embeddablesTest";
+    /** The Constant HBASE_PU. */
+    protected static final String HBASE_PU = "embeddablesTest";
 
+    /** The emf. */
     protected static EntityManagerFactory emf;
 
+    /** The em. */
     protected static EntityManager em;
 
+    /** The Constant T. */
     protected static final boolean T = true;
 
+    /** The Constant F. */
     protected static final boolean F = false;
 
+    /** The p4. */
     protected PersonEmbed p1, p2, p3, p4;
 
+    /**
+     * Inits the.
+     */
     protected void init()
     {
         this.p1 = getPerson_1();
@@ -50,6 +62,15 @@ public class EmbeddablesBase
         this.p4 = getPerson_4();
     }
 
+    /**
+     * Prepare person.
+     *
+     * @param id the id
+     * @param email the email
+     * @param details1 the details1
+     * @param details2 the details2
+     * @return the person embed
+     */
     protected PersonEmbed preparePerson(int id, String email, PersonalDetails details1, ProfessionalDetails details2)
     {
         PersonEmbed p = new PersonEmbed();
@@ -60,6 +81,15 @@ public class EmbeddablesBase
         return p;
     }
 
+    /**
+     * Prepare personal details.
+     *
+     * @param fname the fname
+     * @param mname the mname
+     * @param lname the lname
+     * @param address the address
+     * @return the personal details
+     */
     protected PersonalDetails preparePersonalDetails(String fname, String mname, String lname, List address)
     {
         PersonalDetails p = new PersonalDetails();
@@ -72,6 +102,14 @@ public class EmbeddablesBase
         return p;
     }
 
+    /**
+     * Prepare pro details.
+     *
+     * @param project the project
+     * @param comp the comp
+     * @param salary the salary
+     * @return the professional details
+     */
     protected ProfessionalDetails prepareProDetails(String project, String comp, Double salary)
     {
         ProfessionalDetails p = new ProfessionalDetails();
@@ -81,6 +119,11 @@ public class EmbeddablesBase
         return p;
     }
 
+    /**
+     * Gets the person_1.
+     *
+     * @return the person_1
+     */
     protected PersonEmbed getPerson_1()
     {
         ProfessionalDetails pro = prepareProDetails("kundera", "impetus", (double) 40000);
@@ -102,6 +145,11 @@ public class EmbeddablesBase
         return preparePerson(1, "pg@gmail.com", personal, pro);
     }
 
+    /**
+     * Gets the person_2.
+     *
+     * @return the person_2
+     */
     protected PersonEmbed getPerson_2()
     {
         ProfessionalDetails pro = prepareProDetails("kundera", "impetus", (double) 40000);
@@ -123,6 +171,11 @@ public class EmbeddablesBase
         return preparePerson(2, "dev@gmail.com", personal, pro);
     }
 
+    /**
+     * Gets the person_3.
+     *
+     * @return the person_3
+     */
     protected PersonEmbed getPerson_3()
     {
         ProfessionalDetails pro = prepareProDetails("kundera", "impetus", (double) 50000);
@@ -144,6 +197,11 @@ public class EmbeddablesBase
         return preparePerson(3, "karthik@gmail.com", personal, pro);
     }
 
+    /**
+     * Gets the person_4.
+     *
+     * @return the person_4
+     */
     protected PersonEmbed getPerson_4()
     {
         ProfessionalDetails pro = prepareProDetails("kundera", "impetus", (double) 50000);
@@ -165,6 +223,12 @@ public class EmbeddablesBase
         return preparePerson(4, "amit@gmail.com", personal, pro);
     }
 
+    /**
+     * Assert person.
+     *
+     * @param expected the expected
+     * @param actual the actual
+     */
     protected void assertPerson(PersonEmbed expected, PersonEmbed actual)
     {
         Assert.assertNotNull(actual);
@@ -190,6 +254,9 @@ public class EmbeddablesBase
 
     }
 
+    /**
+     * Persist data.
+     */
     protected void persistData()
     {
         em.persist(p1);
@@ -199,6 +266,15 @@ public class EmbeddablesBase
         em.clear();
     }
 
+    /**
+     * Assert results.
+     *
+     * @param results the results
+     * @param b1 the b1
+     * @param b2 the b2
+     * @param b3 the b3
+     * @param b4 the b4
+     */
     protected void assertResults(List results, Boolean b1, Boolean b2, Boolean b3, Boolean b4)
     {
         Assert.assertNotNull(results);
@@ -235,6 +311,14 @@ public class EmbeddablesBase
         }
     }
 
+    /**
+     * Assert deleted.
+     *
+     * @param b1 the b1
+     * @param b2 the b2
+     * @param b3 the b3
+     * @param b4 the b4
+     */
     protected void assertDeleted(Boolean b1, Boolean b2, Boolean b3, Boolean b4)
     {
         em.clear();
