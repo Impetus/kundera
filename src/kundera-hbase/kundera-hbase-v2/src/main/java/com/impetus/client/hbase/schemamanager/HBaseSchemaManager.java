@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.client.hbase.config.HBasePropertyReader;
 import com.impetus.client.hbase.utils.HBaseUtils;
+import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.configure.ClientProperties.DataStore.Schema;
 import com.impetus.kundera.configure.ClientProperties.DataStore.Schema.Table;
 import com.impetus.kundera.configure.schema.CollectionColumnInfo;
@@ -117,7 +118,7 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
     @Override
     protected void update(List<TableInfo> tableInfos)
     {
-        createOrUpdateSchema(tableInfos, true);
+        createOrUpdateSchema(true);
 
     }
 
@@ -202,7 +203,7 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
     @Override
     protected void create_drop(List<TableInfo> tableInfos)
     {
-        createOrUpdateSchema(tableInfos, false);
+        createOrUpdateSchema(false);
     }
 
     /*
@@ -215,7 +216,7 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
     @Override
     protected void create(List<TableInfo> tableInfos)
     {
-        createOrUpdateSchema(tableInfos, false);
+        createOrUpdateSchema(false);
     }
 
     /**
@@ -259,7 +260,7 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
      * @param isUpdate
      *            the is update
      */
-    private void createOrUpdateSchema(List<TableInfo> tableInfos, Boolean isUpdate)
+    private void createOrUpdateSchema(Boolean isUpdate)
 
     {
         createNamespace(isUpdate);

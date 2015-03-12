@@ -30,14 +30,11 @@ import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.impetus.client.hbase.junits.HBaseCli;
 import com.impetus.client.hbase.testingutil.HBaseTestingUtils;
 import com.impetus.client.hbase.utils.HBaseUtils;
 import com.impetus.kundera.PersistenceProperties;
@@ -58,11 +55,11 @@ public class HBaseSchemaGenerationTest
 
     private static HBaseAdmin admin;
 
-    private static HBaseCli cli;
-
     private String persistenceUnit = "schemaTest";
 
     private Map propertyMap = new HashMap();
+    
+    private static Connection connection;
 
     /**
      * @throws java.lang.Exception
@@ -70,9 +67,7 @@ public class HBaseSchemaGenerationTest
     @BeforeClass
     public static void setUpBeforeClass() throws Exception
     {
-        cli = new HBaseCli();
-        cli.startCluster();
-        Connection connection = ConnectionFactory.createConnection();
+        connection = ConnectionFactory.createConnection();
         admin = (HBaseAdmin) connection.getAdmin();
     }
 
@@ -82,16 +77,9 @@ public class HBaseSchemaGenerationTest
     @AfterClass
     public static void tearDownAfterClass() throws Exception
     {
+        admin.close();
+        connection.close();
         HBaseTestingUtils.dropSchema(SCHEMA);
-        HBaseCli.stopCluster();
-    }
-
-    /**
-     * @throws java.lang.Exception
-     */
-    @After
-    public void tearDown() throws Exception
-    {
     }
 
     @Test

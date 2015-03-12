@@ -13,29 +13,31 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.client.hbase.crud;
+package com.impetus.client.hbase.crud.association;
 
-/**
- * @author Pragalbh Garg
- *
- */
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+/**
+ * The Class PersonUniOTO.
+ * 
+ * @author Devender Yadav
+ */
 @Entity
-@Table(name = "PERSON_HBASE", schema = "HBaseNew@crudTest")
-public class PersonHBase
+@Table(name = "PERSON_UOTO", schema = "HBaseNew@associationTest")
+public class PersonUniOTO
 {
 
     /** The person id. */
     @Id
-    // @GeneratedValue(strategy = GenerationType.TABLE)
     @Column(name = "PERSON_ID")
-    private String personId;
+    private int personId;
 
     /** The person name. */
     @Column(name = "PERSON_NAME")
@@ -43,24 +45,57 @@ public class PersonHBase
 
     /** The age. */
     @Column(name = "AGE")
-    private Integer age;
+    private int age;
 
-    @Column(name = "ENUM")
-    @Enumerated(EnumType.STRING)
-    private Day day;
+    /**
+     * Instantiates a new person uni oto.
+     */
+    public PersonUniOTO()
+    {
 
-    @Column(name = "MONTH_ENUM")
-    @Enumerated(EnumType.STRING)
-    private Month month;
+    }
+
+    /**
+     * Instantiates a new person uni oto.
+     * 
+     * @param personId
+     *            the person id
+     * @param personName
+     *            the person name
+     * @param age
+     *            the age
+     */
+    public PersonUniOTO(int personId, String personName, int age)
+    {
+        this.personId = personId;
+        this.personName = personName;
+        this.age = age;
+    }
+
+    /** The address. */
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "ADDRESS_ID")
+    private AddressUniOTO address;
 
     /**
      * Gets the person id.
      * 
      * @return the person id
      */
-    public String getPersonId()
+    public int getPersonId()
     {
         return personId;
+    }
+
+    /**
+     * Sets the person id.
+     * 
+     * @param personId
+     *            the new person id
+     */
+    public void setPersonId(int personId)
+    {
+        this.personId = personId;
     }
 
     /**
@@ -85,27 +120,20 @@ public class PersonHBase
     }
 
     /**
-     * Sets the person id.
+     * Gets the age.
      * 
-     * @param personId
-     *            the new person id
-     */
-    public void setPersonId(String personId)
-    {
-        this.personId = personId;
-    }
-
-    /**
      * @return the age
      */
-    public Integer getAge()
+    public int getAge()
     {
         return age;
     }
 
     /**
+     * Sets the age.
+     * 
      * @param age
-     *            the age to set
+     *            the new age
      */
     public void setAge(int age)
     {
@@ -113,40 +141,24 @@ public class PersonHBase
     }
 
     /**
-     * @return the day
+     * Gets the address.
+     * 
+     * @return the address
      */
-    public Day getDay()
+    public AddressUniOTO getAddress()
     {
-        return day;
+        return address;
     }
 
     /**
-     * @param day
-     *            the day to set
+     * Sets the address.
+     * 
+     * @param address
+     *            the new address
      */
-    public void setDay(Day day)
+    public void setAddress(AddressUniOTO address)
     {
-        this.day = day;
-    }
-
-    public Month getMonth()
-    {
-        return month;
-    }
-
-    public void setMonth(Month month)
-    {
-        this.month = month;
-    }
-
-    enum Day
-    {
-        MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
-    }
-
-    enum Month
-    {
-        JAN, FEB, MARCH, APRIL, MAY, JUNE;
+        this.address = address;
     }
 
 }

@@ -49,6 +49,9 @@
 	<persistence-unit name="queryTest">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<class>com.impetus.client.query.Book</class>
+		<class>com.impetus.client.hbase.validator.BookEntity</class>
+		<class>com.impetus.client.query.Student</class>
+		<class>com.impetus.client.hbase.compositetype.HBasePrimeUser</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<property name="kundera.nodes" value="localhost" />
@@ -64,6 +67,10 @@
 		<class>com.impetus.kundera.client.crud.associations.MobileHandset</class>
 		<class>com.impetus.kundera.client.crud.associations.MobileManufacturer</class>
 		<class>com.impetus.kundera.client.crud.associations.MobileOperatingSystem</class>
+		<class>com.impetus.client.hbase.crud.association.PersonUniOTO</class>
+		<class>com.impetus.client.hbase.crud.association.PersonBiOTO</class>
+		<class>com.impetus.client.hbase.crud.association.AddressUniOTO</class>
+		<class>com.impetus.client.hbase.crud.association.AddressBiOTO</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<property name="kundera.nodes" value="localhost" />
@@ -98,6 +105,59 @@
 			<property name="kundera.dialect" value="hbase" />
 			<property name="kundera.client.lookup.class" value="com.impetus.client.hbase.HBaseClientFactory" />
 			<property name="kundera.ddl.auto.prepare" value="create" />
+		</properties>
+	</persistence-unit>
+
+	<persistence-unit name="dataTypeTest">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseBigDecimal</class>
+		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseBigInteger</class>
+		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseBooleanPrimitive</class>
+		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseBooleanWrapper</class>
+		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseBytePrimitive</class>
+		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseByteWrapper</class>
+		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseCalendar</class>
+		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseChar</class>
+		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseCharacter</class>
+		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseDate</class>
+		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseDoublePrimitive</class>
+		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseDoubleWrapper</class>
+		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseFloatPrimitive</class>
+		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseFloatWrapper</class>
+		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseInt</class>
+		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseInteger</class>
+		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseLongPrimitive</class>
+		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseLongWrapper</class>
+		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseShortPrimitive</class>
+		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseShortWrapper</class>
+		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseSqlDate</class>
+		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseString</class>
+		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseTime</class>
+		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseTimestamp</class>
+		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseUUID</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="60000" />
+			<property name="kundera.keyspace" value="HBaseNew" />
+			<property name="kundera.dialect" value="hbase" />
+			<property name="kundera.client.lookup.class" value="com.impetus.client.hbase.HBaseClientFactory" />
+			<property name="kundera.ddl.auto.prepare" value="create" />
+			<property name="kundera.client.property" value="kundera-hbase.properties" />
+		</properties>
+	</persistence-unit>
+
+	<persistence-unit name="transactionTest">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.client.hbase.transaction.User</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="60000" />
+			<property name="kundera.keyspace" value="HBaseNew" />
+			<property name="kundera.dialect" value="hbase" />
+			<property name="kundera.ddl.auto.prepare" value="create" />
+			<property name="kundera.client.lookup.class" value="com.impetus.client.hbase.HBaseClientFactory" />
 		</properties>
 	</persistence-unit>
 

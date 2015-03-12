@@ -1133,8 +1133,6 @@ public class HBaseDataHandler implements DataHandler
      */
     public HBaseDataHandler getHandle()
     {
-        // HBaseDataHandler handler = new HBaseDataHandler(this.kunderaMetadata,
-        // this.conf);
         HBaseDataHandler handler = new HBaseDataHandler(this.kunderaMetadata, this.connection);
         handler.filter = this.filter;
         handler.filters = this.filters;
@@ -1191,7 +1189,7 @@ public class HBaseDataHandler implements DataHandler
             try
             {
                 Table hTable = gethTable(tableName);
-                hTable.batch(actions, new Object[] {});
+                hTable.batch(actions, new Object[actions.size()]);
             }
             catch (IOException | InterruptedException e)
             {
