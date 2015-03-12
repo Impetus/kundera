@@ -151,7 +151,7 @@ public interface Writer
      * @param rowKey
      *            the row key
      */
-    void delete(Table hTable, Object rowKey);
+    void delete(Table hTable, Object rowKey,String colFamily, String colName);
 
     /**
      * Write row.

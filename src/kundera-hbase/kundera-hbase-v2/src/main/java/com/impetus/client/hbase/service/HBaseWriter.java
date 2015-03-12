@@ -112,12 +112,15 @@ public class HBaseWriter implements Writer
      * .Table, java.lang.Object)
      */
     @Override
-    public void delete(Table hTable, Object rowKey)
+    public void delete(Table hTable, Object rowKey, String colFamily, String colName)
     {
         try
         {
             byte[] rowBytes = HBaseUtils.getBytes(rowKey);
             Delete delete = new Delete(rowBytes);
+            if(colName!=null && colFamily!=null){
+                delete.addColumn(Bytes.toBytes(colFamily), Bytes.toBytes(colName));
+            }
             hTable.delete(delete);
         }
         catch (IOException e)

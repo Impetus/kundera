@@ -13,9 +13,6 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-/*
- * author: karthikp.manchala
- */
 package com.impetus.client.hbase.crud.embedded;
 
 import javax.persistence.Persistence;

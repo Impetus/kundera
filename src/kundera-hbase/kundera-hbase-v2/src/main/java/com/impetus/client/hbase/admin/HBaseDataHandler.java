@@ -464,11 +464,11 @@ public class HBaseDataHandler implements DataHandler
         List<E> foreignKeys = new ArrayList<E>();
 
         Table hTable = null;
-
+        String tableName = HBaseUtils.getHTableName(schemaName, joinTableName);
         // Load raw data from Join Table in HBase
         try
         {
-            hTable = gethTable(schemaName);
+            hTable = gethTable(tableName);
 
             List<HBaseData> results = hbaseReader.LoadData(hTable, joinTableName, rowKey, getFilter(joinTableName));
 
@@ -483,7 +483,7 @@ public class HBaseDataHandler implements DataHandler
 
                 for (String columnName : columnNames)
                 {
-                    if (columnName.startsWith(inverseJoinColumnName) && data.getColumnFamily().equals(joinTableName))
+                    if (columnName.startsWith(HBaseUtils.getColumnDataKey(joinTableName, inverseJoinColumnName)))
                     {
                         byte[] columnValue = data.getColumnValue(columnName);
 
@@ -726,10 +726,10 @@ public class HBaseDataHandler implements DataHandler
      * java.lang.String)
      */
     @Override
-    public void deleteRow(Object rowKey, String tableName) throws IOException
+    public void deleteRow(Object rowKey, String colName, String colFamily, String tableName) throws IOException
     {
         Table hTable = gethTable(tableName);
-        hbaseWriter.delete(hTable, rowKey);
+        hbaseWriter.delete(hTable, rowKey,colFamily,colName);
         closeHTable(hTable);
     }
 

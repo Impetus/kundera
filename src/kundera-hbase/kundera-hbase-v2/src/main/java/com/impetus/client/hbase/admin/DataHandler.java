@@ -206,7 +206,7 @@ public interface DataHandler
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    void deleteRow(Object rowKey, String tableName) throws IOException;
+    void deleteRow(Object rowKey, String colName, String colFamily, String tableName) throws IOException;
 
     /**
      * Scan rowy keys.

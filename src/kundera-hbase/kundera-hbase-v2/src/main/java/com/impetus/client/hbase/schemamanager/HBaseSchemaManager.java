@@ -50,6 +50,8 @@ import com.impetus.kundera.configure.schema.TableInfo;
 import com.impetus.kundera.configure.schema.api.AbstractSchemaManager;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.Relation;
+import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.metadata.model.annotation.DefaultEntityAnnotationProcessor;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
@@ -272,7 +274,8 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
         {
             String tablename = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, clazz).getTableName();
             HTableDescriptor hTableDescriptor = getTableDescriptor(clazz, entityMap.get(clazz), tablename);
-            createOrUpdateTable(tablename, hTableDescriptor);
+            String hTableName = HBaseUtils.getHTableName(databaseName, tablename);
+            createOrUpdateTable(hTableName, hTableDescriptor);
         }
     }
 
@@ -312,6 +315,10 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                 addColumnFamilyAndSetProperties(tableDescriptor, secTable);
             }
 
+            // handle @JoinTable for @ManyToMany
+            List<Relation> relations = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, clazz).getRelations();
+            addJoinTable(relations);
+
             // @CollectionTable is not handled.
             return tableDescriptor;
         }
@@ -327,19 +334,34 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
         }
     }
 
+    private void addJoinTable(List<Relation> relations)
+    {
+        for (Relation relation : relations)
+        {
+            if (relation.getType().equals(ForeignKey.MANY_TO_MANY) && relation.isRelatedViaJoinTable())
+            {
+                String joinTableName = relation.getJoinTableMetadata().getJoinTableName();
+                String hTableName = HBaseUtils.getHTableName(databaseName, joinTableName);
+                HTableDescriptor tableDescriptor = new HTableDescriptor(TableName.valueOf(hTableName));
+                tableDescriptor.addFamily(new HColumnDescriptor(joinTableName));
+                createOrUpdateTable(hTableName, tableDescriptor);
+            }
+        }
+    }
+
     /**
      * Adds the column family and set properties.
      * 
      * @param tableDescriptor
      *            the table descriptor
-     * @param secTable
+     * @param colFamilyName
      *            the sec table
      */
-    private void addColumnFamilyAndSetProperties(HTableDescriptor tableDescriptor, String secTable)
+    private void addColumnFamilyAndSetProperties(HTableDescriptor tableDescriptor, String colFamilyName)
     {
-        if (!tableDescriptor.hasFamily(secTable.getBytes()))
+        if (!tableDescriptor.hasFamily(colFamilyName.getBytes()))
         {
-            HColumnDescriptor hColumnDescriptor = getColumnDescriptor(secTable);
+            HColumnDescriptor hColumnDescriptor = getColumnDescriptor(colFamilyName);
             tableDescriptor.addFamily(hColumnDescriptor);
             setExternalProperties(tableDescriptor.getNameAsString(), hColumnDescriptor);
         }
@@ -434,9 +456,9 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
     {
         try
         {
-            if (admin.isTableAvailable(databaseName + ":" + tablename))
+            if (admin.isTableAvailable(tablename))
             {
-                admin.modifyTable(databaseName + ":" + tablename, hTableDescriptor);
+                admin.modifyTable(tablename, hTableDescriptor);
             }
             else
             {

@@ -518,7 +518,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         String joinTableName = joinTableData.getJoinTableName();
         String invJoinColumnName = joinTableData.getInverseJoinColumnName();
         Map<Object, Set<Object>> joinTableRecords = joinTableData.getJoinTableRecords();
-
+        String tableName = HBaseUtils.getHTableName(joinTableData.getSchemaName(), joinTableName);
         for (Object key : joinTableRecords.keySet())
         {
             Set<Object> values = joinTableRecords.get(key);
@@ -535,8 +535,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
             {
                 try
                 {
-                    handler.createTableIfDoesNotExist(joinTableData.getSchemaName(), joinTableName);
-                    handler.writeJoinTableData(joinTableData.getSchemaName(), joinColumnValue, columns, joinTableName);
+                    handler.writeJoinTableData(tableName, joinColumnValue, columns, joinTableName);
                     KunderaCoreUtils.printQuery("Persist Join Table:" + joinTableName, showQuery);
                 }
                 catch (IOException e)
@@ -574,7 +573,8 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
     {
         try
         {
-            handler.deleteRow(columnValue, tableName);
+            String hTableName = HBaseUtils.getHTableName(tableName, colFamily);
+            handler.deleteRow(columnValue,columnName,colFamily,hTableName);
         }
         catch (IOException ioex)
         {
@@ -593,14 +593,13 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
     public void delete(Object entity, Object pKey)
     {
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entity.getClass());
-        String tableName = HBaseUtils.getHTableName(m.getSchema(), m.getTableName());
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
         if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
         {
             pKey = KunderaCoreUtils.prepareCompositeKey(m, pKey);
         }
-        deleteByColumn(tableName, null, null, pKey);
+        deleteByColumn(m.getSchema(), m.getTableName(), null, pKey);
     }
 
     /*
