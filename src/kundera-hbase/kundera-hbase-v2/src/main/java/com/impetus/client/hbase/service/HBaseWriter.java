@@ -94,7 +94,7 @@ public class HBaseWriter implements Writer
         boolean isPresent = false;
         for (String columnName : columns.keySet())
         {
-            p.add(columnFamilyName.getBytes(), Bytes.toBytes(columnName), HBaseUtils.getBytes(columns.get(columnName)));
+            p.addColumn(columnFamilyName.getBytes(), Bytes.toBytes(columnName), HBaseUtils.getBytes(columns.get(columnName)));
             isPresent = true;
         }
 
