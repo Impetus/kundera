@@ -665,7 +665,6 @@ public class UdtAsEmbeddablesCRUDTest
     public void tearDown() throws Exception
     {
         entityManager.close();
-         CassandraCli.dropKeySpace("UdtTest");
     }
 
     /**
@@ -674,6 +673,7 @@ public class UdtAsEmbeddablesCRUDTest
     @AfterClass
     public static void tearDownAfterClass()
     {
+        CassandraCli.dropKeySpace("UdtTest");
         if (entityManager != null)
         {
             entityManager.close();
