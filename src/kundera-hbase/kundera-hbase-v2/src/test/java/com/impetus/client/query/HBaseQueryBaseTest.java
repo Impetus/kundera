@@ -348,6 +348,14 @@ public class HBaseQueryBaseTest extends BookBaseTest
         Assert.assertEquals("book4", ((List) results.get(0)).get(0));
         Assert.assertEquals(400, ((List) results.get(0)).get(1));
 
+        //TODO ..check this
+        results = em.createQuery("select b.bookId , b.title from Book b where b.author = 'author1' and b.pages > 200")
+                .getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(1, results.size());
+        Assert.assertEquals(4, ((List) results.get(0)).get(0));
+        Assert.assertEquals("book4", ((List) results.get(0)).get(1));
+
         results = em
                 .createQuery(
                         "select b.author, b.pages, b.year from Book b where b.author = 'author1' and b.year <> 2015 and b.pages < 300")

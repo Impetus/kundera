@@ -60,6 +60,7 @@ public class HBaseBatchProcessorTest
     /** The rows. */
     private List<PersonHBase> rows;
 
+    /** The batch size. */
     private int BATCH_SIZE = 5;
 
     /** The property map. */
@@ -200,7 +201,6 @@ public class HBaseBatchProcessorTest
             o.setAge(10);
             persons.add(o);
         }
-
         return persons;
     }
 

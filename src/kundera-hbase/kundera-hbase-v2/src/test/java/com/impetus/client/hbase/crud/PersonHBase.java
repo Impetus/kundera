@@ -33,7 +33,6 @@ public class PersonHBase
 
     /** The person id. */
     @Id
-    // @GeneratedValue(strategy = GenerationType.TABLE)
     @Column(name = "PERSON_ID")
     private String personId;
 

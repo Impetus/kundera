@@ -22,15 +22,14 @@ import javax.persistence.Table;
 
 /**
  * The Class User.
- *
+ * 
  * @author Devender Yadav
  */
 @Entity
 @Table(name = "USER", schema = "HBaseNew@transactionTest")
-public class User {
+public class User
+{
 
-    
-    
     /** The id. */
     @Id
     @Column(name = "ID")
@@ -39,7 +38,7 @@ public class User {
     /** The name. */
     @Column(name = "NAME")
     private String name;
-    
+
     /** The age. */
     @Column(name = "AGE")
     private int age;
@@ -47,61 +46,71 @@ public class User {
     /**
      * Instantiates a new user.
      */
-    protected User(){}
-   
+    public User()
+    {
+    }
+
     /**
      * Gets the id.
-     *
+     * 
      * @return the id
      */
-    public String getId() {
+    public String getId()
+    {
         return id;
     }
 
     /**
      * Sets the id.
-     *
-     * @param id the new id
+     * 
+     * @param id
+     *            the new id
      */
-    public void setId(String id) {
+    public void setId(String id)
+    {
         this.id = id;
     }
 
     /**
      * Gets the name.
-     *
+     * 
      * @return the name
      */
-    public String getName() {
+    public String getName()
+    {
         return name;
     }
 
     /**
      * Sets the name.
-     *
-     * @param name the new name
+     * 
+     * @param name
+     *            the new name
      */
-    public void setName(String name) {
+    public void setName(String name)
+    {
         this.name = name;
     }
 
     /**
      * Gets the age.
-     *
+     * 
      * @return the age
      */
-    public int getAge() {
+    public int getAge()
+    {
         return age;
     }
 
     /**
      * Sets the age.
-     *
-     * @param age the new age
+     * 
+     * @param age
+     *            the new age
      */
-    public void setAge(int age) {
+    public void setAge(int age)
+    {
         this.age = age;
     }
-    
-    
+
 }

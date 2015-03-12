@@ -188,25 +188,25 @@ public class BookBaseTest
                 if (foundBook1)
                     validateBook1(book);
                 else
-                    Assert.assertTrue(false);
+                    Assert.fail();
                 break;
             case 2:
                 if (foundBook2)
                     validateBook2(book);
                 else
-                    Assert.assertTrue(false);
+                    Assert.fail();
                 break;
             case 3:
                 if (foundBook3)
                     validateBook3(book);
                 else
-                    Assert.assertTrue(false);
+                    Assert.fail();
                 break;
             case 4:
                 if (foundBook4)
                     validateBook4(book);
                 else
-                    Assert.assertTrue(false);
+                    Assert.fail();
                 break;
             }
         }

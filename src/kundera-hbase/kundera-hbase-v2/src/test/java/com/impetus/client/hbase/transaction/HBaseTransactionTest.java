@@ -124,7 +124,6 @@ public class HBaseTransactionTest
     @Test
     public void onRollbackAfterPersist() throws Exception
     {
-
         em.getTransaction().begin();
         persistUsers();
         em.getTransaction().rollback();

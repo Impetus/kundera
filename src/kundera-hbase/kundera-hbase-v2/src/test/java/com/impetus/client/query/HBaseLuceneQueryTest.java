@@ -129,14 +129,6 @@ public class HBaseLuceneQueryTest extends HBaseQueryBaseTest
 
         qry = "Select b from Book b where b.title like :title";
         q = em.createQuery(qry);
-        q.setParameter("title", "der");
-        results = q.getResultList();
-        Assert.assertNotNull(results);
-        Assert.assertEquals(1, results.size());
-        assertBook3(results.get(0));
-
-        qry = "Select b from Book b where b.title like :title";
-        q = em.createQuery(qry);
         q.setParameter("title", "House");
         results = q.getResultList();
         Assert.assertNotNull(results);
@@ -154,6 +146,22 @@ public class HBaseLuceneQueryTest extends HBaseQueryBaseTest
             }
         }
 
+        qry = "Select b from Book b where b.title like :title";
+        q = em.createQuery(qry);
+        q.setParameter("title", "%der");
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(1, results.size());
+        assertBook3(results.get(0));
+
+        qry = "Select b from Book b where b.title like :title";
+        q = em.createQuery(qry);
+        q.setParameter("title", "und%");
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(1, results.size());
+        assertBook3(results.get(0));
+
         qry = "Select b from Book b where b.author like :author";
         q = em.createQuery(qry);
         q.setParameter("author", "Lowry");
@@ -164,7 +172,7 @@ public class HBaseLuceneQueryTest extends HBaseQueryBaseTest
 
         qry = "Select b from Book b where b.author like :author";
         q = em.createQuery(qry);
-        q.setParameter("author", "hart");
+        q.setParameter("author", "%hart%");
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(1, results.size());

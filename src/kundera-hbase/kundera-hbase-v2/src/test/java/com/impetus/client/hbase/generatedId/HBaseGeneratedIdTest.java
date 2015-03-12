@@ -43,26 +43,49 @@ import com.impetus.client.hbase.testingutil.HBaseTestingUtils;
 import com.impetus.kundera.KunderaException;
 
 /**
- * @author Devender Yadav
+ * The Class HBaseGeneratedIdTest.
  * 
+ * @author Pragalbh Garg
  */
 public class HBaseGeneratedIdTest
 {
+    /** The Constant SCHEMA. */
+    protected static final String SCHEMA = "HBaseNew";
+
+    /** The Constant HBASE_PU. */
+    protected static final String HBASE_PU = "autoIdTest";
+
+    /** The emf. */
     private EntityManagerFactory emf;
 
+    /**
+     * Sets the up.
+     * 
+     * @throws Exception
+     *             the exception
+     */
     @Before
     public void setUp() throws Exception
     {
-        emf = Persistence.createEntityManagerFactory("autoIdTest");
+        emf = Persistence.createEntityManagerFactory(HBASE_PU);
     }
 
+    /**
+     * Tear down.
+     * 
+     * @throws Exception
+     *             the exception
+     */
     @After
     public void tearDown() throws Exception
     {
         emf.close();
-        HBaseTestingUtils.dropSchema("HBaseNew");
+        HBaseTestingUtils.dropSchema(SCHEMA);
     }
 
+    /**
+     * Test persist.
+     */
     @Test
     public void testPersist()
     {
