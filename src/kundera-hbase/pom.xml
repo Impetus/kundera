@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -6,17 +7,25 @@
 		<artifactId>kundera</artifactId>
 		<version>2.16-SNAPSHOT</version>
 	</parent>
+
 	<groupId>com.impetus.kundera.client</groupId>
-	<artifactId>kundera-hbase</artifactId>
-	<packaging>jar</packaging>
-	<name>kundera-hbase</name>
+	<artifactId>kundera-hbase-parent</artifactId>
+	<packaging>pom</packaging>
+	<name>kundera-hbase-parent</name>
 	<url>http://maven.apache.org</url>
 
-	<properties>
-		<hadoop.version>2.2.0</hadoop.version>
-		<hbase.version>0.96.1.1-hadoop2</hbase.version>
-		<thrift.version>0.9.0</thrift.version>
-	</properties>
+	<repositories>
+		<repository>
+			<id>hbase-dependency</id>
+			<name>Hbase Dependencies</name>
+			<url>http://repo1.maven.org/maven2</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+
+
 
 	<!-- Dependencies -->
 	<dependencies>
@@ -63,75 +72,7 @@
 			<scope>test</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>org.apache.hbase</groupId>
-			<artifactId>hbase-client</artifactId>
-			<version>${hbase.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-api</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.hbase</groupId>
-			<artifactId>hbase-server</artifactId>
-			<version>${hbase.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-api</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.hbase</groupId>
-			<artifactId>hbase-server</artifactId>
-			<version>${hbase.version}</version>
-			<classifier>tests</classifier>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.hbase</groupId>
-			<artifactId>hbase-common</artifactId>
-			<version>${hbase.version}</version>
-			<classifier>tests</classifier>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.thrift</groupId>
-			<artifactId>libthrift</artifactId>
-			<version>${thrift.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.hbase</groupId>
-			<artifactId>hbase-common</artifactId>
-			<version>${hbase.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-api</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.hadoop</groupId>
-			<artifactId>hadoop-common</artifactId>
-			<version>${hadoop.version}</version>
-		</dependency>
-		<!-- <dependency> <groupId>org.apache.hbase.zookeeper</groupId> <artifactId>zookeeper</artifactId> 
-			<version>3.3.2</version> </dependency> -->
-
-		<!-- Test Dependencies -->
-		<!-- <dependency> <groupId>org.apache.hbase</groupId> <artifactId>hbase</artifactId> 
-			<version>0.92.1</version> <type>test-jar</type> <scope>test</scope> </dependency> -->
-		<!-- <dependency> <groupId>org.apache.hadoop</groupId> <artifactId>hadoop-test</artifactId> 
-			<version>${hadoop.version}</version> <scope>test</scope> </dependency> -->
-
-		<!-- <dependency> <groupId>org.apache.hbase</groupId> <artifactId>hbase</artifactId> 
-			<version>${hbase.version}</version> <type>test-jar</type> <scope>test</scope> 
-			</dependency> -->
+	
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
@@ -146,47 +87,61 @@
 		</dependency>
 
 	</dependencies>
+	<profiles>
 
+		<profile>
+			<id>all</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<modules>
+				<module>kundera-hbase</module>
+				<module>kundera-hbase-v2</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>hbase</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<modules>
+				<module>kundera-hbase</module>
+			</modules>
+		</profile>
+
+		<profile>
+			<id>hbase-v2</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<modules>
+				<module>kundera-hbase-v2</module>
+			</modules>
+		</profile>
+	</profiles>
 	<!-- Assembly build -->
 	<build>
 		<plugins>
 			<plugin>
-				<!-- NOTE: We don't need a groupId specification because the group is 
-					org.apache.maven.plugins ...which is assumed by default. -->
-				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.2.1</version>
+				<artifactId>maven-clean-plugin</artifactId>
+				<version>2.4.1</version>
 				<configuration>
-					<descriptorRefs>
-						<descriptorRef>jar-with-dependencies</descriptorRef>
-					</descriptorRefs>
+					<filesets>
+						<fileset>
+							<directory>${basedir}</directory>
+							<excludes>
+								<exclude>.git/**</exclude>
+								<exclude>.gitignore</exclude>
+							</excludes>
+							<includes>
+								<include>lucene/**</include>
+							</includes>
+						</fileset>
+					</filesets>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.2</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>test-jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-surefire-plugin</artifactId> 
-				<version>2.14.1</version> <configuration> <forkMode>pertest</forkMode> <argLine>-Xms256m 
-				-Xmx1024m -XX:MaxPermSize=512m</argLine> <parallel>tests</parallel> <threadCount>10</threadCount> 
-				</configuration> </plugin> -->			 <!-- <plugin> <groupId>org.jacoco</groupId> <artifactId>jacoco-maven-plugin</artifactId> 
-				<configuration> The destination file for the code coverage report has to 
-				be set to the same value in the parent pom and in each module pom. Then JaCoCo 
-				will add up information in the same report, so that, it will give the cross-module 
-				code coverage. <destFile>${project.basedir}/../target/jacoco-it.exec</destFile> 
-				</configuration> <executions> <execution> <id>post-test</id> <configuration> 
-				<skip>true</skip> </configuration> </execution> </executions> </plugin> -->
-			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-surefire-plugin</artifactId> 
-				<version>2.6</version> <configuration> <excludes> <exclude>**/datatypes/*.java</exclude> 
-				</excludes> </configuration> </plugin> -->
 		</plugins>
 	</build>
+
 
 </project>

@@ -31,6 +31,7 @@ import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.SingularAttribute;
 
+import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteRequest;
@@ -55,6 +56,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.client.es.utils.ESResponseReader;
+import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
@@ -79,7 +81,6 @@ import com.impetus.kundera.property.accessor.EnumAccessor;
 import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.utils.KunderaCoreUtils;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class ESClient.
  * 
@@ -328,7 +329,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
 
         // adding fields to retrieve dynamically by converting to jpa column
         // name
-        if (fieldsToSelect.length > 1 && !(fieldsToSelect[1] == null))
+        if (fieldsToSelect != null && fieldsToSelect.length > 1 && !(fieldsToSelect[1] == null))
         {
             for (int i = 1; i < fieldsToSelect.length; i++)
             {
@@ -350,25 +351,44 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
             }
         }
 
-        SearchResponse response = builder.execute().actionGet();
+        SearchResponse response = null;
+        try
+        {
+            response = builder.execute().actionGet();
+        }
+        catch (ElasticsearchException e)
+        {
+            throw new KunderaException("Aggregations can not performed over non-numeric fields.", e);
+        }
 
         if (aggregation == null)
         {
             SearchHits hits = response.getHits();
-            if (fieldsToSelect.length > 1 && !(fieldsToSelect[1] == null))
+            if (fieldsToSelect != null && fieldsToSelect.length > 1 && !(fieldsToSelect[1] == null))
             {
                 for (SearchHit hit : hits.getHits())
                 {
-                    List temp = new ArrayList();
-
-                    for (int i = 1; i < fieldsToSelect.length; i++)
+                    if (fieldsToSelect.length == 2)
                     {
-                        temp.add(hit
+                        results.add(hit
                                 .getFields()
-                                .get(((AbstractAttribute) metaModel.entity(clazz).getAttribute(fieldsToSelect[i]))
+                                .get(((AbstractAttribute) metaModel.entity(clazz).getAttribute(fieldsToSelect[1]))
                                         .getJPAColumnName()).getValue());
+
                     }
-                    results.add(temp);
+                    else
+                    {
+                        List temp = new ArrayList();
+
+                        for (int i = 1; i < fieldsToSelect.length; i++)
+                        {
+                            temp.add(hit
+                                    .getFields()
+                                    .get(((AbstractAttribute) metaModel.entity(clazz).getAttribute(fieldsToSelect[i]))
+                                            .getJPAColumnName()).getValue());
+                        }
+                        results.add(temp);
+                    }
                 }
             }
             else
@@ -377,7 +397,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
 
                 for (SearchHit hit : hits.getHits())
                 {
-                    entity=KunderaCoreUtils.createNewInstance(clazz);
+                    entity = KunderaCoreUtils.createNewInstance(clazz);
                     Map<String, Object> hitResult = hit.sourceAsMap();
                     results.add(wrap(hitResult, entityType, entity, entityMetadata, false));
                 }
@@ -707,7 +727,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
                 Map<String, Object> searchResults = hit.getSource();
                 // hit
                 Object result = null;
-                result= KunderaCoreUtils.createNewInstance(entityClazz);
+                result = KunderaCoreUtils.createNewInstance(entityClazz);
                 result = wrap(searchResults, entityType, result, metadata, false);
                 if (result != null)
                 {

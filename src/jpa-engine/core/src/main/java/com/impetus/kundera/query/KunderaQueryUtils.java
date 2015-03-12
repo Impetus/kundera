@@ -13,7 +13,6 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-
 package com.impetus.kundera.query;
 
 import org.eclipse.persistence.jpa.jpql.parser.DeleteStatement;
@@ -26,13 +25,13 @@ import org.eclipse.persistence.jpa.jpql.parser.WhereClause;
  * 
  * @author Amit Kumar
  */
-public class KunderaQueryUtils
+public final class KunderaQueryUtils
 {
-
     /**
      * Gets the where clause.
-     *
-     * @param jpqlExpression the jpql expression
+     * 
+     * @param jpqlExpression
+     *            the jpql expression
      * @return the where clause
      */
     public static WhereClause getWhereClause(JPQLExpression jpqlExpression)
@@ -61,8 +60,9 @@ public class KunderaQueryUtils
 
     /**
      * Checks for where clause.
-     *
-     * @param jpqlExpression the jpql expression
+     * 
+     * @param jpqlExpression
+     *            the jpql expression
      * @return true, if successful
      */
     public static boolean hasWhereClause(JPQLExpression jpqlExpression)
@@ -84,8 +84,9 @@ public class KunderaQueryUtils
 
     /**
      * Checks for group by.
-     *
-     * @param jpqlExpression the jpql expression
+     * 
+     * @param jpqlExpression
+     *            the jpql expression
      * @return true, if successful
      */
     public static boolean hasGroupBy(JPQLExpression jpqlExpression)
@@ -99,8 +100,9 @@ public class KunderaQueryUtils
 
     /**
      * Checks for having.
-     *
-     * @param jpqlExpression the jpql expression
+     * 
+     * @param jpqlExpression
+     *            the jpql expression
      * @return true, if successful
      */
     public static boolean hasHaving(JPQLExpression jpqlExpression)
@@ -114,8 +116,9 @@ public class KunderaQueryUtils
 
     /**
      * Checks for order by.
-     *
-     * @param jpqlExpression the jpql expression
+     * 
+     * @param jpqlExpression
+     *            the jpql expression
      * @return true, if successful
      */
     public static boolean hasOrderBy(JPQLExpression jpqlExpression)
@@ -129,8 +132,9 @@ public class KunderaQueryUtils
 
     /**
      * Checks if is select statement.
-     *
-     * @param jpqlExpression the jpql expression
+     * 
+     * @param jpqlExpression
+     *            the jpql expression
      * @return true, if is select statement
      */
     public static boolean isSelectStatement(JPQLExpression jpqlExpression)
@@ -141,8 +145,9 @@ public class KunderaQueryUtils
 
     /**
      * Checks if is delete statement.
-     *
-     * @param jpqlExpression the jpql expression
+     * 
+     * @param jpqlExpression
+     *            the jpql expression
      * @return true, if is delete statement
      */
     public static boolean isDeleteStatement(JPQLExpression jpqlExpression)
@@ -152,8 +157,9 @@ public class KunderaQueryUtils
 
     /**
      * Checks if is update statement.
-     *
-     * @param jpqlExpression the jpql expression
+     * 
+     * @param jpqlExpression
+     *            the jpql expression
      * @return true, if is update statement
      */
     public static boolean isUpdateStatement(JPQLExpression jpqlExpression)

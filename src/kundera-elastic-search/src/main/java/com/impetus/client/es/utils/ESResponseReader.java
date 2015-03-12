@@ -34,11 +34,13 @@ import org.elasticsearch.search.aggregations.metrics.avg.InternalAvg;
 import org.elasticsearch.search.aggregations.metrics.max.InternalMax;
 import org.elasticsearch.search.aggregations.metrics.min.InternalMin;
 import org.elasticsearch.search.aggregations.metrics.sum.InternalSum;
+import org.elasticsearch.search.aggregations.metrics.valuecount.InternalValueCount;
 
+import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
-import com.impetus.kundera.query.KunderaQueryUtils;
 import com.impetus.kundera.query.KunderaQuery;
+import com.impetus.kundera.query.KunderaQueryUtils;
 
 /**
  * @author Amit Kumar
@@ -129,7 +131,7 @@ public class ESResponseReader
      * @param exp
      * @return result value of aggregation
      */
-    private Double getAggregatedResult(InternalAggregations internalAggs, String identifier, String field,
+    private Object getAggregatedResult(InternalAggregations internalAggs, String identifier, String field,
             Expression exp)
     {
         switch (identifier)
@@ -145,8 +147,12 @@ public class ESResponseReader
 
         case Expression.SUM:
             return (((InternalSum) internalAggs.get(exp.toParsedText())).getValue());
+
+        case Expression.COUNT:
+            return (((InternalValueCount) internalAggs.get(exp.toParsedText())).getValue());
         }
-        return null;
+
+        throw new KunderaException("No support for " + identifier + " aggregation.");
     }
 
     /**
