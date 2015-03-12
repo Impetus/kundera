@@ -48,9 +48,9 @@
 	</persistence-unit>
 	<persistence-unit name="queryTest">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
-		<class>com.impetus.client.query.Book</class>
+<!-- 		<class>com.impetus.client.query.Book</class> -->
 		<class>com.impetus.client.hbase.validator.BookEntity</class>
-		<class>com.impetus.client.query.Student</class>
+<!-- 		<class>com.impetus.client.query.Student</class> -->
 		<class>com.impetus.client.hbase.compositetype.HBasePrimeUser</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
@@ -142,7 +142,7 @@
 			<property name="kundera.keyspace" value="HBaseNew" />
 			<property name="kundera.dialect" value="hbase" />
 			<property name="kundera.client.lookup.class" value="com.impetus.client.hbase.HBaseClientFactory" />
-			<property name="kundera.ddl.auto.prepare" value="create" />
+			<property name="kundera.ddl.auto.prepare" value="update" />
 			<property name="kundera.client.property" value="kundera-hbase.properties" />
 		</properties>
 	</persistence-unit>
@@ -158,6 +158,19 @@
 			<property name="kundera.dialect" value="hbase" />
 			<property name="kundera.ddl.auto.prepare" value="create" />
 			<property name="kundera.client.lookup.class" value="com.impetus.client.hbase.HBaseClientFactory" />
+		</properties>
+	</persistence-unit>
+	
+		<persistence-unit name="XmlPropertyTest">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="60000" />
+			<property name="kundera.keyspace" value="KunderaHbaseXmlTest" />
+			<property name="kundera.dialect" value="hbase" />
+			<property name="kundera.ddl.auto.prepare" value="create" />
+			<property name="kundera.client.lookup.class" value="com.impetus.client.hbase.HBaseClientFactory" />
+			<property name="kundera.client.property" value="kunderaTest.xml" />
 		</properties>
 	</persistence-unit>
 

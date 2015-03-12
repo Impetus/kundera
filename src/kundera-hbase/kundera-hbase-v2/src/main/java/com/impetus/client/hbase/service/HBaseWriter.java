@@ -72,7 +72,7 @@ public class HBaseWriter implements Writer
             String colQualifier = hbaseCell.getColumnName();
             Object colValue = hbaseCell.getValue();
             if (colFamily != null && colQualifier != null && colValue != null)
-                p.add(Bytes.toBytes(colFamily), Bytes.toBytes(colQualifier), HBaseUtils.getBytes(colValue));
+                p.addColumn(Bytes.toBytes(colFamily), Bytes.toBytes(colQualifier), HBaseUtils.getBytes(colValue));
         }
         return p;
     }

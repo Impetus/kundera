@@ -16,6 +16,7 @@
 package com.impetus.client.hbase.schemamanager;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -41,7 +42,6 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.client.hbase.config.HBasePropertyReader;
 import com.impetus.client.hbase.utils.HBaseUtils;
-import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.configure.ClientProperties.DataStore.Schema;
 import com.impetus.kundera.configure.ClientProperties.DataStore.Schema.Table;
 import com.impetus.kundera.configure.schema.CollectionColumnInfo;
@@ -74,7 +74,7 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
 
     // private Properties schemaProperties;
 
-    private Map<String, Properties> externalProperties;
+    private Map<String, Properties> externalProperties = new HashMap<String, Properties>();
 
     /**
      * Instantiates a new h base schema manager.
