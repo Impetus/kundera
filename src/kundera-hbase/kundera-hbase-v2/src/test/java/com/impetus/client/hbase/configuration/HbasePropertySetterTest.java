@@ -1,5 +1,5 @@
 /*******************************************************************************
- * * Copyright 2015 Impetus Infotech.
+ * * Copyright 2013 Impetus Infotech.
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -40,16 +40,20 @@ import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 
 /**
- * @author Chhavi Gangwal
+ * The Class HbasePropertySetterTest.
  * 
+ * @author Chhavi Gangwal
  */
 public class HbasePropertySetterTest
 {
 
-    private static final String _PU = "XmlPropertyTest";
+    /** The Constant HBASE_PU. */
+    private static final String HBASE_PU = "XmlPropertyTest";
 
+    /** The emf. */
     private EntityManagerFactory emf;
 
+    /** The em. */
     private EntityManager em;
 
     /**
@@ -58,7 +62,10 @@ public class HbasePropertySetterTest
     private static final Logger logger = LoggerFactory.getLogger(HbasePropertySetterTest.class);
 
     /**
-     * setup habse client connection
+     * Sets the up.
+     * 
+     * @throws Exception
+     *             the exception
      */
     @Before
     public void setUp() throws Exception
@@ -66,12 +73,15 @@ public class HbasePropertySetterTest
         Map<String, String> puProperties = new HashMap<String, String>();
         puProperties.put("kundera.ddl.auto.prepare", "create-drop");
         puProperties.put("kundera.keyspace", "KunderaHbaseKeyspace");
-        emf = Persistence.createEntityManagerFactory(_PU, puProperties);
+        emf = Persistence.createEntityManagerFactory(HBASE_PU, puProperties);
 
     }
 
     /**
-     * drops the keyspace and closes connection
+     * drops the keyspace and closes connection.
+     * 
+     * @throws Exception
+     *             the exception
      */
     @After
     public void tearDown() throws Exception
@@ -80,30 +90,33 @@ public class HbasePropertySetterTest
     }
 
     /**
-     * Sets property of hbase client in form of String
+     * Sets property of hbase client in form of String.
+     * 
+     * @throws IOException
+     *             Signals that an I/O exception has occurred.
      */
     @Test
     public void testUsingExternalStringProperty() throws IOException
     {
-        
-            Map<String, Object> puPropertiesString = new HashMap<String, Object>();
 
-            puPropertiesString.put(PersistenceProperties.KUNDERA_BATCH_SIZE, "10");
+        Map<String, Object> puPropertiesString = new HashMap<String, Object>();
 
-            em = emf.createEntityManager(puPropertiesString);
+        puPropertiesString.put(PersistenceProperties.KUNDERA_BATCH_SIZE, "10");
 
-            Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
-            Client client = clients.get(_PU);
+        em = emf.createEntityManager(puPropertiesString);
 
-            Assert.assertEquals(((HBaseClient) client).getBatchSize(), 10);
+        Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
+        Client client = clients.get(HBASE_PU);
 
-        }
-       
+        Assert.assertEquals(((HBaseClient) client).getBatchSize(), 10);
 
-    
+    }
 
     /**
-     * Sets property of hbase client in form of object map
+     * Sets property of hbase client in form of object map.
+     * 
+     * @throws IOException
+     *             Signals that an I/O exception has occurred.
      */
     @Test
     public void testUsingExternalObjectProperty() throws IOException
@@ -121,7 +134,7 @@ public class HbasePropertySetterTest
             em = emf.createEntityManager(puPropertiesString);
 
             Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
-            Client client = clients.get(_PU);
+            Client client = clients.get(HBASE_PU);
 
             Field f1, f2;
 
@@ -135,18 +148,18 @@ public class HbasePropertySetterTest
         catch (NoSuchFieldException nfe)
         {
             Assert.fail();
-            logger.error("Error in test, Caused by: .",nfe.getMessage());
-          
+            logger.error("Error in test, Caused by: .", nfe.getMessage());
+
         }
         catch (IllegalArgumentException iae)
         {
             Assert.fail();
-            logger.error("Error in test, Caused by: .",iae.getMessage());
+            logger.error("Error in test, Caused by: .", iae.getMessage());
         }
         catch (IllegalAccessException e)
         {
             Assert.fail();
-            logger.error("Error in test, Caused by: .",e.getMessage());
+            logger.error("Error in test, Caused by: .", e.getMessage());
         }
     }
 }

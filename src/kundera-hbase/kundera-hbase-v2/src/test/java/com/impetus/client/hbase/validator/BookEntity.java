@@ -22,7 +22,7 @@ import javax.persistence.Table;
 
 /**
  * The Class BookEntity.
- *
+ * 
  * @author Devender Yadav
  */
 @Entity
@@ -50,13 +50,13 @@ public class BookEntity
     /**
      * Instantiates a new book entity.
      */
-    public BookEntity()
+    protected BookEntity()
     {
     }
 
     /**
      * Gets the book id.
-     *
+     * 
      * @return the book id
      */
     public int getBookId()
@@ -66,8 +66,9 @@ public class BookEntity
 
     /**
      * Sets the book id.
-     *
-     * @param bookId the new book id
+     * 
+     * @param bookId
+     *            the new book id
      */
     public void setBookId(int bookId)
     {
@@ -76,7 +77,7 @@ public class BookEntity
 
     /**
      * Gets the title.
-     *
+     * 
      * @return the title
      */
     public String getTitle()
@@ -86,8 +87,9 @@ public class BookEntity
 
     /**
      * Sets the title.
-     *
-     * @param title the new title
+     * 
+     * @param title
+     *            the new title
      */
     public void setTitle(String title)
     {
@@ -96,7 +98,7 @@ public class BookEntity
 
     /**
      * Gets the author.
-     *
+     * 
      * @return the author
      */
     public String getAuthor()
@@ -106,8 +108,9 @@ public class BookEntity
 
     /**
      * Sets the author.
-     *
-     * @param author the new author
+     * 
+     * @param author
+     *            the new author
      */
     public void setAuthor(String author)
     {
@@ -116,7 +119,7 @@ public class BookEntity
 
     /**
      * Gets the pages.
-     *
+     * 
      * @return the pages
      */
     public int getPages()
@@ -126,8 +129,9 @@ public class BookEntity
 
     /**
      * Sets the pages.
-     *
-     * @param pages the new pages
+     * 
+     * @param pages
+     *            the new pages
      */
     public void setPages(int pages)
     {

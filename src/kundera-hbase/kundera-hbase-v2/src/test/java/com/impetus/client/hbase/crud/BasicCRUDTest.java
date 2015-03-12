@@ -22,46 +22,78 @@ import javax.persistence.Persistence;
 import junit.framework.Assert;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.impetus.client.hbase.crud.PersonHBase.Day;
 import com.impetus.client.hbase.crud.PersonHBase.Month;
-import com.impetus.client.hbase.junits.HBaseCli;
 import com.impetus.client.hbase.testingutil.HBaseTestingUtils;
 
 /**
- * @author Pragalbh Garg
+ * The Class CrudTestBasic.
  * 
+ * @author Pragalbh Garg
  */
-public class CrudTestBasic
+public class BasicCRUDTest
 {
+    /** The Constant SCHEMA. */
+    protected static final String SCHEMA = "HBaseNew";
+
+    /** The Constant HBASE_PU. */
+    protected static final String HBASE_PU = "crudTest";
+
     /** The emf. */
     protected static EntityManagerFactory emf;
 
     /** The em. */
     protected static EntityManager em;
 
-    protected HBaseCli cli;
+    /**
+     * Sets the up before class.
+     * 
+     * @throws Exception
+     *             the exception
+     */
+    @BeforeClass
+    public static void SetUpBeforeClass() throws Exception
+    {
+        emf = Persistence.createEntityManagerFactory(HBASE_PU);
+    }
 
+    /**
+     * Sets the up.
+     * 
+     * @throws Exception
+     *             the exception
+     */
     @Before
     public void setUp() throws Exception
     {
-        cli = new HBaseCli();
-        cli.startCluster();
-        emf = Persistence.createEntityManagerFactory("crudTest");
         em = emf.createEntityManager();
     }
 
+    /**
+     * Test crud operations.
+     * 
+     * @throws Exception
+     *             the exception
+     */
     @Test
     public void testCRUDOperations() throws Exception
     {
         testInsert();
         testMerge();
         testRemove();
-
     }
 
+    /**
+     * Test insert.
+     * 
+     * @throws Exception
+     *             the exception
+     */
     private void testInsert() throws Exception
     {
         em.clear();
@@ -81,6 +113,9 @@ public class CrudTestBasic
 
     }
 
+    /**
+     * Test merge.
+     */
     private void testMerge()
     {
         em.clear();
@@ -92,6 +127,9 @@ public class CrudTestBasic
         Assert.assertEquals("devender", p1.getPersonName());
     }
 
+    /**
+     * Test remove.
+     */
     private void testRemove()
     {
         em.clear();
@@ -102,13 +140,30 @@ public class CrudTestBasic
         Assert.assertNull(p1);
     }
 
+    /**
+     * Tear down.
+     * 
+     * @throws Exception
+     *             the exception
+     */
     @After
     public void tearDown() throws Exception
     {
         em.close();
+    }
+
+    /**
+     * Tear down after class.
+     * 
+     * @throws Exception
+     *             the exception
+     */
+    @AfterClass
+    public static void tearDownAfterClass() throws Exception
+    {
         emf.close();
-        HBaseTestingUtils.dropSchema("HBaseNew");
-        HBaseCli.stopCluster();
+        emf = null;
+        HBaseTestingUtils.dropSchema(SCHEMA);
     }
 
 }

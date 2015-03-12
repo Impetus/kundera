@@ -13,6 +13,9 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
+/*
+ * author: karthikp.manchala
+ */
 package com.impetus.client.hbase.crud.embedded;
 
 import javax.persistence.Persistence;
@@ -22,25 +25,50 @@ import junit.framework.Assert;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.impetus.client.hbase.testingutil.HBaseTestingUtils;
 
 /**
- * @author Pragalbh Garg
+ * The Class EmbeddablesCrudTest.
  * 
+ * @author Pragalbh Garg
  */
 public class EmbeddablesCrudTest extends EmbeddablesBase
 {
 
+    /**
+     * Sets the up before class.
+     * 
+     * @throws Exception
+     *             the exception
+     */
+    @BeforeClass
+    public static void SetUpBeforeClass() throws Exception
+    {
+        emf = Persistence.createEntityManagerFactory(HBASE_PU);
+    }
+
+    /**
+     * Sets the up.
+     * 
+     * @throws Exception
+     *             the exception
+     */
     @Before
     public void setUp() throws Exception
     {
-        emf = Persistence.createEntityManagerFactory(PU);
+        emf = Persistence.createEntityManagerFactory(HBASE_PU);
         em = emf.createEntityManager();
-
     }
 
+    /**
+     * Test crud operations.
+     * 
+     * @throws Exception
+     *             the exception
+     */
     @Test
     public void testCRUDOperations() throws Exception
     {
@@ -51,6 +79,9 @@ public class EmbeddablesCrudTest extends EmbeddablesBase
 
     }
 
+    /**
+     * Test remove.
+     */
     private void testRemove()
     {
         PersonEmbed person1 = em.find(PersonEmbed.class, 1);
@@ -65,6 +96,9 @@ public class EmbeddablesCrudTest extends EmbeddablesBase
         Assert.assertNull(person2);
     }
 
+    /**
+     * Test merge.
+     */
     private void testMerge()
     {
         PersonEmbed person1 = em.find(PersonEmbed.class, 1);
@@ -78,6 +112,9 @@ public class EmbeddablesCrudTest extends EmbeddablesBase
         assertPerson(p1, person1);
     }
 
+    /**
+     * Test insert.
+     */
     private void testInsert()
     {
         em.persist(p1);
@@ -99,20 +136,18 @@ public class EmbeddablesCrudTest extends EmbeddablesBase
     @After
     public void tearDown() throws Exception
     {
+        em.close();
     }
 
+    /**
+     * Tear down after class.
+     */
     @AfterClass
     public static void tearDownAfterClass()
     {
-        HBaseTestingUtils.dropSchema("HBaseNew");
-        if (em != null)
-        {
-            em.close();
-            em = null;
-            emf.close();
-            emf = null;
-        }
-
+        HBaseTestingUtils.dropSchema(SCHEMA);
+        emf.close();
+        emf = null;
     }
 
 }

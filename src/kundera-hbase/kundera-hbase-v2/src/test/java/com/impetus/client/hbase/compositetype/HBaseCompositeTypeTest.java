@@ -211,6 +211,15 @@ public class HBaseCompositeTypeTest
         Assert.assertEquals(1, ((HBaseCompoundKey) results.get(0)).getTweetId());
         Assert.assertEquals(timeLineId, ((HBaseCompoundKey) results.get(0)).getTimeLineId());
 
+        final String withSelectiveNestedCompositeColClause = "Select u.key.userId from HBasePrimeUser u where u.key.userId = :userId and u.key.tweetId = :tweetId and u.key.timeLineId = :timeLineId";
+        q = em.createQuery(withSelectiveNestedCompositeColClause);
+        q.setParameter("userId", "mevivs");
+        q.setParameter("tweetId", 1);
+        q.setParameter("timeLineId", timeLineId);
+        results = q.getResultList();
+        Assert.assertEquals(1, results.size());
+        Assert.assertEquals("mevivs", results.get(0));
+
         em.remove(user);
         em.clear();// optional,just to clear persistence cache.
     }
@@ -235,7 +244,7 @@ public class HBaseCompositeTypeTest
     {
         EntityManager em = emf.createEntityManager();
 
-        UUID timeLineId = UUID.randomUUID();
+        timeLineId = UUID.randomUUID();
 
         HBaseCompoundKey key = new HBaseCompoundKey("mevivs", 1, timeLineId);
         HBasePrimeUser user = new HBasePrimeUser(key);
@@ -267,7 +276,7 @@ public class HBaseCompositeTypeTest
      */
     private void deleteNamed()
     {
-        UUID timeLineId = UUID.randomUUID();
+        timeLineId = UUID.randomUUID();
 
         HBaseCompoundKey key = new HBaseCompoundKey("mevivs", 1, timeLineId);
 
@@ -313,7 +322,7 @@ public class HBaseCompositeTypeTest
     /**
      * Assert prime user.
      * 
-     * @param user
+     * @param result
      *            the result
      */
     private void validatePrimeUser(Object result)
