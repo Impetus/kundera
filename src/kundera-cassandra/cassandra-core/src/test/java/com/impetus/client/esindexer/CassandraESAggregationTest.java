@@ -38,6 +38,8 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.esindexer.PersonESIndexerCassandra.Day;
 
@@ -58,6 +60,11 @@ public class CassandraESAggregationTest
 
     /** The person. */
     private PersonESIndexerCassandra person;
+    
+    /**
+     * logger 
+     */
+    private Logger logger = LoggerFactory.getLogger(CassandraESAggregationTest.class);
 
     /**
      * Sets the up before class.
@@ -156,7 +163,33 @@ public class CassandraESAggregationTest
      * Test min aggregation.
      */
     @Test
-    public void testMinAggregation()
+    public void testAggregation()
+    {
+        testMinAggregation();
+        testMultiMinAggregation();
+        testMaxAggregation();
+        testMultiMaxAggregation();
+        testSumAggregation();
+        testMultiSumAggregation();
+        testAvgAggregation();
+        testMultiAvgAggregation();
+        testMaxMinSameFieldAggregation();
+        testMultiAggregation();
+        testMinMaxSumAvgAggregation();
+        testAggregationWithWhereClause();
+        testPositionalQuery();
+        testParameterQuery();
+        testBetween();
+        testBetweenWithExpression();
+        testBetweenMin();
+        testLikeQuery();
+
+    }
+
+    /**
+     * Test min aggregation.
+     */
+    private void testMinAggregation()
     {
         PersonESIndexerCassandra p = em.find(PersonESIndexerCassandra.class, "1");
         String queryString = "Select min(p.salary) from PersonESIndexerCassandra p";
@@ -170,8 +203,7 @@ public class CassandraESAggregationTest
     /**
      * Test multi min aggregation.
      */
-    @Test
-    public void testMultiMinAggregation()
+    private void testMultiMinAggregation()
     {
 
         String queryString = "Select min(p.salary), min(p.age) from PersonESIndexerCassandra p where p.age > 20";
@@ -186,8 +218,7 @@ public class CassandraESAggregationTest
     /**
      * Test max aggregation.
      */
-    @Test
-    public void testMaxAggregation()
+    private void testMaxAggregation()
     {
         String queryString = "Select max(p.age) from PersonESIndexerCassandra p";
         Query query = em.createQuery(queryString);
@@ -200,8 +231,7 @@ public class CassandraESAggregationTest
     /**
      * Test multi max aggregation.
      */
-    @Test
-    public void testMultiMaxAggregation()
+    private void testMultiMaxAggregation()
 
     {
         String queryString = "Select max(p.age), max(p.salary) from PersonESIndexerCassandra p";
@@ -216,8 +246,7 @@ public class CassandraESAggregationTest
     /**
      * Test sum aggregation.
      */
-    @Test
-    public void testSumAggregation()
+    private void testSumAggregation()
     {
         String queryString = "Select sum(p.salary) from PersonESIndexerCassandra p";
         Query query = em.createQuery(queryString);
@@ -230,8 +259,7 @@ public class CassandraESAggregationTest
     /**
      * Test multi sum aggregation.
      */
-    @Test
-    public void testMultiSumAggregation()
+    private void testMultiSumAggregation()
     {
         String queryString = "Select sum(p.salary), sum(p.age) from PersonESIndexerCassandra p";
         Query query = em.createQuery(queryString);
@@ -245,8 +273,7 @@ public class CassandraESAggregationTest
     /**
      * Test avg aggregation.
      */
-    @Test
-    public void testAvgAggregation()
+    private void testAvgAggregation()
     {
         String queryString = "Select avg(p.salary) from PersonESIndexerCassandra p";
         Query query = em.createQuery(queryString);
@@ -259,8 +286,7 @@ public class CassandraESAggregationTest
     /**
      * Test multi avg aggregation.
      */
-    @Test
-    public void testMultiAvgAggregation()
+    private void testMultiAvgAggregation()
     {
         String avgQuery = "Select avg(p.salary), avg(p.age) from PersonESIndexerCassandra p";
         Query query = em.createQuery(avgQuery);
@@ -274,8 +300,7 @@ public class CassandraESAggregationTest
     /**
      * Test max min same field aggregation.
      */
-    @Test
-    public void testMaxMinSameFieldAggregation()
+    private void testMaxMinSameFieldAggregation()
     {
         String queryString = "Select max(p.age), min(p.age) from PersonESIndexerCassandra p";
         Query query = em.createQuery(queryString);
@@ -289,8 +314,7 @@ public class CassandraESAggregationTest
     /**
      * Test multi aggregation.
      */
-    @Test
-    public void testMultiAggregation()
+    private void testMultiAggregation()
     {
         String queryString = "Select min(p.age), min(p.salary), max(p.age), max(p.salary) from PersonESIndexerCassandra p";
         Query query = em.createQuery(queryString);
@@ -306,8 +330,7 @@ public class CassandraESAggregationTest
     /**
      * Test min max sum avg aggregation.
      */
-    @Test
-    public void testMinMaxSumAvgAggregation()
+    private void testMinMaxSumAvgAggregation()
     {
         String queryString = "Select min(p.salary), max(p.salary), sum(p.salary), avg(p.salary) from PersonESIndexerCassandra p";
         Query query = em.createQuery(queryString);
@@ -326,65 +349,70 @@ public class CassandraESAggregationTest
      * @throws InterruptedException
      *             the interrupted exception
      */
-    @Test
-    public void testAggregationWithWhereClause() throws InterruptedException
+    private void testAggregationWithWhereClause()
     {
-        waitThread();
+        try
+        {
+            waitThread();
 
-        String invalidQueryWithAndClause = "Select min(p.age) from PersonESIndexerCassandra p where p.personName = 'amit' AND p.age = 34";
-        Query nameQuery = em.createNamedQuery(invalidQueryWithAndClause);
-        List persons = nameQuery.getResultList();
+            String invalidQueryWithAndClause = "Select min(p.age) from PersonESIndexerCassandra p where p.personName = 'amit' AND p.age = 34";
+            Query nameQuery = em.createNamedQuery(invalidQueryWithAndClause);
+            List persons = nameQuery.getResultList();
 
-        Assert.assertTrue(persons.isEmpty());
+            Assert.assertTrue(persons.isEmpty());
 
-        String queryWithAndClause = "Select min(p.age) from PersonESIndexerCassandra p where p.personName = 'amit' AND p.age = 20";
-        nameQuery = em.createNamedQuery(queryWithAndClause);
-        persons = nameQuery.getResultList();
+            String queryWithAndClause = "Select min(p.age) from PersonESIndexerCassandra p where p.personName = 'amit' AND p.age = 20";
+            nameQuery = em.createNamedQuery(queryWithAndClause);
+            persons = nameQuery.getResultList();
 
-        Assert.assertFalse(persons.isEmpty());
-        Assert.assertEquals(1, persons.size());
-        Assert.assertEquals(20.0, persons.get(0));
+            Assert.assertFalse(persons.isEmpty());
+            Assert.assertEquals(1, persons.size());
+            Assert.assertEquals(20.0, persons.get(0));
 
-        String queryWithORClause = "Select max(p.salary) from PersonESIndexerCassandra p where p.personName = 'amit' OR p.personName = 'dev'";
-        nameQuery = em.createNamedQuery(queryWithORClause);
-        persons = nameQuery.getResultList();
+            String queryWithORClause = "Select max(p.salary) from PersonESIndexerCassandra p where p.personName = 'amit' OR p.personName = 'dev'";
+            nameQuery = em.createNamedQuery(queryWithORClause);
+            persons = nameQuery.getResultList();
 
-        Assert.assertFalse(persons.isEmpty());
-        Assert.assertEquals(1, persons.size());
-        Assert.assertEquals(200.0, persons.get(0));
+            Assert.assertFalse(persons.isEmpty());
+            Assert.assertEquals(1, persons.size());
+            Assert.assertEquals(200.0, persons.get(0));
 
-        String queryMinMaxWithORClause = "Select max(p.salary), min(p.age) from PersonESIndexerCassandra p where p.personName = 'amit' OR p.personName = 'karthik'";
-        nameQuery = em.createNamedQuery(queryMinMaxWithORClause);
-        persons = nameQuery.getResultList();
+            String queryMinMaxWithORClause = "Select max(p.salary), min(p.age) from PersonESIndexerCassandra p where p.personName = 'amit' OR p.personName = 'karthik'";
+            nameQuery = em.createNamedQuery(queryMinMaxWithORClause);
+            persons = nameQuery.getResultList();
 
-        Assert.assertFalse(persons.isEmpty());
-        Assert.assertEquals(2, persons.size());
-        Assert.assertEquals(300.0, persons.get(0));
-        Assert.assertEquals(20.0, persons.get(1));
+            Assert.assertFalse(persons.isEmpty());
+            Assert.assertEquals(2, persons.size());
+            Assert.assertEquals(300.0, persons.get(0));
+            Assert.assertEquals(20.0, persons.get(1));
 
-        String invalidQueryWithORClause = "Select sum(p.age) from PersonESIndexerCassandra p where p.personName = 'amit' OR p.personName = 'lkl'";
-        nameQuery = em.createNamedQuery(invalidQueryWithORClause);
-        persons = nameQuery.getResultList();
+            String invalidQueryWithORClause = "Select sum(p.age) from PersonESIndexerCassandra p where p.personName = 'amit' OR p.personName = 'lkl'";
+            nameQuery = em.createNamedQuery(invalidQueryWithORClause);
+            persons = nameQuery.getResultList();
 
-        Assert.assertFalse(persons.isEmpty());
-        Assert.assertEquals(1, persons.size());
-        Assert.assertEquals(20.0, persons.get(0));
+            Assert.assertFalse(persons.isEmpty());
+            Assert.assertEquals(1, persons.size());
+            Assert.assertEquals(20.0, persons.get(0));
 
-        String testSumWithGreaterThanClause = "Select sum(p.age) from PersonESIndexerCassandra p where p.age > 15";
-        nameQuery = em.createNamedQuery(testSumWithGreaterThanClause);
-        persons = nameQuery.getResultList();
+            String testSumWithGreaterThanClause = "Select sum(p.age) from PersonESIndexerCassandra p where p.age > 15";
+            nameQuery = em.createNamedQuery(testSumWithGreaterThanClause);
+            persons = nameQuery.getResultList();
 
-        Assert.assertFalse(persons.isEmpty());
-        Assert.assertEquals(1, persons.size());
-        Assert.assertEquals(90.0, persons.get(0));
-        waitThread();
+            Assert.assertFalse(persons.isEmpty());
+            Assert.assertEquals(1, persons.size());
+            Assert.assertEquals(90.0, persons.get(0));
+            waitThread();
+        }
+        catch (InterruptedException e)
+        {
+            logger.error(e.getMessage());
+        }
     }
 
     /**
      * Test positional query.
      */
-    @Test
-    public void testPositionalQuery()
+    private void testPositionalQuery()
     {
         String queryString = "Select min(p.salary) from PersonESIndexerCassandra p where p.personName = ?1";
         Query query = em.createQuery(queryString);
@@ -398,8 +426,7 @@ public class CassandraESAggregationTest
     /**
      * Test parameter query.
      */
-    @Test
-    public void testParameterQuery()
+    private void testParameterQuery()
     {
         String queryString = "Select p from PersonESIndexerCassandra p where p.personName = :personName";
         Query query = em.createQuery(queryString);
@@ -413,8 +440,7 @@ public class CassandraESAggregationTest
     /**
      * Test between.
      */
-    @Test
-    public void testBetween()
+    private void testBetween()
     {
         String queryString = "Select p from PersonESIndexerCassandra p where p.age between 20 and 34";
         Query query = em.createQuery(queryString);
@@ -426,8 +452,7 @@ public class CassandraESAggregationTest
     /**
      * Test between with expression.
      */
-    @Test
-    public void testBetweenWithExpression()
+    private void testBetweenWithExpression()
     {
         String queryString = "Select p from PersonESIndexerCassandra p where p.age between 15+5 and 40-6";
         Query query = em.createQuery(queryString);
@@ -439,8 +464,7 @@ public class CassandraESAggregationTest
     /**
      * Test between min.
      */
-    @Test
-    public void testBetweenMin()
+    private void testBetweenMin()
     {
         String queryString = "Select min(p.age) from PersonESIndexerCassandra p where p.age between 18 and 34";
         Query query = em.createQuery(queryString);
@@ -453,8 +477,7 @@ public class CassandraESAggregationTest
     /**
      * Test like query.
      */
-    @Test
-    public void testLikeQuery()
+    private void testLikeQuery()
     {
         String queryString = "Select min(p.age) from PersonESIndexerCassandra p where p.personName like '%mit'";
         Query query = em.createQuery(queryString);
