@@ -42,18 +42,11 @@ public class HbaseSecondaryTableTest
     /** The em. */
     private static EntityManager em;
 
-    private HBaseCli cli;
-
     @Before
     public void setUp() throws Exception
     {
-
-        cli = new HBaseCli();
-        cli.startCluster();
-
         emf = Persistence.createEntityManagerFactory("secTableTest");
         em = emf.createEntityManager();
-
     }
 
     @After
@@ -62,7 +55,6 @@ public class HbaseSecondaryTableTest
         em.close();
         emf.close();
         HBaseTestingUtils.dropSchema("HBaseNew");
-        HBaseCli.stopCluster();
     }
 
     @Test
