@@ -59,7 +59,6 @@ public class EmbeddablesCrudTest extends EmbeddablesBase
     @Before
     public void setUp() throws Exception
     {
-        emf = Persistence.createEntityManagerFactory(HBASE_PU);
         em = emf.createEntityManager();
     }
 
@@ -145,9 +144,9 @@ public class EmbeddablesCrudTest extends EmbeddablesBase
     @AfterClass
     public static void tearDownAfterClass()
     {
-        HBaseTestingUtils.dropSchema(SCHEMA);
         emf.close();
         emf = null;
+        HBaseTestingUtils.dropSchema(SCHEMA);
     }
 
 }

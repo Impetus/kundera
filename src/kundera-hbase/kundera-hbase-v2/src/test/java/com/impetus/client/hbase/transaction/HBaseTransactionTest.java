@@ -36,12 +36,11 @@ import com.impetus.client.hbase.testingutil.HBaseTestingUtils;
  */
 public class HBaseTransactionTest
 {
+    /** The Constant SCHEMA. */
+    private static final String SCHEMA = "HBaseNew";
 
     /** The Constant HBASE_PU. */
     private static final String HBASE_PU = "transactionTest";
-
-    /** The Constant SCHEMA. */
-    private static final String SCHEMA = "HBaseNew";
 
     /** The emf. */
     private static EntityManagerFactory emf;

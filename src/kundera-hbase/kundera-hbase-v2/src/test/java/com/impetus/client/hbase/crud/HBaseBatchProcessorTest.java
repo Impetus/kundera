@@ -46,16 +46,16 @@ public class HBaseBatchProcessorTest
 {
 
     /** The Constant SCHEMA. */
-    protected static final String SCHEMA = "HBaseNew";
+    private static final String SCHEMA = "HBaseNew";
 
     /** The Constant HBASE_PU. */
-    protected static final String HBASE_PU = "crudTest";
+    private static final String HBASE_PU = "crudTest";
 
     /** The emf. */
-    protected static EntityManagerFactory emf;
+    private static EntityManagerFactory emf;
 
     /** The em. */
-    protected EntityManager em;
+    private EntityManager em;
 
     /** The rows. */
     private List<PersonHBase> rows;

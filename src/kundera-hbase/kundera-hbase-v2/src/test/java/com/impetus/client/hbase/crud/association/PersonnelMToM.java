@@ -30,51 +30,89 @@ import javax.persistence.Table;
 import com.impetus.kundera.index.Index;
 import com.impetus.kundera.index.IndexCollection;
 
-@Entity
-@Table(name = "PersonnelMToM", schema = "HBaseNew@mtmTest")
-@IndexCollection(columns = { @Index(name = "personName") })
 /**
- * @author Pragalbh Garg
+ * The Class PersonnelMToM.
  * 
+ * @author Pragalbh Garg
  */
+@Entity
+@Table(name = "PERSONNEL_MTM", schema = "HBaseNew@mtmTest")
+@IndexCollection(columns = { @Index(name = "personName") })
 public class PersonnelMToM
 {
+
+    /** The person id. */
     @Id
     @Column(name = "PERSON_ID")
     private String personId;
 
+    /** The person name. */
     @Column(name = "PERSON_NAME")
     private String personName;
 
+    /** The habitats. */
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(name = "PERSON_ADDRESS", schema = "HBaseNew", joinColumns = { @JoinColumn(name = "PERSON_ID") }, inverseJoinColumns = { @JoinColumn(name = "ADDRESS_ID") })
     private Set<HabitatMToM> habitats;
 
+    /**
+     * Gets the person id.
+     * 
+     * @return the person id
+     */
     public String getPersonId()
     {
         return personId;
     }
 
+    /**
+     * Gets the person name.
+     * 
+     * @return the person name
+     */
     public String getPersonName()
     {
         return personName;
     }
 
+    /**
+     * Sets the person name.
+     * 
+     * @param personName
+     *            the new person name
+     */
     public void setPersonName(String personName)
     {
         this.personName = personName;
     }
 
+    /**
+     * Sets the person id.
+     * 
+     * @param personId
+     *            the new person id
+     */
     public void setPersonId(String personId)
     {
         this.personId = personId;
     }
 
+    /**
+     * Gets the habitats.
+     * 
+     * @return the habitats
+     */
     public Set<HabitatMToM> getHabitats()
     {
         return habitats;
     }
 
+    /**
+     * Sets the habitats.
+     * 
+     * @param habitats
+     *            the new habitats
+     */
     public void setHabitats(Set<HabitatMToM> habitats)
     {
         this.habitats = habitats;

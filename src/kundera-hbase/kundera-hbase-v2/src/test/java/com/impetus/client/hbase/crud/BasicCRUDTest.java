@@ -39,16 +39,16 @@ import com.impetus.client.hbase.testingutil.HBaseTestingUtils;
 public class BasicCRUDTest
 {
     /** The Constant SCHEMA. */
-    protected static final String SCHEMA = "HBaseNew";
+    private static final String SCHEMA = "HBaseNew";
 
     /** The Constant HBASE_PU. */
-    protected static final String HBASE_PU = "crudTest";
+    private static final String HBASE_PU = "crudTest";
 
     /** The emf. */
-    protected static EntityManagerFactory emf;
+    private static EntityManagerFactory emf;
 
     /** The em. */
-    protected static EntityManager em;
+    private EntityManager em;
 
     /**
      * Sets the up before class.

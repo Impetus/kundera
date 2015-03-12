@@ -3,10 +3,11 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence
 	https://raw.github.com/impetus-opensource/Kundera/Kundera-2.0.4/kundera-core/src/test/resources/META-INF/persistence_2_0.xsd"
 	version="2.0">
+
 	<persistence-unit name="schemaTest">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
-		<class>com.impetus.client.hbase.schematest.ProductHBase</class>
-		<class>com.impetus.client.hbase.schematest.UserHBase</class>
+		<class>com.impetus.client.hbase.schema.ProductHBase</class>
+		<class>com.impetus.client.hbase.schema.UserHBase</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<property name="kundera.nodes" value="localhost" />
@@ -17,6 +18,7 @@
 			<property name="kundera.client.property" value="kundera-hbase.properties" />
 		</properties>
 	</persistence-unit>
+
 	<persistence-unit name="secTableTest">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<class>com.impetus.client.hbase.secondarytable.HbaseSecondaryTableEntity</class>
@@ -32,6 +34,7 @@
 			<property name="kundera.client.property" value="kundera-hbase.properties" />
 		</properties>
 	</persistence-unit>
+
 	<persistence-unit name="crudTest">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<class>com.impetus.client.hbase.crud.PersonHBase</class>
@@ -46,12 +49,13 @@
 			<property name="kundera.client.property" value="kundera-hbase.properties" />
 		</properties>
 	</persistence-unit>
+
 	<persistence-unit name="queryTest">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<class>com.impetus.client.query.Book</class>
 		<class>com.impetus.client.hbase.validator.BookEntity</class>
 		<class>com.impetus.client.query.Student</class>
-		<class>com.impetus.client.hbase.compositetype.HBasePrimeUser</class>
+		<class>com.impetus.client.hbase.crud.compositetype.HBasePrimeUser</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<property name="kundera.nodes" value="localhost" />
@@ -63,6 +67,7 @@
 			<property name="kundera.client.property" value="kundera-hbase.properties" />
 		</properties>
 	</persistence-unit>
+
 	<persistence-unit name="associationTest">
 		<class>com.impetus.kundera.client.crud.associations.MobileHandset</class>
 		<class>com.impetus.kundera.client.crud.associations.MobileManufacturer</class>
@@ -110,31 +115,31 @@
 
 	<persistence-unit name="dataTypeTest">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
-		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseBigDecimal</class>
-		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseBigInteger</class>
-		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseBooleanPrimitive</class>
-		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseBooleanWrapper</class>
-		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseBytePrimitive</class>
-		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseByteWrapper</class>
-		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseCalendar</class>
-		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseChar</class>
-		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseCharacter</class>
-		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseDate</class>
-		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseDoublePrimitive</class>
-		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseDoubleWrapper</class>
-		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseFloatPrimitive</class>
-		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseFloatWrapper</class>
-		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseInt</class>
-		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseInteger</class>
-		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseLongPrimitive</class>
-		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseLongWrapper</class>
-		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseShortPrimitive</class>
-		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseShortWrapper</class>
-		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseSqlDate</class>
-		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseString</class>
-		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseTime</class>
-		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseTimestamp</class>
-		<class>com.impetus.client.hbase.datatypes.entities.StudentHBaseUUID</class>
+		<class>com.impetus.client.hbase.crud.datatypes.entities.StudentHBaseBigDecimal</class>
+		<class>com.impetus.client.hbase.crud.datatypes.entities.StudentHBaseBigInteger</class>
+		<class>com.impetus.client.hbase.crud.datatypes.entities.StudentHBaseBooleanPrimitive</class>
+		<class>com.impetus.client.hbase.crud.datatypes.entities.StudentHBaseBooleanWrapper</class>
+		<class>com.impetus.client.hbase.crud.datatypes.entities.StudentHBaseBytePrimitive</class>
+		<class>com.impetus.client.hbase.crud.datatypes.entities.StudentHBaseByteWrapper</class>
+		<class>com.impetus.client.hbase.crud.datatypes.entities.StudentHBaseCalendar</class>
+		<class>com.impetus.client.hbase.crud.datatypes.entities.StudentHBaseChar</class>
+		<class>com.impetus.client.hbase.crud.datatypes.entities.StudentHBaseCharacter</class>
+		<class>com.impetus.client.hbase.crud.datatypes.entities.StudentHBaseDate</class>
+		<class>com.impetus.client.hbase.crud.datatypes.entities.StudentHBaseDoublePrimitive</class>
+		<class>com.impetus.client.hbase.crud.datatypes.entities.StudentHBaseDoubleWrapper</class>
+		<class>com.impetus.client.hbase.crud.datatypes.entities.StudentHBaseFloatPrimitive</class>
+		<class>com.impetus.client.hbase.crud.datatypes.entities.StudentHBaseFloatWrapper</class>
+		<class>com.impetus.client.hbase.crud.datatypes.entities.StudentHBaseInt</class>
+		<class>com.impetus.client.hbase.crud.datatypes.entities.StudentHBaseInteger</class>
+		<class>com.impetus.client.hbase.crud.datatypes.entities.StudentHBaseLongPrimitive</class>
+		<class>com.impetus.client.hbase.crud.datatypes.entities.StudentHBaseLongWrapper</class>
+		<class>com.impetus.client.hbase.crud.datatypes.entities.StudentHBaseShortPrimitive</class>
+		<class>com.impetus.client.hbase.crud.datatypes.entities.StudentHBaseShortWrapper</class>
+		<class>com.impetus.client.hbase.crud.datatypes.entities.StudentHBaseSqlDate</class>
+		<class>com.impetus.client.hbase.crud.datatypes.entities.StudentHBaseString</class>
+		<class>com.impetus.client.hbase.crud.datatypes.entities.StudentHBaseTime</class>
+		<class>com.impetus.client.hbase.crud.datatypes.entities.StudentHBaseTimestamp</class>
+		<class>com.impetus.client.hbase.crud.datatypes.entities.StudentHBaseUUID</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<property name="kundera.nodes" value="localhost" />

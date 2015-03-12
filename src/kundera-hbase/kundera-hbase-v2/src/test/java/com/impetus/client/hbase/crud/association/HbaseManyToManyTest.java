@@ -27,30 +27,60 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.impetus.client.hbase.testingutil.HBaseTestingUtils;
 
 /**
+ * The Class HbaseManyToManyTest.
  * 
  * @author Pragalbh Garg
- * 
  */
 public class HbaseManyToManyTest
 {
 
-    private EntityManagerFactory emf;
+    /** The Constant SCHEMA. */
+    private static final String SCHEMA = "HBaseNew";
 
+    /** The Constant HBASE_PU. */
+    private static final String HBASE_PU = "mtmTest";
+
+    /** The emf. */
+    private static EntityManagerFactory emf;
+
+    /** The em. */
     private EntityManager em;
 
+    /**
+     * Sets the up before class.
+     * 
+     * @throws Exception
+     *             the exception
+     */
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception
+    {
+        emf = Persistence.createEntityManagerFactory(HBASE_PU);
+    }
+
+    /**
+     * Sets the up.
+     * 
+     * @throws Exception
+     *             the exception
+     */
     @Before
     public void setUp() throws Exception
     {
-        emf = Persistence.createEntityManagerFactory("mtmTest");
         em = emf.createEntityManager();
     }
 
+    /**
+     * Test many to many.
+     */
     @Test
     public void testManyToMany()
     {
@@ -96,6 +126,9 @@ public class HbaseManyToManyTest
 
     }
 
+    /**
+     * Persist mtm.
+     */
     private void persistMTM()
     {
         Set<HabitatMToM> habitats1 = new HashSet<HabitatMToM>();
@@ -134,12 +167,29 @@ public class HbaseManyToManyTest
         em.persist(person2);
     }
 
+    /**
+     * Tear down.
+     * 
+     * @throws Exception
+     *             the exception
+     */
     @After
     public void tearDown() throws Exception
     {
         em.close();
-        emf.close();
-        HBaseTestingUtils.dropSchema("HBaseNew");
     }
 
+    /**
+     * Tear down after class.
+     * 
+     * @throws Exception
+     *             the exception
+     */
+    @AfterClass
+    public static void tearDownAfterClass() throws Exception
+    {
+        emf.close();
+        emf = null;
+        HBaseTestingUtils.dropSchema(SCHEMA);
+    }
 }

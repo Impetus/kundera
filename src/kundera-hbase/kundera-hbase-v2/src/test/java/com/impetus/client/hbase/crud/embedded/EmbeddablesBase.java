@@ -25,7 +25,7 @@ import junit.framework.Assert;
 
 /**
  * The Class EmbeddablesBase.
- *
+ * 
  * @author Pragalbh Garg
  */
 public class EmbeddablesBase
@@ -40,7 +40,7 @@ public class EmbeddablesBase
     protected static EntityManagerFactory emf;
 
     /** The em. */
-    protected static EntityManager em;
+    protected EntityManager em;
 
     /** The Constant T. */
     protected static final boolean T = true;
@@ -64,11 +64,15 @@ public class EmbeddablesBase
 
     /**
      * Prepare person.
-     *
-     * @param id the id
-     * @param email the email
-     * @param details1 the details1
-     * @param details2 the details2
+     * 
+     * @param id
+     *            the id
+     * @param email
+     *            the email
+     * @param details1
+     *            the details1
+     * @param details2
+     *            the details2
      * @return the person embed
      */
     protected PersonEmbed preparePerson(int id, String email, PersonalDetails details1, ProfessionalDetails details2)
@@ -83,11 +87,15 @@ public class EmbeddablesBase
 
     /**
      * Prepare personal details.
-     *
-     * @param fname the fname
-     * @param mname the mname
-     * @param lname the lname
-     * @param address the address
+     * 
+     * @param fname
+     *            the fname
+     * @param mname
+     *            the mname
+     * @param lname
+     *            the lname
+     * @param address
+     *            the address
      * @return the personal details
      */
     protected PersonalDetails preparePersonalDetails(String fname, String mname, String lname, List address)
@@ -104,10 +112,13 @@ public class EmbeddablesBase
 
     /**
      * Prepare pro details.
-     *
-     * @param project the project
-     * @param comp the comp
-     * @param salary the salary
+     * 
+     * @param project
+     *            the project
+     * @param comp
+     *            the comp
+     * @param salary
+     *            the salary
      * @return the professional details
      */
     protected ProfessionalDetails prepareProDetails(String project, String comp, Double salary)
@@ -121,7 +132,7 @@ public class EmbeddablesBase
 
     /**
      * Gets the person_1.
-     *
+     * 
      * @return the person_1
      */
     protected PersonEmbed getPerson_1()
@@ -147,7 +158,7 @@ public class EmbeddablesBase
 
     /**
      * Gets the person_2.
-     *
+     * 
      * @return the person_2
      */
     protected PersonEmbed getPerson_2()
@@ -173,7 +184,7 @@ public class EmbeddablesBase
 
     /**
      * Gets the person_3.
-     *
+     * 
      * @return the person_3
      */
     protected PersonEmbed getPerson_3()
@@ -199,7 +210,7 @@ public class EmbeddablesBase
 
     /**
      * Gets the person_4.
-     *
+     * 
      * @return the person_4
      */
     protected PersonEmbed getPerson_4()
@@ -225,9 +236,11 @@ public class EmbeddablesBase
 
     /**
      * Assert person.
-     *
-     * @param expected the expected
-     * @param actual the actual
+     * 
+     * @param expected
+     *            the expected
+     * @param actual
+     *            the actual
      */
     protected void assertPerson(PersonEmbed expected, PersonEmbed actual)
     {
@@ -268,12 +281,17 @@ public class EmbeddablesBase
 
     /**
      * Assert results.
-     *
-     * @param results the results
-     * @param b1 the b1
-     * @param b2 the b2
-     * @param b3 the b3
-     * @param b4 the b4
+     * 
+     * @param results
+     *            the results
+     * @param b1
+     *            the b1
+     * @param b2
+     *            the b2
+     * @param b3
+     *            the b3
+     * @param b4
+     *            the b4
      */
     protected void assertResults(List results, Boolean b1, Boolean b2, Boolean b3, Boolean b4)
     {
@@ -313,11 +331,15 @@ public class EmbeddablesBase
 
     /**
      * Assert deleted.
-     *
-     * @param b1 the b1
-     * @param b2 the b2
-     * @param b3 the b3
-     * @param b4 the b4
+     * 
+     * @param b1
+     *            the b1
+     * @param b2
+     *            the b2
+     * @param b3
+     *            the b3
+     * @param b4
+     *            the b4
      */
     protected void assertDeleted(Boolean b1, Boolean b2, Boolean b3, Boolean b4)
     {

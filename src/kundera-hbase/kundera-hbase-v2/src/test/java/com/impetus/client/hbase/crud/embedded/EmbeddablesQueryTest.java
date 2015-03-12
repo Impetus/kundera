@@ -317,9 +317,9 @@ public class EmbeddablesQueryTest extends EmbeddablesBase
     @AfterClass
     public static void tearDownAfterClass()
     {
-        HBaseTestingUtils.dropSchema(SCHEMA);
         emf.close();
         emf = null;
+        HBaseTestingUtils.dropSchema(SCHEMA);
     }
 
 }

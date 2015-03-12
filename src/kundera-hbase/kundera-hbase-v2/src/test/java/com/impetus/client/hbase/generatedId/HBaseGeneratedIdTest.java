@@ -50,10 +50,10 @@ import com.impetus.kundera.KunderaException;
 public class HBaseGeneratedIdTest
 {
     /** The Constant SCHEMA. */
-    protected static final String SCHEMA = "HBaseNew";
+    private static final String SCHEMA = "HBaseNew";
 
     /** The Constant HBASE_PU. */
-    protected static final String HBASE_PU = "autoIdTest";
+    private static final String HBASE_PU = "autoIdTest";
 
     /** The emf. */
     private EntityManagerFactory emf;

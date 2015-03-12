@@ -24,12 +24,19 @@ import com.impetus.client.hbase.testingutil.HBaseTestingUtils;
 import com.impetus.kundera.client.crud.associations.AssociationsBiDirectionalBase;
 
 /**
- * @author Pragalbh Garg
+ * The Class HBaseBiAssociationTest.
  * 
+ * @author Pragalbh Garg
  */
 public class HBaseBiAssociationTest extends AssociationsBiDirectionalBase
 {
 
+    /**
+     * Sets the up.
+     * 
+     * @throws Exception
+     *             the exception
+     */
     @Before
     public void setUp() throws Exception
     {
@@ -37,6 +44,9 @@ public class HBaseBiAssociationTest extends AssociationsBiDirectionalBase
         super.setUpInternal();
     }
 
+    /**
+     * Test.
+     */
     @Test
     public void test()
     {

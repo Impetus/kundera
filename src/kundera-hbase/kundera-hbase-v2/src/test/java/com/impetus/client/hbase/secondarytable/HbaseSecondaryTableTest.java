@@ -27,36 +27,57 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.hbase.junits.HBaseCli;
 import com.impetus.client.hbase.testingutil.HBaseTestingUtils;
 
 /**
- * @author Pragalbh Garg
+ * The Class HbaseSecondaryTableTest.
  * 
+ * @author Pragalbh Garg
  */
 public class HbaseSecondaryTableTest
 {
+    /** The Constant HBASE_PU. */
+    private static final String HBASE_PU = "secTableTest";
 
+    /** The Constant SCHEMA. */
+    private static final String SCHEMA = "HBaseNew";
+
+    /** The emf. */
     private EntityManagerFactory emf;
 
     /** The em. */
-    private static EntityManager em;
+    private EntityManager em;
 
+    /**
+     * Sets the up.
+     * 
+     * @throws Exception
+     *             the exception
+     */
     @Before
     public void setUp() throws Exception
     {
-        emf = Persistence.createEntityManagerFactory("secTableTest");
+        emf = Persistence.createEntityManagerFactory(HBASE_PU);
         em = emf.createEntityManager();
     }
 
+    /**
+     * Tear down.
+     * 
+     * @throws Exception
+     *             the exception
+     */
     @After
     public void tearDown() throws Exception
     {
         em.close();
         emf.close();
-        HBaseTestingUtils.dropSchema("HBaseNew");
+        HBaseTestingUtils.dropSchema(SCHEMA);
     }
 
+    /**
+     * Test.
+     */
     @Test
     public void test()
     {

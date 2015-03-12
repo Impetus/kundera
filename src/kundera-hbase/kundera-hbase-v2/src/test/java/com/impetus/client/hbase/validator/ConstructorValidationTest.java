@@ -21,7 +21,10 @@ import javax.persistence.Persistence;
 
 import junit.framework.Assert;
 
+import org.junit.AfterClass;
 import org.junit.Test;
+
+import com.impetus.client.hbase.testingutil.HBaseTestingUtils;
 
 /**
  * The Class ConstructorValidationTest.
@@ -30,9 +33,14 @@ import org.junit.Test;
  */
 public class ConstructorValidationTest
 {
+    /** The Constant SCHEMA. */
+    private static final String SCHEMA = "HBaseNew";
+
+    /** The Constant HBASE_PU. */
+    private static final String HBASE_PU = "queryTest";
 
     /** The emf. */
-    private EntityManagerFactory emf;
+    private static EntityManagerFactory emf;
 
     /** The em. */
     private EntityManager em;
@@ -46,7 +54,7 @@ public class ConstructorValidationTest
     @Test
     public void validConstructorTest() throws Exception
     {
-        emf = Persistence.createEntityManagerFactory("queryTest");
+        emf = Persistence.createEntityManagerFactory(HBASE_PU);
         em = emf.createEntityManager();
         BookEntity book = new BookEntity();
         book.setBookId(1);
@@ -72,7 +80,20 @@ public class ConstructorValidationTest
         Assert.assertNull(book2);
 
         em.close();
+    }
+
+    /**
+     * Tear down after class.
+     * 
+     * @throws Exception
+     *             the exception
+     */
+    @AfterClass
+    public static void tearDownAfterClass() throws Exception
+    {
         emf.close();
+        emf = null;
+        HBaseTestingUtils.dropSchema(SCHEMA);
     }
 
 }
