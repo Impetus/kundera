@@ -144,4 +144,9 @@ public class PersonHBase
         MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
     }
 
+    enum Month
+    {
+        JAN, FEB, MARCH, APRIL, MAY, JUNE;
+    }
+
 }

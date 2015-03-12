@@ -26,6 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.hbase.crud.PersonHBase.Day;
+import com.impetus.client.hbase.crud.PersonHBase.Month;
 import com.impetus.client.hbase.junits.HBaseCli;
 import com.impetus.client.hbase.testingutil.HBaseTestingUtils;
 
