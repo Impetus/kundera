@@ -20,7 +20,6 @@ package com.impetus.client.cassandra.udt;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -94,7 +93,6 @@ public class UdtAsEmbeddablesCRUDTest
      *             the exception
      */
     @Test
-    // working
     public void onInsert() throws Exception
     {
         Object p1 = prepareDataLevel1();
@@ -120,6 +118,7 @@ public class UdtAsEmbeddablesCRUDTest
 
     }
 
+
     /**
      * On delete.
      * 
@@ -127,7 +126,6 @@ public class UdtAsEmbeddablesCRUDTest
      *             the exception
      */
     @Test
-    // working
     public void onDelete() throws Exception
     {
         Object p1 = prepareDataLevel1();
@@ -165,7 +163,6 @@ public class UdtAsEmbeddablesCRUDTest
      *             the exception
      */
     @Test
-    // issues with embeddable merging (deleted embeddable)
     public void onMerge() throws Exception
     {
         Object p1 = prepareDataLevel1();
@@ -240,7 +237,6 @@ public class UdtAsEmbeddablesCRUDTest
      *             the exception
      */
     @Test
-    // issues with embeddable merging (deleted embeddable)
     public void onEmbeddableMerge() throws Exception
     {
         Object p1 = prepareDataLevel1();
@@ -405,33 +401,49 @@ public class UdtAsEmbeddablesCRUDTest
                 .getFullname().getFirstName());
         Assert.assertEquals(expected.getPersonalDetails().getFullname().getLastName(), actual.getPersonalDetails()
                 .getFullname().getLastName());
-        Assert.assertEquals(expected.getPersonalDetails().getPhone().getNumber(), actual.getPersonalDetails()
-                .getPhone().getNumber());
-        Assert.assertEquals(expected.getPersonalDetails().getAddresses().getPin(), actual.getPersonalDetails()
-                .getAddresses().getPin());
-        Assert.assertEquals(expected.getPersonalDetails().getSpouse().getMaidenName(), actual.getPersonalDetails()
-                .getSpouse().getMaidenName());
-        Assert.assertEquals(expected.getPersonalDetails().getSpouse().getFullname().getFirstName(), actual
-                .getPersonalDetails().getSpouse().getFullname().getFirstName());
-        Assert.assertEquals(expected.getProfessionalDetails().getCompany(), actual.getProfessionalDetails()
-                .getCompany());
-        Assert.assertEquals(expected.getProfessionalDetails().getGrade(), actual.getProfessionalDetails().getGrade());
-        Assert.assertEquals(expected.getProfessionalDetails().getMonthlySalary(), actual.getProfessionalDetails()
-                .getMonthlySalary());
-        // assert collection data
-        Assert.assertEquals(expected.getProfessionalDetails().getProjects().get(0), actual.getProfessionalDetails()
-                .getProjects().get(0));
-        Assert.assertEquals(expected.getProfessionalDetails().getProjects().get(1), actual.getProfessionalDetails()
-                .getProjects().get(1));
-        Assert.assertEquals(
-                true,
-                expected.getProfessionalDetails().getColleagues()
-                        .containsAll(actual.getProfessionalDetails().getColleagues()));
-        Assert.assertEquals(expected.getProfessionalDetails().getExtentions().get(0), actual.getProfessionalDetails()
-                .getExtentions().get(0));
-        Assert.assertEquals(expected.getProfessionalDetails().getExtentions().get(1), actual.getProfessionalDetails()
-                .getExtentions().get(1));
+        assertPersonalDetails(expected.getPersonalDetails(), actual.getPersonalDetails());
+        assertProfessionalDetails(expected.getProfessionalDetails(), actual.getProfessionalDetails());
+        //assert collection data
+        assertProfessionalDetails(expected.getListProfs().get(0), actual.getListProfs().get(0));
+        assertProfessionalDetails(expected.getMapProfsKey().get("karthik"), actual.getMapProfsKey().get("karthik"));
+        assertProfessionalDetails(expected.getMapProfsKey().get("pragalbh"), actual.getMapProfsKey().get("pragalbh"));
+        assertProfessionalDetails(expected.getSetProfs().iterator().next(), actual.getSetProfs().iterator().next());
+    }
 
+    /**
+     * Assert personal details.
+     *
+     * @param expected the expected
+     * @param actual the actual
+     */
+    private void assertPersonalDetails(PersonalDetailsUDT expected, PersonalDetailsUDT actual)
+    {
+        Assert.assertEquals(expected.getAddresses().get("Office").getStreet(), actual.getAddresses().get("Office").getStreet());
+        Assert.assertEquals(expected.getAddresses().get("Home").getPin(), actual.getAddresses().get("Home").getPin());
+        Assert.assertEquals(expected.getPhones().get(0).getNumber(), actual.getPhones().get(0).getNumber());
+        Assert.assertEquals(expected.getPhones().get(0).getTags(), actual.getPhones().get(0).getTags());
+        Assert.assertEquals(expected.getSpouses().iterator().next().getMaidenName(), actual.getSpouses().iterator().next().getMaidenName());
+    }
+
+    /**
+     * Assert professional details.
+     *
+     * @param expected the expected
+     * @param actual the actual
+     */
+    private void assertProfessionalDetails(ProfessionalDetailsUDT expected,
+            ProfessionalDetailsUDT actual)
+    {
+        Assert.assertEquals(expected.getCompany(), actual.getCompany());
+        Assert.assertEquals(expected.getGrade(), actual.getGrade());
+        Assert.assertEquals(expected.getMonthlySalary(), actual.getMonthlySalary());
+        // assert collection data
+        Assert.assertEquals(expected.getProjects().get(0), actual.getProjects().get(0));
+        Assert.assertEquals(expected.getProjects().get(1), actual.getProjects().get(1));
+        Assert.assertEquals(true, expected.getColleagues().containsAll(actual.getColleagues()));
+        Assert.assertEquals(expected.getExtentions().get(0), actual.getExtentions().get(0));
+        Assert.assertEquals(expected.getExtentions().get(1), actual.getExtentions().get(1));
+        
     }
 
     /**
@@ -452,6 +464,7 @@ public class UdtAsEmbeddablesCRUDTest
         personUDT.setPersonalDetails(personalDetails);
         ProfessionalDetailsUDT professionalDetails = loadProfessionalDetails();
         personUDT.setProfessionalDetails(professionalDetails);
+        prepareCollectionData(personUDT);
 
         return personUDT;
     }
@@ -474,6 +487,7 @@ public class UdtAsEmbeddablesCRUDTest
         personUDT.setPersonalDetails(personalDetails);
         ProfessionalDetailsUDT professionalDetails = loadProfessionalDetails();
         personUDT.setProfessionalDetails(professionalDetails);
+        prepareCollectionData(personUDT);
 
         return personUDT;
     }
@@ -497,6 +511,11 @@ public class UdtAsEmbeddablesCRUDTest
         personUDT.setPersonalDetails(personalDetails);
         ProfessionalDetailsUDT professionalDetails = loadProfessionalDetails();
         personUDT.setProfessionalDetails(professionalDetails);
+        List<ProfessionalDetailsUDT> listProfs = new ArrayList<ProfessionalDetailsUDT>();
+        listProfs.add(professionalDetails);
+        listProfs.add(professionalDetails);
+        personUDT.setListProfs(listProfs);
+        prepareCollectionData(personUDT);
 
         return personUDT;
     }
@@ -520,8 +539,34 @@ public class UdtAsEmbeddablesCRUDTest
         personUDT.setPersonalDetails(personalDetails);
         ProfessionalDetailsUDT professionalDetails = loadProfessionalDetails();
         personUDT.setProfessionalDetails(professionalDetails);
+        // set collections
+        prepareCollectionData(personUDT);
 
         return personUDT;
+    }
+
+    /**
+     * Prepare collection data.
+     *
+     * @param personUDT the person udt
+     */
+    private void prepareCollectionData(PersonUDT personUDT)
+    {
+        ProfessionalDetailsUDT professionalDetails = loadProfessionalDetails();
+
+        List<ProfessionalDetailsUDT> listProfs = new ArrayList<ProfessionalDetailsUDT>();
+        listProfs.add(professionalDetails);
+        personUDT.setListProfs(listProfs);
+
+        Map<String, ProfessionalDetailsUDT> mapProfsKey = new HashMap<String, ProfessionalDetailsUDT>();
+        mapProfsKey.put("pragalbh", professionalDetails);
+        mapProfsKey.put("karthik", professionalDetails);
+        personUDT.setMapProfsKey(mapProfsKey);
+
+        Set<ProfessionalDetailsUDT> setProfs = new HashSet<ProfessionalDetailsUDT>();
+        setProfs.add(professionalDetails);
+        setProfs.add(professionalDetails);
+        personUDT.setSetProfs(setProfs);
     }
 
     /**
@@ -563,27 +608,42 @@ public class UdtAsEmbeddablesCRUDTest
     private PersonalDetailsUDT loadPersonalDetails(String firstname, String lastname)
     {
         PersonalDetailsUDT personalDetails = new PersonalDetailsUDT();
-        Address addresses = new Address();
-        addresses.setCity("indore");
-        addresses.setPin("452001");
-        addresses.setStreet("palasia");
-        personalDetails.setAddresses(addresses);
         Fullname fullname = new Fullname();
         fullname.setFirstName(firstname);
         fullname.setLastName(lastname);
         personalDetails.setFullname(fullname);
+        
+        Address address = new Address();
+        address.setCity("indore");
+        address.setPin("452001");
+        address.setStreet("palasia");
+        Map<String, Address> addresses = new HashMap<String, Address>();
+        addresses.put("Office", address);
+        Address address1 = new Address();
+        address1.setCity("Delhi");
+        address1.setPin("201301");
+        address1.setStreet("NSEZ");
+        addresses.put("Home", address1);
+        personalDetails.setAddresses(addresses);
+       
+        
         Phone phone = new Phone();
         phone.setNumber("9988776655");
-        // String elements[] = { "personal", "main", "indore" };
-        // phone.setTags(new HashSet<String>(Arrays.asList(elements)));
-        personalDetails.setPhone(phone);
+        String elements[] = { "personal", "main", "indore" };
+        phone.setTags(new HashSet<String>(Arrays.asList(elements)));
+        List<Phone> phoneList = new ArrayList<Phone>();
+        phoneList.add(phone);
+        personalDetails.setPhones(phoneList );
+        
         Spouse spouse = new Spouse();
         spouse.setAge(20);
         Fullname spouseName = new Fullname();
         spouseName.setFirstName("asdfgh");
         spouse.setFullname(spouseName);
         spouse.setMaidenName("qrqrrte");
-        personalDetails.setSpouse(spouse);
+        Set<Spouse> spouses = new HashSet<Spouse>();
+        spouses.add(spouse);
+        personalDetails.setSpouses(spouses );
 
         return personalDetails;
     }
@@ -597,7 +657,7 @@ public class UdtAsEmbeddablesCRUDTest
     @After
     public void tearDown() throws Exception
     {
-         CassandraCli.dropKeySpace("UdtTest");
+        // CassandraCli.dropKeySpace("UdtTest");
     }
 
     /**

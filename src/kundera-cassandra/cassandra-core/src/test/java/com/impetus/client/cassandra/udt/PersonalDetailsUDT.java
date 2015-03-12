@@ -20,13 +20,13 @@ package com.impetus.client.cassandra.udt;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class PersonalDetailsUDT.
  */
@@ -39,16 +39,16 @@ public class PersonalDetailsUDT
     private Fullname fullname;
 
     /** The addresses. */
-    @Embedded
-    private Address addresses;
+    @ElementCollection
+    private Map<String, Address> addresses;
 
-    /** The phone. */
-    @Embedded
-    private Phone phone;
-
-    /** The spouse. */
-    @Embedded
-    private Spouse spouse;
+    /** The phones. */
+    @ElementCollection
+    private List<Phone> phones;
+    
+    /** The spouses. */
+    @ElementCollection
+    private Set<Spouse> spouses;
 
     /**
      * Gets the fullname.
@@ -75,7 +75,7 @@ public class PersonalDetailsUDT
      *
      * @return the addresses
      */
-    public Address getAddresses()
+    public Map<String, Address> getAddresses()
     {
         return addresses;
     }
@@ -83,51 +83,53 @@ public class PersonalDetailsUDT
     /**
      * Sets the addresses.
      *
-     * @param addresses the new addresses
+     * @param addresses the addresses
      */
-    public void setAddresses(Address addresses)
+    public void setAddresses(Map<String, Address> addresses)
     {
         this.addresses = addresses;
     }
 
     /**
-     * Gets the phone.
+     * Gets the phones.
      *
-     * @return the phone
+     * @return the phones
      */
-    public Phone getPhone()
+    public List<Phone> getPhones()
     {
-        return phone;
+        return phones;
     }
 
     /**
-     * Sets the phone.
+     * Sets the phones.
      *
-     * @param phone the new phone
+     * @param phones the new phones
      */
-    public void setPhone(Phone phone)
+    public void setPhones(List<Phone> phones)
     {
-        this.phone = phone;
+        this.phones = phones;
     }
 
     /**
-     * Gets the spouse.
+     * Gets the spouses.
      *
-     * @return the spouse
+     * @return the spouses
      */
-    public Spouse getSpouse()
+    public Set<Spouse> getSpouses()
     {
-        return spouse;
+        return spouses;
     }
 
     /**
-     * Sets the spouse.
+     * Sets the spouses.
      *
-     * @param spouse the new spouse
+     * @param spouses the new spouses
      */
-    public void setSpouse(Spouse spouse)
+    public void setSpouses(Set<Spouse> spouses)
     {
-        this.spouse = spouse;
+        this.spouses = spouses;
     }
+    
+    
 
 }

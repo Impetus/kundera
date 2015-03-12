@@ -35,8 +35,9 @@ public class Phone
     @Column
     private String number;
 
-    // @Column
-    // private Set<String> tags;
+     /** The tags. */
+     @Column
+     private Set<String> tags;
 
     /**
      * Instantiates a new phone.
@@ -66,14 +67,24 @@ public class Phone
         this.number = number;
     }
 
-    // public Set<String> getTags()
-    // {
-    // return tags;
-    // }
-    //
-    // public void setTags(Set<String> tags)
-    // {
-    // this.tags = tags;
-    // }
+     /**
+      * Gets the tags.
+      *
+      * @return the tags
+      */
+     public Set<String> getTags()
+     {
+     return tags;
+     }
+    
+     /**
+      * Sets the tags.
+      *
+      * @param tags the new tags
+      */
+     public void setTags(Set<String> tags)
+     {
+     this.tags = tags;
+     }
 
 }
