@@ -39,6 +39,7 @@ import org.apache.hadoop.hbase.client.Row;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.FilterList;
+import org.apache.hadoop.hbase.filter.KeyOnlyFilter;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.jboss.netty.util.internal.ConcurrentHashMap;
 import org.slf4j.Logger;
@@ -56,7 +57,6 @@ import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
-import com.impetus.kundera.metadata.model.annotation.DefaultEntityAnnotationProcessor;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
@@ -161,8 +161,17 @@ public class HBaseDataHandler implements DataHandler
             }
             f.addFilter(getFilter(m.getTableName()));
         }
+        boolean isFindKeyOnly = HBaseUtils.isFindKeyOnly(m, colToOutput);
+        if (isFindKeyOnly)
+        {
+            if (f == null)
+            {
+                f = new FilterList();
+            }
+            f.addFilter(new KeyOnlyFilter());
+        }
         List<String> columnsList = new ArrayList<String>();
-        if (colToOutput != null && !colToOutput.isEmpty())
+        if (colToOutput != null && !colToOutput.isEmpty() && !isFindKeyOnly)
         {
             for (Map<String, Object> map : colToOutput)
             {
@@ -188,7 +197,7 @@ public class HBaseDataHandler implements DataHandler
             List<String> relationNames, String... columns) throws IOException
     {
 
-        List output = null;
+        List<Map<String, Object>> output = null;
 
         Object entity = null;
 
@@ -196,25 +205,13 @@ public class HBaseDataHandler implements DataHandler
 
         hTable = gethTable(tableName);
 
-        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
-                m.getPersistenceUnit());
-
-        AbstractManagedType managedType = (AbstractManagedType) metaModel.entity(m.getEntityClazz());
-        List<String> secondaryTables = ((DefaultEntityAnnotationProcessor) managedType.getEntityAnnotation())
-                .getSecondaryTablesName();
-        secondaryTables.add(m.getTableName());
         List<HBaseData> results = new ArrayList<HBaseData>();
-        for (String colTableName : secondaryTables)
+        List table = ((HBaseReader) hbaseReader).loadAll(hTable, rowKey, null, columns);
+        if (table != null)
         {
-            List table = ((HBaseReader) hbaseReader).loadAll(hTable, rowKey, colTableName, columns);
-            if (table != null)
-            {
-                results.addAll(table);
-            }
+            results.addAll(table);
         }
-
-        output = onRead(tableName, clazz, m, output, hTable, entity, relationNames, results);
-        return output;
+        return onRead(tableName, clazz, m, output, hTable, entity, relationNames, results);
     }
 
     /*
@@ -242,8 +239,17 @@ public class HBaseDataHandler implements DataHandler
             }
             f.addFilter(filter);
         }
+        boolean isFindKeyOnly = HBaseUtils.isFindKeyOnly(m, colToOutput);
+        if (isFindKeyOnly)
+        {
+            if (f == null)
+            {
+                f = new FilterList();
+            }
+            f.addFilter(new KeyOnlyFilter());
+        }
         List<String> columnsList = new ArrayList<String>();
-        if (colToOutput != null && !colToOutput.isEmpty())
+        if (colToOutput != null && !colToOutput.isEmpty() && !isFindKeyOnly)
         {
             for (Map<String, Object> map : colToOutput)
             {
@@ -251,7 +257,7 @@ public class HBaseDataHandler implements DataHandler
             }
         }
         hTable = gethTable(tableName);
-        List<HBaseData> results = hbaseReader.loadAll(hTable, f, startRow, endRow, m.getTableName(), null,
+        List<HBaseData> results = hbaseReader.loadAll(hTable, f, startRow, endRow, null, null,
                 columnsList.toArray(new String[columnsList.size()]));
         return onRead(tableName, clazz, m, colToOutput, hTable, entity, relationNames, results);
     }
@@ -729,7 +735,7 @@ public class HBaseDataHandler implements DataHandler
     public void deleteRow(Object rowKey, String colName, String colFamily, String tableName) throws IOException
     {
         Table hTable = gethTable(tableName);
-        hbaseWriter.delete(hTable, rowKey,colFamily,colName);
+        hbaseWriter.delete(hTable, rowKey, colFamily, colName);
         closeHTable(hTable);
     }
 
@@ -828,15 +834,19 @@ public class HBaseDataHandler implements DataHandler
                         Object obj;
                         String colDataKey = HBaseUtils.getColumnDataKey((String) map.get("colFamily"),
                                 (String) map.get("colName"));
-                        if (!(boolean) map.get("isEmbeddable"))
-                        {
-                            obj = HBaseUtils.fromBytes(columns.get(colDataKey), (Class) map.get("fieldClazz"));
-                        }
-                        else
+                        if ((boolean) map.get("isEmbeddable"))
                         {
                             Class embedClazz = (Class) map.get("fieldClazz");
                             obj = populateEmbeddableObject(data, KunderaCoreUtils.createNewInstance(embedClazz), m,
                                     embedClazz);
+                        }
+                        else if (isIdCol(m, (String) map.get("colName")))
+                        {
+                            obj = HBaseUtils.fromBytes(data.getRowKey(), (Class) map.get("fieldClazz"));
+                        }
+                        else
+                        {
+                            obj = HBaseUtils.fromBytes(columns.get(colDataKey), (Class) map.get("fieldClazz"));
                         }
                         result.add(obj);
                     }
@@ -900,6 +910,11 @@ public class HBaseDataHandler implements DataHandler
         }
 
         return outputResults;
+    }
+
+    private boolean isIdCol(EntityMetadata m, String colName)
+    {
+        return ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName().equals(colName);
     }
 
     /**

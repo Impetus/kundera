@@ -315,16 +315,6 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
                 filter.addFilter(f);
             }
         }
-        if (HBaseUtils.isFindKeyOnly(metadata, colToOutput))
-        {
-            colToOutput = null;
-            if (filter == null)
-            {
-                filter = new FilterList();
-            }
-            filter.addFilter(new KeyOnlyFilter());
-        }
-
         try
         {
             results = fetchEntity(entityClass, null, entityMetadata, relationNames, tableName, results, filter,
@@ -379,16 +369,6 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
                 filter.addFilter(f);
             }
         }
-        if (HBaseUtils.isFindKeyOnly(metadata, colToOutput))
-        {
-            colToOutput = null;
-            if (filter == null)
-            {
-                filter = new FilterList();
-            }
-            filter.addFilter(new KeyOnlyFilter());
-        }
-
         try
         {
             MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
@@ -574,7 +554,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         try
         {
             String hTableName = HBaseUtils.getHTableName(tableName, colFamily);
-            handler.deleteRow(columnValue,columnName,colFamily,hTableName);
+            handler.deleteRow(columnValue, columnName, colFamily, hTableName);
         }
         catch (IOException ioex)
         {

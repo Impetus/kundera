@@ -316,8 +316,6 @@ public class HBaseReader implements Reader
         Result[] rawResult = hTable.get(getRequest);
         for (Result result : rawResult)
         {
-            if (!HBaseUtils.isAutoIdValueRow(result.getRow()))
-            {
                 List<Cell> cells = result.listCells();
                 if (cells != null)
                 {
@@ -325,7 +323,6 @@ public class HBaseReader implements Reader
                     data.setColumns(cells);
                     results.add(data);
                 }
-            }
         }
         return results;
     }

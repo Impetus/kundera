@@ -118,9 +118,6 @@ public class HBaseWriter implements Writer
         {
             byte[] rowBytes = HBaseUtils.getBytes(rowKey);
             Delete delete = new Delete(rowBytes);
-            if(colName!=null && colFamily!=null){
-                delete.addColumn(Bytes.toBytes(colFamily), Bytes.toBytes(colName));
-            }
             hTable.delete(delete);
         }
         catch (IOException e)

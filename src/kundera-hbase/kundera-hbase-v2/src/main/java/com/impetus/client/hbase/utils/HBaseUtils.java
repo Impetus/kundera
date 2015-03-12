@@ -274,7 +274,7 @@ public final class HBaseUtils
      */
     public static boolean isFindKeyOnly(EntityMetadata metadata, List<Map<String, Object>> colToOutput)
     {
-        if (colToOutput.size() == 1)
+        if (colToOutput!=null && colToOutput.size() == 1)
         {
             String idCol = ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName();
             return idCol.equals(colToOutput.get(0).get("colName")) && !(boolean) colToOutput.get(0).get("isEmbeddable");
