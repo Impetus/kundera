@@ -37,7 +37,7 @@ public class CollectionColumnInfo
     
     /**
      * Generic classes of data held in collection
-     * would old one element for Set and List, two for Map
+     * would hold one element for Set and List, two for Map
      */
     private List<Class<?>> genericClasses;
 

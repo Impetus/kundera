@@ -49,7 +49,7 @@ import com.impetus.kundera.proxy.ProxyHelper;
 import com.impetus.kundera.proxy.collection.ProxyCollection;
 
 /**
- * Provides utility methods for operation on objects
+ * Provides utility methods for operation on objects.
  * 
  * @author amresh.singh
  */
@@ -58,6 +58,15 @@ public class ObjectUtils
     /** The log. */
     private static Logger log = LoggerFactory.getLogger(ObjectUtils.class);
 
+    /**
+     * Deep copy.
+     * 
+     * @param source
+     *            the source
+     * @param kunderaMetadata
+     *            the kundera metadata
+     * @return the object
+     */
     public static final Object deepCopy(Object source, final KunderaMetadata kunderaMetadata)
     {
         Map<Object, Object> copiedObjectMap = new HashMap<Object, Object>();
@@ -71,10 +80,15 @@ public class ObjectUtils
     }
 
     /**
+     * Deep copy using metadata.
+     * 
      * @param source
-     * @param mainCache
-     *            TODO
-     * @return
+     *            the source
+     * @param copiedObjectMap
+     *            the copied object map
+     * @param kunderaMetadata
+     *            the kundera metadata
+     * @return the object
      */
     private static Object deepCopyUsingMetadata(Object source, Map<Object, Object> copiedObjectMap,
             final KunderaMetadata kunderaMetadata)
@@ -197,7 +211,9 @@ public class ObjectUtils
                                     {
                                         Object targetKey = null;
                                         Object targetValue = null;
-                                        if (PersistenceType.BASIC.equals(embeddedColumn.getPersistenceType()))
+                                        if (PersistenceType.BASIC.equals(embeddedColumn.getPersistenceType())
+                                                || PersistenceType.EMBEDDABLE.equals(embeddedColumn
+                                                        .getPersistenceType()))
                                         {
                                             // Create copy of map key
                                             if (sourceKey != null)
@@ -373,6 +389,17 @@ public class ObjectUtils
         return target;
     }
 
+    /**
+     * Search in cache then copy.
+     * 
+     * @param copiedObjectMap
+     *            the copied object map
+     * @param sourceObject
+     *            the source object
+     * @param kunderaMetadata
+     *            the kundera metadata
+     * @return the object
+     */
     private static Object searchInCacheThenCopy(Map<Object, Object> copiedObjectMap, Object sourceObject,
             final KunderaMetadata kunderaMetadata)
     {

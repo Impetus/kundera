@@ -49,9 +49,43 @@ public class TableInfo
     /** The collection column metadatas. */
     private List<CollectionColumnInfo> collectionColumnMetadatas;
 
+    /** The element collection metadatas. */
+    private List<CollectionColumnInfo> elementCollectionMetadatas;
+
     /**
+     * Gets the element collection metadatas.
      * 
+     * @return the element collection metadatas
      */
+    public List<CollectionColumnInfo> getElementCollectionMetadatas()
+    {
+        if (this.elementCollectionMetadatas == null)
+        {
+            this.elementCollectionMetadatas = new ArrayList<CollectionColumnInfo>();
+        }
+        return elementCollectionMetadatas;
+    }
+
+    /**
+     * Adds the element collection metadata.
+     * 
+     * @param elementCollectionMetadata
+     *            the element collection metadata
+     */
+    public void addElementCollectionMetadata(CollectionColumnInfo elementCollectionMetadata)
+    {
+        if (this.elementCollectionMetadatas == null)
+        {
+            this.elementCollectionMetadatas = new ArrayList<CollectionColumnInfo>();
+        }
+
+        if (!elementCollectionMetadatas.contains(elementCollectionMetadata))
+        {
+            elementCollectionMetadatas.add(elementCollectionMetadata);
+        }
+    }
+
+    /** The column to be indexed. */
     private List<IndexInfo> columnToBeIndexed = new ArrayList<IndexInfo>();
 
     /**
@@ -59,12 +93,12 @@ public class TableInfo
      * 
      * @param tableName
      *            the table name
-     * @param isIndexable
-     *            the is indexable
      * @param tableSchemaType
      *            the table schema type
      * @param idClassType
      *            the id class type
+     * @param idColumnName
+     *            the id column name
      */
     public TableInfo(String tableName, String tableSchemaType, Class<?> idClassType, String idColumnName)
     {
@@ -91,6 +125,11 @@ public class TableInfo
 
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#hashCode()
+     */
     @Override
     /**
      * returns the hash code for object. 
@@ -101,6 +140,11 @@ public class TableInfo
         return HashCodeBuilder.reflectionHashCode(this);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
     @Override
     /**
      * returns the string representation of object .
@@ -226,6 +270,8 @@ public class TableInfo
     }
 
     /**
+     * Gets the collection column metadatas.
+     * 
      * @return the collectionColumnMetadatas
      */
     public List<CollectionColumnInfo> getCollectionColumnMetadatas()
@@ -238,8 +284,10 @@ public class TableInfo
     }
 
     /**
-     * @param collectionColumnMetadatas
-     *            the collectionColumnMetadatas to set
+     * Adds the collection column metadata.
+     * 
+     * @param collectionColumnMetadata
+     *            the collection column metadata
      */
     public void addCollectionColumnMetadata(CollectionColumnInfo collectionColumnMetadata)
     {
@@ -277,13 +325,20 @@ public class TableInfo
     /**
      * Returns list of index information object.
      * 
-     * @return
+     * @return the columns to be indexed
      */
     public List<IndexInfo> getColumnsToBeIndexed()
     {
         return this.columnToBeIndexed;
     }
 
+    /**
+     * Gets the column to be indexed.
+     * 
+     * @param columnName
+     *            the column name
+     * @return the column to be indexed
+     */
     public IndexInfo getColumnToBeIndexed(String columnName)
     {
         IndexInfo idxInfo = new IndexInfo(columnName);
@@ -295,6 +350,12 @@ public class TableInfo
         return idxInfo;
     }
 
+    /**
+     * Adds the to indexed column list.
+     * 
+     * @param indexInfo
+     *            the index info
+     */
     public void addToIndexedColumnList(IndexInfo indexInfo)
     {
         ColumnInfo columnInfo = new ColumnInfo();

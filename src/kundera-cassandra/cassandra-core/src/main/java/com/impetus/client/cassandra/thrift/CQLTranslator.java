@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.ElementCollection;
 import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
@@ -364,53 +365,86 @@ public final class CQLTranslator
                 if (metaModel.isEmbeddable(((AbstractAttribute) attribute).getBindableJavaType()))
                 {
                     // create embedded entity persisting format
-
-                    EmbeddableType embeddableKey = metaModel.embeddable(field.getType());
-                    Object embeddableKeyObj = PropertyAccessorHelper.getObject(record, field);
-                    if (embeddableKeyObj != null)
+                    if (field.isAnnotationPresent(ElementCollection.class))
                     {
-
-                        StringBuilder embeddedValueBuilder = new StringBuilder("{");
-
-                        for (Field embeddableColumn : field.getType().getDeclaredFields())
-                        {
-                            if (!ReflectUtils.isTransientOrStatic(embeddableColumn))
-                            {
-                                AbstractAttribute subAttribute = (AbstractAttribute) embeddableKey
-                                        .getAttribute(embeddableColumn.getName());
-                                if (metaModel.isEmbeddable(subAttribute.getBindableJavaType()))
-                                {
-                                    // construct map; recursive
-                                    // send attribute
-                                    buildEmbeddedValue(embeddableKeyObj, metaModel, embeddedValueBuilder,
-                                            (SingularAttribute) subAttribute);
-                                }
-                                else
-                                {
-                                    // append key value
-                                    appendColumnName(
-                                            embeddedValueBuilder,
-                                            ((AbstractAttribute) (embeddableKey.getAttribute(embeddableColumn.getName())))
-                                                    .getJPAColumnName());
-                                    embeddedValueBuilder.append(":");
-                                    appendColumnValue(embeddedValueBuilder, embeddableKeyObj, embeddableColumn);
-
-                                }
-                                embeddedValueBuilder.append(",");
-                            }
-
-                        }
-                        // strip last char and append '}'
-                        embeddedValueBuilder.deleteCharAt(embeddedValueBuilder.length() - 1);
-                        embeddedValueBuilder.append("}");
-                        // add to columnbuilder and builder
+                        // handle embeddable collection
+                        // check list, map, set
+                        // build embedded value
+                        StringBuilder elementCollectionValue = buildElementCollectionValue(field, record, metaModel,
+                                attribute);
                         columnBuilder.append("\"");
                         columnBuilder.append(((AbstractAttribute) attribute).getJPAColumnName());
                         columnBuilder.append("\"");
                         columnBuilder.append(",");
-                        builder.append(embeddedValueBuilder);
+                        builder.append(elementCollectionValue);
                         builder.append(",");
-                        // end if
+                    }
+                    else
+                    {
+                        EmbeddableType embeddableKey = metaModel.embeddable(field.getType());
+                        Object embeddableKeyObj = PropertyAccessorHelper.getObject(record, field);
+                        if (embeddableKeyObj != null)
+                        {
+
+                            StringBuilder embeddedValueBuilder = new StringBuilder("{");
+
+                            for (Field embeddableColumn : field.getType().getDeclaredFields())
+                            {
+                                if (!ReflectUtils.isTransientOrStatic(embeddableColumn))
+                                {
+                                    AbstractAttribute subAttribute = (AbstractAttribute) embeddableKey
+                                            .getAttribute(embeddableColumn.getName());
+                                    if (metaModel.isEmbeddable(subAttribute.getBindableJavaType()))
+                                    {
+                                        // construct map; recursive
+                                        // send attribute
+                                        if (embeddableColumn.isAnnotationPresent(ElementCollection.class))
+                                        {
+                                            // build element collection value
+                                            StringBuilder elementCollectionValue = buildElementCollectionValue(
+                                                    embeddableColumn, embeddableKeyObj, metaModel,
+                                                    (Attribute) subAttribute);
+
+                                            appendColumnName(embeddedValueBuilder,
+                                                    ((AbstractAttribute) (embeddableKey.getAttribute(embeddableColumn
+                                                            .getName()))).getJPAColumnName());
+                                            embeddedValueBuilder.append(":");
+                                            embeddedValueBuilder.append(elementCollectionValue);
+
+                                        }
+                                        else
+                                        {
+                                            buildEmbeddedValue(embeddableKeyObj, metaModel, embeddedValueBuilder,
+                                                    (SingularAttribute) subAttribute);
+                                        }
+
+                                    }
+                                    else
+                                    {
+                                        // append key value
+                                        appendColumnName(embeddedValueBuilder,
+                                                ((AbstractAttribute) (embeddableKey.getAttribute(embeddableColumn
+                                                        .getName()))).getJPAColumnName());
+                                        embeddedValueBuilder.append(":");
+                                        appendColumnValue(embeddedValueBuilder, embeddableKeyObj, embeddableColumn);
+
+                                    }
+                                    embeddedValueBuilder.append(",");
+                                }
+
+                            }
+                            // strip last char and append '}'
+                            embeddedValueBuilder.deleteCharAt(embeddedValueBuilder.length() - 1);
+                            embeddedValueBuilder.append("}");
+                            // add to columnbuilder and builder
+                            columnBuilder.append("\"");
+                            columnBuilder.append(((AbstractAttribute) attribute).getJPAColumnName());
+                            columnBuilder.append("\"");
+                            columnBuilder.append(",");
+                            builder.append(embeddedValueBuilder);
+                            builder.append(",");
+                            // end if
+                        }
                     }
                 }
                 else if (!ReflectUtils.isTransientOrStatic(field) && !attribute.isAssociation())
@@ -429,6 +463,214 @@ public final class CQLTranslator
 
         // on inherited columns.
         onDiscriminatorColumn(builders.get(m.getTableName()), columnBuilders.get(m.getTableName()), entityType);
+    }
+
+    /**
+     * Builds the element collection value.
+     * 
+     * @param field
+     *            the field
+     * @param record
+     *            the record
+     * @param metaModel
+     *            the meta model
+     * @param attribute
+     *            the attribute
+     * @return the string builder
+     */
+    private StringBuilder buildElementCollectionValue(Field field, Object record, MetamodelImpl metaModel,
+            Attribute attribute)
+    {
+        StringBuilder elementCollectionValueBuilder = new StringBuilder();
+        EmbeddableType embeddableKey = metaModel.embeddable(((AbstractAttribute) attribute).getBindableJavaType());
+        ((AbstractAttribute) attribute).getJavaMember();
+        Object value = PropertyAccessorHelper.getObject(record, field);
+        boolean isPresent = false;
+        if (Collection.class.isAssignableFrom(field.getType()))
+        {
+
+            if (value instanceof Collection)
+            {
+                Collection collection = ((Collection) value);
+                isPresent = true;
+                if (List.class.isAssignableFrom(field.getType()))
+                {
+                    elementCollectionValueBuilder.append("[");
+                }
+                if (Set.class.isAssignableFrom(field.getType()))
+                {
+                    elementCollectionValueBuilder.append("{");
+                }
+                for (Object o : collection)
+                {
+                    // Allowing null values.
+                    // build embedded value
+                    if (o != null)
+                    {
+
+                        StringBuilder embeddedValueBuilder = new StringBuilder("{");
+
+                        for (Field embeddableColumn : ((AbstractAttribute) attribute).getBindableJavaType()
+                                .getDeclaredFields())
+                        {
+                            if (!ReflectUtils.isTransientOrStatic(embeddableColumn))
+                            {
+                                AbstractAttribute subAttribute = (AbstractAttribute) embeddableKey
+                                        .getAttribute(embeddableColumn.getName());
+                                if (metaModel.isEmbeddable(subAttribute.getBindableJavaType()))
+                                {
+                                    // construct map; recursive
+                                    // send attribute
+                                    if (embeddableColumn.getType().isAnnotationPresent(ElementCollection.class))
+                                    {
+                                        // build element collection value
+                                        StringBuilder elementCollectionValue = buildElementCollectionValue(
+                                                embeddableColumn, o, metaModel, (Attribute) subAttribute);
+                                        appendColumnName(embeddedValueBuilder,
+                                                ((AbstractAttribute) (embeddableKey.getAttribute(embeddableColumn
+                                                        .getName()))).getJPAColumnName());
+                                        embeddedValueBuilder.append(":");
+                                        embeddedValueBuilder.append(elementCollectionValue);
+                                    }
+                                    else
+                                    {
+                                        buildEmbeddedValue(o, metaModel, embeddedValueBuilder,
+                                                (SingularAttribute) subAttribute);
+                                    }
+                                }
+                                else
+                                {
+                                    // append key value
+                                    appendColumnName(
+                                            embeddedValueBuilder,
+                                            ((AbstractAttribute) (embeddableKey.getAttribute(embeddableColumn.getName())))
+                                                    .getJPAColumnName());
+                                    embeddedValueBuilder.append(":");
+                                    appendColumnValue(embeddedValueBuilder, o, embeddableColumn);
+
+                                }
+                                embeddedValueBuilder.append(",");
+                            }
+
+                        }
+                        // strip last char and append '}'
+                        embeddedValueBuilder.deleteCharAt(embeddedValueBuilder.length() - 1);
+                        embeddedValueBuilder.append("}");
+                        // add to columnbuilder and builder
+                        elementCollectionValueBuilder.append(embeddedValueBuilder);
+                        // end if
+                    }
+
+                    elementCollectionValueBuilder.append(",");
+                }
+                if (!collection.isEmpty())
+                {
+                    elementCollectionValueBuilder.deleteCharAt(elementCollectionValueBuilder.length() - 1);
+                }
+                if (List.class.isAssignableFrom(field.getType()))
+                {
+                    elementCollectionValueBuilder.append("]");
+                }
+                if (Set.class.isAssignableFrom(field.getType()))
+                {
+                    elementCollectionValueBuilder.append("}");
+                }
+                return elementCollectionValueBuilder;
+            }
+            return null;
+
+        }
+
+        else if (Map.class.isAssignableFrom(field.getType()))
+        {
+            if (value instanceof Map)
+            {
+                Map map = ((Map) value);
+                isPresent = true;
+                elementCollectionValueBuilder.append("{");
+                for (Object mapKey : map.keySet())
+                {
+                    Object mapValue = map.get(mapKey);
+                    // Allowing null keys.
+                    // key is basic type.. no support for embeddable keys
+                    appendValue(elementCollectionValueBuilder, mapKey != null ? mapKey.getClass() : null, mapKey, false);
+                    elementCollectionValueBuilder.append(":");
+                    // Allowing null values.
+                    if (mapValue != null)
+                    {
+
+                        StringBuilder embeddedValueBuilder = new StringBuilder("{");
+
+                        for (Field embeddableColumn : ((AbstractAttribute) attribute).getBindableJavaType()
+                                .getDeclaredFields())
+                        {
+                            if (!ReflectUtils.isTransientOrStatic(embeddableColumn))
+                            {
+                                AbstractAttribute subAttribute = (AbstractAttribute) embeddableKey
+                                        .getAttribute(embeddableColumn.getName());
+                                if (metaModel.isEmbeddable(subAttribute.getBindableJavaType()))
+                                {
+                                    // construct map; recursive
+                                    // send attribute
+                                    if (embeddableColumn.getType().isAnnotationPresent(ElementCollection.class))
+                                    {
+                                        // build element collection value
+                                        StringBuilder elementCollectionValue = buildElementCollectionValue(
+                                                embeddableColumn, mapValue, metaModel, (Attribute) subAttribute);
+                                        appendColumnName(embeddedValueBuilder,
+                                                ((AbstractAttribute) (embeddableKey.getAttribute(embeddableColumn
+                                                        .getName()))).getJPAColumnName());
+                                        embeddedValueBuilder.append(":");
+                                        embeddedValueBuilder.append(elementCollectionValue);
+                                    }
+                                    else
+                                    {
+                                        buildEmbeddedValue(mapValue, metaModel, embeddedValueBuilder,
+                                                (SingularAttribute) subAttribute);
+                                    }
+                                }
+                                else
+                                {
+                                    // append key value
+                                    appendColumnName(
+                                            embeddedValueBuilder,
+                                            ((AbstractAttribute) (embeddableKey.getAttribute(embeddableColumn.getName())))
+                                                    .getJPAColumnName());
+                                    embeddedValueBuilder.append(":");
+                                    appendColumnValue(embeddedValueBuilder, mapValue, embeddableColumn);
+
+                                }
+                                embeddedValueBuilder.append(",");
+                            }
+
+                        }
+                        // strip last char and append '}'
+                        embeddedValueBuilder.deleteCharAt(embeddedValueBuilder.length() - 1);
+                        embeddedValueBuilder.append("}");
+                        // add to columnbuilder and builder
+                        elementCollectionValueBuilder.append(embeddedValueBuilder);
+                        // end if
+                    }
+                    // appendValue(builder, mapValue != null ?
+                    // mapValue.getClass() : null, mapValue, false);
+                    elementCollectionValueBuilder.append(",");
+                }
+                if (!map.isEmpty())
+                {
+                    elementCollectionValueBuilder.deleteCharAt(elementCollectionValueBuilder.length() - 1);
+                }
+
+                elementCollectionValueBuilder.append("}");
+                return elementCollectionValueBuilder;
+            }
+            return null;
+            // else
+            // {
+            // appendValue(builder, value.getClass(), value, false);
+            // }
+        }
+        return null;
+
     }
 
     /**
