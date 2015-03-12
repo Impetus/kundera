@@ -27,7 +27,7 @@ import com.impetus.kundera.index.IndexingConstants;
  * Builder interface to build lucene query.
  * 
  * @author vivek.mishra
- *
+ * 
  */
 public final class LuceneQueryBuilder
 {
@@ -38,11 +38,13 @@ public final class LuceneQueryBuilder
 
     public static enum condition
     {
-        EQ, LIKE, GT, LT, LTE, GTE,AND,OR;
+        EQ, LIKE, GT, LT, LTE, GTE, AND, OR, NOT_EQ, IN;
     }
-    
+
     private static final String LUCENE_ESCAPE_CHARS = "[\\\\+\\-\\!\\(\\)\\:\\^\\]\\{\\}\\~\\*\\?]";
+
     private static final Pattern LUCENE_PATTERN = Pattern.compile(LUCENE_ESCAPE_CHARS);
+
     private static final String REPLACEMENT_STRING = "\\\\$0";
 
     static
@@ -55,12 +57,15 @@ public final class LuceneQueryBuilder
         conditions.put("<=", condition.LTE);
         conditions.put("and", condition.AND);
         conditions.put("or", condition.OR);
+        conditions.put("<>", condition.NOT_EQ);
+        conditions.put("in", condition.IN);
     }
 
     /**
      * @param condition
      * @param builder
-     * Code inspired : http://www.javalobby.org/java/forums/t86124.html
+     *            Code inspired :
+     *            http://www.javalobby.org/java/forums/t86124.html
      */
     public final LuceneQueryBuilder buildQuery(final String condition, final String value, final Class valueClazz)
     {
@@ -76,7 +81,14 @@ public final class LuceneQueryBuilder
                 builder.append(lucenevalue);
                 builder.append("\"");
                 break;
-                
+
+            case NOT_EQ:
+                builder.append(":(* NOT ");
+                builder.append("\"");
+                builder.append(lucenevalue);
+                builder.append("\")");
+                break;
+
             case LIKE:
                 builder.append(":");
                 builder.append("(");
@@ -87,11 +99,11 @@ public final class LuceneQueryBuilder
             case GT:
                 builder.append(appendRange(lucenevalue, false, true, valueClazz));
                 break;
-                
+
             case LT:
                 builder.append(appendRange(lucenevalue, false, false, valueClazz));
                 break;
-                
+
             case GTE:
                 builder.append(appendRange(lucenevalue, true, true, valueClazz));
                 break;
@@ -100,11 +112,16 @@ public final class LuceneQueryBuilder
                 builder.append(appendRange(lucenevalue, true, false, valueClazz));
                 break;
 
+            case IN:
+                builder.append(":");
+                builder.append(value);
+                break;
+
             default:
                 builder.append(" " + lucenevalue + " ");
                 break;
             }
-        
+
         return this;
     }
 
@@ -114,6 +131,8 @@ public final class LuceneQueryBuilder
         // add Entity_CLASS field too.
         if (builder.length() > 0)
         {
+            builder.insert(0, "(");
+            builder.append(")");
             builder.append(" AND ");
         }
         // sb.append("+");
@@ -164,62 +183,65 @@ public final class LuceneQueryBuilder
         sb.append(appender);
         sb.append("TO");
         sb.append(appender);
-        //composite key over lucene is not working issue #491
-        if (clazz != null  && (clazz.isAssignableFrom(int.class) || clazz.isAssignableFrom(Integer.class)
-                || clazz.isAssignableFrom(short.class) || clazz.isAssignableFrom(long.class)
-                || clazz.isAssignableFrom(Timestamp.class)
-                || clazz.isAssignableFrom(Long.class) || clazz.isAssignableFrom(float.class)
-                || clazz.isAssignableFrom(Float.class) || clazz.isAssignableFrom(BigDecimal.class)
-                || clazz.isAssignableFrom(Double.class) || clazz.isAssignableFrom(double.class)))
+        // composite key over lucene is not working issue #491
+        if (clazz != null
+                && (clazz.isAssignableFrom(int.class) || clazz.isAssignableFrom(Integer.class)
+                        || clazz.isAssignableFrom(short.class) || clazz.isAssignableFrom(long.class)
+                        || clazz.isAssignableFrom(Timestamp.class) || clazz.isAssignableFrom(Long.class)
+                        || clazz.isAssignableFrom(float.class) || clazz.isAssignableFrom(Float.class)
+                        || clazz.isAssignableFrom(BigDecimal.class) || clazz.isAssignableFrom(Double.class) || clazz
+                            .isAssignableFrom(double.class)))
         {
             sb.append(isGreaterThan ? "*" : value);
 
         }
         else
         {
- 
+
             sb.append(isGreaterThan ? "null" : value);
         }
-
-        // sb.append(isGreaterThan ? "null" : value);
 
         sb.append(inclusive ? "]" : "}");
         return sb.toString();
     }
-    
+
     /**
      * @param value
-     * checks if value contains % and replaces with *
-     * default: if no % is found.. replaces both sides
+     *            checks if value contains % and replaces with * default: if no
+     *            % is found.. replaces both sides
      */
-    private void matchMode(String value){
+    private void matchMode(String value)
+    {
         boolean left = false;
         boolean right = false;
-        
-        
 
-        if(value.charAt(0) == '%'){
+        if (value.charAt(0) == '%')
+        {
             value = value.substring(1);
             left = true;
         }
-        if(value.charAt(value.length()-1)=='%'){
-            value = value.substring(0, value.length()-1);
+        if (value.charAt(value.length() - 1) == '%')
+        {
+            value = value.substring(0, value.length() - 1);
             right = true;
         }
-        if((left && right) || (!left && !right)){
+        if ((left && right) || (!left && !right))
+        {
             builder.append("*");
             builder.append(value);
             builder.append("*");
         }
-        else if(left){
+        else if (left)
+        {
             builder.append("*");
             builder.append(value);
         }
-        else if(right){
+        else if (right)
+        {
             builder.append(value);
             builder.append("*");
         }
-  
+
     }
 
 }
