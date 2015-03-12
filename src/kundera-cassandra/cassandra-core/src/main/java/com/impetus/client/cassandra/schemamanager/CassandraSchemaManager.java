@@ -128,6 +128,9 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     /** The created keyspaces. */
     private List<String> createdKeyspaces = new ArrayList<String>();
 
+    /** The created userTypes. */
+    private List<String> createdPuEmbeddables = new ArrayList<String>();
+
     /**
      * Instantiates a new cassandra schema manager.
      * 
@@ -962,88 +965,93 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     private void createTypeforEmbeddables() throws UnavailableException, TimedOutException,
             SchemaDisagreementException, UnsupportedEncodingException, TException
     {
-        CQLTranslator translator = new CQLTranslator();
-
-        Map<String, String> embNametoUDTQuery = new HashMap<String, String>();
-        Map<String, List<String>> embNametoDependentList = new HashMap<String, List<String>>();
-
-        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
-                puMetadata.getPersistenceUnitName());
-
-        Iterator iter = metaModel.getEmbeddables().iterator();
-        while (iter.hasNext())
+        if (!createdPuEmbeddables.contains(puMetadata.getPersistenceUnitName()))
         {
-            List<String> childEmb = new ArrayList<String>();
+            CQLTranslator translator = new CQLTranslator();
 
-            String typeQuery = CQLTranslator.CREATE_TYPE;
-            EmbeddableType embeddedColumn = (EmbeddableType) iter.next();
-            if (!embeddedColumn.getPersistenceType().equals(PersistenceType.EMBEDDABLE))
+            Map<String, String> embNametoUDTQuery = new HashMap<String, String>();
+            Map<String, List<String>> embNametoDependentList = new HashMap<String, List<String>>();
+
+            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                    puMetadata.getPersistenceUnitName());
+
+            Iterator iter = metaModel.getEmbeddables().iterator();
+            while (iter.hasNext())
             {
-                continue;
-            }
+                List<String> childEmb = new ArrayList<String>();
 
-            typeQuery = StringUtils.replace(typeQuery, CQLTranslator.TYPE,
-                    translator.ensureCase(new StringBuilder(), embeddedColumn.getJavaType().getSimpleName(), false)
-                            .toString());
-
-            StringBuilder typeQueryBuilder = new StringBuilder();
-
-            for (Object column : embeddedColumn.getAttributes())
-            {
-
-                Attribute columnAttribute = (Attribute) column;
-                Field f = (Field) columnAttribute.getJavaMember();
-
-                if (columnAttribute.getJavaType().isAnnotationPresent(Embeddable.class))
+                String typeQuery = CQLTranslator.CREATE_TYPE;
+                EmbeddableType embeddedColumn = (EmbeddableType) iter.next();
+                if (!embeddedColumn.getPersistenceType().equals(PersistenceType.EMBEDDABLE))
                 {
-
-                    // handle embeddable
-                    String cqlType = CQLTranslator.FROZEN + "<\"" + columnAttribute.getJavaType().getSimpleName()
-                            + "\"> ";
-                    translator.appendColumnName(typeQueryBuilder, columnAttribute.getName(), cqlType);
-                    typeQueryBuilder.append(" ,");
-                    childEmb.add(columnAttribute.getJavaType().getSimpleName());
+                    continue;
                 }
-                else if (columnAttribute.isCollection())
+
+                typeQuery = StringUtils.replace(typeQuery, CQLTranslator.TYPE,
+                        translator.ensureCase(new StringBuilder(), embeddedColumn.getJavaType().getSimpleName(), false)
+                                .toString());
+
+                StringBuilder typeQueryBuilder = new StringBuilder();
+
+                for (Object column : embeddedColumn.getAttributes())
                 {
-                    // handle element collection with embeddables
-                    handleElementCollectionAttribute(translator, columnAttribute, typeQueryBuilder);
-                    if (!MetadataUtils.isBasicElementCollectionField((Field) columnAttribute.getJavaMember()))
+
+                    Attribute columnAttribute = (Attribute) column;
+                    Field f = (Field) columnAttribute.getJavaMember();
+
+                    if (columnAttribute.getJavaType().isAnnotationPresent(Embeddable.class))
                     {
-                        childEmb.add(((AbstractAttribute) columnAttribute).getBindableJavaType().getSimpleName());
+
+                        // handle embeddable
+                        String cqlType = CQLTranslator.FROZEN + "<\"" + columnAttribute.getJavaType().getSimpleName()
+                                + "\"> ";
+                        translator.appendColumnName(typeQueryBuilder, columnAttribute.getName(), cqlType);
+                        typeQueryBuilder.append(" ,");
+                        childEmb.add(columnAttribute.getJavaType().getSimpleName());
+                    }
+                    else if (columnAttribute.isCollection())
+                    {
+                        // handle element collection with embeddables
+                        handleElementCollectionAttribute(translator, columnAttribute, typeQueryBuilder);
+                        if (!MetadataUtils.isBasicElementCollectionField((Field) columnAttribute.getJavaMember()))
+                        {
+                            childEmb.add(((AbstractAttribute) columnAttribute).getBindableJavaType().getSimpleName());
+                        }
+
+                    }
+                    // else if (columnAttribute.isCollection()
+                    // && MetadataUtils.isBasicElementCollectionField((Field)
+                    // columnAttribute.getJavaMember()))
+                    // {
+                    // //handle basic element collection
+                    // handleBasicCollectionAttribute(translator,
+                    // columnAttribute,
+                    // typeQueryBuilder);
+                    // }
+                    else
+                    {
+                        String cqlType = null;
+                        String dataType = CassandraValidationClassMapper.getValidationClass(f.getType(), true);
+                        cqlType = translator.getCQLType(dataType);
+                        // check for JPA names
+                        translator.appendColumnName(typeQueryBuilder,
+                                ((AbstractAttribute) columnAttribute).getJPAColumnName(), cqlType);
+                        typeQueryBuilder.append(" ,");
+
                     }
 
                 }
-                // else if (columnAttribute.isCollection()
-                // && MetadataUtils.isBasicElementCollectionField((Field)
-                // columnAttribute.getJavaMember()))
-                // {
-                // //handle basic element collection
-                // handleBasicCollectionAttribute(translator, columnAttribute,
-                // typeQueryBuilder);
-                // }
-                else
-                {
-                    String cqlType = null;
-                    String dataType = CassandraValidationClassMapper.getValidationClass(f.getType(), true);
-                    cqlType = translator.getCQLType(dataType);
-                    // check for JPA names
-                    translator.appendColumnName(typeQueryBuilder,
-                            ((AbstractAttribute) columnAttribute).getJPAColumnName(), cqlType);
-                    typeQueryBuilder.append(" ,");
 
-                }
+                typeQueryBuilder = stripLastChar(typeQuery, typeQueryBuilder);
+                typeQueryBuilder.append(")");
+                embNametoUDTQuery.put(embeddedColumn.getJavaType().getSimpleName(), typeQueryBuilder.toString());
+                embNametoDependentList.put(embeddedColumn.getJavaType().getSimpleName(), childEmb);
+                // run query final
 
             }
-
-            typeQueryBuilder = stripLastChar(typeQuery, typeQueryBuilder);
-            typeQueryBuilder.append(")");
-            embNametoUDTQuery.put(embeddedColumn.getJavaType().getSimpleName(), typeQueryBuilder.toString());
-            embNametoDependentList.put(embeddedColumn.getJavaType().getSimpleName(), childEmb);
-            // run query final
-
+            postProcessEmbedded(embNametoUDTQuery, embNametoDependentList);
+            createdPuEmbeddables.add(puMetadata.getPersistenceUnitName());
         }
-        postProcessEmbedded(embNametoUDTQuery, embNametoDependentList);
     }
 
     /**
