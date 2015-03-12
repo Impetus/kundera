@@ -37,6 +37,7 @@ import junit.framework.Assert;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
@@ -59,11 +60,24 @@ public class UdtAsEmbeddablesCRUDTest
     private static EntityManager entityManager;
 
     /** The property map. */
-    protected Map propertyMap = null;
+    protected static Map propertyMap = null;
 
     /** The auto manage schema. */
     protected boolean AUTO_MANAGE_SCHEMA = true;
 
+    
+    
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception
+    {
+        CassandraCli.cassandraSetUp();
+        propertyMap = new HashMap();
+        propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create");
+        propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
+
+        emf = Persistence.createEntityManagerFactory(PU, propertyMap);
+
+    }
     /**
      * Sets the up.
      * 
@@ -74,14 +88,7 @@ public class UdtAsEmbeddablesCRUDTest
     public void setUp() throws Exception
     {
 
-        CassandraCli.cassandraSetUp();
-        // CassandraCli.createKeySpace("UdtTest");
-
-        propertyMap = new HashMap();
-        propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create");
-        propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
-
-        emf = Persistence.createEntityManagerFactory(PU, propertyMap);
+       
         entityManager = emf.createEntityManager();
 
     }
@@ -657,7 +664,7 @@ public class UdtAsEmbeddablesCRUDTest
     @After
     public void tearDown() throws Exception
     {
-        // CassandraCli.dropKeySpace("UdtTest");
+        entityManager.close();
     }
 
     /**
@@ -666,6 +673,7 @@ public class UdtAsEmbeddablesCRUDTest
     @AfterClass
     public static void tearDownAfterClass()
     {
+        CassandraCli.dropKeySpace("UdtTest");
         if (entityManager != null)
         {
             entityManager.close();
