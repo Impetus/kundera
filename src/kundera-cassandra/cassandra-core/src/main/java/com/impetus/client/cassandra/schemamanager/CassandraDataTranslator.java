@@ -93,7 +93,7 @@ public final class CassandraDataTranslator
     /**
      * CassandradataType enum.
      */
-    static enum CassandraType
+    public static enum CassandraType
     {
 
         /** The IN t32. */
