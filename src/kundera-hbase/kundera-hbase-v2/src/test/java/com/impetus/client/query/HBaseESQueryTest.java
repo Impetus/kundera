@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.EntityManager;
 import javax.persistence.Persistence;
 
 import junit.framework.Assert;
@@ -37,6 +36,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.impetus.client.hbase.testingutil.HBaseTestingUtils;
+import com.impetus.kundera.utils.LuceneCleanupUtilities;
 
 /**
  * The Class HBaseESQueryTest.
@@ -87,6 +87,35 @@ public class HBaseESQueryTest extends HBaseQueryBaseTest
         Thread.sleep(2000);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.client.query.HBaseQueryBaseTest#tearDown()
+     */
+    @After
+    public void tearDown() throws Exception
+    {
+        deleteBooks();
+        em.close();
+    }
+
+    /**
+     * Tear down after class.
+     * 
+     * @throws Exception
+     *             the exception
+     */
+    @AfterClass
+    public static void tearDownAfterClass() throws Exception
+    {
+        if (node != null)
+            node.close();
+        emf.close();
+        emf = null;
+        HBaseTestingUtils.dropSchema(SCHEMA);
+        LuceneCleanupUtilities.cleanDir("target/data");
+    }
+
     /**
      * Check if server running.
      * 
@@ -118,8 +147,6 @@ public class HBaseESQueryTest extends HBaseQueryBaseTest
     @Test
     public void aggregationTest() throws Exception
     {
-
-        persistBooks();
         minAggregation();
         minAggregationError();
         multiMinAggregation();
@@ -371,35 +398,6 @@ public class HBaseESQueryTest extends HBaseQueryBaseTest
         String query = "Select min(b.pages), max(b.year), sum(b.pages), avg(b.year) from Book b where b.pages > 100 ";
         List resultList = em.createQuery(query).getResultList();
         assertES(resultList, 200.0, 2015.0, 900.0, 2010.0);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.client.query.HBaseQueryBaseTest#tearDown()
-     */
-    @After
-    public void tearDown() throws Exception
-    {
-        EntityManager em = emf.createEntityManager();
-        deleteBooks();
-        em.close();
-    }
-
-    /**
-     * Tear down after class.
-     * 
-     * @throws Exception
-     *             the exception
-     */
-    @AfterClass
-    public static void tearDownAfterClass() throws Exception
-    {
-        if (node != null)
-            node.close();
-        emf.close();
-        emf = null;
-        HBaseTestingUtils.dropSchema(SCHEMA);
     }
 
     /**
