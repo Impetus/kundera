@@ -61,7 +61,7 @@ import com.impetus.kundera.query.KunderaQueryUtils;
 import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**
- * The Class ESResponseReader.
+ * The Class ESResponseWrapper.
  * 
  * @author Amit Kumar
  * 
