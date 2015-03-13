@@ -695,25 +695,28 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      * @param metadata the metadata
      * @return true, if is cql3 enabled
      */
-    public boolean isCql3Enabled(EntityMetadata metadata) {
-        if (metadata != null) {
+    public boolean isCql3Enabled(EntityMetadata metadata)
+    {
+        if (metadata != null)
+        {
 
             MetamodelImpl metaModel =
                 (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(metadata.getPersistenceUnit());
 
-            if (metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType())) {
+            if (metaModel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
+            {
                 return true;
             } 
-         // added for embeddables support on cql3
-            for(Field field : metadata.getEntityClazz().getDeclaredFields()){
-                if(field.isAnnotationPresent(Embedded.class)){                    
-                    return getCqlVersion().equalsIgnoreCase(CassandraConstants.CQL_VERSION_3_0);
-                }
+           // added for embeddables support on cql3
+            AbstractManagedType managedType = (AbstractManagedType) metaModel.entity(metadata.getEntityClazz());
+            if(managedType.hasEmbeddableAttribute()) 
+            {
+                return getCqlVersion().equalsIgnoreCase(CassandraConstants.CQL_VERSION_3_0);
             }
          
             if (getCqlVersion().equalsIgnoreCase(CassandraConstants.CQL_VERSION_3_0)
                 && metadata.getType().equals(Type.SUPER_COLUMN_FAMILY))  
-            		{
+            {
                 log.warn("Super Columns not supported by cql, Any operation on supercolumn family will be executed using thrift, returning false.");
                 return false;
             }

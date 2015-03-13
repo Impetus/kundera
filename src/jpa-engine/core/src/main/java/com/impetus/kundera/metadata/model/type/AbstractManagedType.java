@@ -80,8 +80,12 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
     private EntityAnnotationProcessor entityAnnotationProcessor;
 
     private List<ManagedType<X>> subManagedTypes = new ArrayList<ManagedType<X>>();
-
+    
+    /** Whether a managed type has validation constraints. */
     protected boolean hasValidationConstraints = false;
+
+    /** Whether a managed type has embeddable attribute. */
+    private boolean hasEmbeddableAttribute;
 
     /**
      * Super constructor with arguments.
@@ -778,6 +782,7 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
         declaredSingluarAttribs.put(attributeName, attribute);
 
         onValidateAttributeConstraints((Field) attribute.getJavaMember());
+        onEmbeddableAttribute((Field) attribute.getJavaMember());
     }
 
     public void addPluralAttribute(String attributeName, PluralAttribute<X, ?, ?> attribute)
@@ -790,6 +795,7 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
         declaredPluralAttributes.put(attributeName, attribute);
 
         onValidateAttributeConstraints((Field) attribute.getJavaMember());
+        onEmbeddableAttribute((Field) attribute.getJavaMember());
 
     }
 
@@ -1342,6 +1348,40 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
 
         }
 
+    }
+    
+    /**
+     * Sets if a managed type consists of an embeddable attribute
+     * 
+     * 
+     * @param field
+     */
+    private void onEmbeddableAttribute(Field field)
+    {
+
+        if (!this.hasEmbeddableAttribute && MetadataUtils.onCheckEmbeddableAttribute(field))
+        {
+
+            this.hasEmbeddableAttribute = true;
+
+        }
+
+    }
+    
+    /**
+     * @return the hasEmbeddableAttribute
+     */
+    public boolean hasEmbeddableAttribute()
+    {
+        if (this.hasEmbeddableAttribute)
+        {
+            return this.hasEmbeddableAttribute;
+        }
+        if (this.superClazzType != null)
+        {
+            return ((AbstractManagedType) superClazzType).hasEmbeddableAttribute();
+        }
+        return false;
     }
 
 }

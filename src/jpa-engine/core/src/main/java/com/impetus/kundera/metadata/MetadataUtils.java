@@ -28,6 +28,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 import javax.persistence.Embeddable;
+import javax.persistence.Embedded;
 import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
@@ -697,6 +698,20 @@ public class MetadataUtils
                 || attribute.isAnnotationPresent(NotNull.class) || attribute.isAnnotationPresent(Null.class)
                 || attribute.isAnnotationPresent(Past.class) || attribute.isAnnotationPresent(Pattern.class)
                 || attribute.isAnnotationPresent(Size.class);
+
+    }
+    
+    /**
+     * Returns true if an entity contains embedded attribute
+     * enabled
+     * 
+     * @param attribute
+     * @return
+     */
+    public static boolean onCheckEmbeddableAttribute(Field attribute)
+    {
+        // / Checks if attribute is embeddable
+        return attribute.isAnnotationPresent(Embedded.class) ;
 
     }
 
