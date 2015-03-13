@@ -157,7 +157,6 @@ public class HBaseESQueryTest extends HBaseQueryBaseTest
     /**
      * Min aggregation error.
      */
-    @Test
     public void minAggregationError()
     {
         String query = "Select min(b.title)from Book b";
