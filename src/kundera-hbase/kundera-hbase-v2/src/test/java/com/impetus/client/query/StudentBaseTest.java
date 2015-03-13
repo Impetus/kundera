@@ -29,7 +29,7 @@ import javax.persistence.EntityManagerFactory;
  * @author Devender Yadav
  * 
  */
-public class StudentBaseTest
+public abstract class StudentBaseTest
 {
 
     /** The Constant SCHEMA. */

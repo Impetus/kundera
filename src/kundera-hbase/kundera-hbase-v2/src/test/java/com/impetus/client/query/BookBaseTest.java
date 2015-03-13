@@ -27,7 +27,7 @@ import junit.framework.Assert;
  * 
  * @author Pragalbh Garg
  */
-public class BookBaseTest
+public abstract class BookBaseTest
 {
 
     /** The Constant SCHEMA. */
