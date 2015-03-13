@@ -16,6 +16,7 @@
 package com.impetus.kundera.metadata.processor;
 
 import java.lang.reflect.Field;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -388,10 +389,19 @@ public class TableProcessor extends AbstractEntityFieldProcessor
 
             if (entityType.getSupertype() != null)
             {
-                for (Field f : clazz.getSuperclass().getDeclaredFields())
+                Set<Attribute> attributes = ((AbstractIdentifiableType) entityType.getSupertype()).getAttributes();
+                Iterator<Attribute> iter = attributes.iterator();
+
+                while (iter.hasNext())
                 {
+                    Attribute attribute = iter.next();
+                   
+                    Field f = (Field) ((Field) attribute.getJavaMember());
+                    
                     onFamilyType(metadata, clazz, f);
                 }
+                
+
             }
             validateandSetEntityType(metadata, (Class<X>) clazz.getSuperclass(), metaModelBuilder);
         }
