@@ -26,24 +26,10 @@ import com.impetus.kundera.index.Index;
 import com.impetus.kundera.index.IndexCollection;
 
 @Entity
-@Table(name = "PERSON", schema = "KunderaTests@patest")
+@Table(name = "PERSON")
 @IndexCollection(columns = { @Index(name = "personName"), @Index(name = "age"), @Index(name = "salary") })
 public class Person
 {
-/*    public static final String UID = "uid";
-
-    public static final String EID = "eid";
-
-    public static final String FIRST_NAME = "firstName";
-
-    public static final String LAST_NAME = "lastName";
-
-    public static final String CITY = "city";
-
-    public static final String CREATED = "created";
-
-    public static final String LAST_MODIFIED = "lastModified";*/
-
     /** The person id. */
     @Id
      @Column(name = "PERSON_ID")

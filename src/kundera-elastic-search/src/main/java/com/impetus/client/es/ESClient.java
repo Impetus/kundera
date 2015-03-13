@@ -16,10 +16,7 @@
 package com.impetus.client.es;
 
 import java.lang.reflect.Field;
-import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +26,6 @@ import java.util.concurrent.ExecutionException;
 import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
-import javax.persistence.metamodel.SingularAttribute;
 
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
@@ -55,13 +51,12 @@ import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.impetus.client.es.utils.ESResponseReader;
+import com.impetus.client.es.utils.ESResponseWrapper;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.ClientPropertiesSetter;
-import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.lifecycle.states.RemovedState;
@@ -75,9 +70,7 @@ import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
-import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
-import com.impetus.kundera.property.accessor.EnumAccessor;
 import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.utils.KunderaCoreUtils;
 
@@ -114,7 +107,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
     private static final String KEY_SEPERATOR = "\001";
 
     /** The es response reader. */
-    private ESResponseReader esResponseReader = new ESResponseReader();
+    private ESResponseWrapper esResponseReader = new ESResponseWrapper();
 
     /**
      * Instantiates a new ES client.
@@ -287,7 +280,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
         {
             result = KunderaCoreUtils.createNewInstance(entityClass);
             PropertyAccessorHelper.setId(result, metadata, key);
-            result = wrap(results, entityType, result, metadata, true);
+            result = esResponseReader.wrapFindResult(results, entityType, result, metadata, true);
         }
 
         return result;
@@ -318,7 +311,6 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
                 entityMetadata.getPersistenceUnit());
 
         EntityType entityType = metaModel.entity(clazz);
-        List results = new ArrayList();
 
         SearchRequestBuilder builder = txClient.prepareSearch(entityMetadata.getSchema().toLowerCase()).setTypes(
                 entityMetadata.getTableName());
@@ -361,109 +353,8 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
             throw new KunderaException("Aggregations can not performed over non-numeric fields.", e);
         }
 
-        if (aggregation == null)
-        {
-            SearchHits hits = response.getHits();
-            if (fieldsToSelect != null && fieldsToSelect.length > 1 && !(fieldsToSelect[1] == null))
-            {
-                for (SearchHit hit : hits.getHits())
-                {
-                    if (fieldsToSelect.length == 2)
-                    {
-                        results.add(hit
-                                .getFields()
-                                .get(((AbstractAttribute) metaModel.entity(clazz).getAttribute(fieldsToSelect[1]))
-                                        .getJPAColumnName()).getValue());
-
-                    }
-                    else
-                    {
-                        List temp = new ArrayList();
-
-                        for (int i = 1; i < fieldsToSelect.length; i++)
-                        {
-                            temp.add(hit
-                                    .getFields()
-                                    .get(((AbstractAttribute) metaModel.entity(clazz).getAttribute(fieldsToSelect[i]))
-                                            .getJPAColumnName()).getValue());
-                        }
-                        results.add(temp);
-                    }
-                }
-            }
-            else
-            {
-                Object entity = null;
-
-                for (SearchHit hit : hits.getHits())
-                {
-                    entity = KunderaCoreUtils.createNewInstance(clazz);
-                    Map<String, Object> hitResult = hit.sourceAsMap();
-                    results.add(wrap(hitResult, entityType, entity, entityMetadata, false));
-                }
-            }
-        }
-        else
-        {
-            results = esResponseReader.parseAggregatedResponse(response, query, metaModel, clazz);
-        }
-        return results;
-    }
-
-    /**
-     * Wrap.
-     * 
-     * @param results
-     *            the results
-     * @param entityType
-     *            the entity type
-     * @param result
-     *            the result
-     * @param metadata
-     *            the metadata
-     * @param isIdSet
-     *            the is id set
-     * @return the object
-     */
-    private Object wrap(Map<String, Object> results, EntityType entityType, Object result, EntityMetadata metadata,
-            boolean isIdSet)
-    {
-
-        Map<String, Object> relations = new HashMap<String, Object>();
-        Object key = null;
-        Set<Attribute> attributes = entityType.getAttributes();
-        for (Attribute attribute : attributes)
-        {
-
-            String fieldName = ((AbstractAttribute) attribute).getJPAColumnName();
-
-            if (!attribute.isAssociation())
-            {
-                Object fieldValue = results.get(fieldName);
-
-                key = onId(key, attribute, fieldValue);
-
-                if (!isIdSet && key != null)
-                {
-                    PropertyAccessorHelper.setId(result, metadata, key);
-                }
-
-                fieldValue = onEnum(attribute, fieldValue);
-
-                // TODOO:This has to be corrected. Reason is, in case of execute
-                // query over composite key. It will not work
-
-                setField(result, key, attribute, fieldValue);
-            }
-
-            if (attribute.isAssociation())
-            {
-                Object fieldValue = results.get(fieldName);
-                relations.put(fieldName, fieldValue);
-            }
-        }
-
-        return relations.isEmpty() ? result : new EnhanceEntity(result, key, relations);
+        return esResponseReader.parseResponse(response, aggregation, fieldsToSelect, metaModel, clazz, entityMetadata,
+                query);
     }
 
     /*
@@ -728,7 +619,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
                 // hit
                 Object result = null;
                 result = KunderaCoreUtils.createNewInstance(entityClazz);
-                result = wrap(searchResults, entityType, result, metadata, false);
+                result = esResponseReader.wrapFindResult(searchResults, entityType, result, metadata, false);
                 if (result != null)
                 {
                     results.add(result);
@@ -979,77 +870,4 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
     {
         this.clientProperties = properties;
     }
-
-    /**
-     * Sets the field.
-     * 
-     * @param result
-     *            the result
-     * @param key
-     *            the key
-     * @param attribute
-     *            the attribute
-     * @param fieldValue
-     *            the field value
-     */
-    private void setField(Object result, Object key, Attribute attribute, Object fieldValue)
-    {
-        if (fieldValue != null)
-        {
-            if (((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(Date.class)
-                    || ((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(java.sql.Date.class)
-                    || ((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(Timestamp.class)
-                    || ((AbstractAttribute) attribute).getBindableJavaType().isAssignableFrom(Calendar.class))
-            {
-                PropertyAccessorFactory.STRING.fromString(((AbstractAttribute) attribute).getBindableJavaType(),
-                        fieldValue.toString());
-            }
-            else if (key == null || !key.equals(fieldValue))
-            {
-                PropertyAccessorHelper.set(result, (Field) attribute.getJavaMember(), fieldValue);
-            }
-        }
-    }
-
-    /**
-     * On id.
-     * 
-     * @param key
-     *            the key
-     * @param attribute
-     *            the attribute
-     * @param fieldValue
-     *            the field value
-     * @return the object
-     */
-    private Object onId(Object key, Attribute attribute, Object fieldValue)
-    {
-        if (SingularAttribute.class.isAssignableFrom(attribute.getClass()) && ((SingularAttribute) attribute).isId())
-        {
-            key = fieldValue;
-        }
-        return key;
-    }
-
-    /**
-     * On enum.
-     * 
-     * @param attribute
-     *            the attribute
-     * @param fieldValue
-     *            the field value
-     * @return the object
-     */
-    private Object onEnum(Attribute attribute, Object fieldValue)
-    {
-        if (((Field) attribute.getJavaMember()).getType().isEnum())
-        {
-            EnumAccessor accessor = new EnumAccessor();
-            fieldValue = accessor.fromString(((AbstractAttribute) attribute).getBindableJavaType(),
-                    fieldValue.toString());
-
-        }
-        return fieldValue;
-    }
-
 }
