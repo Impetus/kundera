@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.persistence.metamodel.EntityType;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -18,6 +16,7 @@ import org.eclipse.persistence.jpa.jpql.parser.Expression;
 import org.eclipse.persistence.jpa.jpql.parser.WhereClause;
 import org.eclipse.persistence.jpa.jpql.utility.iterable.ListIterable;
 import org.eclipse.persistence.jpa.jpql.utility.iterable.SnapshotCloneListIterable;
+import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.ListenableActionFuture;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.index.IndexResponse;
@@ -27,7 +26,6 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.index.query.FilterBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
@@ -48,8 +46,8 @@ import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.property.PropertyAccessorHelper;
-import com.impetus.kundera.query.KunderaQueryUtils;
 import com.impetus.kundera.query.KunderaQuery;
+import com.impetus.kundera.query.KunderaQueryUtils;
 import com.thoughtworks.xstream.XStream;
 
 /**
@@ -217,7 +215,15 @@ public class ESIndexer implements Indexer
                 builder.setSize(0);
             }
         }
-        SearchResponse response = builder.execute().actionGet();
+        SearchResponse response = null;
+        try
+        {
+            response = builder.execute().actionGet();
+        }
+        catch (ElasticsearchException e)
+        {
+            throw new KunderaException("Aggregations can not performed over non-numeric fields.", e);
+        }
 
         Map<String, Object> map = new HashMap<>();
         for (SearchHit hit : response.getHits())
