@@ -34,7 +34,7 @@ import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.impetus.client.es.ESQuery;
-import com.impetus.client.es.utils.ESResponseReader;
+import com.impetus.client.es.utils.ESResponseWrapper;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.index.Indexer;
 import com.impetus.kundera.index.IndexerProperties;
@@ -195,7 +195,7 @@ public class ESIndexer implements Indexer
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
         Expression whereExpression = KunderaQueryUtils.getWhereClause(kunderaQuery.getJpqlExpression());
-        ESResponseReader esResponseReader = new ESResponseReader();
+        ESResponseWrapper esResponseReader = new ESResponseWrapper();
 
         FilterBuilder filter = whereExpression != null ? query.getEsFilterBuilder().populateFilterBuilder(
                 ((WhereClause) whereExpression).getConditionalExpression(), m) : null;

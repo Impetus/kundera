@@ -153,6 +153,19 @@ public class ESNestedQueryTest
     }
 
     @Test
+    public void testNestedQuery()
+    {
+        testQueryWithAndClause();
+        testQueryWithMultiAndClause();
+        testQueryWithOrClause();
+        testQueryWithMultiOrClause();
+        testQueryWithNestedAndOrClause();
+        testMinAggregationWithNestedAndOrClause();
+        testMaxAggregationWithNestedAndOrClause();
+        testMinAggregationWithNestedAndOrClause();
+        testMinAggregationWithNestedAndOr();
+    }
+
     public void testQueryWithAndClause()
     {
         String nestedQquery = "Select p from PersonES p where p.personName = 'karthik' AND p.personName = 'pragalbh'";
@@ -162,7 +175,6 @@ public class ESNestedQueryTest
         Assert.assertEquals(0, resultList.size());
     }
 
-    @Test
     public void testQueryWithMultiAndClause()
     {
         String nestedQquery = "Select p from PersonES p where p.age > 0 AND p.age < 35 AND p.salary > 150";
@@ -172,7 +184,6 @@ public class ESNestedQueryTest
         assertResultList(resultList, person2, person3);
     }
 
-    @Test
     public void testQueryWithOrClause()
     {
         String nestedQquery = "Select p from PersonES p where p.personName = 'karthik' OR p.personName = 'pragalbh'";
@@ -182,7 +193,6 @@ public class ESNestedQueryTest
         assertResultList(resultList, person3, person4);
     }
 
-    @Test
     public void testQueryWithMultiOrClause()
     {
         String nestedQquery = "Select p from PersonES p where p.personName = 'amit' OR p.age < 15 OR p.age > 35";
@@ -192,7 +202,6 @@ public class ESNestedQueryTest
         assertResultList(resultList, person1, person2, person4);
     }
 
-    @Test
     public void testQueryWithNestedAndOrClause()
     {
         String nestedQuery = "Select p from PersonES p where p.age > 0 AND (p.salary > 350 and (p.personName = :name OR p.personName = 'pragalbh'))";
@@ -204,7 +213,6 @@ public class ESNestedQueryTest
         assertResultList(resultList, person4);
     }
 
-    @Test
     public void testMaxAggregationWithNestedAndOrClause()
     {
         String nestedQuery = "Select max(p.age) from PersonES p where p.age > 0 AND (p.salary > 250 and (p.personName = 'karthik' OR p.personName = 'pragalbh'))";
@@ -217,7 +225,6 @@ public class ESNestedQueryTest
         Assert.assertEquals(40.0, resultList.get(0));
     }
 
-    @Test
     public void testMinAggregationWithNestedAndOrClause()
     {
         String invalidQueryWithAndClause = "Select min(p.age) from PersonES p where p.age > 0 AND (p.personName = 'amit' OR p.personName = 'dev')";
@@ -229,7 +236,6 @@ public class ESNestedQueryTest
         Assert.assertEquals(10.0, resultList.get(0));
     }
 
-    @Test
     public void testMinAggregationWithNestedAndOr()
     {
         String invalidQueryWithAndClause = "Select min(p.age) from PersonES p where p.age > 0 AND (p.personName = 'amit' OR p.personName = 'dev')";

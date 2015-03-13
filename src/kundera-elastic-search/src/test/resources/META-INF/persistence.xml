@@ -17,6 +17,19 @@
 		</properties>
 	</persistence-unit>
 
+	<persistence-unit name="esAggregationPU">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.kundera.query.Person</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="9300" />
+			<property name="kundera.keyspace" value="esSchema" />
+			<property name="kundera.dialect" value="es" />
+			<property name="kundera.client.lookup.class" value="com.impetus.client.es.ESClientFactory" />
+		</properties>
+	</persistence-unit>
+
 
 	<persistence-unit name="es-external-config">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
@@ -29,7 +42,7 @@
 			<property name="kundera.client.property" value="kunderaes.xml" />
 		</properties>
 	</persistence-unit>
-	
+
 	<persistence-unit name="esMappedSuperClass-pu">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<class>com.impetus.kundera.metadata.mappedsuperclass.Person</class>

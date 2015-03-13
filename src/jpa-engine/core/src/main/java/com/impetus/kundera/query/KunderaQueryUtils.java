@@ -15,7 +15,9 @@
  ******************************************************************************/
 package com.impetus.kundera.query;
 
+import org.eclipse.persistence.jpa.jpql.parser.AggregateFunction;
 import org.eclipse.persistence.jpa.jpql.parser.DeleteStatement;
+import org.eclipse.persistence.jpa.jpql.parser.Expression;
 import org.eclipse.persistence.jpa.jpql.parser.JPQLExpression;
 import org.eclipse.persistence.jpa.jpql.parser.SelectStatement;
 import org.eclipse.persistence.jpa.jpql.parser.UpdateStatement;
@@ -165,5 +167,17 @@ public final class KunderaQueryUtils
     public static boolean isUpdateStatement(JPQLExpression jpqlExpression)
     {
         return jpqlExpression.getQueryStatement().getClass().isAssignableFrom(UpdateStatement.class);
+    }
+    
+    
+    /**
+     * Checks if is aggregated expression.
+     *
+     * @param expression the expression
+     * @return true, if is aggregated expression
+     */
+    public static boolean isAggregatedExpression(Expression expression)
+    {
+        return AggregateFunction.class.isAssignableFrom(expression.getClass());
     }
 }
