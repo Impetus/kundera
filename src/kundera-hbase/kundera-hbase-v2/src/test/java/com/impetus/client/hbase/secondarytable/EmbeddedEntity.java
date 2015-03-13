@@ -19,33 +19,59 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 /**
- * @author Pragalbh Garg
+ * The Class EmbeddedEntity.
  * 
+ * @author Pragalbh Garg
  */
 @Embeddable
 public class EmbeddedEntity
 {
+
+    /** The email id. */
     @Column(name = "EMAIL_ID", table = "HBASE_SECONDARY_TABLE")
     private String emailId;
 
+    /** The phone no. */
     @Column(name = "PHONE_NO")
     private long phoneNo;
 
+    /**
+     * Gets the email id.
+     * 
+     * @return the email id
+     */
     public String getEmailId()
     {
         return emailId;
     }
 
+    /**
+     * Sets the email id.
+     * 
+     * @param emailId
+     *            the new email id
+     */
     public void setEmailId(String emailId)
     {
         this.emailId = emailId;
     }
 
+    /**
+     * Gets the phone no.
+     * 
+     * @return the phone no
+     */
     public long getPhoneNo()
     {
         return phoneNo;
     }
 
+    /**
+     * Sets the phone no.
+     * 
+     * @param phoneNo
+     *            the new phone no
+     */
     public void setPhoneNo(long phoneNo)
     {
         this.phoneNo = phoneNo;

@@ -24,8 +24,9 @@ import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 
 /**
- * @author Devender Yadav
+ * The Class HBaseGeneratedIdStrategyTable.
  * 
+ * @author Devender Yadav
  */
 @Entity
 @Table(name = "HBaseGeneratedIdStrategyTable", schema = "HBaseNew@autoIdTest")
@@ -33,15 +34,19 @@ import javax.persistence.TableGenerator;
 public class HBaseGeneratedIdStrategyTable
 {
 
+    /** The id. */
     @Id
     @TableGenerator(name = "table_gen_1")
     @GeneratedValue(generator = "table_gen", strategy = GenerationType.TABLE)
     private int id;
 
+    /** The name. */
     @Column
     private String name;
 
     /**
+     * Gets the id.
+     * 
      * @return the id
      */
     public int getId()
@@ -50,6 +55,8 @@ public class HBaseGeneratedIdStrategyTable
     }
 
     /**
+     * Sets the id.
+     * 
      * @param id
      *            the id to set
      */
@@ -59,6 +66,8 @@ public class HBaseGeneratedIdStrategyTable
     }
 
     /**
+     * Gets the name.
+     * 
      * @return the name
      */
     public String getName()
@@ -67,6 +76,8 @@ public class HBaseGeneratedIdStrategyTable
     }
 
     /**
+     * Sets the name.
+     * 
      * @param name
      *            the name to set
      */

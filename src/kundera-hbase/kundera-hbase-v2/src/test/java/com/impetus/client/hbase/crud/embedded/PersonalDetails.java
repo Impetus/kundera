@@ -23,8 +23,9 @@ import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
 
 /**
- * @author Pragalbh Garg
+ * The Class PersonalDetails.
  * 
+ * @author Pragalbh Garg
  */
 @Embeddable
 public class PersonalDetails

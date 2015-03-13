@@ -19,8 +19,9 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 /**
- * @author Pragalbh Garg
+ * The Class Address.
  * 
+ * @author Pragalbh Garg
  */
 @Embeddable
 public class Address

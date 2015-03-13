@@ -39,19 +39,17 @@ import com.impetus.client.hbase.crud.datatypes.entities.StudentHBaseBigInteger;
 public class StudentHBaseBigIntegerTest extends Base
 {
 
-    /** The Constant SCHEMA. */
-    protected static final String SCHEMA = "HBaseNew";
-
     /** The Constant HBASE_PU. */
-    protected static final String HBASE_PU = "dataTypeTest";
+    private static final String HBASE_PU = "dataTypeTest";
 
     /** The emf. */
     private static EntityManagerFactory emf;
 
     /**
      * Sets the up before class.
-     *
-     * @throws Exception the exception
+     * 
+     * @throws Exception
+     *             the exception
      */
     @BeforeClass
     public static void setUpBeforeClass() throws Exception
@@ -61,15 +59,16 @@ public class StudentHBaseBigIntegerTest extends Base
 
     /**
      * Tear down after class.
-     *
-     * @throws Exception the exception
+     * 
+     * @throws Exception
+     *             the exception
      */
     @AfterClass
     public static void tearDownAfterClass() throws Exception
     {
         emf.close();
         emf = null;
-        
+
     }
 
     /**
@@ -132,8 +131,9 @@ public class StudentHBaseBigIntegerTest extends Base
 
     /**
      * Test find by id.
-     *
-     * @param useSameEm the use same em
+     * 
+     * @param useSameEm
+     *            the use same em
      */
     public void testFindById(boolean useSameEm)
     {
@@ -168,8 +168,9 @@ public class StudentHBaseBigIntegerTest extends Base
 
     /**
      * Test merge.
-     *
-     * @param useSameEm the use same em
+     * 
+     * @param useSameEm
+     *            the use same em
      */
     public void testMerge(boolean useSameEm)
     {
@@ -194,8 +195,9 @@ public class StudentHBaseBigIntegerTest extends Base
 
     /**
      * Test find by query.
-     *
-     * @param useSameEm the use same em
+     * 
+     * @param useSameEm
+     *            the use same em
      */
     public void testFindByQuery(boolean useSameEm)
     {
@@ -221,7 +223,7 @@ public class StudentHBaseBigIntegerTest extends Base
         int count;
         em = emf.createEntityManager();
         query = "Select s From StudentHBaseBigInteger s where s.age = " + getPartialValue(short.class)
-                + " and s.name > 'Amresh' and s.name <= '" + getMaxValue(String.class)+"'";
+                + " and s.name > 'Amresh' and s.name <= '" + getMaxValue(String.class) + "'";
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -239,8 +241,6 @@ public class StudentHBaseBigIntegerTest extends Base
         em.close();
 
     }
-
-  
 
     /**
      * Find by name and age with or clause.
@@ -303,8 +303,9 @@ public class StudentHBaseBigIntegerTest extends Base
 
     /**
      * Test named query use same em.
-     *
-     * @param useSameEm the use same em
+     * 
+     * @param useSameEm
+     *            the use same em
      */
     public void testNamedQueryUseSameEm(boolean useSameEm)
     {
@@ -314,8 +315,9 @@ public class StudentHBaseBigIntegerTest extends Base
 
     /**
      * Test named query.
-     *
-     * @param useSameEm the use same em
+     * 
+     * @param useSameEm
+     *            the use same em
      */
     public void testNamedQuery(boolean useSameEm)
     {
@@ -325,8 +327,9 @@ public class StudentHBaseBigIntegerTest extends Base
 
     /**
      * Test delete.
-     *
-     * @param useSameEm the use same em
+     * 
+     * @param useSameEm
+     *            the use same em
      */
     public void testDelete(boolean useSameEm)
     {
@@ -349,8 +352,9 @@ public class StudentHBaseBigIntegerTest extends Base
 
     /**
      * Delete named.
-     *
-     * @param useSameEm the use same em
+     * 
+     * @param useSameEm
+     *            the use same em
      */
     private void deleteNamed(boolean useSameEm)
     {
@@ -371,8 +375,9 @@ public class StudentHBaseBigIntegerTest extends Base
 
     /**
      * Update named.
-     *
-     * @param useSameEm the use same em
+     * 
+     * @param useSameEm
+     *            the use same em
      */
     private void updateNamed(boolean useSameEm)
     {

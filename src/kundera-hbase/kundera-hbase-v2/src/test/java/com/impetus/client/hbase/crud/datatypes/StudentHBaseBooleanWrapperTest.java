@@ -39,19 +39,17 @@ import com.impetus.kundera.query.QueryHandlerException;
 public class StudentHBaseBooleanWrapperTest extends Base
 {
 
-    /** The Constant SCHEMA. */
-    protected static final String SCHEMA = "HBaseNew";
-
     /** The Constant HBASE_PU. */
-    protected static final String HBASE_PU = "dataTypeTest";
+    private static final String HBASE_PU = "dataTypeTest";
 
     /** The emf. */
     private static EntityManagerFactory emf;
 
     /**
      * Sets the up before class.
-     *
-     * @throws Exception the exception
+     * 
+     * @throws Exception
+     *             the exception
      */
     @BeforeClass
     public static void setUpBeforeClass() throws Exception
@@ -61,15 +59,16 @@ public class StudentHBaseBooleanWrapperTest extends Base
 
     /**
      * Tear down after class.
-     *
-     * @throws Exception the exception
+     * 
+     * @throws Exception
+     *             the exception
      */
     @AfterClass
     public static void tearDownAfterClass() throws Exception
     {
         emf.close();
         emf = null;
-        
+
     }
 
     /**
@@ -126,8 +125,9 @@ public class StudentHBaseBooleanWrapperTest extends Base
 
     /**
      * Test find by id.
-     *
-     * @param useSameEm the use same em
+     * 
+     * @param useSameEm
+     *            the use same em
      */
     public void testFindById(Boolean useSameEm)
     {
@@ -153,8 +153,9 @@ public class StudentHBaseBooleanWrapperTest extends Base
 
     /**
      * Test merge.
-     *
-     * @param useSameEm the use same em
+     * 
+     * @param useSameEm
+     *            the use same em
      */
     public void testMerge(Boolean useSameEm)
     {
@@ -179,8 +180,9 @@ public class StudentHBaseBooleanWrapperTest extends Base
 
     /**
      * Test find by query.
-     *
-     * @param useSameEm the use same em
+     * 
+     * @param useSameEm
+     *            the use same em
      */
     public void testFindByQuery(Boolean useSameEm)
     {
@@ -294,8 +296,9 @@ public class StudentHBaseBooleanWrapperTest extends Base
 
     /**
      * Test named query use same em.
-     *
-     * @param useSameEm the use same em
+     * 
+     * @param useSameEm
+     *            the use same em
      */
     public void testNamedQueryUseSameEm(Boolean useSameEm)
     {
@@ -305,8 +308,9 @@ public class StudentHBaseBooleanWrapperTest extends Base
 
     /**
      * Test named query.
-     *
-     * @param useSameEm the use same em
+     * 
+     * @param useSameEm
+     *            the use same em
      */
     public void testNamedQuery(Boolean useSameEm)
     {
@@ -316,8 +320,9 @@ public class StudentHBaseBooleanWrapperTest extends Base
 
     /**
      * Test delete.
-     *
-     * @param useSameEm the use same em
+     * 
+     * @param useSameEm
+     *            the use same em
      */
     public void testDelete(Boolean useSameEm)
     {
@@ -340,8 +345,9 @@ public class StudentHBaseBooleanWrapperTest extends Base
 
     /**
      * Delete named.
-     *
-     * @param useSameEm the use same em
+     * 
+     * @param useSameEm
+     *            the use same em
      */
     private void deleteNamed(Boolean useSameEm)
     {
@@ -362,8 +368,9 @@ public class StudentHBaseBooleanWrapperTest extends Base
 
     /**
      * Update named.
-     *
-     * @param useSameEm the use same em
+     * 
+     * @param useSameEm
+     *            the use same em
      */
     private void updateNamed(Boolean useSameEm)
     {

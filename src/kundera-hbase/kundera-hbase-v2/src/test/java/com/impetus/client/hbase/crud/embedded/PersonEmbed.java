@@ -22,8 +22,9 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
- * @author Pragalbh Garg
+ * The Class PersonEmbed.
  * 
+ * @author Pragalbh Garg
  */
 @Entity
 @Table(name = "PERSON", schema = "HBaseNew@embeddablesTest")

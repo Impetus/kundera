@@ -19,8 +19,9 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 /**
- * @author Pragalbh Garg
+ * The Class Fullname.
  * 
+ * @author Pragalbh Garg
  */
 @Embeddable
 public class Fullname

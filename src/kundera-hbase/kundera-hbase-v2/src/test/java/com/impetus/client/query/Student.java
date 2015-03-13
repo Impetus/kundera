@@ -1,5 +1,5 @@
 /*******************************************************************************
- * * Copyright 2012 Impetus Infotech.
+ * * Copyright 2015 Impetus Infotech.
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -129,7 +129,7 @@ public class Student
 
     /**
      * Gets the student id.
-     *
+     * 
      * @return the studentId
      */
     public long getStudentId()
@@ -139,8 +139,9 @@ public class Student
 
     /**
      * Sets the student id.
-     *
-     * @param studentId            the studentId to set
+     * 
+     * @param studentId
+     *            the studentId to set
      */
     public void setStudentId(long studentId)
     {
@@ -149,7 +150,7 @@ public class Student
 
     /**
      * Gets the student name.
-     *
+     * 
      * @return the studentName
      */
     public String getStudentName()
@@ -159,8 +160,9 @@ public class Student
 
     /**
      * Sets the student name.
-     *
-     * @param studentName            the studentName to set
+     * 
+     * @param studentName
+     *            the studentName to set
      */
     public void setStudentName(String studentName)
     {
@@ -169,7 +171,7 @@ public class Student
 
     /**
      * Checks if is exceptional.
-     *
+     * 
      * @return the isExceptional
      */
     public boolean isExceptional()
@@ -179,8 +181,9 @@ public class Student
 
     /**
      * Sets the exceptional.
-     *
-     * @param isExceptional            the isExceptional to set
+     * 
+     * @param isExceptional
+     *            the isExceptional to set
      */
     public void setExceptional(boolean isExceptional)
     {
@@ -189,7 +192,7 @@ public class Student
 
     /**
      * Gets the age.
-     *
+     * 
      * @return the age
      */
     public int getAge()
@@ -199,8 +202,9 @@ public class Student
 
     /**
      * Sets the age.
-     *
-     * @param age            the age to set
+     * 
+     * @param age
+     *            the age to set
      */
     public void setAge(int age)
     {
@@ -209,7 +213,7 @@ public class Student
 
     /**
      * Gets the semester.
-     *
+     * 
      * @return the semester
      */
     public char getSemester()
@@ -219,8 +223,9 @@ public class Student
 
     /**
      * Sets the semester.
-     *
-     * @param semester            the semester to set
+     * 
+     * @param semester
+     *            the semester to set
      */
     public void setSemester(char semester)
     {
@@ -229,7 +234,7 @@ public class Student
 
     /**
      * Gets the digital signature.
-     *
+     * 
      * @return the digitalSignature
      */
     public byte getDigitalSignature()
@@ -239,8 +244,9 @@ public class Student
 
     /**
      * Sets the digital signature.
-     *
-     * @param digitalSignature            the digitalSignature to set
+     * 
+     * @param digitalSignature
+     *            the digitalSignature to set
      */
     public void setDigitalSignature(byte digitalSignature)
     {
@@ -249,7 +255,7 @@ public class Student
 
     /**
      * Gets the cgpa.
-     *
+     * 
      * @return the cgpa
      */
     public short getCgpa()
@@ -259,8 +265,9 @@ public class Student
 
     /**
      * Sets the cgpa.
-     *
-     * @param cgpa            the cgpa to set
+     * 
+     * @param cgpa
+     *            the cgpa to set
      */
     public void setCgpa(short cgpa)
     {
@@ -269,7 +276,7 @@ public class Student
 
     /**
      * Gets the percentage.
-     *
+     * 
      * @return the percentage
      */
     public float getPercentage()
@@ -279,8 +286,9 @@ public class Student
 
     /**
      * Sets the percentage.
-     *
-     * @param percentage            the percentage to set
+     * 
+     * @param percentage
+     *            the percentage to set
      */
     public void setPercentage(float percentage)
     {
@@ -289,7 +297,7 @@ public class Student
 
     /**
      * Gets the height.
-     *
+     * 
      * @return the height
      */
     public double getHeight()
@@ -299,8 +307,9 @@ public class Student
 
     /**
      * Sets the height.
-     *
-     * @param height            the height to set
+     * 
+     * @param height
+     *            the height to set
      */
     public void setHeight(double height)
     {
@@ -309,7 +318,7 @@ public class Student
 
     /**
      * Gets the enrolment date.
-     *
+     * 
      * @return the enrolmentDate
      */
     public java.util.Date getEnrolmentDate()
@@ -319,8 +328,9 @@ public class Student
 
     /**
      * Sets the enrolment date.
-     *
-     * @param enrolmentDate            the enrolmentDate to set
+     * 
+     * @param enrolmentDate
+     *            the enrolmentDate to set
      */
     public void setEnrolmentDate(java.util.Date enrolmentDate)
     {
@@ -329,7 +339,7 @@ public class Student
 
     /**
      * Gets the enrolment time.
-     *
+     * 
      * @return the enrolmentTime
      */
     public java.util.Date getEnrolmentTime()
@@ -339,8 +349,9 @@ public class Student
 
     /**
      * Sets the enrolment time.
-     *
-     * @param enrolmentTime            the enrolmentTime to set
+     * 
+     * @param enrolmentTime
+     *            the enrolmentTime to set
      */
     public void setEnrolmentTime(java.util.Date enrolmentTime)
     {
@@ -349,7 +360,7 @@ public class Student
 
     /**
      * Gets the joining date and time.
-     *
+     * 
      * @return the joiningDateAndTime
      */
     public java.util.Date getJoiningDateAndTime()
@@ -359,8 +370,9 @@ public class Student
 
     /**
      * Sets the joining date and time.
-     *
-     * @param joiningDateAndTime            the joiningDateAndTime to set
+     * 
+     * @param joiningDateAndTime
+     *            the joiningDateAndTime to set
      */
     public void setJoiningDateAndTime(java.util.Date joiningDateAndTime)
     {
@@ -369,7 +381,7 @@ public class Student
 
     /**
      * Gets the years spent.
-     *
+     * 
      * @return the yearsSpent
      */
     public Integer getYearsSpent()
@@ -379,8 +391,9 @@ public class Student
 
     /**
      * Sets the years spent.
-     *
-     * @param yearsSpent            the yearsSpent to set
+     * 
+     * @param yearsSpent
+     *            the yearsSpent to set
      */
     public void setYearsSpent(Integer yearsSpent)
     {
@@ -389,7 +402,7 @@ public class Student
 
     /**
      * Gets the roll number.
-     *
+     * 
      * @return the rollNumber
      */
     public Long getRollNumber()
@@ -399,8 +412,9 @@ public class Student
 
     /**
      * Sets the roll number.
-     *
-     * @param rollNumber            the rollNumber to set
+     * 
+     * @param rollNumber
+     *            the rollNumber to set
      */
     public void setRollNumber(Long rollNumber)
     {
@@ -409,7 +423,7 @@ public class Student
 
     /**
      * Gets the monthly fee.
-     *
+     * 
      * @return the monthlyFee
      */
     public Double getMonthlyFee()
@@ -419,8 +433,9 @@ public class Student
 
     /**
      * Sets the monthly fee.
-     *
-     * @param monthlyFee            the monthlyFee to set
+     * 
+     * @param monthlyFee
+     *            the monthlyFee to set
      */
     public void setMonthlyFee(Double monthlyFee)
     {
@@ -429,7 +444,7 @@ public class Student
 
     /**
      * Gets the sql date.
-     *
+     * 
      * @return the sql date
      */
     public java.sql.Date getSqlDate()
@@ -439,8 +454,9 @@ public class Student
 
     /**
      * Sets the sql date.
-     *
-     * @param sqlDate the new sql date
+     * 
+     * @param sqlDate
+     *            the new sql date
      */
     public void setSqlDate(java.sql.Date sqlDate)
     {
@@ -449,7 +465,7 @@ public class Student
 
     /**
      * Gets the sql timestamp.
-     *
+     * 
      * @return the sqlTimestamp
      */
     public java.sql.Timestamp getSqlTimestamp()
@@ -459,8 +475,9 @@ public class Student
 
     /**
      * Sets the sql timestamp.
-     *
-     * @param sqlTimestamp            the sqlTimestamp to set
+     * 
+     * @param sqlTimestamp
+     *            the sqlTimestamp to set
      */
     public void setSqlTimestamp(java.sql.Timestamp sqlTimestamp)
     {
@@ -469,7 +486,7 @@ public class Student
 
     /**
      * Gets the sql time.
-     *
+     * 
      * @return the sqlTime
      */
     public java.sql.Time getSqlTime()
@@ -479,8 +496,9 @@ public class Student
 
     /**
      * Sets the sql time.
-     *
-     * @param sqlTime            the sqlTime to set
+     * 
+     * @param sqlTime
+     *            the sqlTime to set
      */
     public void setSqlTime(java.sql.Time sqlTime)
     {
@@ -489,7 +507,7 @@ public class Student
 
     /**
      * Gets the big integer.
-     *
+     * 
      * @return the bigInteger
      */
     public BigInteger getBigInteger()
@@ -499,8 +517,9 @@ public class Student
 
     /**
      * Sets the big integer.
-     *
-     * @param bigInteger            the bigInteger to set
+     * 
+     * @param bigInteger
+     *            the bigInteger to set
      */
     public void setBigInteger(BigInteger bigInteger)
     {
@@ -509,7 +528,7 @@ public class Student
 
     /**
      * Gets the big decimal.
-     *
+     * 
      * @return the bigDecimal
      */
     public BigDecimal getBigDecimal()
@@ -519,8 +538,9 @@ public class Student
 
     /**
      * Sets the big decimal.
-     *
-     * @param bigDecimal            the bigDecimal to set
+     * 
+     * @param bigDecimal
+     *            the bigDecimal to set
      */
     public void setBigDecimal(BigDecimal bigDecimal)
     {
@@ -529,7 +549,7 @@ public class Student
 
     /**
      * Gets the calendar.
-     *
+     * 
      * @return the calendar
      */
     public Calendar getCalendar()
@@ -539,8 +559,9 @@ public class Student
 
     /**
      * Sets the calendar.
-     *
-     * @param calendar            the calendar to set
+     * 
+     * @param calendar
+     *            the calendar to set
      */
     public void setCalendar(Calendar calendar)
     {
