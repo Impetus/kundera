@@ -38,11 +38,8 @@ import com.impetus.client.hbase.crud.datatypes.entities.StudentHBaseLongWrapper;
 public class StudentHBaseLongWrapperTest extends Base
 {
 
-    /** The Constant SCHEMA. */
-    protected static final String SCHEMA = "HBaseNew";
-
     /** The Constant HBASE_PU. */
-    protected static final String HBASE_PU = "dataTypeTest";
+    private static final String HBASE_PU = "dataTypeTest";
 
     /** The emf. */
     private static EntityManagerFactory emf;
@@ -70,7 +67,7 @@ public class StudentHBaseLongWrapperTest extends Base
     {
         emf.close();
         emf = null;
-        
+
     }
 
     /**

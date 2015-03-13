@@ -39,19 +39,17 @@ import com.impetus.kundera.query.QueryHandlerException;
 public class StudentHBaseBooleanPrimitiveTest extends Base
 {
 
-    /** The Constant SCHEMA. */
-    protected static final String SCHEMA = "HBaseNew";
-
     /** The Constant HBASE_PU. */
-    protected static final String HBASE_PU = "dataTypeTest";
+    private static final String HBASE_PU = "dataTypeTest";
 
     /** The emf. */
     private static EntityManagerFactory emf;
 
     /**
      * Sets the up before class.
-     *
-     * @throws Exception the exception
+     * 
+     * @throws Exception
+     *             the exception
      */
     @BeforeClass
     public static void setUpBeforeClass() throws Exception
@@ -61,15 +59,16 @@ public class StudentHBaseBooleanPrimitiveTest extends Base
 
     /**
      * Tear down after class.
-     *
-     * @throws Exception the exception
+     * 
+     * @throws Exception
+     *             the exception
      */
     @AfterClass
     public static void tearDownAfterClass() throws Exception
     {
         emf.close();
         emf = null;
-        
+
     }
 
     /**
@@ -126,14 +125,16 @@ public class StudentHBaseBooleanPrimitiveTest extends Base
 
     /**
      * Test find by id.
-     *
-     * @param useSameEm the use same em
+     * 
+     * @param useSameEm
+     *            the use same em
      */
     public void testFindById(boolean useSameEm)
     {
         EntityManager em = emf.createEntityManager();
 
-        StudentHBaseBooleanPrimitive studentMax = em.find(StudentHBaseBooleanPrimitive.class, getMaxValue(boolean.class));
+        StudentHBaseBooleanPrimitive studentMax = em.find(StudentHBaseBooleanPrimitive.class,
+                getMaxValue(boolean.class));
         Assert.assertNotNull(studentMax);
         Assert.assertEquals(getMaxValue(short.class), studentMax.getAge());
         Assert.assertEquals(getMaxValue(String.class), studentMax.getName());
@@ -143,7 +144,8 @@ public class StudentHBaseBooleanPrimitiveTest extends Base
             em.close();
             em = emf.createEntityManager();
         }
-        StudentHBaseBooleanPrimitive studentMin = em.find(StudentHBaseBooleanPrimitive.class, getMinValue(boolean.class));
+        StudentHBaseBooleanPrimitive studentMin = em.find(StudentHBaseBooleanPrimitive.class,
+                getMinValue(boolean.class));
         Assert.assertNotNull(studentMin);
         Assert.assertEquals(getPartialValue(short.class), studentMin.getAge());
         Assert.assertEquals(getMinValue(String.class), studentMin.getName());
@@ -153,8 +155,9 @@ public class StudentHBaseBooleanPrimitiveTest extends Base
 
     /**
      * Test merge.
-     *
-     * @param useSameEm the use same em
+     * 
+     * @param useSameEm
+     *            the use same em
      */
     public void testMerge(boolean useSameEm)
     {
@@ -171,7 +174,8 @@ public class StudentHBaseBooleanPrimitiveTest extends Base
             em.close();
             em = emf.createEntityManager();
         }
-        StudentHBaseBooleanPrimitive newStudent = em.find(StudentHBaseBooleanPrimitive.class, getMaxValue(boolean.class));
+        StudentHBaseBooleanPrimitive newStudent = em.find(StudentHBaseBooleanPrimitive.class,
+                getMaxValue(boolean.class));
         Assert.assertNotNull(newStudent);
         Assert.assertEquals(getMaxValue(short.class), newStudent.getAge());
         Assert.assertEquals("Kuldeep", newStudent.getName());
@@ -179,8 +183,9 @@ public class StudentHBaseBooleanPrimitiveTest extends Base
 
     /**
      * Test find by query.
-     *
-     * @param useSameEm the use same em
+     * 
+     * @param useSameEm
+     *            the use same em
      */
     public void testFindByQuery(boolean useSameEm)
     {
@@ -206,7 +211,7 @@ public class StudentHBaseBooleanPrimitiveTest extends Base
         int count;
         em = emf.createEntityManager();
         query = "Select s From StudentHBaseBooleanPrimitive s where s.age = " + getPartialValue(short.class)
-                + " and s.name > 'Amresh' and s.name <= '" + getMaxValue(String.class)+"'";
+                + " and s.name > 'Amresh' and s.name <= '" + getMaxValue(String.class) + "'";
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -225,7 +230,6 @@ public class StudentHBaseBooleanPrimitiveTest extends Base
 
     }
 
-
     /**
      * Find by name and age with or clause.
      */
@@ -237,12 +241,13 @@ public class StudentHBaseBooleanPrimitiveTest extends Base
         List<StudentHBaseBooleanPrimitive> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentHBaseBooleanPrimitive s where s.name = 'John' or s.age > " + getPartialValue(short.class);
+        query = "Select s From StudentHBaseBooleanPrimitive s where s.name = 'John' or s.age > "
+                + getPartialValue(short.class);
         try
         {
             q = em.createQuery(query);
             students = q.getResultList();
-          //  Assert.fail("Should have gone to catch block");
+            // Assert.fail("Should have gone to catch block");
             Assert.assertNotNull(students);
             Assert.assertEquals(1, students.size());
             count = 0;
@@ -294,8 +299,9 @@ public class StudentHBaseBooleanPrimitiveTest extends Base
 
     /**
      * Test named query use same em.
-     *
-     * @param useSameEm the use same em
+     * 
+     * @param useSameEm
+     *            the use same em
      */
     public void testNamedQueryUseSameEm(boolean useSameEm)
     {
@@ -305,8 +311,9 @@ public class StudentHBaseBooleanPrimitiveTest extends Base
 
     /**
      * Test named query.
-     *
-     * @param useSameEm the use same em
+     * 
+     * @param useSameEm
+     *            the use same em
      */
     public void testNamedQuery(boolean useSameEm)
     {
@@ -316,14 +323,16 @@ public class StudentHBaseBooleanPrimitiveTest extends Base
 
     /**
      * Test delete.
-     *
-     * @param useSameEm the use same em
+     * 
+     * @param useSameEm
+     *            the use same em
      */
     public void testDelete(boolean useSameEm)
     {
         EntityManager em = emf.createEntityManager();
 
-        StudentHBaseBooleanPrimitive studentMax = em.find(StudentHBaseBooleanPrimitive.class, getMinValue(boolean.class));
+        StudentHBaseBooleanPrimitive studentMax = em.find(StudentHBaseBooleanPrimitive.class,
+                getMinValue(boolean.class));
         Assert.assertNotNull(studentMax);
         Assert.assertEquals(getPartialValue(short.class), studentMax.getAge());
         Assert.assertEquals("Kuldeep", studentMax.getName());
@@ -340,8 +349,9 @@ public class StudentHBaseBooleanPrimitiveTest extends Base
 
     /**
      * Delete named.
-     *
-     * @param useSameEm the use same em
+     * 
+     * @param useSameEm
+     *            the use same em
      */
     private void deleteNamed(boolean useSameEm)
     {
@@ -355,15 +365,17 @@ public class StudentHBaseBooleanPrimitiveTest extends Base
             em.close();
             em = emf.createEntityManager();
         }
-        StudentHBaseBooleanPrimitive newStudent = em.find(StudentHBaseBooleanPrimitive.class, getRandomValue(boolean.class));
+        StudentHBaseBooleanPrimitive newStudent = em.find(StudentHBaseBooleanPrimitive.class,
+                getRandomValue(boolean.class));
         Assert.assertNull(newStudent);
         em.close();
     }
 
     /**
      * Update named.
-     *
-     * @param useSameEm the use same em
+     * 
+     * @param useSameEm
+     *            the use same em
      */
     private void updateNamed(boolean useSameEm)
     {
@@ -376,7 +388,8 @@ public class StudentHBaseBooleanPrimitiveTest extends Base
             em.close();
             em = emf.createEntityManager();
         }
-        StudentHBaseBooleanPrimitive newStudent = em.find(StudentHBaseBooleanPrimitive.class, getMaxValue(boolean.class));
+        StudentHBaseBooleanPrimitive newStudent = em.find(StudentHBaseBooleanPrimitive.class,
+                getMaxValue(boolean.class));
         Assert.assertNotNull(newStudent);
         Assert.assertEquals(getMaxValue(short.class), newStudent.getAge());
         Assert.assertEquals("Vivek", newStudent.getName());
@@ -393,8 +406,8 @@ public class StudentHBaseBooleanPrimitiveTest extends Base
         Query q;
         List<StudentHBaseBooleanPrimitive> students;
         em = emf.createEntityManager();
-        query = "Select s From StudentHBaseBooleanPrimitive s where s.name = 'Amresh' and s.age > " + getPartialValue(short.class)
-                + " and s.age < " + getMaxValue(short.class);
+        query = "Select s From StudentHBaseBooleanPrimitive s where s.name = 'Amresh' and s.age > "
+                + getPartialValue(short.class) + " and s.age < " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);

@@ -24,11 +24,19 @@ import org.apache.hadoop.hbase.client.HBaseAdmin;
 import com.impetus.kundera.KunderaException;
 
 /**
- * @author Pragalbh Garg
+ * The Class HBaseTestingUtils.
  * 
+ * @author Pragalbh Garg
  */
 public final class HBaseTestingUtils
 {
+
+    /**
+     * Drop schema.
+     * 
+     * @param databaseName
+     *            the database name
+     */
     public static void dropSchema(String databaseName)
     {
         try

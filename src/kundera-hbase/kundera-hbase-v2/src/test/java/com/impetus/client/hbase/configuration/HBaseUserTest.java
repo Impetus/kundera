@@ -49,9 +49,9 @@ public class HBaseUserTest
     private static final String TABLE = "KunderaHbaseXmlTest:HBASEUSERXYZ";
 
     private EntityManagerFactory emf;
-    
+
     private static HBaseAdmin admin;
-    
+
     private static Connection connection;
 
     /**

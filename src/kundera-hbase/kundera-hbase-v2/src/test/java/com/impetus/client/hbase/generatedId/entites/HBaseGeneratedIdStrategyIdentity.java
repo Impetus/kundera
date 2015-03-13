@@ -23,22 +23,27 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
- * @author Devender Yadav
+ * The Class HBaseGeneratedIdStrategyIdentity.
  * 
+ * @author Devender Yadav
  */
 @Entity
 @Table(name = "HBaseGeneratedIdStrategyIdentity", schema = "HBaseNew@autoIdTest")
 public class HBaseGeneratedIdStrategyIdentity
 {
 
+    /** The id. */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    /** The name. */
     @Column
     private String name;
 
     /**
+     * Gets the id.
+     * 
      * @return the id
      */
     public int getId()
@@ -47,6 +52,8 @@ public class HBaseGeneratedIdStrategyIdentity
     }
 
     /**
+     * Sets the id.
+     * 
      * @param id
      *            the id to set
      */
@@ -56,6 +63,8 @@ public class HBaseGeneratedIdStrategyIdentity
     }
 
     /**
+     * Gets the name.
+     * 
      * @return the name
      */
     public String getName()
@@ -64,6 +73,8 @@ public class HBaseGeneratedIdStrategyIdentity
     }
 
     /**
+     * Sets the name.
+     * 
      * @param name
      *            the name to set
      */

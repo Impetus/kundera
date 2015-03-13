@@ -22,8 +22,9 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
- * @author Pragalbh Garg
+ * The Class ProductHBase.
  * 
+ * @author Pragalbh Garg
  */
 @Entity
 @Table(name = "PRODUCT_HBASE", schema = "HBaseNew@schemaTest")
@@ -43,44 +44,89 @@ public class ProductHBase
     @Column(name = "DESCRIPTION")
     private String description;
 
+    /** The price. */
     @Column(name = "PRICE")
     private int price;
 
+    /**
+     * Gets the product id.
+     * 
+     * @return the product id
+     */
     public String getProductId()
     {
         return productId;
     }
 
+    /**
+     * Sets the product id.
+     * 
+     * @param productId
+     *            the new product id
+     */
     public void setProductId(String productId)
     {
         this.productId = productId;
     }
 
+    /**
+     * Gets the product name.
+     * 
+     * @return the product name
+     */
     public String getProductName()
     {
         return productName;
     }
 
+    /**
+     * Sets the product name.
+     * 
+     * @param productName
+     *            the new product name
+     */
     public void setProductName(String productName)
     {
         this.productName = productName;
     }
 
+    /**
+     * Gets the description.
+     * 
+     * @return the description
+     */
     public String getDescription()
     {
         return description;
     }
 
+    /**
+     * Sets the description.
+     * 
+     * @param description
+     *            the new description
+     */
     public void setDescription(String description)
     {
         this.description = description;
     }
 
+    /**
+     * Gets the price.
+     * 
+     * @return the price
+     */
     public int getPrice()
     {
         return price;
     }
 
+    /**
+     * Sets the price.
+     * 
+     * @param price
+     *            the new price
+     */
     public void setPrice(int price)
     {
         this.price = price;

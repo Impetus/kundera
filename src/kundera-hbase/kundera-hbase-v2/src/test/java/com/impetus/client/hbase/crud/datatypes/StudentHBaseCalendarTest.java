@@ -40,11 +40,8 @@ import com.impetus.kundera.query.QueryHandlerException;
 public class StudentHBaseCalendarTest extends Base
 {
 
-    /** The Constant SCHEMA. */
-    protected static final String SCHEMA = "HBaseNew";
-
     /** The Constant HBASE_PU. */
-    protected static final String HBASE_PU = "dataTypeTest";
+    private static final String HBASE_PU = "dataTypeTest";
 
     /** The emf. */
     private static EntityManagerFactory emf;
@@ -72,7 +69,7 @@ public class StudentHBaseCalendarTest extends Base
     {
         emf.close();
         emf = null;
-        
+
     }
 
     /**

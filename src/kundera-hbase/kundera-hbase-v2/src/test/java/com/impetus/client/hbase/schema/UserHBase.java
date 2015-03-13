@@ -22,8 +22,9 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
- * @author Pragalbh Garg
+ * The Class UserHBase.
  * 
+ * @author Pragalbh Garg
  */
 @Entity
 @Table(name = "USER_HBASE", schema = "HBaseNew@schemaTest")
@@ -43,44 +44,89 @@ public class UserHBase
     @Column(name = "EMAIL_ID")
     private String email;
 
+    /** The phone no. */
     @Column(name = "PHONE_NO")
     private long phoneNo;
 
+    /**
+     * Gets the user id.
+     * 
+     * @return the user id
+     */
     public String getUserId()
     {
         return userId;
     }
 
+    /**
+     * Sets the user id.
+     * 
+     * @param userId
+     *            the new user id
+     */
     public void setUserId(String userId)
     {
         this.userId = userId;
     }
 
+    /**
+     * Gets the user name.
+     * 
+     * @return the user name
+     */
     public String getUserName()
     {
         return userName;
     }
 
+    /**
+     * Sets the user name.
+     * 
+     * @param userName
+     *            the new user name
+     */
     public void setUserName(String userName)
     {
         this.userName = userName;
     }
 
+    /**
+     * Gets the email.
+     * 
+     * @return the email
+     */
     public String getEmail()
     {
         return email;
     }
 
+    /**
+     * Sets the email.
+     * 
+     * @param email
+     *            the new email
+     */
     public void setEmail(String email)
     {
         this.email = email;
     }
 
+    /**
+     * Gets the phone no.
+     * 
+     * @return the phone no
+     */
     public long getPhoneNo()
     {
         return phoneNo;
     }
 
+    /**
+     * Sets the phone no.
+     * 
+     * @param phoneNo
+     *            the new phone no
+     */
     public void setPhoneNo(long phoneNo)
     {
         this.phoneNo = phoneNo;

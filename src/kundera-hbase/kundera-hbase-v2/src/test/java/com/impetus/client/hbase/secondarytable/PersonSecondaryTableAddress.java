@@ -21,40 +21,69 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
- * @author Pragalbh Garg
+ * The Class PersonSecondaryTableAddress.
  * 
+ * @author Pragalbh Garg
  */
 @Entity
 @Table(name = "SEC_TABLE", schema = "HBaseNew@secTableTest")
 public class PersonSecondaryTableAddress
 {
+
+    /** The address id. */
     @Id
     @Column(name = "ADDRESS_ID")
     private Double addressId;
 
+    /**
+     * Instantiates a new person secondary table address.
+     */
     public PersonSecondaryTableAddress()
     {
 
     }
 
+    /**
+     * Instantiates a new person secondary table address.
+     * 
+     * @param addressId
+     *            the address id
+     */
     public PersonSecondaryTableAddress(Double addressId)
     {
         this.addressId = addressId;
     }
 
+    /** The address. */
     @Column(name = "address")
     private String address;
 
+    /**
+     * Gets the address.
+     * 
+     * @return the address
+     */
     public String getAddress()
     {
         return address;
     }
 
+    /**
+     * Sets the address.
+     * 
+     * @param address
+     *            the new address
+     */
     public void setAddress(String address)
     {
         this.address = address;
     }
 
+    /**
+     * Gets the address id.
+     * 
+     * @return the address id
+     */
     public Double getAddressId()
     {
         return addressId;

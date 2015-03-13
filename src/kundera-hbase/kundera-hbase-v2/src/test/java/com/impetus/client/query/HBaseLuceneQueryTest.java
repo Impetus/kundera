@@ -31,7 +31,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.impetus.client.hbase.testingutil.HBaseTestingUtils;
-import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 import com.impetus.kundera.utils.LuceneCleanupUtilities;
 
 /**
@@ -77,6 +76,7 @@ public class HBaseLuceneQueryTest extends HBaseQueryBaseTest
     public void tearDown() throws Exception
     {
         deleteBooks();
+        LuceneCleanupUtilities.cleanDir("lucene");
         em.close();
     }
 
@@ -89,9 +89,6 @@ public class HBaseLuceneQueryTest extends HBaseQueryBaseTest
     @AfterClass
     public static void tearDownAfterClass() throws Exception
     {
-        LuceneCleanupUtilities.cleanLuceneDirectory(((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance()
-                .getApplicationMetadata().getPersistenceUnitMetadata(HBASE_PU));
-        LuceneCleanupUtilities.cleanDir("./lucene");
         emf.close();
         emf = null;
         HBaseTestingUtils.dropSchema(SCHEMA);

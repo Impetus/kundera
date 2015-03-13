@@ -24,23 +24,28 @@ import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 
 /**
- * @author Devender Yadav
+ * The Class HBaseGeneratedIdWithTableGenerator.
  * 
+ * @author Devender Yadav
  */
 @Entity
 @Table(name = "HBaseGeneratedIdWithTableGenerator", schema = "HBaseNew@autoIdTest")
 public class HBaseGeneratedIdWithTableGenerator
 {
 
+    /** The id. */
     @Id
     @TableGenerator(name = "id_gen", allocationSize = 30, initialValue = 100, schema = "HBaseNew", valueColumnName = "sequenceValue")
     @GeneratedValue(generator = "id_gen", strategy = GenerationType.TABLE)
     private int id;
 
+    /** The name. */
     @Column
     private String name;
 
     /**
+     * Gets the id.
+     * 
      * @return the id
      */
     public int getId()
@@ -49,6 +54,8 @@ public class HBaseGeneratedIdWithTableGenerator
     }
 
     /**
+     * Sets the id.
+     * 
      * @param id
      *            the id to set
      */
@@ -58,6 +65,8 @@ public class HBaseGeneratedIdWithTableGenerator
     }
 
     /**
+     * Gets the name.
+     * 
      * @return the name
      */
     public String getName()
@@ -66,6 +75,8 @@ public class HBaseGeneratedIdWithTableGenerator
     }
 
     /**
+     * Sets the name.
+     * 
      * @param name
      *            the name to set
      */

@@ -19,47 +19,59 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 /**
- * @author Pragalbh Garg
+ * The Class EmbeddedCollectionEntity.
  * 
+ * @author Pragalbh Garg
  */
 @Embeddable
 public class EmbeddedCollectionEntity
 {
-    // @Id
+
+    /** The collection id. */
     @Column(name = "COLLECTION_ID")
     private String collectionId;
 
+    /** The collection name. */
     @Column(name = "COLLECTION_NAME")
     private String collectionName;
 
-    // @ManyToOne(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
-    // @JoinColumn(name="SEC")
-    // private HbaseSecondaryTableEntity hbaseSec;
-    // public HbaseSecondaryTableEntity getHbaseSec()
-    // {
-    // return hbaseSec;
-    // }
-    //
-    // public void setHbaseSec(HbaseSecondaryTableEntity hbaseSec)
-    // {
-    // this.hbaseSec = hbaseSec;
-    // }
-
+    /**
+     * Gets the collection id.
+     * 
+     * @return the collection id
+     */
     public String getCollectionId()
     {
         return collectionId;
     }
 
+    /**
+     * Sets the collection id.
+     * 
+     * @param collectionId
+     *            the new collection id
+     */
     public void setCollectionId(String collectionId)
     {
         this.collectionId = collectionId;
     }
 
+    /**
+     * Gets the collection name.
+     * 
+     * @return the collection name
+     */
     public String getCollectionName()
     {
         return collectionName;
     }
 
+    /**
+     * Sets the collection name.
+     * 
+     * @param collectionName
+     *            the new collection name
+     */
     public void setCollectionName(String collectionName)
     {
         this.collectionName = collectionName;

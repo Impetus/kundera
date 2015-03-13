@@ -50,6 +50,7 @@ import com.impetus.kundera.configure.schema.TableInfo;
 import com.impetus.kundera.configure.schema.api.AbstractSchemaManager;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.metadata.model.annotation.DefaultEntityAnnotationProcessor;
@@ -272,10 +273,13 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
         // iterating all classes of pu to generate schema
         for (Class<?> clazz : entityMap.keySet())
         {
-            String tablename = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, clazz).getTableName();
+            EntityMetadata m = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, clazz);
+            if(m!=null){
+            String tablename = m.getTableName();
             HTableDescriptor hTableDescriptor = getTableDescriptor(clazz, entityMap.get(clazz), tablename);
             String hTableName = HBaseUtils.getHTableName(databaseName, tablename);
             createOrUpdateTable(hTableName, hTableDescriptor);
+            }
         }
     }
 

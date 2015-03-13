@@ -1,5 +1,5 @@
 /*******************************************************************************
- * * Copyright 2012 Impetus Infotech.
+ * * Copyright 2015 Impetus Infotech.
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -89,7 +89,7 @@ public class HBaseCompositeTypeTest
      * CRUD over Compound primary Key.
      */
     @Test
-    public synchronized void onCRUD()
+    public void onCRUD()
     {
         timeLineId = UUID.randomUUID();
         HBaseCompoundKey key = new HBaseCompoundKey("mevivs", 1, timeLineId);
@@ -127,7 +127,7 @@ public class HBaseCompositeTypeTest
      * On query.
      */
     @Test
-    public synchronized void onQuery()
+    public void onQuery()
     {
         timeLineId = UUID.randomUUID();
         HBaseCompoundKey key = new HBaseCompoundKey("mevivs", 1, timeLineId);
@@ -228,7 +228,7 @@ public class HBaseCompositeTypeTest
      * On named query test.
      */
     @Test
-    public synchronized void onNamedQueryTest()
+    public void onNamedQueryTest()
     {
         updateNamed();
         deleteNamed();

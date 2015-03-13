@@ -53,10 +53,14 @@ public class LuceneCleanupUtilities
                 {
                     for (File file : files)
                     {
-                        // Delete each file
-                        if (!file.delete())
-                        {
-                        }
+                    	if(file.isDirectory() && !(file.list().length==0)){
+                    	
+                    			cleanDir(file.getPath());
+                    			file.delete();
+                    	}else{
+                    		file.delete();
+                    	}
+                        
                     }
                 }
             }

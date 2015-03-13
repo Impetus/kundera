@@ -19,7 +19,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.hbase.junits.HBaseCli;
 import com.impetus.client.hbase.testingutil.HBaseTestingUtils;
 import com.impetus.kundera.client.crud.associations.AssociationsBiDirectionalBase;
 
@@ -66,7 +65,6 @@ public class HBaseBiAssociationTest extends AssociationsBiDirectionalBase
         em.close();
         emf.close();
         HBaseTestingUtils.dropSchema("HBaseNew");
-        HBaseCli.stopCluster();
     }
 
 }
