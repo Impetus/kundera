@@ -676,7 +676,7 @@ public class UdtAsEmbeddablesCRUDTest
         CassandraCli.dropKeySpace("UdtTest");
         if (entityManager != null)
         {
-            entityManager.close();
+            
             entityManager = null;
             emf.close();
             emf = null;
