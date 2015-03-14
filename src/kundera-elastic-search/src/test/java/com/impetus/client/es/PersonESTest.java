@@ -45,6 +45,8 @@ import com.impetus.client.es.PersonES.Day;
 import com.impetus.kundera.PersistenceProperties;
 
 /**
+ * The Class PersonESTest.
+ * 
  * @author vivek.mishra junit to demonstrate ESQuery implementation.
  */
 public class PersonESTest
@@ -56,6 +58,7 @@ public class PersonESTest
     /** The em. */
     private EntityManager em;
 
+    /** The node. */
     private static Node node = null;
 
     /** The person1. */
@@ -100,6 +103,9 @@ public class PersonESTest
         }
     }
 
+    /**
+     * Setup.
+     */
     @Before
     public void setup()
     {
@@ -109,6 +115,20 @@ public class PersonESTest
         init();
     }
 
+    /**
+     * Test with batch.
+     * 
+     * @throws NoSuchFieldException
+     *             the no such field exception
+     * @throws SecurityException
+     *             the security exception
+     * @throws IllegalArgumentException
+     *             the illegal argument exception
+     * @throws IllegalAccessException
+     *             the illegal access exception
+     * @throws InterruptedException
+     *             the interrupted exception
+     */
     @Test
     public void testWithBatch() throws NoSuchFieldException, SecurityException, IllegalArgumentException,
             IllegalAccessException, InterruptedException
@@ -216,6 +236,12 @@ public class PersonESTest
         emf.close();
     }
 
+    /**
+     * Test specific field retrieval.
+     * 
+     * @throws InterruptedException
+     *             the interrupted exception
+     */
     @Test
     public void testSpecificFieldRetrieval() throws InterruptedException
     {
@@ -234,6 +260,12 @@ public class PersonESTest
 
     }
 
+    /**
+     * Test find jpql.
+     * 
+     * @throws InterruptedException
+     *             the interrupted exception
+     */
     @Test
     public void testFindJPQL() throws InterruptedException
     {
@@ -309,8 +341,36 @@ public class PersonESTest
 
         assertResultList(persons, person1, person2, person4);
 
+        testCount();
+        testCountWithField();
+        testCountWithWhere();
+        testCountWithWhereAnd();
+        testCountWithWhereNullAnd();
+        testCountWithWhereOr();
+        testCountWithNot();
+        testCountWithIn();
+        testCountWithInString();
+        testInWithStringArray();
+        testInWithIntegerArray();
+        testInWithListPositionalParameter();
+        testInWithStringList();
+        testInWithIntegerList();
+        testInWithObjectList();
+        testInWithBlankList();
+        testInWithIntegerSet();
+        testInWithStringSet();
+        testInWithIntegerValues();
+        testInWithStringValues();
+        testInWithOrClause();
+        testInWithAndClause();
+        testFieldWithInClause();
+        testMinWithIn();
+        testInWithBlankValues();
     }
 
+    /**
+     * Test not with delete.
+     */
     @Test
     public void testNotWithDelete()
     {
@@ -324,6 +384,9 @@ public class PersonESTest
         assertResultList(resultList, person1, person2, person3, person4);
     }
 
+    /**
+     * Test not with update.
+     */
     @Test
     public void testNotWithUpdate()
     {
@@ -342,7 +405,9 @@ public class PersonESTest
         Assert.assertEquals(50, person.getAge().intValue());
     }
 
-    @Test
+    /**
+     * Test count.
+     */
     public void testCount()
     {
         String queryString = "Select count(p) from PersonES p";
@@ -354,7 +419,9 @@ public class PersonESTest
         Assert.assertEquals(4, ((Long) resultList.get(0)).intValue());
     }
 
-    @Test
+    /**
+     * Test count with field.
+     */
     public void testCountWithField()
     {
         String queryString = "Select count(p.age) from PersonES p";
@@ -366,7 +433,9 @@ public class PersonESTest
         Assert.assertEquals(4, ((Long) resultList.get(0)).intValue());
     }
 
-    @Test
+    /**
+     * Test count with where.
+     */
     public void testCountWithWhere()
     {
         String queryString = "Select count(p.age) from PersonES p where p.age > 25";
@@ -378,7 +447,9 @@ public class PersonESTest
         Assert.assertEquals(2, ((Long) resultList.get(0)).intValue());
     }
 
-    @Test
+    /**
+     * Test count with where and.
+     */
     public void testCountWithWhereAnd()
     {
         String queryString = "Select count(p.age) from PersonES p where p.age > 25 and p.personName = 'amit'";
@@ -390,7 +461,9 @@ public class PersonESTest
         Assert.assertEquals(1, ((Long) resultList.get(0)).intValue());
     }
 
-    @Test
+    /**
+     * Test count with where null and.
+     */
     public void testCountWithWhereNullAnd()
     {
         String queryString = "Select count(p.age) from PersonES p where p.age < 25 and p.personName = 'amit'";
@@ -402,7 +475,9 @@ public class PersonESTest
         Assert.assertEquals(0, ((Long) resultList.get(0)).intValue());
     }
 
-    @Test
+    /**
+     * Test count with where or.
+     */
     public void testCountWithWhereOr()
     {
         String queryString = "Select count(p) from PersonES p where p.age < 25 or p.personName = 'amit'";
@@ -414,7 +489,9 @@ public class PersonESTest
         Assert.assertEquals(3, ((Long) resultList.get(0)).intValue());
     }
 
-    @Test
+    /**
+     * Test count with not.
+     */
     public void testCountWithNot()
     {
         String queryString = "Select count(p.age) from PersonES p where p.personName <> 'amit'";
@@ -426,7 +503,9 @@ public class PersonESTest
         Assert.assertEquals(3, ((Long) resultList.get(0)).intValue());
     }
 
-    @Test
+    /**
+     * Test count with in.
+     */
     public void testCountWithIn()
     {
         String queryString = "Select count(p.age) from PersonES p where p.age In (20, 30)";
@@ -438,7 +517,9 @@ public class PersonESTest
         Assert.assertEquals(2, ((Long) resultList.get(0)).intValue());
     }
 
-    @Test
+    /**
+     * Test count with in string.
+     */
     public void testCountWithInString()
     {
         String queryString = "Select count(p.age) from PersonES p where p.personName IN ('amit', 'dev', 'lilkl')";
@@ -450,7 +531,9 @@ public class PersonESTest
         Assert.assertEquals(2, ((Long) resultList.get(0)).intValue());
     }
 
-    @Test
+    /**
+     * Test in with string array.
+     */
     public void testInWithStringArray()
     {
         String queryString = "Select p from PersonES p where p.personId IN :values";
@@ -462,7 +545,9 @@ public class PersonESTest
         assertResultList(resultList, person1, person3, person4);
     }
 
-    @Test
+    /**
+     * Test in with integer array.
+     */
     public void testInWithIntegerArray()
     {
         String queryString = "Select p from PersonES p where p.age IN :values";
@@ -474,7 +559,9 @@ public class PersonESTest
         assertResultList(resultList, person1, person2);
     }
 
-    @Test
+    /**
+     * Test in with list positional parameter.
+     */
     public void testInWithListPositionalParameter()
     {
         String queryString = "Select p from PersonES p where p.age IN ?1";
@@ -488,7 +575,9 @@ public class PersonESTest
         assertResultList(resultList, person2, person3);
     }
 
-    @Test
+    /**
+     * Test in with string list.
+     */
     public void testInWithStringList()
     {
         String queryString = "Select p from PersonES p where p.personId IN :list";
@@ -502,7 +591,9 @@ public class PersonESTest
         assertResultList(resultList, person2, person3);
     }
 
-    @Test
+    /**
+     * Test in with integer list.
+     */
     public void testInWithIntegerList()
     {
         String queryString = "Select p from PersonES p where p.age IN :list";
@@ -516,7 +607,9 @@ public class PersonESTest
         assertResultList(resultList, person2, person4);
     }
 
-    @Test
+    /**
+     * Test in with object list.
+     */
     public void testInWithObjectList()
     {
         String queryString = "Select p from PersonES p where p.personId IN :list";
@@ -530,7 +623,9 @@ public class PersonESTest
         assertResultList(resultList, person2, person3);
     }
 
-    @Test
+    /**
+     * Test in with blank list.
+     */
     public void testInWithBlankList()
     {
         String queryString = "Select p from PersonES p where p.age IN :list";
@@ -542,7 +637,9 @@ public class PersonESTest
         assertResultList(resultList);
     }
 
-    @Test
+    /**
+     * Test in with integer set.
+     */
     public void testInWithIntegerSet()
     {
         String queryString = "Select p from PersonES p where p.age IN :set";
@@ -556,7 +653,9 @@ public class PersonESTest
         assertResultList(resultList, person1, person3);
     }
 
-    @Test
+    /**
+     * Test in with string set.
+     */
     public void testInWithStringSet()
     {
         String queryString = "Select p from PersonES p where p.personId IN :set";
@@ -570,7 +669,9 @@ public class PersonESTest
         assertResultList(resultList, person2, person3);
     }
 
-    @Test
+    /**
+     * Test in with integer values.
+     */
     public void testInWithIntegerValues()
     {
         String queryString = "Select p from PersonES p where p.age IN ( 10, 20)";
@@ -580,7 +681,9 @@ public class PersonESTest
         assertResultList(resultList, person1, person2);
     }
 
-    @Test
+    /**
+     * Test in with string values.
+     */
     public void testInWithStringValues()
     {
         String queryString = "Select p from PersonES p where p.personId IN ( '2', '3','10')";
@@ -590,7 +693,9 @@ public class PersonESTest
         assertResultList(resultList, person2, person3);
     }
 
-    @Test
+    /**
+     * Test in with or clause.
+     */
     public void testInWithOrClause()
     {
         String queryString = "Select p from PersonES p where p.age IN ( 10, 20) or p.age = 40";
@@ -600,7 +705,9 @@ public class PersonESTest
         assertResultList(resultList, person1, person2, person4);
     }
 
-    @Test
+    /**
+     * Test in with and clause.
+     */
     public void testInWithAndClause()
     {
         String queryString = "Select p from PersonES p where p.age IN ( 10, 20) and p.personId = '2'";
@@ -610,7 +717,9 @@ public class PersonESTest
         assertResultList(resultList, person2);
     }
 
-    @Test
+    /**
+     * Test field with in clause.
+     */
     public void testFieldWithInClause()
     {
         String queryString = "Select p.personName from PersonES p where p.personId IN ( '1', '2') and p.age = 10";
@@ -622,7 +731,9 @@ public class PersonESTest
         Assert.assertEquals("karthik", resultList.get(0));
     }
 
-    @Test
+    /**
+     * Test min with in.
+     */
     public void testMinWithIn()
     {
         String queryString = "Select sum(p.age) from PersonES p where p.personId IN ( '1', '2') or p.age = 40";
@@ -634,7 +745,9 @@ public class PersonESTest
         Assert.assertEquals(70.0, resultList.get(0));
     }
 
-    @Test
+    /**
+     * Test in with blank values.
+     */
     public void testInWithBlankValues()
     {
         String queryString = "Select p from PersonES p where p.personId IN ( )";
@@ -644,6 +757,9 @@ public class PersonESTest
         assertResultList(resultList);
     }
 
+    /**
+     * Test in with delete.
+     */
     @Test
     public void testInWithDelete()
     {
@@ -659,7 +775,6 @@ public class PersonESTest
         List resultList = query.getResultList();
 
         assertResultList(resultList, person1, person3);
-
     }
 
     /**
@@ -723,8 +838,6 @@ public class PersonESTest
      *            the age
      * @param name
      *            the name
-     * @param salary
-     *            the salary
      * @return the person es
      */
     private PersonES createPerson(String id, int age, String name)
@@ -783,10 +896,10 @@ public class PersonESTest
     /**
      * Match person to verify each field of both PersonES objects are same.
      * 
-     * @param person
-     *            the person
      * @param resultPerson
      *            the result person
+     * @param person
+     *            the person
      */
     private void matchPerson(PersonES resultPerson, PersonES person)
     {

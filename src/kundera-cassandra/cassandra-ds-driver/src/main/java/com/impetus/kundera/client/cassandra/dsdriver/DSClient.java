@@ -306,7 +306,7 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         {
             Row row = rowIter.next();
             DataType dataType = row.getColumnDefinitions().getType(columnName);
-            Object columnValue = DSClientUtilities.assign(row, null, null, dataType.getName(), null, columnName, null);
+            Object columnValue = DSClientUtilities.assign(row, null, null, dataType.getName(), null, columnName, null, null);
             results.add(columnValue);
         }
         return results;
@@ -646,7 +646,7 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
                     && !columnName.equals(((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName()))
             {
                 Object relationalValue = DSClientUtilities.assign(row, null, metadata, dataType.getName(), entityType,
-                        columnName, null);
+                        columnName, null, metamodel);
                 relationalValues.put(columnName, relationalValue);
             }
             else
@@ -661,7 +661,7 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
                     if (!attribute.isAssociation())
                     {
                         entity = DSClientUtilities.assign(row, entity, metadata, dataType.getName(), entityType,
-                                columnName, null);
+                                columnName, null, metamodel);
                     }
                 }
                 else if (metamodel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType()))
@@ -672,7 +672,7 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
                 else
                 {
                     entity = DSClientUtilities.assign(row, entity, metadata, dataType.getName(), entityType,
-                            columnName, null);
+                            columnName, null, metamodel);
                 }
             }
         }
@@ -731,7 +731,7 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
                     else if (((AbstractAttribute) compoundAttribute).getJPAColumnName().equals(columnName))
                     {
                         DSClientUtilities.assign(row, compoundKeyObject, null, dataType.getName(), null, columnName,
-                                (Field) compoundAttribute.getJavaMember());
+                                (Field) compoundAttribute.getJavaMember(), metaModel);
                         PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), compoundKeyObject);
                         break;
                     }
