@@ -296,7 +296,7 @@ public class BlogPostTest
         }
         catch (Exception e)
         {
-            Assert.assertEquals("com.impetus.kundera.KunderaException: InvalidRequestException(why:null is not supported inside collections)", e.getMessage());
+            Assert.assertEquals("com.impetus.kundera.KunderaException: com.datastax.driver.core.exceptions.InvalidQueryException: null is not supported inside collections", e.getMessage());
         }
         try
         {
@@ -307,7 +307,7 @@ public class BlogPostTest
         }
         catch (Exception e)
         {
-            Assert.assertEquals("com.impetus.kundera.KunderaException: InvalidRequestException(why:null is not supported inside collections)", e.getMessage());
+            Assert.assertEquals("com.impetus.kundera.KunderaException: com.datastax.driver.core.exceptions.InvalidQueryException: null is not supported inside collections", e.getMessage());
         }
 
         p1 = prepareBlogPost1();
@@ -322,7 +322,7 @@ public class BlogPostTest
         }
         catch (Exception e)
         {
-            Assert.assertEquals("com.impetus.kundera.KunderaException: InvalidRequestException(why:null is not supported inside collections)", e.getMessage());
+            Assert.assertEquals("com.impetus.kundera.KunderaException: com.datastax.driver.core.exceptions.InvalidQueryException: null is not supported inside collections", e.getMessage());
         }
 
         try
@@ -334,7 +334,7 @@ public class BlogPostTest
         }
         catch (Exception e)
         {
-            Assert.assertEquals("com.impetus.kundera.KunderaException: InvalidRequestException(why:null is not supported inside collections)", e.getMessage());
+            Assert.assertEquals("com.impetus.kundera.KunderaException: com.datastax.driver.core.exceptions.InvalidQueryException: null is not supported inside collections", e.getMessage());
         }
 
     }
