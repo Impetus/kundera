@@ -1,0 +1,97 @@
+Kundera
+Copyright 2010-2015 The Apache Software Foundation
+
+This product includes software developed by The Apache Software
+Foundation (http://www.apache.org/). Additionally, 
+it uses the following softwares included as its maven dependencies
+
+Cassandra Libraries 
+cassandra-all (https://github.com/apache/cassandra)
+
+Logging utilities
+slf4j (http://www.slf4j.org/)
+log4j (http://logging.apache.org/log4j/)
+commons-logging(http://commons.apache.org/proper/commons-logging/)
+
+Pelops client utility
+https://github.com/s7/scale7-pelops
+
+Compression support provided by snappy-java (http://code.google.com/p/snappy-java/)
+Written by Taro L. Saito.
+org.xerial(snappy)
+
+Apache commoms library
+commons-lang (http://commons.apache.org/proper/commons-lang/)
+
+Persistence Api :
+javaee-api (http://docs.oracle.com/javaee/7/api/)
+
+Lucene utilities 
+Lucene core and helper jars (http://lucene.apache.org/)
+
+Directory naming 
+directory-naming
+
+Eclipse link parser API
+EclipseLink(https://github.com/eclipse/eclipselink.runtime)
+
+Byte code generation library 
+cglib (https://github.com/cglib/cglib)
+
+Caching library
+Ehcache (http://ehcache.org/)
+
+Java Bytecode manipulation libraray
+javassist(javassist(https://github.com/jboss-javassist/javassist)
+
+Google' core library 
+Guava(https://code.google.com/p/guava-libraries/)
+
+Hibernate libraries
+Hibernate(http://hibernate.org/)
+
+Testing utils:
+Easymock (http://easymock.org/)
+
+Hbase & Hadoop client APIs and utilities :
+hbase (http://hbase.apache.org/)
+hadoop (http://hadoop.apache.org/)
+
+MongoDB client APIs and utilities
+mongodb Driver (https://github.com/mongodb/mongo-java-driver)
+
+Neo4j database and driver
+Neo4j database driver (https://github.com/neo4j-contrib/neo4j-org)
+
+Library to serialize objects to XML and back again.
+thoughtworks xtream(http://xstream.codehaus.org/)
+
+Jersey API for rest client 
+jersey(https://jersey.java.net/)
+
+Redis java driver 
+Jedis (https://github.com/xetorthio/jedis)
+
+Continuous test performing utility
+org.databene.contiperf(http://databene.org/contiperf)
+
+HSQL database andclient util
+HSQL DB (http://hsqldb.org/)
+
+Oracle KV Store and Client Community edition
+(http://www.oracle.com/technetwork/database/database-technologies/nosqldb/downloads/)
+Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
+
+JTS Topology Suite for 2D spatial predicates and functions
+com.vividsolutions.jts(http://www.vividsolutions.com/)
+
+Http client for rest calls :
+httpcomponent (http://hc.apache.org/)
+
+Json library
+Gson (https://code.google.com/p/google-gson/)
+
+Jackson libraries for object to xml & json conversions
+fasterxml API(https://github.com/FasterXML/)
+
+
