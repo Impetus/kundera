@@ -44,7 +44,7 @@ import com.impetus.kundera.query.Query;
  */
 public class ResultIteratorTest extends BaseTest
 {
-    private static final String SEC_IDX_CASSANDRA_TEST = "ds_pu";
+    private static final String SEC_IDX_CASSANDRA_TEST = "cassandra_ds_pu";
 
     /** The emf. */
     private EntityManagerFactory emf;

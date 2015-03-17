@@ -17,9 +17,10 @@
 				value="com.impetus.kundera.client.cassandra.dsdriver.DSClientFactory" />
 		</properties>
 	</persistence-unit>
-	
+
 	<persistence-unit name="external_pu">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="9042" />
@@ -29,6 +30,56 @@
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.kundera.client.cassandra.dsdriver.DSClientFactory" />
 			<property name="kundera.client.property" value="dsclient.xml" />
+		</properties>
+	</persistence-unit>
+
+	<persistence-unit name="ds_collection_pu">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.client.crud.collection.BlogPost</class>
+		<class>com.impetus.client.cassandra.udt.PersonUDT</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="9042" />
+			<property name="kundera.keyspace" value="KunderaExamples" />
+			<property name="kundera.dialect" value="cassandra" />
+			<property name="kundera.ddl.auto.prepare" value="create" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.kundera.client.cassandra.dsdriver.DSClientFactory" />
+		</properties>
+	</persistence-unit>
+
+	<persistence-unit name="ds_composite_pu">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.client.cassandra.crud.compositeType.association.CassandraEmbeddedAssociation</class>
+		<class>com.impetus.client.cassandra.crud.compositeType.association.UserInfo</class>
+		<class>com.impetus.kundera.client.cassandra.composite.PrimeUserDataType</class>
+		<class>com.impetus.kundera.client.cassandra.composite.PrimeUser</class>
+		<class>com.impetus.kundera.client.cassandra.composite.DSEmbeddedAssociation</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="9042" />
+			<property name="kundera.keyspace" value="KunderaExamples" />
+			<property name="kundera.dialect" value="cassandra" />
+			<property name="kundera.ddl.auto.prepare" value="create" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.kundera.client.cassandra.dsdriver.DSClientFactory" />
+		</properties>
+	</persistence-unit>
+
+	<persistence-unit name="cassandra_ds_pu">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.client.crud.PersonCassandra</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="9042" />
+			<property name="kundera.keyspace" value="KunderaExamples" />
+			<property name="kundera.dialect" value="cassandra" />
+			<property name="kundera.ddl.auto.prepare" value="create" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.kundera.client.cassandra.dsdriver.DSClientFactory" />
 		</properties>
 	</persistence-unit>
 

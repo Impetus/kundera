@@ -63,7 +63,7 @@ import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
  */
 public class PersonEntityTest extends BaseTest
 {
-    private static final String _PU = "ds_pu";
+    private static final String _PU = "cassandra_ds_pu";
 
     /** The emf. */
     private EntityManagerFactory emf;

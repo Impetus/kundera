@@ -47,7 +47,7 @@ public class BlogPostTest
 
     EntityManager em;
 
-    String persistenceUnit = "ds_pu";
+    String persistenceUnit = "ds_collection_pu";
 
     private boolean RUN_IN_EMBEDDED_MOODE = true;
 

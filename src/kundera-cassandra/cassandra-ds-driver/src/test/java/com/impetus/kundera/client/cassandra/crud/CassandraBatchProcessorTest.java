@@ -48,7 +48,7 @@ public class CassandraBatchProcessorTest
     /**
      * 
      */
-    private static final String PERSISTENCE_UNIT = "ds_pu";
+    private static final String PERSISTENCE_UNIT = "cassandra_ds_pu";
 
     /** The emf. */
     private EntityManagerFactory emf;

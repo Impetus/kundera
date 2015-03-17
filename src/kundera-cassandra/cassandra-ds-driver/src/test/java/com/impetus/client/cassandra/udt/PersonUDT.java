@@ -36,7 +36,7 @@ import com.impetus.kundera.index.IndexCollection;
  * The Class PersonUDT.
  */
 @Entity
-@Table(name = "person_udt", schema = "KunderaExamples@ds_pu")
+@Table(name = "person_udt", schema = "KunderaExamples@ds_collection_pu")
 @IndexCollection(columns = { @Index(name = "nicknames"), @Index(name = "email"), @Index(name = "password") })
 public class PersonUDT
 {

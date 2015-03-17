@@ -46,7 +46,7 @@ import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
 
 public class DSCompositeTypeOrderByTest
 {
-    private static final String _PU = "ds_pu";
+    private static final String _PU = "ds_composite_pu";
 
     private EntityManagerFactory emf;
 

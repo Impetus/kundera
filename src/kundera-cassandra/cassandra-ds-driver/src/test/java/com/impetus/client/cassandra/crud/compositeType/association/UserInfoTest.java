@@ -56,7 +56,7 @@ public class UserInfoTest
         CassandraCli.initClient();
         CassandraCli.dropKeySpace("KunderaExamples");
         Map<String, String> props = new HashMap<String, String>(1);
-        emf = Persistence.createEntityManagerFactory("ds_pu", props);
+        emf = Persistence.createEntityManagerFactory("ds_composite_pu", props);
     }
 
     @Test
@@ -144,7 +144,7 @@ public class UserInfoTest
     {
         EntityManager em = emf.createEntityManager();
         Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
-        Client client = clients.get("ds_pu");
+        Client client = clients.get("ds_composite_pu");
         ((CassandraClientBase) client).setCqlVersion("3.0.0");
         return em;
     }

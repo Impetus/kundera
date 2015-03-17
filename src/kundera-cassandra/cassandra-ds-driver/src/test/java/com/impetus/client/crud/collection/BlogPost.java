@@ -38,7 +38,7 @@ import com.impetus.kundera.index.IndexCollection;
  * @author amresh.singh
  */
 @Entity
-@Table(name="blog_posts", schema="KunderaExamples@ds_pu")
+@Table(name="blog_posts", schema="KunderaExamples@ds_collection_pu")
 @NamedNativeQuery(name="select.post.1", query="select * from blog_posts where post_id = 1")
 @NamedQuery(name="select.post.2", query="Select p from BlogPost p where p.postId=2")
 @IndexCollection(columns = { @Index(name = "body"), @Index(name = "tags"), @Index(name = "likedBy"), @Index(name = "comments") })

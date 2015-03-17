@@ -53,7 +53,7 @@ public class DSCQLTranslatorTest
     
     private static final String KEYSPACE = "KunderaExamples";
 
-    private static final String _PU="ds_pu";
+    private static final String _PU="ds_composite_pu";
     
     /**
      * @throws java.lang.Exception

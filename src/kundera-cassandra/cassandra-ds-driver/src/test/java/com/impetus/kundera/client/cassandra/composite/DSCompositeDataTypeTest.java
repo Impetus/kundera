@@ -51,7 +51,7 @@ public class DSCompositeDataTypeTest
     /**
      * 
      */
-    private static final String PERSISTENCE_UNIT = "ds_pu";
+    private static final String PERSISTENCE_UNIT = "ds_composite_pu";
 
     private EntityManagerFactory emf;
 

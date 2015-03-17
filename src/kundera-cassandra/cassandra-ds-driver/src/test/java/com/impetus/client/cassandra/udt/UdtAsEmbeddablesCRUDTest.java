@@ -51,7 +51,7 @@ public class UdtAsEmbeddablesCRUDTest
 {
 
     /** The Constant PU. */
-    private static final String PU = "ds_pu";
+    private static final String PU = "ds_collection_pu";
 
     /** The emf. */
     private static EntityManagerFactory emf;
