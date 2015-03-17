@@ -83,7 +83,7 @@ public class CassQueryTest
             InvocationTargetException
     {
         CassandraCli.createKeySpace("KunderaExamples");
-        String pu = "secIdxCassandraTest";
+        String pu = "genericCassandraTest";
         EntityManagerFactory emf = Persistence.createEntityManagerFactory(pu);
         EntityManager em = emf.createEntityManager();
 
@@ -312,7 +312,7 @@ public class CassQueryTest
             InvocationTargetException
     {
         CassandraCli.createKeySpace("KunderaExamples");
-        String pu = "secIdxCassandraTest";
+        String pu = "genericCassandraTest";
         EntityManagerFactory emf = Persistence.createEntityManagerFactory(pu);
         EntityManager em = emf.createEntityManager();
 
@@ -432,7 +432,7 @@ public class CassQueryTest
             InvocationTargetException
     {
         CassandraCli.createKeySpace("KunderaExamples");
-        String pu = "secIdxCassandraTest";
+        String pu = "genericCassandraTest";
         EntityManagerFactory emf = Persistence.createEntityManagerFactory(pu);
         EntityManager em = emf.createEntityManager();
 

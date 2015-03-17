@@ -78,7 +78,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  */
 public class PersonCassandraTest extends BaseTest
 {
-    private static final String SEC_IDX_CASSANDRA_TEST = "secIdxCassandraTest";
+    private static final String SEC_IDX_CASSANDRA_TEST = "genericCassandraTest";
 
     /** The emf. */
     private EntityManagerFactory emf;

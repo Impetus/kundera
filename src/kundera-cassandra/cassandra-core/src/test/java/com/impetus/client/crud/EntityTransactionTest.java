@@ -72,7 +72,7 @@ public class EntityTransactionTest extends BaseTest
         CassandraCli.createKeySpace("KunderaExamples");
         loadData();
 
-        emf = Persistence.createEntityManagerFactory("secIdxCassandraTest");
+        emf = Persistence.createEntityManagerFactory("genericCassandraTest");
         em = emf.createEntityManager();
     }
 

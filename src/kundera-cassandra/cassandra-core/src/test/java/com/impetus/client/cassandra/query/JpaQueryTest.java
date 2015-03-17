@@ -71,7 +71,7 @@ public class JpaQueryTest {
 	@Test
 	public void test() throws Exception {
 
-		String pu = "secIdxCassandraTest";
+		String pu = "genericCassandraTest";
 		EntityManagerFactory emf = Persistence.createEntityManagerFactory(pu);
 		EntityManager em = emf.createEntityManager();
 

@@ -60,7 +60,7 @@ public class CassandraIdQueryTest extends BaseTest
         CassandraCli.createKeySpace("KunderaExamples");
         Map propertyMap = new HashMap();
         propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_2_0);
-        emf = Persistence.createEntityManagerFactory("secIdxCassandraTest", propertyMap);
+        emf = Persistence.createEntityManagerFactory("genericCassandraTest", propertyMap);
         loadData();
         em = emf.createEntityManager();
         col = new java.util.HashMap<Object, Object>();
