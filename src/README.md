@@ -56,7 +56,12 @@ Currently Supported Datasources
 
 Recent Releases
 ================================
-####Please Note: trunk is current development branch. kundera-2.15.1 is released tag.
+####Please Note: trunk is current development branch. kundera-2.16 is released tag.
+
+#### 17-March-2015 - Kundera 2.16 released
+This release includes [bug fixes] (https://github.com/impetus-opensource/Kundera/wiki/Bug-Fixes), additional  improvements and the following new features compared to version 2.16:
+   * Hbase data remodeling with support for HBase-1.0 version.
+   ( Support for Hbase version 1.0 with the revised data model is available with Kundera's  "kundera-hbase-v2" dependency.)
 
 #### 2-March-2015 - Kundera 2.15.1 released
 This release includes [bug fixes] (https://github.com/impetus-opensource/Kundera/wiki/Bug-Fixes), additional  improvements and the following new features compared to version 2.15:
