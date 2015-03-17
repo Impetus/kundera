@@ -7,7 +7,21 @@
 
 	<persistence-unit name="secIdxCassandraTest">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
+    	<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="9160" />
+			<property name="kundera.keyspace" value="KunderaExamples" />
+			<property name="kundera.dialect" value="cassandra" />
+			<!-- <property name="kundera.ddl.auto.prepare" value="create" /> -->
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
+		</properties>
+	</persistence-unit>
+	
+	<persistence-unit name="genericCassandraTest">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<class>com.impetus.client.crud.PersonCassandra</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="9160" />
@@ -41,7 +55,9 @@
 
 	<persistence-unit name="luceneCassandraTest">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
-		<class>com.impetus.client.crud.PersonCassandra</class>
+		<class>com.impetus.client.crud.PersonLuceneCassandra</class>
+		<class>com.impetus.client.crud.PersonLuceneCassandraUUID</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="9160" />
@@ -189,6 +205,12 @@
 
 	<persistence-unit name="composite_pu">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.client.crud.compositeType.CassandraPrimeUser</class>
+		<class>com.impetus.client.cassandra.thrift.Phone</class>
+		<class>com.impetus.client.cassandra.thrift.PersonIdentity</class>
+		<class>com.impetus.client.crud.compositeType.association.UserInfo</class>
+		<class>com.impetus.client.crud.compositeType.CassandraEmbeddedAssociation</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="9160" />
@@ -282,6 +304,9 @@
 
 	<persistence-unit name="esIndexerTest">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.client.esindexer.PersonESIndexerCassandra</class>
+		<class>com.impetus.client.esindexer.PersonESIndexerCassandraUUID</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="9160" />
