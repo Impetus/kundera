@@ -971,7 +971,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
                         subEntity.getJavaType());
                 results = handler.readData(tableName, subEntityMetadata.getEntityClazz(), subEntityMetadata, rowId,
                         subEntityMetadata.getRelationNames(), filter, colToOutput);
-                if (!results.isEmpty())
+                if (results != null && !results.isEmpty())
                 {
                     break;
                 }
