@@ -796,10 +796,6 @@ public class HBaseQuery extends QueryImpl
             AbstractAttribute idCol = (AbstractAttribute) m.getIdAttribute();
             MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                     m.getPersistenceUnit());
-            if (metaModel.isEmbeddable(fieldClazz))
-            {
-                System.out.println("aivain");
-            }
             if (isIdColumn && metaModel.isEmbeddable(idCol.getBindableJavaType()))
             {
                 Map<Attribute, List<Object>> columnValues = new HashMap<Attribute, List<Object>>();
