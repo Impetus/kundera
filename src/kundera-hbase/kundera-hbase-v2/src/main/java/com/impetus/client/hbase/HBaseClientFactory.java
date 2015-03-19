@@ -36,7 +36,7 @@ import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
- * HBaseClientFactory, instantiates client for HBase
+ * HBaseClientFactory, instantiates client for HBase.
  */
 /**
  * @author Devender Yadav
@@ -44,15 +44,16 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
  */
 public class HBaseClientFactory extends GenericClientFactory
 {
-
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(HBaseClientFactory.class);
 
     /** The conf. */
     private Configuration conf;
 
+    /** The connection. */
     private org.apache.hadoop.hbase.client.Connection connection;
 
+    /** The Constant DEFAULT_ZOOKEEPER_PORT. */
     private static final String DEFAULT_ZOOKEEPER_PORT = "2181";
 
     /*
@@ -130,6 +131,7 @@ public class HBaseClientFactory extends GenericClientFactory
         }
         catch (IOException e)
         {
+            logger.error("Connection could not be established", e);
             throw new KunderaException("Connection could not be established", e);
         }
     }
@@ -180,6 +182,7 @@ public class HBaseClientFactory extends GenericClientFactory
         }
         catch (IOException e)
         {
+            logger.error("connection already closed", e);
             throw new KunderaException("connection already closed", e);
         }
     }

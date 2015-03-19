@@ -40,18 +40,23 @@ import org.slf4j.LoggerFactory;
 import com.impetus.client.hbase.testingutil.HBaseTestingUtils;
 
 /**
- * @author Kuldeep Mishra
+ * The Class HBaseUserTest.
  * 
+ * @author Kuldeep Mishra
  */
 public class HBaseUserTest
 {
 
+    /** The Constant TABLE. */
     private static final String TABLE = "KunderaHbaseXmlTest:HBASEUSERXYZ";
 
+    /** The emf. */
     private EntityManagerFactory emf;
 
+    /** The admin. */
     private static HBaseAdmin admin;
 
+    /** The connection. */
     private static Connection connection;
 
     /**
@@ -60,7 +65,10 @@ public class HBaseUserTest
     private static final Logger logger = LoggerFactory.getLogger(HBaseUserTest.class);
 
     /**
-     * @throws java.lang.Exception
+     * Sets the up before class.
+     * 
+     * @throws Exception
+     *             the exception
      */
     @BeforeClass
     public static void setUpBeforeClass() throws Exception
@@ -70,7 +78,10 @@ public class HBaseUserTest
     }
 
     /**
-     * @throws java.lang.Exception
+     * Tear down after class.
+     * 
+     * @throws Exception
+     *             the exception
      */
     @AfterClass
     public static void tearDownAfterClass() throws Exception
@@ -78,6 +89,12 @@ public class HBaseUserTest
         HBaseTestingUtils.dropSchema("HBaseNew");
     }
 
+    /**
+     * Test.
+     * 
+     * @throws IOException
+     *             Signals that an I/O exception has occurred.
+     */
     @Test
     public void test() throws IOException
     {
@@ -115,6 +132,12 @@ public class HBaseUserTest
         }
     }
 
+    /**
+     * Test using external property.
+     * 
+     * @throws IOException
+     *             Signals that an I/O exception has occurred.
+     */
     @Test
     public void testUsingExternalProperty() throws IOException
     {

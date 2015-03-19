@@ -41,27 +41,40 @@ import com.impetus.kundera.query.IResultIterator;
 import com.impetus.kundera.query.QueryHandlerException;
 
 /**
- * @author Pragalbh Garg
+ * The Class ResultIterator.
  * 
+ * @author Pragalbh Garg
+ * @param <E>
+ *            the element type
  */
 class ResultIterator<E> implements IResultIterator<E>
 {
+
+    /** The client. */
     private HBaseClient client;
 
+    /** The entity metadata. */
     private EntityMetadata entityMetadata;
 
+    /** The persistence delegator. */
     private PersistenceDelegator persistenceDelegator;
 
+    /** The handler. */
     private HBaseDataHandler handler;
 
+    /** The translator. */
     private QueryTranslator translator;
 
+    /** The columns. */
     private List<Map<String, Object>> columns;
 
+    /** The fetch size. */
     private int fetchSize;
 
+    /** The count. */
     private int count;
 
+    /** The scroll complete. */
     private boolean scrollComplete;
 
     /** the log used by this class. */

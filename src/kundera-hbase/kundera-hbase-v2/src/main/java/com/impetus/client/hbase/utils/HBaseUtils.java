@@ -28,13 +28,25 @@ import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 
 /**
- * @author Pragalbh Garg
+ * The Class HBaseUtils.
  * 
+ * @author Pragalbh Garg
  */
 public final class HBaseUtils
 {
 
+    /** The Constant AUTO_ID_ROW. */
     public static final String AUTO_ID_ROW = "kunderaAutoIdRow";
+
+    public static final String COL_FAMILY = "colFamily";
+
+    public static final String COL_NAME = "colName";
+
+    public static final String IS_EMBEDDABLE = "isEmbeddable";
+
+    public static final String FIELD_CLAZZ = "fieldClazz";
+
+    public static final String DELIM = "#";
 
     /**
      * Gets the bytes.
@@ -274,7 +286,7 @@ public final class HBaseUtils
      */
     public static boolean isFindKeyOnly(EntityMetadata metadata, List<Map<String, Object>> colToOutput)
     {
-        if (colToOutput!=null && colToOutput.size() == 1)
+        if (colToOutput != null && colToOutput.size() == 1)
         {
             String idCol = ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName();
             return idCol.equals(colToOutput.get(0).get("colName")) && !(boolean) colToOutput.get(0).get("isEmbeddable");

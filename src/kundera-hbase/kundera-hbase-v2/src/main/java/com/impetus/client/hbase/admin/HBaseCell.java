@@ -16,17 +16,39 @@
 package com.impetus.client.hbase.admin;
 
 /**
- * @author Pragalbh Garg
+ * The Class HBaseCell.
  * 
+ * @author Pragalbh Garg
  */
 public class HBaseCell
 {
 
+    /** The column family. */
     private String columnFamily;
 
+    /** The column name. */
     private String columnName;
 
+    /** The value. */
     private Object value;
+
+    /**
+     * Instantiates a new h base cell.
+     * 
+     * @param columnFamily
+     *            the column family
+     * @param columnName
+     *            the column name
+     * @param value
+     *            the value
+     */
+    public HBaseCell(String columnFamily, String columnName, Object value)
+    {
+        super();
+        this.columnFamily = columnFamily;
+        this.columnName = columnName;
+        this.value = value;
+    }
 
     /**
      * Gets the column family.
@@ -88,24 +110,6 @@ public class HBaseCell
      */
     public void setValue(Object value)
     {
-        this.value = value;
-    }
-
-    /**
-     * Instantiates a new h base cell.
-     * 
-     * @param columnFamily
-     *            the column family
-     * @param columnName
-     *            the column name
-     * @param value
-     *            the value
-     */
-    public HBaseCell(String columnFamily, String columnName, Object value)
-    {
-        super();
-        this.columnFamily = columnFamily;
-        this.columnName = columnName;
         this.value = value;
     }
 

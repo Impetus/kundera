@@ -19,13 +19,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Pragalbh Garg
+ * The Class HBaseRow.
  * 
+ * @author Pragalbh Garg
  */
 public class HBaseRow
 {
+
+    /** The row key. */
     private Object rowKey;
 
+    /** The row cells. */
     private List<HBaseCell> rowCells = new ArrayList<HBaseCell>();
 
     /**

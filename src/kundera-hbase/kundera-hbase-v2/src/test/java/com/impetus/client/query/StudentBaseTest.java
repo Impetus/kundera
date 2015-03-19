@@ -35,6 +35,7 @@ public abstract class StudentBaseTest
     /** The Constant SCHEMA. */
     protected static final String SCHEMA = "HBaseNew";
 
+    /** The Constant HBASE_PU. */
     protected static final String HBASE_PU = "queryTest";
 
     /** The emf. */

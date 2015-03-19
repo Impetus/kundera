@@ -18,8 +18,6 @@ package com.impetus.client.hbase;
 import java.util.Map;
 
 import org.apache.hadoop.hbase.filter.Filter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
@@ -33,11 +31,10 @@ import com.impetus.kundera.client.Client;
  */
 class HBaseClientProperties
 {
-    /** log for this class. */
-    private static Logger log = LoggerFactory.getLogger(HBaseClientProperties.class);
-
+    /** The Constant FILTER. */
     private static final String FILTER = "hbase.filter";
 
+    /** The hbase client. */
     private HBaseClient hbaseClient;
 
     /**

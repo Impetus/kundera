@@ -77,8 +77,9 @@ import com.impetus.kundera.utils.KunderaCoreUtils;
 import com.impetus.kundera.utils.ReflectUtils;
 
 /**
- * @author Pragalbh Garg
+ * The Class HBaseQuery.
  * 
+ * @author Pragalbh Garg
  */
 public class HBaseQuery extends QueryImpl
 {
@@ -282,23 +283,28 @@ public class HBaseQuery extends QueryImpl
      */
     class QueryTranslator
     {
+
+        /** The filter. */
         private Filter filter = null;
 
         /*
          * byte[] value for start row, in case of range query, else will contain
          * null.
          */
+        /** The start row. */
         private byte[] startRow = null;
 
         /*
          * byte[] value for end row, in case of range query, else will contain
          * null.
          */
+        /** The end row. */
         private byte[] endRow = null;
 
         /*
          * byte[] value for list of rows null.
          */
+        /** The is where or aggregation. */
         private boolean isWhereOrAggregation = false;
 
         /**

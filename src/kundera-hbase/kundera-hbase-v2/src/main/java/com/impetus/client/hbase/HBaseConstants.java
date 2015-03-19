@@ -16,14 +16,19 @@
 package com.impetus.client.hbase;
 
 /**
- * @author Pragalbh Garg
+ * The Class HBaseConstants.
  * 
+ * @author Pragalbh Garg
  */
 public final class HBaseConstants
 {
+
+    /** The Constant CF_DEFS. */
     public static final String CF_DEFS = "cf.defs";
 
+    /** The Constant ZOOKEEPER_PORT. */
     public static final String ZOOKEEPER_PORT = "zookeeper.port";
 
+    /** The Constant ZOOKEEPER_HOST. */
     public static final String ZOOKEEPER_HOST = "zookeeper.host";
 }

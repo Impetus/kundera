@@ -33,8 +33,9 @@ import com.impetus.client.hbase.admin.HBaseRow;
 import com.impetus.client.hbase.utils.HBaseUtils;
 
 /**
- * @author Pragalbh Garg
+ * The Class HBaseWriter.
  * 
+ * @author Pragalbh Garg
  */
 public class HBaseWriter implements Writer
 {
@@ -94,7 +95,8 @@ public class HBaseWriter implements Writer
         boolean isPresent = false;
         for (String columnName : columns.keySet())
         {
-            p.addColumn(columnFamilyName.getBytes(), Bytes.toBytes(columnName), HBaseUtils.getBytes(columns.get(columnName)));
+            p.addColumn(columnFamilyName.getBytes(), Bytes.toBytes(columnName),
+                    HBaseUtils.getBytes(columns.get(columnName)));
             isPresent = true;
         }
 

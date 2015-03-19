@@ -22,8 +22,9 @@ import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.filter.Filter;
 
 /**
- * @author Pragalbh Garg
+ * The Interface Reader.
  * 
+ * @author Pragalbh Garg
  */
 public interface Reader
 {
@@ -45,7 +46,7 @@ public interface Reader
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    List<HBaseData> LoadData(Table hTable, String columnFamily, Object rowKey, Filter filter, String... columns)
+    List<HBaseDataWrapper> LoadData(Table hTable, String columnFamily, Object rowKey, Filter filter, String... columns)
             throws IOException;
 
     /**
@@ -63,7 +64,7 @@ public interface Reader
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    List<HBaseData> LoadData(Table hTable, Object rowKey, Filter filter, String... columns) throws IOException;
+    List<HBaseDataWrapper> LoadData(Table hTable, Object rowKey, Filter filter, String... columns) throws IOException;
 
     /**
      * Load all.
@@ -86,7 +87,7 @@ public interface Reader
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    List<HBaseData> loadAll(Table hTable, Filter filter, byte[] startRow, byte[] endRow, String columnFamily,
+    List<HBaseDataWrapper> loadAll(Table hTable, Filter filter, byte[] startRow, byte[] endRow, String columnFamily,
             String qualifier, String[] columns) throws IOException;
 
     /**

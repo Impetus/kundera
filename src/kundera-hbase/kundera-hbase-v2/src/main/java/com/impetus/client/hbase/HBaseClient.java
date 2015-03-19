@@ -62,7 +62,6 @@ import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
-import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.TableGeneratorDiscriptor;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
@@ -73,8 +72,9 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**
- * @author Devender Yadav
+ * The Class HBaseClient.
  * 
+ * @author Devender Yadav
  */
 public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batcher, ClientPropertiesSetter,
         TableGenerator
@@ -88,9 +88,13 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
     /** The reader. */
     private EntityReader reader;
 
+    /** The nodes. */
     private List<Node> nodes = new ArrayList<Node>();
 
+    /** The batch size. */
     private int batchSize;
+
+    private static final String PIPE = "|";
 
     /**
      * Instantiates a new h base client.
@@ -139,24 +143,20 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         List<String> relationNames = entityMetadata.getRelationNames();
         String tableName = HBaseUtils.getHTableName(entityMetadata.getSchema(), entityMetadata.getTableName());
         Object enhancedEntity = null;
-        List results = null;
+        if (rowId == null)
+        {
+            return null;
+
+        }
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                entityMetadata.getPersistenceUnit());
+        if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
+        {
+            rowId = KunderaCoreUtils.prepareCompositeKey(entityMetadata, rowId);
+        }
         try
         {
-            if (rowId == null)
-            {
-                return null;
-            }
-
-            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
-                    entityMetadata.getPersistenceUnit());
-
-            if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
-            {
-                rowId = KunderaCoreUtils.prepareCompositeKey(entityMetadata, rowId);
-            }
-
-            results = fetchEntity(entityClass, rowId, entityMetadata, relationNames, tableName, results, null, null,
-                    null);
+            List results = fetchEntity(entityClass, rowId, entityMetadata, relationNames, tableName, null, null, null);
 
             if (results != null && !results.isEmpty())
             {
@@ -166,7 +166,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         catch (IOException e)
         {
             log.error("Error during find by id, Caused by: .", e);
-            throw new KunderaException(e);
+            throw new KunderaException("Error during find by id, Caused by: .", e);
         }
         return enhancedEntity;
     }
@@ -185,7 +185,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         {
             return null;
         }
-        List results = new ArrayList<E>();
+        List<E> results = new ArrayList<E>();
 
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 entityMetadata.getPersistenceUnit());
@@ -219,37 +219,43 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         catch (IOException ioex)
         {
             log.error("Error during find All , Caused by: .", ioex);
-            throw new KunderaException(ioex);
+            throw new KunderaException("Error during find All , Caused by: .", ioex);
         }
 
         return results;
     }
 
     /**
-     * (non-Javadoc)
+     * (non-Javadoc).
      * 
+     * @param <E>
+     *            the element type
+     * @param entityClass
+     *            the entity class
+     * @param column
+     *            the column
+     * @return the list
      * @see com.impetus.kundera.client.Client#find(java.lang.Class,
      *      java.util.Map)
      */
     @Override
-    public <E> List<E> find(Class<E> entityClass, Map<String, String> col)
+    public <E> List<E> find(Class<E> entityClass, Map<String, String> column)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, getPersistenceUnit(),
                 entityClass);
         List<E> entities = new ArrayList<E>();
         Map<String, Field> columnFamilyNameToFieldMap = MetadataUtils.createSuperColumnsFieldMap(entityMetadata,
                 kunderaMetadata);
-        for (String columnFamilyName : col.keySet())
+        for (String columnFamilyName : column.keySet())
         {
-            String entityId = col.get(columnFamilyName);
+            String entityId = column.get(columnFamilyName);
             if (entityId != null)
             {
                 E e = null;
                 try
                 {
-                    List results = new ArrayList();
-                    fetchEntity(entityClass, entityId, entityMetadata, entityMetadata.getRelationNames(),
-                            entityMetadata.getSchema(), results, null, null, null);
+                    List results = fetchEntity(entityClass, entityId, entityMetadata,
+                            entityMetadata.getRelationNames(), entityMetadata.getSchema(), null, null, null);
                     if (results != null)
                     {
                         e = (E) results.get(0);
@@ -258,12 +264,11 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
                 catch (IOException ioex)
                 {
                     log.error("Error during find for embedded entities, Caused by: .", ioex);
-
-                    throw new KunderaException(ioex);
+                    throw new KunderaException("Error during find for embedded entities, Caused by: .", ioex);
                 }
 
                 Field columnFamilyField = columnFamilyNameToFieldMap.get(columnFamilyName.substring(0,
-                        columnFamilyName.indexOf("|")));
+                        columnFamilyName.indexOf(PIPE)));
                 Object columnFamilyValue = PropertyAccessorHelper.getObject(e, columnFamilyField);
                 if (Collection.class.isAssignableFrom(columnFamilyField.getType()))
                 {
@@ -287,45 +292,51 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
      *            the entity class
      * @param metadata
      *            the metadata
-     * @param f
+     * @param filters
      *            the f
-     * @param filterClausequeue
+     * @param filterClauseQueue
      *            the filter clausequeue
-     * @param colToOutput
+     * @param columnsToOutput
      *            the col to output
      * @return the list
      */
-    public <E> List<E> findByQuery(Class<E> entityClass, EntityMetadata metadata, Filter f, Queue filterClausequeue,
-            List<Map<String, Object>> colToOutput)
+    public <E> List<E> findByQuery(Class<E> entityClass, EntityMetadata metadata, Filter filters,
+            Queue filterClauseQueue, List<Map<String, Object>> columnsToOutput)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClass);
         List<String> relationNames = entityMetadata.getRelationNames();
         String tableName = HBaseUtils.getHTableName(entityMetadata.getSchema(), entityMetadata.getTableName());
         List results = null;
-        FilterList filter = null;
-        if (f != null)
-        {
-            if (FilterList.class.isAssignableFrom(f.getClass()))
-            {
-                filter = (FilterList) f;
-            }
-            else
-            {
-                filter = new FilterList();
-                filter.addFilter(f);
-            }
-        }
+        FilterList filter = getFilterList(filters);
         try
         {
-            results = fetchEntity(entityClass, null, entityMetadata, relationNames, tableName, results, filter,
-                    filterClausequeue, colToOutput);
+            results = fetchEntity(entityClass, null, entityMetadata, relationNames, tableName, filter,
+                    filterClauseQueue, columnsToOutput);
         }
         catch (IOException ioex)
         {
             log.error("Error during find by query, Caused by: .", ioex);
-            throw new KunderaException(ioex);
+            throw new KunderaException("Error during find by query, Caused by: .", ioex);
         }
         return results != null ? results : new ArrayList();
+    }
+
+    private FilterList getFilterList(Filter filters)
+    {
+        FilterList filter = null;
+        if (filters != null)
+        {
+            if (FilterList.class.isAssignableFrom(filters.getClass()))
+            {
+                filter = (FilterList) filters;
+            }
+            else
+            {
+                filter = new FilterList();
+                filter.addFilter(filters);
+            }
+        }
+        return filter;
     }
 
     /**
@@ -356,19 +367,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         String tableName = HBaseUtils.getHTableName(entityMetadata.getSchema(), entityMetadata.getTableName());
         List results = new ArrayList();
 
-        FilterList filter = null;
-        if (f != null)
-        {
-            if (FilterList.class.isAssignableFrom(f.getClass()))
-            {
-                filter = (FilterList) f;
-            }
-            else
-            {
-                filter = new FilterList();
-                filter.addFilter(f);
-            }
-        }
+        FilterList filter = getFilterList(f);
         try
         {
             MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
@@ -507,8 +506,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
             Map<String, Object> columns = new HashMap<String, Object>();
             for (Object childValue : values)
             {
-                Object invJoinColumnValue = childValue;
-                columns.put(invJoinColumnName + "_" + invJoinColumnValue, invJoinColumnValue);
+                columns.put(invJoinColumnName + "_" + childValue, childValue);
             }
 
             if (columns != null && !columns.isEmpty())
@@ -570,16 +568,16 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
      * java.lang.Object)
      */
     @Override
-    public void delete(Object entity, Object pKey)
+    public void delete(Object entity, Object rowKey)
     {
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entity.getClass());
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
         if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
         {
-            pKey = KunderaCoreUtils.prepareCompositeKey(m, pKey);
+            rowKey = KunderaCoreUtils.prepareCompositeKey(m, rowKey);
         }
-        deleteByColumn(m.getSchema(), m.getTableName(), null, pKey);
+        deleteByColumn(m.getSchema(), m.getTableName(), null, rowKey);
     }
 
     /*
@@ -591,16 +589,11 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
     @Override
     public List<Object> findByRelation(String colName, Object colValue, Class entityClazz)
     {
-        CompareOp operator = HBaseUtils.getOperator("=", false, false);
-
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClazz);
-
         String columnFamilyName = m.getTableName();
-
         byte[] valueInBytes = HBaseUtils.getBytes(colValue);
-        SingleColumnValueFilter f = null;
-        f = new SingleColumnValueFilter(Bytes.toBytes(columnFamilyName), Bytes.toBytes(colName), operator, valueInBytes);
-
+        SingleColumnValueFilter filter = new SingleColumnValueFilter(Bytes.toBytes(columnFamilyName),
+                Bytes.toBytes(colName), CompareOp.EQUAL, valueInBytes);
         List output = new ArrayList();
         try
         {
@@ -614,7 +607,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
                             subEntity.getJavaType());
                     tableName = HBaseUtils.getHTableName(subEntityMetadata.getSchema(),
                             subEntityMetadata.getTableName());
-                    List results = ((HBaseDataHandler) handler).scanData(f, tableName,
+                    List results = ((HBaseDataHandler) handler).scanData(filter, tableName,
                             subEntityMetadata.getEntityClazz(), subEntityMetadata, columnFamilyName, colName);
                     if (!results.isEmpty())
                     {
@@ -625,25 +618,15 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
             else
             {
                 tableName = HBaseUtils.getHTableName(m.getSchema(), m.getTableName());
-                return ((HBaseDataHandler) handler).scanData(f, tableName, entityClazz, m, columnFamilyName, colName);
+                return ((HBaseDataHandler) handler).scanData(filter, tableName, entityClazz, m, columnFamilyName,
+                        colName);
             }
         }
-        catch (IOException ioe)
+        catch (IOException | InstantiationException | IllegalAccessException ex)
         {
-            log.error("Error during find By Relation, Caused by: .", ioe);
-            throw new KunderaException(ioe);
+            log.error("Error during find By Relation, Caused by: .", ex);
+            throw new KunderaException("Error during find By Relation, Caused by: .", ex);
         }
-        catch (InstantiationException ie)
-        {
-            log.error("Error during find By Relation, Caused by: .", ie);
-            throw new KunderaException(ie);
-        }
-        catch (IllegalAccessException iae)
-        {
-            log.error("Error during find By Relation, Caused by: .", iae);
-            throw new KunderaException(iae);
-        }
-
         return output;
     }
 
@@ -818,29 +801,21 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
      */
     private void getBatchSize(String persistenceUnit, Map<String, Object> puProperties)
     {
-        String batch_Size = puProperties != null ? (String) puProperties.get(PersistenceProperties.KUNDERA_BATCH_SIZE)
+        String batch_size = puProperties != null ? (String) puProperties.get(PersistenceProperties.KUNDERA_BATCH_SIZE)
                 : null;
-        if (batch_Size != null)
-        {
-            setBatchSize(Integer.valueOf(batch_Size));
-        }
-        else
-        {
-            PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata,
-                    persistenceUnit);
-            setBatchSize(puMetadata.getBatchSize());
-        }
+        setBatchSize(batch_size != null ? Integer.valueOf(batch_size) : KunderaMetadataManager
+                .getPersistenceUnitMetadata(kunderaMetadata, persistenceUnit).getBatchSize());
     }
 
     /**
      * Sets the batch size.
      * 
-     * @param batch_Size
+     * @param batch_size
      *            the new batch size
      */
-    public void setBatchSize(int batch_Size)
+    public void setBatchSize(int batch_size)
     {
-        this.batchSize = batch_Size;
+        this.batchSize = batch_size;
     }
 
     /*
@@ -866,9 +841,9 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
     @Override
     public Long generate(TableGeneratorDiscriptor discriptor)
     {
+        String tableName = HBaseUtils.getHTableName(discriptor.getSchema(), discriptor.getPkColumnValue());
         try
         {
-            String tableName = HBaseUtils.getHTableName(discriptor.getSchema(), discriptor.getPkColumnValue());
             Table hTable = ((HBaseDataHandler) handler).gethTable(tableName);
             Long latestCount = hTable.incrementColumnValue(HBaseUtils.AUTO_ID_ROW.getBytes(), discriptor
                     .getPkColumnValue().getBytes(), discriptor.getValueColumnName().getBytes(), 1);
@@ -947,20 +922,21 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
      *            the table name
      * @param results
      *            the results
-     * @param filter
-     *            the filter
-     * @param filterClausequeue
-     *            the filter clausequeue
-     * @param colToOutput
+     * @param filterList
+     *            the filter lists
+     * @param filterClauseQueue
+     *            the filter clause queue
+     * @param columnsToOutput
      *            the col to output
      * @return the list
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
     private List fetchEntity(Class entityClass, Object rowId, EntityMetadata entityMetadata,
-            List<String> relationNames, String tableName, List results, FilterList filter, Queue filterClausequeue,
-            List colToOutput) throws IOException
+            List<String> relationNames, String tableName, FilterList filterList, Queue filterClauseQueue,
+            List columnsToOutput) throws IOException
     {
+        List results = new ArrayList();
         List<AbstractManagedType> subManagedType = getSubManagedType(entityClass, entityMetadata);
 
         if (!subManagedType.isEmpty())
@@ -970,7 +946,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
                 EntityMetadata subEntityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
                         subEntity.getJavaType());
                 results = handler.readData(tableName, subEntityMetadata.getEntityClazz(), subEntityMetadata, rowId,
-                        subEntityMetadata.getRelationNames(), filter, colToOutput);
+                        subEntityMetadata.getRelationNames(), filterList, columnsToOutput);
                 if (results != null && !results.isEmpty())
                 {
                     break;
@@ -980,16 +956,16 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         else
         {
             results = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata, rowId,
-                    relationNames, filter, colToOutput);
+                    relationNames, filterList, columnsToOutput);
         }
         if (rowId != null)
         {
             KunderaCoreUtils.printQuery("Fetch data from " + entityMetadata.getTableName() + " for PK " + rowId,
                     showQuery);
         }
-        else if (showQuery && filterClausequeue.size() > 0)
+        else if (showQuery && filterClauseQueue.size() > 0)
         {
-            KunderaCoreUtils.printQueryWithFilterClause(filterClausequeue, entityMetadata.getTableName());
+            KunderaCoreUtils.printQueryWithFilterClause(filterClauseQueue, entityMetadata.getTableName());
         }
 
         return results;

@@ -26,20 +26,20 @@ import org.apache.hadoop.hbase.util.Bytes;
 import com.impetus.kundera.DataWrapper;
 
 /**
- * @author Pragalbh Garg
+ * The Class HBaseData.
  * 
+ * @author Pragalbh Garg
  */
-public class HBaseData implements DataWrapper
+public class HBaseDataWrapper implements DataWrapper
 {
 
-    /** The column family. */
-    // private String columnFamily;
-
+    /** The table name. */
     private String tableName;
 
     /** The row key. */
     private byte[] rowKey;
 
+    /** The columns. */
     private Map<String, byte[]> columns = new HashMap<String, byte[]>();
 
     /**
@@ -50,7 +50,7 @@ public class HBaseData implements DataWrapper
      * @param rowKey
      *            the row key
      */
-    public HBaseData(String tableName, byte[] rowKey)
+    public HBaseDataWrapper(String tableName, byte[] rowKey)
     {
         this.tableName = tableName;
         this.rowKey = rowKey;
@@ -62,7 +62,7 @@ public class HBaseData implements DataWrapper
      * @param rowKey
      *            the row key
      */
-    public HBaseData(byte[] rowKey)
+    public HBaseDataWrapper(byte[] rowKey)
     {
         this.rowKey = rowKey;
     }

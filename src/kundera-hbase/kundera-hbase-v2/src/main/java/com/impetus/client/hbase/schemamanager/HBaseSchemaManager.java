@@ -58,11 +58,14 @@ import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 
 /**
- * @author Pragalbh Garg
+ * The Class HBaseSchemaManager.
  * 
+ * @author Pragalbh Garg
  */
 public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaManager
 {
+
+    /** The Constant DEFAULT_ZOOKEEPER_PORT. */
     private static final String DEFAULT_ZOOKEEPER_PORT = "2181";
 
     /**
@@ -77,6 +80,7 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
 
     // private Properties schemaProperties;
 
+    /** The external properties. */
     private Map<String, Properties> externalProperties = new HashMap<String, Properties>();
 
     /**
@@ -258,8 +262,6 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
     /**
      * Creates the or update schema.
      * 
-     * @param tableInfos
-     *            the table infos
      * @param isUpdate
      *            the is update
      */
@@ -274,11 +276,12 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
         for (Class<?> clazz : entityMap.keySet())
         {
             EntityMetadata m = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, clazz);
-            if(m!=null){
-            String tablename = m.getTableName();
-            HTableDescriptor hTableDescriptor = getTableDescriptor(clazz, entityMap.get(clazz), tablename);
-            String hTableName = HBaseUtils.getHTableName(databaseName, tablename);
-            createOrUpdateTable(hTableName, hTableDescriptor);
+            if (m != null)
+            {
+                String tablename = m.getTableName();
+                HTableDescriptor hTableDescriptor = getTableDescriptor(clazz, entityMap.get(clazz), tablename);
+                String hTableName = HBaseUtils.getHTableName(databaseName, tablename);
+                createOrUpdateTable(hTableName, hTableDescriptor);
             }
         }
     }
@@ -338,6 +341,12 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
         }
     }
 
+    /**
+     * Adds the join table.
+     * 
+     * @param relations
+     *            the relations
+     */
     private void addJoinTable(List<Relation> relations)
     {
         for (Relation relation : relations)

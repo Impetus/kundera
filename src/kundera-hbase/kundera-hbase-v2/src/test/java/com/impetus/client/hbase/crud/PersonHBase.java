@@ -26,6 +26,9 @@ import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+/**
+ * The Class PersonHBase.
+ */
 @Entity
 @Table(name = "PERSON_HBASE", schema = "HBaseNew@crudTest")
 public class PersonHBase
@@ -44,10 +47,12 @@ public class PersonHBase
     @Column(name = "AGE")
     private Integer age;
 
+    /** The day. */
     @Column(name = "ENUM")
     @Enumerated(EnumType.STRING)
     private Day day;
 
+    /** The month. */
     @Column(name = "MONTH_ENUM")
     @Enumerated(EnumType.STRING)
     private Month month;
@@ -95,6 +100,8 @@ public class PersonHBase
     }
 
     /**
+     * Gets the age.
+     * 
      * @return the age
      */
     public Integer getAge()
@@ -103,6 +110,8 @@ public class PersonHBase
     }
 
     /**
+     * Sets the age.
+     * 
      * @param age
      *            the age to set
      */
@@ -112,6 +121,8 @@ public class PersonHBase
     }
 
     /**
+     * Gets the day.
+     * 
      * @return the day
      */
     public Day getDay()
@@ -120,6 +131,8 @@ public class PersonHBase
     }
 
     /**
+     * Sets the day.
+     * 
      * @param day
      *            the day to set
      */
@@ -128,24 +141,67 @@ public class PersonHBase
         this.day = day;
     }
 
+    /**
+     * Gets the month.
+     * 
+     * @return the month
+     */
     public Month getMonth()
     {
         return month;
     }
 
+    /**
+     * Sets the month.
+     * 
+     * @param month
+     *            the new month
+     */
     public void setMonth(Month month)
     {
         this.month = month;
     }
 
+    /**
+     * The Enum Day.
+     */
     enum Day
     {
-        MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
+
+        /** The monday. */
+        MONDAY,
+        /** The tuesday. */
+        TUESDAY,
+        /** The wednesday. */
+        WEDNESDAY,
+        /** The thursday. */
+        THURSDAY,
+        /** The friday. */
+        FRIDAY,
+        /** The saturday. */
+        SATURDAY,
+        /** The sunday. */
+        SUNDAY;
     }
 
+    /**
+     * The Enum Month.
+     */
     enum Month
     {
-        JAN, FEB, MARCH, APRIL, MAY, JUNE;
+
+        /** The jan. */
+        JAN,
+        /** The feb. */
+        FEB,
+        /** The march. */
+        MARCH,
+        /** The april. */
+        APRIL,
+        /** The may. */
+        MAY,
+        /** The june. */
+        JUNE;
     }
 
 }

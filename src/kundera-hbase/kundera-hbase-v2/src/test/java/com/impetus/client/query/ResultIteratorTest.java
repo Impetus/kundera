@@ -34,6 +34,8 @@ import com.impetus.kundera.query.IResultIterator;
 import com.impetus.kundera.query.Query;
 
 /**
+ * The Class ResultIteratorTest.
+ * 
  * @author vivek.mishra junit for {@link IResultIterator}.
  */
 public class ResultIteratorTest extends BookBaseTest
@@ -63,42 +65,51 @@ public class ResultIteratorTest extends BookBaseTest
         persistBooks();
     }
 
+    /**
+     * Scroll test.
+     * 
+     * @throws Exception
+     *             the exception
+     */
     @Test
     public void scrollTest() throws Exception
     {
         assertBegin();
     }
 
+    /**
+     * Assert begin.
+     */
     private void assertBegin()
     {
         String query = "Select b from Book b";
         List<Book> results = assertBookScrolling(query, 4);
         assertResults(results, T, T, T, T);
         assertForFetchSize(query, 4);
-        
+
         query = "select b from Book b where b.title = 'book1'";
         results = assertBookScrolling(query, 1);
         assertResults(results, T, F, F, F);
         assertForFetchSize(query, 1);
-        
+
         query = "select b from Book b where b.author = 'author2'";
         results = assertBookScrolling(query, 1);
         assertResults(results, F, T, F, F);
-        
+
         query = "select b from Book b where b.author = 'author1'";
         results = assertBookScrolling(query, 2);
         assertResults(results, T, F, F, T);
-        
+
         query = "select b from Book b where b.year > 2000";
         results = assertBookScrolling(query, 3);
         assertResults(results, F, T, T, T);
         assertForFetchSize(query, 3);
-        
+
         query = "select b from Book b where b.year >= 2000";
         results = assertBookScrolling(query, 4);
         assertResults(results, T, T, T, T);
         assertForFetchSize(query, 4);
-        
+
         query = "select b from Book b where b.year < 2015";
         results = assertBookScrolling(query, 3);
         assertResults(results, T, T, T, F);
@@ -106,6 +117,15 @@ public class ResultIteratorTest extends BookBaseTest
 
     }
 
+    /**
+     * Assert book scrolling.
+     * 
+     * @param queryClause
+     *            the query clause
+     * @param expected
+     *            the expected
+     * @return the list
+     */
     private List<Book> assertBookScrolling(String queryClause, int expected)
     {
         Query query = (Query) em.createQuery(queryClause, Book.class);
@@ -125,19 +145,37 @@ public class ResultIteratorTest extends BookBaseTest
         return books;
     }
 
+    /**
+     * Assert for fetch size.
+     * 
+     * @param qry
+     *            the qry
+     * @param expectedCount
+     *            the expected count
+     */
     private void assertForFetchSize(final String qry, int expectedCount)
     {
         Query query = (Query) em.createQuery(qry, Book.class);
 
         assertOnFetch(query, 0, expectedCount);
         assertOnFetch(query, 1, expectedCount);
-        assertOnFetch(query, 2, expectedCount); 
+        assertOnFetch(query, 2, expectedCount);
         assertOnFetch(query, 3, expectedCount);
         assertOnFetch(query, 4, expectedCount);
         assertOnFetch(query, null, expectedCount);
 
     }
 
+    /**
+     * Assert on fetch.
+     * 
+     * @param query
+     *            the query
+     * @param fetchSize
+     *            the fetch size
+     * @param available
+     *            the available
+     */
     private void assertOnFetch(Query query, Integer fetchSize, int available)
     {
         query.setFetchSize(fetchSize);

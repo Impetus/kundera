@@ -30,8 +30,9 @@ import com.impetus.kundera.configure.PropertyReader;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
- * @author Devender Yadav
+ * The Class HBasePropertyReader.
  * 
+ * @author Devender Yadav
  */
 public class HBasePropertyReader extends AbstractPropertyReader implements PropertyReader
 {
@@ -39,7 +40,7 @@ public class HBasePropertyReader extends AbstractPropertyReader implements Prope
     /**
      * The log instance.
      */
-    private static Logger log = LoggerFactory.getLogger(HBasePropertyReader.class);
+    private static Logger logger = LoggerFactory.getLogger(HBasePropertyReader.class);
 
     /**
      * The Hbase schema metadata instance.
@@ -81,6 +82,8 @@ public class HBasePropertyReader extends AbstractPropertyReader implements Prope
      */
     public class HBaseSchemaMetadata
     {
+        private static final String HBASE = "hbase";
+
         /**
          * zookeeper port.
          */
@@ -174,7 +177,7 @@ public class HBasePropertyReader extends AbstractPropertyReader implements Prope
             {
                 for (DataStore dataStore : getClientProperties().getDatastores())
                 {
-                    if (dataStore.getName() != null && dataStore.getName().trim().equalsIgnoreCase("hbase"))
+                    if (dataStore.getName() != null && dataStore.getName().trim().equalsIgnoreCase(HBASE))
                     {
                         return dataStore;
                     }

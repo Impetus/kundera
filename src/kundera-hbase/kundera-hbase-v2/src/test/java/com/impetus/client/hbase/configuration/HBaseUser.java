@@ -21,24 +21,30 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
- * @author Kuldeep Mishra
+ * The Class HBaseUser.
  * 
+ * @author Kuldeep Mishra
  */
 @Entity
 @Table(name = "HBASEUSERXYZ", schema = "KunderaHbaseXmlTest@XmlPropertyTest")
 public class HBaseUser
 {
 
+    /** The name. */
     @Id
     private String name;
 
+    /** The age. */
     @Column
     private int age;
 
+    /** The address. */
     @Column
     private String address;
 
     /**
+     * Gets the name.
+     * 
      * @return the name
      */
     public String getName()
@@ -47,6 +53,8 @@ public class HBaseUser
     }
 
     /**
+     * Sets the name.
+     * 
      * @param name
      *            the name to set
      */
@@ -56,6 +64,8 @@ public class HBaseUser
     }
 
     /**
+     * Gets the age.
+     * 
      * @return the age
      */
     public int getAge()
@@ -64,6 +74,8 @@ public class HBaseUser
     }
 
     /**
+     * Sets the age.
+     * 
      * @param age
      *            the age to set
      */
@@ -73,6 +85,8 @@ public class HBaseUser
     }
 
     /**
+     * Gets the address.
+     * 
      * @return the address
      */
     public String getAddress()
@@ -81,6 +95,8 @@ public class HBaseUser
     }
 
     /**
+     * Sets the address.
+     * 
      * @param address
      *            the address to set
      */

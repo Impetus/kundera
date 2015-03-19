@@ -30,24 +30,31 @@ import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.util.Bytes;
 
-import com.impetus.client.hbase.HBaseData;
+import com.impetus.client.hbase.HBaseDataWrapper;
 import com.impetus.client.hbase.Reader;
 import com.impetus.client.hbase.utils.HBaseUtils;
 
 /**
- * @author Pragalbh Garg
+ * The Class HBaseReader.
  * 
+ * @author Pragalbh Garg
  */
 public class HBaseReader implements Reader
 {
+
+    /** The scanner. */
     private ResultScanner scanner = null;
 
+    /** The results iter. */
     private Iterator<Result> resultsIter;
 
+    /** The fetch size. */
     private Integer fetchSize;
 
+    /** The counter. */
     private Integer counter = 0;
 
+    /** The table name. */
     private String tableName = null;
 
     /*
@@ -59,11 +66,11 @@ public class HBaseReader implements Reader
      * org.apache.hadoop.hbase.filter.Filter, java.lang.String[])
      */
     @Override
-    public List<HBaseData> LoadData(Table hTable, String columnFamily, Object rowKey, Filter filter, String... columns)
-            throws IOException
+    public List<HBaseDataWrapper> LoadData(Table hTable, String columnFamily, Object rowKey, Filter filter,
+            String... columns) throws IOException
     {
         setTableName(hTable);
-        List<HBaseData> results = new ArrayList<HBaseData>();
+        List<HBaseDataWrapper> results = new ArrayList<HBaseDataWrapper>();
         if (scanner == null)
         {
 
@@ -85,7 +92,7 @@ public class HBaseReader implements Reader
 
                 if (!result.isEmpty() && result != null && result.listCells() != null)
                 {
-                    HBaseData data = new HBaseData(hTable.getName().getNameAsString(), result.getRow());
+                    HBaseDataWrapper data = new HBaseDataWrapper(hTable.getName().getNameAsString(), result.getRow());
                     data.setColumns(result.listCells());
                     results.add(data);
                 }
@@ -122,7 +129,8 @@ public class HBaseReader implements Reader
      * .HTable, java.lang.String)
      */
     @Override
-    public List<HBaseData> LoadData(Table hTable, Object rowKey, Filter filter, String... columns) throws IOException
+    public List<HBaseDataWrapper> LoadData(Table hTable, Object rowKey, Filter filter, String... columns)
+            throws IOException
     {
         return LoadData(hTable, hTable.getName().toString(), rowKey, filter, columns);
     }
@@ -135,11 +143,11 @@ public class HBaseReader implements Reader
      * .HTable, org.apache.hadoop.hbase.filter.Filter, byte[], byte[])
      */
     @Override
-    public List<HBaseData> loadAll(Table hTable, Filter filter, byte[] startRow, byte[] endRow, String columnFamily,
-            String qualifier, String[] columns) throws IOException
+    public List<HBaseDataWrapper> loadAll(Table hTable, Filter filter, byte[] startRow, byte[] endRow,
+            String columnFamily, String qualifier, String[] columns) throws IOException
     {
         setTableName(hTable);
-        List<HBaseData> results = new ArrayList<HBaseData>();
+        List<HBaseDataWrapper> results = new ArrayList<HBaseDataWrapper>();
         if (scanner == null)
         {
             Scan s = null;
@@ -225,14 +233,15 @@ public class HBaseReader implements Reader
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    private List<HBaseData> scanResults(final String tableName, List<HBaseData> results) throws IOException
+    private List<HBaseDataWrapper> scanResults(final String tableName, List<HBaseDataWrapper> results)
+            throws IOException
     {
         if (fetchSize == null)
         {
             for (Result result : scanner)
             {
                 List<Cell> cells = result.listCells();
-                HBaseData data = new HBaseData(tableName, result.getRow());
+                HBaseDataWrapper data = new HBaseDataWrapper(tableName, result.getRow());
                 data.setColumns(cells);
                 results.add(data);
             }
@@ -298,11 +307,11 @@ public class HBaseReader implements Reader
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    public List<HBaseData> loadAll(final Table hTable, final List<Object> rows, final String columnFamily,
+    public List<HBaseDataWrapper> loadAll(final Table hTable, final List<Object> rows, final String columnFamily,
             final String[] columns) throws IOException
     {
         setTableName(hTable);
-        List<HBaseData> results = new ArrayList<HBaseData>();
+        List<HBaseDataWrapper> results = new ArrayList<HBaseDataWrapper>();
         List<Get> getRequest = new ArrayList<Get>();
         for (Object rowKey : rows)
         {
@@ -316,13 +325,13 @@ public class HBaseReader implements Reader
         Result[] rawResult = hTable.get(getRequest);
         for (Result result : rawResult)
         {
-                List<Cell> cells = result.listCells();
-                if (cells != null)
-                {
-                    HBaseData data = new HBaseData(tableName, result.getRow());
-                    data.setColumns(cells);
-                    results.add(data);
-                }
+            List<Cell> cells = result.listCells();
+            if (cells != null)
+            {
+                HBaseDataWrapper data = new HBaseDataWrapper(tableName, result.getRow());
+                data.setColumns(cells);
+                results.add(data);
+            }
         }
         return results;
     }
@@ -343,11 +352,11 @@ public class HBaseReader implements Reader
      * 
      * @return the h base data
      */
-    public HBaseData next()
+    public HBaseDataWrapper next()
     {
         Result result = resultsIter.next();
         List<Cell> cells = result.listCells();
-        HBaseData data = new HBaseData(tableName, result.getRow());
+        HBaseDataWrapper data = new HBaseDataWrapper(tableName, result.getRow());
         data.setColumns(cells);
         return data;
     }

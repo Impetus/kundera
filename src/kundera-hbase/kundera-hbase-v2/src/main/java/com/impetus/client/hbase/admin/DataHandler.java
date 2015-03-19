@@ -27,8 +27,9 @@ import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 
 /**
- * @author Pragalbh Garg
+ * The Interface DataHandler.
  * 
+ * @author Pragalbh Garg
  */
 public interface DataHandler
 {
@@ -201,6 +202,10 @@ public interface DataHandler
      * 
      * @param rowKey
      *            the row key
+     * @param colName
+     *            the col name
+     * @param colFamily
+     *            the col family
      * @param tableName
      *            the table name
      * @throws IOException

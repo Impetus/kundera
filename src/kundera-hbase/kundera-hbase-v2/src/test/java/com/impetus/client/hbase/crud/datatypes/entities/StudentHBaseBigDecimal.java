@@ -46,7 +46,7 @@ public class StudentHBaseBigDecimal
 
     /**
      * Gets the id.
-     *
+     * 
      * @return the id
      */
     public BigDecimal getId()
@@ -56,8 +56,9 @@ public class StudentHBaseBigDecimal
 
     /**
      * Sets the id.
-     *
-     * @param id            the id to set
+     * 
+     * @param id
+     *            the id to set
      */
     public void setId(BigDecimal id)
     {
@@ -66,7 +67,7 @@ public class StudentHBaseBigDecimal
 
     /**
      * Gets the age.
-     *
+     * 
      * @return the age
      */
     public short getAge()
@@ -76,8 +77,9 @@ public class StudentHBaseBigDecimal
 
     /**
      * Sets the age.
-     *
-     * @param age            the age to set
+     * 
+     * @param age
+     *            the age to set
      */
     public void setAge(short age)
     {
@@ -86,7 +88,7 @@ public class StudentHBaseBigDecimal
 
     /**
      * Gets the name.
-     *
+     * 
      * @return the name
      */
     public String getName()
@@ -96,8 +98,9 @@ public class StudentHBaseBigDecimal
 
     /**
      * Sets the name.
-     *
-     * @param name            the name to set
+     * 
+     * @param name
+     *            the name to set
      */
     public void setName(String name)
     {

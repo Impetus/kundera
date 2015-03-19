@@ -45,7 +45,7 @@ import org.jboss.netty.util.internal.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.impetus.client.hbase.HBaseData;
+import com.impetus.client.hbase.HBaseDataWrapper;
 import com.impetus.client.hbase.Reader;
 import com.impetus.client.hbase.Writer;
 import com.impetus.client.hbase.service.HBaseReader;
@@ -65,17 +65,19 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**
- * @author Pragalbh Garg
+ * The Class HBaseDataHandler.
  * 
+ * @author Pragalbh Garg
  */
 public class HBaseDataHandler implements DataHandler
 {
     /** the log used by this class. */
-    private static Logger log = LoggerFactory.getLogger(HBaseDataHandler.class);
+    private static Logger logger = LoggerFactory.getLogger(HBaseDataHandler.class);
 
     /** The admin. */
     private HBaseAdmin admin;
 
+    /** The connection. */
     private Connection connection;
 
     /** The hbase reader. */
@@ -84,14 +86,17 @@ public class HBaseDataHandler implements DataHandler
     /** The hbase writer. */
     private Writer hbaseWriter = new HBaseWriter();
 
+    /** The filter. */
     private FilterList filter = null;
 
+    /** The filters. */
     private Map<String, FilterList> filters = new ConcurrentHashMap<String, FilterList>();
 
+    /** The kundera metadata. */
     private KunderaMetadata kunderaMetadata;
 
     /**
-     * Instantiates a new h base data handler.
+     * Instantiates a new hBase data handler.
      * 
      * @param kunderaMetadata
      *            the kundera metadata
@@ -107,6 +112,7 @@ public class HBaseDataHandler implements DataHandler
         }
         catch (Exception e)
         {
+            logger.error("Error in instantiating HBaseDataHandler. Caused by: ", e);
             throw new PersistenceException(e);
         }
     }
@@ -144,42 +150,24 @@ public class HBaseDataHandler implements DataHandler
      */
     @Override
     public List readData(final String tableName, Class clazz, EntityMetadata m, final Object rowKey,
-            List<String> relationNames, FilterList f, List<Map<String, Object>> colToOutput) throws IOException
+            List<String> relationNames, FilterList filterList, List<Map<String, Object>> colToOutput)
+            throws IOException
     {
-
         Object entity = null;
-
-        Table hTable = null;
-
-        hTable = gethTable(tableName);
-
-        if (getFilter(m.getTableName()) != null)
-        {
-            if (f == null)
-            {
-                f = new FilterList();
-            }
-            f.addFilter(getFilter(m.getTableName()));
-        }
+        Table hTable = gethTable(tableName);
+        filterList = getExtPropertyFilters(m, filterList);
         boolean isFindKeyOnly = HBaseUtils.isFindKeyOnly(m, colToOutput);
-        if (isFindKeyOnly)
-        {
-            if (f == null)
-            {
-                f = new FilterList();
-            }
-            f.addFilter(new KeyOnlyFilter());
-        }
+        filterList = onFindKeyOnly(filterList, isFindKeyOnly);
         List<String> columnsList = new ArrayList<String>();
         if (colToOutput != null && !colToOutput.isEmpty() && !isFindKeyOnly)
         {
             for (Map<String, Object> map : colToOutput)
             {
-                columnsList.add(((String) map.get("colName")));
+                columnsList.add(((String) map.get(HBaseUtils.COL_NAME)));
             }
         }
-        List<HBaseData> results = new ArrayList<HBaseData>();
-        results.addAll(hbaseReader.LoadData(hTable, null, rowKey, f,
+        List<HBaseDataWrapper> results = new ArrayList<HBaseDataWrapper>();
+        results.addAll(hbaseReader.LoadData(hTable, null, rowKey, filterList,
                 columnsList.toArray(new String[columnsList.size()])));
         return onRead(tableName, clazz, m, colToOutput, hTable, entity, relationNames, results);
     }
@@ -196,22 +184,9 @@ public class HBaseDataHandler implements DataHandler
     public List readAll(final String tableName, Class clazz, EntityMetadata m, final List<Object> rowKey,
             List<String> relationNames, String... columns) throws IOException
     {
-
-        List<Map<String, Object>> output = null;
-
-        Object entity = null;
-
-        Table hTable = null;
-
-        hTable = gethTable(tableName);
-
-        List<HBaseData> results = new ArrayList<HBaseData>();
-        List table = ((HBaseReader) hbaseReader).loadAll(hTable, rowKey, null, columns);
-        if (table != null)
-        {
-            results.addAll(table);
-        }
-        return onRead(tableName, clazz, m, output, hTable, entity, relationNames, results);
+        Table hTable = gethTable(tableName);
+        List<HBaseDataWrapper> results = ((HBaseReader) hbaseReader).loadAll(hTable, rowKey, null, columns);
+        return onRead(tableName, clazz, m, null, hTable, null, relationNames, results);
     }
 
     /*
@@ -225,41 +200,53 @@ public class HBaseDataHandler implements DataHandler
      */
     @Override
     public List readDataByRange(String tableName, Class clazz, EntityMetadata m, byte[] startRow, byte[] endRow,
-            List<Map<String, Object>> colToOutput, FilterList f) throws IOException
+            List<Map<String, Object>> colToOutput, FilterList filterList) throws IOException
     {
         Table hTable = null;
         Object entity = null;
         List<String> relationNames = m.getRelationNames();
-        Filter filter = getFilter(m.getTableName());
-        if (filter != null)
-        {
-            if (f == null)
-            {
-                f = new FilterList();
-            }
-            f.addFilter(filter);
-        }
+        filterList = getExtPropertyFilters(m, filterList);
         boolean isFindKeyOnly = HBaseUtils.isFindKeyOnly(m, colToOutput);
-        if (isFindKeyOnly)
-        {
-            if (f == null)
-            {
-                f = new FilterList();
-            }
-            f.addFilter(new KeyOnlyFilter());
-        }
+        filterList = onFindKeyOnly(filterList, isFindKeyOnly);
         List<String> columnsList = new ArrayList<String>();
         if (colToOutput != null && !colToOutput.isEmpty() && !isFindKeyOnly)
         {
             for (Map<String, Object> map : colToOutput)
             {
-                columnsList.add(((String) map.get("colName")));
+                columnsList.add(((String) map.get(HBaseUtils.COL_NAME)));
             }
         }
         hTable = gethTable(tableName);
-        List<HBaseData> results = hbaseReader.loadAll(hTable, f, startRow, endRow, null, null,
+        List<HBaseDataWrapper> results = hbaseReader.loadAll(hTable, filterList, startRow, endRow, null, null,
                 columnsList.toArray(new String[columnsList.size()]));
         return onRead(tableName, clazz, m, colToOutput, hTable, entity, relationNames, results);
+    }
+
+    private FilterList onFindKeyOnly(FilterList filterList, boolean isFindKeyOnly)
+    {
+        if (isFindKeyOnly)
+        {
+            if (filterList == null)
+            {
+                filterList = new FilterList();
+            }
+            filterList.addFilter(new KeyOnlyFilter());
+        }
+        return filterList;
+    }
+
+    private FilterList getExtPropertyFilters(EntityMetadata m, FilterList filterList)
+    {
+        Filter filter = getFilter(m.getTableName());
+        if (filter != null)
+        {
+            if (filterList == null)
+            {
+                filterList = new FilterList();
+            }
+            filterList.addFilter(filter);
+        }
+        return filterList;
     }
 
     /*
@@ -289,7 +276,7 @@ public class HBaseDataHandler implements DataHandler
      *            the row id
      * @param relations
      *            the relations
-     * @return the h base row
+     * @return the hBase row
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
@@ -402,7 +389,8 @@ public class HBaseDataHandler implements DataHandler
                 if (attribute.isCollection())
                 {
                     int newCount = count + 1;
-                    String newPrefix = prefix != null ? prefix + "#" + attribute.getName() : attribute.getName();
+                    String newPrefix = prefix != null ? prefix + HBaseUtils.DELIM + attribute.getName() : attribute
+                            .getName();
                     for (Object obj : (List) embeddedField)
                     {
                         createCellsAndAddToRow(obj, metaModel, attribEmbeddables, hbaseRow, m, newCount++, newPrefix);
@@ -418,7 +406,8 @@ public class HBaseDataHandler implements DataHandler
                 String columnFamily = ((AbstractAttribute) attribute).getTableName() != null ? ((AbstractAttribute) attribute)
                         .getTableName() : m.getTableName();
                 String columnName = ((AbstractAttribute) attribute).getJPAColumnName();
-                columnName = count != -1 ? prefix + "#" + columnName + "#" + count : columnName;
+                columnName = count != -1 ? prefix + HBaseUtils.DELIM + columnName + HBaseUtils.DELIM + count
+                        : columnName;
                 Object value = PropertyAccessorHelper.getObject(entity, (Field) attribute.getJavaMember());
                 HBaseCell hbaseCell = new HBaseCell(columnFamily, columnName, value);
                 if (!idCol.getName().equals(attribute.getName()) && value != null)
@@ -468,35 +457,24 @@ public class HBaseDataHandler implements DataHandler
             String inverseJoinColumnName)
     {
         List<E> foreignKeys = new ArrayList<E>();
-
         Table hTable = null;
         String tableName = HBaseUtils.getHTableName(schemaName, joinTableName);
-        // Load raw data from Join Table in HBase
         try
         {
             hTable = gethTable(tableName);
-
-            List<HBaseData> results = hbaseReader.LoadData(hTable, joinTableName, rowKey, getFilter(joinTableName));
-
-            // assuming rowKey is not null.
-            if (results != null)
+            List<HBaseDataWrapper> results = hbaseReader.LoadData(hTable, joinTableName, rowKey,
+                    getFilter(joinTableName));
+            if (results != null && !results.isEmpty())
             {
-
-                HBaseData data = results.get(0);
-
+                HBaseDataWrapper data = results.get(0);
                 Map<String, byte[]> hbaseValues = data.getColumns();
                 Set<String> columnNames = hbaseValues.keySet();
-
                 for (String columnName : columnNames)
                 {
                     if (columnName.startsWith(HBaseUtils.getColumnDataKey(joinTableName, inverseJoinColumnName)))
                     {
                         byte[] columnValue = data.getColumnValue(columnName);
-
-                        // TODO : Because no attribute class is present, so
-                        // cannot be done.
                         String hbaseColumnValue = Bytes.toString(columnValue);
-
                         foreignKeys.add((E) hbaseColumnValue);
                     }
                 }
@@ -517,8 +495,7 @@ public class HBaseDataHandler implements DataHandler
             }
             catch (IOException e)
             {
-
-                // Do nothing.
+                logger.error("Error in closing hTable, caused by: ", e);
             }
         }
         return foreignKeys;
@@ -559,23 +536,10 @@ public class HBaseDataHandler implements DataHandler
     @Override
     public void shutdown()
     {
-
-        // TODO: Shutting down admin actually shuts down HMaster, something we
-        // don't want.
-        // Devise a better way to release resources.
-
-        /*
-         * try {
-         * 
-         * admin.shutdown();
-         * 
-         * } catch (IOException e) { throw new RuntimeException(e.getMessage());
-         * }
-         */
     }
 
     /**
-     * Populate entity from h base data.
+     * Populate entity from hBase data.
      * 
      * @param entity
      *            the entity
@@ -589,8 +553,8 @@ public class HBaseDataHandler implements DataHandler
      *            the relation names
      * @return the object
      */
-    private Object populateEntityFromHBaseData(Object entity, HBaseData hbaseData, EntityMetadata m, Object rowKey,
-            List<String> relationNames)
+    private Object populateEntityFromHBaseData(Object entity, HBaseDataWrapper hbaseData, EntityMetadata m,
+            Object rowKey, List<String> relationNames)
     {
         try
         {
@@ -659,9 +623,9 @@ public class HBaseDataHandler implements DataHandler
      *            the prefix
      * @return the int
      */
-    private int writeValuesToEntity(Object entity, HBaseData hbaseData, EntityMetadata m, MetamodelImpl metaModel,
-            Set<Attribute> attributes, List<String> relationNames, Map<String, Object> relations, int count,
-            String prefix)
+    private int writeValuesToEntity(Object entity, HBaseDataWrapper hbaseData, EntityMetadata m,
+            MetamodelImpl metaModel, Set<Attribute> attributes, List<String> relationNames,
+            Map<String, Object> relations, int count, String prefix)
     {
         int check = 0;
         for (Attribute attribute : attributes)
@@ -669,41 +633,13 @@ public class HBaseDataHandler implements DataHandler
             Class javaType = ((AbstractAttribute) attribute).getBindableJavaType();
             if (metaModel.isEmbeddable(javaType))
             {
-                Set<Attribute> attribEmbeddables = metaModel.embeddable(javaType).getAttributes();
-                Object embeddedField = KunderaCoreUtils.createNewInstance(javaType);
-                if (!attribute.isCollection())
-                {
-                    writeValuesToEntity(embeddedField, hbaseData, m, metaModel, attribEmbeddables, null, null, -1,
-                            prefix);
-                    PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), embeddedField);
-                }
-                else
-                {
-                    int newCount = count + 1;
-                    String newPrefix = prefix != null ? prefix + "#" + attribute.getName() : attribute.getName();
-                    List embeddedCollection = new ArrayList();
-                    Boolean f = true;
-                    while (f)
-                    {
-                        embeddedField = KunderaCoreUtils.createNewInstance(javaType);
-                        int checkEnd = writeValuesToEntity(embeddedField, hbaseData, m, metaModel, attribEmbeddables,
-                                null, null, newCount++, newPrefix);
-                        if (checkEnd == 0)
-                        {
-                            f = false;
-                        }
-                        else
-                        {
-                            embeddedCollection.add(embeddedField);
-                        }
-                    }
-                    PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), embeddedCollection);
-                }
+                processEmbeddable(entity, hbaseData, m, metaModel, count, prefix, attribute, javaType);
             }
             else if (!attribute.isCollection())
             {
                 String columnName = ((AbstractAttribute) attribute).getJPAColumnName();
-                columnName = count != -1 ? prefix + "#" + columnName + "#" + count : columnName;
+                columnName = count != -1 ? prefix + HBaseUtils.DELIM + columnName + HBaseUtils.DELIM + count
+                        : columnName;
                 String idColName = ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName();
                 String colFamily = ((AbstractAttribute) attribute).getTableName() != null ? ((AbstractAttribute) attribute)
                         .getTableName() : m.getTableName();
@@ -722,6 +658,40 @@ public class HBaseDataHandler implements DataHandler
             }
         }
         return check;
+    }
+
+    private void processEmbeddable(Object entity, HBaseDataWrapper hbaseData, EntityMetadata m,
+            MetamodelImpl metaModel, int count, String prefix, Attribute attribute, Class javaType)
+    {
+        Set<Attribute> attribEmbeddables = metaModel.embeddable(javaType).getAttributes();
+        Object embeddedField = KunderaCoreUtils.createNewInstance(javaType);
+        if (!attribute.isCollection())
+        {
+            writeValuesToEntity(embeddedField, hbaseData, m, metaModel, attribEmbeddables, null, null, -1, prefix);
+            PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), embeddedField);
+        }
+        else
+        {
+            int newCount = count + 1;
+            String newPrefix = prefix != null ? prefix + HBaseUtils.DELIM + attribute.getName() : attribute.getName();
+            List embeddedCollection = new ArrayList();
+            Boolean f = true;
+            while (f)
+            {
+                embeddedField = KunderaCoreUtils.createNewInstance(javaType);
+                int checkEnd = writeValuesToEntity(embeddedField, hbaseData, m, metaModel, attribEmbeddables, null,
+                        null, newCount++, newPrefix);
+                if (checkEnd == 0)
+                {
+                    f = false;
+                }
+                else
+                {
+                    embeddedCollection.add(embeddedField);
+                }
+            }
+            PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), embeddedCollection);
+        }
     }
 
     /*
@@ -818,87 +788,21 @@ public class HBaseDataHandler implements DataHandler
      *             Signals that an I/O exception has occurred.
      */
     private List onRead(String tableName, Class clazz, EntityMetadata m, List<Map<String, Object>> columnsToOutput,
-            Table hTable, Object entity, List<String> relationNames, List<HBaseData> results) throws IOException
+            Table hTable, Object entity, List<String> relationNames, List<HBaseDataWrapper> results) throws IOException
     {
         List outputResults = new ArrayList();
         try
         {
-            if (columnsToOutput != null && !columnsToOutput.isEmpty())
-            {
-                for (HBaseData data : results)
-                {
-                    List result = new ArrayList();
-                    Map<String, byte[]> columns = data.getColumns();
-                    for (Map<String, Object> map : columnsToOutput)
-                    {
-                        Object obj;
-                        String colDataKey = HBaseUtils.getColumnDataKey((String) map.get("colFamily"),
-                                (String) map.get("colName"));
-                        if ((boolean) map.get("isEmbeddable"))
-                        {
-                            Class embedClazz = (Class) map.get("fieldClazz");
-                            obj = populateEmbeddableObject(data, KunderaCoreUtils.createNewInstance(embedClazz), m,
-                                    embedClazz);
-                        }
-                        else if (isIdCol(m, (String) map.get("colName")))
-                        {
-                            obj = HBaseUtils.fromBytes(data.getRowKey(), (Class) map.get("fieldClazz"));
-                        }
-                        else
-                        {
-                            obj = HBaseUtils.fromBytes(columns.get(colDataKey), (Class) map.get("fieldClazz"));
-                        }
-                        result.add(obj);
-                    }
-                    if (columnsToOutput.size() == 1)
-                        outputResults.addAll(result);
-                    else
-                        outputResults.add(result);
-                }
-            }
-            else
-            {
-                Map<Object, Object> entityListMap = new HashMap<Object, Object>();
-
-                for (HBaseData data : results)
-                {
-                    entity = KunderaCoreUtils.createNewInstance(clazz); // Entity
-                                                                        // Object
-                    MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
-                            m.getPersistenceUnit());
-                    Object rowKeyValue = HBaseUtils.fromBytes(m, metaModel, data.getRowKey());
-                    if (!metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
-                    {
-                        PropertyAccessorHelper.setId(entity, m, rowKeyValue);
-                    }
-
-                    if (entityListMap.get(rowKeyValue) != null)
-                    {
-
-                        entity = entityListMap.get(rowKeyValue);
-
-                    }
-                    entity = populateEntityFromHBaseData(entity, data, m, null, relationNames);
-                    if (entity != null)
-                    {
-                        entityListMap.put(rowKeyValue, entity);
-
-                    }
-                }
-                for (Object obj : entityListMap.values())
-                {
-                    outputResults.add(obj);
-                }
-            }
-
             if (results != null)
             {
-
+                return columnsToOutput != null && !columnsToOutput.isEmpty() ? returnSpecificFieldList(m,
+                        columnsToOutput, results, outputResults) : returnEntityObjectList(clazz, m, relationNames,
+                        results, outputResults);
             }
         }
         catch (Exception e)
         {
-            log.error("Error while creating an instance of {}, Caused by: .", clazz, e);
+            logger.error("Error while creating an instance of {}, Caused by: .", clazz, e);
             throw new PersistenceException(e);
         }
         finally
@@ -908,10 +812,91 @@ public class HBaseDataHandler implements DataHandler
                 closeHTable(hTable);
             }
         }
-
         return outputResults;
     }
 
+    private List returnEntityObjectList(Class clazz, EntityMetadata m, List<String> relationNames,
+            List<HBaseDataWrapper> results, List outputResults)
+    {
+        Object entity;
+        Map<Object, Object> entityListMap = new HashMap<Object, Object>();
+
+        for (HBaseDataWrapper data : results)
+        {
+            entity = KunderaCoreUtils.createNewInstance(clazz); // Entity
+                                                                // Object
+            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                    m.getPersistenceUnit());
+            Object rowKeyValue = HBaseUtils.fromBytes(m, metaModel, data.getRowKey());
+            if (!metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
+            {
+                PropertyAccessorHelper.setId(entity, m, rowKeyValue);
+            }
+
+            if (entityListMap.get(rowKeyValue) != null)
+            {
+
+                entity = entityListMap.get(rowKeyValue);
+
+            }
+            entity = populateEntityFromHBaseData(entity, data, m, null, relationNames);
+            if (entity != null)
+            {
+                entityListMap.put(rowKeyValue, entity);
+
+            }
+        }
+        for (Object obj : entityListMap.values())
+        {
+            outputResults.add(obj);
+        }
+        return outputResults;
+    }
+
+    private List returnSpecificFieldList(EntityMetadata m, List<Map<String, Object>> columnsToOutput,
+            List<HBaseDataWrapper> results, List outputResults)
+    {
+        for (HBaseDataWrapper data : results)
+        {
+            List result = new ArrayList();
+            Map<String, byte[]> columns = data.getColumns();
+            for (Map<String, Object> map : columnsToOutput)
+            {
+                Object obj;
+                String colDataKey = HBaseUtils.getColumnDataKey((String) map.get(HBaseUtils.COL_FAMILY),
+                        (String) map.get(HBaseUtils.COL_NAME));
+                if ((boolean) map.get(HBaseUtils.IS_EMBEDDABLE))
+                {
+                    Class embedClazz = (Class) map.get(HBaseUtils.FIELD_CLAZZ);
+                    obj = populateEmbeddableObject(data, KunderaCoreUtils.createNewInstance(embedClazz), m, embedClazz);
+                }
+                else if (isIdCol(m, (String) map.get(HBaseUtils.COL_NAME)))
+                {
+                    obj = HBaseUtils.fromBytes(data.getRowKey(), (Class) map.get(HBaseUtils.FIELD_CLAZZ));
+                }
+                else
+                {
+                    obj = HBaseUtils.fromBytes(columns.get(colDataKey), (Class) map.get(HBaseUtils.FIELD_CLAZZ));
+                }
+                result.add(obj);
+            }
+            if (columnsToOutput.size() == 1)
+                outputResults.addAll(result);
+            else
+                outputResults.add(result);
+        }
+        return outputResults;
+    }
+
+    /**
+     * Checks if is id col.
+     * 
+     * @param m
+     *            the m
+     * @param colName
+     *            the col name
+     * @return true, if is id col
+     */
     private boolean isIdCol(EntityMetadata m, String colName)
     {
         return ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName().equals(colName);
@@ -930,7 +915,7 @@ public class HBaseDataHandler implements DataHandler
      *            the clazz
      * @return the object
      */
-    private Object populateEmbeddableObject(HBaseData data, Object obj, EntityMetadata m, Class clazz)
+    private Object populateEmbeddableObject(HBaseDataWrapper data, Object obj, EntityMetadata m, Class clazz)
     {
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
@@ -998,16 +983,14 @@ public class HBaseDataHandler implements DataHandler
                 break;
             }
         }
-        List<HBaseData> results = hbaseReader.loadAll(gethTable(tableName), f, null, null, m.getTableName(),
+        List<HBaseDataWrapper> results = hbaseReader.loadAll(gethTable(tableName), f, null, null, m.getTableName(),
                 isCollection ? qualifier : null, null);
         if (results != null)
         {
-            for (HBaseData row : results)
+            for (HBaseDataWrapper row : results)
             {
                 Object entity = clazz.newInstance();// Entity Object
-                /* Set Row Key */
                 PropertyAccessorHelper.setId(entity, m, HBaseUtils.fromBytes(m, metaModel, row.getRowKey()));
-
                 returnedResults.add(populateEntityFromHBaseData(entity, row, m, row.getRowKey(), m.getRelationNames()));
             }
         }
@@ -1026,8 +1009,7 @@ public class HBaseDataHandler implements DataHandler
     public Object[] scanRowyKeys(FilterList filterList, String tableName, String columnFamilyName, String columnName,
             final Class rowKeyClazz) throws IOException
     {
-        Table hTable = null;
-        hTable = gethTable(tableName);
+        Table hTable = gethTable(tableName);
         return hbaseReader.scanRowKeys(hTable, filterList, columnFamilyName, columnName, rowKeyClazz);
     }
 
@@ -1060,7 +1042,7 @@ public class HBaseDataHandler implements DataHandler
                 return colValue;
             }
         }
-        log.warn("No value found for column {}, returning null.", jpaColumnName);
+        logger.warn("No value found for column {}, returning null.", jpaColumnName);
         return null;
     }
 
@@ -1095,8 +1077,8 @@ public class HBaseDataHandler implements DataHandler
     public Object next(EntityMetadata m)
     {
         Object entity = null;
-        HBaseData result = ((HBaseReader) hbaseReader).next();
-        List<HBaseData> results = new ArrayList<HBaseData>();
+        HBaseDataWrapper result = ((HBaseReader) hbaseReader).next();
+        List<HBaseDataWrapper> results = new ArrayList<HBaseDataWrapper>();
         List output = new ArrayList();
         results.add(result);
         try
@@ -1106,7 +1088,7 @@ public class HBaseDataHandler implements DataHandler
         }
         catch (IOException e)
         {
-            log.error("Error during finding next record, Caused by: .", e);
+            logger.error("Error during finding next record, Caused by: .", e);
             throw new KunderaException(e);
         }
 
@@ -1208,7 +1190,7 @@ public class HBaseDataHandler implements DataHandler
             }
             catch (IOException | InterruptedException e)
             {
-                log.error("Error while batch processing on HTable: " + tableName);
+                logger.error("Error while batch processing on HTable: " + tableName);
                 throw new PersistenceException(e);
             }
 
