@@ -78,17 +78,17 @@ public class HBaseReader implements Reader
             if (rowKey != null)
             {
                 byte[] rowKeyBytes = HBaseUtils.getBytes(rowKey);
-                Get g = new Get(rowKeyBytes);
+                Get get = new Get(rowKeyBytes);
                 if (columnFamily != null)
                 {
-                    g.addFamily(Bytes.toBytes(columnFamily));
+                    get.addFamily(Bytes.toBytes(columnFamily));
                 }
 
                 if (filter != null)
                 {
-                    g.setFilter(filter);
+                    get.setFilter(filter);
                 }
-                Result result = hTable.get(g);
+                Result result = hTable.get(get);
 
                 if (!result.isEmpty() && result != null && result.listCells() != null)
                 {
@@ -150,31 +150,31 @@ public class HBaseReader implements Reader
         List<HBaseDataWrapper> results = new ArrayList<HBaseDataWrapper>();
         if (scanner == null)
         {
-            Scan s = null;
+            Scan scan = null;
             if (startRow != null && endRow != null && startRow.equals(endRow))
             {
-                Get g = new Get(startRow);
-                s = new Scan(g);
+                Get get = new Get(startRow);
+                scan = new Scan(get);
             }
             else if (startRow != null && endRow != null)
             {
-                s = new Scan(startRow, endRow);
+                scan = new Scan(startRow, endRow);
             }
             else if (startRow != null)
             {
-                s = new Scan(startRow);
+                scan = new Scan(startRow);
             }
             else if (endRow != null)
             {
-                s = new Scan();
-                s.setStopRow(endRow);
+                scan = new Scan();
+                scan.setStopRow(endRow);
             }
             else
             {
-                s = new Scan();
+                scan = new Scan();
             }
-            setScanCriteria(filter, columnFamily, qualifier, s, columns);
-            scanner = hTable.getScanner(s);
+            setScanCriteria(filter, columnFamily, qualifier, scan, columns);
+            scanner = hTable.getScanner(scan);
             resultsIter = scanner.iterator();
         }
         return scanResults(tableName, results);
@@ -196,8 +196,7 @@ public class HBaseReader implements Reader
      */
     private void setScanCriteria(Filter filter, String columnFamily, String qualifier, Scan s, String[] columns)
     {
-
-        if (filter != null && !filter.toString().equals("FilterList AND (0/0): []"))
+        if (filter != null)
         {
             s.setFilter(filter);
         }

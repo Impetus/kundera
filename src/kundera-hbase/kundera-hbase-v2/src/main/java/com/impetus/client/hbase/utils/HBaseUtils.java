@@ -22,6 +22,7 @@ import java.util.Map;
 import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp;
 import org.apache.hadoop.hbase.util.Bytes;
 
+import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
@@ -48,6 +49,16 @@ public final class HBaseUtils
 
     public static final String DELIM = "#";
 
+    public static final String EQUALS = "=";
+
+    public static final String COMP_KEY_DELIM = "\001";
+
+    public static final String AND = "AND";
+
+    public static final String OR = "OR";
+
+    public static final String COLON = ":";
+
     /**
      * Gets the bytes.
      * 
@@ -59,41 +70,45 @@ public final class HBaseUtils
      */
     public static byte[] getBytes(Object value, Class<?> clazz)
     {
-        if (/* isId || */clazz.isAssignableFrom(String.class))
+        if (clazz.isAssignableFrom(Number.class))
+        {
+            if (clazz.equals(int.class) || clazz.isAssignableFrom(Integer.class))
+            {
+                return Bytes.toBytes(value instanceof Integer ? (Integer) value : new Integer(value.toString()));
+            }
+            else if (clazz.equals(long.class) || clazz.isAssignableFrom(Long.class))
+            {
+                return Bytes.toBytes(value instanceof Long ? (Long) value : new Long(value.toString()));
+            }
+            else if (clazz.equals(double.class) || clazz.isAssignableFrom(Double.class))
+            {
+                return Bytes.toBytes(value instanceof Double ? (Double) value : new Double(value.toString()));
+            }
+            else if (clazz.equals(float.class) || clazz.isAssignableFrom(Float.class))
+            {
+                return Bytes.toBytes(value instanceof Float ? (Float) value : new Float(value.toString()));
+            }
+            else if (clazz.equals(short.class) || clazz.isAssignableFrom(Short.class))
+            {
+                return Bytes.toBytes(value instanceof Short ? (Short) value : new Short(value.toString()));
+            }
+            else if (clazz.equals(BigDecimal.class))
+            {
+                return Bytes.toBytes(value instanceof BigDecimal ? (BigDecimal) value
+                        : new BigDecimal(value.toString()));
+            }
+            else
+            {
+                throw new KunderaException("datatype not supported");
+            }
+        }
+        else if (clazz.isAssignableFrom(String.class))
         {
             return Bytes.toBytes(value.toString());
-        }
-        else if (clazz.equals(int.class) || clazz.isAssignableFrom(Integer.class))
-        {
-            return Bytes.toBytes(value instanceof Integer ? (Integer) value : new Integer(value.toString()));
-        }
-        else if (clazz.equals(long.class) || clazz.isAssignableFrom(Long.class))
-        {
-            return Bytes.toBytes(value instanceof Long ? (Long) value : new Long(value.toString()));
         }
         else if (clazz.equals(boolean.class) || clazz.isAssignableFrom(Boolean.class))
         {
             return Bytes.toBytes(value instanceof Boolean ? (Boolean) value : new Boolean(value.toString()));
-        }
-        else if (clazz.equals(double.class) || clazz.isAssignableFrom(Double.class))
-        {
-            return Bytes.toBytes(value instanceof Double ? (Double) value : new Double(value.toString()));
-        }
-        // else if (clazz.isAssignableFrom(java.util.UUID.class))
-        // {
-        // return Bytes.toBytes(value.toString());
-        // }
-        else if (clazz.equals(float.class) || clazz.isAssignableFrom(Float.class))
-        {
-            return Bytes.toBytes(value instanceof Float ? (Float) value : new Float(value.toString()));
-        }
-        else if (clazz.equals(short.class) || clazz.isAssignableFrom(Short.class))
-        {
-            return Bytes.toBytes(value instanceof Short ? (Short) value : new Short(value.toString()));
-        }
-        else if (clazz.equals(BigDecimal.class))
-        {
-            return Bytes.toBytes(value instanceof BigDecimal ? (BigDecimal) value : new BigDecimal(value.toString()));
         }
         else
         {
@@ -154,38 +169,44 @@ public final class HBaseUtils
      */
     public static Object fromBytes(byte[] b, Class<?> clazz)
     {
-
-        if (clazz.isAssignableFrom(String.class))
+        if (clazz.isAssignableFrom(Number.class))
+        {
+            if (clazz.equals(int.class) || clazz.isAssignableFrom(Integer.class))
+            {
+                return Bytes.toInt(b);
+            }
+            else if (clazz.equals(long.class) || clazz.isAssignableFrom(Long.class))
+            {
+                return Bytes.toLong(b);
+            }
+            else if (clazz.equals(double.class) || clazz.isAssignableFrom(Double.class))
+            {
+                return Bytes.toDouble(b);
+            }
+            else if (clazz.equals(float.class) || clazz.isAssignableFrom(Float.class))
+            {
+                return Bytes.toFloat(b);
+            }
+            else if (clazz.equals(short.class) || clazz.isAssignableFrom(Short.class))
+            {
+                return Bytes.toShort(b);
+            }
+            else if (clazz.equals(BigDecimal.class))
+            {
+                return Bytes.toBigDecimal(b);
+            }
+            else
+            {
+                throw new KunderaException("datatype not supported");
+            }
+        }
+        else if (clazz.isAssignableFrom(String.class))
         {
             return Bytes.toString(b);
-        }
-        else if (clazz.equals(int.class) || clazz.isAssignableFrom(Integer.class))
-        {
-            return Bytes.toInt(b);
-        }
-        else if (clazz.equals(long.class) || clazz.isAssignableFrom(Long.class))
-        {
-            return Bytes.toLong(b);
         }
         else if (clazz.equals(boolean.class) || clazz.isAssignableFrom(Boolean.class))
         {
             return Bytes.toBoolean(b);
-        }
-        else if (clazz.equals(double.class) || clazz.isAssignableFrom(Double.class))
-        {
-            return Bytes.toDouble(b);
-        }
-        else if (clazz.equals(float.class) || clazz.isAssignableFrom(Float.class))
-        {
-            return Bytes.toFloat(b);
-        }
-        else if (clazz.equals(short.class) || clazz.isAssignableFrom(Short.class))
-        {
-            return Bytes.toShort(b);
-        }
-        else if (clazz.equals(BigDecimal.class))
-        {
-            return Bytes.toBigDecimal(b);
         }
         else
         {
@@ -257,7 +278,7 @@ public final class HBaseUtils
      */
     public static String getHTableName(String namespace, String tableName)
     {
-        return namespace + ":" + tableName;
+        return namespace + COLON + tableName;
     }
 
     /**
@@ -271,7 +292,7 @@ public final class HBaseUtils
      */
     public static String getColumnDataKey(String string, String string2)
     {
-        return string + ":" + string2;
+        return string + COLON + string2;
 
     }
 
@@ -289,7 +310,7 @@ public final class HBaseUtils
         if (colToOutput != null && colToOutput.size() == 1)
         {
             String idCol = ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName();
-            return idCol.equals(colToOutput.get(0).get("colName")) && !(boolean) colToOutput.get(0).get("isEmbeddable");
+            return idCol.equals(colToOutput.get(0).get(COL_NAME)) && !(boolean) colToOutput.get(0).get(IS_EMBEDDABLE);
         }
         else
         {
@@ -306,7 +327,7 @@ public final class HBaseUtils
      */
     public static boolean isAutoIdValueRow(byte[] row)
     {
-        return ((String) HBaseUtils.fromBytes(row, String.class)).equals("kunderaAutoIdRow");
+        return ((String) HBaseUtils.fromBytes(row, String.class)).equals(AUTO_ID_ROW);
     }
 
 }

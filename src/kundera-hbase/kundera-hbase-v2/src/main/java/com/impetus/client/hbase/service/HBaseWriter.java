@@ -40,7 +40,7 @@ import com.impetus.client.hbase.utils.HBaseUtils;
 public class HBaseWriter implements Writer
 {
     /** the log used by this class. */
-    private static Logger log = LoggerFactory.getLogger(HBaseWriter.class);
+    private static Logger logger = LoggerFactory.getLogger(HBaseWriter.class);
 
     /*
      * (non-Javadoc)
@@ -52,7 +52,6 @@ public class HBaseWriter implements Writer
     @Override
     public void writeRow(Table hTable, HBaseRow hbaseRow) throws IOException
     {
-
         Put p = preparePut(hbaseRow);
         hTable.put(p);
     }
@@ -89,19 +88,14 @@ public class HBaseWriter implements Writer
     public void writeColumns(Table htable, Object rowKey, Map<String, Object> columns, String columnFamilyName)
             throws IOException
     {
-
-        Put p = new Put(HBaseUtils.getBytes(rowKey));
-
-        boolean isPresent = false;
-        for (String columnName : columns.keySet())
+        if (columns != null && !columns.isEmpty())
         {
-            p.addColumn(columnFamilyName.getBytes(), Bytes.toBytes(columnName),
-                    HBaseUtils.getBytes(columns.get(columnName)));
-            isPresent = true;
-        }
-
-        if (isPresent)
-        {
+            Put p = new Put(HBaseUtils.getBytes(rowKey));
+            for (String columnName : columns.keySet())
+            {
+                p.addColumn(columnFamilyName.getBytes(), Bytes.toBytes(columnName),
+                        HBaseUtils.getBytes(columns.get(columnName)));
+            }
             htable.put(p);
         }
     }
@@ -124,8 +118,8 @@ public class HBaseWriter implements Writer
         }
         catch (IOException e)
         {
-            log.error("Error while delete on hbase for : " + rowKey);
-            throw new PersistenceException(e);
+            logger.error("Error while delete on hbase for : " + rowKey);
+            throw new PersistenceException("Could not perform delete. Caused by: ", e);
         }
     }
 }

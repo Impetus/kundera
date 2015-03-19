@@ -118,7 +118,6 @@ class ResultIterator<E> implements IResultIterator<E>
     @Override
     public boolean hasNext()
     {
-
         boolean available = handler.hasNext();
         if (!available || fetchSize == 0)
         {
@@ -178,9 +177,6 @@ class ResultIterator<E> implements IResultIterator<E>
      */
     private E setRelationEntities(Object enhanceEntity, Client client, EntityMetadata m)
     {
-        // Enhance entities can contain or may not contain relation.
-        // if it contain a relation means it is a child
-        // if it does not then it means it is a parent.
         E result = null;
         if (enhanceEntity != null)
         {
@@ -209,10 +205,8 @@ class ResultIterator<E> implements IResultIterator<E>
      */
     private void onQuery(EntityMetadata m, Client client)
     {
-
         try
         {
-            // Called only in case of standalone entity.
             String tableName = HBaseUtils.getHTableName(m.getSchema(), m.getTableName());
             FilterList filter = null;
             if (translator.getFilter() != null)
