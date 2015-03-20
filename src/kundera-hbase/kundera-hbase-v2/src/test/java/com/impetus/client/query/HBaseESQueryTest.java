@@ -84,7 +84,6 @@ public class HBaseESQueryTest extends HBaseQueryBaseTest
     {
         em = emf.createEntityManager();
         persistBooks();
-        Thread.sleep(2000);
     }
 
     /*
@@ -168,7 +167,6 @@ public class HBaseESQueryTest extends HBaseQueryBaseTest
         multiAvgAggregation();
         multiAvgAggregationWithWhere();
         minMaxSumAvgAggregation();
-
     }
 
     /**
@@ -471,6 +469,27 @@ public class HBaseESQueryTest extends HBaseQueryBaseTest
         Assert.assertEquals(value2, resultList.get(1));
         Assert.assertEquals(value3, resultList.get(2));
         Assert.assertEquals(value4, resultList.get(3));
+    }
+
+    protected void persistBooks()
+    {
+        Book book1 = prepareData(1, "book1", "author1", 2000, 100);
+        Book book2 = prepareData(2, "book2", "author2", 2005, 200);
+        Book book3 = prepareData(3, "book3", "author3", 2010, 300);
+        Book book4 = prepareData(4, "book4", "author1", 2015, 400);
+        em.persist(book1);
+        em.persist(book2);
+        em.persist(book3);
+        em.persist(book4);
+        em.clear();
+        try
+        {
+            Thread.sleep(1000);
+        }
+        catch (InterruptedException e)
+        {
+            e.printStackTrace();
+        }
     }
 
 }
