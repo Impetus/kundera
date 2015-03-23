@@ -45,7 +45,7 @@ public final class HBaseOperationUtils
     public void createTable(String name, String familyName) throws IOException
     {
     	String tableName = name + ":" + familyName;
-        if(admin.isTableAvailable(TableName.valueOf(tableName)))
+        if(admin.tableExists(TableName.valueOf(tableName)))
         {
             deleteTable(tableName);
             admin.deleteNamespace(name);
