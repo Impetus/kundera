@@ -4,21 +4,20 @@ import java.io.IOException;
 
 import javax.persistence.PersistenceException;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
-import org.apache.hadoop.hbase.client.HBaseAdmin;
+import org.apache.hadoop.hbase.NamespaceDescriptor;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Admin;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 
 import common.Logger;
 
 public final class HBaseOperationUtils
 {
 
-    // private final Configuration config = HBaseConfiguration.create(); // new
-    // HBaseConfiguration();
-
-    private HBaseAdmin admin;
+    private Admin admin;
 
     private static Logger logger = Logger.getLogger(HBaseOperationUtils.class);
 
@@ -26,8 +25,8 @@ public final class HBaseOperationUtils
     {
         try
         {
-            Configuration config = HBaseConfiguration.create();
-            admin = new HBaseAdmin(config);
+            Connection conn  = ConnectionFactory.createConnection();
+            admin = conn.getAdmin();
         }
         catch (Exception e)
         {
@@ -37,24 +36,23 @@ public final class HBaseOperationUtils
 
     public void deleteTable(String name) throws IOException
     {
-        // TableDescriptors desc = admin.getTableDescriptor(name.getBytes());
-        // desc.remove(arg0)
-        admin.disableTable(name);
-        admin.deleteTable(name);
+        admin.disableTable(TableName.valueOf(name));
+        admin.deleteTable(TableName.valueOf(name));
         
     }
 
 
     public void createTable(String name, String familyName) throws IOException
     {
-        if(admin.tableExists(name))
+    	String tableName = name + ":" + familyName;
+        if(admin.isTableAvailable(TableName.valueOf(tableName)))
         {
-            deleteTable(name);
+            deleteTable(tableName);
+            admin.deleteNamespace(name);
         }
-        // TableDescriptors desc = admin.getTableDescriptor(name.getBytes());
-        // desc.remove(arg0)
-        HTableDescriptor table = new HTableDescriptor(name);
-        
+        NamespaceDescriptor descriptor = NamespaceDescriptor.create(name).build();
+        admin.createNamespace(descriptor);
+        HTableDescriptor table = new HTableDescriptor(TableName.valueOf(tableName));
         HColumnDescriptor columnFamily = new HColumnDescriptor(familyName);
         table.addFamily(columnFamily);
         admin.createTable(table);
@@ -99,36 +97,32 @@ public final class HBaseOperationUtils
 
     public static void main(String[] args)
     {
-        HBaseOperationUtils utils = new HBaseOperationUtils();
+//        HBaseOperationUtils utils = new HBaseOperationUtils();
         Runtime runtime = Runtime.getRuntime();
         String startHBaseServercommand = "/home/impadmin/software/hbase-0.94.3/bin/start-hbase.sh";
         String stopHBaseServercommand = "/home/impadmin/software/hbase-0.94.3/bin/stop-hbase.sh";
         try
         {
-            utils.startHBaseServer(runtime, startHBaseServercommand);
+            HBaseOperationUtils.startHBaseServer(runtime, startHBaseServercommand);
         }
         catch (IOException e)
         {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         catch (InterruptedException e)
         {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         try
         {
-            utils.stopHBaseServer(stopHBaseServercommand, runtime);
+            HBaseOperationUtils.stopHBaseServer(stopHBaseServercommand, runtime);
         }
         catch (IOException e)
         {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         catch (InterruptedException e)
         {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
