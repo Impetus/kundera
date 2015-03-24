@@ -471,6 +471,11 @@ public class HBaseESQueryTest extends HBaseQueryBaseTest
         Assert.assertEquals(value4, resultList.get(3));
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.client.query.BookBaseTest#persistBooks()
+     */
     protected void persistBooks()
     {
         Book book1 = prepareData(1, "book1", "author1", 2000, 100);
