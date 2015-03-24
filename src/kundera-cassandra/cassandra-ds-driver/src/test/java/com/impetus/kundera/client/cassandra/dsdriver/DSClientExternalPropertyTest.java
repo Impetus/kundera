@@ -91,7 +91,8 @@ public class DSClientExternalPropertyTest
      * Test to check external xml properties in case of
      * RoundRobinPolicy,ExponentialReconnectionPolicy,FallthroughRetryPolicy
      * with baseDelayMs,maxDelayMs available in the external xml file
-     * @throws Exception 
+     * 
+     * @throws Exception
      */
     @Test
     public void withAllPropertyTest() throws Exception
@@ -101,7 +102,7 @@ public class DSClientExternalPropertyTest
         DSClientFactory ds = new DSClientFactory();
         final String RRP = RoundRobinPolicy.class.getName();
         final String ERP = ExponentialReconnectionPolicy.class.getName();
-        final String DCRP = FallthroughRetryPolicy.class.getName();
+        final String DCRP = CustomRetry.class.getName();
         Properties connectionProperties = initialize(ds);
 
         ds.initialize(propertyMap);
@@ -176,7 +177,8 @@ public class DSClientExternalPropertyTest
      * ,DowngradingConsistencyRetryPolicy with
      * localdc,usedHostsPerRemoteDc,constantDelayMs available in the external
      * xml file
-     * @throws Exception 
+     * 
+     * @throws Exception
      */
 
     @Test
@@ -233,7 +235,8 @@ public class DSClientExternalPropertyTest
      * ,DowngradingConsistencyRetryPolicy with
      * localdc,usedHostsPerRemoteDc,constantDelayMs available in the external
      * xml file
-     * @throws Exception 
+     * 
+     * @throws Exception
      */
 
     @Test
@@ -289,7 +292,8 @@ public class DSClientExternalPropertyTest
      * Test to check external xml properties in case of
      * RoundRobinPolicy,ExponentialReconnectionPolicy,FallthroughRetryPolicy
      * with baseDelayMs,maxDelayMs missing from external xml file
-     * @throws Exception 
+     * 
+     * @throws Exception
      */
 
     @Test
@@ -344,7 +348,8 @@ public class DSClientExternalPropertyTest
      * ,DowngradingConsistencyRetryPolicy with
      * localdc,usedHostsPerRemoteDc,constantDelayMs missing from the external
      * xml file
-     * @throws Exception 
+     * 
+     * @throws Exception
      */
 
     @Test
