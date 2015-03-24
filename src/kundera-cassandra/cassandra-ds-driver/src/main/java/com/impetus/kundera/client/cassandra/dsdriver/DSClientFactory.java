@@ -15,6 +15,8 @@
  */
 package com.impetus.kundera.client.cassandra.dsdriver;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Properties;
 
@@ -53,6 +55,7 @@ import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.service.Host;
 import com.impetus.kundera.utils.InvalidConfigurationException;
+import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**
  * Data stax java driver client factory.
@@ -63,13 +66,22 @@ import com.impetus.kundera.utils.InvalidConfigurationException;
 public class DSClientFactory extends CassandraClientFactory
 {
 
+    /** The Constant GET_INSTANCE. */
+    private static final String GET_INSTANCE = "getInstance";
+
+    /** The Constant CUSTOM_RETRY_POLICY. */
+    private static final String CUSTOM_RETRY_POLICY = "customRetryPolicy";
+
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(DSClientFactory.class);
 
+    /** The configuration. */
     private CassandraHostConfiguration configuration;
 
+    /** The keyspace. */
     private String keyspace;
 
+    /** The session. */
     private Session session;
 
     /*
@@ -156,7 +168,7 @@ public class DSClientFactory extends CassandraClientFactory
      * com.impetus.kundera.loader.GenericClientFactory#createPoolOrConnection()
      */
     @Override
-    protected Object createPoolOrConnection()
+    protected Object createPoolOrConnection() throws Exception
     {
         // AuthInfoProvider,LoadBalancingPolicy, ReconnectionPolicy,
         // RetryPolicy,ProtocolOptions.Compression, SSLOptions,
@@ -254,8 +266,8 @@ public class DSClientFactory extends CassandraClientFactory
         {
             keyspace = (String) props.get(PersistenceProperties.KUNDERA_KEYSPACE);
         }
-        setSessionObject(cluster);
-        return cluster;
+        setSessionObject(cluster); // TODO custom session
+        return cluster; // TODO custom cluster
     }
 
     /*
@@ -266,22 +278,39 @@ public class DSClientFactory extends CassandraClientFactory
      * .lang.String)
      */
     @Override
-    protected Client instantiateClient(String persistenceUnit)
+    protected Client<?> instantiateClient(String persistenceUnit)
     {
         return new DSClient(this, persistenceUnit, externalProperties, kunderaMetadata, reader, timestampGenerator);
     }
 
+    /**
+     * Sets the session object.
+     * 
+     * @param cluster
+     *            the new session object
+     */
     void setSessionObject(Cluster cluster)
     {
         this.session = cluster.connect("\"" + keyspace + "\"");
     }
 
+    /**
+     * Gets the connection.
+     * 
+     * @return the connection
+     */
     Session getConnection()
     {
         return this.session != null ? this.session : ((Cluster) this.getConnectionPoolOrConnection()).connect("\""
                 + keyspace + "\"");
     }
 
+    /**
+     * Release connection.
+     * 
+     * @param session
+     *            the session
+     */
     void releaseConnection(Session session)
     {
         if (session != null)
@@ -315,7 +344,7 @@ public class DSClientFactory extends CassandraClientFactory
     }
 
     /**
-     * 
+     * Initialize property reader.
      */
     private void initializePropertyReader()
     {
@@ -327,10 +356,24 @@ public class DSClientFactory extends CassandraClientFactory
         }
     }
 
+    /**
+     * The Enum ReconnectionPolicy.
+     */
     enum ReconnectionPolicy
     {
-        ConstantReconnectionPolicy, ExponentialReconnectionPolicy;
 
+        /** The Constant reconnection policy. */
+        ConstantReconnectionPolicy,
+        /** The Exponential reconnection policy. */
+        ExponentialReconnectionPolicy;
+
+        /**
+         * Gets the policy.
+         * 
+         * @param name
+         *            the name
+         * @return the policy
+         */
         static ReconnectionPolicy getPolicy(String name)
         {
             for (ReconnectionPolicy p : ReconnectionPolicy.values())
@@ -348,10 +391,24 @@ public class DSClientFactory extends CassandraClientFactory
         }
     }
 
+    /**
+     * The Enum BalancingPolicy.
+     */
     enum BalancingPolicy
     {
-        DCAwareRoundRobinPolicy, RoundRobinPolicy;
 
+        /** The DC aware round robin policy. */
+        DCAwareRoundRobinPolicy,
+        /** The Round robin policy. */
+        RoundRobinPolicy;
+
+        /**
+         * Gets the policy.
+         * 
+         * @param name
+         *            the name
+         * @return the policy
+         */
         static BalancingPolicy getPolicy(String name)
         {
             for (BalancingPolicy p : BalancingPolicy.values())
@@ -369,10 +426,26 @@ public class DSClientFactory extends CassandraClientFactory
 
     }
 
+    /**
+     * The Enum RetryPolicy.
+     */
     enum RetryPolicy
     {
-        DowngradingConsistencyRetryPolicy, FallthroughRetryPolicy;
 
+        /** The Downgrading consistency retry policy. */
+        DowngradingConsistencyRetryPolicy,
+        /** The Fallthrough retry policy. */
+        FallthroughRetryPolicy,
+        /** The Custom. */
+        Custom;
+
+        /**
+         * Gets the policy.
+         * 
+         * @param name
+         *            the name
+         * @return the policy
+         */
         static RetryPolicy getPolicy(String name)
         {
             for (RetryPolicy p : RetryPolicy.values())
@@ -389,6 +462,15 @@ public class DSClientFactory extends CassandraClientFactory
         }
     }
 
+    /**
+     * Gets the policy instance.
+     * 
+     * @param policy
+     *            the policy
+     * @param conProperties
+     *            the con properties
+     * @return the policy instance
+     */
     private LoadBalancingPolicy getPolicyInstance(BalancingPolicy policy, Properties conProperties)
     {
 
@@ -429,6 +511,15 @@ public class DSClientFactory extends CassandraClientFactory
         return loadBalancingPolicy;
     }
 
+    /**
+     * Gets the policy.
+     * 
+     * @param policy
+     *            the policy
+     * @param props
+     *            the props
+     * @return the policy
+     */
     private com.datastax.driver.core.policies.ReconnectionPolicy getPolicy(ReconnectionPolicy policy, Properties props)
     {
         com.datastax.driver.core.policies.ReconnectionPolicy reconnectionPolicy = null;
@@ -458,11 +549,24 @@ public class DSClientFactory extends CassandraClientFactory
         return reconnectionPolicy;
     }
 
+    /**
+     * Gets the policy.
+     * 
+     * @param policy
+     *            the policy
+     * @param props
+     *            the props
+     * @return the policy
+     * @throws Exception
+     *             the exception
+     */
     private com.datastax.driver.core.policies.RetryPolicy getPolicy(RetryPolicy policy, Properties props)
+            throws Exception
     {
         com.datastax.driver.core.policies.RetryPolicy retryPolicy = null;
 
         String isLoggingRetry = (String) props.get("isLoggingRetry");
+
         switch (policy)
         {
         case DowngradingConsistencyRetryPolicy:
@@ -471,6 +575,10 @@ public class DSClientFactory extends CassandraClientFactory
 
         case FallthroughRetryPolicy:
             retryPolicy = FallthroughRetryPolicy.INSTANCE;
+            break;
+
+        case Custom:
+            retryPolicy = getCustomRetryPolicy(props);
             break;
 
         default:
@@ -486,6 +594,65 @@ public class DSClientFactory extends CassandraClientFactory
 
     }
 
+    /**
+     * Gets the custom retry policy.
+     * 
+     * @param props
+     *            the props
+     * @return the custom retry policy
+     * @throws Exception
+     *             the exception
+     */
+    private com.datastax.driver.core.policies.RetryPolicy getCustomRetryPolicy(Properties props) throws Exception
+    {
+        String customRetryPolicy = (String) props.get(CUSTOM_RETRY_POLICY);
+        Class<?> clazz = null;
+        Method getter = null;
+        try
+        {
+            clazz = Class.forName(customRetryPolicy);
+            com.datastax.driver.core.policies.RetryPolicy retryPolicy = (com.datastax.driver.core.policies.RetryPolicy) KunderaCoreUtils
+                    .createNewInstance(clazz);
+            if (retryPolicy != null)
+            {
+                return retryPolicy;
+            }
+            getter = clazz.getDeclaredMethod(GET_INSTANCE);
+            return (com.datastax.driver.core.policies.RetryPolicy) getter.invoke(null, (Object[]) null);
+        }
+        catch (ClassNotFoundException e)
+        {
+            logger.error(e.getMessage());
+            throw new ClassNotFoundException("Please make sure class name set in property file is correct "
+                    + e.getMessage());
+        }
+        catch (IllegalAccessException e)
+        {
+            logger.error(e.getMessage());
+            throw new IllegalAccessException("Method " + getter.getName() + " must be declared public "
+                    + e.getMessage());
+        }
+        catch (NoSuchMethodException e)
+        {
+            logger.error(e.getMessage());
+            throw new NoSuchMethodException("Please make sure getter method of " + clazz.getSimpleName()
+                    + " is named \"getInstance()\"");
+        }
+        catch (InvocationTargetException e)
+        {
+            logger.error(e.getMessage());
+            throw new Exception("Error while executing \"getInstance()\" method of Class " + clazz.getSimpleName()
+                    + ": " + e.getMessage());
+        }
+    }
+
+    /**
+     * Gets the socket options.
+     * 
+     * @param connectionProperties
+     *            the connection properties
+     * @return the socket options
+     */
     private SocketOptions getSocketOptions(Properties connectionProperties)
     {
         // SocketOptions
@@ -543,6 +710,13 @@ public class DSClientFactory extends CassandraClientFactory
         return socketConfig;
     }
 
+    /**
+     * Gets the pooling options.
+     * 
+     * @param connectionProperties
+     *            the connection properties
+     * @return the pooling options
+     */
     private PoolingOptions getPoolingOptions(Properties connectionProperties)
     {
         // minSimultaneousRequests, maxSimultaneousRequests, coreConnections,

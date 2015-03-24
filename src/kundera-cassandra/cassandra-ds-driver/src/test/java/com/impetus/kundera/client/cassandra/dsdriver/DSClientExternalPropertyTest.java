@@ -91,16 +91,10 @@ public class DSClientExternalPropertyTest
      * Test to check external xml properties in case of
      * RoundRobinPolicy,ExponentialReconnectionPolicy,FallthroughRetryPolicy
      * with baseDelayMs,maxDelayMs available in the external xml file
-     * 
-     * @throws NoSuchMethodException
-     * @throws SecurityException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
-     * @throws InvocationTargetException
+     * @throws Exception 
      */
     @Test
-    public void withAllPropertyTest() throws NoSuchMethodException, SecurityException, IllegalAccessException,
-            IllegalArgumentException, InvocationTargetException
+    public void withAllPropertyTest() throws Exception
     {
 
         emf = Persistence.createEntityManagerFactory(_PU, propertyMap);
@@ -182,17 +176,11 @@ public class DSClientExternalPropertyTest
      * ,DowngradingConsistencyRetryPolicy with
      * localdc,usedHostsPerRemoteDc,constantDelayMs available in the external
      * xml file
-     * 
-     * @throws NoSuchMethodException
-     * @throws SecurityException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
-     * @throws InvocationTargetException
+     * @throws Exception 
      */
 
     @Test
-    public void withPropertyTest2() throws NoSuchMethodException, SecurityException, IllegalAccessException,
-            IllegalArgumentException, InvocationTargetException
+    public void withPropertyTest2() throws Exception
     {
         propertyMap.put("kundera.client.property", "dsclienttest2.xml");
         emf = Persistence.createEntityManagerFactory(_PU, propertyMap);
@@ -245,17 +233,11 @@ public class DSClientExternalPropertyTest
      * ,DowngradingConsistencyRetryPolicy with
      * localdc,usedHostsPerRemoteDc,constantDelayMs available in the external
      * xml file
-     * 
-     * @throws NoSuchMethodException
-     * @throws SecurityException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
-     * @throws InvocationTargetException
+     * @throws Exception 
      */
 
     @Test
-    public void testLoadBalancingPolicyShouldBeLatencyAware() throws NoSuchMethodException, SecurityException,
-            IllegalAccessException, IllegalArgumentException, InvocationTargetException
+    public void testLoadBalancingPolicyShouldBeLatencyAware() throws Exception
     {
         propertyMap.put("kundera.client.property", "dsclienttest3.xml");
         emf = Persistence.createEntityManagerFactory(_PU, propertyMap);
@@ -307,17 +289,11 @@ public class DSClientExternalPropertyTest
      * Test to check external xml properties in case of
      * RoundRobinPolicy,ExponentialReconnectionPolicy,FallthroughRetryPolicy
      * with baseDelayMs,maxDelayMs missing from external xml file
-     * 
-     * @throws NoSuchMethodException
-     * @throws SecurityException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
-     * @throws InvocationTargetException
+     * @throws Exception 
      */
 
     @Test
-    public void missingPropertytest() throws NoSuchMethodException, SecurityException, IllegalAccessException,
-            IllegalArgumentException, InvocationTargetException
+    public void missingPropertytest() throws Exception
     {
 
         propertyMap.put("kundera.client.property", "DSClientTestWithMissingProperties.xml");
@@ -368,17 +344,11 @@ public class DSClientExternalPropertyTest
      * ,DowngradingConsistencyRetryPolicy with
      * localdc,usedHostsPerRemoteDc,constantDelayMs missing from the external
      * xml file
-     * 
-     * @throws NoSuchMethodException
-     * @throws SecurityException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
-     * @throws InvocationTargetException
+     * @throws Exception 
      */
 
     @Test
-    public void missingPropertyTest2() throws NoSuchMethodException, SecurityException, IllegalAccessException,
-            IllegalArgumentException, InvocationTargetException
+    public void missingPropertyTest2() throws Exception
     {
 
         propertyMap.put("kundera.client.property", "DSClientTestWithMissingProperties2.xml");
