@@ -116,7 +116,14 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
 
         // Construct Pool
         logger.info("Constructing pool for persistence unit : " + persistenceUnit);
-        connectionPoolOrConnection = createPoolOrConnection();
+        try
+        {
+            connectionPoolOrConnection = createPoolOrConnection();
+        }
+        catch (Exception e)
+        {
+            logger.error("Error while creating Connection or Pool.", e.getMessage());
+        }
     }
 
     /**
@@ -216,8 +223,9 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
      * @param externalProperties
      * 
      * @return the object
+     * @throws Exception
      */
-    protected abstract Object createPoolOrConnection();
+    protected abstract Object createPoolOrConnection() throws Exception;
 
     /**
      * Gets the client instance.
