@@ -17,6 +17,7 @@ package com.impetus.client.hbase.query;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -201,7 +202,6 @@ public class HBaseQuery extends QueryImpl
     {
         EntityMetadata m = getEntityMetadata();
         Client client = persistenceDelegeator.getClient(m);
-
         boolean useLuceneOrES = !MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata());
         QueryTranslator translator = new QueryTranslator();
         translator.translate(getKunderaQuery(), m, useLuceneOrES);
@@ -678,7 +678,7 @@ public class HBaseQuery extends QueryImpl
                 byte[] colName, Class fieldClazz)
         {
             InExpression inExp = (InExpression) values;
-            Iterable listIterable;
+            Iterable listIterable = null;
             boolean isParameter = false;
             if (CollectionExpression.class.isAssignableFrom(inExp.getInItems().getClass()))
             {
@@ -687,7 +687,21 @@ public class HBaseQuery extends QueryImpl
             else
             {
                 String param = ((InputParameter) inExp.getInItems()).getParameter();
-                listIterable = (Iterable) getKunderaQuery().getParametersMap().get(param);
+                Object items = getKunderaQuery().getParametersMap().get(param);
+                // If the input parameter is an Array
+                if (items.getClass().isArray())
+                {
+                    listIterable = Arrays.asList((Object[]) items);
+                }
+                // If the input parameter is a List
+                else if (Iterable.class.isAssignableFrom(items.getClass()))
+                {
+                    listIterable = (Iterable) items;
+                }
+                else
+                {
+                    throw new UnsupportedOperationException("Input parameter must either be an array or a list");
+                }
                 isParameter = true;
             }
             Iterator itr = listIterable.iterator();
@@ -935,16 +949,6 @@ public class HBaseQuery extends QueryImpl
         byte[] getEndRow()
         {
             return endRow;
-        }
-
-        /**
-         * Checks if is range scan.
-         * 
-         * @return true, if is range scan
-         */
-        boolean isRangeScan()
-        {
-            return startRow != null || endRow != null;
         }
     }
 

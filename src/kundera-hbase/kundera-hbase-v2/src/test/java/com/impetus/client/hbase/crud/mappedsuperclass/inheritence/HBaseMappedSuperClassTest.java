@@ -26,7 +26,7 @@ import com.impetus.kundera.client.crud.mappedsuperclass.MappedSuperClassBase;
  * The Class HBaseMappedSuperClassTest.
  * 
  * @author Pragalbh Garg
- *         
+ * 
  */
 public class HBaseMappedSuperClassTest extends MappedSuperClassBase
 {
