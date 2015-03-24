@@ -5,27 +5,12 @@
 	
 	<!-- Persistence Units for user-tweets application -->
 
-    <!-- Persistence unit for cassandra -->
-	<persistence-unit name="twissandra">
-		<provider>com.impetus.kundera.KunderaPersistence</provider>
-		<class>com.impetus.kvapps.entities.Video</class>
-    	<exclude-unlisted-classes>true</exclude-unlisted-classes>
-		<properties>
-			<property name="kundera.nodes" value="localhost" />
-			<property name="kundera.port" value="9160" />
-			<property name="kundera.keyspace" value="kvapps" />
-			<property name="kundera.dialect" value="cassandra" />
-			<property name="kundera.client.lookup.class"
-				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
-		   <property name="kundera.ddl.auto.prepare" value="create" />
-	</properties>
-
-	</persistence-unit>
+    </persistence-unit>
 
 	<!-- Persistence unit for mysql -->
 	<persistence-unit name="twirdbms">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
-		<class>com.impetus.kvapps.entities.Tweets</class>
+		<class>com.impetus.kvapps.entities.User</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
     	<properties>
 			<property name="kundera.client.lookup.class" value="com.impetus.client.rdbms.RDBMSClientFactory" />
@@ -44,7 +29,7 @@
     <!-- Persistence unit for mongo -->
 	<persistence-unit name="twingo">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
-		<class>com.impetus.kvapps.entities.User</class>
+		<class>com.impetus.kvapps.entities.Tweets</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			 <property name="kundera.nodes" value="localhost" /> 
@@ -57,5 +42,20 @@
 			<property name="kundera.client.property" value="kundera-mongo.properties"/>
 		</properties>
 	</persistence-unit>
+	
+	<!-- Persistence unit for cassandra -->
+	<persistence-unit name="twissandra">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.kvapps.entities.Video</class>
+    	<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="9160" />
+			<property name="kundera.keyspace" value="kvapps" />
+			<property name="kundera.dialect" value="cassandra" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
+		   <property name="kundera.ddl.auto.prepare" value="create" />
+	</properties>
 </persistence>
 
