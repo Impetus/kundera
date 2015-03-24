@@ -40,7 +40,7 @@ public class HBaseMappedSuperClassTest extends MappedSuperClassBase
     @Before
     public void setUp() throws Exception
     {
-        _PU = "mappesSuperClassTest";
+        _PU = "mappedSuperClassTest";
         setUpInternal();
     }
 

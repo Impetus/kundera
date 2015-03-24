@@ -195,10 +195,10 @@
 	</persistence-unit>
 	<persistence-unit name="inheritenceTest">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
-		<class>com.impetus.kundera.client.crud.inheritence.SocialProfile</class>
-		<class>com.impetus.kundera.client.crud.inheritence.TwitterProfile</class>
-		<class>com.impetus.kundera.client.crud.inheritence.FacebookProfile</class>
-		<class>com.impetus.kundera.client.crud.inheritence.UserAccount</class>
+		<class>com.impetus.client.hbase.crud.inheritence.SocialProfile</class>
+		<class>com.impetus.client.hbase.crud.inheritence.TwitterProfile</class>
+		<class>com.impetus.client.hbase.crud.inheritence.FacebookProfile</class>
+		<class>com.impetus.client.hbase.crud.inheritence.UserAccount</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<property name="kundera.nodes" value="localhost" />
@@ -209,7 +209,7 @@
 			<property name="kundera.client.lookup.class" value="com.impetus.client.hbase.HBaseClientFactory" />
 		</properties>
 	</persistence-unit>
-	<persistence-unit name="mappesSuperClassTest">
+	<persistence-unit name="mappedSuperClassTest">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<class>com.impetus.kundera.client.crud.mappedsuperclass.Transaction</class>
 		<class>com.impetus.kundera.client.crud.mappedsuperclass.CreditTransaction</class>
