@@ -30,12 +30,14 @@ import org.apache.hadoop.hbase.filter.ColumnPaginationFilter;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.FilterList;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.client.hbase.HBaseClient;
+import com.impetus.client.hbase.testingutil.HBaseTestingUtils;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 
@@ -87,6 +89,18 @@ public class HbasePropertySetterTest
     public void tearDown() throws Exception
     {
         emf.close();
+    }
+
+    /**
+     * Tear down after class.
+     * 
+     * @throws Exception
+     *             the exception
+     */
+    @AfterClass
+    public static void tearDownAfterClass() throws Exception
+    {
+        HBaseTestingUtils.dropSchema("KunderaHbaseKeyspace");
     }
 
     /**

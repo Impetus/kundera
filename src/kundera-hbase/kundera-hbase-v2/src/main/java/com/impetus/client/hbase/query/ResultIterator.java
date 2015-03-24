@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 import org.apache.hadoop.hbase.filter.FilterList;
-import org.apache.hadoop.hbase.filter.KeyOnlyFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,15 +29,13 @@ import com.impetus.client.hbase.HBaseClient;
 import com.impetus.client.hbase.admin.HBaseDataHandler;
 import com.impetus.client.hbase.query.HBaseQuery.QueryTranslator;
 import com.impetus.client.hbase.utils.HBaseUtils;
+import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
-import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.EnhanceEntity;
-import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.IResultIterator;
-import com.impetus.kundera.query.QueryHandlerException;
 
 /**
  * The Class ResultIterator.
@@ -86,7 +83,7 @@ class ResultIterator<E> implements IResultIterator<E>
      * @param client
      *            the client
      * @param m
-     *            the m
+     *            the entity metadata
      * @param pd
      *            the pd
      * @param fetchSize
@@ -140,8 +137,7 @@ class ResultIterator<E> implements IResultIterator<E>
         {
             throw new NoSuchElementException("Nothing to scroll further for:" + entityMetadata.getEntityClazz());
         }
-
-        E result = (E) handler.next(entityMetadata);
+        E result = (E) handler.next(entityMetadata, columns);
         if (!entityMetadata.isRelationViaJoinTable()
                 && (entityMetadata.getRelationNames() == null || (entityMetadata.getRelationNames().isEmpty())))
         {
@@ -180,7 +176,6 @@ class ResultIterator<E> implements IResultIterator<E>
         E result = null;
         if (enhanceEntity != null)
         {
-
             if (!(enhanceEntity instanceof EnhanceEntity))
             {
                 enhanceEntity = new EnhanceEntity(enhanceEntity, PropertyAccessorHelper.getId(enhanceEntity, m), null);
@@ -191,7 +186,6 @@ class ResultIterator<E> implements IResultIterator<E>
             result = (E) client.getReader().recursivelyFindEntities(ee.getEntity(), ee.getRelations(), m,
                     persistenceDelegator, false, new HashMap<Object, Object>());
         }
-
         return result;
     }
 
@@ -205,43 +199,16 @@ class ResultIterator<E> implements IResultIterator<E>
      */
     private void onQuery(EntityMetadata m, Client client)
     {
+        String tableName = HBaseUtils.getHTableName(m.getSchema(), m.getTableName());
         try
         {
-            String tableName = HBaseUtils.getHTableName(m.getSchema(), m.getTableName());
-            FilterList filter = null;
-            if (translator.getFilter() != null)
-            {
-                filter = new FilterList(translator.getFilter());
-            }
-            List<Map<String, Object>> colAsList = getColAsList();
-            if (HBaseUtils.isFindKeyOnly(m, colAsList))
-            {
-                this.handler.setFilter(new KeyOnlyFilter());
-            }
-
-            if (filter == null && columns != null)
-            {
-                handler.readDataByRange(tableName, m.getEntityClazz(), m, translator.getStartRow(),
-                        translator.getEndRow(), colAsList, null);
-            }
-            if (MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
-            {
-                if (filter != null && !translator.isRangeScan())
-                {
-                    handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata, null,
-                            m.getRelationNames(), filter, colAsList);
-                }
-                else
-                {
-                    handler.readDataByRange(tableName, m.getEntityClazz(), m, translator.getStartRow(),
-                            translator.getEndRow(), colAsList, filter);
-                }
-            }
+            handler.readData(tableName, m, null, translator.getStartRow(), translator.getEndRow(), getColumnsToOuput(),
+                    (FilterList) translator.getFilters());
         }
-        catch (IOException ioex)
+        catch (IOException e)
         {
-            log.error("Error while executing query{} , Caused by:", ioex);
-            throw new QueryHandlerException("Error while executing , Caused by:", ioex);
+            log.error(e.getMessage());
+            throw new KunderaException("Error in connecting to database or some network problem. Caused by: ", e);
         }
     }
 
@@ -250,7 +217,7 @@ class ResultIterator<E> implements IResultIterator<E>
      * 
      * @return the col as list
      */
-    private List<Map<String, Object>> getColAsList()
+    private List<Map<String, Object>> getColumnsToOuput()
     {
         return this.columns;
     }

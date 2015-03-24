@@ -87,6 +87,7 @@ public class HBaseUserTest
     public static void tearDownAfterClass() throws Exception
     {
         HBaseTestingUtils.dropSchema("HBaseNew");
+        HBaseTestingUtils.dropSchema("KunderaHbaseXmlTest");
     }
 
     /**

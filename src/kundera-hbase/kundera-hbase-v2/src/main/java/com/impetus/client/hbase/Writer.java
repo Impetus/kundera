@@ -29,6 +29,7 @@ import com.impetus.client.hbase.admin.HBaseRow;
  */
 public interface Writer
 {
+
     /**
      * Writes columns data to HBase table, supplied as a map in Key/ value pair;
      * key and value representing column name and value respectively.
@@ -39,6 +40,8 @@ public interface Writer
      *            the row key
      * @param columns
      *            the columns
+     * @param columnFamilyName
+     *            the column family name
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */

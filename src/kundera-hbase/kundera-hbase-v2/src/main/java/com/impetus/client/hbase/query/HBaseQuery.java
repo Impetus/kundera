@@ -165,55 +165,20 @@ public class HBaseQuery extends QueryImpl
      */
     private List onQuery(EntityMetadata m, Client client)
     {
-        Boolean useLuceneOrES = !MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata());
+        boolean useLuceneOrES = !MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata());
         QueryTranslator translator = new QueryTranslator();
-        List<Map<String, Object>> outputColumns = translator.getColumnsToOutput(m, getKunderaQuery(), useLuceneOrES);
-
+        List<Map<String, Object>> columnsToOutput = translator.getColumnsToOutput(m, getKunderaQuery(), useLuceneOrES);
         translator.translate(getKunderaQuery(), m, useLuceneOrES);
-        Filter filter = processFilters(translator.getFilter());
-        if (!translator.isWhereOrAggregationQuery())
+        Filter filters = translator.getFilters();
+        if (!translator.isWhereOrAggregationQuery() || !useLuceneOrES)
         {
-            return ((HBaseClient) client).findByRange(m.getEntityClazz(), m, translator.getStartRow(),
-                    translator.getEndRow(), outputColumns, filter, getKunderaQuery().getFilterClauseQueue());
-        }
-        if (!useLuceneOrES)
-        {
-
-            if (filter != null && !translator.isRangeScan())
-            {
-                return ((HBaseClient) client).findByQuery(m.getEntityClazz(), m, filter, getKunderaQuery()
-                        .getFilterClauseQueue(), outputColumns);
-            }
-            else
-            {
-                return ((HBaseClient) client).findByRange(m.getEntityClazz(), m, translator.getStartRow(),
-                        translator.getEndRow(), outputColumns, filter, getKunderaQuery().getFilterClauseQueue());
-            }
+            return ((HBaseClient) client).findData(m, null, translator.getStartRow(), translator.getEndRow(),
+                    columnsToOutput, filters);
         }
         else
         {
             return populateUsingLucene(m, client, null, null);
         }
-    }
-
-    /**
-     * Process filters.
-     * 
-     * @param filter
-     *            the filter
-     * @return the filter
-     */
-    private Filter processFilters(Filter filter)
-    {
-        FilterList filterList = new FilterList();
-        filterList.addFilter(new PageFilter(getMaxResults()));
-        byte[] value = HBaseUtils.AUTO_ID_ROW.getBytes();
-        filterList.addFilter(new RowFilter(CompareOp.NOT_EQUAL, new BinaryComparator(value)));
-        if (filter != null)
-        {
-            filterList.addFilter(filter);
-        }
-        return filterList;
     }
 
     /*
@@ -237,13 +202,13 @@ public class HBaseQuery extends QueryImpl
         EntityMetadata m = getEntityMetadata();
         Client client = persistenceDelegeator.getClient(m);
 
-        Boolean useLuceneOrES = !MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata());
-        if (useLuceneOrES)
+        boolean useLuceneOrES = !MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata());
+        QueryTranslator translator = new QueryTranslator();
+        translator.translate(getKunderaQuery(), m, useLuceneOrES);
+        if (useLuceneOrES && translator.isWhereOrAggregationQuery())
         {
             throw new UnsupportedOperationException("Scrolling over hbase is unsupported for lucene or ES queries");
         }
-        QueryTranslator translator = new QueryTranslator();
-        translator.translate(getKunderaQuery(), m, useLuceneOrES);
         List<Map<String, Object>> columns = translator.getColumnsToOutput(m, getKunderaQuery(), useLuceneOrES);
         return new ResultIterator((HBaseClient) client, m, persistenceDelegeator,
                 getFetchSize() != null ? getFetchSize() : this.maxResult, translator, columns);
@@ -261,7 +226,7 @@ public class HBaseQuery extends QueryImpl
     {
         QueryTranslator translator = new QueryTranslator();
         translator.translate(getKunderaQuery(), m, true);
-        List columns = translator.getColumnsToOutput(m, getKunderaQuery(), true);
+        List<Map<String, Object>> columns = translator.getColumnsToOutput(m, getKunderaQuery(), true);
         Object value = null;
         for (Object obj : getKunderaQuery().getFilterClauseQueue())
         {
@@ -272,8 +237,7 @@ public class HBaseQuery extends QueryImpl
         }
         byte[] valueInBytes = HBaseUtils
                 .getBytes(value, ((AbstractAttribute) m.getIdAttribute()).getBindableJavaType());
-        return ((HBaseClient) client).findByRange(m.getEntityClazz(), m, valueInBytes, valueInBytes, columns, null,
-                getKunderaQuery().getFilterClauseQueue());
+        return ((HBaseClient) client).findData(m, valueInBytes, null, null, columns, null);
     }
 
     /**
@@ -281,7 +245,6 @@ public class HBaseQuery extends QueryImpl
      */
     class QueryTranslator
     {
-
         /** The filter. */
         private Filter filter = null;
 
@@ -299,9 +262,6 @@ public class HBaseQuery extends QueryImpl
         /** The end row. */
         private byte[] endRow = null;
 
-        /*
-         * byte[] value for list of rows null.
-         */
         /** The is where or aggregation. */
         private boolean isWhereOrAggregation = false;
 
@@ -385,6 +345,16 @@ public class HBaseQuery extends QueryImpl
             return columnsToOutput;
         }
 
+        /**
+         * Adds the to output columns.
+         * 
+         * @param selectExpression
+         *            the select expression
+         * @param m
+         *            the m
+         * @param columnsToOutput
+         *            the columns to output
+         */
         private void addToOutputColumns(Expression selectExpression, EntityMetadata m,
                 List<Map<String, Object>> columnsToOutput)
         {
@@ -405,29 +375,69 @@ public class HBaseQuery extends QueryImpl
          */
         void translate(KunderaQuery query, EntityMetadata m, Boolean useLuceneOrES)
         {
+            FilterList filterList = new FilterList();
+            // add filter for pagination
+            filterList.addFilter(new PageFilter(getMaxResults()));
+            // add filter for kundera auto id generation row
+            filterList.addFilter(new RowFilter(CompareOp.NOT_EQUAL, new BinaryComparator(HBaseUtils.AUTO_ID_ROW
+                    .getBytes())));
+            // get filters from where clause
+            Filter filterFromWhereClause = getFiltersFromWhereClause(query, m, useLuceneOrES);
+            if (filterFromWhereClause != null)
+            {
+                filterList.addFilter(filterFromWhereClause);
+            }
+            // get filters for discriminator column
+            Filter filterForDiscrCol = getFilterForDiscrColumn(m);
+            if (filterForDiscrCol != null)
+            {
+                filterList.addFilter(filterForDiscrCol);
+            }
+            this.filter = filterList;
+        }
+
+        /**
+         * Gets the filter for discr column.
+         * 
+         * @param m
+         *            the m
+         * @return the filter for discr column
+         */
+        private Filter getFilterForDiscrColumn(EntityMetadata m)
+        {
+            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                    m.getPersistenceUnit());
+            AbstractManagedType entity = (AbstractManagedType) metaModel.entity(m.getEntityClazz());
+            if (entity.isInherited())
+            {
+                return new SingleColumnValueFilter(Bytes.toBytes(m.getTableName()), Bytes.toBytes(entity
+                        .getDiscriminatorColumn()), CompareOp.EQUAL, Bytes.toBytes(entity.getDiscriminatorValue()));
+            }
+            return null;
+        }
+
+        /**
+         * Sets the filters from where clause.
+         * 
+         * @param query
+         *            the query
+         * @param m
+         *            the m
+         * @param useLuceneOrES
+         *            the use lucene or es
+         * @return the filters from where clause
+         */
+        private Filter getFiltersFromWhereClause(KunderaQuery query, EntityMetadata m, Boolean useLuceneOrES)
+        {
             String idColumn = ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName();
             WhereClause whereClause = KunderaQueryUtils.getWhereClause(query.getJpqlExpression());
             if (whereClause != null)
             {
                 this.isWhereOrAggregation = true;
                 if (!useLuceneOrES)
-                    setFiltersFromWhereClause(whereClause, m, idColumn);
+                    return traverse(whereClause.getConditionalExpression(), m, idColumn);
             }
-        }
-
-        /**
-         * Sets the filters from where clause.
-         * 
-         * @param whClause
-         *            the wh clause
-         * @param m
-         *            the m
-         * @param idColumn
-         *            the id column
-         */
-        private void setFiltersFromWhereClause(WhereClause whClause, EntityMetadata m, String idColumn)
-        {
-            this.filter = traverse(whClause.getConditionalExpression(), m, idColumn);
+            return null;
         }
 
         /**
@@ -902,7 +912,7 @@ public class HBaseQuery extends QueryImpl
          * 
          * @return the filter
          */
-        Filter getFilter()
+        Filter getFilters()
         {
             return this.filter;
         }

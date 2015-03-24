@@ -38,24 +38,34 @@ public final class HBaseUtils
     /** The Constant AUTO_ID_ROW. */
     public static final String AUTO_ID_ROW = "kunderaAutoIdRow";
 
+    /** The Constant COL_FAMILY. */
     public static final String COL_FAMILY = "colFamily";
 
+    /** The Constant COL_NAME. */
     public static final String COL_NAME = "colName";
 
+    /** The Constant IS_EMBEDDABLE. */
     public static final String IS_EMBEDDABLE = "isEmbeddable";
 
+    /** The Constant FIELD_CLAZZ. */
     public static final String FIELD_CLAZZ = "fieldClazz";
 
+    /** The Constant DELIM. */
     public static final String DELIM = "#";
 
+    /** The Constant EQUALS. */
     public static final String EQUALS = "=";
 
+    /** The Constant COMP_KEY_DELIM. */
     public static final String COMP_KEY_DELIM = "\001";
 
+    /** The Constant AND. */
     public static final String AND = "AND";
 
+    /** The Constant OR. */
     public static final String OR = "OR";
 
+    /** The Constant COLON. */
     public static final String COLON = ":";
 
     /**

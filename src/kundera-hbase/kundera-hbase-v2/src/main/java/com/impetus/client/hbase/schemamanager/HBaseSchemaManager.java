@@ -78,6 +78,7 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
      */
     private static final Logger logger = LoggerFactory.getLogger(HBaseSchemaManager.class);
 
+    /** The Constant WILDCARD. */
     private static final String WILDCARD = ".*";
 
     /** The external properties. */
@@ -303,7 +304,7 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
             AbstractManagedType<?> ent = (AbstractManagedType<?>) entityType;
             HTableDescriptor tableDescriptor = null;
             String hTableName = HBaseUtils.getHTableName(databaseName, tableName);
-            tableDescriptor = !admin.isTableAvailable(TableName.valueOf(hTableName)) ? new HTableDescriptor(
+            tableDescriptor = !admin.tableExists(TableName.valueOf(hTableName)) ? new HTableDescriptor(
                     TableName.valueOf(hTableName)) : admin.getTableDescriptor(TableName.valueOf(hTableName));
             addColumnFamilyAndSetProperties(tableDescriptor, tableName);
 

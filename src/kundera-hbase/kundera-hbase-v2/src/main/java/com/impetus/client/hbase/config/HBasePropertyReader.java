@@ -82,6 +82,8 @@ public class HBasePropertyReader extends AbstractPropertyReader implements Prope
      */
     public class HBaseSchemaMetadata
     {
+
+        /** The Constant HBASE. */
         private static final String HBASE = "hbase";
 
         /**
