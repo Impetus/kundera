@@ -5,8 +5,6 @@
 	
 	<!-- Persistence Units for user-tweets application -->
 
-    </persistence-unit>
-
 	<!-- Persistence unit for mysql -->
 	<persistence-unit name="twirdbms">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
@@ -56,6 +54,7 @@
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
 		   <property name="kundera.ddl.auto.prepare" value="create" />
-	</properties>
+	  </properties>
+	</persistence-unit>
 </persistence>
 
