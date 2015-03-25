@@ -193,5 +193,51 @@
 			<property name="kundera.client.lookup.class" value="com.impetus.client.hbase.HBaseClientFactory" />
 		</properties>
 	</persistence-unit>
+	<persistence-unit name="inheritenceTest">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.client.hbase.crud.inheritence.SocialProfile</class>
+		<class>com.impetus.client.hbase.crud.inheritence.TwitterProfile</class>
+		<class>com.impetus.client.hbase.crud.inheritence.FacebookProfile</class>
+		<class>com.impetus.client.hbase.crud.inheritence.UserAccount</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="60000" />
+			<property name="kundera.keyspace" value="HBaseNew" />
+			<property name="kundera.dialect" value="hbase" />
+			<property name="kundera.ddl.auto.prepare" value="create" />
+			<property name="kundera.client.lookup.class" value="com.impetus.client.hbase.HBaseClientFactory" />
+		</properties>
+	</persistence-unit>
+	<persistence-unit name="mappedSuperClassTest">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.kundera.client.crud.mappedsuperclass.Transaction</class>
+		<class>com.impetus.kundera.client.crud.mappedsuperclass.CreditTransaction</class>
+		<class>com.impetus.kundera.client.crud.mappedsuperclass.DebitTransaction</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="60000" />
+			<property name="kundera.keyspace" value="HBaseNew" />
+			<property name="kundera.dialect" value="hbase" />
+			<property name="kundera.ddl.auto.prepare" value="create" />
+			<property name="kundera.client.lookup.class" value="com.impetus.client.hbase.HBaseClientFactory" />
+		</properties>
+	</persistence-unit>
+		<persistence-unit name="entityWithoutFieldTest">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.kundera.metadata.mappedsuperclass.MappedPerson</class>
+		<class>com.impetus.kundera.metadata.mappedsuperclass.Person</class>
+		<class>com.impetus.kundera.metadata.mappedsuperclass.PersonChild</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="60000" />
+			<property name="kundera.keyspace" value="HBaseNew" />
+			<property name="kundera.dialect" value="hbase" />
+			<property name="kundera.ddl.auto.prepare" value="create" />
+			<property name="kundera.client.lookup.class" value="com.impetus.client.hbase.HBaseClientFactory" />
+		</properties>
+	</persistence-unit>
 
 </persistence>

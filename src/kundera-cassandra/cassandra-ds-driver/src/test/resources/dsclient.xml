@@ -8,7 +8,9 @@
 					<property name="loadbalancing.policy" value="RoundRobinPolicy"></property>
 					<!-- <property name="compression" value="true"></property> -->
 					<property name="reconnection.policy" value="ExponentialReconnectionPolicy"></property>
-					<property name="retry.policy" value="FallthroughRetryPolicy"></property>
+					<property name="retry.policy" value="Custom"></property>
+					<property name="customRetryPolicy"
+						value="com.impetus.kundera.client.cassandra.dsdriver.CustomRetry"></property>
 
 
 					<property name="socket.timeout" value="110000"></property>

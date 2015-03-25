@@ -46,29 +46,54 @@ public interface DataHandler
      */
     void createTableIfDoesNotExist(String tableName, String... colFamily) throws IOException;
 
+    // /**
+    // * Read data.
+    // *
+    // * @param tableName
+    // * the table name
+    // * @param clazz
+    // * the clazz
+    // * @param m
+    // * the m
+    // * @param rowKey
+    // * the row key
+    // * @param relatationNames
+    // * the relatation names
+    // * @param f
+    // * the f
+    // * @param colToOutput
+    // * the col to output
+    // * @return the list
+    // * @throws IOException
+    // * Signals that an I/O exception has occurred.
+    // */
+    // List readData(String tableName, Class clazz, EntityMetadata m, Object
+    // rowKey, List<String> relatationNames,
+    // FilterList f, List<Map<String, Object>> colToOutput) throws IOException;
+
     /**
      * Read data.
      * 
      * @param tableName
      *            the table name
-     * @param clazz
-     *            the clazz
      * @param m
      *            the m
      * @param rowKey
      *            the row key
-     * @param relatationNames
-     *            the relatation names
-     * @param f
-     *            the f
-     * @param colToOutput
-     *            the col to output
+     * @param startRow
+     *            the start row
+     * @param endRow
+     *            the end row
+     * @param columnsToOutput
+     *            the columns to output
+     * @param filterList
+     *            the filter list
      * @return the list
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    List readData(String tableName, Class clazz, EntityMetadata m, Object rowKey, List<String> relatationNames,
-            FilterList f, List<Map<String, Object>> colToOutput) throws IOException;
+    List readData(String tableName, EntityMetadata m, final Object rowKey, byte[] startRow, byte[] endRow,
+            List<Map<String, Object>> columnsToOutput, FilterList filterList) throws IOException;
 
     /**
      * Read all.
@@ -92,29 +117,30 @@ public interface DataHandler
     List readAll(String tableName, Class clazz, EntityMetadata m, List<Object> rowKeys, List<String> relatationNames,
             String... columns) throws IOException;
 
-    /**
-     * Read data by range.
-     * 
-     * @param tableName
-     *            the table name
-     * @param clazz
-     *            the clazz
-     * @param m
-     *            the m
-     * @param startRow
-     *            the start row
-     * @param endRow
-     *            the end row
-     * @param colToOutput
-     *            the col to output
-     * @param f
-     *            the f
-     * @return the list
-     * @throws IOException
-     *             Signals that an I/O exception has occurred.
-     */
-    List readDataByRange(String tableName, Class clazz, EntityMetadata m, byte[] startRow, byte[] endRow,
-            List<Map<String, Object>> colToOutput, FilterList f) throws IOException;
+    // /**
+    // * Read data by range.
+    // *
+    // * @param tableName
+    // * the table name
+    // * @param clazz
+    // * the clazz
+    // * @param m
+    // * the m
+    // * @param startRow
+    // * the start row
+    // * @param endRow
+    // * the end row
+    // * @param colToOutput
+    // * the col to output
+    // * @param f
+    // * the f
+    // * @return the list
+    // * @throws IOException
+    // * Signals that an I/O exception has occurred.
+    // */
+    // List readDataByRange(String tableName, Class clazz, EntityMetadata m,
+    // byte[] startRow, byte[] endRow,
+    // List<Map<String, Object>> colToOutput, FilterList f) throws IOException;
 
     /**
      * Write data.

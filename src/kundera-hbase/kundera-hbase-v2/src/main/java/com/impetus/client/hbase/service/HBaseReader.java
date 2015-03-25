@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellUtil;
@@ -57,58 +58,6 @@ public class HBaseReader implements Reader
     /** The table name. */
     private String tableName = null;
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.client.hbase.Reader#LoadData(org.apache.hadoop.hbase.client
-     * .Table, java.lang.String, java.lang.Object,
-     * org.apache.hadoop.hbase.filter.Filter, java.lang.String[])
-     */
-    @Override
-    public List<HBaseDataWrapper> LoadData(Table hTable, String columnFamily, Object rowKey, Filter filter,
-            String... columns) throws IOException
-    {
-        setTableName(hTable);
-        List<HBaseDataWrapper> results = new ArrayList<HBaseDataWrapper>();
-        if (scanner == null)
-        {
-
-            Scan scan = null;
-            if (rowKey != null)
-            {
-                byte[] rowKeyBytes = HBaseUtils.getBytes(rowKey);
-                Get get = new Get(rowKeyBytes);
-                if (columnFamily != null)
-                {
-                    get.addFamily(Bytes.toBytes(columnFamily));
-                }
-
-                if (filter != null)
-                {
-                    get.setFilter(filter);
-                }
-                Result result = hTable.get(get);
-
-                if (!result.isEmpty() && result != null && result.listCells() != null)
-                {
-                    HBaseDataWrapper data = new HBaseDataWrapper(hTable.getName().getNameAsString(), result.getRow());
-                    data.setColumns(result.listCells());
-                    results.add(data);
-                }
-                return results;
-            }
-            else
-            {
-                scan = new Scan();
-            }
-            setScanCriteria(filter, columnFamily, null, scan, columns);
-            scanner = hTable.getScanner(scan);
-            resultsIter = scanner.iterator();
-        }
-        return scanResults(hTable.getName().getNameAsString(), results);
-    }
-
     /**
      * Sets the table name.
      * 
@@ -125,55 +74,32 @@ public class HBaseReader implements Reader
      * (non-Javadoc)
      * 
      * @see
-     * com.impetus.client.hbase.Reader#LoadData(org.apache.hadoop.hbase.client
-     * .HTable, java.lang.String)
+     * com.impetus.client.hbase.Reader#loadData(org.apache.hadoop.hbase.client
+     * .Table, java.lang.Object, byte[], byte[], java.lang.String,
+     * org.apache.hadoop.hbase.filter.Filter, java.util.List)
      */
     @Override
-    public List<HBaseDataWrapper> LoadData(Table hTable, Object rowKey, Filter filter, String... columns)
-            throws IOException
-    {
-        return LoadData(hTable, hTable.getName().toString(), rowKey, filter, columns);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.client.hbase.Reader#loadAll(org.apache.hadoop.hbase.client
-     * .HTable, org.apache.hadoop.hbase.filter.Filter, byte[], byte[])
-     */
-    @Override
-    public List<HBaseDataWrapper> loadAll(Table hTable, Filter filter, byte[] startRow, byte[] endRow,
-            String columnFamily, String qualifier, String[] columns) throws IOException
+    public List<HBaseDataWrapper> loadData(Table hTable, Object rowKey, byte[] startRow, byte[] endRow,
+            String columnFamily, Filter filter, List<Map<String, Object>> outputColumns) throws IOException
     {
         setTableName(hTable);
         List<HBaseDataWrapper> results = new ArrayList<HBaseDataWrapper>();
+        if (rowKey != null)
+        {
+            startRow = endRow = HBaseUtils.getBytes(rowKey);
+        }
         if (scanner == null)
         {
-            Scan scan = null;
-            if (startRow != null && endRow != null && startRow.equals(endRow))
+            Scan scan = new Scan();
+            if (startRow != null)
             {
-                Get get = new Get(startRow);
-                scan = new Scan(get);
+                scan.setStartRow(startRow);
             }
-            else if (startRow != null && endRow != null)
+            if (endRow != null)
             {
-                scan = new Scan(startRow, endRow);
-            }
-            else if (startRow != null)
-            {
-                scan = new Scan(startRow);
-            }
-            else if (endRow != null)
-            {
-                scan = new Scan();
                 scan.setStopRow(endRow);
             }
-            else
-            {
-                scan = new Scan();
-            }
-            setScanCriteria(filter, columnFamily, qualifier, scan, columns);
+            setScanCriteria(scan, columnFamily, outputColumns, filter);
             scanner = hTable.getScanner(scan);
             resultsIter = scanner.iterator();
         }
@@ -183,42 +109,31 @@ public class HBaseReader implements Reader
     /**
      * Sets the scan criteria.
      * 
-     * @param filter
-     *            the filter
+     * @param scan
+     *            the scan
      * @param columnFamily
      *            the column family
-     * @param qualifier
-     *            the qualifier
-     * @param s
-     *            the s
-     * @param columns
-     *            the columns
+     * @param columnsToOutput
+     *            the columns to output
+     * @param filter
+     *            the filter
      */
-    private void setScanCriteria(Filter filter, String columnFamily, String qualifier, Scan s, String[] columns)
+    private void setScanCriteria(Scan scan, String columnFamily, List<Map<String, Object>> columnsToOutput,
+            Filter filter)
     {
         if (filter != null)
         {
-            s.setFilter(filter);
+            scan.setFilter(filter);
         }
-        if (columnFamily != null && qualifier != null)
-        {
-            s.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(qualifier));
-        }
-        else if (columnFamily != null)
-        {
-            s.addFamily(Bytes.toBytes(columnFamily));
-        }
-
-        if (columns != null && columns.length > 0)
-        {
-            for (String columnName : columns)
-            {
-                if (columnFamily != null && columnName != null)
-                {
-                    s.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(columnName));
-                }
-            }
-        }
+        // if (columnsToOutput != null && !columnsToOutput.isEmpty())
+        // {
+        // for (Map<String, Object> map : columnsToOutput)
+        // {
+        // String family = (String) map.get(HBaseUtils.COL_FAMILY);
+        // String qualifier = (String) map.get(HBaseUtils.COL_NAME);
+        // scan.addColumn(Bytes.toBytes(family), Bytes.toBytes(qualifier));
+        // }
+        // }
     }
 
     /**
@@ -239,9 +154,8 @@ public class HBaseReader implements Reader
         {
             for (Result result : scanner)
             {
-                List<Cell> cells = result.listCells();
                 HBaseDataWrapper data = new HBaseDataWrapper(tableName, result.getRow());
-                data.setColumns(cells);
+                data.setColumns(result.listCells());
                 results.add(data);
             }
 
@@ -273,7 +187,6 @@ public class HBaseReader implements Reader
             scanner = hTable.getScanner(s);
             resultsIter = scanner.iterator();
         }
-
         if (fetchSize == null)
         {
             for (Result result : scanner)

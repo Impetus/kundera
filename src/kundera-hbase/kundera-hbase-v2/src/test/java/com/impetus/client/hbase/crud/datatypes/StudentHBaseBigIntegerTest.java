@@ -38,7 +38,6 @@ import com.impetus.client.hbase.crud.datatypes.entities.StudentHBaseBigInteger;
  */
 public class StudentHBaseBigIntegerTest extends Base
 {
-
     /** The Constant HBASE_PU. */
     private static final String HBASE_PU = "dataTypeTest";
 
