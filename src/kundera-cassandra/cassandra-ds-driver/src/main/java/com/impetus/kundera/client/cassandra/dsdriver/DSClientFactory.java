@@ -49,6 +49,7 @@ import com.impetus.client.cassandra.schemamanager.CassandraSchemaManager;
 import com.impetus.client.cassandra.service.CassandraHost;
 import com.impetus.client.cassandra.service.CassandraHostConfiguration;
 import com.impetus.kundera.Constants;
+import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
@@ -168,7 +169,7 @@ public class DSClientFactory extends CassandraClientFactory
      * com.impetus.kundera.loader.GenericClientFactory#createPoolOrConnection()
      */
     @Override
-    protected Object createPoolOrConnection() throws Exception
+    protected Object createPoolOrConnection()
     {
         // AuthInfoProvider,LoadBalancingPolicy, ReconnectionPolicy,
         // RetryPolicy,ProtocolOptions.Compression, SSLOptions,
@@ -561,7 +562,6 @@ public class DSClientFactory extends CassandraClientFactory
      *             the exception
      */
     private com.datastax.driver.core.policies.RetryPolicy getPolicy(RetryPolicy policy, Properties props)
-            throws Exception
     {
         com.datastax.driver.core.policies.RetryPolicy retryPolicy = null;
 
@@ -600,10 +600,15 @@ public class DSClientFactory extends CassandraClientFactory
      * @param props
      *            the props
      * @return the custom retry policy
+     * @throws ClassNotFoundException
+     * @throws IllegalAccessException
+     * @throws NoSuchMethodException
+     * @throws InvocationTargetException
      * @throws Exception
      *             the exception
      */
-    private com.datastax.driver.core.policies.RetryPolicy getCustomRetryPolicy(Properties props) throws Exception
+    private com.datastax.driver.core.policies.RetryPolicy getCustomRetryPolicy(Properties props)
+
     {
         String customRetryPolicy = (String) props.get(CUSTOM_RETRY_POLICY);
         Class<?> clazz = null;
@@ -623,26 +628,24 @@ public class DSClientFactory extends CassandraClientFactory
         catch (ClassNotFoundException e)
         {
             logger.error(e.getMessage());
-            throw new ClassNotFoundException("Please make sure class name set in property file is correct "
-                    + e.getMessage());
+            throw new KunderaException("Please make sure class "+customRetryPolicy+" set in property file exists in classpath " + e.getMessage());
         }
         catch (IllegalAccessException e)
         {
             logger.error(e.getMessage());
-            throw new IllegalAccessException("Method " + getter.getName() + " must be declared public "
-                    + e.getMessage());
+            throw new KunderaException("Method " + getter.getName() + " must be declared public " + e.getMessage());
         }
         catch (NoSuchMethodException e)
         {
             logger.error(e.getMessage());
-            throw new NoSuchMethodException("Please make sure getter method of " + clazz.getSimpleName()
+            throw new KunderaException("Please make sure getter method of " + clazz.getSimpleName()
                     + " is named \"getInstance()\"");
         }
         catch (InvocationTargetException e)
         {
             logger.error(e.getMessage());
-            throw new Exception("Error while executing \"getInstance()\" method of Class " + clazz.getSimpleName()
-                    + ": " + e.getMessage());
+            throw new KunderaException("Error while executing \"getInstance()\" method of Class "
+                    + clazz.getSimpleName() + ": " + e.getMessage());
         }
     }
 
