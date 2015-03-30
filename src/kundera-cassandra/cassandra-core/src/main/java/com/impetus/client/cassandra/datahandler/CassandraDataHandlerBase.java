@@ -83,7 +83,6 @@ import com.impetus.kundera.property.accessor.LongAccessor;
 import com.impetus.kundera.utils.KunderaCoreUtils;
 import com.impetus.kundera.utils.TimestampGenerator;
 
-// TODO: Auto-generated Javadoc
 /**
  * Base class for all Cassandra Data Handlers.
  * 
@@ -1227,8 +1226,6 @@ public abstract class CassandraDataHandlerBase
      */
     private Object setUdtValue(Object entity, Object thriftColumnValue, MetamodelImpl metaModel, Attribute attribute)
     {
-        // TODO Auto-generated method stub
-
         List<ByteBuffer> fieldNames = new ArrayList<ByteBuffer>();
         List<AbstractType<?>> fieldTypes = new ArrayList<AbstractType<?>>();
 
@@ -1254,35 +1251,19 @@ public abstract class CassandraDataHandlerBase
         {
             userType = UserType.getInstance(new TypeParser(val.substring(val.indexOf("("), val.length())));
         }
-        catch (ConfigurationException e3)
+        catch (ConfigurationException | SyntaxException e)
         {
-            // TODO Auto-generated catch block
-            log.error(e3.getMessage());
+            log.error(e.getMessage());
+            throw new KunderaException("Error while getting instance of UserType " + e);
         }
-        catch (SyntaxException e3)
-        {
-            // TODO Auto-generated catch block
-            log.error(e3.getMessage());
-        }
+
         fieldNames = userType.fieldNames();
         fieldTypes = userType.allTypes();
 
         Field field = (Field) ((AbstractAttribute) attribute).getJavaMember();
         Class embeddedClass = ((AbstractAttribute) attribute).getBindableJavaType();
 
-        Object embeddedObject = null;
-        try
-        {
-            embeddedObject = embeddedClass.newInstance();
-        }
-        catch (InstantiationException ie)
-        {
-            log.error(ie.getMessage());
-        }
-        catch (IllegalAccessException iae)
-        {
-            log.error(iae.getMessage());
-        }
+        Object embeddedObject = KunderaCoreUtils.createNewInstance(embeddedClass);
 
         Object finalValue = populateEmbeddedRecursive((ByteBuffer.wrap((byte[]) thriftColumnValue)), fieldTypes,
                 fieldNames, embeddedObject, metaModel);
@@ -1353,19 +1334,7 @@ public abstract class CassandraDataHandlerBase
 
                 // create entity with type_name and populate fields, set entity
                 // in parent object after exit
-                Object embeddedObjectChild = null;
-                try
-                {
-                    embeddedObjectChild = embeddedClass.newInstance();
-                }
-                catch (InstantiationException ie)
-                {
-                    log.error(ie.getMessage());
-                }
-                catch (IllegalAccessException iae)
-                {
-                    log.error(iae.getMessage());
-                }
+                Object embeddedObjectChild = KunderaCoreUtils.createNewInstance(embeddedClass);
 
                 Object processedEntity = populateEmbeddedRecursive(field, subfieldTypes, subFieldNames,
                         embeddedObjectChild, metaModel);
@@ -1392,7 +1361,6 @@ public abstract class CassandraDataHandlerBase
                         flag = false;
                         setElementCollectionList((ListType) type, field, entity, fieldToSet, metaModel, embeddedClass,
                                 false);
-
                     }
                 }
                 else if (type.getClass().getSimpleName().equals("SetType"))
@@ -1402,7 +1370,6 @@ public abstract class CassandraDataHandlerBase
                         flag = false;
                         setElementCollectionSet((SetType) type, field, entity, fieldToSet, metaModel, embeddedClass,
                                 false);
-
                     }
                 }
                 if (flag)
@@ -1550,13 +1517,10 @@ public abstract class CassandraDataHandlerBase
                 listType = ListType.getInstance(new TypeParser(cqlColumnMetadata.substring(
                         cqlColumnMetadata.indexOf("("), cqlColumnMetadata.length())));
             }
-            catch (ConfigurationException e)
+            catch (ConfigurationException | SyntaxException e)
             {
                 log.error(e.getMessage());
-            }
-            catch (SyntaxException e)
-            {
-                log.error(e.getMessage());
+                throw new KunderaException("Error while getting instance of ListType " + e);
             }
             return setElementCollectionList(listType, ByteBuffer.wrap((byte[]) thriftColumnValue), entity, field,
                     metaModel, embeddedClass, true);
@@ -1570,13 +1534,10 @@ public abstract class CassandraDataHandlerBase
                 setType = SetType.getInstance(new TypeParser(cqlColumnMetadata.substring(
                         cqlColumnMetadata.indexOf("("), cqlColumnMetadata.length())));
             }
-            catch (ConfigurationException e)
+            catch (ConfigurationException | SyntaxException e)
             {
                 log.error(e.getMessage());
-            }
-            catch (SyntaxException e)
-            {
-                log.error(e.getMessage());
+                throw new KunderaException("Error while getting instance of SetType " + e);
             }
             return setElementCollectionSet(setType, ByteBuffer.wrap((byte[]) thriftColumnValue), entity, field,
                     metaModel, embeddedClass, true);
@@ -1590,13 +1551,10 @@ public abstract class CassandraDataHandlerBase
                 mapType = MapType.getInstance(new TypeParser(cqlColumnMetadata.substring(
                         cqlColumnMetadata.indexOf("("), cqlColumnMetadata.length())));
             }
-            catch (ConfigurationException e)
+            catch (ConfigurationException | SyntaxException e)
             {
                 log.error(e.getMessage());
-            }
-            catch (SyntaxException e)
-            {
-                log.error(e.getMessage());
+                throw new KunderaException("Error while getting instance of MapType " + e);
             }
             return setElementCollectionMap(mapType, ByteBuffer.wrap((byte[]) thriftColumnValue), entity, field,
                     metaModel, embeddedClass, true);
@@ -1643,19 +1601,7 @@ public abstract class CassandraDataHandlerBase
 
         for (Object key : outputCollection.keySet())
         {
-            Object embeddedObject = null;
-            try
-            {
-                embeddedObject = embeddedClass.newInstance();
-            }
-            catch (InstantiationException ie)
-            {
-                log.error(ie.getMessage());
-            }
-            catch (IllegalAccessException iae)
-            {
-                log.error(iae.getMessage());
-            }
+            Object embeddedObject = KunderaCoreUtils.createNewInstance(embeddedClass);
             Object value = populateEmbeddedRecursive((ByteBuffer) outputCollection.get(key), usertype.allTypes(),
                     usertype.fieldNames(), embeddedObject, metaModel);
             result.put(key, value);
@@ -1701,19 +1647,7 @@ public abstract class CassandraDataHandlerBase
         Iterator collectionItems = outputCollection.iterator();
         while (collectionItems.hasNext())
         {
-            Object embeddedObject = null;
-            try
-            {
-                embeddedObject = embeddedClass.newInstance();
-            }
-            catch (InstantiationException ie)
-            {
-                log.error(ie.getMessage());
-            }
-            catch (IllegalAccessException iae)
-            {
-                log.error(iae.getMessage());
-            }
+            Object embeddedObject = KunderaCoreUtils.createNewInstance(embeddedClass);
             Object value = populateEmbeddedRecursive((ByteBuffer) collectionItems.next(), usertype.allTypes(),
                     usertype.fieldNames(), embeddedObject, metaModel);
             result.add(value);
@@ -1759,19 +1693,7 @@ public abstract class CassandraDataHandlerBase
         Iterator collectionItems = outputCollection.iterator();
         while (collectionItems.hasNext())
         {
-            Object embeddedObject = null;
-            try
-            {
-                embeddedObject = embeddedClass.newInstance();
-            }
-            catch (InstantiationException ie)
-            {
-                log.error(ie.getMessage());
-            }
-            catch (IllegalAccessException iae)
-            {
-                log.error(iae.getMessage());
-            }
+            Object embeddedObject = KunderaCoreUtils.createNewInstance(embeddedClass);
             Object value = populateEmbeddedRecursive((ByteBuffer) collectionItems.next(), usertype.allTypes(),
                     usertype.fieldNames(), embeddedObject, metaModel);
             result.add(value);
