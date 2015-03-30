@@ -72,6 +72,7 @@ import com.impetus.client.cassandra.config.CassandraPropertyReader.CassandraSche
 import com.impetus.client.cassandra.index.CassandraIndexHelper;
 import com.impetus.client.cassandra.thrift.CQLTranslator;
 import com.impetus.kundera.Constants;
+import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.configure.ClientProperties.DataStore.Schema;
 import com.impetus.kundera.configure.ClientProperties.DataStore.Schema.DataCenter;
 import com.impetus.kundera.configure.ClientProperties.DataStore.Schema.Table;
@@ -927,43 +928,21 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      *             the exception
      */
     private void onEmbeddedColumns(CQLTranslator translator, TableInfo tableInfo, StringBuilder queryBuilder)
-            throws Exception
     {
-
         List<EmbeddedColumnInfo> embeddedColumns = tableInfo.getEmbeddedColumnMetadatas();
         for (EmbeddedColumnInfo embColInfo : embeddedColumns)
         {
-            String typeQuery = CQLTranslator.CREATE_TYPE;
-            typeQuery = StringUtils.replace(
-                    typeQuery,
-                    CQLTranslator.TYPE,
-                    translator.ensureCase(new StringBuilder(),
-                            embColInfo.getEmbeddable().getJavaType().getSimpleName(), false).toString());
-            StringBuilder typeQueryBuilder = new StringBuilder();
-
             String cqlType = CQLTranslator.FROZEN + "<\"" + embColInfo.getEmbeddable().getJavaType().getSimpleName()
                     + "\">, ";
             translator.appendColumnName(queryBuilder, embColInfo.getEmbeddedColumnName(), cqlType);
         }
-
     }
 
     /**
      * Creates the typefor embeddables.
      * 
-     * @throws UnavailableException
-     *             the unavailable exception
-     * @throws TimedOutException
-     *             the timed out exception
-     * @throws SchemaDisagreementException
-     *             the schema disagreement exception
-     * @throws UnsupportedEncodingException
-     *             the unsupported encoding exception
-     * @throws TException
-     *             the t exception
      */
-    private void createTypeforEmbeddables() throws UnavailableException, TimedOutException,
-            SchemaDisagreementException, UnsupportedEncodingException, TException
+    private void createTypeforEmbeddables()
     {
         if (!createdPuEmbeddables.contains(puMetadata.getPersistenceUnitName()))
         {
@@ -1001,7 +980,6 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
 
                     if (columnAttribute.getJavaType().isAnnotationPresent(Embeddable.class))
                     {
-
                         // handle embeddable
                         String cqlType = CQLTranslator.FROZEN + "<\"" + columnAttribute.getJavaType().getSimpleName()
                                 + "\"> ";
@@ -1019,15 +997,6 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                         }
 
                     }
-                    // else if (columnAttribute.isCollection()
-                    // && MetadataUtils.isBasicElementCollectionField((Field)
-                    // columnAttribute.getJavaMember()))
-                    // {
-                    // //handle basic element collection
-                    // handleBasicCollectionAttribute(translator,
-                    // columnAttribute,
-                    // typeQueryBuilder);
-                    // }
                     else
                     {
                         String cqlType = null;
@@ -1041,8 +1010,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                     }
 
                 }
-
-                typeQueryBuilder = stripLastChar(typeQuery, typeQueryBuilder);
+                typeQueryBuilder.deleteCharAt(typeQueryBuilder.length() - 1);
                 typeQueryBuilder.append(")");
                 embNametoUDTQuery.put(embeddedColumn.getJavaType().getSimpleName(), typeQueryBuilder.toString());
                 embNametoDependentList.put(embeddedColumn.getJavaType().getSimpleName(), childEmb);
@@ -1148,29 +1116,15 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      *            the emb nameto udt query
      * @param embNametoDependentList
      *            the emb nameto dependent list
-     * @throws UnavailableException
-     *             the unavailable exception
-     * @throws TimedOutException
-     *             the timed out exception
-     * @throws SchemaDisagreementException
-     *             the schema disagreement exception
-     * @throws UnsupportedEncodingException
-     *             the unsupported encoding exception
-     * @throws TException
-     *             the t exception
+     * 
      */
     private void postProcessEmbedded(Map<String, String> embNametoUDTQuery,
-            Map<String, List<String>> embNametoDependentList) throws UnavailableException, TimedOutException,
-            SchemaDisagreementException, UnsupportedEncodingException, TException
+            Map<String, List<String>> embNametoDependentList)
     {
-        // TODO Auto-generated method stub
-
         for (Map.Entry<String, List<String>> entry : embNametoDependentList.entrySet())
         {
             checkRelationAndExecuteQuery(entry.getKey(), embNametoDependentList, embNametoUDTQuery);
-
         }
-
     }
 
     /**
@@ -1182,21 +1136,10 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      *            the embeddable to dependent embeddables
      * @param queries
      *            the queries
-     * @throws UnavailableException
-     *             the unavailable exception
-     * @throws TimedOutException
-     *             the timed out exception
-     * @throws SchemaDisagreementException
-     *             the schema disagreement exception
-     * @throws UnsupportedEncodingException
-     *             the unsupported encoding exception
-     * @throws TException
-     *             the t exception
+     * 
      */
     private void checkRelationAndExecuteQuery(String embeddableKey,
             Map<String, List<String>> embeddableToDependentEmbeddables, Map<String, String> queries)
-            throws UnavailableException, TimedOutException, SchemaDisagreementException, UnsupportedEncodingException,
-            TException
     {
         List<String> dependentEmbeddables = embeddableToDependentEmbeddables.get(embeddableKey);
 
@@ -1205,15 +1148,20 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             for (String dependentEmbeddable : dependentEmbeddables)
             {
                 checkRelationAndExecuteQuery(dependentEmbeddable, embeddableToDependentEmbeddables, queries);
-
             }
-
         }
         KunderaCoreUtils.printQuery(queries.get(embeddableKey), showQuery);
 
-        cassandra_client.execute_cql3_query(
-                ByteBuffer.wrap(queries.get(embeddableKey).getBytes(Constants.CHARSET_UTF8)), Compression.NONE,
-                ConsistencyLevel.ONE);
+        try
+        {
+            cassandra_client.execute_cql3_query(
+                    ByteBuffer.wrap(queries.get(embeddableKey).getBytes(Constants.CHARSET_UTF8)), Compression.NONE,
+                    ConsistencyLevel.ONE);
+        }
+        catch (Exception e)
+        {
+            throw new KunderaException("Error while creating type: " + queries.get(embeddableKey), e);
+        }
 
     }
 
