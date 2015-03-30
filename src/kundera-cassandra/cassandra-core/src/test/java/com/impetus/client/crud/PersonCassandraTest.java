@@ -78,6 +78,8 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  */
 public class PersonCassandraTest extends BaseTest
 {
+
+    /** The Constant SEC_IDX_CASSANDRA_TEST. */
     private static final String SEC_IDX_CASSANDRA_TEST = "genericCassandraTest";
 
     /** The emf. */
@@ -89,10 +91,13 @@ public class PersonCassandraTest extends BaseTest
     /** The col. */
     private Map<Object, Object> col;
 
+    /** The property map. */
     protected Map propertyMap = null;
 
+    /** The auto manage schema. */
     protected boolean AUTO_MANAGE_SCHEMA = true;
 
+    /** The use cql. */
     protected boolean USE_CQL = false;
 
     /**
@@ -187,7 +192,7 @@ public class PersonCassandraTest extends BaseTest
             person.setPersonName("'after merge'");
             person.setDay(null);
             entityManager.merge(person);
-            
+
         }
 
         entityManager.clear();
@@ -196,7 +201,6 @@ public class PersonCassandraTest extends BaseTest
         Assert.assertNotNull(p);
         Assert.assertEquals("'after merge'", p.getPersonName());
         Assert.assertEquals(new Integer(10), p.getAge());
-       
 
         String updateQuery = "update PersonCassandra p set p.personName='KK MISHRA' where p.personId=1";
         q = entityManager.createQuery(updateQuery);
@@ -228,6 +232,8 @@ public class PersonCassandraTest extends BaseTest
         // Test count native query.
         testCountResult();
 
+        testLightWeightTransactions();
+
         testINClause();
 
         // Delete without WHERE clause.
@@ -241,6 +247,53 @@ public class PersonCassandraTest extends BaseTest
         {
             Assert.assertEquals(3, q.executeUpdate());
         }
+
+    }
+
+    /**
+     * Test light weight transactions.
+     */
+    private void testLightWeightTransactions()
+    {
+        CQLTranslator translator = new CQLTranslator();
+        if (USE_CQL)
+        {
+            Map<String, Client> clientMap = (Map<String, Client>) entityManager.getDelegate();
+            ThriftClient tc = (ThriftClient) clientMap.get(SEC_IDX_CASSANDRA_TEST);
+            tc.setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
+        }
+        String key = USE_CQL ? "\"personId\"" : "key";
+
+        String query = "INSERT INTO " + translator.ensureCase(new StringBuilder(), "PERSONCASSANDRA", false).toString()
+                + " (" + key + ", \"PERSON_NAME\") VALUES ('1', 'Karthik') IF NOT EXISTS";
+        Query q = entityManager.createNativeQuery(query, PersonCassandra.class);
+        q.executeUpdate();
+        entityManager.clear();
+        PersonCassandra p = findById(PersonCassandra.class, "1", entityManager);
+        Assert.assertNotNull(p);
+        Assert.assertEquals("KK MISHRA", p.getPersonName());
+
+        query = "INSERT INTO " + translator.ensureCase(new StringBuilder(), "PERSONCASSANDRA", false).toString() + " ("
+                + key + ", \"PERSON_NAME\") VALUES ('4', 'Karthik') IF NOT EXISTS";
+
+        q = entityManager.createNativeQuery(query, PersonCassandra.class);
+        q.executeUpdate();
+        entityManager.clear();
+        p = findById(PersonCassandra.class, "4", entityManager);
+        Assert.assertNotNull(p);
+        Assert.assertEquals("Karthik", p.getPersonName());
+
+        query = "UPDATE " + translator.ensureCase(new StringBuilder(), "PERSONCASSANDRA", false).toString()
+                + " SET \"PERSON_NAME\" = 'Pragalbh' WHERE " + key + " = '4' IF \"PERSON_NAME\" = 'Karthik'";
+        q = entityManager.createNativeQuery(query, PersonCassandra.class);
+        q.executeUpdate();
+        entityManager.clear();
+        p = findById(PersonCassandra.class, "4", entityManager);
+        Assert.assertNotNull(p);
+        Assert.assertEquals("Pragalbh", p.getPersonName());
+        String deleteQuery = "DELETE from PersonCassandra p WHERE p.personId = '4'";
+        q = entityManager.createQuery(deleteQuery);
+        q.executeUpdate();
 
     }
 
@@ -331,6 +384,11 @@ public class PersonCassandraTest extends BaseTest
 
     }
 
+    /**
+     * Query over rowkey.
+     * 
+     * @return the list
+     */
     private List<PersonCassandra> queryOverRowkey()
     {
         String qry = "Select p.personId,p.personName from PersonCassandra p where p.personId = 1";
@@ -366,6 +424,9 @@ public class PersonCassandraTest extends BaseTest
         return persons;
     }
 
+    /**
+     * Test count result.
+     */
     private void testCountResult()
     {
         Map<String, Client> clientMap = (Map<String, Client>) entityManager.getDelegate();
@@ -436,6 +497,12 @@ public class PersonCassandraTest extends BaseTest
         assertOnMerge(entityManager, "PersonCassandra", PersonCassandra.class, "vivek", "newvivek", "personName");
     }
 
+    /**
+     * On delete then insert cassandra.
+     * 
+     * @throws Exception
+     *             the exception
+     */
     @Test
     public void onDeleteThenInsertCassandra() throws Exception
     {
@@ -477,6 +544,12 @@ public class PersonCassandraTest extends BaseTest
 
     }
 
+    /**
+     * On refresh cassandra.
+     * 
+     * @throws Exception
+     *             the exception
+     */
     @Test
     public void onRefreshCassandra() throws Exception
     {
@@ -544,13 +617,18 @@ public class PersonCassandraTest extends BaseTest
     }
 
     /**
-     * On typed create query
+     * On typed create query.
      * 
      * @throws TException
+     *             the t exception
      * @throws InvalidRequestException
+     *             the invalid request exception
      * @throws UnavailableException
+     *             the unavailable exception
      * @throws TimedOutException
+     *             the timed out exception
      * @throws SchemaDisagreementException
+     *             the schema disagreement exception
      */
     @Test
     public void onTypedQuery() throws TException, InvalidRequestException, UnavailableException, TimedOutException,
@@ -573,13 +651,18 @@ public class PersonCassandraTest extends BaseTest
     }
 
     /**
-     * On typed create query
+     * On typed create query.
      * 
      * @throws TException
+     *             the t exception
      * @throws InvalidRequestException
+     *             the invalid request exception
      * @throws UnavailableException
+     *             the unavailable exception
      * @throws TimedOutException
+     *             the timed out exception
      * @throws SchemaDisagreementException
+     *             the schema disagreement exception
      */
     @Test
     public void onGenericTypedQuery() throws TException, InvalidRequestException, UnavailableException,
@@ -604,10 +687,15 @@ public class PersonCassandraTest extends BaseTest
      * on invalid typed query.
      * 
      * @throws TException
+     *             the t exception
      * @throws InvalidRequestException
+     *             the invalid request exception
      * @throws UnavailableException
+     *             the unavailable exception
      * @throws TimedOutException
+     *             the timed out exception
      * @throws SchemaDisagreementException
+     *             the schema disagreement exception
      */
     @Test
     public void onInvalidTypedQuery() throws TException, InvalidRequestException, UnavailableException,
@@ -632,6 +720,20 @@ public class PersonCassandraTest extends BaseTest
         }
     }
 
+    /**
+     * On ghost rows.
+     * 
+     * @throws TException
+     *             the t exception
+     * @throws InvalidRequestException
+     *             the invalid request exception
+     * @throws UnavailableException
+     *             the unavailable exception
+     * @throws TimedOutException
+     *             the timed out exception
+     * @throws SchemaDisagreementException
+     *             the schema disagreement exception
+     */
     @Test
     public void onGhostRows() throws TException, InvalidRequestException, UnavailableException, TimedOutException,
             SchemaDisagreementException
@@ -656,7 +758,21 @@ public class PersonCassandraTest extends BaseTest
 
     }
 
-   // @Test
+    // @Test
+    /**
+     * Test with multiple thread.
+     * 
+     * @throws TException
+     *             the t exception
+     * @throws InvalidRequestException
+     *             the invalid request exception
+     * @throws UnavailableException
+     *             the unavailable exception
+     * @throws TimedOutException
+     *             the timed out exception
+     * @throws SchemaDisagreementException
+     *             the schema disagreement exception
+     */
     public void testWithMultipleThread() throws TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException
     {
@@ -664,7 +780,7 @@ public class PersonCassandraTest extends BaseTest
 
         List<Future> futureList = new ArrayList<Future>();
 
-        for (int i = 1; i <= 1000 ; i++)
+        for (int i = 1; i <= 1000; i++)
         {
             HandlePersist persist = new HandlePersist(i);
             futureList.add(executor.submit(persist));
@@ -686,18 +802,34 @@ public class PersonCassandraTest extends BaseTest
         List<PersonCassandra> persons = q.getResultList();
         Assert.assertNotNull(persons);
         Assert.assertFalse(persons.isEmpty());
-        Assert.assertEquals(1000 , persons.size());
+        Assert.assertEquals(1000, persons.size());
     }
 
+    /**
+     * The Class HandlePersist.
+     */
     private class HandlePersist implements Runnable
     {
+
+        /** The i. */
         private int i;
 
+        /**
+         * Instantiates a new handle persist.
+         * 
+         * @param i
+         *            the i
+         */
         public HandlePersist(int i)
         {
             this.i = i;
         }
 
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.lang.Runnable#run()
+         */
         @Override
         public void run()
         {
