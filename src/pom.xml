@@ -53,7 +53,7 @@
 		<developer>
 			<id>devender-yadav</id>
 			<name>Devender Yadav</name>
-			<email>devdner.yadav@impetus.co.in</email>
+			<email>devender.yadav@impetus.co.in</email>
 		</developer>
 		<developer>
 			<id>karthikprasad13</id>
@@ -281,8 +281,8 @@
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
+          <source>1.7</source>
+          <target>1.7</target>
         <!--  <fork>true</fork> -->
           <meminitial>512m</meminitial>
           <maxmem>256m</maxmem>
