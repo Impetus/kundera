@@ -768,7 +768,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 queryBuilder.append(" ,");
             }
 
-            queryBuilder = stripLastChar(columnFamilyQuery, queryBuilder);
+            queryBuilder = replaceColumnsAndStripLastChar(columnFamilyQuery, queryBuilder);
 
             // append primary key clause
             queryBuilder.append(translator.ADD_PRIMARYKEY_CLAUSE);
@@ -1010,7 +1010,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                     }
 
                 }
-                typeQueryBuilder.deleteCharAt(typeQueryBuilder.length() - 1);
+                typeQueryBuilder = replaceColumnsAndStripLastChar(typeQuery, typeQueryBuilder);
                 typeQueryBuilder.append(")");
                 embNametoUDTQuery.put(embeddedColumn.getJavaType().getSimpleName(), typeQueryBuilder.toString());
                 embNametoDependentList.put(embeddedColumn.getJavaType().getSimpleName(), childEmb);
@@ -1245,7 +1245,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      *            the query builder
      * @return the string builder
      */
-    private StringBuilder stripLastChar(String columnFamilyQuery, StringBuilder queryBuilder)
+    private StringBuilder replaceColumnsAndStripLastChar(String columnFamilyQuery, StringBuilder queryBuilder)
     {
         // strip last ",".
         if (queryBuilder.length() > 0)
