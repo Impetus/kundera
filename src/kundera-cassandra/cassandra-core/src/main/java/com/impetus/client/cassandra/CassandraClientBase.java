@@ -113,7 +113,6 @@ import com.impetus.kundera.property.accessor.StringAccessor;
 import com.impetus.kundera.utils.KunderaCoreUtils;
 import com.impetus.kundera.utils.TimestampGenerator;
 
-// TODO: Auto-generated Javadoc
 /**
  * Base Class for all Cassandra Clients Contains methods that are applicable to (but not specific to) different
  * Cassandra clients.
