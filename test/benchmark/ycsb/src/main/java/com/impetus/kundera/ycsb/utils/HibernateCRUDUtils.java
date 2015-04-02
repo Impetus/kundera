@@ -73,8 +73,8 @@ public class HibernateCRUDUtils
 
         em.getTransaction().begin();
 
-        Query q = em.createQuery("select max(p.runSequence) from PerformanceNoInfo p where p.date = :date");
-        q.setParameter("date", date, TemporalType.DATE);
+        Query q = em.createQuery("select max(p.runSequence) from PerformanceNoInfo p where p.date = '"+date+"'");
+     //   q.setParameter("date", date, TemporalType.DATE);
         List results = q.getResultList();
 
         em.getTransaction().commit();
