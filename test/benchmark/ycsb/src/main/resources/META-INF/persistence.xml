@@ -43,17 +43,19 @@
 	</persistence-unit>
 
 	<persistence-unit name="kundera_rdbms_pu">
-		<provider>org.hibernate.ejb.HibernatePersistence</provider>
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<class>com.impetus.kundera.ycsb.entities.PerformanceNoInfo</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
+        	<property name="kundera.client.lookup.class" value="com.impetus.client.rdbms.RDBMSClientFactory" />
+	    	<property name="hibernate.show_sql" value="false" />
+			<property name="hibernate.format_sql" value="false" />
+			<property name="dialect" value="org.openmeetings.app.hibernate.utils.MySQL5MyISAMDialect"/>
 			<property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5Dialect" />
 			<property name="hibernate.connection.driver_class" value="com.mysql.jdbc.Driver" />
 			<property name="hibernate.connection.url" value="jdbc:mysql://localhost:3306/testPerformance" />
 			<property name="hibernate.connection.username" value="root" />
 			<property name="hibernate.connection.password" value="impetus" />
-			<property name="hibernate.show_sql" value="false" />
-			<property name="hibernate.format_sql" value="true" />
 		</properties>
 	</persistence-unit>
 
