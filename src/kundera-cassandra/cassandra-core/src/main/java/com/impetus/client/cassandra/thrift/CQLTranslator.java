@@ -81,6 +81,27 @@ import com.impetus.kundera.utils.ReflectUtils;
 public final class CQLTranslator
 {
 
+    /** The Constant ESCAPE_QUOTE. */
+    private static final String ESCAPE_QUOTE = "\"";
+
+    /** The Constant OPEN_SQUARE_BRACKET. */
+    private static final String OPEN_SQUARE_BRACKET = "[";
+
+    /** The Constant CLOSE_SQUARE_BRACKET. */
+    private static final String CLOSE_SQUARE_BRACKET = "]";
+
+    /** The Constant OPEN_CURLY_BRACKET. */
+    private static final String OPEN_CURLY_BRACKET = "{";
+
+    /** The Constant COMMA. */
+    private static final String COMMA = ",";
+
+    /** The Constant CLOSE_CURLY_BRACKET. */
+    private static final String CLOSE_CURLY_BRACKET = "}";
+
+    /** The Constant COLON. */
+    private static final String COLON = ":";
+
     /** The Constant CREATE_COLUMNFAMILY_QUERY. */
     public static final String CREATE_COLUMNFAMILY_QUERY = "CREATE COLUMNFAMILY $COLUMNFAMILY ($COLUMNS";
 
@@ -372,12 +393,12 @@ public final class CQLTranslator
                         // build embedded value
                         StringBuilder elementCollectionValue = buildElementCollectionValue(field, record, metaModel,
                                 attribute);
-                        columnBuilder.append("\"");
+                        columnBuilder.append(ESCAPE_QUOTE);
                         columnBuilder.append(((AbstractAttribute) attribute).getJPAColumnName());
-                        columnBuilder.append("\"");
-                        columnBuilder.append(",");
+                        columnBuilder.append(ESCAPE_QUOTE);
+                        columnBuilder.append(COMMA);
                         builder.append(elementCollectionValue);
-                        builder.append(",");
+                        builder.append(COMMA);
                     }
                     else
                     {
@@ -386,7 +407,7 @@ public final class CQLTranslator
                         if (embeddableKeyObj != null)
                         {
 
-                            StringBuilder embeddedValueBuilder = new StringBuilder("{");
+                            StringBuilder embeddedValueBuilder = new StringBuilder(OPEN_CURLY_BRACKET);
 
                             for (Field embeddableColumn : field.getType().getDeclaredFields())
                             {
@@ -408,16 +429,14 @@ public final class CQLTranslator
                                             appendColumnName(embeddedValueBuilder,
                                                     ((AbstractAttribute) (embeddableKey.getAttribute(embeddableColumn
                                                             .getName()))).getJPAColumnName());
-                                            embeddedValueBuilder.append(":");
+                                            embeddedValueBuilder.append(COLON);
                                             embeddedValueBuilder.append(elementCollectionValue);
-
                                         }
                                         else
                                         {
                                             buildEmbeddedValue(embeddableKeyObj, metaModel, embeddedValueBuilder,
                                                     (SingularAttribute) subAttribute);
                                         }
-
                                     }
                                     else
                                     {
@@ -425,24 +444,22 @@ public final class CQLTranslator
                                         appendColumnName(embeddedValueBuilder,
                                                 ((AbstractAttribute) (embeddableKey.getAttribute(embeddableColumn
                                                         .getName()))).getJPAColumnName());
-                                        embeddedValueBuilder.append(":");
+                                        embeddedValueBuilder.append(COLON);
                                         appendColumnValue(embeddedValueBuilder, embeddableKeyObj, embeddableColumn);
-
                                     }
-                                    embeddedValueBuilder.append(",");
+                                    embeddedValueBuilder.append(COMMA);
                                 }
-
                             }
                             // strip last char and append '}'
                             embeddedValueBuilder.deleteCharAt(embeddedValueBuilder.length() - 1);
-                            embeddedValueBuilder.append("}");
+                            embeddedValueBuilder.append(CLOSE_CURLY_BRACKET);
                             // add to columnbuilder and builder
-                            columnBuilder.append("\"");
+                            columnBuilder.append(ESCAPE_QUOTE);
                             columnBuilder.append(((AbstractAttribute) attribute).getJPAColumnName());
-                            columnBuilder.append("\"");
-                            columnBuilder.append(",");
+                            columnBuilder.append(ESCAPE_QUOTE);
+                            columnBuilder.append(COMMA);
                             builder.append(embeddedValueBuilder);
-                            builder.append(",");
+                            builder.append(COMMA);
                             // end if
                         }
                     }
@@ -495,11 +512,11 @@ public final class CQLTranslator
                 isPresent = true;
                 if (List.class.isAssignableFrom(field.getType()))
                 {
-                    elementCollectionValueBuilder.append("[");
+                    elementCollectionValueBuilder.append(OPEN_SQUARE_BRACKET);
                 }
                 if (Set.class.isAssignableFrom(field.getType()))
                 {
-                    elementCollectionValueBuilder.append("{");
+                    elementCollectionValueBuilder.append(OPEN_CURLY_BRACKET);
                 }
                 for (Object o : collection)
                 {
@@ -508,7 +525,7 @@ public final class CQLTranslator
                     if (o != null)
                     {
 
-                        StringBuilder embeddedValueBuilder = new StringBuilder("{");
+                        StringBuilder embeddedValueBuilder = new StringBuilder(OPEN_CURLY_BRACKET);
 
                         for (Field embeddableColumn : ((AbstractAttribute) attribute).getBindableJavaType()
                                 .getDeclaredFields())
@@ -529,7 +546,7 @@ public final class CQLTranslator
                                         appendColumnName(embeddedValueBuilder,
                                                 ((AbstractAttribute) (embeddableKey.getAttribute(embeddableColumn
                                                         .getName()))).getJPAColumnName());
-                                        embeddedValueBuilder.append(":");
+                                        embeddedValueBuilder.append(COLON);
                                         embeddedValueBuilder.append(elementCollectionValue);
                                     }
                                     else
@@ -545,23 +562,21 @@ public final class CQLTranslator
                                             embeddedValueBuilder,
                                             ((AbstractAttribute) (embeddableKey.getAttribute(embeddableColumn.getName())))
                                                     .getJPAColumnName());
-                                    embeddedValueBuilder.append(":");
+                                    embeddedValueBuilder.append(COLON);
                                     appendColumnValue(embeddedValueBuilder, o, embeddableColumn);
-
                                 }
-                                embeddedValueBuilder.append(",");
+                                embeddedValueBuilder.append(COMMA);
                             }
-
                         }
                         // strip last char and append '}'
                         embeddedValueBuilder.deleteCharAt(embeddedValueBuilder.length() - 1);
-                        embeddedValueBuilder.append("}");
+                        embeddedValueBuilder.append(CLOSE_CURLY_BRACKET);
                         // add to columnbuilder and builder
                         elementCollectionValueBuilder.append(embeddedValueBuilder);
                         // end if
                     }
 
-                    elementCollectionValueBuilder.append(",");
+                    elementCollectionValueBuilder.append(COMMA);
                 }
                 if (!collection.isEmpty())
                 {
@@ -569,11 +584,11 @@ public final class CQLTranslator
                 }
                 if (List.class.isAssignableFrom(field.getType()))
                 {
-                    elementCollectionValueBuilder.append("]");
+                    elementCollectionValueBuilder.append(CLOSE_SQUARE_BRACKET);
                 }
                 if (Set.class.isAssignableFrom(field.getType()))
                 {
-                    elementCollectionValueBuilder.append("}");
+                    elementCollectionValueBuilder.append(CLOSE_CURLY_BRACKET);
                 }
                 return elementCollectionValueBuilder;
             }
@@ -587,19 +602,19 @@ public final class CQLTranslator
             {
                 Map map = ((Map) value);
                 isPresent = true;
-                elementCollectionValueBuilder.append("{");
+                elementCollectionValueBuilder.append(OPEN_CURLY_BRACKET);
                 for (Object mapKey : map.keySet())
                 {
                     Object mapValue = map.get(mapKey);
                     // Allowing null keys.
                     // key is basic type.. no support for embeddable keys
                     appendValue(elementCollectionValueBuilder, mapKey != null ? mapKey.getClass() : null, mapKey, false);
-                    elementCollectionValueBuilder.append(":");
+                    elementCollectionValueBuilder.append(COLON);
                     // Allowing null values.
                     if (mapValue != null)
                     {
 
-                        StringBuilder embeddedValueBuilder = new StringBuilder("{");
+                        StringBuilder embeddedValueBuilder = new StringBuilder(OPEN_CURLY_BRACKET);
 
                         for (Field embeddableColumn : ((AbstractAttribute) attribute).getBindableJavaType()
                                 .getDeclaredFields())
@@ -620,7 +635,7 @@ public final class CQLTranslator
                                         appendColumnName(embeddedValueBuilder,
                                                 ((AbstractAttribute) (embeddableKey.getAttribute(embeddableColumn
                                                         .getName()))).getJPAColumnName());
-                                        embeddedValueBuilder.append(":");
+                                        embeddedValueBuilder.append(COLON);
                                         embeddedValueBuilder.append(elementCollectionValue);
                                     }
                                     else
@@ -636,41 +651,34 @@ public final class CQLTranslator
                                             embeddedValueBuilder,
                                             ((AbstractAttribute) (embeddableKey.getAttribute(embeddableColumn.getName())))
                                                     .getJPAColumnName());
-                                    embeddedValueBuilder.append(":");
+                                    embeddedValueBuilder.append(COLON);
                                     appendColumnValue(embeddedValueBuilder, mapValue, embeddableColumn);
 
                                 }
-                                embeddedValueBuilder.append(",");
+                                embeddedValueBuilder.append(COMMA);
                             }
 
                         }
                         // strip last char and append '}'
                         embeddedValueBuilder.deleteCharAt(embeddedValueBuilder.length() - 1);
-                        embeddedValueBuilder.append("}");
+                        embeddedValueBuilder.append(CLOSE_CURLY_BRACKET);
                         // add to columnbuilder and builder
                         elementCollectionValueBuilder.append(embeddedValueBuilder);
                         // end if
                     }
-                    // appendValue(builder, mapValue != null ?
-                    // mapValue.getClass() : null, mapValue, false);
-                    elementCollectionValueBuilder.append(",");
+                    elementCollectionValueBuilder.append(COMMA);
                 }
                 if (!map.isEmpty())
                 {
                     elementCollectionValueBuilder.deleteCharAt(elementCollectionValueBuilder.length() - 1);
                 }
 
-                elementCollectionValueBuilder.append("}");
+                elementCollectionValueBuilder.append(CLOSE_CURLY_BRACKET);
                 return elementCollectionValueBuilder;
             }
             return null;
-            // else
-            // {
-            // appendValue(builder, value.getClass(), value, false);
-            // }
         }
         return null;
-
     }
 
     /**
@@ -696,7 +704,7 @@ public final class CQLTranslator
         if (embeddableKeyObj != null)
         {
             StringBuilder tempBuilder = new StringBuilder();
-            tempBuilder.append("{");
+            tempBuilder.append(OPEN_CURLY_BRACKET);
 
             for (Field embeddableColumn : field.getType().getDeclaredFields())
             {
@@ -714,18 +722,18 @@ public final class CQLTranslator
                         // append key value
                         appendColumnName(tempBuilder, ((AbstractAttribute) (embeddableKey.getAttribute(embeddableColumn
                                 .getName()))).getJPAColumnName());
-                        tempBuilder.append(":");
+                        tempBuilder.append(COLON);
                         appendColumnValue(tempBuilder, embeddableKeyObj, embeddableColumn);
                     }
-                    tempBuilder.append(",");
+                    tempBuilder.append(COMMA);
                 }
 
             }
             // strip last char and append '}'
             tempBuilder.deleteCharAt(tempBuilder.length() - 1);
-            tempBuilder.append("}");
+            tempBuilder.append(CLOSE_CURLY_BRACKET);
             appendColumnName(embeddedValueBuilder, ((AbstractAttribute) attribute).getJPAColumnName());
-            embeddedValueBuilder.append(":");
+            embeddedValueBuilder.append(COLON);
             embeddedValueBuilder.append(tempBuilder);
         }
         else
@@ -820,9 +828,9 @@ public final class CQLTranslator
         if (discrColumn != null && discrValue != null)
         {
             appendValue(builder, String.class, discrValue, false);
-            builder.append(",");
+            builder.append(COMMA);
             appendColumnName(columnBuilder, discrColumn);
-            columnBuilder.append(","); // because only key columns
+            columnBuilder.append(COMMA); // because only key columns
 
         }
     }
@@ -923,8 +931,8 @@ public final class CQLTranslator
             for (String str : items)
             {
                 str = str.trim();
-                str = (str.startsWith("\"") && str.endsWith("\"")) || (str.startsWith("'") && str.endsWith("'")) ? str
-                        .substring(1, str.length() - 1) : str;
+                str = (str.startsWith(ESCAPE_QUOTE) && str.endsWith(ESCAPE_QUOTE))
+                        || (str.startsWith("'") && str.endsWith("'")) ? str.substring(1, str.length() - 1) : str;
                 appendValue(builder, fieldClazz, str, false, false);
                 counter++;
                 if (counter < items.size())
@@ -1010,9 +1018,9 @@ public final class CQLTranslator
         {
             builder.append(TOKEN);
         }
-        builder.append("\"");
+        builder.append(ESCAPE_QUOTE);
         builder.append(fieldName);
-        builder.append("\"");
+        builder.append(ESCAPE_QUOTE);
         if (useToken)
         {
             builder.append(CLOSE_BRACKET);
@@ -1047,23 +1055,23 @@ public final class CQLTranslator
         case ALL:
             if (appendColumnValue(builder, record, column))
             {
-                builder.append(",");
+                builder.append(COMMA);
                 appendColumnName(columnBuilder, columnName);
-                columnBuilder.append(","); // because only key columns
+                columnBuilder.append(COMMA); // because only key columns
             }
             break;
 
         case COLUMN:
 
             appendColumnName(columnBuilder, columnName);
-            columnBuilder.append(","); // because only key columns
+            columnBuilder.append(COMMA); // because only key columns
             break;
 
         case VALUE:
 
             if (appendColumnValue(builder, record, column))
             {
-                builder.append(","); // because only key columns
+                builder.append(COMMA); // because only key columns
             }
             break;
         }
@@ -1145,18 +1153,18 @@ public final class CQLTranslator
         {
             Collection collection = ((Collection) value);
             isPresent = true;
-            builder.append("[");
+            builder.append(OPEN_SQUARE_BRACKET);
             for (Object o : collection)
             {
                 // Allowing null values.
                 appendValue(builder, o != null ? o.getClass() : null, o, false);
-                builder.append(",");
+                builder.append(COMMA);
             }
             if (!collection.isEmpty())
             {
                 builder.deleteCharAt(builder.length() - 1);
             }
-            builder.append("]");
+            builder.append(CLOSE_SQUARE_BRACKET);
 
         }
         else
@@ -1182,18 +1190,18 @@ public final class CQLTranslator
         {
             Collection collection = ((Collection) value);
             isPresent = true;
-            builder.append("{");
+            builder.append(OPEN_CURLY_BRACKET);
             for (Object o : collection)
             {
                 // Allowing null values.
                 appendValue(builder, o != null ? o.getClass() : null, o, false);
-                builder.append(",");
+                builder.append(COMMA);
             }
             if (!collection.isEmpty())
             {
                 builder.deleteCharAt(builder.length() - 1);
             }
-            builder.append("}");
+            builder.append(CLOSE_CURLY_BRACKET);
         }
         else
         {
@@ -1218,23 +1226,23 @@ public final class CQLTranslator
         {
             Map map = ((Map) value);
             isPresent = true;
-            builder.append("{");
+            builder.append(OPEN_CURLY_BRACKET);
             for (Object mapKey : map.keySet())
             {
                 Object mapValue = map.get(mapKey);
                 // Allowing null keys.
                 appendValue(builder, mapKey != null ? mapKey.getClass() : null, mapKey, false);
-                builder.append(":");
+                builder.append(COLON);
                 // Allowing null values.
                 appendValue(builder, mapValue != null ? mapValue.getClass() : null, mapValue, false);
-                builder.append(",");
+                builder.append(COMMA);
             }
             if (!map.isEmpty())
             {
                 builder.deleteCharAt(builder.length() - 1);
             }
 
-            builder.append("}");
+            builder.append(CLOSE_CURLY_BRACKET);
         }
         else
         {
