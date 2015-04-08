@@ -349,12 +349,14 @@ public class HBaseDataHandler implements DataHandler
                 Set<Attribute> attribEmbeddables = metaModel.embeddable(
                         ((AbstractAttribute) attribute).getBindableJavaType()).getAttributes();
                 Object embeddedField = PropertyAccessorHelper.getObject(entity, (Field) attribute.getJavaMember());
-                if (attribute.isCollection())
+                if (attribute.isCollection() && embeddedField != null)
                 {
                     int newCount = count + 1;
                     String newPrefix = prefix != null ? prefix + HBaseUtils.DELIM + attribute.getName() : attribute
                             .getName();
-                    for (Object obj : (List) embeddedField)
+                    List listOfEmbeddables = (List) embeddedField;
+                    addColumnForCollectionSize(hbaseRow, listOfEmbeddables.size(), newPrefix, m.getTableName());
+                    for (Object obj : listOfEmbeddables)
                     {
                         createCellsAndAddToRow(obj, metaModel, attribEmbeddables, hbaseRow, m, newCount++, newPrefix);
                     }
@@ -379,6 +381,13 @@ public class HBaseDataHandler implements DataHandler
                 }
             }
         }
+    }
+
+    private void addColumnForCollectionSize(HBaseRow hbaseRow, int size, String prefix, String colFamily)
+    {
+        String columnName = prefix + HBaseUtils.DELIM + HBaseUtils.SIZE;
+        HBaseCell hbaseCell = new HBaseCell(colFamily, columnName, size);
+        hbaseRow.addCell(hbaseCell);
     }
 
     /*
@@ -557,11 +566,10 @@ public class HBaseDataHandler implements DataHandler
      *            the prefix
      * @return the int
      */
-    private int writeValuesToEntity(Object entity, HBaseDataWrapper hbaseData, EntityMetadata m,
+    private void writeValuesToEntity(Object entity, HBaseDataWrapper hbaseData, EntityMetadata m,
             MetamodelImpl metaModel, Set<Attribute> attributes, List<String> relationNames,
             Map<String, Object> relations, int count, String prefix)
     {
-        int check = 0;
         for (Attribute attribute : attributes)
         {
             Class javaType = ((AbstractAttribute) attribute).getBindableJavaType();
@@ -587,11 +595,9 @@ public class HBaseDataHandler implements DataHandler
                 else if (!idColName.equals(columnName) && columnValue != null)
                 {
                     PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), columnValue);
-                    check++;
                 }
             }
         }
-        return check;
     }
 
     /**
@@ -629,20 +635,14 @@ public class HBaseDataHandler implements DataHandler
             int newCount = count + 1;
             String newPrefix = prefix != null ? prefix + HBaseUtils.DELIM + attribute.getName() : attribute.getName();
             List embeddedCollection = new ArrayList();
-            Boolean f = true;
-            while (f)
+            int size = Bytes.toInt(hbaseData.getColumnValue(HBaseUtils.getColumnDataKey(m.getTableName(), newPrefix
+                    + HBaseUtils.DELIM + HBaseUtils.SIZE)));
+            while (size != newCount)
             {
                 embeddedField = KunderaCoreUtils.createNewInstance(javaType);
-                int checkEnd = writeValuesToEntity(embeddedField, hbaseData, m, metaModel, attribEmbeddables, null,
+                writeValuesToEntity(embeddedField, hbaseData, m, metaModel, attribEmbeddables, null,
                         null, newCount++, newPrefix);
-                if (checkEnd == 0)
-                {
-                    f = false;
-                }
-                else
-                {
-                    embeddedCollection.add(embeddedField);
-                }
+                embeddedCollection.add(embeddedField);
             }
             PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), embeddedCollection);
         }

@@ -68,6 +68,8 @@ public final class HBaseUtils
     /** The Constant COLON. */
     public static final String COLON = ":";
 
+    public static final String SIZE = "size";
+
     /**
      * Gets the bytes.
      * 
