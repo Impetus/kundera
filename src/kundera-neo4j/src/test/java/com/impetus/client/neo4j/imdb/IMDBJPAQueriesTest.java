@@ -15,6 +15,7 @@
  */
 package com.impetus.client.neo4j.imdb;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Query;
@@ -77,6 +78,7 @@ public class IMDBJPAQueriesTest extends IMDBTestBase
         findActorByID();
         findActorByName();
         findActorByIDAndName();
+        findActorUsingInClause();
         findActorWithMatchingName();
         findActorWithinGivenIdRange();
         findSelectedFields();
@@ -84,7 +86,6 @@ public class IMDBJPAQueriesTest extends IMDBTestBase
         findMoviesGreaterThanLessThanYear();
         findMoviesUsingIdOrTitle();
         findMoviesUsingIdOrTitleOrYear();
-
         // Delete Queries
         deleteAllActors();
 
@@ -140,6 +141,38 @@ public class IMDBJPAQueriesTest extends IMDBTestBase
         actors = query.getResultList();
         Assert.assertTrue(actors == null || actors.isEmpty());
     }
+
+    private void findActorUsingInClause() {
+        	Query query = em.createQuery("select a from Actor a where a.name in ('Tom Cruise','Emmanuelle Béart')");
+        	List<Actor> actors = query.getResultList();
+        	Assert.assertNotNull(actors);
+            Assert.assertFalse(actors.isEmpty());
+            Assert.assertEquals(2, actors.size());
+            
+            query = em.createQuery("select a from Actor a where a.name in ('Tom Cruise','Brad Pitt')");
+        	actors = query.getResultList();
+        	Assert.assertNotNull(actors);
+            Assert.assertFalse(actors.isEmpty());
+            Assert.assertEquals(1, actors.size());
+            
+            query = em.createQuery("select a from Actor a where a.name in :names");
+            List<String> names = new ArrayList<String>();
+            names.add("Tom Cruise");
+            names.add("Brad Pitt");
+            query.setParameter("names", names);
+        	actors = query.getResultList();
+        	Assert.assertNotNull(actors);
+            Assert.assertFalse(actors.isEmpty());
+            Assert.assertEquals(1, actors.size());
+    		
+            query = em.createQuery("select a from Actor a where a.name in :names");
+            String[] namesArray = new String[]{"Tom Cruise","Brad Pitt"};
+            query.setParameter("names", namesArray);
+        	actors = query.getResultList();
+        	Assert.assertNotNull(actors);
+            Assert.assertFalse(actors.isEmpty());
+            Assert.assertEquals(1, actors.size());
+    	}
 
     private void findActorWithMatchingName()
     {

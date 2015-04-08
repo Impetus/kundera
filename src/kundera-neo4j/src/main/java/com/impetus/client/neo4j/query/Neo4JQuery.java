@@ -18,6 +18,7 @@ package com.impetus.client.neo4j.query;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -52,7 +53,8 @@ public class Neo4JQuery extends QueryImpl
      * @param query
      * @param persistenceDelegator
      */
-    public Neo4JQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator, final KunderaMetadata kunderaMetadata)
+    public Neo4JQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator,
+            final KunderaMetadata kunderaMetadata)
     {
         super(kunderaQuery, persistenceDelegator, kunderaMetadata);
         if (getHints().containsKey(NATIVE_QUERY_TYPE))
@@ -80,7 +82,11 @@ public class Neo4JQuery extends QueryImpl
         ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
 
         String query = appMetadata.getQuery(getJPAQuery());
-        boolean isNative = kunderaQuery.isNative()/*query == null ? true : appMetadata.isNative(getJPAQuery())*/;        
+        boolean isNative = kunderaQuery.isNative()/*
+                                                   * query == null ? true :
+                                                   * appMetadata
+                                                   * .isNative(getJPAQuery())
+                                                   */;
 
         if (isNative)
         {
@@ -168,7 +174,30 @@ public class Neo4JQuery extends QueryImpl
                         sb.append(appendRange(filter.getValue().get(0).toString(), true, false, String.class));
                         appended = true;
                     }
-
+                    else if (condition.equalsIgnoreCase("in"))
+                    {
+                        sb.append(":");
+                        List<Object> items = filter.getValue();
+                        Object firstItem = items.get(0);
+                        if (firstItem.getClass().isArray())
+                        {
+                            items = Arrays.asList((Object[]) firstItem);
+                        }
+                        if (items.size() > 1)
+                        {
+                            sb.append("(");
+                            for (Object item : items)
+                            {
+                                sb.append("\"" + item.toString() + "\" ");
+                            }
+                            sb.append(")");
+                        }
+                        else
+                        {
+                            sb.append(items.get(0).toString().replaceAll("[,]", "").replaceAll("[']", "\""));
+                        }
+                        appended = true;
+                    }
                     // value. if not already appended.
                     if (!appended)
                     {
@@ -201,7 +230,7 @@ public class Neo4JQuery extends QueryImpl
     public void close()
     {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
@@ -210,7 +239,6 @@ public class Neo4JQuery extends QueryImpl
         // TODO Auto-generated method stub
         return null;
     }
-
 
     /**
      * Append range.
@@ -237,8 +265,7 @@ public class Neo4JQuery extends QueryImpl
                 || clazz.isAssignableFrom(short.class) || clazz.isAssignableFrom(long.class)
                 || clazz.isAssignableFrom(Long.class) || clazz.isAssignableFrom(float.class)
                 || clazz.isAssignableFrom(Float.class) || clazz.isAssignableFrom(BigDecimal.class)
-                || clazz.isAssignableFrom(BigInteger.class)
-                || clazz.isAssignableFrom(Double.class)
+                || clazz.isAssignableFrom(BigInteger.class) || clazz.isAssignableFrom(Double.class)
                 || clazz.isAssignableFrom(double.class))
         {
             sb.append(isGreaterThan ? "*" : value);
@@ -254,7 +281,7 @@ public class Neo4JQuery extends QueryImpl
         sb.append(inclusive ? "]" : "}");
         return sb.toString();
     }
-    
+
     @Override
     protected List findUsingLucene(EntityMetadata m, Client client)
     {
