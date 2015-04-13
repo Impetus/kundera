@@ -315,7 +315,7 @@ public class KunderaQuery
      */
     public final void setAggregationResult(String[] aggResult)
     {
-        this.result = result;
+        this.aggregationResult = aggResult;
     }
 
     /**
