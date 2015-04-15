@@ -25,7 +25,6 @@ import java.util.Set;
 import javax.persistence.metamodel.EntityType;
 
 import org.apache.commons.lang.NotImplementedException;
-import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +36,7 @@ import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.ClientPropertiesSetter;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
-import com.impetus.kundera.generator.AutoGenerator;
+import com.impetus.kundera.generator.Generator;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.lifecycle.states.RemovedState;
@@ -72,8 +71,7 @@ import com.mongodb.util.JSONParseException;
  * 
  * @author impetusopensource
  */
-public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, Batcher, ClientPropertiesSetter,
-        AutoGenerator
+public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, Batcher, ClientPropertiesSetter
 {
     /** The mongo db. */
     private DB mongoDb;
@@ -87,12 +85,16 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     /** The log. */
     private static Logger log = LoggerFactory.getLogger(MongoDBClient.class);
 
+    /** The nodes. */
     private List<Node> nodes = new ArrayList<Node>();
 
+    /** The batch size. */
     private int batchSize;
 
+    /** The write concern. */
     private WriteConcern writeConcern = null;
 
+    /** The encoder. */
     private DBEncoder encoder = DefaultDBEncoder.FACTORY.create();
 
     /**
@@ -104,7 +106,14 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      *            the mgr
      * @param reader
      *            the reader
-     * @param puProperties
+     * @param persistenceUnit
+     *            the persistence unit
+     * @param externalProperties
+     *            the external properties
+     * @param clientMetadata
+     *            the client metadata
+     * @param kunderaMetadata
+     *            the kundera metadata
      */
     public MongoDBClient(Object mongo, IndexManager mgr, EntityReader reader, String persistenceUnit,
             Map<String, Object> externalProperties, ClientMetadata clientMetadata, final KunderaMetadata kunderaMetadata)
@@ -121,6 +130,13 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         populateBatchSize(persistenceUnit, this.externalProperties);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.client.Client#persistJoinTable(com.impetus.kundera
+     * .persistence.context.jointable.JoinTableData)
+     */
     @Override
     public void persistJoinTable(JoinTableData joinTableData)
     {
@@ -152,6 +168,13 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         dbCollection.insert(documents.toArray(new BasicDBObject[0]), getWriteConcern(), encoder);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getColumnsById(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.String, java.lang.Object,
+     * java.lang.Class)
+     */
     @Override
     public <E> List<E> getColumnsById(String schemaName, String joinTableName, String joinColumnName,
             String inverseJoinColumnName, Object parentId, Class columnJavaType)
@@ -310,6 +333,15 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         }
     }
 
+    /**
+     * Instantiate entity.
+     * 
+     * @param entityClass
+     *            the entity class
+     * @param entity
+     *            the entity
+     * @return the object
+     */
     private Object instantiateEntity(Class entityClass, Object entity)
     {
         if (entity == null)
@@ -360,14 +392,18 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      *            the entity metadata
      * @param mongoQuery
      *            the mongo query
-     * @param result
-     *            the result
      * @param relationNames
      *            the relation names
      * @param orderBy
      *            the order by
      * @param maxResult
+     *            the max result
+     * @param firstResult
+     *            the first result
      * @param keys
+     *            the keys
+     * @param results
+     *            the results
      * @return the list
      * @throws Exception
      *             the exception
@@ -439,6 +475,25 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         return entities;
     }
 
+    /**
+     * Gets the DB cursor instance.
+     * 
+     * @param mongoQuery
+     *            the mongo query
+     * @param orderBy
+     *            the order by
+     * @param maxResult
+     *            the max result
+     * @param firstResult
+     *            the first result
+     * @param keys
+     *            the keys
+     * @param documentName
+     *            the document name
+     * @param isCountQuery
+     *            the is count query
+     * @return the DB cursor instance
+     */
     public Object getDBCursorInstance(BasicDBObject mongoQuery, BasicDBObject orderBy, int maxResult, int firstResult,
             BasicDBObject keys, String documentName, boolean isCountQuery)
     {
@@ -567,8 +622,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      *            the col name
      * @param colValue
      *            the col value
-     * @param m
-     *            the m
+     * @param entityClazz
+     *            the entity clazz
      * @return the list
      */
     public List<Object> findByRelation(String colName, Object colValue, Class entityClazz)
@@ -630,6 +685,14 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         return MongoDBQuery.class;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.client.ClientBase#onPersist(com.impetus.kundera.metadata
+     * .model.EntityMetadata, java.lang.Object, java.lang.Object,
+     * java.util.List)
+     */
     @Override
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
     {
@@ -825,6 +888,13 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.client.ClientPropertiesSetter#populateClientProperties
+     * (com.impetus.kundera.client.Client, java.util.Map)
+     */
     @Override
     public void populateClientProperties(Client client, Map<String, Object> properties)
     {
@@ -832,6 +902,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     }
 
     /**
+     * Sets the mongo db.
+     * 
      * @param mongoDb
      *            the mongoDb to set
      */
@@ -841,6 +913,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     }
 
     /**
+     * Sets the handler.
+     * 
      * @param handler
      *            the handler to set
      */
@@ -850,6 +924,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     }
 
     /**
+     * Sets the nodes.
+     * 
      * @param nodes
      *            the nodes to set
      */
@@ -859,6 +935,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     }
 
     /**
+     * Sets the write concern.
+     * 
      * @param writeConcern
      *            the writeConcern to set
      */
@@ -868,6 +946,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     }
 
     /**
+     * Sets the encoder.
+     * 
      * @param encoder
      *            the encoder to set
      */
@@ -877,6 +957,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     }
 
     /**
+     * Gets the encoder.
+     * 
      * @return the encoder
      */
     public DBEncoder getEncoder()
@@ -885,6 +967,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     }
 
     /**
+     * Gets the write concern.
+     * 
      * @return the writeConcern
      */
     public WriteConcern getWriteConcern()
@@ -897,6 +981,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     }
 
     /**
+     * Sets the batch size.
+     * 
      * @param batchSize
      *            the batchSize to set
      */
@@ -906,8 +992,12 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     }
 
     /**
+     * Populate batch size.
+     * 
      * @param persistenceUnit
+     *            the persistence unit
      * @param puProperties
+     *            the pu properties
      */
     private void populateBatchSize(String persistenceUnit, Map<String, Object> puProperties)
     {
@@ -929,13 +1019,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         }
     }
 
-    @Override
-    public Object generate()
-    {
-        // return auto generated id used by mongodb.
-        return new ObjectId();
-    }
-
     /**
      * Method to execute mongo jscripts.
      * 
@@ -953,9 +1036,13 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     }
 
     /**
+     * Execute query.
+     * 
      * @param jsonClause
+     *            the json clause
      * @param entityMetadata
-     * @return
+     *            the entity metadata
+     * @return the list
      */
     public List executeQuery(String jsonClause, EntityMetadata entityMetadata)
     {
@@ -989,6 +1076,15 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         }
     }
 
+    /**
+     * Execute native query.
+     * 
+     * @param jsonClause
+     *            the json clause
+     * @param entityMetadata
+     *            the entity metadata
+     * @return the list
+     */
     public List executeNativeQuery(String jsonClause, EntityMetadata entityMetadata)
     {
         List entities = new ArrayList();
@@ -1044,10 +1140,15 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     }
 
     /**
+     * Parses the and scroll.
+     * 
      * @param jsonClause
+     *            the json clause
      * @param collectionName
-     * @return
+     *            the collection name
+     * @return the DB cursor
      * @throws JSONParseException
+     *             the JSON parse exception
      */
     private DBCursor parseAndScroll(String jsonClause, String collectionName) throws JSONParseException
     {
@@ -1057,9 +1158,14 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     }
 
     /**
+     * Populate entity.
+     * 
      * @param entityMetadata
+     *            the entity metadata
      * @param entities
+     *            the entities
      * @param fetchedDocument
+     *            the fetched document
      */
     private void populateEntity(EntityMetadata entityMetadata, List entities, DBObject fetchedDocument)
     {
@@ -1116,6 +1222,17 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         }
     }
 
+    /**
+     * Handle update functions.
+     * 
+     * @param query
+     *            the query
+     * @param update
+     *            the update
+     * @param collName
+     *            the coll name
+     * @return the int
+     */
     public int handleUpdateFunctions(BasicDBObject query, BasicDBObject update, String collName)
     {
         DBCollection collection = mongoDb.getCollection(collName);
@@ -1124,6 +1241,17 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         if (result.getError() != null || result.getN() <= 0)
             return -1;
         return result.getN();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getIdGenerator()
+     */
+    @Override
+    public Generator getIdGenerator()
+    {
+        return (Generator) KunderaCoreUtils.createNewInstance(MongoDBIdGenerator.class);
     }
 
 }

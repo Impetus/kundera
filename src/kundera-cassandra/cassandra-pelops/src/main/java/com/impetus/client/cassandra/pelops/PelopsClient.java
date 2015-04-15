@@ -57,6 +57,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.client.cassandra.CassandraClientBase;
+import com.impetus.client.cassandra.CassandraIdGenerator;
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
@@ -70,6 +71,7 @@ import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.db.SearchResult;
 import com.impetus.kundera.generator.AutoGenerator;
+import com.impetus.kundera.generator.Generator;
 import com.impetus.kundera.generator.TableGenerator;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
@@ -96,8 +98,7 @@ import com.impetus.kundera.utils.TimestampGenerator;
  * @author animesh.kumar
  * @since 0.1
  */
-public class PelopsClient extends CassandraClientBase implements Client<CassQuery>, Batcher, TableGenerator,
-        AutoGenerator
+public class PelopsClient extends CassandraClientBase implements Client<CassQuery>, Batcher
 {
     /** log for this class. */
     private static Logger log = LoggerFactory.getLogger(PelopsClient.class);
@@ -105,14 +106,16 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     /** The data handler. */
     private PelopsDataHandler dataHandler;
 
-    /** Handler for Inverted indexing */
+    /** Handler for Inverted indexing. */
     private InvertedIndexHandler invertedIndexHandler;
 
     /** The reader. */
     private EntityReader reader;
 
+    /** The client factory. */
     private PelopsClientFactory clientFactory;
 
+    /** The pool. */
     private IThriftPool pool;
 
     /**
@@ -122,8 +125,18 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
      *            the index manager
      * @param reader
      *            the reader
+     * @param clientFactory
+     *            the client factory
      * @param persistenceUnit
      *            the persistence unit
+     * @param externalProperties
+     *            the external properties
+     * @param pool
+     *            the pool
+     * @param kunderaMetadata
+     *            the kundera metadata
+     * @param generator
+     *            the generator
      */
     public PelopsClient(IndexManager indexManager, EntityReader reader, PelopsClientFactory clientFactory,
             String persistenceUnit, Map<String, Object> externalProperties, IThriftPool pool,
@@ -140,12 +153,26 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         this.pool = pool;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.cassandra.CassandraClientBase#find(java.lang.Class,
+     * java.lang.Object)
+     */
     @Override
     public final Object find(Class entityClass, Object rowId)
     {
         return super.find(entityClass, rowId);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.cassandra.CassandraClientBase#findAll(java.lang.Class,
+     * java.lang.String[], java.lang.Object[])
+     */
     @Override
     public final <E> List<E> findAll(Class<E> entityClass, String[] columnsToSelect, Object... rowIds)
     {
@@ -179,6 +206,13 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         return findByRowKeys(entityClass, relationNames, isWrapReq, metadata, rowIds);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.cassandra.CassandraClientBase#delete(java.lang.Object,
+     * java.lang.Object)
+     */
     @Override
     public void delete(Object entity, Object pKey)
     {
@@ -235,6 +269,11 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.client.cassandra.CassandraClientBase#close()
+     */
     @Override
     public final void close()
     {
@@ -244,7 +283,10 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     }
 
     /**
-     * Persists records into Join Table
+     * Persists records into Join Table.
+     * 
+     * @param joinTableData
+     *            the join table data
      */
     public void persistJoinTable(JoinTableData joinTableData)
     {
@@ -297,6 +339,13 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         mutator.execute(getConsistencyLevel());
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getColumnsById(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.String, java.lang.Object,
+     * java.lang.Class)
+     */
     @Override
     public <E> List<E> getColumnsById(String schemaName, String joinTableName, String joinColumnName,
             String inverseJoinColumnName, Object parentId, Class columnJavaType)
@@ -326,6 +375,13 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         return (List<E>) foreignKeys;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.String, java.lang.Object,
+     * java.lang.Class)
+     */
     @Override
     public Object[] findIdsByColumn(String schemaName, String tableName, String pKeyName, String columnName,
             Object columnValue, Class entityClazz)
@@ -374,6 +430,12 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         return null;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.Object)
+     */
     @Override
     public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
     {
@@ -390,6 +452,12 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
 
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#find(java.lang.Class,
+     * java.util.Map)
+     */
     @Override
     public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap)
     {
@@ -469,12 +537,25 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         return reader;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getQueryImplementor()
+     */
     @Override
     public Class<CassQuery> getQueryImplementor()
     {
         return CassQuery.class;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.client.ClientBase#onPersist(com.impetus.kundera.metadata
+     * .model.EntityMetadata, java.lang.Object, java.lang.Object,
+     * java.util.List)
+     */
     @Override
     protected void onPersist(EntityMetadata metadata, Object entity, Object id, List<RelationHolder> rlHolders)
     {
@@ -601,7 +682,12 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
 
     /**
      * Indexes @Embedded and @ElementCollection objects of this entity to a
-     * separate column family
+     * separate column family.
+     * 
+     * @param node
+     *            the node
+     * @param entityMetadata
+     *            the entity metadata
      */
     @Override
     protected void indexNode(Node node, EntityMetadata entityMetadata)
@@ -647,7 +733,19 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
                 getConsistencyLevel());
     }
 
-    /** Query related methods */
+    /**
+     * Query related methods.
+     * 
+     * @param clazz
+     *            the clazz
+     * @param relationalField
+     *            the relational field
+     * @param isNative
+     *            the is native
+     * @param cqlQuery
+     *            the cql query
+     * @return the list
+     */
 
     /**
      * Method to execute cql query and return back entity/enhance entities.
@@ -678,6 +776,10 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
      *            the is relation
      * @param relations
      *            the relations
+     * @param maxResult
+     *            the max result
+     * @param columns
+     *            the columns
      * @return the list
      */
     @Override
@@ -799,6 +901,10 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
      *            the relation names
      * @param conditions
      *            the conditions
+     * @param maxResult
+     *            the max result
+     * @param columns
+     *            the columns
      * @return the list
      */
     public List<EnhanceEntity> find(EntityMetadata m, List<String> relationNames, List<IndexClause> conditions,
@@ -820,6 +926,12 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
      *            the is wrap req
      * @param relations
      *            the relations
+     * @param columns
+     *            the columns
+     * @param conditions
+     *            the conditions
+     * @param maxResults
+     *            the max results
      * @return the list
      * @throws Exception
      *             the exception
@@ -860,6 +972,14 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         return results;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.cassandra.CassandraClientBase#searchInInvertedIndex
+     * (java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata,
+     * java.util.Map)
+     */
     public List<SearchResult> searchInInvertedIndex(String columnFamilyName, EntityMetadata m,
             Map<Boolean, List<IndexClause>> indexClauseMap)
     {
@@ -886,6 +1006,11 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         return dataHandler;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.client.cassandra.CassandraClientBase#getConnection()
+     */
     protected IPooledConnection getConnection()
     {
         return clientFactory.getConnection(pool);
@@ -895,7 +1020,8 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
      * Return cassandra client instance.
      * 
      * @param connection
-     * @return
+     *            the connection
+     * @return the connection
      */
     protected Cassandra.Client getConnection(Object connection)
     {
@@ -908,27 +1034,43 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
                 + this.getClass().getSimpleName());
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.cassandra.CassandraClientBase#releaseConnection(java
+     * .lang.Object)
+     */
     protected void releaseConnection(Object conn)
     {
         clientFactory.releaseConnection((IPooledConnection) conn);
     }
 
-    @Override
-    public Long generate(TableGeneratorDiscriptor discriptor)
-    {
-        return getGeneratedValue(discriptor, getPersistenceUnit());
-    }
-
+    /**
+     * Gets the mutator.
+     * 
+     * @return the mutator
+     */
     Mutator getMutator()
     {
         return clientFactory.getMutator(pool);
     }
 
+    /**
+     * Gets the selector.
+     * 
+     * @return the selector
+     */
     Selector getSelector()
     {
         return clientFactory.getSelector(pool);
     }
 
+    /**
+     * Gets the row deletor.
+     * 
+     * @return the row deletor
+     */
     RowDeletor getRowDeletor()
     {
         return clientFactory.getRowDeletor(pool);
@@ -949,6 +1091,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
      *            the relation names
      * @param dataHandler
      *            the data handler
+     * @return the list
      */
     private List populateData(EntityMetadata m, Map<Bytes, List<Column>> qResults, List<Object> entities,
             boolean isRelational, List<String> relationNames, CassandraDataHandler dataHandler)
@@ -1006,10 +1149,15 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         return entities;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getIdGenerator()
+     */
     @Override
-    public Object generate()
+    public Generator getIdGenerator()
     {
-        return super.getAutoGeneratedValue();
+        return (Generator) KunderaCoreUtils.createNewInstance(PelopsIdGenerator.class);
     }
 
 }

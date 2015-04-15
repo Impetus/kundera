@@ -24,7 +24,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
@@ -60,7 +59,7 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.db.SearchResult;
-import com.impetus.kundera.generator.AutoGenerator;
+import com.impetus.kundera.generator.Generator;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -83,16 +82,34 @@ import com.impetus.kundera.utils.TimestampGenerator;
  * @author vivek.mishra
  * 
  */
-public class DSClient extends CassandraClientBase implements Client<CassQuery>, Batcher, AutoGenerator
+public class DSClient extends CassandraClientBase implements Client<CassQuery>, Batcher
 {
 
     /** log for this class. */
     private static Logger log = LoggerFactory.getLogger(DSClient.class);
 
+    /** The factory. */
     private DSClientFactory factory;
 
+    /** The reader. */
     private EntityReader reader;
 
+    /**
+     * Instantiates a new DS client.
+     * 
+     * @param factory
+     *            the factory
+     * @param persistenceUnit
+     *            the persistence unit
+     * @param externalProperties
+     *            the external properties
+     * @param kunderaMetadata
+     *            the kundera metadata
+     * @param reader
+     *            the reader
+     * @param generator
+     *            the generator
+     */
     public DSClient(DSClientFactory factory, String persistenceUnit, Map<String, Object> externalProperties,
             KunderaMetadata kunderaMetadata, EntityReader reader, final TimestampGenerator generator)
     {
@@ -103,6 +120,14 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         this.setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.client.ClientBase#onPersist(com.impetus.kundera.metadata
+     * .model.EntityMetadata, java.lang.Object, java.lang.Object,
+     * java.util.List)
+     */
     @Override
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
     {
@@ -131,7 +156,13 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
     }
 
     /**
-     * Finds an entity from database
+     * Finds an entity from database.
+     * 
+     * @param entityClass
+     *            the entity class
+     * @param rowId
+     *            the row id
+     * @return the object
      */
     @Override
     public Object find(Class entityClass, Object rowId)
@@ -143,6 +174,17 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         return results.isEmpty() ? null : results.get(0);
     }
 
+    /**
+     * Creates the select query.
+     * 
+     * @param rowId
+     *            the row id
+     * @param metadata
+     *            the metadata
+     * @param tableName
+     *            the table name
+     * @return the string builder
+     */
     private StringBuilder createSelectQuery(Object rowId, EntityMetadata metadata, String tableName)
     {
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
@@ -162,6 +204,13 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         return builder;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.cassandra.CassandraClientBase#findAll(java.lang.Class,
+     * java.lang.String[], java.lang.Object[])
+     */
     @Override
     public final <E> List<E> findAll(Class<E> entityClass, String[] columnsToSelect, Object... rowIds)
     {
@@ -183,16 +232,12 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         return results;
     }
 
-    @Override
-    public Object generate()
-    {
-        final String generatedId = "Select now() from system.schema_columns";
-        ResultSet rSet = this.execute(generatedId, null);
-
-        UUID uuid = rSet.iterator().next().getUUID(0);
-        return uuid;
-    }
-
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#find(java.lang.Class,
+     * java.util.Map)
+     */
     @Override
     public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap)
     {
@@ -200,6 +245,13 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
                 "Support for super columns is not available with DS java driver. Either use Thrift or pelops for the same");
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.client.Client#persistJoinTable(com.impetus.kundera
+     * .persistence.context.jointable.JoinTableData)
+     */
     @Override
     public void persistJoinTable(JoinTableData joinTableData)
     {
@@ -276,6 +328,13 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getColumnsById(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.String, java.lang.Object,
+     * java.lang.Class)
+     */
     @Override
     public <E> List<E> getColumnsById(String schemaName, String tableName, String pKeyColumnName, String columnName,
             Object pKeyColumnValue, Class columnJavaType)
@@ -306,12 +365,20 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         {
             Row row = rowIter.next();
             DataType dataType = row.getColumnDefinitions().getType(columnName);
-            Object columnValue = DSClientUtilities.assign(row, null, null, dataType.getName(), null, columnName, null, null);
+            Object columnValue = DSClientUtilities.assign(row, null, null, dataType.getName(), null, columnName, null,
+                    null);
             results.add(columnValue);
         }
         return results;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.String, java.lang.Object,
+     * java.lang.Class)
+     */
     @Override
     public Object[] findIdsByColumn(String schemaName, String tableName, String pKeyName, String columnName,
             Object columnValue, Class entityClazz)
@@ -323,6 +390,12 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
                 metadata.getIdAttribute().getBindableJavaType()).toArray();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.Object)
+     */
     @Override
     public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
     {
@@ -360,6 +433,12 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#findByRelation(java.lang.String,
+     * java.lang.Object, java.lang.Class)
+     */
     @Override
     public List<Object> findByRelation(String colName, Object colValue, Class entityClazz)
     {
@@ -382,18 +461,36 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         return iterateAndReturn(rSet, entityClazz, m);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getReader()
+     */
     @Override
     public EntityReader getReader()
     {
         return this.reader;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getQueryImplementor()
+     */
     @Override
     public Class<CassQuery> getQueryImplementor()
     {
         return CassQuery.class;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.cassandra.CassandraClientBase#find(java.lang.Class,
+     * java.util.List, boolean,
+     * com.impetus.kundera.metadata.model.EntityMetadata, java.lang.Object[])
+     */
     @Override
     public List find(Class entityClass, List<String> relationNames, boolean isWrapReq, EntityMetadata metadata,
             Object... rowIds)
@@ -401,6 +498,13 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         return findAll(entityClass, null, rowIds);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.cassandra.CassandraClientBase#loadSuperColumns(java
+     * .lang.String, java.lang.String, java.lang.String, java.lang.String[])
+     */
     @Override
     protected List<SuperColumn> loadSuperColumns(String keyspace, String columnFamily, String rowId,
             String... superColumnNames)
@@ -409,6 +513,13 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
                 "Support for super columns is not available with DS java driver. Either use Thrift or pelops for the same");
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.cassandra.CassandraClientBase#executeQuery(java.lang
+     * .Class, java.util.List, boolean, java.lang.String)
+     */
     @Override
     public List executeQuery(Class clazz, List<String> relationalField, boolean isNative, String cqlQuery)
     {
@@ -417,6 +528,14 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         return iterateAndReturn(rSet, clazz, metadata);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.cassandra.CassandraClientBase#find(java.util.List,
+     * com.impetus.kundera.metadata.model.EntityMetadata, boolean,
+     * java.util.List, int, java.util.List)
+     */
     @Override
     public List find(List<IndexClause> ixClause, EntityMetadata m, boolean isRelation, List<String> relations,
             int maxResult, List<String> columns)
@@ -424,6 +543,13 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         throw new UnsupportedOperationException("Support available only for thrift/pelops.");
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.client.cassandra.CassandraClientBase#findByRange(byte[],
+     * byte[], com.impetus.kundera.metadata.model.EntityMetadata, boolean,
+     * java.util.List, java.util.List, java.util.List, int)
+     */
     @Override
     public List findByRange(byte[] muinVal, byte[] maxVal, EntityMetadata m, boolean isWrapReq, List<String> relations,
             List<String> columns, List<IndexExpression> conditions, int maxResults) throws Exception
@@ -431,6 +557,14 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         throw new UnsupportedOperationException("Support available only for thrift/pelops.");
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.cassandra.CassandraClientBase#searchInInvertedIndex
+     * (java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata,
+     * java.util.Map)
+     */
     @Override
     public List<SearchResult> searchInInvertedIndex(String columnFamilyName, EntityMetadata m,
             Map<Boolean, List<IndexClause>> indexClauseMap)
@@ -438,6 +572,14 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         throw new UnsupportedOperationException("Support available only for thrift/pelops.");
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.cassandra.CassandraClientBase#find(com.impetus.kundera
+     * .metadata.model.EntityMetadata, java.util.List, java.util.List, int,
+     * java.util.List)
+     */
     @Override
     public List<EnhanceEntity> find(EntityMetadata m, List<String> relationNames, List<IndexClause> conditions,
             int maxResult, List<String> columns)
@@ -445,12 +587,24 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         throw new UnsupportedOperationException("Support available only for thrift/pelops.");
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.client.cassandra.CassandraClientBase#getDataHandler()
+     */
     @Override
     protected CassandraDataHandler getDataHandler()
     {
         throw new UnsupportedOperationException("Support available only for thrift/pelops.");
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.cassandra.CassandraClientBase#delete(java.lang.Object,
+     * java.lang.Object)
+     */
     @Override
     public void delete(Object entity, Object pKey)
     {
@@ -472,6 +626,11 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.client.cassandra.CassandraClientBase#getConnection()
+     */
     @Override
     protected Object getConnection()
     {
@@ -479,24 +638,44 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         return null;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.cassandra.CassandraClientBase#getConnection(java.lang
+     * .Object)
+     */
     @Override
     protected Object getConnection(Object connection)
     {
         return null;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.cassandra.CassandraClientBase#releaseConnection(java
+     * .lang.Object)
+     */
     @Override
     protected void releaseConnection(Object conn)
     {
         // do nothing
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.cassandra.CassandraClientBase#execute(java.lang.String
+     * , java.lang.Object)
+     */
     @Override
-    protected <T> T execute(final String query, Object connection)
+    public <T> T execute(final String query, Object connection)
     {
 
         Session session = factory.getConnection();
-        ;
         try
         {
             Statement queryStmt = new SimpleStatement(query);
@@ -515,6 +694,13 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.cassandra.CassandraClientBase#executeUpdateDeleteQuery
+     * (java.lang.String)
+     */
     public int executeUpdateDeleteQuery(String cqlQuery)
     {
         Session session = null;
@@ -538,11 +724,15 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
     }
 
     /**
+     * Iterate and return.
      * 
      * @param rSet
+     *            the r set
      * @param entityClazz
+     *            the entity clazz
      * @param metadata
-     * @return
+     *            the metadata
+     * @return the list
      */
     private List iterateAndReturn(ResultSet rSet, Class entityClazz, EntityMetadata metadata)
     {
@@ -589,14 +779,16 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
     }
 
     /**
-     * 
      * Populates data form secondary tables of entity for given row key.
      * 
      * @param rowId
+     *            the row id
      * @param entity
+     *            the entity
      * @param metaModel
+     *            the meta model
      * @param metadata
-     * @return
+     *            the metadata
      */
     private void populateSecondaryTableData(Object rowId, Object entity, MetamodelImpl metaModel,
             EntityMetadata metadata)
@@ -622,15 +814,23 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
     }
 
     /**
+     * Iterator columns.
      * 
      * @param metadata
+     *            the metadata
      * @param metamodel
+     *            the metamodel
      * @param entityType
+     *            the entity type
      * @param relationalValues
+     *            the relational values
      * @param entity
+     *            the entity
      * @param row
+     *            the row
      * @param columnDefIter
-     * @return
+     *            the column def iter
+     * @return the object
      */
     private Object iteratorColumns(EntityMetadata metadata, MetamodelImpl metamodel, EntityType entityType,
             Map<String, Object> relationalValues, Object entity, Row row, Iterator<Definition> columnDefIter)
@@ -679,12 +879,22 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         return entity;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.client.cassandra.CassandraClientBase#close()
+     */
     @Override
     public void close()
     {
         super.close();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.ClientBase#getPersistenceUnit()
+     */
     @Override
     public String getPersistenceUnit()
     {
@@ -692,16 +902,25 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
     }
 
     /**
+     * Populate composite id.
      * 
      * @param metadata
+     *            the metadata
      * @param entity
+     *            the entity
      * @param columnName
+     *            the column name
      * @param row
+     *            the row
      * @param metaModel
+     *            the meta model
      * @param attribute
+     *            the attribute
      * @param entityClazz
+     *            the entity clazz
      * @param dataType
-     * @return
+     *            the data type
+     * @return the object
      */
     private Object populateCompositeId(EntityMetadata metadata, Object entity, String columnName, Row row,
             MetamodelImpl metaModel, Attribute attribute, Class<?> entityClazz, DataType dataType)
@@ -752,12 +971,17 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
     }
 
     /**
+     * Gets the compound key.
      * 
      * @param attribute
+     *            the attribute
      * @param entity
-     * @return
+     *            the entity
+     * @return the compound key
      * @throws InstantiationException
+     *             the instantiation exception
      * @throws IllegalAccessException
+     *             the illegal access exception
      */
     private Object getCompoundKey(Attribute attribute, Object entity) throws InstantiationException,
             IllegalAccessException
@@ -773,5 +997,16 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         }
 
         return compoundKeyObject;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getIdGenerator()
+     */
+    @Override
+    public Generator getIdGenerator()
+    {
+        return (Generator) KunderaCoreUtils.createNewInstance(DSIdGenerator.class);
     }
 }

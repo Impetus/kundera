@@ -50,6 +50,7 @@ import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.ClientPropertiesSetter;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
+import com.impetus.kundera.generator.Generator;
 import com.impetus.kundera.generator.SequenceGenerator;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.Indexer;
@@ -79,20 +80,23 @@ import com.impetus.kundera.utils.KunderaCoreUtils;
  * @author vivek.mishra
  */
 public class RedisClient extends ClientBase implements Client<RedisQuery>, Batcher, ClientPropertiesSetter,
-        TransactionBinder, SequenceGenerator
+        TransactionBinder
 {
     /**
      * Reference to redis client factory.
      */
-    private RedisClientFactory factory;
+    RedisClientFactory factory;
 
+    /** The reader. */
     private EntityReader reader;
 
+    /** The settings. */
     private Map<String, Object> settings;
 
     /** list of nodes for batch processing. */
     private List<Node> nodes = new ArrayList<Node>();
 
+    /** The resource. */
     private TransactionResource resource;
 
     /** batch size. */
@@ -101,10 +105,24 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(RedisClient.class);
 
+    /** The Constant COMPOSITE_KEY_SEPERATOR. */
     private static final String COMPOSITE_KEY_SEPERATOR = "\001";
 
+    /** The connection. */
     private Jedis connection;
 
+    /**
+     * Instantiates a new redis client.
+     * 
+     * @param factory
+     *            the factory
+     * @param puProperties
+     *            the pu properties
+     * @param persistenceUnit
+     *            the persistence unit
+     * @param kunderaMetadata
+     *            the kundera metadata
+     */
     RedisClient(final RedisClientFactory factory, final Map<String, Object> puProperties, final String persistenceUnit,
             final KunderaMetadata kunderaMetadata)
     {
@@ -159,12 +177,25 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
     }
 
+    /**
+     * Gets the double.
+     * 
+     * @param valueAsStr
+     *            the value as str
+     * @return the double
+     */
     private double getDouble(String valueAsStr)
     {
         return StringUtils.isNumeric(valueAsStr) ? Double.parseDouble(valueAsStr) : Double
                 .parseDouble(((Integer) valueAsStr.hashCode()).toString());
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#find(java.lang.Class,
+     * java.lang.Object)
+     */
     @Override
     public Object find(Class entityClass, Object key)
     {
@@ -285,6 +316,17 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         return result;
     }
 
+    /**
+     * Gets the columns.
+     * 
+     * @param connection
+     *            the connection
+     * @param hashKey
+     *            the hash key
+     * @param columns
+     *            the columns
+     * @return the columns
+     */
     private Map<byte[], byte[]> getColumns(Object connection, String hashKey, Map<byte[], byte[]> columns)
     {
         if (resource != null && resource.isActive())
@@ -346,12 +388,23 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         return results;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#find(java.lang.Class,
+     * java.util.Map)
+     */
     @Override
     public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap)
     {
         throw new UnsupportedOperationException("Method not supported!");
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#close()
+     */
     @Override
     public void close()
     {
@@ -412,7 +465,6 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
      *            entity metadata.
      * @param rowKey
      *            row key.
-     * @param relationHolders
      */
     private void deleteRelation(Object connection, EntityMetadata entityMetadata, String rowKey)
     {
@@ -451,6 +503,13 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
          */
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.client.Client#persistJoinTable(com.impetus.kundera
+     * .persistence.context.jointable.JoinTableData)
+     */
     @Override
     public void persistJoinTable(JoinTableData joinTableData)
     {
@@ -540,6 +599,22 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
      * Returns collection of column values for given join table. TODO: Method is
      * very much tightly coupled with Join table implementation and does not
      * serve purpose as it is meant for.
+     * 
+     * @param <E>
+     *            the element type
+     * @param schemaName
+     *            the schema name
+     * @param tableName
+     *            the table name
+     * @param pKeyColumnName
+     *            the key column name
+     * @param columnName
+     *            the column name
+     * @param pKeyColumnValue
+     *            the key column value
+     * @param columnJavaType
+     *            the column java type
+     * @return the columns by id
      */
     @Override
     public <E> List<E> getColumnsById(String schemaName, String tableName, String pKeyColumnName, String columnName,
@@ -591,10 +666,17 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     }
 
     /**
+     * Fetch column.
+     * 
      * @param columnName
+     *            the column name
      * @param connection
+     *            the connection
      * @param results
+     *            the results
      * @param resultKeys
+     *            the result keys
+     * @return the list
      */
     private List fetchColumn(String columnName, Object connection, List results, Set<String> resultKeys)
     {
@@ -627,6 +709,13 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         return results;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.String, java.lang.Object,
+     * java.lang.Class)
+     */
     @Override
     public Object[] findIdsByColumn(String schemaName, String tableName, String pKeyName, String columnName,
             Object columnValue, Class entityClazz)
@@ -673,6 +762,12 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         return null;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.Object)
+     */
     @Override
     public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
     {
@@ -758,6 +853,12 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#findByRelation(java.lang.String,
+     * java.lang.Object, java.lang.Class)
+     */
     @Override
     public List<Object> findByRelation(String colName, Object colValue, Class entityClazz)
     {
@@ -778,12 +879,22 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         return resultSet;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getReader()
+     */
     @Override
     public EntityReader getReader()
     {
         return reader;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getQueryImplementor()
+     */
     @Override
     public Class<RedisQuery> getQueryImplementor()
     {
@@ -792,6 +903,9 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
     /**
      * To supply configurations for jedis connection.
+     * 
+     * @param configurations
+     *            the configurations
      */
     public void setConfig(Map<String, Object> configurations)
     {
@@ -899,6 +1013,17 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         }
     }
 
+    /**
+     * Find ids by column.
+     * 
+     * @param tableName
+     *            the table name
+     * @param columnName
+     *            the column name
+     * @param columnValue
+     *            the column value
+     * @return the object[]
+     */
     private Object[] findIdsByColumn(String tableName, String columnName, Object columnValue)
     {
         Object connection = null;
@@ -959,10 +1084,16 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
      */
     class AttributeWrapper
     {
+
+        /** The columns. */
         private Map<byte[], byte[]> columns;
 
+        /** The indexes. */
         private Map<String, Double> indexes;
 
+        /**
+         * Instantiates a new attribute wrapper.
+         */
         private AttributeWrapper()
         {
             columns = new HashMap<byte[], byte[]>();
@@ -971,8 +1102,10 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         }
 
         /**
-         * @param columns
-         * @param indexes
+         * Instantiates a new attribute wrapper.
+         * 
+         * @param size
+         *            the size
          */
         AttributeWrapper(int size)
         {
@@ -981,21 +1114,47 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             indexes = new HashMap<String, Double>(size);
         }
 
+        /**
+         * Adds the column.
+         * 
+         * @param key
+         *            the key
+         * @param value
+         *            the value
+         */
         private void addColumn(byte[] key, byte[] value)
         {
             columns.put(key, value);
         }
 
+        /**
+         * Adds the index.
+         * 
+         * @param key
+         *            the key
+         * @param score
+         *            the score
+         */
         private void addIndex(String key, Double score)
         {
             indexes.put(key, score);
         }
 
+        /**
+         * Gets the columns.
+         * 
+         * @return the columns
+         */
         Map<byte[], byte[]> getColumns()
         {
             return columns;
         }
 
+        /**
+         * Gets the indexes.
+         * 
+         * @return the indexes
+         */
         Map getIndexes()
         {
             return indexes;
@@ -1027,7 +1186,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
      *            field name.
      * @return encoded byte array.
      */
-    private byte[] getEncodedBytes(final String name)
+    byte[] getEncodedBytes(final String name)
     {
         try
         {
@@ -1054,6 +1213,8 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
      *            attribute wrapper.
      * @param rowKey
      *            row key to be stor
+     * @param metadata
+     *            the metadata
      */
     private void addIndex(final Object connection, final AttributeWrapper wrapper, final String rowKey,
             final EntityMetadata metadata)
@@ -1132,12 +1293,10 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     /*    *//**
      * Prepares composite key as a redis key.
      * 
-     * @param m
-     *            entity metadata
-     * @param metaModel
-     *            meta model.
-     * @param compositeKey
-     *            composite key instance
+     * @param entityMetadata
+     *            the entity metadata
+     * @param entity
+     *            the entity
      * @return redis key
      */
     /*
@@ -1231,9 +1390,13 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
      * Adds field to wrapper.
      * 
      * @param entityMetadata
+     *            the entity metadata
      * @param wrapper
+     *            the wrapper
      * @param resultedObject
+     *            the resulted object
      * @param attrib
+     *            the attrib
      */
     private void addToWrapper(EntityMetadata entityMetadata, AttributeWrapper wrapper, Object resultedObject,
             Attribute attrib)
@@ -1242,13 +1405,18 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     }
 
     /**
-     * Wraps entity attributes into redis format byte[]
+     * Wraps entity attributes into redis format byte[].
      * 
      * @param entityMetadata
+     *            the entity metadata
      * @param wrapper
+     *            the wrapper
      * @param embeddedObject
+     *            the embedded object
      * @param attrib
+     *            the attrib
      * @param embeddedAttrib
+     *            the embedded attrib
      */
     private void addToWrapper(EntityMetadata entityMetadata, AttributeWrapper wrapper, Object embeddedObject,
             Attribute attrib, Attribute embeddedAttrib)
@@ -1290,11 +1458,16 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
      * Unwraps redis results into entity.
      * 
      * @param entityMetadata
+     *            the entity metadata
      * @param results
+     *            the results
      * @param key
-     * @return
+     *            the key
+     * @return the object
      * @throws InstantiationException
+     *             the instantiation exception
      * @throws IllegalAccessException
+     *             the illegal access exception
      */
     private Object unwrap(EntityMetadata entityMetadata, Map<byte[], byte[]> results, Object key)
             throws InstantiationException, IllegalAccessException
@@ -1408,6 +1581,15 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         return entity;
     }
 
+    /**
+     * On execute query.
+     * 
+     * @param queryParameter
+     *            the query parameter
+     * @param entityClazz
+     *            the entity clazz
+     * @return the list
+     */
     List onExecuteQuery(RedisQueryInterpreter queryParameter, Class entityClazz)
     {
         /**
@@ -1620,6 +1802,15 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         return results;
     }
 
+    /**
+     * Re initialize.
+     * 
+     * @param connection
+     *            the connection
+     * @param rowKeys
+     *            the row keys
+     * @return the object
+     */
     private Object reInitialize(Object connection, Set<String> rowKeys)
     {
         /*
@@ -1630,6 +1821,19 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         return connection;
     }
 
+    /**
+     * Find all columns.
+     * 
+     * @param <E>
+     *            the element type
+     * @param entityClass
+     *            the entity class
+     * @param columns
+     *            the columns
+     * @param keys
+     *            the keys
+     * @return the list
+     */
     private <E> List<E> findAllColumns(Class<E> entityClass, byte[][] columns, Object... keys)
     {
         Object connection = getConnection();
@@ -1681,6 +1885,13 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.persistence.TransactionBinder#bind(com.impetus.kundera
+     * .persistence.TransactionResource)
+     */
     @Override
     public void bind(TransactionResource resource)
     {
@@ -1746,6 +1957,11 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         }
     }
 
+    /**
+     * Gets the and set connection.
+     * 
+     * @return the and set connection
+     */
     private Jedis getAndSetConnection()
     {
         Jedis conn = factory.getConnection();
@@ -1763,8 +1979,12 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     }
 
     /**
+     * Sets the batch size.
+     * 
      * @param persistenceUnit
+     *            the persistence unit
      * @param puProperties
+     *            the pu properties
      */
     private void setBatchSize(String persistenceUnit, Map<String, Object> puProperties)
     {
@@ -1786,11 +2006,31 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         }
     }
 
+    /**
+     * Sets the batch size.
+     * 
+     * @param batch_Size
+     *            the new batch size
+     */
     private void setBatchSize(int batch_Size)
     {
         this.batchSize = batch_Size;
     }
 
+    /**
+     * On persist.
+     * 
+     * @param entityMetadata
+     *            the entity metadata
+     * @param entity
+     *            the entity
+     * @param id
+     *            the id
+     * @param rlHolders
+     *            the rl holders
+     * @param connection
+     *            the connection
+     */
     private void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders,
             Object connection)
     {
@@ -1887,6 +2127,16 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
 
     }
 
+    /**
+     * On delete.
+     * 
+     * @param entity
+     *            the entity
+     * @param pKey
+     *            the key
+     * @param connection
+     *            the connection
+     */
     private void onDelete(Object entity, Object pKey, Object connection)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entity.getClass());
@@ -1949,22 +2199,13 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                 showQuery);
     }
 
-    @Override
-    public Object generate(SequenceGeneratorDiscriptor discriptor)
-    {
-        Jedis jedis = factory.getConnection();
-
-        Long latestCount = jedis.incr(getEncodedBytes(discriptor.getSequenceName()));
-        if (latestCount == 1)
-        {
-            return discriptor.getInitialValue();
-        }
-        else
-        {
-            return (latestCount - 1) * discriptor.getAllocationSize();
-        }
-    }
-
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.client.ClientBase#indexNode(com.impetus.kundera.graph
+     * .Node, com.impetus.kundera.metadata.model.EntityMetadata)
+     */
     @Override
     protected void indexNode(Node node, EntityMetadata entityMetadata)
     {
@@ -1976,6 +2217,9 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         }
     }
 
+    /**
+     * Initialize indexer.
+     */
     private void initializeIndexer()
     {
         if (this.indexManager.getIndexer() != null
@@ -1985,9 +2229,25 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         }
     }
 
+    /**
+     * Checks if is bound transaction.
+     * 
+     * @return true, if is bound transaction
+     */
     private boolean isBoundTransaction()
     {
         return resource == null || (resource != null && !resource.isActive());
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getIdGenerator()
+     */
+    @Override
+    public Generator getIdGenerator()
+    {
+        return (Generator) KunderaCoreUtils.createNewInstance(RedisIdGenerator.class);
     }
 
 }

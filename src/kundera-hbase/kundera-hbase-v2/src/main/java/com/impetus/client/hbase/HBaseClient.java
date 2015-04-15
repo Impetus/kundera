@@ -29,7 +29,6 @@ import javax.persistence.metamodel.EntityType;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.Row;
-import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.FilterList;
@@ -50,7 +49,7 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.ClientPropertiesSetter;
 import com.impetus.kundera.db.RelationHolder;
-import com.impetus.kundera.generator.TableGenerator;
+import com.impetus.kundera.generator.Generator;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.lifecycle.states.RemovedState;
@@ -58,7 +57,6 @@ import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
-import com.impetus.kundera.metadata.model.TableGeneratorDiscriptor;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
@@ -71,14 +69,13 @@ import com.impetus.kundera.utils.KunderaCoreUtils;
  * 
  * @author Devender Yadav
  */
-public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batcher, ClientPropertiesSetter,
-        TableGenerator
+public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batcher, ClientPropertiesSetter
 {
     /** the log used by this class. */
     private static Logger log = LoggerFactory.getLogger(HBaseClient.class);
 
     /** The handler. */
-    private DataHandler handler;
+    DataHandler handler;
 
     /** The reader. */
     private EntityReader reader;
@@ -686,42 +683,6 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         new HBaseClientProperties().populateClientProperties(client, properties);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.generator.TableGenerator#generate(com.impetus.kundera
-     * .metadata.model.TableGeneratorDiscriptor)
-     */
-    @Override
-    public Long generate(TableGeneratorDiscriptor discriptor)
-    {
-        String tableName = HBaseUtils.getHTableName(discriptor.getSchema(), discriptor.getPkColumnValue());
-        try
-        {
-            Table hTable = ((HBaseDataHandler) handler).gethTable(tableName);
-            Long latestCount = hTable.incrementColumnValue(HBaseUtils.AUTO_ID_ROW.getBytes(), discriptor
-                    .getPkColumnValue().getBytes(), discriptor.getValueColumnName().getBytes(), 1);
-            if (latestCount == 1)
-            {
-                return (long) discriptor.getInitialValue();
-            }
-            else if (discriptor.getAllocationSize() == 1)
-            {
-                return latestCount + discriptor.getInitialValue();
-            }
-            else
-            {
-                return (latestCount - 1) * discriptor.getAllocationSize() + discriptor.getInitialValue();
-            }
-        }
-        catch (IOException ioex)
-        {
-            log.error("Error while generating id for entity, Caused by: .", ioex);
-            throw new KunderaException(ioex);
-        }
-    }
-
     /**
      * Reset.
      */
@@ -762,5 +723,16 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
     public HBaseDataHandler getHandle()
     {
         return ((HBaseDataHandler) handler).getHandle();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getIdGenerator()
+     */
+    @Override
+    public Generator getIdGenerator()
+    {
+        return (Generator) KunderaCoreUtils.createNewInstance(HBaseIdGenerator.class);
     }
 }

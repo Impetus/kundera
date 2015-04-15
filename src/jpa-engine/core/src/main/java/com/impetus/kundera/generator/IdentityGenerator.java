@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.generator;
 
+import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.model.SequenceGeneratorDiscriptor;
 
 /**
@@ -26,13 +27,17 @@ import com.impetus.kundera.metadata.model.SequenceGeneratorDiscriptor;
  */
 public interface IdentityGenerator extends Generator
 {
+
     /**
-     * generate id on the basis of {@SequenceGeneratorDiscriptor
-     * 
-     * } property.
+     * Generate.
      * 
      * @param discriptor
-     * @return
+     *            the discriptor
+     * @param client
+     *            the client
+     * @param dataType
+     *            the data type
+     * @return the object
      */
-    public Object generate(SequenceGeneratorDiscriptor discriptor);
+    public Object generate(SequenceGeneratorDiscriptor discriptor, Client<?> client, String dataType);
 }

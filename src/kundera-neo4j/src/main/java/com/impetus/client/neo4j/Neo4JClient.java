@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.persistence.GenerationType;
 import javax.persistence.PersistenceException;
 
 import org.apache.commons.lang.StringUtils;
@@ -51,6 +52,7 @@ import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.configure.ClientProperties;
 import com.impetus.kundera.configure.ClientProperties.DataStore;
 import com.impetus.kundera.db.RelationHolder;
+import com.impetus.kundera.generator.Generator;
 import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -77,6 +79,7 @@ import com.impetus.kundera.utils.ReflectUtils;
 public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, TransactionBinder, Batcher
 {
 
+    /** The log. */
     private static Logger log = LoggerFactory.getLogger(Neo4JClient.class);
 
     /**
@@ -84,14 +87,30 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
      */
     private Neo4JClientFactory factory;
 
+    /** The reader. */
     private EntityReader reader;
 
+    /** The mapper. */
     private GraphEntityMapper mapper;
 
+    /** The resource. */
     private TransactionResource resource;
 
+    /** The indexer. */
     private Neo4JIndexManager indexer;
 
+    /**
+     * Instantiates a new neo4 j client.
+     * 
+     * @param factory
+     *            the factory
+     * @param puProperties
+     *            the pu properties
+     * @param persistenceUnit
+     *            the persistence unit
+     * @param kunderaMetadata
+     *            the kundera metadata
+     */
     Neo4JClient(final Neo4JClientFactory factory, Map<String, Object> puProperties, String persistenceUnit,
             final KunderaMetadata kunderaMetadata)
     {
@@ -105,6 +124,13 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
 
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.client.ClientPropertiesSetter#populateClientProperties
+     * (com.impetus.kundera.client.Client, java.util.Map)
+     */
     @Override
     public void populateClientProperties(Client client, Map<String, Object> properties)
     {
@@ -126,7 +152,13 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
     }
 
     /**
-     * Finds an entity from graph database
+     * Finds an entity from graph database.
+     * 
+     * @param entityClass
+     *            the entity class
+     * @param key
+     *            the key
+     * @return the object
      */
     @Override
     public Object find(Class entityClass, Object key)
@@ -154,6 +186,12 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
         return entity;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#findAll(java.lang.Class,
+     * java.lang.String[], java.lang.Object[])
+     */
     @Override
     public <E> List<E> findAll(Class<E> entityClass, String[] columnsToSelect, Object... keys)
     {
@@ -165,12 +203,23 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
         return entities;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#find(java.lang.Class,
+     * java.util.Map)
+     */
     @Override
     public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap)
     {
         throw new UnsupportedOperationException("Embedded attributes not supported in Neo4J as of now");
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#close()
+     */
     @Override
     public void close()
     {
@@ -178,7 +227,12 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
     }
 
     /**
-     * Deletes an entity from database
+     * Deletes an entity from database.
+     * 
+     * @param entity
+     *            the entity
+     * @param key
+     *            the key
      */
     @Override
     public void delete(Object entity, Object key)
@@ -223,12 +277,26 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.client.Client#persistJoinTable(com.impetus.kundera
+     * .persistence.context.jointable.JoinTableData)
+     */
     @Override
     public void persistJoinTable(JoinTableData joinTableData)
     {
         throw new UnsupportedOperationException("Join Table not supported for Neo4J as of now");
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getColumnsById(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.String, java.lang.Object,
+     * java.lang.Class)
+     */
     @Override
     public <E> List<E> getColumnsById(String schemaName, String tableName, String pKeyColumnName, String columnName,
             Object pKeyColumnValue, Class columnJavaType)
@@ -236,6 +304,13 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
         throw new UnsupportedOperationException("Operation not supported for Neo4J");
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.String, java.lang.Object,
+     * java.lang.Class)
+     */
     @Override
     public Object[] findIdsByColumn(String schemaName, String tableName, String pKeyName, String columnName,
             Object columnValue, Class entityClazz)
@@ -243,24 +318,46 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
         throw new UnsupportedOperationException("Operation not supported for Neo4J");
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.Object)
+     */
     @Override
     public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
     {
         throw new UnsupportedOperationException("Operation not supported for Neo4J");
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#findByRelation(java.lang.String,
+     * java.lang.Object, java.lang.Class)
+     */
     @Override
     public List<Object> findByRelation(String colName, Object colValue, Class entityClazz)
     {
         throw new UnsupportedOperationException("Operation not supported for Neo4J");
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getReader()
+     */
     @Override
     public EntityReader getReader()
     {
         return reader;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getQueryImplementor()
+     */
     @Override
     public Class<Neo4JQuery> getQueryImplementor()
     {
@@ -268,7 +365,16 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
     }
 
     /**
-     * Writes an entity to database
+     * Writes an entity to database.
+     * 
+     * @param entityMetadata
+     *            the entity metadata
+     * @param entity
+     *            the entity
+     * @param id
+     *            the id
+     * @param rlHolders
+     *            the rl holders
      */
     @Override
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
@@ -384,6 +490,13 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.persistence.api.Batcher#addBatch(com.impetus.kundera
+     * .graph.Node)
+     */
     @Override
     public void addBatch(com.impetus.kundera.graph.Node node)
     {
@@ -398,6 +511,11 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.persistence.api.Batcher#executeBatch()
+     */
     @Override
     public int executeBatch()
     {
@@ -521,12 +639,18 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
     }
 
     /**
-     * Populates relationship entities into original entity
+     * Populates relationship entities into original entity.
      * 
      * @param m
+     *            the m
      * @param entity
+     *            the entity
      * @param relationMap
+     *            the relation map
      * @param node
+     *            the node
+     * @param nodeIdToEntityMap
+     *            the node id to entity map
      */
     private void populateRelations(EntityMetadata m, Object entity, Map<String, Object> relationMap, Node node,
             Map<Long, Object> nodeIdToEntityMap)
@@ -646,7 +770,9 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
     }
 
     /**
-     * Returns instance of {@link BatchInserter}
+     * Returns instance of {@link BatchInserter}.
+     * 
+     * @return the batch inserter
      */
     protected BatchInserter getBatchInserter()
     {
@@ -696,7 +822,10 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
     }
 
     /**
-     * Binds Transaction resource to this client
+     * Binds Transaction resource to this client.
+     * 
+     * @param resource
+     *            the resource
      */
     @Override
     public void bind(TransactionResource resource)
@@ -713,6 +842,15 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
         }
     }
 
+    /**
+     * Execute lucene query.
+     * 
+     * @param m
+     *            the m
+     * @param luceneQuery
+     *            the lucene query
+     * @return the list
+     */
     public List<Object> executeLuceneQuery(EntityMetadata m, String luceneQuery)
     {
         log.info("Executing Lucene Query on Neo4J:" + luceneQuery);
@@ -739,9 +877,14 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
     }
 
     /**
+     * Adds the entity from index hits.
+     * 
      * @param m
+     *            the m
      * @param entities
+     *            the entities
      * @param hits
+     *            the hits
      */
     protected void addEntityFromIndexHits(EntityMetadata m, List<Object> entities, IndexHits<Node> hits)
     {
@@ -761,9 +904,13 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
     }
 
     /**
+     * Gets the entity with association from node.
+     * 
      * @param m
-     * @param entities
+     *            the m
      * @param node
+     *            the node
+     * @return the entity with association from node
      */
     private Object getEntityWithAssociationFromNode(EntityMetadata m, Node node)
     {
@@ -798,7 +945,7 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
      * Checks whether there is an active transaction within this client Batch
      * operations are run without any transaction boundary hence this check is
      * not applicable for them All Modifying Neo4J operations must be executed
-     * within a transaction
+     * within a transaction.
      */
     private void checkActiveTransaction()
     {
@@ -808,6 +955,11 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
         }
     }
 
+    /**
+     * Gets the connection.
+     * 
+     * @return the connection
+     */
     public GraphDatabaseService getConnection()
     {
         if (resource != null)
@@ -819,6 +971,18 @@ public class Neo4JClient extends Neo4JClientBase implements Client<Neo4JQuery>, 
             return factory.getConnection();
         }
 
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getIdGenerator()
+     */
+    @Override
+    public Generator getIdGenerator()
+    {
+        throw new UnsupportedOperationException(GenerationType.class.getSimpleName()
+                + " Strategies not supported by this client : Neo4JClient");
     }
 
 }

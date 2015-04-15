@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.generator;
 
+import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.metadata.model.TableGeneratorDiscriptor;
 
 /**
@@ -26,14 +27,18 @@ import com.impetus.kundera.metadata.model.TableGeneratorDiscriptor;
  */
 public interface TableGenerator extends Generator
 {
+
     /**
-     * generate id on the basis of {@TableGeneratorDiscriptor
-     * 
-     * 
-     * } property.
+     * Generate.
      * 
      * @param discriptor
-     * @return
+     *            the discriptor
+     * @param client
+     *            the client
+     * @param dataType
+     *            the data type
+     * @return the object
      */
-    public Object generate(TableGeneratorDiscriptor discriptor);
+    public Object generate(TableGeneratorDiscriptor discriptor, ClientBase client, String dataType);
+
 }

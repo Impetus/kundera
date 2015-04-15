@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.GenerationType;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -53,6 +54,7 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
+import com.impetus.kundera.generator.Generator;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
@@ -80,6 +82,8 @@ import com.impetus.kundera.utils.KunderaCoreUtils;
  */
 public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
 {
+
+    /** The client factory. */
     private RDBMSClientFactory clientFactory;
 
     /** The s. */
@@ -100,7 +104,14 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      *            the index manager
      * @param reader
      *            the reader
-     * @param puProperties
+     * @param clientFactory
+     *            the client factory
+     * @param externalProperties
+     *            the external properties
+     * @param clientMetadata
+     *            the client metadata
+     * @param kunderaMetadata
+     *            the kundera metadata
      */
     public HibernateClient(final String persistenceUnit, IndexManager indexManager, EntityReader reader,
             RDBMSClientFactory clientFactory, Map<String, Object> externalProperties,
@@ -147,7 +158,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         tx = onBegin();
         s.delete(entity);
         onCommit(tx);
-        
+
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entity.getClass());
         MetamodelImpl metamodel = (MetamodelImpl) KunderaMetadataManager.getMetamodel(kunderaMetadata,
                 metadata.getPersistenceUnit());
@@ -157,6 +168,11 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         }
     }
 
+    /**
+     * On begin.
+     * 
+     * @return the transaction
+     */
     private Transaction onBegin()
     {
         Transaction tx;
@@ -227,12 +243,26 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         return c.list();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#find(java.lang.Class,
+     * java.util.Map)
+     */
     @Override
     public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap)
     {
         return null;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.client.ClientBase#onPersist(com.impetus.kundera.metadata
+     * .model.EntityMetadata, java.lang.Object, java.lang.Object,
+     * java.util.List)
+     */
     @Override
     protected void onPersist(EntityMetadata metadata, Object entity, Object id, List<RelationHolder> relationHolders)
     {
@@ -280,6 +310,12 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         }
     }
 
+    /**
+     * On commit.
+     * 
+     * @param tx
+     *            the tx
+     */
     private void onCommit(Transaction tx)
     {
         if (tx.isActive())
@@ -289,7 +325,10 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     }
 
     /**
-     * Inserts records into JoinTable
+     * Inserts records into JoinTable.
+     * 
+     * @param joinTableData
+     *            the join table data
      */
     @Override
     public void persistJoinTable(JoinTableData joinTableData)
@@ -309,6 +348,13 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getColumnsById(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.String, java.lang.Object,
+     * java.lang.Class)
+     */
     @Override
     public <E> List<E> getColumnsById(String schemaName, String joinTableName, String joinColumnName,
             String inverseJoinColumnName, Object parentId, Class columnJavaType)
@@ -383,19 +429,18 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     /**
      * Insert record in join table.
      * 
+     * @param schemaName
+     *            the schema name
      * @param joinTableName
      *            the join table name
      * @param joinColumnName
      *            the join column name
      * @param inverseJoinColumnName
      *            the inverse join column name
-     * @param relMetadata
-     *            the rel metadata
      * @param parentId
      *            the parent id
-     * @param schema
-     * @param child
-     *            the child
+     * @param childrenIds
+     *            the children ids
      */
     private void insertRecordInJoinTable(String schemaName, String joinTableName, String joinColumnName,
             String inverseJoinColumnName, Object parentId, Set<Object> childrenIds)
@@ -540,10 +585,8 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      * 
      * @param query
      *            the native fquery
-     * @param relations
-     *            the relations
-     * @param m
-     *            the m
+     * @param parameterMap
+     *            the parameter map
      * @return the list
      */
     public List findByQuery(String query, Map<Parameter, Object> parameterMap)
@@ -557,6 +600,15 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         return q.list();
     }
 
+    /**
+     * On native update.
+     * 
+     * @param query
+     *            the query
+     * @param parameterMap
+     *            the parameter map
+     * @return the int
+     */
     public int onNativeUpdate(String query, Map<Parameter, Object> parameterMap)
     {
         s = getStatelessSession();
@@ -580,10 +632,8 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      * 
      * @param query
      *            the native fquery
-     * @param relations
-     *            the relations
-     * @param m
-     *            the m
+     * @param parameterMap
+     *            the parameter map
      * @return the list
      */
     public int onExecuteUpdate(String query, Map<Parameter, Object> parameterMap)
@@ -603,6 +653,15 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         return i;
     }
 
+    /**
+     * Gets the query instance.
+     * 
+     * @param nativeQuery
+     *            the native query
+     * @param m
+     *            the m
+     * @return the query instance
+     */
     public SQLQuery getQueryInstance(String nativeQuery, EntityMetadata m)
     {
         s = getStatelessSession();
@@ -711,8 +770,13 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     }
 
     /**
-     * @param metadata
-     * @return
+     * Gets the from clause.
+     * 
+     * @param schemaName
+     *            the schema name
+     * @param tableName
+     *            the table name
+     * @return the from clause
      */
     private String getFromClause(String schemaName, String tableName)
     {
@@ -725,11 +789,14 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     }
 
     /**
-     * Updates foreign keys into master table
+     * Updates foreign keys into master table.
      * 
      * @param metadata
+     *            the metadata
      * @param id
+     *            the id
      * @param relationHolders
+     *            the relation holders
      */
     private void updateForeignKeys(EntityMetadata metadata, Object id, List<RelationHolder> relationHolders)
     {
@@ -758,9 +825,15 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     }
 
     /**
+     * Removes the kundera proxies.
+     * 
      * @param metadata
+     *            the metadata
      * @param entity
+     *            the entity
      * @param relationHolders
+     *            the relation holders
+     * @return true, if successful
      */
     private boolean removeKunderaProxies(EntityMetadata metadata, Object entity, List<RelationHolder> relationHolders)
     {
@@ -818,10 +891,8 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      *            the m
      * @param relationNames
      *            the relation names
-     * @param client
-     *            the client
-     * @param sqlQuery
-     *            the sql query
+     * @param result
+     *            the result
      * @return the list
      */
     private List<EnhanceEntity> populateEnhanceEntities(EntityMetadata m, List<String> relationNames, List result)
@@ -849,10 +920,13 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     }
 
     /**
+     * Instantiate entity.
      * 
      * @param entityClass
+     *            the entity class
      * @param entity
-     * @return
+     *            the entity
+     * @return the object
      */
     private Object instantiateEntity(Class entityClass, Object entity)
     {
@@ -876,9 +950,12 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     }
 
     /**
+     * Sets the parameters.
      * 
      * @param parameterMap
+     *            the parameter map
      * @param q
+     *            the q
      */
     private void setParameters(Map<Parameter, Object> parameterMap, Query q)
     {
@@ -911,6 +988,18 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
                 }
             }
         }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getIdGenerator()
+     */
+    @Override
+    public Generator getIdGenerator()
+    {
+        throw new UnsupportedOperationException(GenerationType.class.getSimpleName()
+                + " Strategies not supported by this client : HibernateClient");
     }
 
 }

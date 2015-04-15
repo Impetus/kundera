@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.TimeUnit;
 
+import javax.persistence.GenerationType;
 import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
@@ -52,7 +53,6 @@ import oracle.kv.table.TableAPI;
 import oracle.kv.table.TableOperation;
 
 import org.apache.commons.lang.StringUtils;
-import org.omg.PortableInterceptor.INACTIVE;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,6 +65,7 @@ import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.ClientPropertiesSetter;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
+import com.impetus.kundera.generator.Generator;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.lifecycle.states.RemovedState;
@@ -87,19 +88,23 @@ import com.impetus.kundera.query.QueryHandlerException;
 import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**
- * Implementation of {@link Client} interface for Oracle NoSQL database
+ * Implementation of {@link Client} interface for Oracle NoSQL database.
  * 
  * @author vivek.mishra
  */
 public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQuery>, Batcher, ClientPropertiesSetter
 {
+
+    /** The Constant SEPERATOR. */
     private static final String SEPERATOR = "_";
 
     /** The kvstore db. */
     private KVStore kvStore;
 
+    /** The factory. */
     private OracleNoSQLClientFactory factory;
 
+    /** The handler. */
     private OracleNoSQLDataHandler handler;
 
     /** The reader. */
@@ -112,14 +117,19 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     private int batchSize;
 
     // Configuration Parameter
+    /** The timeout. */
     private int timeout = OracleNOSQLConstants.DEFAULT_WRITE_TIMEOUT_SECONDS;
 
+    /** The durability. */
     private Durability durability = OracleNOSQLConstants.DEFAULT_DURABILITY;
 
+    /** The time unit. */
     private TimeUnit timeUnit = OracleNOSQLConstants.DEFAULT_TIME_UNIT;
 
+    /** The consistency. */
     private Consistency consistency = OracleNOSQLConstants.DEFAULT_CONSISTENCY;
 
+    /** The table api. */
     private TableAPI tableAPI;
 
     /** The log. */
@@ -128,12 +138,20 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     /**
      * Instantiates a new oracle no sqldb client.
      * 
-     * @param kvStore
-     *            the kv store
-     * @param indexManager
-     *            the index manager
+     * @param factory
+     *            the factory
      * @param reader
      *            the reader
+     * @param indexManager
+     *            the index manager
+     * @param kvStore
+     *            the kv store
+     * @param puProperties
+     *            the pu properties
+     * @param persistenceUnit
+     *            the persistence unit
+     * @param kunderaMetadata
+     *            the kundera metadata
      */
     OracleNoSQLClient(final OracleNoSQLClientFactory factory, EntityReader reader, IndexManager indexManager,
             final KVStore kvStore, Map<String, Object> puProperties, String persistenceUnit,
@@ -173,7 +191,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
      *            primary key
      * @param columnsToSelect
      *            columns to select
-     * @return
+     * @return the object
      */
     @SuppressWarnings("unchecked")
     private Object find(Class entityClass, Object key, List<String> columnsToSelect)
@@ -224,6 +242,24 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         return entities.isEmpty() ? null : entities.get(0);
     }
 
+    /**
+     * Read embeddable.
+     * 
+     * @param key
+     *            the key
+     * @param columnsToSelect
+     *            the columns to select
+     * @param entityMetadata
+     *            the entity metadata
+     * @param metamodel
+     *            the metamodel
+     * @param schemaTable
+     *            the schema table
+     * @param value
+     *            the value
+     * @param attribute
+     *            the attribute
+     */
     private void readEmbeddable(Object key, List<String> columnsToSelect, EntityMetadata entityMetadata,
             MetamodelImpl metamodel, Table schemaTable, RecordValue value, Attribute attribute)
     {
@@ -243,6 +279,11 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#close()
+     */
     @Override
     public void close()
     {
@@ -254,6 +295,11 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
 
     /**
      * Delete by primary key.
+     * 
+     * @param entity
+     *            the entity
+     * @param pKey
+     *            the key
      */
     @Override
     public void delete(Object entity, Object pKey)
@@ -301,12 +347,8 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
      *            the entity
      * @param id
      *            the id
-     * @param relations
-     *            the relations
-     * @throws Exception
-     *             the exception
-     * @throws PropertyAccessException
-     *             the property access exception
+     * @param rlHolders
+     *            the rl holders
      */
     @Override
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
@@ -320,6 +362,13 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         tableAPI.put(row, null, null);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.client.Client#persistJoinTable(com.impetus.kundera
+     * .persistence.context.jointable.JoinTableData)
+     */
     @Override
     public void persistJoinTable(JoinTableData joinTableData)
     {
@@ -367,6 +416,16 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         }
     }
 
+    /**
+     * Adds the ops.
+     * 
+     * @param operations
+     *            the operations
+     * @param schemaTable
+     *            the schema table
+     * @param row
+     *            the row
+     */
     private void addOps(Map<Key, List<TableOperation>> operations, Table schemaTable, Row row)
     {
         Key key = ((TableImpl) schemaTable).createKey(row, false);
@@ -386,6 +445,12 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         }
     }
 
+    /**
+     * Execute.
+     * 
+     * @param batches
+     *            the batches
+     */
     private void execute(Map<Key, List<TableOperation>> batches)
     {
         if (batches != null && !batches.isEmpty())
@@ -476,13 +541,15 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     /**
      * On JPQL query execution.
      * 
+     * @param <E>
+     *            the element type
      * @param entityClass
      *            entity class.
      * @param interpreter
      *            query interpreter
      * @param primaryKeys
      *            set of primary keys. Empty if
-     * @return
+     * @return the list
      */
     public <E> List<E> executeQuery(Class<E> entityClass, OracleNoSQLQueryInterpreter interpreter,
             Set<Object> primaryKeys)
@@ -536,12 +603,25 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         // UnsupportedOperationException("Query with where clause is not yet supported");
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#find(java.lang.Class,
+     * java.util.Map)
+     */
     @Override
     public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap)
     {
         throw new UnsupportedOperationException("This operation is not supported for OracleNoSQL.");
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getColumnsById(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.String, java.lang.Object,
+     * java.lang.Class)
+     */
     @Override
     public <E> List<E> getColumnsById(String schemaName, String tableName, String pKeyColumnName, String columnName,
             Object pKeyColumnValue, Class columnJavaType)
@@ -571,6 +651,13 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
 
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.String, java.lang.Object,
+     * java.lang.Class)
+     */
     @Override
     public Object[] findIdsByColumn(String schemaName, String tableName, String pKeyName, String columnName,
             Object columnValue, Class entityClazz)
@@ -578,6 +665,12 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         return getColumnsById(schemaName, tableName, columnName, pKeyName, columnValue, entityClazz).toArray();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.Object)
+     */
     @Override
     public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
     {
@@ -608,6 +701,14 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
      */
     /**
      * Find by relational column name and value.
+     * 
+     * @param colName
+     *            the col name
+     * @param colValue
+     *            the col value
+     * @param entityClazz
+     *            the entity clazz
+     * @return the list
      */
     @Override
     public List<Object> findByRelation(String colName, Object colValue, Class entityClazz)
@@ -651,18 +752,35 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
 
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getReader()
+     */
     @Override
     public EntityReader getReader()
     {
         return reader;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getQueryImplementor()
+     */
     @Override
     public Class<OracleNoSQLQuery> getQueryImplementor()
     {
         return OracleNoSQLQuery.class;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.persistence.api.Batcher#addBatch(com.impetus.kundera
+     * .graph.Node)
+     */
     @Override
     public void addBatch(Node node)
     {
@@ -674,6 +792,8 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     }
 
     /**
+     * Gets the handler.
+     * 
      * @return the handler
      */
     public OracleNoSQLDataHandler getHandler()
@@ -681,6 +801,11 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         return handler;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.persistence.api.Batcher#executeBatch()
+     */
     @Override
     public int executeBatch()
     {
@@ -718,12 +843,22 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         return nodes.size();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.persistence.api.Batcher#getBatchSize()
+     */
     @Override
     public int getBatchSize()
     {
         return batchSize;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.persistence.api.Batcher#clear()
+     */
     @Override
     public void clear()
     {
@@ -747,8 +882,12 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     }
 
     /**
+     * Sets the batch size.
+     * 
      * @param persistenceUnit
+     *            the persistence unit
      * @param puProperties
+     *            the pu properties
      */
     private void setBatchSize(String persistenceUnit, Map<String, Object> puProperties)
     {
@@ -770,11 +909,24 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         }
     }
 
+    /**
+     * Sets the batch size.
+     * 
+     * @param batch_Size
+     *            the new batch size
+     */
     public void setBatchSize(int batch_Size)
     {
         this.batchSize = batch_Size;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.client.ClientPropertiesSetter#populateClientProperties
+     * (com.impetus.kundera.client.Client, java.util.Map)
+     */
     @Override
     public void populateClientProperties(Client client, Map<String, Object> properties)
     {
@@ -783,6 +935,8 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     }
 
     /**
+     * Sets the timeout.
+     * 
      * @param timeout
      *            the timeout to set
      */
@@ -792,6 +946,8 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     }
 
     /**
+     * Sets the durability.
+     * 
      * @param durability
      *            the durability to set
      */
@@ -801,6 +957,8 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     }
 
     /**
+     * Sets the time unit.
+     * 
      * @param timeUnit
      *            the timeUnit to set
      */
@@ -810,6 +968,8 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     }
 
     /**
+     * Sets the consistency.
+     * 
      * @param consistency
      *            the consistency to set
      */
@@ -819,6 +979,8 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     }
 
     /**
+     * Gets the timeout.
+     * 
      * @return the timeout
      */
     public int getTimeout()
@@ -827,6 +989,8 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     }
 
     /**
+     * Gets the durability.
+     * 
      * @return the durability
      */
     public Durability getDurability()
@@ -835,6 +999,8 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     }
 
     /**
+     * Gets the time unit.
+     * 
      * @return the timeUnit
      */
     public TimeUnit getTimeUnit()
@@ -843,6 +1009,8 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     }
 
     /**
+     * Gets the consistency.
+     * 
      * @return the consistency
      */
     public Consistency getConsistency()
@@ -861,8 +1029,10 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
      *            kv row.
      * @param attributes
      *            JPA attributes.
-     * @param fieldDefs
-     *            kv fields meta data
+     * @param schemaTable
+     *            the schema table
+     * @param metadata
+     *            the metadata
      */
     private void process(Object entity, MetamodelImpl metamodel, Row row, Set<Attribute> attributes, Table schemaTable,
             EntityMetadata metadata)
@@ -894,6 +1064,22 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         }
     }
 
+    /**
+     * Process embeddable attribute.
+     * 
+     * @param entity
+     *            the entity
+     * @param metamodel
+     *            the metamodel
+     * @param row
+     *            the row
+     * @param schemaTable
+     *            the schema table
+     * @param metadata
+     *            the metadata
+     * @param attribute
+     *            the attribute
+     */
     private void processEmbeddableAttribute(Object entity, MetamodelImpl metamodel, Row row, Table schemaTable,
             EntityMetadata metadata, Attribute attribute)
     {
@@ -913,12 +1099,10 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
      * 
      * @param rlHolders
      *            relation holders
-     * 
      * @param row
      *            kv row object
-     * 
-     * @param fieldDefs
-     *            fields metadata
+     * @param schemaTable
+     *            the schema table
      */
     private void onRelationalAttributes(List<RelationHolder> rlHolders, Row row, Table schemaTable)
     {
@@ -944,17 +1128,14 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     }
 
     /**
-     * Process discriminator columns
+     * Process discriminator columns.
      * 
      * @param row
      *            kv row object.
-     * 
      * @param entityType
      *            metamodel attribute.
-     * 
-     * @param fieldDefs
-     *            field definition.
-     * 
+     * @param schemaTable
+     *            the schema table
      */
     private void addDiscriminatorColumn(Row row, EntityType entityType, Table schemaTable)
     {
@@ -975,12 +1156,16 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     }
 
     /**
-     * setter field
+     * setter field.
      * 
      * @param row
-     * @param fieldDefs
+     *            the row
+     * @param schemaTable
+     *            the schema table
      * @param embeddedObject
+     *            the embedded object
      * @param embeddedAttrib
+     *            the embedded attrib
      */
     private void setField(Row row, Table schemaTable, Object embeddedObject, Attribute embeddedAttrib)
     {
@@ -994,6 +1179,18 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
 
     }
 
+    /**
+     * Populate id.
+     * 
+     * @param entityMetadata
+     *            the entity metadata
+     * @param schemaTable
+     *            the schema table
+     * @param entity
+     *            the entity
+     * @param row
+     *            the row
+     */
     private void populateId(EntityMetadata entityMetadata, Table schemaTable, Object entity, Row row)
     {
         FieldDef fieldMetadata;
@@ -1007,6 +1204,24 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         NoSqlDBUtils.get(fieldMetadata, value, entity, (Field) entityMetadata.getIdAttribute().getJavaMember());
     }
 
+    /**
+     * On embeddable id.
+     * 
+     * @param entityMetadata
+     *            the entity metadata
+     * @param metaModel
+     *            the meta model
+     * @param schemaTable
+     *            the schema table
+     * @param entity
+     *            the entity
+     * @param row
+     *            the row
+     * @throws InstantiationException
+     *             the instantiation exception
+     * @throws IllegalAccessException
+     *             the illegal access exception
+     */
     private void onEmbeddableId(EntityMetadata entityMetadata, MetamodelImpl metaModel, Table schemaTable,
             Object entity, Row row) throws InstantiationException, IllegalAccessException
     {
@@ -1029,6 +1244,13 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         PropertyAccessorHelper.set(entity, (Field) entityMetadata.getIdAttribute().getJavaMember(), embeddedObject);
     }
 
+    /**
+     * Initialize.
+     * 
+     * @param entityMetadata
+     *            the entity metadata
+     * @return the map
+     */
     private Map<String, Object> initialize(EntityMetadata entityMetadata)
     {
         Map<String, Object> relationMap = null;
@@ -1039,6 +1261,29 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         return relationMap;
     }
 
+    /**
+     * Scroll and populate.
+     * 
+     * @param key
+     *            the key
+     * @param entityMetadata
+     *            the entity metadata
+     * @param metaModel
+     *            the meta model
+     * @param schemaTable
+     *            the schema table
+     * @param rowsIter
+     *            the rows iter
+     * @param relationMap
+     *            the relation map
+     * @param columnsToSelect
+     *            the columns to select
+     * @return the list
+     * @throws InstantiationException
+     *             the instantiation exception
+     * @throws IllegalAccessException
+     *             the illegal access exception
+     */
     private List scrollAndPopulate(Object key, EntityMetadata entityMetadata, MetamodelImpl metaModel,
             Table schemaTable, Iterator<Row> rowsIter, Map<String, Object> relationMap, List<String> columnsToSelect)
             throws InstantiationException, IllegalAccessException
@@ -1136,11 +1381,17 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
     }
 
     /**
+     * Initialize entity.
+     * 
      * @param key
+     *            the key
      * @param entityMetadata
-     * @return
+     *            the entity metadata
+     * @return the object
      * @throws InstantiationException
+     *             the instantiation exception
      * @throws IllegalAccessException
+     *             the illegal access exception
      */
     private Object initializeEntity(Object key, EntityMetadata entityMetadata) throws InstantiationException,
             IllegalAccessException
@@ -1154,6 +1405,23 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         return entity;
     }
 
+    /**
+     * On index search.
+     * 
+     * @param <E>
+     *            the element type
+     * @param interpreter
+     *            the interpreter
+     * @param entityMetadata
+     *            the entity metadata
+     * @param metamodel
+     *            the metamodel
+     * @param results
+     *            the results
+     * @param columnsToSelect
+     *            the columns to select
+     * @return the list
+     */
     private <E> List<E> onIndexSearch(OracleNoSQLQueryInterpreter interpreter, EntityMetadata entityMetadata,
             MetamodelImpl metamodel, List<E> results, List<String> columnsToSelect)
     {
@@ -1223,6 +1491,19 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         return results;
     }
 
+    /**
+     * Creates the row.
+     * 
+     * @param entityMetadata
+     *            the entity metadata
+     * @param entity
+     *            the entity
+     * @param id
+     *            the id
+     * @param rlHolders
+     *            the rl holders
+     * @return the row
+     */
     private Row createRow(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
     {
         String schema = entityMetadata.getSchema(); // Irrelevant for this
@@ -1254,10 +1535,31 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
         return row;
     }
 
+    /**
+     * Eligible to fetch.
+     * 
+     * @param columnsToSelect
+     *            the columns to select
+     * @param columnName
+     *            the column name
+     * @return true, if successful
+     */
     private boolean eligibleToFetch(List<String> columnsToSelect, String columnName)
     {
         return (columnsToSelect != null && !columnsToSelect.isEmpty() && columnsToSelect.contains(columnName))
                 || (columnsToSelect == null || columnsToSelect.isEmpty());
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getIdGenerator()
+     */
+    @Override
+    public Generator getIdGenerator()
+    {
+        throw new UnsupportedOperationException(GenerationType.class.getSimpleName()
+                + " Strategies not supported by this client : OracleNoSQLClient");
     }
 
 }
