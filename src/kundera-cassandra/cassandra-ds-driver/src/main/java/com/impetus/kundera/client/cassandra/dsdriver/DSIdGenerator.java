@@ -1,5 +1,5 @@
 /*******************************************************************************
- * * Copyright 2012 Impetus Infotech.
+ *  * Copyright 2015 Impetus Infotech.
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -13,32 +13,37 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.kundera.generator;
+package com.impetus.kundera.client.cassandra.dsdriver;
 
+import java.util.UUID;
+
+import com.datastax.driver.core.ResultSet;
 import com.impetus.kundera.client.Client;
-import com.impetus.kundera.metadata.model.SequenceGeneratorDiscriptor;
+import com.impetus.kundera.generator.AutoGenerator;
 
 /**
- * {@link SequenceGenerator} interface , all client should implement this
- * interface in order to support sequence generation strategy.
+ * The Class DSIdGenerator.
  * 
- * @author Kuldeep.Mishra
- * 
+ * @author: karthikp.manchala
  */
-public interface SequenceGenerator extends Generator
+public class DSIdGenerator implements AutoGenerator
 {
 
-    /**
-     * Generate.
+    /*
+     * (non-Javadoc)
      * 
-     * @param discriptor
-     *            the discriptor
-     * @param client
-     *            the client
-     * @param dataType
-     *            the data type
-     * @return the object
+     * @see
+     * com.impetus.kundera.generator.AutoGenerator#generate(com.impetus.kundera
+     * .client.Client, java.lang.Object)
      */
-    public Object generate(SequenceGeneratorDiscriptor discriptor, Client<?> client, String dataType);
+    @Override
+    public Object generate(Client<?> client, String dataType)
+    {
 
+        final String generatedId = "Select now() from system.schema_columns";
+        ResultSet rSet = ((DSClient) client).execute(generatedId, null);
+
+        UUID uuid = rSet.iterator().next().getUUID(0);
+        return uuid;
+    }
 }

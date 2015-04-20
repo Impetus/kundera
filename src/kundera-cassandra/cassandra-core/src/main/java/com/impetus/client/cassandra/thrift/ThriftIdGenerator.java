@@ -1,5 +1,5 @@
 /*******************************************************************************
- * * Copyright 2012 Impetus Infotech.
+ *  * Copyright 2015 Impetus Infotech.
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -13,32 +13,17 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.kundera.generator;
+package com.impetus.client.cassandra.thrift;
 
-import com.impetus.kundera.client.Client;
-import com.impetus.kundera.metadata.model.SequenceGeneratorDiscriptor;
+import com.impetus.client.cassandra.CassandraIdGenerator;
 
 /**
- * {@link SequenceGenerator} interface , all client should implement this
- * interface in order to support sequence generation strategy.
+ * The Class ThriftIdGenerator.
  * 
- * @author Kuldeep.Mishra
- * 
+ * @author: karthikp.manchala
  */
-public interface SequenceGenerator extends Generator
+public class ThriftIdGenerator extends CassandraIdGenerator
 {
-
-    /**
-     * Generate.
-     * 
-     * @param discriptor
-     *            the discriptor
-     * @param client
-     *            the client
-     * @param dataType
-     *            the data type
-     * @return the object
-     */
-    public Object generate(SequenceGeneratorDiscriptor discriptor, Client<?> client, String dataType);
-
+    // methods available from super class
+    // override if necessary
 }

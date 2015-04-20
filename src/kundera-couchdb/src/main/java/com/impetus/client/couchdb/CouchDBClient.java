@@ -30,7 +30,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 import javax.naming.OperationNotSupportedException;
 import javax.persistence.metamodel.EmbeddableType;
@@ -59,7 +58,7 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.ClientPropertiesSetter;
 import com.impetus.kundera.db.RelationHolder;
-import com.impetus.kundera.generator.AutoGenerator;
+import com.impetus.kundera.generator.Generator;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
@@ -82,25 +81,47 @@ import com.impetus.kundera.utils.KunderaCoreUtils;
  * @author Kuldeep Mishra
  * 
  */
-public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, Batcher, ClientPropertiesSetter,
-        AutoGenerator
+public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, Batcher, ClientPropertiesSetter
 {
     /** the log used by this class. */
     private static Logger log = LoggerFactory.getLogger(CouchDBClient.class);
 
+    /** The gson. */
     private Gson gson = new Gson();
 
+    /** The http client. */
     private HttpClient httpClient;
 
+    /** The http host. */
     private HttpHost httpHost;
 
+    /** The nodes. */
     private List<Node> nodes = new ArrayList<Node>();
 
+    /** The batch size. */
     private int batchSize;
 
     /** The reader. */
     private EntityReader reader;
 
+    /**
+     * Instantiates a new couch db client.
+     * 
+     * @param client
+     *            the client
+     * @param httpHost
+     *            the http host
+     * @param reader
+     *            the reader
+     * @param persistenceUnit
+     *            the persistence unit
+     * @param externalProperties
+     *            the external properties
+     * @param clientMetadata
+     *            the client metadata
+     * @param kunderaMetadata
+     *            the kundera metadata
+     */
     public CouchDBClient(HttpClient client, HttpHost httpHost, EntityReader reader, String persistenceUnit,
             Map<String, Object> externalProperties, ClientMetadata clientMetadata, final KunderaMetadata kunderaMetadata)
     {
@@ -112,6 +133,12 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         this.setBatchSize(persistenceUnit, externalProperties);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#find(java.lang.Class,
+     * java.lang.Object)
+     */
     @Override
     public Object find(Class entityClass, Object key)
     {
@@ -170,6 +197,12 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#findAll(java.lang.Class,
+     * java.lang.String[], java.lang.Object[])
+     */
     @Override
     public <E> List<E> findAll(Class<E> entityClass, String[] columnsToSelect, Object... keys)
     {
@@ -185,18 +218,35 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         return results;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#find(java.lang.Class,
+     * java.util.Map)
+     */
     @Override
     public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap)
     {
         return null;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#close()
+     */
     @Override
     public void close()
     {
         externalProperties = null;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#delete(java.lang.Object,
+     * java.lang.Object)
+     */
     @Override
     public void delete(Object entity, Object pKey)
     {
@@ -245,6 +295,13 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.client.Client#persistJoinTable(com.impetus.kundera
+     * .persistence.context.jointable.JoinTableData)
+     */
     @Override
     public void persistJoinTable(JoinTableData joinTableData)
     {
@@ -294,6 +351,13 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getColumnsById(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.String, java.lang.Object,
+     * java.lang.Class)
+     */
     @Override
     public <E> List<E> getColumnsById(String schemaName, String tableName, String pKeyColumnName,
             String inverseJoinColumnName, Object pKeyColumnValue, Class columnJavaType)
@@ -346,6 +410,13 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         return foreignKeys;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.String, java.lang.Object,
+     * java.lang.Class)
+     */
     @Override
     public Object[] findIdsByColumn(String schemaName, String tableName, String pKeyName, String columnName,
             Object columnValue, Class entityClazz)
@@ -396,6 +467,12 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         return foreignKeys.toArray();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.Object)
+     */
     @Override
     public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
     {
@@ -442,6 +519,24 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         }
     }
 
+    /**
+     * On delete.
+     * 
+     * @param schemaName
+     *            the schema name
+     * @param pKey
+     *            the key
+     * @param response
+     *            the response
+     * @param jsonObject
+     *            the json object
+     * @throws URISyntaxException
+     *             the URI syntax exception
+     * @throws IOException
+     *             Signals that an I/O exception has occurred.
+     * @throws ClientProtocolException
+     *             the client protocol exception
+     */
     private void onDelete(String schemaName, Object pKey, HttpResponse response, JsonObject jsonObject)
             throws URISyntaxException, IOException, ClientProtocolException
     {
@@ -464,6 +559,12 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         closeContent(response);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#findByRelation(java.lang.String,
+     * java.lang.Object, java.lang.Class)
+     */
     @Override
     public List<Object> findByRelation(String colName, Object colValue, Class entityClazz)
     {
@@ -485,18 +586,36 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         return resultSet;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getReader()
+     */
     @Override
     public EntityReader getReader()
     {
         return reader;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getQueryImplementor()
+     */
     @Override
     public Class<CouchDBQuery> getQueryImplementor()
     {
         return CouchDBQuery.class;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.client.ClientBase#onPersist(com.impetus.kundera.metadata
+     * .model.EntityMetadata, java.lang.Object, java.lang.Object,
+     * java.util.List)
+     */
     @Override
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
     {
@@ -554,24 +673,37 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         }
     }
 
+    /**
+     * Close content.
+     * 
+     * @param response
+     *            the response
+     */
     private void closeContent(HttpResponse response)
     {
         CouchDBUtils.closeContent(response);
     }
 
-    @Override
-    public Object generate()
-    {
-        // Need to generate using couchdb.
-        return UUID.randomUUID().toString();
-    }
-
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.client.ClientPropertiesSetter#populateClientProperties
+     * (com.impetus.kundera.client.Client, java.util.Map)
+     */
     @Override
     public void populateClientProperties(Client client, Map<String, Object> properties)
     {
         new CouchDbDBClientProperties().populateClientProperties(client, properties);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.persistence.api.Batcher#addBatch(com.impetus.kundera
+     * .graph.Node)
+     */
     @Override
     public void addBatch(Node node)
     {
@@ -583,6 +715,11 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
 
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.persistence.api.Batcher#executeBatch()
+     */
     @Override
     public int executeBatch()
     {
@@ -651,12 +788,22 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         return nodes.size();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.persistence.api.Batcher#getBatchSize()
+     */
     @Override
     public int getBatchSize()
     {
         return batchSize;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.persistence.api.Batcher#clear()
+     */
     @Override
     public void clear()
     {
@@ -681,9 +828,11 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
     }
 
     /**
+     * Creates the and execute query.
      * 
      * @param interpreter
-     * @return
+     *            the interpreter
+     * @return the list
      */
     List createAndExecuteQuery(CouchDBQueryInterpreter interpreter)
     {
@@ -764,14 +913,22 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
     }
 
     /**
+     * Execute query.
      * 
      * @param q
+     *            the q
      * @param _id
+     *            the _id
      * @param m
+     *            the m
      * @param results
+     *            the results
      * @throws IOException
+     *             Signals that an I/O exception has occurred.
      * @throws ClientProtocolException
+     *             the client protocol exception
      * @throws URISyntaxException
+     *             the URI syntax exception
      */
     void executeQuery(StringBuilder q, String _id, EntityMetadata m, List results) throws IOException,
             ClientProtocolException, URISyntaxException
@@ -799,10 +956,11 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
             for (JsonElement element : array)
             {
                 String id = element.getAsJsonObject().get("value").getAsJsonObject()
-                                    .get(((AbstractAttribute) m.getIdAttribute()).getJPAColumnName()).getAsString();
+                        .get(((AbstractAttribute) m.getIdAttribute()).getJPAColumnName()).getAsString();
                 Object entityFromJson = CouchDBObjectMapper.getEntityFromJson(m.getEntityClazz(), m, element
                         .getAsJsonObject().get("value").getAsJsonObject(), m.getRelationNames(), kunderaMetadata);
-                if (entityFromJson != null && (m.getTableName().concat(id)).equals(element.getAsJsonObject().get("id").getAsString()))
+                if (entityFromJson != null
+                        && (m.getTableName().concat(id)).equals(element.getAsJsonObject().get("id").getAsString()))
                 {
                     results.add(entityFromJson);
                 }
@@ -816,16 +974,25 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
     }
 
     /**
+     * Creates the query.
      * 
      * @param interpreter
+     *            the interpreter
      * @param m
+     *            the m
      * @param q
+     *            the q
      * @param _id
-     * @return
+     *            the _id
+     * @return the string
      * @throws URISyntaxException
+     *             the URI syntax exception
      * @throws UnsupportedEncodingException
+     *             the unsupported encoding exception
      * @throws IOException
+     *             Signals that an I/O exception has occurred.
      * @throws ClientProtocolException
+     *             the client protocol exception
      */
     String createQuery(CouchDBQueryInterpreter interpreter, EntityMetadata m, StringBuilder q, String _id)
             throws URISyntaxException, UnsupportedEncodingException, IOException, ClientProtocolException
@@ -890,8 +1057,12 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
     }
 
     /**
+     * Sets the batch size.
+     * 
      * @param persistenceUnit
+     *            the persistence unit
      * @param puProperties
+     *            the pu properties
      */
     private void setBatchSize(String persistenceUnit, Map<String, Object> puProperties)
     {
@@ -909,8 +1080,25 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         }
     }
 
+    /**
+     * Sets the batch size.
+     * 
+     * @param batch_Size
+     *            the new batch size
+     */
     void setBatchSize(int batch_Size)
     {
         this.batchSize = batch_Size;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getIdGenerator()
+     */
+    @Override
+    public Generator getIdGenerator()
+    {
+        return (Generator) KunderaCoreUtils.createNewInstance(CouchDBIdGenerator.class);
     }
 }

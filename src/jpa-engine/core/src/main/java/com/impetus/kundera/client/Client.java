@@ -20,6 +20,8 @@ import java.util.Map;
 
 import javax.persistence.Query;
 
+import com.impetus.kundera.generator.AutoGenerator;
+import com.impetus.kundera.generator.Generator;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.loader.ClientFactory;
@@ -210,7 +212,7 @@ public interface Client<Q extends Query>
      * @return class instance of configured query interface.
      */
     Class<Q> getQueryImplementor();
-    
+
     /**
      * Enables executing native script specific to a db client
      * 
@@ -219,5 +221,12 @@ public interface Client<Q extends Query>
      * @return
      */
     Object executeScript(String script);
+
+    /**
+     * Gets the id generator.
+     * 
+     * @return the id generator
+     */
+    Generator getIdGenerator();
 
 }

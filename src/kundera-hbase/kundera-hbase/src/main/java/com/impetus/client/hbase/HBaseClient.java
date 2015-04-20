@@ -53,6 +53,7 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.ClientPropertiesSetter;
 import com.impetus.kundera.db.RelationHolder;
+import com.impetus.kundera.generator.Generator;
 import com.impetus.kundera.generator.TableGenerator;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
@@ -79,20 +80,21 @@ import com.impetus.kundera.utils.KunderaCoreUtils;
  * 
  * @author impetus
  */
-public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batcher, ClientPropertiesSetter,
-        TableGenerator
+public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batcher, ClientPropertiesSetter
 {
     /** the log used by this class. */
     private static Logger log = LoggerFactory.getLogger(HBaseClient.class);
 
     /** The handler. */
-    private DataHandler handler;
+    DataHandler handler;
 
     /** The reader. */
     private EntityReader reader;
 
+    /** The nodes. */
     private List<Node> nodes = new ArrayList<Node>();
 
+    /** The batch size. */
     private int batchSize;
 
     /**
@@ -108,7 +110,12 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
      *            the reader
      * @param persistenceUnit
      *            the persistence unit
-     * @param puProperties
+     * @param externalProperties
+     *            the external properties
+     * @param clientMetadata
+     *            the client metadata
+     * @param kunderaMetadata
+     *            the kundera metadata
      */
     public HBaseClient(IndexManager indexManager, Configuration conf, HTablePool hTablePool, EntityReader reader,
 
@@ -226,8 +233,15 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
     }
 
     /**
-     * (non-Javadoc)
+     * (non-Javadoc).
      * 
+     * @param <E>
+     *            the element type
+     * @param entityClass
+     *            the entity class
+     * @param col
+     *            the col
+     * @return the list
      * @see com.impetus.kundera.client.Client#find(java.lang.Class,
      *      java.util.Map)
      */
@@ -287,6 +301,12 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
      *            entity class.
      * @param metadata
      *            entity metadata.
+     * @param f
+     *            the f
+     * @param filterClausequeue
+     *            the filter clausequeue
+     * @param columns
+     *            the columns
      * @return list of entities.
      */
     public <E> List<E> findByQuery(Class<E> entityClass, EntityMetadata metadata, Filter f, Queue filterClausequeue,
@@ -336,6 +356,12 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
      *            start row.
      * @param endRow
      *            end row.
+     * @param columns
+     *            the columns
+     * @param f
+     *            the f
+     * @param filterClausequeue
+     *            the filter clausequeue
      * @return collection holding results.
      */
     public <E> List<E> findByRange(Class<E> entityClass, EntityMetadata metadata, byte[] startRow, byte[] endRow,
@@ -396,9 +422,13 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
     }
 
     /**
+     * Checks if is find key only.
+     * 
      * @param metadata
+     *            the metadata
      * @param columns
-     * @return
+     *            the columns
+     * @return true, if is find key only
      */
     private boolean isFindKeyOnly(EntityMetadata metadata, String[] columns)
     {
@@ -452,11 +482,22 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         ((HBaseDataHandler) handler).setFilter(filter);
     }
 
+    /**
+     * Adds the filter.
+     * 
+     * @param columnFamily
+     *            the column family
+     * @param filter
+     *            the filter
+     */
     public void addFilter(final String columnFamily, Filter filter)
     {
         ((HBaseDataHandler) handler).addFilter(columnFamily, filter);
     }
 
+    /**
+     * Reset filter.
+     */
     public void resetFilter()
     {
         ((HBaseDataHandler) handler).resetFilter();
@@ -465,8 +506,8 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
     /**
      * Setter for filter.
      * 
-     * @param filter
-     *            filter.
+     * @param fetchSize
+     *            the new fetch size
      */
     public void setFetchSize(int fetchSize)
     {
@@ -501,6 +542,13 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.client.Client#persistJoinTable(com.impetus.kundera
+     * .persistence.context.jointable.JoinTableData)
+     */
     @Override
     public void persistJoinTable(JoinTableData joinTableData)
     {
@@ -552,6 +600,12 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         return handler.getForeignKeysFromJoinTable(schemaName, joinTableName, parentId, inverseJoinColumnName);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.Object)
+     */
     public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
     {
         try
@@ -861,8 +915,13 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
     }
 
     /**
+     * Gets the batch size.
+     * 
      * @param persistenceUnit
+     *            the persistence unit
      * @param puProperties
+     *            the pu properties
+     * @return the batch size
      */
     private void getBatchSize(String persistenceUnit, Map<String, Object> puProperties)
     {
@@ -880,65 +939,95 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         }
     }
 
+    /**
+     * Sets the batch size.
+     * 
+     * @param batch_Size
+     *            the new batch size
+     */
     void setBatchSize(int batch_Size)
     {
         this.batchSize = batch_Size;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.client.ClientPropertiesSetter#populateClientProperties
+     * (com.impetus.kundera.client.Client, java.util.Map)
+     */
     @Override
     public void populateClientProperties(Client client, Map<String, Object> properties)
     {
         new HBaseClientProperties().populateClientProperties(client, properties);
     }
 
-    @Override
-    public Long generate(TableGeneratorDiscriptor discriptor)
-    {
-        try
-        {
-            HTableInterface hTable = ((HBaseDataHandler) handler).gethTable(discriptor.getSchema());
-            Long latestCount = hTable.incrementColumnValue(discriptor.getPkColumnValue().getBytes(), discriptor
-                    .getTable().getBytes(), discriptor.getValueColumnName().getBytes(), 1);
-            if (latestCount == 1)
-            {
-                return (long) discriptor.getInitialValue();
-            }
-            else if (discriptor.getAllocationSize() == 1)
-            {
-                return latestCount + discriptor.getInitialValue();
-            }
-            else
-            {
-                return (latestCount - 1) * discriptor.getAllocationSize() + discriptor.getInitialValue();
-            }
-        }
-        catch (IOException ioex)
-        {
-            log.error("Error while generating id for entity, Caused by: .", ioex);
-            throw new KunderaException(ioex);
-        }
-    }
-
+    /**
+     * Reset.
+     */
     public void reset()
     {
         ((HBaseDataHandler) handler).reset();
     }
 
+    /**
+     * Next.
+     * 
+     * @param m
+     *            the m
+     * @return the object
+     */
     public Object next(EntityMetadata m)
     {
         return ((HBaseDataHandler) handler).next(m);
     }
 
+    /**
+     * Checks for next.
+     * 
+     * @return true, if successful
+     */
     public boolean hasNext()
     {
         return ((HBaseDataHandler) handler).hasNext();
     }
 
+    /**
+     * Gets the handle.
+     * 
+     * @return the handle
+     */
     public HBaseDataHandler getHandle()
     {
         return ((HBaseDataHandler) handler).getHandle();
     }
 
+    /**
+     * Fetch entity.
+     * 
+     * @param entityClass
+     *            the entity class
+     * @param rowId
+     *            the row id
+     * @param entityMetadata
+     *            the entity metadata
+     * @param relationNames
+     *            the relation names
+     * @param tableName
+     *            the table name
+     * @param results
+     *            the results
+     * @param filter
+     *            the filter
+     * @param filterClausequeue
+     *            the filter clausequeue
+     * @param columns
+     *            the columns
+     * @return the list
+     * @throws IOException
+     *             Signals that an I/O exception has occurred.
+     */
     private List fetchEntity(Class entityClass, Object rowId, EntityMetadata entityMetadata,
             List<String> relationNames, String tableName, List results, FilterList filter, Queue filterClausequeue,
             String... columns) throws IOException
@@ -979,6 +1068,15 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         return results;
     }
 
+    /**
+     * Gets the sub managed type.
+     * 
+     * @param entityClass
+     *            the entity class
+     * @param entityMetadata
+     *            the entity metadata
+     * @return the sub managed type
+     */
     private List<AbstractManagedType> getSubManagedType(Class entityClass, EntityMetadata entityMetadata)
     {
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
@@ -988,6 +1086,17 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
 
         List<AbstractManagedType> subManagedType = ((AbstractManagedType) entityType).getSubManagedType();
         return subManagedType;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getIdGenerator()
+     */
+    @Override
+    public Generator getIdGenerator()
+    {
+        return (Generator) KunderaCoreUtils.createNewInstance(HBaseIdGenerator.class);
     }
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * * Copyright 2012 Impetus Infotech.
+ *  * Copyright 2015 Impetus Infotech.
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -13,32 +13,34 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.kundera.generator;
+package com.impetus.client.cassandra.pelops;
 
+import javax.persistence.GenerationType;
+
+import com.impetus.client.cassandra.CassandraIdGenerator;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.metadata.model.TableGeneratorDiscriptor;
 
 /**
- * {@link TableGenerator} interface , all client should implement this interface
- * in order to support table generation strategy.
+ * The Class PelopsIdGenerator.
  * 
- * @author Kuldeep.Mishra
- * 
+ * @author: karthikp.manchala
  */
-public interface TableGenerator extends Generator
+public class PelopsIdGenerator extends CassandraIdGenerator
 {
 
-    /**
-     * Generate.
+    /*
+     * (non-Javadoc)
      * 
-     * @param discriptor
-     *            the discriptor
-     * @param client
-     *            the client
-     * @param dataType
-     *            the data type
-     * @return the object
+     * @see
+     * com.impetus.client.cassandra.CassandraIdGenerator#generate(com.impetus
+     * .kundera.metadata.model.TableGeneratorDiscriptor,
+     * com.impetus.kundera.client.ClientBase, java.lang.Object)
      */
-    public Object generate(TableGeneratorDiscriptor discriptor, ClientBase client, String dataType);
-
+    @Override
+    public Object generate(TableGeneratorDiscriptor discriptor, ClientBase client, String dataType)
+    {
+        throw new UnsupportedOperationException(GenerationType.class.getSimpleName()
+                + ".TABLE Strategy not supported by this client :" + client.getClass().getName());
+    }
 }
