@@ -30,8 +30,7 @@ import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
- * @author vivek.mishra
- *  Client factory implementation for elastic search. 
+ * @author vivek.mishra Client factory implementation for elastic search.
  */
 public class ESClientFactory extends GenericClientFactory
 {
@@ -45,7 +44,6 @@ public class ESClientFactory extends GenericClientFactory
     @Override
     public SchemaManager getSchemaManager(Map<String, Object> puProperties)
     {
-      
         return null;
     }
 
@@ -59,13 +57,12 @@ public class ESClientFactory extends GenericClientFactory
     {
         this.externalProperties = null;
         Object connection = getConnectionPoolOrConnection();
-        
-        if(connection != null)
+
+        if (connection != null)
         {
             ((TransportClient) connection).close();
-            
-        }
 
+        }
     }
 
     /*
@@ -78,11 +75,10 @@ public class ESClientFactory extends GenericClientFactory
     public void initialize(Map<String, Object> puProperties)
     {
         this.externalProperties = puProperties;
-        
+
         this.propertyReader = new ESClientPropertyReader(externalProperties, kunderaMetadata.getApplicationMetadata()
                 .getPersistenceUnitMetadata(getPersistenceUnit()));
         propertyReader.read(getPersistenceUnit());
-        
     }
 
     /*
@@ -94,15 +90,15 @@ public class ESClientFactory extends GenericClientFactory
     @Override
     protected Object createPoolOrConnection()
     {
-
         PersistenceUnitMetadata persistenceUnitMetadata = kunderaMetadata.getApplicationMetadata()
                 .getPersistenceUnitMetadata(getPersistenceUnit());
 
         Properties props = persistenceUnitMetadata.getProperties();
 
-        
-        String host = externalProperties != null ? (String) externalProperties.get(PersistenceProperties.KUNDERA_NODES): null;
-        String port = externalProperties != null? (String) externalProperties.get(PersistenceProperties.KUNDERA_PORT):null;
+        String host = externalProperties != null ? (String) externalProperties.get(PersistenceProperties.KUNDERA_NODES)
+                : null;
+        String port = externalProperties != null ? (String) externalProperties.get(PersistenceProperties.KUNDERA_PORT)
+                : null;
 
         if (host == null)
         {
@@ -116,26 +112,26 @@ public class ESClientFactory extends GenericClientFactory
 
         String[] hosts = getHosts(host);
 
-        Properties properties = ((ESClientPropertyReader)propertyReader).getConnectionProperties();
-        
+        Properties properties = ((ESClientPropertyReader) propertyReader).getConnectionProperties();
+
         ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder();
-        
-        if(properties != null)
+
+        if (properties != null)
         {
             builder.put(properties);
         }
-        
+
         builder.put("client.transport.sniff", true);
-        
+
         Settings settings = builder.build();
-       
+
         org.elasticsearch.client.Client client = new TransportClient(settings);
 
         for (String h : hosts)
         {
             ((TransportClient) client).addTransportAddress(new InetSocketTransportAddress(h, new Integer(port)));
         }
-        
+
         return client;
     }
 
@@ -149,7 +145,8 @@ public class ESClientFactory extends GenericClientFactory
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
-        return new ESClient(this,((TransportClient) getConnectionPoolOrConnection()),this.externalProperties, kunderaMetadata, persistenceUnit);
+        return new ESClient(this, ((TransportClient) getConnectionPoolOrConnection()), this.externalProperties,
+                kunderaMetadata, persistenceUnit);
     }
 
     /*

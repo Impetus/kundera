@@ -269,11 +269,20 @@ public class PersonESTest
     @Test
     public void testFindJPQL() throws InterruptedException
     {
-
-        String queryWithOutAndClause = "Select p from PersonES p where p.personName = 'karthik'";
-        Query nameQuery = em.createNamedQuery(queryWithOutAndClause);
+        String queryWithId = "Select p from PersonES p where p.personId = 3";
+        Query nameQuery = em.createNamedQuery(queryWithId);
 
         List<PersonES> persons = nameQuery.getResultList();
+
+        Assert.assertFalse(persons.isEmpty());
+        Assert.assertEquals(1, persons.size());
+        Assert.assertEquals("amit", persons.get(0).getPersonName());
+        Assert.assertEquals(30, persons.get(0).getAge().intValue());
+
+        String queryWithOutAndClause = "Select p from PersonES p where p.personName = 'karthik'";
+        nameQuery = em.createNamedQuery(queryWithOutAndClause);
+
+        persons = nameQuery.getResultList();
 
         Assert.assertFalse(persons.isEmpty());
         Assert.assertEquals(1, persons.size());

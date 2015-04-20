@@ -39,7 +39,7 @@ import org.eclipse.persistence.jpa.jpql.utility.iterable.SnapshotCloneListIterab
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
-import org.elasticsearch.search.aggregations.AggregationBuilder;
+import org.elasticsearch.search.aggregations.AbstractAggregationBuilder;
 import org.elasticsearch.search.aggregations.InternalAggregations;
 import org.elasticsearch.search.aggregations.bucket.filter.InternalFilter;
 import org.elasticsearch.search.aggregations.metrics.avg.InternalAvg;
@@ -47,7 +47,10 @@ import org.elasticsearch.search.aggregations.metrics.max.InternalMax;
 import org.elasticsearch.search.aggregations.metrics.min.InternalMin;
 import org.elasticsearch.search.aggregations.metrics.sum.InternalSum;
 import org.elasticsearch.search.aggregations.metrics.valuecount.InternalValueCount;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.impetus.client.es.ESConstants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -68,6 +71,8 @@ import com.impetus.kundera.utils.KunderaCoreUtils;
  */
 public final class ESResponseWrapper
 {
+    /** log for this class. */
+    private static Logger log = LoggerFactory.getLogger(ESResponseWrapper.class);
 
     /**
      * Parses the response.
@@ -88,9 +93,10 @@ public final class ESResponseWrapper
      *            the query
      * @return the list
      */
-    public List parseResponse(SearchResponse response, AggregationBuilder aggregation, String[] fieldsToSelect,
+    public List parseResponse(SearchResponse response, AbstractAggregationBuilder aggregation, String[] fieldsToSelect,
             MetamodelImpl metaModel, Class clazz, final EntityMetadata entityMetadata, KunderaQuery query)
     {
+        log.debug("Response of query: " + response);
         List results = new ArrayList();
         EntityType entityType = metaModel.entity(clazz);
 
@@ -158,16 +164,17 @@ public final class ESResponseWrapper
             Class clazz)
     {
         List temp = new ArrayList<>(), results = new ArrayList<>();
-        InternalAggregations internalAggs = ((InternalFilter) response.getAggregations().getAsMap().get("whereClause"))
-                .getAggregations();
+        InternalAggregations internalAggs = ((InternalFilter) response.getAggregations().getAsMap()
+                .get(ESConstants.aggName)).getAggregations();
         Iterator<Expression> itr = getSelectExpressionOrder(query);
 
         while (itr.hasNext())
         {
             Expression exp = itr.next();
             String text = exp.toActualText();
-            String field = KunderaQueryUtils.isAggregatedExpression(exp) ? text.substring(text.indexOf('.') + 1,
-                    text.indexOf(')')) : text.substring(text.indexOf('.') + 1, text.length());
+            String field = KunderaQueryUtils.isAggregatedExpression(exp) ? text.substring(
+                    text.indexOf(ESConstants.dot) + 1, text.indexOf(ESConstants.rightBracket)) : text.substring(
+                    text.indexOf(ESConstants.dot) + 1, text.length());
 
             temp.add(KunderaQueryUtils.isAggregatedExpression(exp) ? getAggregatedResult(internalAggs,
                     ((AggregateFunction) exp).getIdentifier(), text, exp) : response.getHits().getAt(0).getFields()
@@ -175,9 +182,10 @@ public final class ESResponseWrapper
                     .getValue());
 
         }
+
         for (Object value : temp)
         {
-            if (!value.toString().equalsIgnoreCase("INFINITY"))
+            if (!value.toString().equalsIgnoreCase(ESConstants.infinity))
             {
                 results.add(value);
             }
@@ -205,7 +213,7 @@ public final class ESResponseWrapper
         if (query.isAggregated() == true && response.getAggregations() != null)
         {
             InternalAggregations internalAggs = ((InternalFilter) response.getAggregations().getAsMap()
-                    .get("whereClause")).getAggregations();
+                    .get(ESConstants.aggName)).getAggregations();
             Iterator<Expression> itr = getSelectExpressionOrder(query);
 
             while (itr.hasNext())
@@ -215,7 +223,7 @@ public final class ESResponseWrapper
                 {
                     Object value = getAggregatedResult(internalAggs, ((AggregateFunction) exp).getIdentifier(),
                             exp.toParsedText(), exp);
-                    if (!value.toString().equalsIgnoreCase("INFINITY"))
+                    if (!value.toString().equalsIgnoreCase(ESConstants.infinity))
                     {
                         aggMap.put(exp.toParsedText(), Double.valueOf(value.toString()));
                     }

@@ -41,7 +41,7 @@ import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
-import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.FilteredQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermFilterBuilder;
 import org.elasticsearch.search.SearchHit;
@@ -81,7 +81,6 @@ import com.impetus.kundera.utils.KunderaCoreUtils;
  */
 public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, ClientPropertiesSetter
 {
-
     /** The factory. */
     private ESClientFactory factory;
 
@@ -147,7 +146,6 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
     {
         try
         {
-
             Map<String, Object> values = new HashMap<String, Object>();
 
             MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
@@ -301,8 +299,8 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
      *            the query
      * @return the list
      */
-    public List executeQuery(FilterBuilder filter, AggregationBuilder aggregation, QueryBuilder queryBuilder,
-            final EntityMetadata entityMetadata, KunderaQuery query)
+    public List executeQuery(FilterBuilder filter, AggregationBuilder aggregation, final EntityMetadata entityMetadata,
+            KunderaQuery query)
     {
         String[] fieldsToSelect = query.getResult();
         Class clazz = entityMetadata.getEntityClazz();
@@ -312,15 +310,57 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
 
         EntityType entityType = metaModel.entity(clazz);
 
+        FilteredQueryBuilder queryBuilder = QueryBuilders.filteredQuery(null, filter);
         SearchRequestBuilder builder = txClient.prepareSearch(entityMetadata.getSchema().toLowerCase()).setTypes(
                 entityMetadata.getTableName());
-        if (queryBuilder != null)
+
+        addFieldsToBuilder(fieldsToSelect, clazz, metaModel, builder);
+
+        if (aggregation == null)
         {
             builder.setQuery(queryBuilder);
         }
+        else
+        {
+            builder.addAggregation(aggregation);
 
-        // adding fields to retrieve dynamically by converting to jpa column
-        // name
+            if (fieldsToSelect.length == 1)
+            {
+                builder.setSize(0);
+            }
+        }
+
+        SearchResponse response = null;
+        log.debug("Query generated: " + builder);
+
+        try
+        {
+            response = builder.execute().actionGet();
+        }
+        catch (ElasticsearchException e)
+        {
+            throw new KunderaException("Exception occured while executing query on Elasticsearch.", e);
+        }
+
+        return esResponseReader.parseResponse(response, aggregation, fieldsToSelect, metaModel, clazz, entityMetadata,
+                query);
+    }
+
+    /**
+     * Adds the fields to builder
+     * 
+     * @param fieldsToSelect
+     *            the fields to select
+     * @param clazz
+     *            the clazz
+     * @param metaModel
+     *            the meta model
+     * @param builder
+     *            the builder
+     */
+    private void addFieldsToBuilder(String[] fieldsToSelect, Class clazz, MetamodelImpl metaModel,
+            SearchRequestBuilder builder)
+    {
         if (fieldsToSelect != null && fieldsToSelect.length > 1 && !(fieldsToSelect[1] == null))
         {
             for (int i = 1; i < fieldsToSelect.length; i++)
@@ -330,31 +370,6 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
                                 .getJPAColumnName());
             }
         }
-        if (aggregation == null)
-        {
-            builder.setPostFilter(filter);
-        }
-        else
-        {
-            builder.addAggregation(aggregation).setPostFilter(filter);
-            if (fieldsToSelect.length == 1)
-            {
-                builder.setSize(0);
-            }
-        }
-
-        SearchResponse response = null;
-        try
-        {
-            response = builder.execute().actionGet();
-        }
-        catch (ElasticsearchException e)
-        {
-            throw new KunderaException("Aggregations can not performed over non-numeric fields.", e);
-        }
-
-        return esResponseReader.parseResponse(response, aggregation, fieldsToSelect, metaModel, clazz, entityMetadata,
-                query);
     }
 
     /*

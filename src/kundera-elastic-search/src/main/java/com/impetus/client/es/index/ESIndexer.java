@@ -28,7 +28,7 @@ import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
+import org.elasticsearch.search.aggregations.AggregationBuilder;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -201,7 +201,7 @@ public class ESIndexer implements Indexer
                 ((WhereClause) whereExpression).getConditionalExpression(), m) : null;
         SearchRequestBuilder builder = client.prepareSearch(m.getSchema().toLowerCase()).setTypes(
                 m.getEntityClazz().getSimpleName());
-        FilterAggregationBuilder aggregation = query.useAggregation(kunderaQuery, m, filter);
+        AggregationBuilder aggregation = query.buildAggregation(kunderaQuery, m, filter);
 
         if (aggregation == null)
         {

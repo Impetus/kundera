@@ -16,6 +16,7 @@
 package com.impetus.client.es;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -48,6 +49,8 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeFilterBuilder;
 import org.elasticsearch.index.query.TermFilterBuilder;
 import org.elasticsearch.index.query.TermsFilterBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -58,16 +61,20 @@ import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 
 /**
- * @author Amit Kumar
+ * The Class ESFilterBuilder.
  * 
+ * @author Amit Kumar
  */
 public class ESFilterBuilder
 {
-    /** The kundera query. */
+    /** The Kundera query. */
     private KunderaQuery kunderaQuery;
 
-    /** The kundera metadata. */
+    /** The Kundera metadata. */
     private KunderaMetadata kunderaMetadata;
+
+    /** log for this class. */
+    private static Logger log = LoggerFactory.getLogger(ESFilterBuilder.class);
 
     /**
      * Instantiates a new ES filter builder.
@@ -96,42 +103,40 @@ public class ESFilterBuilder
      */
     public FilterBuilder populateFilterBuilder(Expression condtionalExp, EntityMetadata m)
     {
+        log.info("Populating filter for expression: " + condtionalExp);
         FilterBuilder filter = null;
 
         if (condtionalExp instanceof SubExpression)
         {
-            condtionalExp = ((SubExpression) condtionalExp).getExpression();
+            filter = populateFilterBuilder(((SubExpression) condtionalExp).getExpression(), m);
         }
-
-        if (condtionalExp instanceof ComparisonExpression)
+        else if (condtionalExp instanceof ComparisonExpression)
         {
             filter = getFilter(populateFilterClause((ComparisonExpression) condtionalExp), m);
         }
-
-        if (condtionalExp instanceof BetweenExpression)
+        else if (condtionalExp instanceof BetweenExpression)
         {
             filter = populateBetweenFilter((BetweenExpression) condtionalExp, m);
         }
-
-        if (condtionalExp instanceof LogicalExpression)
+        else if (condtionalExp instanceof LogicalExpression)
         {
             filter = populateLogicalFilterBuilder(condtionalExp, m);
         }
-
-        if (condtionalExp instanceof LikeExpression)
+        else if (condtionalExp instanceof LikeExpression)
         {
             filter = populateLikeQuery((LikeExpression) condtionalExp, m);
         }
-
-        if (condtionalExp instanceof InExpression)
+        else if (condtionalExp instanceof InExpression)
         {
             filter = populateInQuery((InExpression) condtionalExp, m);
         }
-
-        if (filter == null)
+        else
         {
+            log.error(condtionalExp.toParsedText() + "found in where clause. Not supported in elasticsearch.");
             throw new KunderaException(condtionalExp.toParsedText() + " not supported in ElasticSearch");
         }
+
+        log.debug("Following is the populated filter for required query: " + filter);
         return filter;
     }
 
@@ -147,12 +152,13 @@ public class ESFilterBuilder
     private FilterBuilder populateLikeQuery(LikeExpression likeExpression, EntityMetadata metadata)
     {
         Expression patternValue = likeExpression.getPatternValue();
-        String fieldExpression = likeExpression.getStringExpression().toString();
+        String field = likeExpression.getStringExpression().toString();
 
         String likePattern = (patternValue instanceof InputParameter) ? kunderaQuery.getParametersMap()
                 .get((patternValue).toParsedText()).toString() : patternValue.toParsedText().toString();
-        String jpaField = getField(fieldExpression);
+        String jpaField = getField(field);
 
+        log.debug("Pattern value for field " + field + " is: " + patternValue);
         FilterBuilder filterBuilder = getQueryBuilder(kunderaQuery.new FilterClause(jpaField, Expression.LIKE,
                 likePattern), metadata);
 
@@ -172,13 +178,15 @@ public class ESFilterBuilder
     {
         String property = getField(inExpression.getExpression().toParsedText());
         Expression inItemsParameter = inExpression.getInItems();
+
+        log.debug("IN query parameters for field " + property + " is: " + inItemsParameter);
         Iterable inItemsIterable = getInValuesCollection(inItemsParameter);
 
         return getFilter(kunderaQuery.new FilterClause(property, Expression.IN, inItemsIterable), metadata);
     }
 
     /**
-     * Returns the collection of IN values.
+     * Returns the collection of IN clause values.
      * 
      * @param inClauseValues
      *            the in clause values
@@ -189,29 +197,27 @@ public class ESFilterBuilder
         Collection inParameterCollection = new ArrayList<>();
         if (inClauseValues instanceof NullExpression)
         {
+            log.debug("No items passed in IN clause values, returning blank IN values list");
             return inParameterCollection;
         }
 
         if (inClauseValues instanceof InputParameter)
         {
             Object inValues = kunderaQuery.getParametersMap().get(inClauseValues.toParsedText());
-            if (inValues.getClass().isArray())
-            {
-                for (Object value : (Object[]) inValues)
-                {
-                    inParameterCollection.add(value);
-                }
-            }
-            else
-            {
-                inParameterCollection = (Collection) kunderaQuery.getParametersMap().get(inClauseValues.toParsedText());
-            }
+            log.debug(inClauseValues.toParsedText() + "named parameter found in query, Replacing parameter with "
+                    + inValues);
+
+            inParameterCollection = inValues.getClass().isArray() ? Arrays.asList((Object[]) inValues)
+                    : (Collection) kunderaQuery.getParametersMap().get(inClauseValues.toParsedText());
+
             return inParameterCollection;
         }
+
         if (inClauseValues instanceof CollectionExpression)
         {
             Iterator inValueIterator = ((CollectionExpression) inClauseValues).children().iterator();
 
+            log.debug("Collection object found for IN clause values");
             while (inValueIterator.hasNext())
             {
                 Expression value = (Expression) inValueIterator.next();
@@ -232,7 +238,7 @@ public class ESFilterBuilder
      */
     private String getField(String fieldValue)
     {
-        return fieldValue.substring(fieldValue.indexOf('.') + 1, fieldValue.length());
+        return fieldValue.substring(fieldValue.indexOf(ESConstants.dot) + 1, fieldValue.length());
     }
 
     /**
@@ -252,8 +258,12 @@ public class ESFilterBuilder
         String upperBoundExpression = getBetweenBoundaryValues(betweenExpression.getUpperBoundExpression());
         String field = getField(betweenExpression.getExpression().toParsedText());
 
-        return new AndFilterBuilder(getFilter(kunderaQuery.new FilterClause(field, ">=", lowerBoundExpression), m),
-                getFilter(kunderaQuery.new FilterClause(field, "<=", upperBoundExpression), m));
+        log.debug("Between clause for field " + field + "with lower bound " + lowerBoundExpression + "and upper bound "
+                + upperBoundExpression);
+
+        return new AndFilterBuilder(getFilter(kunderaQuery.new FilterClause(field, Expression.GREATER_THAN_OR_EQUAL,
+                lowerBoundExpression), m), getFilter(kunderaQuery.new FilterClause(field,
+                Expression.LOWER_THAN_OR_EQUAL, upperBoundExpression), m));
     }
 
     /**
@@ -265,7 +275,6 @@ public class ESFilterBuilder
      */
     private String getBetweenBoundaryValues(Expression boundExpression)
     {
-
         if (boundExpression instanceof IdentificationVariable || boundExpression instanceof NumericLiteral
                 || boundExpression instanceof InputParameter)
         {
@@ -273,23 +282,21 @@ public class ESFilterBuilder
                     (boundExpression).toParsedText()) : boundExpression.toParsedText();
             return value.toString();
         }
-
-        if (boundExpression instanceof AdditionExpression)
+        else if (boundExpression instanceof AdditionExpression)
         {
             String leftValue = checkInputParameter(((AdditionExpression) boundExpression).getLeftExpression());
             String rightValue = checkInputParameter(((AdditionExpression) boundExpression).getRightExpression());
+
             return new Integer(Integer.parseInt(leftValue) + Integer.parseInt(rightValue)).toString();
         }
-
-        if (boundExpression instanceof SubtractionExpression)
+        else if (boundExpression instanceof SubtractionExpression)
         {
             String leftValue = checkInputParameter(((SubtractionExpression) boundExpression).getLeftExpression());
             String rightValue = checkInputParameter(((SubtractionExpression) boundExpression).getRightExpression());
 
             return new Integer(Integer.parseInt(leftValue) - Integer.parseInt(rightValue)).toString();
         }
-
-        if (boundExpression instanceof MultiplicationExpression)
+        else if (boundExpression instanceof MultiplicationExpression)
         {
             String leftValue = checkInputParameter(((MultiplicationExpression) boundExpression).getLeftExpression());
             String rightValue = checkInputParameter(((MultiplicationExpression) boundExpression).getRightExpression());
@@ -297,12 +304,13 @@ public class ESFilterBuilder
             return new Integer(Integer.parseInt(leftValue) * Integer.parseInt(rightValue)).toString();
         }
 
-        if (boundExpression instanceof DivisionExpression)
+        else if (boundExpression instanceof DivisionExpression)
         {
             String leftValue = checkInputParameter(((DivisionExpression) boundExpression).getLeftExpression());
             String rightValue = checkInputParameter(((DivisionExpression) boundExpression).getRightExpression());
             return new Integer(Integer.parseInt(leftValue) / Integer.parseInt(rightValue)).toString();
         }
+
         return null;
     }
 
@@ -315,7 +323,6 @@ public class ESFilterBuilder
      */
     private String checkInputParameter(Expression expression)
     {
-
         return (expression instanceof InputParameter) ? kunderaQuery.getParametersMap()
                 .get((expression).toParsedText()).toString() : expression.toParsedText().toString();
     }
@@ -411,7 +418,6 @@ public class ESFilterBuilder
      */
     private FilterBuilder getFilter(FilterClause clause, final EntityMetadata metadata)
     {
-
         String condition = clause.getCondition();
         Object value = condition.equals(Expression.IN) ? clause.getValue() : clause.getValue().get(0);
         String name = ((AbstractAttribute) ((MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
@@ -420,27 +426,27 @@ public class ESFilterBuilder
 
         FilterBuilder filterBuilder = null;
 
-        if (condition.equals("="))
+        if (condition.equals(Expression.EQUAL))
         {
             filterBuilder = new TermFilterBuilder(name, value);
         }
-        else if (condition.equals(">"))
+        else if (condition.equals(Expression.GREATER_THAN))
         {
             filterBuilder = new RangeFilterBuilder(name).gt(value);
         }
-        else if (condition.equals("<"))
+        else if (condition.equals(Expression.LOWER_THAN))
         {
             filterBuilder = new RangeFilterBuilder(name).lt(value);
         }
-        else if (condition.equals(">="))
+        else if (condition.equals(Expression.GREATER_THAN_OR_EQUAL))
         {
             filterBuilder = new RangeFilterBuilder(name).gte(value);
         }
-        else if (condition.equals("<="))
+        else if (condition.equals(Expression.LOWER_THAN_OR_EQUAL))
         {
             filterBuilder = new RangeFilterBuilder(name).lte(value);
         }
-        else if (condition.equals("<>"))
+        else if (condition.equals(Expression.DIFFERENT))
         {
             filterBuilder = new NotFilterBuilder(new TermFilterBuilder(name, value));
         }
@@ -469,7 +475,8 @@ public class ESFilterBuilder
                 metadata.getPersistenceUnit())).entity(metadata.getEntityClazz()).getAttribute(clause.getProperty()))
                 .getJPAColumnName();
 
-        String likePattern = value.contains("%") ? value.replaceAll("%", "*") : "*" + value + "*";
+        String likePattern = value.contains(ESConstants.percentage) ? value.replaceAll(ESConstants.percentage,
+                ESConstants.asterisk) : ESConstants.asterisk + value + ESConstants.asterisk;
 
         QueryBuilder queryBuilder = null;
         if (condition.equals(Expression.LIKE))

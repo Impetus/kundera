@@ -19,7 +19,6 @@ package com.impetus.client.es;
  * @author Amit Kumar
  *
  */
-
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -41,7 +40,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.impetus.client.es.PersonES;
 import com.impetus.client.es.PersonES.Day;
 
 public class ESAggregationTest
@@ -150,7 +148,6 @@ public class ESAggregationTest
         testBetweenWithExpression();
         testBetweenMin();
         testLikeQuery();
-
     }
 
     private void testMinAggregation()
@@ -163,7 +160,6 @@ public class ESAggregationTest
         Assert.assertEquals(100.0, resultList.get(0));
     }
 
-    
     private void testMinAggregationOnString()
     {
         String queryString = "Select min(p.personName) from PersonES p";
@@ -180,7 +176,6 @@ public class ESAggregationTest
         }
     }
 
-    
     private void testMultiMinAggregation()
     {
         String queryString = "Select min(p.salary), min(p.age) from PersonES p where p.age > 20";
@@ -192,7 +187,6 @@ public class ESAggregationTest
         Assert.assertEquals(30.0, resultList.get(1));
     }
 
-   
     private void testMaxAggregation()
     {
         String queryString = "Select max(p.age) from PersonES p";
@@ -203,7 +197,6 @@ public class ESAggregationTest
         Assert.assertEquals(40.0, resultList.get(0));
     }
 
-    
     private void testMultiMaxAggregation()
 
     {
@@ -216,7 +209,6 @@ public class ESAggregationTest
         Assert.assertEquals(400.0, resultList.get(1));
     }
 
-    
     private void testSumAggregation()
     {
         String queryString = "Select sum(p.salary) from PersonES p";
@@ -227,7 +219,6 @@ public class ESAggregationTest
         Assert.assertEquals(1000.0, resultList.get(0));
     }
 
-    
     private void testMultiSumAggregation()
     {
         String queryString = "Select sum(p.salary), sum(p.age) from PersonES p";
@@ -239,7 +230,6 @@ public class ESAggregationTest
         Assert.assertEquals(100.0, resultList.get(1));
     }
 
-    
     private void testAvgAggregation()
     {
         String queryString = "Select avg(p.salary) from PersonES p";
@@ -250,7 +240,6 @@ public class ESAggregationTest
         Assert.assertEquals(250.0, resultList.get(0));
     }
 
-    
     private void testMultiAvgAggregation()
     {
         String avgQuery = "Select avg(p.salary), avg(p.age) from PersonES p";
@@ -262,7 +251,6 @@ public class ESAggregationTest
         Assert.assertEquals(25.0, resultList.get(1));
     }
 
-    
     private void testMaxMinSameFieldAggregation()
     {
         String queryString = "Select max(p.age), min(p.age) from PersonES p";
@@ -274,7 +262,6 @@ public class ESAggregationTest
         Assert.assertEquals(10.0, resultList.get(1));
     }
 
-    
     private void testMultiAggregation()
     {
         String queryString = "Select min(p.age), min(p.salary), max(p.age), max(p.salary) from PersonES p";
@@ -288,7 +275,6 @@ public class ESAggregationTest
         Assert.assertEquals(400.0, resultList.get(3));
     }
 
-    
     private void testMinMaxSumAvgAggregation()
     {
         String queryString = "Select min(p.salary), max(p.salary), sum(p.salary), avg(p.salary) from PersonES p";
@@ -302,7 +288,6 @@ public class ESAggregationTest
         Assert.assertEquals(250.0, resultList.get(3));
     }
 
-    
     private void testAttributeWithMinAggregation()
     {
         String queryString = "Select p.age, min(p.salary) from PersonES p";
@@ -314,7 +299,6 @@ public class ESAggregationTest
         Assert.assertEquals(100.0, resultList.get(1));
     }
 
-    
     private void testMinWithAttributeAggregation()
     {
         String queryString = "Select min(p.salary), p.age from PersonES p";
@@ -326,7 +310,6 @@ public class ESAggregationTest
         Assert.assertEquals(40, resultList.get(1));
     }
 
-    
     private void testMaxWithAttributeAggregation()
     {
         String queryString = "Select max(p.salary), p.salary from PersonES p";
@@ -338,7 +321,6 @@ public class ESAggregationTest
         Assert.assertEquals(400.0, resultList.get(1));
     }
 
-    
     private void testAttributeWithSumAggregation()
     {
         String queryString = "Select p.age, sum(p.salary) from PersonES p";
@@ -350,7 +332,6 @@ public class ESAggregationTest
         Assert.assertEquals(1000.0, resultList.get(1));
     }
 
-    
     private void testSumWithAttributeSameFieldAggregation()
     {
         String queryString = "Select sum(p.salary), p.salary from PersonES p";
@@ -362,7 +343,6 @@ public class ESAggregationTest
         Assert.assertEquals(400.0, resultList.get(1));
     }
 
-    
     private void testAttributeWithAvgAggregation()
     {
         String queryString = "Select p.age, avg(p.salary) from PersonES p";
@@ -374,7 +354,6 @@ public class ESAggregationTest
         Assert.assertEquals(250.0, resultList.get(1));
     }
 
-    
     private void testAvgWithAttributeSameFieldAggregation()
     {
         String queryString = "Select avg(p.salary), p.salary from PersonES p";
@@ -386,7 +365,6 @@ public class ESAggregationTest
         Assert.assertEquals(400.0, resultList.get(1));
     }
 
-    
     private void testMultiFieldAggregation()
     {
         String queryString = "Select p.age, min(p.salary), p.salary, max(p.salary), p.personId, sum(p.salary), p.personName, avg(p.salary) from PersonES p";
@@ -404,7 +382,6 @@ public class ESAggregationTest
         Assert.assertEquals(250.0, resultList.get(7));
     }
 
-    
     private void testAggregationWithWhereClause()
     {
         try
@@ -466,7 +443,6 @@ public class ESAggregationTest
         }
     }
 
-    
     private void testPositionalQuery()
     {
         String queryString = "Select min(p.salary) from PersonES p where p.personName = ?1";
@@ -478,7 +454,6 @@ public class ESAggregationTest
         Assert.assertEquals(100.0, resultList.get(0));
     }
 
-    
     private void testParameterQuery()
     {
         String queryString = "Select p from PersonES p where p.personName = :personName";
@@ -490,7 +465,6 @@ public class ESAggregationTest
         Assert.assertEquals(100.0, ((PersonES) resultList.get(0)).getSalary());
     }
 
-    
     private void testBetween()
     {
         String queryString = "Select p from PersonES p where p.age between 20 and 34";
@@ -500,7 +474,6 @@ public class ESAggregationTest
         Assert.assertEquals(2, resultList.size());
     }
 
-    
     private void testBetweenWithExpression()
     {
         String queryString = "Select p from PersonES p where p.age between 15+5 and 40-6";
@@ -510,7 +483,6 @@ public class ESAggregationTest
         Assert.assertEquals(2, resultList.size());
     }
 
-    
     private void testBetweenMin()
     {
         String queryString = "Select min(p.age) from PersonES p where p.age between 18 and 34";
@@ -521,7 +493,6 @@ public class ESAggregationTest
         Assert.assertEquals(20.0, resultList.get(0));
     }
 
-    
     private void testLikeQuery()
     {
         String queryString = "Select min(p.age) from PersonES p where p.personName like '%mit'";
