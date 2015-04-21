@@ -33,7 +33,7 @@ import org.eclipse.persistence.jpa.jpql.parser.WhereClause;
 import org.eclipse.persistence.jpa.jpql.utility.iterable.ListIterable;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
-import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
 import org.elasticsearch.search.aggregations.metrics.MetricsAggregationBuilder;
@@ -94,12 +94,12 @@ public class ESQuery<E> extends QueryImpl
                 m.getPersistenceUnit());
         EntityType entity = metaModel.entity(m.getEntityClazz());
         Expression whereExpression = KunderaQueryUtils.getWhereClause(kunderaQuery.getJpqlExpression());
-        QueryBuilder queryBuilder = null;
 
         FilterBuilder filter = whereExpression == null || whereExpression instanceof NullExpression ? null
                 : esFilterBuilder.populateFilterBuilder(((WhereClause) whereExpression).getConditionalExpression(), m);
-        return ((ESClient) client).executeQuery(filter, useAggregation(kunderaQuery, m, filter), queryBuilder, m,
-                getKunderaQuery());
+
+        return ((ESClient) client)
+                .executeQuery(filter, buildAggregation(kunderaQuery, m, filter), m, getKunderaQuery());
     }
 
     /*
@@ -115,7 +115,6 @@ public class ESQuery<E> extends QueryImpl
     {
         List result = populateEntities(m, client);
         return setRelationEntities(result, client, m);
-        // return null;
     }
 
     /*
@@ -196,8 +195,7 @@ public class ESQuery<E> extends QueryImpl
      *            the filter
      * @return the filter aggregation builder
      */
-    public FilterAggregationBuilder useAggregation(KunderaQuery query, EntityMetadata entityMetadata,
-            FilterBuilder filter)
+    public AggregationBuilder buildAggregation(KunderaQuery query, EntityMetadata entityMetadata, FilterBuilder filter)
     {
         return (query.getSelectStatement() != null) ? query.isAggregated() ? buildSelectAggregations(
                 query.getSelectStatement(), entityMetadata, filter) : null : null;
@@ -215,7 +213,7 @@ public class ESQuery<E> extends QueryImpl
     private FilterAggregationBuilder buildWhereAggregations(EntityMetadata entityMetadata, FilterBuilder filter)
     {
         filter = filter != null ? filter : FilterBuilders.matchAllFilter();
-        FilterAggregationBuilder filteragg = AggregationBuilders.filter("whereClause").filter(filter);
+        FilterAggregationBuilder filteragg = AggregationBuilders.filter(ESConstants.aggName).filter(filter);
         return filteragg;
     }
 
@@ -230,23 +228,23 @@ public class ESQuery<E> extends QueryImpl
      *            the filter
      * @return the filter aggregation builder
      */
-    private FilterAggregationBuilder buildSelectAggregations(SelectStatement selectStatement,
-            EntityMetadata entityMetadata, FilterBuilder filter)
+    private AggregationBuilder buildSelectAggregations(SelectStatement selectStatement, EntityMetadata entityMetadata,
+            FilterBuilder filter)
     {
-        FilterAggregationBuilder filteredAggregation = buildWhereAggregations(entityMetadata, filter);
+        AggregationBuilder aggregationBuilder = buildWhereAggregations(entityMetadata, filter);
         Expression expression = ((SelectClause) selectStatement.getSelectClause()).getSelectExpression();
 
         if (expression instanceof CollectionExpression)
         {
-            filteredAggregation = appendAggregation((CollectionExpression) expression, entityMetadata,
-                    filteredAggregation);
+            aggregationBuilder = appendAggregation((CollectionExpression) expression, entityMetadata,
+                    aggregationBuilder);
         }
         else
         {
             if (isAggregationExpression(expression))
-                filteredAggregation.subAggregation(getAggregation(expression, entityMetadata));
+                aggregationBuilder.subAggregation(getMetricsAggregation(expression, entityMetadata));
         }
-        return filteredAggregation;
+        return aggregationBuilder;
     }
 
     /**
@@ -256,19 +254,21 @@ public class ESQuery<E> extends QueryImpl
      *            the collection expression
      * @param entityMetadata
      *            the entity metadata
+     * @param nestedAggregation
      * @param aggregationBuilder
      *            the aggregation builder
      * @return the filter aggregation builder
      */
-    private FilterAggregationBuilder appendAggregation(CollectionExpression collectionExpression,
-            EntityMetadata entityMetadata, FilterAggregationBuilder aggregationBuilder)
+    private AggregationBuilder appendAggregation(CollectionExpression collectionExpression,
+            EntityMetadata entityMetadata, AggregationBuilder aggregationBuilder)
     {
-
         ListIterable<Expression> functionlist = collectionExpression.children();
         for (Expression function : functionlist)
         {
             if (isAggregationExpression(function))
-                aggregationBuilder.subAggregation(getAggregation(function, entityMetadata));
+            {
+                aggregationBuilder.subAggregation(getMetricsAggregation(function, entityMetadata));
+            }
         }
         return aggregationBuilder;
     }
@@ -282,7 +282,7 @@ public class ESQuery<E> extends QueryImpl
      *            the entity metadata
      * @return the aggregation
      */
-    private MetricsAggregationBuilder getAggregation(Expression expression, EntityMetadata entityMetadata)
+    private MetricsAggregationBuilder getMetricsAggregation(Expression expression, EntityMetadata entityMetadata)
     {
         AggregateFunction function = (AggregateFunction) expression;
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
@@ -294,7 +294,7 @@ public class ESQuery<E> extends QueryImpl
         switch (function.getIdentifier())
         {
         case Expression.MIN:
-            aggregationBuilder = AggregationBuilders.min(function.toParsedText()).field(jPAColumnName); // AggregationBuilders.min("minimum").field(jPAColumnName);
+            aggregationBuilder = AggregationBuilders.min(function.toParsedText()).field(jPAColumnName);
             break;
         case Expression.MAX:
             aggregationBuilder = AggregationBuilders.max(function.toParsedText()).field(jPAColumnName);
@@ -342,7 +342,8 @@ public class ESQuery<E> extends QueryImpl
         if (field.indexOf('.') > 0)
         {
             return ((AbstractAttribute) metaModel.entity(entityMetadata.getEntityClazz()).getAttribute(
-                    field.substring(field.indexOf('.') + 1, field.indexOf(')')))).getJPAColumnName();
+                    field.substring(field.indexOf(ESConstants.dot) + 1, field.indexOf(ESConstants.rightBracket))))
+                    .getJPAColumnName();
         }
         else
         {

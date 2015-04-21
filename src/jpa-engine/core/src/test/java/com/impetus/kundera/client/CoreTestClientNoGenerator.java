@@ -287,6 +287,6 @@ public class CoreTestClientNoGenerator extends ClientBase implements Client<Luce
     @Override
     public Generator getIdGenerator()
     {
-        return (Generator) KunderaCoreUtils.createNewInstance(CoreTestIdGenerator.class);
+        return null;
     }
 }

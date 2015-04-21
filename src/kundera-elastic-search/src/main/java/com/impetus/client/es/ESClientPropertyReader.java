@@ -26,46 +26,66 @@ import com.impetus.kundera.configure.PropertyReader;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
+ * The Class ESClientPropertyReader.
+ * 
  * @author vivek.mishra
- *
  */
 public class ESClientPropertyReader extends AbstractPropertyReader implements PropertyReader
 {
 
+    /** The esmd. */
     private ESSchemaMetadata esmd;
-    
+
+    /**
+     * Instantiates a new ES client property reader.
+     * 
+     * @param externalProperties
+     *            the external properties
+     * @param puMetadata
+     *            the pu metadata
+     */
     public ESClientPropertyReader(Map externalProperties, final PersistenceUnitMetadata puMetadata)
     {
         super(externalProperties, puMetadata);
         esmd = new ESSchemaMetadata();
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.configure.AbstractPropertyReader#onXml(com.impetus.kundera.configure.ClientProperties)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.configure.AbstractPropertyReader#onXml(com.impetus
+     * .kundera.configure.ClientProperties)
      */
     @Override
     protected void onXml(ClientProperties cp)
     {
-        if(cp != null)
+        if (cp != null)
         {
             esmd.setClientProperties(cp);
         }
     }
 
+    /**
+     * Gets the connection properties.
+     * 
+     * @return the connection properties
+     */
     public Properties getConnectionProperties()
     {
-        return esmd != null? esmd.getConnectionProperties():null;
+        return esmd != null ? esmd.getConnectionProperties() : null;
     }
-    
-    
 
+    /**
+     * The Class ESSchemaMetadata.
+     */
     private class ESSchemaMetadata extends AbstractSchemaMetadata
     {
-        
+
         public Properties getConnectionProperties()
         {
-            DataStore  ds = getDataStore("elasticsearch");
-            
+            DataStore ds = getDataStore("elasticsearch");
+
             if (ds != null)
             {
                 Connection connection = ds.getConnection();
@@ -75,7 +95,7 @@ public class ESClientPropertyReader extends AbstractPropertyReader implements Pr
 
                     return properties;
                 }
-            }       
+            }
             return null;
         }
     }

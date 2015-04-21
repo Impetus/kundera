@@ -26,17 +26,32 @@ import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.query.KunderaQuery;
 
 /**
- * @author vivek.mishra {@link EntityReader} implementation for elastic search.
+ * The Class ESEntityReader.
  * 
+ * @author vivek.mishra {@link EntityReader} implementation for elastic search.
  */
 public class ESEntityReader extends AbstractEntityReader implements EntityReader
 {
 
+    /**
+     * Instantiates a new ES entity reader.
+     * 
+     * @param kunderaMetadata
+     *            the kundera metadata
+     */
     public ESEntityReader(final KunderaMetadata kunderaMetadata)
     {
         super(kunderaMetadata);
     }
 
+    /**
+     * Instantiates a new ES entity reader.
+     * 
+     * @param kunderaQuery
+     *            the kundera query
+     * @param kunderaMetadata
+     *            the kundera metadata
+     */
     public ESEntityReader(KunderaQuery kunderaQuery, final KunderaMetadata kunderaMetadata)
     {
         super(kunderaMetadata);
