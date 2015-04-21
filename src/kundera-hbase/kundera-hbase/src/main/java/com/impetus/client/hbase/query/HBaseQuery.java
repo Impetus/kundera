@@ -32,6 +32,7 @@ import javax.persistence.metamodel.EntityType;
 import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.FilterList;
+import org.apache.hadoop.hbase.filter.PageFilter;
 import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.slf4j.Logger;
@@ -94,11 +95,13 @@ public class HBaseQuery extends QueryImpl
     @Override
     protected List<Object> populateEntities(EntityMetadata m, Client client)
     {
-        if(!kunderaQuery.isAggregated()){
+        if (!kunderaQuery.isAggregated())
+        {
             List results = onQuery(m, client);
             return results;
         }
-        else{
+        else
+        {
             return populateUsingLucene(m, client, null, kunderaQuery.getResult());
         }
     }
@@ -424,18 +427,19 @@ public class HBaseQuery extends QueryImpl
          */
         Filter getFilter()
         {
+            FilterList filters = new FilterList(new PageFilter(getMaxResults()));
             if (filterList != null)
             {
                 if (this.isORQuery)
                 {
-                    return new FilterList(FilterList.Operator.MUST_PASS_ONE, filterList);
+                    filters.addFilter(new FilterList(FilterList.Operator.MUST_PASS_ONE, filterList));
                 }
                 else
                 {
-                    return new FilterList(filterList);
+                    filters.addFilter(new FilterList(filterList));
                 }
             }
-            return null;
+            return filters;
         }
 
         /**

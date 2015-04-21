@@ -16,11 +16,11 @@
 package com.impetus.client.hbase.query;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.FilterList;
 import org.apache.hadoop.hbase.filter.KeyOnlyFilter;
 import org.slf4j.Logger;
@@ -140,7 +140,7 @@ class ResultIterator<E> implements IResultIterator<E>
             EnhanceEntity ee = (EnhanceEntity) enhanceEntity;
 
             result = (E) client.getReader().recursivelyFindEntities(ee.getEntity(), ee.getRelations(), m,
-                    persistenceDelegator, false,new HashMap<Object,Object>());
+                    persistenceDelegator, false, new HashMap<Object, Object>());
         }
 
         return result;
@@ -266,7 +266,13 @@ class ResultIterator<E> implements IResultIterator<E>
     @Override
     public List<E> next(int chunkSize)
     {
-        throw new UnsupportedOperationException("Fetch in chunks is not yet supported over HBase!");
+        int counter = 0;
+        List<E> chunkList = new ArrayList<E>();
+        while (this.hasNext() && counter++ < chunkSize)
+        {
+            chunkList.add(this.next());
+        }
+        return chunkList;
     }
 
     /**
