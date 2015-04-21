@@ -86,7 +86,14 @@ public class HBaseReader implements Reader
         List<HBaseDataWrapper> results = new ArrayList<HBaseDataWrapper>();
         if (rowKey != null)
         {
-            startRow = endRow = HBaseUtils.getBytes(rowKey);
+            Result result = hTable.get(new Get(HBaseUtils.getBytes(rowKey)));
+            if (result != null && !result.isEmpty())
+            {
+                HBaseDataWrapper data = new HBaseDataWrapper(tableName, result.getRow());
+                data.setColumns(result.listCells());
+                results.add(data);
+            }
+            return results;
         }
         if (scanner == null)
         {
