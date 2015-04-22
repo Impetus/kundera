@@ -274,6 +274,7 @@ public class HBaseReader implements Reader
     public HBaseDataWrapper next()
     {
         Result result = resultsIter.next();
+        counter++;
         List<Cell> cells = result.listCells();
         HBaseDataWrapper data = new HBaseDataWrapper(tableName, result.getRow());
         data.setColumns(cells);
@@ -297,7 +298,6 @@ public class HBaseReader implements Reader
             {
                 if (counter < fetchSize)
                 {
-                    counter++;
                     return resultsIter.hasNext();
                 }
             }

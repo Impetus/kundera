@@ -74,6 +74,7 @@ public class PaginationTests extends BaseTest
     {
         int chunkSize = 50;
         Query query = (Query) em.createQuery("Select p from PersonHBase p", PersonHBase.class);
+        query.setFetchSize(1000);
         Iterator<PersonHBase> iter = query.iterate();
         IResultIterator<PersonHBase> iIter = (IResultIterator<PersonHBase>) iter;
         while (iIter.hasNext())
@@ -86,12 +87,11 @@ public class PaginationTests extends BaseTest
 
     private void persistData(int noOfRecords)
     {
-        while (noOfRecords-- == 0)
+        while (noOfRecords--!= 0)
         {
             Object p = prepareHbaseInstance("" + noOfRecords, 20);
             em.persist(p);
             em.clear();
         }
-    
     }
 }
