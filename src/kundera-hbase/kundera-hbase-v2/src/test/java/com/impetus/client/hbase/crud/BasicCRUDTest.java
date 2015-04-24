@@ -105,7 +105,6 @@ public class BasicCRUDTest
         p.setDay(Day.FRIDAY);
         em.persist(p);
         em.clear();
-        em.persist(p);
         PersonHBase p2 = em.find(PersonHBase.class, "1");
         Assert.assertNotNull(p2);
         Assert.assertEquals("1", p2.getPersonId());
