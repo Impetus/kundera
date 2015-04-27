@@ -1174,13 +1174,17 @@ public abstract class CassandraDataHandlerBase
                     entity = populateCompositeId(m, entity, thriftColumnName, thriftColumnValue, metaModel,
                             m.getIdAttribute(), m.getEntityClazz());
                 }
-                else
+                else if (clientBase.getCqlMetadata() != null)
                 {
                     if (entity == null)
                     {
                         entity = new HashMap();
                     }
-                    composeAndAdd((HashMap) entity, clientBase.getCqlMetadata(), thriftColumnValue, thriftColumnName);
+                    if (entity instanceof HashMap)
+                    {
+                        composeAndAdd((HashMap) entity, clientBase.getCqlMetadata(), thriftColumnValue,
+                                thriftColumnName);
+                    }
                 }
             }
         }
