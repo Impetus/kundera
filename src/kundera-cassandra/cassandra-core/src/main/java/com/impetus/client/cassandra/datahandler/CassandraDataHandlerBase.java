@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import javax.persistence.ElementCollection;
 import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
@@ -35,7 +34,6 @@ import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.PluralAttribute;
 
 import org.apache.cassandra.db.marshal.AbstractType;
-import org.apache.cassandra.db.marshal.FrozenType;
 import org.apache.cassandra.db.marshal.ListType;
 import org.apache.cassandra.db.marshal.MapType;
 import org.apache.cassandra.db.marshal.SetType;
@@ -52,6 +50,7 @@ import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.cassandra.thrift.CounterSuperColumn;
+import org.apache.cassandra.thrift.CqlMetadata;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.cassandra.utils.ByteBufferUtil;
 import org.slf4j.Logger;
@@ -1170,10 +1169,22 @@ public abstract class CassandraDataHandlerBase
                         }
                     }
                 }
-                else
+                else if (metaModel.isEmbeddable(((AbstractAttribute) m.getIdAttribute()).getBindableJavaType()))
                 {
                     entity = populateCompositeId(m, entity, thriftColumnName, thriftColumnValue, metaModel,
                             m.getIdAttribute(), m.getEntityClazz());
+                }
+                else if (clientBase.getCqlMetadata() != null)
+                {
+                    if (entity == null)
+                    {
+                        entity = new HashMap();
+                    }
+                    if (entity instanceof HashMap)
+                    {
+                        composeAndAdd((HashMap) entity, clientBase.getCqlMetadata(), thriftColumnValue,
+                                thriftColumnName);
+                    }
                 }
             }
         }
@@ -1209,6 +1220,38 @@ public abstract class CassandraDataHandlerBase
 
         }
         return entity;
+    }
+
+    /**
+     * Compose and add.
+     * 
+     * @param entity
+     *            the entity
+     * @param cqlMetadata
+     *            the cql metadata
+     * @param thriftColumnValue
+     *            the thrift column value
+     * @param thriftColumnName
+     *            the thrift column name
+     */
+    private void composeAndAdd(HashMap entity, CqlMetadata cqlMetadata, Object thriftColumnValue,
+            String thriftColumnName)
+    {
+        byte[] columnName = thriftColumnName.getBytes();
+
+        Map<ByteBuffer, String> schemaTypes = this.clientBase.getCqlMetadata().getValue_types();
+        AbstractType<?> type = null;
+        try
+        {
+            type = TypeParser.parse(schemaTypes.get(ByteBuffer.wrap((byte[]) columnName)));
+        }
+        catch (SyntaxException | ConfigurationException e)
+        {
+            log.error(e.getMessage());
+            throw new KunderaException("Error while parsing CQL Type " + e);
+        }
+
+        entity.put(thriftColumnName, type.compose(ByteBuffer.wrap((byte[]) thriftColumnValue)));
     }
 
     /**

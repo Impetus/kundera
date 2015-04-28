@@ -31,6 +31,10 @@ import javax.persistence.NoResultException;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Root;
 
 import junit.framework.Assert;
 
@@ -60,8 +64,10 @@ import com.impetus.client.crud.PersonCassandra.Day;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
+import com.impetus.kundera.persistence.CriteriaQueryTranslator;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.query.Person;
 
 /**
  * Test case to perform simple CRUD operation.(insert, delete, merge, and
@@ -158,6 +164,13 @@ public class PersonCassandraTest extends BaseTest
 
         entityManager.persist(p1);
         entityManager.persist(p2);
+//        ((PersonCassandra) p2).setPersonName("karthik");
+//        ((PersonCassandra) p2).setMonth(null);
+//        entityManager.merge(p2);entityManager.clear();
+//        PersonCassandra pc = new PersonCassandra();
+//        pc.setPersonId("1");
+//        pc.setPersonName("pg");
+//        entityManager.merge(pc);entityManager.clear();
         entityManager.persist(p3);
 
         PersonCassandra personWithKey = new PersonCassandra();
@@ -231,6 +244,8 @@ public class PersonCassandraTest extends BaseTest
 
         // Test count native query.
         testCountResult();
+
+        testCriteriaCountResult();
 
         testLightWeightTransactions();
 
@@ -425,6 +440,52 @@ public class PersonCassandraTest extends BaseTest
     }
 
     /**
+     * Test criteria count result.
+     */
+    private void testCriteriaCountResult()
+    {
+        Map<String, Client> clientMap = (Map<String, Client>) entityManager.getDelegate();
+        ThriftClient tc = (ThriftClient) clientMap.get(SEC_IDX_CASSANDRA_TEST);
+        tc.setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
+        CQLTranslator translator = new CQLTranslator();
+
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+
+        CriteriaQuery<Long> personQuery = criteriaBuilder.createQuery(Long.class);
+        Root<PersonCassandra> from = personQuery.from(PersonCassandra.class);
+        personQuery.select(criteriaBuilder.count((Expression<?>) from.alias("p")));
+        String actual = CriteriaQueryTranslator.translate(personQuery);
+
+        Query q = entityManager.createQuery(actual);
+        List noOfRows = q.getResultList();
+
+        if (USE_CQL)
+        {
+            Assert.assertEquals(new Long(4),((Map) noOfRows.get(0)).get("count"));
+        }
+        else
+        {
+            Assert.assertEquals(new Long(3), ((Map) noOfRows.get(0)).get("count"));
+        }
+        // Assert.assertEquals("count",
+        // PropertyAccessorHelper.getObject(String.class, ((Column)
+        // noOfRows.get(0)).getName()));
+
+        entityManager.clear();
+        q = entityManager.createNamedQuery("q");
+        noOfRows = q.getResultList();
+        if (USE_CQL)
+        {
+            Assert.assertEquals(4, noOfRows.size());
+        }
+        else
+        {
+            Assert.assertEquals(3, noOfRows.size());
+        }
+        tc.setCqlVersion(CassandraConstants.CQL_VERSION_2_0);
+    }
+
+    /**
      * Test count result.
      */
     private void testCountResult()
@@ -441,16 +502,15 @@ public class PersonCassandraTest extends BaseTest
 
         if (USE_CQL)
         {
-            Assert.assertEquals(new Long(4),
-                    PropertyAccessorHelper.getObject(Long.class, ((Column) noOfRows.get(0)).getValue()));
+            Assert.assertEquals(new Long(4),((Map) noOfRows.get(0)).get("count"));
         }
         else
         {
-            Assert.assertEquals(new Long(3),
-                    PropertyAccessorHelper.getObject(Long.class, ((Column) noOfRows.get(0)).getValue()));
+            Assert.assertEquals(new Long(3), ((Map) noOfRows.get(0)).get("count"));
         }
-        Assert.assertEquals("count",
-                PropertyAccessorHelper.getObject(String.class, ((Column) noOfRows.get(0)).getName()));
+        // Assert.assertEquals("count",
+        // PropertyAccessorHelper.getObject(String.class, ((Column)
+        // noOfRows.get(0)).getName()));
 
         entityManager.clear();
         q = entityManager.createNamedQuery("q");
