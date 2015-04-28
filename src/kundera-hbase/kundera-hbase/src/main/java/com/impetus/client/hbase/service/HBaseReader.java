@@ -70,13 +70,13 @@ public class HBaseReader implements Reader
             {
                 byte[] rowKeyBytes = HBaseUtils.getBytes(rowKey);
                 Get g = new Get(rowKeyBytes);
-                
+
                 // TODO: After more than one column family for 1 table. this
                 // should work. currently failing for embeddable entities.
-                 if(columnFamily != null)
-                 {
-                   g.addFamily(Bytes.toBytes(columnFamily));
-                 }
+                if (columnFamily != null)
+                {
+                    g.addFamily(Bytes.toBytes(columnFamily));
+                }
 
                 if (filter != null)
                 {
@@ -181,8 +181,8 @@ public class HBaseReader implements Reader
      */
     private void setScanCriteria(Filter filter, String columnFamily, String qualifier, Scan s, String[] columns)
     {
-    	
-    	if (filter != null && !filter.toString().equals("FilterList AND (0/0): []"))
+
+        if (filter != null && !filter.toString().equals("FilterList AND (0/0): []"))
         {
             s.setFilter(filter);
         }
@@ -336,6 +336,7 @@ public class HBaseReader implements Reader
     {
         HBaseData data = null;
         Result result = resultsIter.next();
+        counter++;
         List<KeyValue> values = result.list();
         for (KeyValue value : values)
         {
@@ -358,7 +359,6 @@ public class HBaseReader implements Reader
             {
                 if (counter < fetchSize)
                 {
-                    counter++;
                     return resultsIter.hasNext();
                 }
             }

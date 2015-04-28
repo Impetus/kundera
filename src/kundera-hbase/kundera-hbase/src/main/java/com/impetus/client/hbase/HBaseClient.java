@@ -54,7 +54,6 @@ import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.ClientPropertiesSetter;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.generator.Generator;
-import com.impetus.kundera.generator.TableGenerator;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.lifecycle.states.RemovedState;
@@ -64,7 +63,6 @@ import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
-import com.impetus.kundera.metadata.model.TableGeneratorDiscriptor;
 import com.impetus.kundera.metadata.model.annotation.DefaultEntityAnnotationProcessor;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
@@ -1032,6 +1030,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
             List<String> relationNames, String tableName, List results, FilterList filter, Queue filterClausequeue,
             String... columns) throws IOException
     {
+        results = new ArrayList();
         List<AbstractManagedType> subManagedType = getSubManagedType(entityClass, entityMetadata);
 
         if (!subManagedType.isEmpty())
@@ -1040,13 +1039,11 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
             {
                 EntityMetadata subEntityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
                         subEntity.getJavaType());
-                results = handler.readData(tableName, subEntityMetadata.getEntityClazz(), subEntityMetadata, rowId,
-                        subEntityMetadata.getRelationNames(), filter, columns);
-                // Result will not be empty for match sub entity.
-
-                if (!results.isEmpty())
+                List tempResults = handler.readData(tableName, subEntityMetadata.getEntityClazz(), subEntityMetadata,
+                        rowId, subEntityMetadata.getRelationNames(), filter, columns);
+                if (tempResults != null && !tempResults.isEmpty())
                 {
-                    break;
+                    results.addAll(tempResults);
                 }
             }
         }

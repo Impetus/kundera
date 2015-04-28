@@ -41,7 +41,7 @@ import com.impetus.kundera.query.KunderaQuery.SortOrder;
  * 
  * @author vivek.mishra
  */
-final class CriteriaQueryTranslator
+public final class CriteriaQueryTranslator
 {
 
     static Map<ConditionalOperator, String> conditions = new HashMap<AbstractPredicate.ConditionalOperator, String>();
@@ -64,7 +64,7 @@ final class CriteriaQueryTranslator
      * 
      * @return JPQL string.
      */
-    static <S> String translate(CriteriaQuery criteriaQuery)
+    public static <S> String translate(CriteriaQuery criteriaQuery)
     {
         QueryBuilder builder = new CriteriaQueryTranslator.QueryBuilder();
 
@@ -90,6 +90,10 @@ final class CriteriaQueryTranslator
         {
             List<Selection<?>> selections = ((CompoundSelection) select).getCompoundSelectionItems();
             builder.appendMultiSelect(selections);
+        }
+        else if (select instanceof AggregateExpression)
+        {
+            builder.appendAggregate(((AggregateExpression) select).getAggregation());
         }
         else
         {
@@ -164,6 +168,13 @@ final class CriteriaQueryTranslator
         QueryBuilder()
         {
 
+        }
+
+        QueryBuilder appendAggregate(String aggregation)
+        {
+            this.builder.append(aggregation);
+            return this;
+            
         }
 
         public String getQuery()

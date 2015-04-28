@@ -39,6 +39,9 @@ import org.apache.cassandra.thrift.IndexExpression;
 import org.apache.cassandra.thrift.IndexOperator;
 import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.persistence.jpa.jpql.parser.CountFunction;
+import org.eclipse.persistence.jpa.jpql.parser.Expression;
+import org.eclipse.persistence.jpa.jpql.parser.SelectClause;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,7 +74,7 @@ import com.impetus.kundera.utils.ReflectUtils;
 
 /**
  * The Class CassQuery.
- *
+ * 
  * @author vivek.mishra
  * 
  *         Query implementation for Cassandra.
@@ -91,10 +94,13 @@ public class CassQuery extends QueryImpl
 
     /**
      * Instantiates a new cass query.
-     *
-     * @param kunderaQuery            the kundera query
-     * @param persistenceDelegator            the persistence delegator
-     * @param kunderaMetadata the kundera metadata
+     * 
+     * @param kunderaQuery
+     *            the kundera query
+     * @param persistenceDelegator
+     *            the persistence delegator
+     * @param kunderaMetadata
+     *            the kundera metadata
      */
     public CassQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator,
             final KunderaMetadata kunderaMetadata)
@@ -131,9 +137,9 @@ public class CassQuery extends QueryImpl
         boolean isNative = kunderaQuery.isNative();
         if (!isNative && !MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
         {
-             result = populateUsingLucene(m, client, result, getKunderaQuery().getResult());
+            result = populateUsingLucene(m, client, result, getKunderaQuery().getResult());
         }
-//change for embeddable
+        // change for embeddable
         else if (!isNative && ((CassandraClientBase) client).isCql3Enabled(m)
                 && MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
         {
@@ -183,8 +189,12 @@ public class CassQuery extends QueryImpl
         return result;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.query.QueryImpl#findUsingLucene(com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.client.Client)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.query.QueryImpl#findUsingLucene(com.impetus.kundera
+     * .metadata.model.EntityMetadata, com.impetus.kundera.client.Client)
      */
     protected List findUsingLucene(EntityMetadata m, Client client)
     {
@@ -210,9 +220,11 @@ public class CassQuery extends QueryImpl
 
     /**
      * (non-Javadoc).
-     *
-     * @param m the m
-     * @param client the client
+     * 
+     * @param m
+     *            the m
+     * @param client
+     *            the client
      * @return the list
      * @see com.impetus.kundera.query.QueryImpl#recursivelyPopulateEntities(com.impetus
      *      .kundera.metadata.model.EntityMetadata,
@@ -238,17 +250,18 @@ public class CassQuery extends QueryImpl
         }
         else if (!isNative && ((CassandraClientBase) client).isCql3Enabled(m))
         {
-            //edited
-            //check if lucene or indexer are enabled then populate
-             if (MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
-             {
-                 ls = ((CassandraClientBase) client).executeQuery(m.getEntityClazz(), m.getRelationNames(), isNative,
-                            
-                         onQueryOverCQL3(m, client, metaModel, m.getRelationNames()));
-             }
-             else{
-                 ls = populateUsingLucene(m, client, null, getKunderaQuery().getResult());
-             }
+            // edited
+            // check if lucene or indexer are enabled then populate
+            if (MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
+            {
+                ls = ((CassandraClientBase) client).executeQuery(m.getEntityClazz(), m.getRelationNames(), isNative,
+
+                onQueryOverCQL3(m, client, metaModel, m.getRelationNames()));
+            }
+            else
+            {
+                ls = populateUsingLucene(m, client, null, getKunderaQuery().getResult());
+            }
         }
         else
         {
@@ -320,8 +333,9 @@ public class CassQuery extends QueryImpl
 
     /**
      * Checks whether a given JPA DML query is convertible to CQL.
-     *
-     * @param kunderaQuery the kundera query
+     * 
+     * @param kunderaQuery
+     *            the kundera query
      * @return true, if is query convertible to cql
      */
     private boolean isQueryConvertibleToCQL(KunderaQuery kunderaQuery)
@@ -355,11 +369,15 @@ public class CassQuery extends QueryImpl
 
     /**
      * Gets the column list.
-     *
-     * @param m            the m
-     * @param metamodel the metamodel
-     * @param results            the results
-     * @param compoundKey the compound key
+     * 
+     * @param m
+     *            the m
+     * @param metamodel
+     *            the metamodel
+     * @param results
+     *            the results
+     * @param compoundKey
+     *            the compound key
      * @return the column list
      */
     List<String> getColumnList(EntityMetadata m, MetamodelImpl metamodel, String[] results, EmbeddableType compoundKey)
@@ -658,11 +676,15 @@ public class CassQuery extends QueryImpl
 
     /**
      * On query over composite columns.
-     *
-     * @param m            the m
-     * @param client            the client
-     * @param metaModel            the meta model
-     * @param relations the relations
+     * 
+     * @param m
+     *            the m
+     * @param client
+     *            the client
+     * @param metaModel
+     *            the meta model
+     * @param relations
+     *            the relations
      * @return the list
      */
     String onQueryOverCQL3(EntityMetadata m, Client client, MetamodelImpl metaModel, List<String> relations)
@@ -686,8 +708,7 @@ public class CassQuery extends QueryImpl
 
         boolean isPresent = false;
         List<String> columns = getColumnList(m, metaModel, getKunderaQuery().getResult(), compoundKey);
-        String selectQuery = columns != null && !columns.isEmpty() ? CQLTranslator.SELECT_QUERY
-                : CQLTranslator.SELECTALL_QUERY;
+        String selectQuery = setSelectQuery(columns);
 
         CQLTranslator translator = new CQLTranslator();
 
@@ -701,6 +722,32 @@ public class CassQuery extends QueryImpl
         onCondition(m, metaModel, compoundKey, idColumn, builder, isPresent, translator, true);
 
         return builder.toString();
+    }
+
+    /**
+     * Sets the select query.
+     * 
+     * @param columns
+     *            the columns
+     * @return the string
+     */
+    private String setSelectQuery(List<String> columns)
+    {
+        if (columns != null && !columns.isEmpty())
+        {
+            return CQLTranslator.SELECT_QUERY;
+        }
+        if (kunderaQuery.isAggregated())
+        {
+            Expression selectExpression = ((SelectClause) kunderaQuery.getSelectStatement().getSelectClause())
+                    .getSelectExpression();
+            // create query depending on function
+            if (selectExpression instanceof CountFunction)
+            {
+                return CQLTranslator.SELECT_COUNT_QUERY;
+            }
+        }
+        return CQLTranslator.SELECTALL_QUERY;
     }
 
     /**
@@ -720,15 +767,23 @@ public class CassQuery extends QueryImpl
 
     /**
      * On condition.
-     *
-     * @param m            the m
-     * @param metaModel            the meta model
-     * @param keyObj            the compound key
-     * @param idColumn            the id column
-     * @param builder            the builder
-     * @param isPresent            the is present
-     * @param translator            the translator
-     * @param use the use
+     * 
+     * @param m
+     *            the m
+     * @param metaModel
+     *            the meta model
+     * @param keyObj
+     *            the compound key
+     * @param idColumn
+     *            the id column
+     * @param builder
+     *            the builder
+     * @param isPresent
+     *            the is present
+     * @param translator
+     *            the translator
+     * @param use
+     *            the use
      * @return true, if successful
      */
     private boolean onCondition(EntityMetadata m, MetamodelImpl metaModel, EmbeddableType keyObj, String idColumn,
@@ -795,17 +850,21 @@ public class CassQuery extends QueryImpl
                 else
                 {
                     EntityType entity = metaModel.entity(m.getEntityClazz());
-//                    Metamodel metamodel = KunderaMetadataManager.getMetamodel(kunderaMetadata, m.getPersistenceUnit());
+                    // Metamodel metamodel =
+                    // KunderaMetadataManager.getMetamodel(kunderaMetadata,
+                    // m.getPersistenceUnit());
                     String discriminatorColumn = ((AbstractManagedType) entity).getDiscriminatorColumn();
-                    if(fieldName.equals(discriminatorColumn))
+                    if (fieldName.equals(discriminatorColumn))
                     {
-                    translator.buildWhereClause(builder, String.class, fieldName,
+                        translator.buildWhereClause(builder, String.class, fieldName,
                                 value.isEmpty() ? null : value.get(0), condition, false);
-                    isPresent = true;
-                    
-                    } else
+                        isPresent = true;
+
+                    }
+                    else
                     {
-                        Metamodel metamodel = KunderaMetadataManager.getMetamodel(kunderaMetadata, m.getPersistenceUnit());
+                        Metamodel metamodel = KunderaMetadataManager.getMetamodel(kunderaMetadata,
+                                m.getPersistenceUnit());
                         Attribute attribute = ((MetamodelImpl) metamodel).getEntityAttribute(m.getEntityClazz(),
                                 m.getFieldName(fieldName));
 
@@ -843,16 +902,25 @@ public class CassQuery extends QueryImpl
 
     /**
      * Gets the compound key column.
-     *
-     * @param metamodel the metamodel
-     * @param keyObj the key obj
-     * @param builder the builder
-     * @param isPresent the is present
-     * @param translator the translator
-     * @param fieldName the field name
-     * @param condition the condition
-     * @param value the value
-     * @param useInClause the use in clause
+     * 
+     * @param metamodel
+     *            the metamodel
+     * @param keyObj
+     *            the key obj
+     * @param builder
+     *            the builder
+     * @param isPresent
+     *            the is present
+     * @param translator
+     *            the translator
+     * @param fieldName
+     *            the field name
+     * @param condition
+     *            the condition
+     * @param value
+     *            the value
+     * @param useInClause
+     *            the use in clause
      * @return the compound key column
      */
     private boolean getCompoundKeyColumn(MetamodelImpl metamodel, EmbeddableType keyObj, StringBuilder builder,
@@ -918,12 +986,17 @@ public class CassQuery extends QueryImpl
 
     /**
      * Append order by clause.
-     *
-     * @param metaModel the meta model
-     * @param m the m
-     * @param keyObj the key obj
-     * @param builder the builder
-     * @param translator the translator
+     * 
+     * @param metaModel
+     *            the meta model
+     * @param m
+     *            the m
+     * @param keyObj
+     *            the key obj
+     * @param builder
+     *            the builder
+     * @param translator
+     *            the translator
      * @return the string builder
      */
     private StringBuilder appendOrderByClause(MetamodelImpl metaModel, EntityMetadata m, EmbeddableType keyObj,
@@ -977,15 +1050,23 @@ public class CassQuery extends QueryImpl
 
     /**
      * Extract composite key.
-     *
-     * @param metaModel the meta model
-     * @param keyObj the key obj
-     * @param builder the builder
-     * @param translator the translator
-     * @param value the value
-     * @param useInClause the use in clause
-     * @param columnValues the column values
-     * @param field the field
+     * 
+     * @param metaModel
+     *            the meta model
+     * @param keyObj
+     *            the key obj
+     * @param builder
+     *            the builder
+     * @param translator
+     *            the translator
+     * @param value
+     *            the value
+     * @param useInClause
+     *            the use in clause
+     * @param columnValues
+     *            the column values
+     * @param field
+     *            the field
      * @return true, if successful
      */
     private boolean extractCompositeKey(MetamodelImpl metaModel, EmbeddableType keyObj, StringBuilder builder,
@@ -1071,16 +1152,25 @@ public class CassQuery extends QueryImpl
 
     /**
      * Builds the where clause.
-     *
-     * @param builder the builder
-     * @param isPresent the is present
-     * @param translator the translator
-     * @param condition the condition
-     * @param value the value
-     * @param useInClause the use in clause
-     * @param idAttributeColumn the id attribute column
-     * @param columnName the column name
-     * @param useToken the use token
+     * 
+     * @param builder
+     *            the builder
+     * @param isPresent
+     *            the is present
+     * @param translator
+     *            the translator
+     * @param condition
+     *            the condition
+     * @param value
+     *            the value
+     * @param useInClause
+     *            the use in clause
+     * @param idAttributeColumn
+     *            the id attribute column
+     * @param columnName
+     *            the column name
+     * @param useToken
+     *            the use token
      * @return true, if successful
      */
     private boolean buildWhereClause(StringBuilder builder, boolean isPresent, CQLTranslator translator,
@@ -1093,6 +1183,7 @@ public class CassQuery extends QueryImpl
             builder.append("( )");
             builder.append(" AND ");
         }
+        // handle relations in Id
         else if (useInClause && value.size() > 1)
         {
             isPresent = appendInClause(builder, translator, value, idAttributeColumn.getBindableJavaType(), columnName,
@@ -1101,7 +1192,8 @@ public class CassQuery extends QueryImpl
         else
         {
             // TODO for partition key in case of embedded key.
-            //idAttributeColumn.getBindableJavaType() was sending this class, changed to getJavaType()
+            // idAttributeColumn.getBindableJavaType() was sending this class,
+            // changed to getJavaType()
             translator.buildWhereClause(builder, ((Attribute) idAttributeColumn).getJavaType(), columnName,
                     value.isEmpty() ? null : value.get(0), condition, useToken);
         }
@@ -1110,10 +1202,13 @@ public class CassQuery extends QueryImpl
 
     /**
      * Append in.
-     *
-     * @param builder the builder
-     * @param translator the translator
-     * @param columnName the column name
+     * 
+     * @param builder
+     *            the builder
+     * @param translator
+     *            the translator
+     * @param columnName
+     *            the column name
      * @return true, if successful
      */
     private boolean appendIn(StringBuilder builder, CQLTranslator translator, String columnName)
@@ -1127,13 +1222,19 @@ public class CassQuery extends QueryImpl
 
     /**
      * Append in clause.
-     *
-     * @param queryBuilder the query builder
-     * @param translator the translator
-     * @param value the value
-     * @param fieldClazz the field clazz
-     * @param columnName the column name
-     * @param isPresent the is present
+     * 
+     * @param queryBuilder
+     *            the query builder
+     * @param translator
+     *            the translator
+     * @param value
+     *            the value
+     * @param fieldClazz
+     *            the field clazz
+     * @param columnName
+     *            the column name
+     * @param isPresent
+     *            the is present
      * @return true, if successful
      */
     private boolean appendInClause(StringBuilder queryBuilder, CQLTranslator translator, List<Object> value,
@@ -1168,7 +1269,9 @@ public class CassQuery extends QueryImpl
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.query.QueryImpl#close()
      */
     @Override
@@ -1177,7 +1280,9 @@ public class CassQuery extends QueryImpl
         // Nothing to close.
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.query.QueryImpl#iterate()
      */
     @Override
@@ -1202,10 +1307,13 @@ public class CassQuery extends QueryImpl
 
     /**
      * Sets the relational entities.
-     *
-     * @param enhanceEntities the enhance entities
-     * @param client the client
-     * @param m the m
+     * 
+     * @param enhanceEntities
+     *            the enhance entities
+     * @param client
+     *            the client
+     * @param m
+     *            the m
      */
     void setRelationalEntities(List enhanceEntities, Client client, EntityMetadata m)
     {
@@ -1214,8 +1322,9 @@ public class CassQuery extends QueryImpl
 
     /**
      * Create Update CQL query from a given JPA query.
-     *
-     * @param kunderaQuery the kundera query
+     * 
+     * @param kunderaQuery
+     *            the kundera query
      * @return the string
      */
     public String createUpdateQuery(KunderaQuery kunderaQuery)
@@ -1283,8 +1392,9 @@ public class CassQuery extends QueryImpl
 
     /**
      * Create Delete query from a given JPA query.
-     *
-     * @param kunderaQuery the kundera query
+     * 
+     * @param kunderaQuery
+     *            the kundera query
      * @return the string
      */
     public String createDeleteQuery(KunderaQuery kunderaQuery)
@@ -1322,12 +1432,17 @@ public class CassQuery extends QueryImpl
 
     /**
      * Builds where Clause.
-     *
-     * @param kunderaQuery the kundera query
-     * @param metadata the metadata
-     * @param metaModel the meta model
-     * @param translator the translator
-     * @param builder the builder
+     * 
+     * @param kunderaQuery
+     *            the kundera query
+     * @param metadata
+     *            the metadata
+     * @param metaModel
+     *            the meta model
+     * @param translator
+     *            the translator
+     * @param builder
+     *            the builder
      */
     private void buildWhereClause(KunderaQuery kunderaQuery, EntityMetadata metadata, MetamodelImpl metaModel,
             CQLTranslator translator, StringBuilder builder)
@@ -1369,9 +1484,11 @@ public class CassQuery extends QueryImpl
 
     /**
      * Gets column name for a given field name.
-     *
-     * @param metadata the metadata
-     * @param property the property
+     * 
+     * @param metadata
+     *            the metadata
+     * @param property
+     *            the property
      * @return the column name
      */
     private String getColumnName(EntityMetadata metadata, String property)
@@ -1396,7 +1513,7 @@ public class CassQuery extends QueryImpl
 
     /**
      * Checks if is native.
-     *
+     * 
      * @return true, if is native
      */
     boolean isNative()

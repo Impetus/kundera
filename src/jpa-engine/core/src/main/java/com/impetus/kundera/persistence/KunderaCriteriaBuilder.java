@@ -329,7 +329,8 @@ public class KunderaCriteriaBuilder implements CriteriaBuilder
     public Expression<Long> count(Expression<?> arg0)
     {
         // TODO Auto-generated method stub
-        return null;
+        String arg1 = "Count("+arg0.getAlias()+")";
+        return new AggregateExpression(arg0, arg1);
     }
 
     /*

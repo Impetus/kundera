@@ -32,6 +32,7 @@ import javax.persistence.metamodel.EntityType;
 import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.FilterList;
+import org.apache.hadoop.hbase.filter.PageFilter;
 import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.slf4j.Logger;
@@ -94,11 +95,13 @@ public class HBaseQuery extends QueryImpl
     @Override
     protected List<Object> populateEntities(EntityMetadata m, Client client)
     {
-        if(!kunderaQuery.isAggregated()){
+        if (!kunderaQuery.isAggregated())
+        {
             List results = onQuery(m, client);
             return results;
         }
-        else{
+        else
+        {
             return populateUsingLucene(m, client, null, kunderaQuery.getResult());
         }
     }
@@ -159,13 +162,12 @@ public class HBaseQuery extends QueryImpl
         // start with 1 as first element is alias.
         List<String> columns = getTranslatedColumns(m, getKunderaQuery().getResult(), 1);
         Filter filter = translator.getFilter();
-
         if (translator.rowList != null && !translator.rowList.isEmpty())
         {
             return ((HBaseClient) client).findAll(m.getEntityClazz(), columns.toArray(new String[columns.size()]),
                     translator.getRowList());
         }
-        if (filter == null && columns != null)
+        if (!translator.isWhereQuery() && columns != null)
         {
             return ((HBaseClient) client).findByRange(m.getEntityClazz(), m, translator.getStartRow(), translator
                     .getEndRow(), columns.toArray(new String[columns.size()]), null, getKunderaQuery()
@@ -174,51 +176,26 @@ public class HBaseQuery extends QueryImpl
 
         if (MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
         {
+            // if range query. means query over id column. create range
+            // scan method.
 
-            if (filter == null)
+            // else setFilter to client and invoke new method. find by
+            // query if isFindById is false! else invoke findById
+            if (translator.isWhereQuery() && !translator.isRangeScan())
             {
-                // means complete scan without where clause, scan all records.
-                // findAll.
-                if (translator.isRangeScan())
-                {
-                    return ((HBaseClient) client).findByRange(m.getEntityClazz(), m, translator.getStartRow(),
-                            translator.getEndRow(), columns.toArray(new String[columns.size()]), null,
-                            getKunderaQuery().getFilterClauseQueue());
-                }
-                else
-                {
-                    return ((HBaseClient) client)
-                            .findByRange(m.getEntityClazz(), m, null, null,
-                                    columns.toArray(new String[columns.size()]), null, getKunderaQuery()
-                                            .getFilterClauseQueue());
-                }
+                return ((HBaseClient) client).findByQuery(m.getEntityClazz(), m, filter, getKunderaQuery()
+                        .getFilterClauseQueue(), columns.toArray(new String[columns.size()]));
             }
             else
             {
-
-                // means WHERE clause is present.
-                if (translator.isRangeScan())
-                {
-                    return ((HBaseClient) client).findByRange(m.getEntityClazz(), m, translator.getStartRow(),
-                            translator.getEndRow(), columns.toArray(new String[columns.size()]), filter,
-                            getKunderaQuery().getFilterClauseQueue());
-                }
-                else
-                {
-                    // if range query. means query over id column. create range
-                    // scan method.
-
-                    // else setFilter to client and invoke new method. find by
-                    // query if isFindById is false! else invoke findById
-                    return ((HBaseClient) client).findByQuery(m.getEntityClazz(), m, filter, getKunderaQuery()
-                            .getFilterClauseQueue(), columns.toArray(new String[columns.size()]));
-                }
+                return ((HBaseClient) client).findByRange(m.getEntityClazz(), m, translator.getStartRow(), translator
+                        .getEndRow(), columns.toArray(new String[columns.size()]), filter, getKunderaQuery()
+                        .getFilterClauseQueue());
             }
         }
         else
         {
-            List results = null;
-            return populateUsingLucene(m, client, results, null);
+            return populateUsingLucene(m, client, null, null);
         }
     }
 
@@ -340,6 +317,8 @@ public class HBaseQuery extends QueryImpl
          */
         private boolean isORQuery;
 
+        private boolean isWhereQuery;
+
         /**
          * @return
          */
@@ -424,18 +403,20 @@ public class HBaseQuery extends QueryImpl
          */
         Filter getFilter()
         {
+            FilterList filters = new FilterList(new PageFilter(getMaxResults()));
             if (filterList != null)
             {
+                this.setWhereQuery(true);
                 if (this.isORQuery)
                 {
-                    return new FilterList(FilterList.Operator.MUST_PASS_ONE, filterList);
+                    filters.addFilter(new FilterList(FilterList.Operator.MUST_PASS_ONE, filterList));
                 }
                 else
                 {
-                    return new FilterList(filterList);
+                    filters.addFilter(new FilterList(filterList));
                 }
             }
-            return null;
+            return filters;
         }
 
         /**
@@ -596,6 +577,16 @@ public class HBaseQuery extends QueryImpl
                 filterList = new ArrayList<Filter>();
             }
             filterList.add(f);
+        }
+
+        public boolean isWhereQuery()
+        {
+            return isWhereQuery;
+        }
+
+        public void setWhereQuery(boolean isWhereQuery)
+        {
+            this.isWhereQuery = isWhereQuery;
         }
     }
 

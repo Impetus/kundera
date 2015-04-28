@@ -32,7 +32,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.ElementCollection;
-import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
@@ -110,6 +109,9 @@ public final class CQLTranslator
 
     /** The Constant SELECTALL_QUERY. */
     public static final String SELECTALL_QUERY = "SELECT * FROM $COLUMNFAMILY";
+
+    /** The Constant SELECT_COUNT_QUERY. */
+    public static final String SELECT_COUNT_QUERY = "SELECT COUNT(*) FROM $COLUMNFAMILY";
 
     /** The Constant ADD_WHERE_CLAUSE. */
     public static final String ADD_WHERE_CLAUSE = " WHERE ";

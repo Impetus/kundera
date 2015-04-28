@@ -16,6 +16,7 @@
 package com.impetus.client.hbase.query;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -230,7 +231,13 @@ class ResultIterator<E> implements IResultIterator<E>
     @Override
     public List<E> next(int chunkSize)
     {
-        throw new UnsupportedOperationException("Fetch in chunks is not yet supported over HBase!");
+        int counter = 0;
+        List<E> chunkList = new ArrayList<E>();
+        while (this.hasNext() && counter++ < chunkSize)
+        {
+            chunkList.add(this.next());
+        }
+        return chunkList;
     }
 
     /**
