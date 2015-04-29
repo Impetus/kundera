@@ -34,6 +34,7 @@ import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
+import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
@@ -310,7 +311,8 @@ public final class MetaModelBuilder<X, T>
         }
 
         /**
-         * Checks for constraint on embeddabletype  and accordingly set it on managedType
+         * Checks for constraint on embeddabletype and accordingly set it on
+         * managedType
          * 
          * @param embeddableType
          */
@@ -340,9 +342,9 @@ public final class MetaModelBuilder<X, T>
             catch (Exception e)
             {
                 LOG.error("Error setting Contstraint for managed type, Caused by: {}", e);
-                throw new MetamodelLoaderException("Error setting Contstraint for managed type"+e.getMessage());
+                throw new MetamodelLoaderException("Error setting Contstraint for managed type" + e.getMessage());
             }
-           
+
         }
 
         /**
@@ -407,6 +409,8 @@ public final class MetaModelBuilder<X, T>
             {
                 if (isNonTransient(attribute))
                 {
+                    if (!managedType.hasLobAttribute() && attribute.getAnnotation(Lob.class) != null)
+                        managedType.setHasLobAttribute(true);
 
                     if (isPluralAttribute(attribute))
                     {

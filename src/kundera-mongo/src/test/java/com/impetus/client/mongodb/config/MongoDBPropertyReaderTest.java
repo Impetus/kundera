@@ -113,11 +113,11 @@ public class MongoDBPropertyReaderTest
                 {
                     if (readPreference.equalsIgnoreCase("primary"))
                     {
-                        this.readPreference = ReadPreference.PRIMARY;
+                        this.readPreference = ReadPreference.primary();
                     }
                     else if (readPreference.equalsIgnoreCase("secondary"))
                     {
-                        this.readPreference = ReadPreference.SECONDARY;
+                        this.readPreference = ReadPreference.secondary();
                     }
                     else
                     {

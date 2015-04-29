@@ -16,13 +16,28 @@
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.mongodb.MongoDBClientFactory" />
 			<property name="kundera.ddl.auto.prepare" value="create" />
-			
 			<!-- <property name="index.home.dir" value="lucene" /> -->
 			<!-- <property name="kundera.client.property" value="kundera-mongo.properties" 
 				/> -->
 		</properties>
 	</persistence-unit>
-	
+
+	<persistence-unit name="gfs_pu">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.client.crud.gfs.GFSUser</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<!-- <property name="kundera.nodes" value="192.168.145.168" /> -->
+			<property name="kundera.port" value="27017" />
+			<property name="kundera.keyspace" value="GFS" />
+			<property name="kundera.dialect" value="mongodb" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.mongodb.MongoDBClientFactory" />
+			<property name="kundera.ddl.auto.prepare" value="update" />
+		</properties>
+	</persistence-unit>
+
 	<persistence-unit name="validAuthenticationMongoPu">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>
@@ -37,7 +52,7 @@
 			<property name="kundera.password" value="kunderapassword" />
 		</properties>
 	</persistence-unit>
-	
+
 	<persistence-unit name="validAuthenticationMongoPuAdminDb">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>
@@ -52,8 +67,6 @@
 			<property name="kundera.password" value="password" />
 		</properties>
 	</persistence-unit>
-	
-
 
 	<persistence-unit name="invalidAuthenticationMongoPu">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
@@ -84,7 +97,6 @@
 		</properties>
 	</persistence-unit>
 
-
 	<persistence-unit name="MongoBatchTest">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>
@@ -97,7 +109,6 @@
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.mongodb.MongoDBClientFactory" />
 			<property name="kundera.batch.size" value="5" />
-
 		</properties>
 	</persistence-unit>
 
@@ -131,7 +142,7 @@
 			<property name="kundera.show.query" value="true" />
 		</properties>
 	</persistence-unit>
-	
+
 	<persistence-unit name="mongoShowQueryDisabledPU">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<class>com.impetus.client.crud.entities.UserInformation</class>
@@ -149,8 +160,7 @@
 			<property name="kundera.ddl.auto.prepare" value="create-drop" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.mongodb.MongoDBClientFactory" />
-			</properties>
+		</properties>
 	</persistence-unit>
-	
-	
+
 </persistence>

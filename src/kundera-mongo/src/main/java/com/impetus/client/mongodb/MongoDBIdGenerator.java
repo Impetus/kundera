@@ -18,7 +18,6 @@ package com.impetus.client.mongodb;
 import org.bson.types.ObjectId;
 
 import com.impetus.kundera.client.Client;
-import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.generator.AutoGenerator;
 
 /**

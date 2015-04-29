@@ -18,6 +18,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -132,18 +133,27 @@ public class DeepEquals
             // elements within the array must be deeply equivalent.
             if (dualKey._key1.getClass().isArray())
             {
-                int len = Array.getLength(dualKey._key1);
-                if (len != Array.getLength(dualKey._key2))
+                if (dualKey._key1.getClass().isAssignableFrom(byte[].class))
                 {
-                    return false;
+                    if (!Arrays.equals(((byte[]) dualKey._key1), ((byte[]) dualKey._key2)))
+                        return false;
                 }
 
-                for (int i = 0; i < len; i++)
+                else
                 {
-                    DualKey dk = new DualKey(Array.get(dualKey._key1, i), Array.get(dualKey._key2, i));
-                    if (!visited.contains(dk))
+                    int len = Array.getLength(dualKey._key1);
+                    if (len != Array.getLength(dualKey._key2))
                     {
-                        stack.addFirst(dk);
+                        return false;
+                    }
+
+                    for (int i = 0; i < len; i++)
+                    {
+                        DualKey dk = new DualKey(Array.get(dualKey._key1, i), Array.get(dualKey._key2, i));
+                        if (!visited.contains(dk))
+                        {
+                            stack.addFirst(dk);
+                        }
                     }
                 }
                 continue;

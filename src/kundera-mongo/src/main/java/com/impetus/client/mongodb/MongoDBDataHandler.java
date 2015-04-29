@@ -15,6 +15,9 @@
  ******************************************************************************/
 package com.impetus.client.mongodb;
 
+import java.util.List;
+import java.util.Map;
+
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
@@ -22,9 +25,6 @@ import com.impetus.kundera.property.PropertyAccessException;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * Provides utility methods for handling data held in MongoDB.
@@ -47,8 +47,8 @@ public interface MongoDBDataHandler
      *            the relations
      * @return the entity from document
      */
-    Map<String, Object> getEntityFromDocument(Class<?> entityClass, Object entity, EntityMetadata m,
-            DBObject document, List<String> relations, Map<String, Object> relationValue, final KunderaMetadata kunderaMetadata);
+    Map<String, Object> getEntityFromDocument(Class<?> entityClass, Object entity, EntityMetadata m, DBObject document,
+            List<String> relations, Map<String, Object> relationValue, final KunderaMetadata kunderaMetadata);
 
     /**
      * Retrieves A collection of embedded object within a document that match a
@@ -76,8 +76,9 @@ public interface MongoDBDataHandler
      *             the property access exception
      */
     List getEmbeddedObjectList(DBCollection dbCollection, EntityMetadata m, String documentName,
-            BasicDBObject mongoQuery, String result, BasicDBObject orderBy, int maxResult, int firstResult, BasicDBObject keys, final KunderaMetadata kunderaMetadata)
-            throws PropertyAccessException, InstantiationException, IllegalAccessException;
+            BasicDBObject mongoQuery, String result, BasicDBObject orderBy, int maxResult, int firstResult,
+            BasicDBObject keys, final KunderaMetadata kunderaMetadata) throws PropertyAccessException,
+            InstantiationException, IllegalAccessException;
 
     /**
      * Gets the document from entity.
@@ -92,6 +93,6 @@ public interface MongoDBDataHandler
      * @throws PropertyAccessException
      *             the property access exception
      */
-    Map<String, DBObject> getDocumentFromEntity(EntityMetadata m, Object entity, List<RelationHolder> relations, final KunderaMetadata kunderaMetadata)
-            throws PropertyAccessException;
+    Map<String, DBObject> getDocumentFromEntity(EntityMetadata m, Object entity, List<RelationHolder> relations,
+            final KunderaMetadata kunderaMetadata) throws PropertyAccessException;
 }
