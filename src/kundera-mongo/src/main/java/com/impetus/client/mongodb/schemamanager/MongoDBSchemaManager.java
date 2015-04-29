@@ -43,7 +43,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
-import com.mongodb.Mongo;
+import com.mongodb.MongoClient;
 
 /**
  * The Class MongoDBSchemaManager manages auto schema operation
@@ -56,7 +56,7 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
 {
 
     /** The m. */
-    private Mongo mongo;
+    private MongoClient mongo;
 
     /** The db. */
     private DB db;
@@ -219,7 +219,7 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
             }
             try
             {
-                mongo = new Mongo(host, Integer.parseInt(port));
+                mongo = new MongoClient(host, Integer.parseInt(port));
                 db = mongo.getDB(databaseName);
 
                 try
@@ -320,7 +320,7 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
         {
             options.put(MongoDBConstants.MAX, indexInfo.getMaxValue());
         }
-        collection.ensureIndex(keys, options);
+        collection.createIndex(keys, options);
         KunderaCoreUtils.printQuery("Create indexes on:" + keys, showQuery);
     }
 
@@ -337,7 +337,7 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
         {
             options.put(MongoDBConstants.MAX, indexInfo.getMaxValue());
         }
-        collection.ensureIndex(keys, options);
+        collection.createIndex(keys, options);
         KunderaCoreUtils.printQuery("Create indexes on:" + keys, showQuery);
     }
 
@@ -375,7 +375,6 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
     @Override
     public boolean validateEntity(Class clazz)
     {
-        // TODO Auto-generated method stub
         return true;
     }
 

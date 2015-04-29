@@ -157,7 +157,7 @@ public class DocumentObjectMapper
             }
             else
             {
-                setFieldValue(documentObj, obj, column);
+                setFieldValue(documentObj, obj, column, false);
             }
         }
         return obj;
@@ -183,13 +183,14 @@ public class DocumentObjectMapper
      * @param column
      *            column field.
      */
-    static void setFieldValue(DBObject document, Object entityObject, Attribute column)
+    static void setFieldValue(DBObject document, Object entityObject, Attribute column, boolean isLob)
     {
         Object value = null;
 
         if (document != null)
         {
-            value = document.get(((AbstractAttribute) column).getJPAColumnName());
+            value = isLob ? ((DBObject) document.get("metadata")).get(((AbstractAttribute) column).getJPAColumnName())
+                    : document.get(((AbstractAttribute) column).getJPAColumnName());
         }
         if (value != null)
         {

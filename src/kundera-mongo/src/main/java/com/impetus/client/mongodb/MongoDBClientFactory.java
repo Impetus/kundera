@@ -1,5 +1,5 @@
 /*******************************************************************************
- * * Copyright 2012 Impetus Infotech.
+ *  * Copyright 2015 Impetus Infotech.
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -43,13 +43,16 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.mongodb.DB;
 import com.mongodb.DBDecoderFactory;
 import com.mongodb.DBEncoderFactory;
-import com.mongodb.Mongo;
+import com.mongodb.MongoClient;
+import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoException;
-import com.mongodb.MongoOptions;
 import com.mongodb.ServerAddress;
+import com.mongodb.WriteConcern;
 
 /**
  * A factory for creating MongoDBClient objects.
+ * 
+ * @author Devender Yadav
  */
 public class MongoDBClientFactory extends GenericClientFactory
 {
@@ -59,6 +62,12 @@ public class MongoDBClientFactory extends GenericClientFactory
     /** The mongo db. */
     private DB mongoDB;
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.loader.GenericClientFactory#initialize(java.util.Map)
+     */
     @Override
     public void initialize(Map<String, Object> externalProperty)
     {
@@ -67,6 +76,12 @@ public class MongoDBClientFactory extends GenericClientFactory
         setExternalProperties(externalProperty);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.loader.GenericClientFactory#createPoolOrConnection()
+     */
     @Override
     protected Object createPoolOrConnection()
     {
@@ -74,10 +89,18 @@ public class MongoDBClientFactory extends GenericClientFactory
         return mongoDB;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.loader.GenericClientFactory#instantiateClient(java
+     * .lang.String)
+     */
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
-        return new MongoDBClient(mongoDB, indexManager, reader, persistenceUnit, externalProperties, clientMetadata, kunderaMetadata);
+        return new MongoDBClient(mongoDB, indexManager, reader, persistenceUnit, externalProperties, clientMetadata,
+                kunderaMetadata);
     }
 
     /**
@@ -88,8 +111,8 @@ public class MongoDBClientFactory extends GenericClientFactory
     private DB getConnection()
     {
 
-        PersistenceUnitMetadata puMetadata = kunderaMetadata.getApplicationMetadata()
-                .getPersistenceUnitMetadata(getPersistenceUnit());
+        PersistenceUnitMetadata puMetadata = kunderaMetadata.getApplicationMetadata().getPersistenceUnitMetadata(
+                getPersistenceUnit());
 
         Properties props = puMetadata.getProperties();
         String contactNode = null;
@@ -124,7 +147,7 @@ public class MongoDBClientFactory extends GenericClientFactory
 
         List<ServerAddress> addrs = new ArrayList<ServerAddress>();
 
-        Mongo mongo = null;
+        MongoClient mongo = null;
         try
         {
             mongo = onSetMongoServerProperties(contactNode, defaultPort, poolSize, addrs);
@@ -164,18 +187,25 @@ public class MongoDBClientFactory extends GenericClientFactory
     }
 
     /**
+     * On set mongo server properties.
+     * 
      * @param contactNode
+     *            the contact node
      * @param defaultPort
+     *            the default port
      * @param poolSize
+     *            the pool size
      * @param addrs
-     * @return
+     *            the addrs
+     * @return the mongo client
      * @throws UnknownHostException
+     *             the unknown host exception
      */
-    private Mongo onSetMongoServerProperties(String contactNode, String defaultPort, String poolSize,
+    private MongoClient onSetMongoServerProperties(String contactNode, String defaultPort, String poolSize,
             List<ServerAddress> addrs) throws UnknownHostException
     {
-        Mongo mongo = null;
-        MongoOptions mo = null;
+        MongoClient mongo = null;
+        MongoClientOptions mo = null;
         MongoDBSchemaMetadata metadata = MongoDBPropertyReader.msmd;
         ClientProperties cp = metadata != null ? metadata.getClientProperties() : null;
         if (cp != null)
@@ -189,40 +219,56 @@ public class MongoDBClientFactory extends GenericClientFactory
                 {
                     addrs.add(new ServerAddress(server.getHost().trim(), Integer.parseInt(server.getPort().trim())));
                 }
-                mongo = new Mongo(addrs);
+                mongo = new MongoClient(addrs);
             }
             else
             {
                 logger.info("Connecting to mongodb at " + contactNode + " on port " + defaultPort);
-                mongo = new Mongo(contactNode, Integer.parseInt(defaultPort));
+                // mongo = new MongoClient(contactNode,
+                // Integer.parseInt(defaultPort));
+
             }
-            mo = mongo.getMongoOptions();
+            mo = mongo.getMongoClientOptions();
             Properties p = dataStore != null && dataStore.getConnection() != null ? dataStore.getConnection()
                     .getProperties() : null;
 
             PopulateMongoOptions.populateMongoOptions(mo, p);
+
+            mongo = new MongoClient(contactNode, mo);
         }
         else
         {
             logger.info("Connecting to mongodb at " + contactNode + " on port " + defaultPort);
-            mongo = new Mongo(contactNode, Integer.parseInt(defaultPort));
-            mo = mongo.getMongoOptions();
+            mongo = new MongoClient(contactNode, Integer.parseInt(defaultPort));
+            mo = mongo.getMongoClientOptions();
         }
         // setting server property.
 
         if (mo.getConnectionsPerHost() <= 0 && !StringUtils.isEmpty(poolSize))
         {
-            mo.connectionsPerHost = Integer.parseInt(poolSize);
+            mo = MongoClientOptions.builder().connectionsPerHost(Integer.parseInt(poolSize)).build();
+            mongo.close();
+            mongo = new MongoClient(contactNode, mo);
         }
         return mongo;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.loader.GenericClientFactory#isThreadSafe()
+     */
     @Override
     public boolean isThreadSafe()
     {
         return false;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.loader.ClientLifeCycleManager#destroy()
+     */
     @Override
     public void destroy()
     {
@@ -245,6 +291,12 @@ public class MongoDBClientFactory extends GenericClientFactory
         schemaManager = null;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.loader.ClientFactory#getSchemaManager(java.util.Map)
+     */
     @Override
     public SchemaManager getSchemaManager(Map<String, Object> externalProperty)
     {
@@ -252,13 +304,14 @@ public class MongoDBClientFactory extends GenericClientFactory
         {
             initializePropertyReader();
             setExternalProperties(externalProperty);
-            schemaManager = new MongoDBSchemaManager(MongoDBClientFactory.class.getName(), externalProperty, kunderaMetadata);
+            schemaManager = new MongoDBSchemaManager(MongoDBClientFactory.class.getName(), externalProperty,
+                    kunderaMetadata);
         }
         return schemaManager;
     }
 
     /**
-     * 
+     * Initialize property reader.
      */
     private void initializePropertyReader()
     {
@@ -270,79 +323,125 @@ public class MongoDBClientFactory extends GenericClientFactory
         }
     }
 
+    /**
+     * The Class PopulateMongoOptions.
+     */
     public static class PopulateMongoOptions
     {
+
+        /** The logger. */
         private static Logger logger = LoggerFactory.getLogger(PopulateMongoOptions.class);
 
-        public static void populateMongoOptions(MongoOptions mo, Properties props)
+        /**
+         * Populate mongo options.
+         * 
+         * @param mo
+         *            the mo
+         * @param props
+         *            the props
+         */
+        public static void populateMongoOptions(MongoClientOptions mo, Properties props)
         {
             if (props != null && mo != null)
             {
-                if (props.get(MongoDBConstants.DB_DECODER_FACTORY) != null)
-                {
-                    mo.setDbDecoderFactory((DBDecoderFactory) props.get(MongoDBConstants.DB_DECODER_FACTORY));
-                }
-                if (props.get(MongoDBConstants.DB_ENCODER_FACTORY) != null)
-                {
-                    mo.setDbEncoderFactory((DBEncoderFactory) props.get(MongoDBConstants.DB_ENCODER_FACTORY));
-                }
-
-                mo.setAutoConnectRetry(Boolean.parseBoolean((String) props.get(MongoDBConstants.AUTO_CONNECT_RETRY)));
-                mo.setFsync(Boolean.parseBoolean((String) props.get(MongoDBConstants.FSYNC)));
-                mo.setJ(Boolean.parseBoolean((String) props.get(MongoDBConstants.J)));
-
-                if (props.get(MongoDBConstants.SAFE) != null)
-                {
-                    mo.setSafe((Boolean) props.get(MongoDBConstants.SAFE));
-                }
-                if (props.get(MongoDBConstants.SOCKET_FACTORY) != null)
-                {
-                    mo.setSocketFactory((SocketFactory) props.get(MongoDBConstants.SOCKET_FACTORY));
-                }
-
                 try
                 {
+                    /*
+                     * if value of SAFE is provided in client properties. Then
+                     * it is given preference over other parameters values like
+                     * W, W_TIME_OUT, FSYNC, J
+                     * 
+                     * So, whether choose simply write concern SAFE or not. Or
+                     * you can put values like W, W_TIME_OUT
+                     */
+                    int w = props.get(MongoDBConstants.W) != null ? Integer.parseInt((String) props
+                            .get(MongoDBConstants.W)) : 1;
+                    int wTimeOut = props.get(MongoDBConstants.W_TIME_OUT) != null ? Integer.parseInt((String) props
+                            .get(MongoDBConstants.W_TIME_OUT)) : 0;
+
+                    boolean j = Boolean.parseBoolean((String) props.get(MongoDBConstants.J));
+
+                    boolean fsync = Boolean.parseBoolean((String) props.get(MongoDBConstants.FSYNC));
+
+                    if (props.get(MongoDBConstants.SAFE) != null)
+                    {
+                        if (Boolean.parseBoolean((String) props.get(MongoDBConstants.SAFE)))
+                            MongoClientOptions.builder().writeConcern(WriteConcern.SAFE);
+                        else
+                            MongoClientOptions.builder().writeConcern(WriteConcern.NORMAL);
+                    }
+                    else
+                    {
+                        MongoClientOptions.builder().writeConcern(new WriteConcern(w, wTimeOut, fsync, j));
+                    }
+
+                    if (props.get(MongoDBConstants.DB_DECODER_FACTORY) != null)
+                    {
+                        MongoClientOptions.builder().dbDecoderFactory(
+                                (DBDecoderFactory) props.get(MongoDBConstants.DB_DECODER_FACTORY));
+                    }
+                    if (props.get(MongoDBConstants.DB_ENCODER_FACTORY) != null)
+                    {
+                        MongoClientOptions.builder().dbEncoderFactory(
+                                (DBEncoderFactory) props.get(MongoDBConstants.DB_ENCODER_FACTORY));
+                    }
+                    if (props.get(MongoDBConstants.SOCKET_FACTORY) != null)
+                    {
+                        MongoClientOptions.builder().socketFactory(
+                                (SocketFactory) props.get(MongoDBConstants.SOCKET_FACTORY));
+                    }
+
+                    if (props.get(MongoDBConstants.AUTO_CONNECT_RETRY) != null)
+                    {
+                        MongoClientOptions.builder().autoConnectRetry(
+                                (Boolean.parseBoolean((String) props.get(MongoDBConstants.AUTO_CONNECT_RETRY))));
+                    }
+
+                    if (props.get(MongoDBConstants.MAX_AUTO_CONNECT_RETRY) != null)
+                    {
+                        MongoClientOptions.builder().maxAutoConnectRetryTime(
+                                (Long.parseLong((String) props.get(MongoDBConstants.MAX_AUTO_CONNECT_RETRY))));
+                    }
+
                     if (props.get(MongoDBConstants.CONNECTION_PER_HOST) != null)
                     {
-                        mo.setConnectionsPerHost(Integer.parseInt((String) props
-                                .get(MongoDBConstants.CONNECTION_PER_HOST)));
+                        MongoClientOptions.builder().connectionsPerHost(
+                                Integer.parseInt((String) props.get(MongoDBConstants.CONNECTION_PER_HOST)));
                     }
 
                     if (props.get(MongoDBConstants.CONNECT_TIME_OUT) != null)
                     {
-                        mo.setConnectTimeout(Integer.parseInt((String) props.get(MongoDBConstants.CONNECT_TIME_OUT)));
+                        MongoClientOptions.builder().connectTimeout(
+                                Integer.parseInt((String) props.get(MongoDBConstants.CONNECT_TIME_OUT)));
                     }
                     if (props.get(MongoDBConstants.MAX_WAIT_TIME) != null)
                     {
-                        mo.setMaxWaitTime(Integer.parseInt((String) props.get(MongoDBConstants.MAX_WAIT_TIME)));
+                        MongoClientOptions.builder().maxWaitTime(
+                                Integer.parseInt((String) props.get(MongoDBConstants.MAX_WAIT_TIME)));
                     }
                     if (props.get(MongoDBConstants.TABCM) != null)
                     {
-                        mo.setThreadsAllowedToBlockForConnectionMultiplier(Integer.parseInt((String) props
-                                .get(MongoDBConstants.TABCM)));
-                    }
-                    if (props.get(MongoDBConstants.W) != null)
-                    {
-                        mo.setW(Integer.parseInt((String) props.get(MongoDBConstants.W)));
-                    }
-                    if (props.get(MongoDBConstants.W_TIME_OUT) != null)
-                    {
-                        mo.setWtimeout(Integer.parseInt((String) props.get(MongoDBConstants.W_TIME_OUT)));
-                    }
-                    if (props.get(MongoDBConstants.MAX_AUTO_CONNECT_RETRY) != null)
-                    {
-                        mo.setMaxAutoConnectRetryTime(Long.parseLong((String) props
-                                .get(MongoDBConstants.MAX_AUTO_CONNECT_RETRY)));
+                        MongoClientOptions.builder().threadsAllowedToBlockForConnectionMultiplier(
+                                Integer.parseInt((String) props.get(MongoDBConstants.TABCM)));
                     }
                 }
                 catch (NumberFormatException nfe)
                 {
-                    logger.warn("Error while setting mongo properties, caused by :" + nfe);
+                    logger.error("Error while setting mongo properties, caused by :" + nfe);
+                    throw new NumberFormatException("Error while setting mongo properties, caused by :" + nfe);
                 }
             }
+            MongoClientOptions.builder().build();
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.loader.GenericClientFactory#initializeLoadBalancer
+     * (java.lang.String)
+     */
     @Override
     protected void initializeLoadBalancer(String loadBalancingPolicyName)
     {

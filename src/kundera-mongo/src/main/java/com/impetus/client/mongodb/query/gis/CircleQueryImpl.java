@@ -48,11 +48,11 @@ public class CircleQueryImpl implements GeospatialQuery
 
         if (circle.getSurfaceType().equals(SurfaceType.SPHERICAL))
         {
-            q.put(geolocationColumnName, new BasicDBObject("$within", new BasicDBObject("$centerSphere", circleList)));
+            q.put(geolocationColumnName, new BasicDBObject("$geoWithin", new BasicDBObject("$centerSphere", circleList)));
         }
         else
         {
-            q.put(geolocationColumnName, new BasicDBObject("$within", new BasicDBObject("$center", circleList)));
+            q.put(geolocationColumnName, new BasicDBObject("$geoWithin", new BasicDBObject("$center", circleList)));
         }
 
         return q;

@@ -31,6 +31,7 @@ import org.junit.Test;
 import com.impetus.client.crud.entities.MongoDBCappedEntity;
 import com.impetus.client.mongodb.MongoDBClient;
 import com.impetus.client.mongodb.MongoDBConstants;
+import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
 import com.mongodb.CommandResult;
 import com.mongodb.DB;
@@ -124,10 +125,17 @@ public class CappedCollectionTest
 
         // Deleting documents within a capped collection should simply ignore,
         // as is done by native API
-        em.remove(lastRecord);
-        em.clear();
-        lastRecord = em.find(MongoDBCappedEntity.class, "" + (max + 1));
-        Assert.assertNotNull(lastRecord);
+        try
+        {
+            em.remove(lastRecord);
+            Assert.fail();
+        }
+        catch (KunderaException ex)
+        {
+            em.clear();
+            lastRecord = em.find(MongoDBCappedEntity.class, "" + (max + 1));
+            Assert.assertNotNull(lastRecord);
+        }
 
     }
 
@@ -161,23 +169,19 @@ public class CappedCollectionTest
 
             catch (SecurityException e)
             {
-                // TODO Auto-generated catch block
-                
+
             }
             catch (NoSuchFieldException e)
             {
-                // TODO Auto-generated catch block
-                
+
             }
             catch (IllegalArgumentException e)
             {
-                // TODO Auto-generated catch block
-                
+
             }
             catch (IllegalAccessException e)
             {
-                // TODO Auto-generated catch block
-                
+
             }
         }
     }

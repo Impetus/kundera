@@ -71,7 +71,7 @@ public class OperationLevelPropertiesTest
         DBEncoder encoder = client.getEncoder();
         Assert.assertNotNull(wc);
         Assert.assertFalse(wc.getFsync());
-        Assert.assertEquals(0, wc.getW());
+        Assert.assertEquals(1, wc.getW());
         Assert.assertEquals(0, wc.getWtimeout());
         Assert.assertNotNull(encoder);
         Assert.assertTrue(encoder instanceof DefaultDBEncoder);
