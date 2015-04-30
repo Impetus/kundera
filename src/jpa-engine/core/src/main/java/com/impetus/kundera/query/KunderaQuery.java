@@ -970,7 +970,7 @@ public class KunderaQuery
         }
         catch (KunderaException e)
         {
-            logger.info("No Entity class provided, Proceedig as Scalar Query");
+            logger.info("No Entity class provided, Proceeding as Scalar Query");
         }
         if (!this.isNativeQuery && metadata == null)
         {
