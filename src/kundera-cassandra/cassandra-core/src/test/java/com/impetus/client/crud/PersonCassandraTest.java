@@ -66,8 +66,6 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
 import com.impetus.kundera.persistence.CriteriaQueryTranslator;
 import com.impetus.kundera.property.PropertyAccessorFactory;
-import com.impetus.kundera.property.PropertyAccessorHelper;
-import com.impetus.kundera.query.Person;
 
 /**
  * Test case to perform simple CRUD operation.(insert, delete, merge, and
@@ -164,13 +162,6 @@ public class PersonCassandraTest extends BaseTest
 
         entityManager.persist(p1);
         entityManager.persist(p2);
-//        ((PersonCassandra) p2).setPersonName("karthik");
-//        ((PersonCassandra) p2).setMonth(null);
-//        entityManager.merge(p2);entityManager.clear();
-//        PersonCassandra pc = new PersonCassandra();
-//        pc.setPersonId("1");
-//        pc.setPersonName("pg");
-//        entityManager.merge(pc);entityManager.clear();
         entityManager.persist(p3);
 
         PersonCassandra personWithKey = new PersonCassandra();
@@ -461,15 +452,12 @@ public class PersonCassandraTest extends BaseTest
 
         if (USE_CQL)
         {
-            Assert.assertEquals(new Long(4),((Map) noOfRows.get(0)).get("count"));
+            Assert.assertEquals(new Long(4), ((Map) noOfRows.get(0)).get("count"));
         }
         else
         {
             Assert.assertEquals(new Long(3), ((Map) noOfRows.get(0)).get("count"));
         }
-        // Assert.assertEquals("count",
-        // PropertyAccessorHelper.getObject(String.class, ((Column)
-        // noOfRows.get(0)).getName()));
 
         entityManager.clear();
         q = entityManager.createNamedQuery("q");
@@ -502,15 +490,12 @@ public class PersonCassandraTest extends BaseTest
 
         if (USE_CQL)
         {
-            Assert.assertEquals(new Long(4),((Map) noOfRows.get(0)).get("count"));
+            Assert.assertEquals(new Long(4), ((Map) noOfRows.get(0)).get("count"));
         }
         else
         {
             Assert.assertEquals(new Long(3), ((Map) noOfRows.get(0)).get("count"));
         }
-        // Assert.assertEquals("count",
-        // PropertyAccessorHelper.getObject(String.class, ((Column)
-        // noOfRows.get(0)).getName()));
 
         entityManager.clear();
         q = entityManager.createNamedQuery("q");

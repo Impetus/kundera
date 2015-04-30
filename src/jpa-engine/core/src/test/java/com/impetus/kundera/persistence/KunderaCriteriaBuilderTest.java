@@ -75,7 +75,7 @@ public class KunderaCriteriaBuilderTest
     @Test
     public void testCountClause()
     {
-        String expected = "Seect Count(p) from Person p";
+        String expected = "Select Count(p) from Person p";
         CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
 
         CriteriaQuery<Long> personQuery = criteriaBuilder.createQuery(Long.class);
