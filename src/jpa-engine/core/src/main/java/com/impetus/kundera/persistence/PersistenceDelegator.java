@@ -489,7 +489,7 @@ public final class PersistenceDelegator
         return getClient(persistenceUnit);
     }
 
-    private Client getClient(final String persistenceUnit)
+    public Client getClient(final String persistenceUnit)
     {
         Client client = clientMap.get(persistenceUnit);
         if (client == null)
@@ -531,10 +531,19 @@ public final class PersistenceDelegator
     Query createQuery(String jpaQuery, final String persistenceUnit)
     {
         Client client = getClient(persistenceUnit);
-        EntityMetadata metadata = KunderaMetadataManager.getMetamodel(kunderaMetadata, client.getPersistenceUnit())
-                .getEntityMetadataMap().values().iterator().next();
+        EntityMetadata metadata = null;
+        try
+        {
+            metadata = KunderaMetadataManager.getMetamodel(kunderaMetadata, client.getPersistenceUnit())
+                    .getEntityMetadataMap().values().iterator().next();
+        }
+        catch (Exception e)
+        {
+            log.info("Entity metadata is null. Proceeding as Scalar Query.");
+        }
+
         Query query = new QueryResolver().getQueryImplementation(jpaQuery, getClient(persistenceUnit)
-                .getQueryImplementor(), this, metadata);
+                .getQueryImplementor(), this, metadata, persistenceUnit);
         return query;
     }
 

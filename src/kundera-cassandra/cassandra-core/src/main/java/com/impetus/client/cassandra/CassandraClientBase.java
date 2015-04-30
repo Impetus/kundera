@@ -26,11 +26,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 import javassist.Modifier;
 
-import javax.persistence.Embedded;
 import javax.persistence.PersistenceException;
 import javax.persistence.Transient;
 import javax.persistence.metamodel.Attribute;
@@ -39,13 +37,15 @@ import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.ManagedType;
 import javax.persistence.metamodel.SingularAttribute;
 
-import org.apache.cassandra.db.marshal.TimeUUIDType;
+import org.apache.cassandra.db.marshal.AbstractType;
+import org.apache.cassandra.db.marshal.TypeParser;
+import org.apache.cassandra.exceptions.ConfigurationException;
+import org.apache.cassandra.exceptions.SyntaxException;
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnDef;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
-import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.Compression;
 import org.apache.cassandra.thrift.ConsistencyLevel;
@@ -61,7 +61,6 @@ import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KeySlice;
 import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.Mutation;
-import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.cassandra.thrift.TimedOutException;
@@ -80,6 +79,7 @@ import com.impetus.client.cassandra.schemamanager.CassandraDataTranslator;
 import com.impetus.client.cassandra.schemamanager.CassandraValidationClassMapper;
 import com.impetus.client.cassandra.thrift.CQLTranslator;
 import com.impetus.client.cassandra.thrift.CQLTranslator.TranslationType;
+import com.impetus.client.cassandra.thrift.ThriftDataHandler;
 import com.impetus.client.cassandra.thrift.ThriftDataResultHelper;
 import com.impetus.client.cassandra.thrift.ThriftRow;
 import com.impetus.kundera.Constants;
@@ -95,12 +95,10 @@ import com.impetus.kundera.db.SearchResult;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
-import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata.Type;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
-import com.impetus.kundera.metadata.model.TableGeneratorDiscriptor;
 import com.impetus.kundera.metadata.model.annotation.DefaultEntityAnnotationProcessor;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
@@ -939,6 +937,95 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             }
         }
         return entities;
+    }
+
+    /**
+     * Execute scalar query.
+     * 
+     * @param dataHandler
+     *            the data handler
+     * @param cqlQuery
+     *            the cql query
+     * @return the list
+     */
+    public List executeScalarQuery(String cqlQuery)
+    {
+        CqlResult cqlResult = null;
+        List results = new ArrayList();
+        try
+        {
+            if (log.isInfoEnabled())
+            {
+                log.info("Executing query {}.", cqlQuery);
+            }
+            cqlResult = (CqlResult) executeCQLQuery(cqlQuery, true);
+
+            if (cqlResult != null && (cqlResult.getRows() != null || cqlResult.getRowsSize() > 0))
+            {
+                results = new ArrayList<Object>(cqlResult.getRowsSize());
+                Iterator<CqlRow> iter = cqlResult.getRowsIterator();
+                while (iter.hasNext())
+                {
+                    Map<String, Object> entity = new HashMap<String, Object>();
+
+                    CqlRow row = iter.next();
+                    for (Column column : row.getColumns())
+                    {
+                        if (column != null)
+                        {
+                            String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(String.class,
+                                    column.getName());
+
+                            if (column.getValue() == null)
+                            {
+                                entity.put(thriftColumnName, null);
+                            }
+                            else
+                            {
+                                entity.put(thriftColumnName,
+                                        composeColumnValue(cqlResult.getSchema(), column.getValue(), column.getName()));
+                            }
+                        }
+                    }
+                    results.add(entity);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            log.error("Error while executing native CQL query Caused by {}.", e);
+            throw new PersistenceException(e);
+        }
+        return results;
+    }
+
+    /**
+     * Compose column value.
+     * 
+     * @param entity
+     *            the entity
+     * @param cqlMetadata
+     *            the cql metadata
+     * @param thriftColumnValue
+     *            the thrift column value
+     * @param thriftColumnName
+     *            the thrift column name
+     * @return the object
+     */
+    private Object composeColumnValue(CqlMetadata cqlMetadata, byte[] thriftColumnValue, byte[] thriftColumnName)
+    {
+        Map<ByteBuffer, String> schemaTypes = cqlMetadata.getValue_types();
+        AbstractType<?> type = null;
+        try
+        {
+            type = TypeParser.parse(schemaTypes.get(ByteBuffer.wrap(thriftColumnName)));
+        }
+        catch (SyntaxException | ConfigurationException ex)
+        {
+            log.error(ex.getMessage());
+            throw new KunderaException("Error while deserializing column value " + ex);
+        }
+        return type.compose(ByteBuffer.wrap(thriftColumnValue));
     }
 
     /**
@@ -2152,7 +2239,6 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 boolean isCql3Enabled, boolean isNative, String cqlQuery)
         {
             EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, clazz);
-            ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
 
             CqlResult result = null;
             List returnedEntities = new ArrayList();

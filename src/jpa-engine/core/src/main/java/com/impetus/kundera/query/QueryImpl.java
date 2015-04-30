@@ -173,21 +173,35 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
 
         // as per JPA post event should happen before fetching data from
         // database.
-
-        handlePostEvent();
-
         List results = null;
 
-        if (kunderaQuery.isDeleteUpdate())
+        if (getEntityMetadata() == null)
         {
-            executeUpdate();
+            // Scalar Query
+            if (kunderaQuery.isDeleteUpdate())
+            {
+                executeUpdate();
+            }
+            else
+            {
+                Client client = persistenceDelegeator.getClient(kunderaQuery.getPersistenceUnit());
+                results = populateEntities(null, client);
+            }
         }
         else
         {
-            results = fetch();
-            assignReferenceToProxy(results);
-        }
+            handlePostEvent();
 
+            if (kunderaQuery.isDeleteUpdate())
+            {
+                executeUpdate();
+            }
+            else
+            {
+                results = fetch();
+                assignReferenceToProxy(results);
+            }
+        }
         return results != null ? results : new ArrayList();
     }
 
@@ -1242,7 +1256,7 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
     public abstract <E> Iterator<E> iterate();
 
     /**
-     * Handle post even callbacks.
+     * Handle post event callbacks.
      * 
      */
     protected void handlePostEvent()
