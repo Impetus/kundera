@@ -23,23 +23,29 @@ package com.impetus.client.es;
 public interface ESConstants
 {
     /** The Constant dot. */
-    public static final char dot = '.';
+    public static final char DOT = '.';
 
     /** The Constant leftBracket. */
-    public static final char leftBracket = '(';
+    public static final char LEFT_BRACKET = '(';
 
     /** The Constant rightBracket. */
-    public static final char rightBracket = ')';
+    public static final char RIGHT_BRACKET = ')';
 
     /** The Constant asterisk. */
-    public static final String asterisk = "*";
+    public static final String ASTERISK = "*";
 
     /** The Constant percentage. */
-    public static final String percentage = "%";
+    public static final String PERCENTAGE = "%";
 
     /** The Constant infinity. */
-    public static final String infinity = "INFINITY";
+    public static final String INFINITY = "INFINITY";
 
     /** The Constant aggName. */
-    public static final String aggName = "esAggs";
+    public static final String AGGREGATION_NAME = "esAggs";
+    
+    /** The Constant groupBy. */
+    public static final String GROUP_BY = "group by";
+    
+    /** The Constant topHits. */
+    public static final String TOP_HITS = "top";
 }
