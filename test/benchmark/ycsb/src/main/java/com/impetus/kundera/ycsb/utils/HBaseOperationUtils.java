@@ -58,6 +58,20 @@ public final class HBaseOperationUtils
         admin.createTable(table);
     }
 
+
+    public void deleteAllTables()
+    {
+        try
+        {
+            admin.disableTables(".*");
+            admin.deleteTables(".*");
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+
+    }
     /**
      * Start HBase server.
      * 
