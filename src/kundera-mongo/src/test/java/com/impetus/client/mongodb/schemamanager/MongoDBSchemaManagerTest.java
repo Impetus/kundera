@@ -101,7 +101,7 @@ public class MongoDBSchemaManagerTest
         getDB();
 
         DBCollection collection = db.getCollection("MongoDBEntitySimple");
-        Assert.assertEquals(ReadPreference.PRIMARY, collection.getReadPreference());
+        Assert.assertEquals(ReadPreference.primary(), collection.getReadPreference());
         Assert.assertNotNull(collection.getIndexInfo());
         Assert.assertEquals(4, collection.getIndexInfo().size());
         int count = 0;
@@ -151,7 +151,7 @@ public class MongoDBSchemaManagerTest
         getDB();
 
         DBCollection collection = db.getCollection("MongoDBEntitySimple");
-        Assert.assertEquals(ReadPreference.PRIMARY, collection.getReadPreference());
+        Assert.assertEquals(ReadPreference.primary(), collection.getReadPreference());
         Assert.assertNotNull(collection.getIndexInfo());
         Assert.assertEquals(4, collection.getIndexInfo().size());
         int count = 0;
@@ -196,7 +196,7 @@ public class MongoDBSchemaManagerTest
         getDB();
 
         DBCollection collection = db.getCollection("MongoDBEmbeddedEntity");
-        Assert.assertEquals(ReadPreference.PRIMARY, collection.getReadPreference());
+        Assert.assertEquals(ReadPreference.primary(), collection.getReadPreference());
         Assert.assertNotNull(collection.getIndexInfo());
         Assert.assertEquals(5, collection.getIndexInfo().size());
         int count = 0;

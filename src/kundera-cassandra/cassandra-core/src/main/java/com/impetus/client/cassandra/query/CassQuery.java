@@ -131,7 +131,7 @@ public class CassQuery extends QueryImpl
         // composite into where clause and let cassandra complain for it.
 
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
-                m.getPersistenceUnit());
+                m != null ? m.getPersistenceUnit() : client.getPersistenceUnit());
 
         String query = appMetadata.getQuery(getJPAQuery());
         boolean isNative = kunderaQuery.isNative();
@@ -150,8 +150,8 @@ public class CassQuery extends QueryImpl
         {
             if (isNative)
             {
-                result = ((CassandraClientBase) client).executeQuery(m.getEntityClazz(), null, isNative,
-                        query != null ? query : getJPAQuery());
+                result = ((CassandraClientBase) client).executeQuery(m != null ? m.getEntityClazz() : null, null,
+                        isNative, query != null ? query : getJPAQuery());
             }
             else
             {
@@ -293,7 +293,9 @@ public class CassQuery extends QueryImpl
     protected int onExecuteUpdate()
     {
         EntityMetadata m = getEntityMetadata();
-        externalProperties = ((CassandraClientBase) persistenceDelegeator.getClient(m)).getExternalProperties();
+        Client client = m != null ? persistenceDelegeator.getClient(m) : persistenceDelegeator.getClient(kunderaQuery
+                .getPersistenceUnit());
+        externalProperties = ((CassandraClientBase) client).getExternalProperties();
         ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
 
         String query = appMetadata.getQuery(getJPAQuery());
@@ -302,7 +304,7 @@ public class CassQuery extends QueryImpl
 
         if (isNative)
         {
-            ((CassandraClientBase) persistenceDelegeator.getClient(m)).executeQuery(m.getEntityClazz(), null, isNative,
+            ((CassandraClientBase) client).executeQuery(m == null ? null : m.getEntityClazz(), null, isNative,
                     query != null ? query : getJPAQuery());
         }
         else if (kunderaQuery.isDeleteUpdate())
@@ -325,7 +327,7 @@ public class CassQuery extends QueryImpl
                 {
                     query = createDeleteQuery(kunderaQuery);
                 }
-                return ((CassandraClientBase) persistenceDelegeator.getClient(m)).executeUpdateDeleteQuery(query);
+                return ((CassandraClientBase) client).executeUpdateDeleteQuery(query);
             }
         }
         return 0;

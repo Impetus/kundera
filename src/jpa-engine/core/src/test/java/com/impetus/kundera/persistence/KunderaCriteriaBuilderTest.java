@@ -67,7 +67,35 @@ public class KunderaCriteriaBuilderTest
         // Check for multi column select
         CriteriaQuery<Person> personQuery = criteriaBuilder.createQuery(Person.class);
         Root<Person> from = personQuery.from(Person.class);
-        personQuery.select((Selection)from.get("personName").alias("p"));
+        personQuery.select((Selection) from.get("personName").alias("p"));
+        String actual = CriteriaQueryTranslator.translate(personQuery);
+        Assert.assertEquals(expected.trim(), actual.trim());
+    }
+
+    @Test
+    public void testCountClause()
+    {
+        String expected = "Select Count(p) from Person p";
+        CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+
+        CriteriaQuery<Long> personQuery = criteriaBuilder.createQuery(Long.class);
+        Root<Person> from = personQuery.from(Person.class);
+        personQuery.select(criteriaBuilder.count((Expression<?>) from.alias("p")));
+        String actual = CriteriaQueryTranslator.translate(personQuery);
+        Assert.assertEquals(expected.trim(), actual.trim());
+    }
+
+    @Test
+    public void testCountWithWhereClause()
+    {
+        String expected = "Select Count(p) from Person p where p.personName = vivek AND p.age = 32";
+        CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+
+        CriteriaQuery<Long> personQuery = criteriaBuilder.createQuery(Long.class);
+        Root<Person> from = personQuery.from(Person.class);
+        personQuery.select(criteriaBuilder.count((Expression<?>) from.alias("p")));
+        personQuery.where(criteriaBuilder.and(criteriaBuilder.equal(from.get("personName"), "vivek"),
+                criteriaBuilder.equal(from.get("age"), 32)));
         String actual = CriteriaQueryTranslator.translate(personQuery);
         Assert.assertEquals(expected.trim(), actual.trim());
     }
@@ -205,11 +233,11 @@ public class KunderaCriteriaBuilderTest
         Root<Person> from = personQuery.from(Person.class);
         personQuery.select(from.alias("p"));
         personQuery.where(criteriaBuilder.and(criteriaBuilder.equal(from.get("personName"), "vivek"),
-                criteriaBuilder.equal(from.get("age"), 32),criteriaBuilder.equal(from.get("salary"), 3200.01)));
+                criteriaBuilder.equal(from.get("age"), 32), criteriaBuilder.equal(from.get("salary"), 3200.01)));
         String actual = CriteriaQueryTranslator.translate(personQuery);
         Assert.assertEquals(expected.trim(), actual.trim());
     }
-    
+
     @Test
     public void testWithANDGTLTClause()
     {
@@ -219,7 +247,8 @@ public class KunderaCriteriaBuilderTest
         Root<Person> from = personQuery.from(Person.class);
         personQuery.select(from.alias("p"));
         personQuery.where(criteriaBuilder.and(criteriaBuilder.equal(from.get("personName"), "vivek"),
-                criteriaBuilder.gt((Expression)from.get("age"), 32),criteriaBuilder.le((Expression)from.get("salary"), 3200.01)));
+                criteriaBuilder.gt((Expression) from.get("age"), 32),
+                criteriaBuilder.le((Expression) from.get("salary"), 3200.01)));
         String actual = CriteriaQueryTranslator.translate(personQuery);
         Assert.assertEquals(expected.trim(), actual.trim());
     }
@@ -234,7 +263,7 @@ public class KunderaCriteriaBuilderTest
         embedQuery.select(from.alias("u"));
         embedQuery.orderBy(criteriaBuilder.asc(from.get("personalDetail").get("emailId")));
         embedQuery.where(criteriaBuilder.equal(from.get("personalDetail").get("phoneNo"), "91234567"));
-        
+
         String actual = CriteriaQueryTranslator.translate(embedQuery);
         Assert.assertEquals(expected.trim(), actual.trim());
     }
@@ -253,7 +282,7 @@ public class KunderaCriteriaBuilderTest
         String actual = CriteriaQueryTranslator.translate(personQuery);
         Assert.assertEquals(expected.trim(), actual.trim());
     }
-    
+
     @Test
     public void testOrderByWithWhereClause()
     {
@@ -264,7 +293,8 @@ public class KunderaCriteriaBuilderTest
         Root<Person> from = personQuery.from(Person.class);
         personQuery.select(from.alias("p"));
         personQuery.where(criteriaBuilder.and(criteriaBuilder.equal(from.get("personName"), "vivek"),
-                criteriaBuilder.gt((Expression)from.get("age"), 32),criteriaBuilder.le((Expression)from.get("salary"), 3200.01)));
+                criteriaBuilder.gt((Expression) from.get("age"), 32),
+                criteriaBuilder.le((Expression) from.get("salary"), 3200.01)));
         personQuery.orderBy(criteriaBuilder.desc(from.get("personName")));
         String actual = CriteriaQueryTranslator.translate(personQuery);
         Assert.assertEquals(expected.trim(), actual.trim());
@@ -279,8 +309,8 @@ public class KunderaCriteriaBuilderTest
         // Check for multi column select
         CriteriaQuery<Person> personQuery = criteriaBuilder.createQuery(Person.class);
         Root<Person> from = personQuery.from(Person.class);
-        personQuery.multiselect((Selection)from.get("personName").alias("p"),(Selection)from.get("age").alias("p"));
-        
+        personQuery.multiselect((Selection) from.get("personName").alias("p"), (Selection) from.get("age").alias("p"));
+
         String actual = CriteriaQueryTranslator.translate(personQuery);
         Assert.assertEquals(expected.trim(), actual.trim());
     }

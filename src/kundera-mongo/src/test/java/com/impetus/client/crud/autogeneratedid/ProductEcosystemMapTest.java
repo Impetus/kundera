@@ -50,6 +50,10 @@ public class ProductEcosystemMapTest
 
         Query q = em.createQuery("Select p from Product p");
         List<Product> products = q.getResultList();
+        Assert.assertNotNull(products);
+        Assert.assertEquals(1, products.size());
+        
+        em.remove(em.find(Product.class, products.get(0).getProductId()));
 
         ProductEcosystemMap ecosystem = new ProductEcosystemMap();
         ecosystem.setProduct(products.get(0));

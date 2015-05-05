@@ -53,9 +53,9 @@ import com.impetus.kundera.metadata.model.annotation.EntityAnnotationProcessor;
 /**
  * Implementation for <code>ManagedType</code> interface.
  * 
+ * @author vivek.mishra
  * @param <X>
  *            the generic entity type.
- * @author vivek.mishra
  */
 public abstract class AbstractManagedType<X> extends AbstractType<X> implements ManagedType<X>
 {
@@ -69,18 +69,46 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
     /** The declared plural attributes. */
     private Map<String, PluralAttribute<X, ?, ?>> declaredPluralAttributes;
 
-    @SuppressWarnings("unchecked")
+    /** The Constant validJPAAnnotations. */
     private static final List<Class<? extends Annotation>> validJPAAnnotations = Arrays.asList(
             AttributeOverrides.class, AttributeOverride.class);
 
+    /** The column bindings. */
     private Map<String, Column> columnBindings = new ConcurrentHashMap<String, Column>();
 
+    /** The model. */
     private InheritanceModel model;
 
+    /** The entity annotation processor. */
     private EntityAnnotationProcessor entityAnnotationProcessor;
 
+    /** The sub managed types. */
     private List<ManagedType<X>> subManagedTypes = new ArrayList<ManagedType<X>>();
-    
+
+    /** The has lob attribute. */
+    private boolean hasLobAttribute;
+
+    /**
+     * Checks for lob attribute.
+     * 
+     * @return true, if successful
+     */
+    public boolean hasLobAttribute()
+    {
+        return hasLobAttribute;
+    }
+
+    /**
+     * Sets the checks for lob attribute.
+     * 
+     * @param hasLobAttribute
+     *            the new checks for lob attribute
+     */
+    public void setHasLobAttribute(boolean hasLobAttribute)
+    {
+        this.hasLobAttribute = hasLobAttribute;
+    }
+
     /** Whether a managed type has validation constraints. */
     protected boolean hasValidationConstraints = false;
 
@@ -96,10 +124,6 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
      *            persistenceType.
      * @param superClazzType
      *            the super clazz type
-     * @param declaredSingluarAttribs
-     *            the declared singluar attribs
-     * @param declaredPluralAttributes
-     *            the declared plural attributes
      */
     AbstractManagedType(Class<X> clazz, javax.persistence.metamodel.Type.PersistenceType persistenceType,
             ManagedType<? super X> superClazzType)
@@ -186,7 +210,6 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
      * javax.persistence.metamodel.ManagedType#getDeclaredSingularAttribute(
      * java.lang.String, java.lang.Class)
      */
-    @SuppressWarnings("unchecked")
     @Override
     public <Y> SingularAttribute<X, Y> getDeclaredSingularAttribute(String paramString, Class<Y> paramClass)
     {
@@ -544,6 +567,15 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
         return attribute;
     }
 
+    /**
+     * Gets the singular attribute.
+     * 
+     * @param paramString
+     *            the param string
+     * @param checkValidity
+     *            the check validity
+     * @return the singular attribute
+     */
     private SingularAttribute<? super X, ?> getSingularAttribute(String paramString, boolean checkValidity)
     {
         SingularAttribute<? super X, ?> attribute = getDeclaredSingularAttribute(paramString, false);
@@ -767,11 +799,24 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
                 "attribute of the given name and type is not present in the managed type, for name:" + paramName);
     }
 
+    /**
+     * Gets the super clazz type.
+     * 
+     * @return the super clazz type
+     */
     ManagedType<? super X> getSuperClazzType()
     {
         return superClazzType;
     }
 
+    /**
+     * Adds the singular attribute.
+     * 
+     * @param attributeName
+     *            the attribute name
+     * @param attribute
+     *            the attribute
+     */
     public void addSingularAttribute(String attributeName, SingularAttribute<X, ?> attribute)
     {
         if (declaredSingluarAttribs == null)
@@ -785,6 +830,14 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
         onEmbeddableAttribute((Field) attribute.getJavaMember());
     }
 
+    /**
+     * Adds the plural attribute.
+     * 
+     * @param attributeName
+     *            the attribute name
+     * @param attribute
+     *            the attribute
+     */
     public void addPluralAttribute(String attributeName, PluralAttribute<X, ?, ?> attribute)
     {
         if (declaredPluralAttributes == null)
@@ -799,11 +852,24 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
 
     }
 
+    /**
+     * Gets the attribute binding.
+     * 
+     * @param attribute
+     *            the attribute
+     * @return the attribute binding
+     */
     public Column getAttributeBinding(Field attribute)
     {
         return columnBindings.get(attribute.getName());
     }
 
+    /**
+     * Adds the sub managed type.
+     * 
+     * @param inheritedType
+     *            the inherited type
+     */
     private void addSubManagedType(ManagedType inheritedType)
     {
 
@@ -813,6 +879,11 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
         }
     }
 
+    /**
+     * Gets the sub managed type.
+     * 
+     * @return the sub managed type
+     */
     public List<ManagedType<X>> getSubManagedType()
     {
         return subManagedTypes;
@@ -1029,9 +1100,13 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
     }
 
     /**
+     * Gets the declared attribute.
+     * 
      * @param paramName
+     *            the param name
      * @param checkValidity
-     * @return
+     *            the check validity
+     * @return the declared attribute
      */
     private Attribute<X, ?> getDeclaredAttribute(String paramName, boolean checkValidity)
     {
@@ -1053,10 +1128,14 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
      * Returns declared singular attribute.
      * 
      * @param <Y>
+     *            the generic type
      * @param paramString
+     *            the param string
      * @param paramClass
+     *            the param class
      * @param checkValidity
-     * @return
+     *            the check validity
+     * @return the declared singular attribute
      */
     private <Y> SingularAttribute<X, Y> getDeclaredSingularAttribute(String paramString, Class<Y> paramClass,
             boolean checkValidity)
@@ -1081,8 +1160,10 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
      * Returns declared singular attribute.
      * 
      * @param paramString
+     *            the param string
      * @param checkValidity
-     * @return
+     *            the check validity
+     * @return the declared singular attribute
      */
     private SingularAttribute<X, ?> getDeclaredSingularAttribute(String paramString, boolean checkValidity)
     {
@@ -1100,11 +1181,14 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
     }
 
     /**
-     * On validity check
+     * On validity check.
      * 
      * @param paramString
+     *            the param string
      * @param checkValidity
+     *            the check validity
      * @param attribute
+     *            the attribute
      */
     private void onValidity(String paramString, boolean checkValidity, SingularAttribute<? super X, ?> attribute)
     {
@@ -1115,6 +1199,9 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
         }
     }
 
+    /**
+     * Bind type annotations.
+     */
     private void bindTypeAnnotations()
     {
         // TODO:: need to check @Embeddable attributes as well!
@@ -1150,6 +1237,12 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
         }
     }
 
+    /**
+     * Bind attribute.
+     * 
+     * @param annotation
+     *            the annotation
+     */
     private void bindAttribute(Annotation annotation)
     {
         String fieldname = ((AttributeOverride) annotation).name();
@@ -1157,6 +1250,9 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
         ((AbstractManagedType) this.superClazzType).columnBindings.put(fieldname, column);
     }
 
+    /**
+     * Check for valid.
+     */
     private void checkForValid()
     {
         if (this.superClazzType == null)
@@ -1208,6 +1304,23 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
         return model;
     }
 
+    /**
+     * On strategy type.
+     * 
+     * @param model
+     *            the model
+     * @param strategyType
+     *            the strategy type
+     * @param descriminator
+     *            the descriminator
+     * @param descriminatorValue
+     *            the descriminator value
+     * @param tableName
+     *            the table name
+     * @param schemaName
+     *            the schema name
+     * @return the inheritance model
+     */
     private InheritanceModel onStrategyType(InheritanceModel model, InheritanceType strategyType, String descriminator,
             String descriminatorValue, String tableName, String schemaName)
     {
@@ -1250,49 +1363,102 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
         return model;
     }
 
+    /**
+     * Checks if is inherited.
+     * 
+     * @return true, if is inherited
+     */
     public boolean isInherited()
     {
         return this.model != null;
     }
 
+    /**
+     * Gets the inheritence type.
+     * 
+     * @return the inheritence type
+     */
     public InheritanceType getInheritenceType()
     {
 
         return isInherited() ? this.model.inheritenceType : null;
     }
 
+    /**
+     * Gets the discriminator column.
+     * 
+     * @return the discriminator column
+     */
     public String getDiscriminatorColumn()
     {
         return isInherited() ? this.model.discriminatorColumn : null;
     }
 
+    /**
+     * Gets the discriminator value.
+     * 
+     * @return the discriminator value
+     */
     public String getDiscriminatorValue()
     {
         return isInherited() ? this.model.discriminatorValue : null;
     }
 
+    /**
+     * Gets the table name.
+     * 
+     * @return the table name
+     */
     public String getTableName()
     {
         return isInherited() ? this.model.tableName : null;
     }
 
+    /**
+     * Gets the schema name.
+     * 
+     * @return the schema name
+     */
     public String getSchemaName()
     {
         return isInherited() ? this.model.schemaName : null;
     }
 
+    /**
+     * The Class InheritanceModel.
+     */
     private static class InheritanceModel
     {
+
+        /** The inheritence type. */
         private InheritanceType inheritenceType;
 
+        /** The discriminator column. */
         private String discriminatorColumn;
 
+        /** The discriminator value. */
         private String discriminatorValue;
 
+        /** The table name. */
         private String tableName;
 
+        /** The schema name. */
         private String schemaName;
 
+        /**
+         * Instantiates a new inheritance model.
+         * 
+         * @param type
+         *            the type
+         * @param discriminatorCol
+         *            the discriminator col
+         * @param discriminatorValue
+         *            the discriminator value
+         * @param tableName
+         *            the table name
+         * @param schemaName
+         *            the schema name
+         */
         InheritanceModel(final InheritanceType type, final String discriminatorCol, final String discriminatorValue,
                 final String tableName, final String schemaName)
         {
@@ -1303,6 +1469,16 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
             this.schemaName = schemaName;
         }
 
+        /**
+         * Instantiates a new inheritance model.
+         * 
+         * @param type
+         *            the type
+         * @param tableName
+         *            the table name
+         * @param schemaName
+         *            the schema name
+         */
         InheritanceModel(final InheritanceType type, final String tableName, final String schemaName)
         {
             this.inheritenceType = type;
@@ -1311,12 +1487,19 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
         }
     }
 
+    /**
+     * Gets the entity annotation.
+     * 
+     * @return the entity annotation
+     */
     public EntityAnnotationProcessor getEntityAnnotation()
     {
         return entityAnnotationProcessor;
     }
 
     /**
+     * Checks for validation constraints.
+     * 
      * @return the hasValidationConstraints
      */
     public boolean hasValidationConstraints()
@@ -1334,9 +1517,10 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
 
     /**
      * Sets the validation constraint present field if an attribute has a
-     * constraint present
+     * constraint present.
      * 
      * @param field
+     *            the field
      */
     private void onValidateAttributeConstraints(Field field)
     {
@@ -1349,12 +1533,12 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
         }
 
     }
-    
+
     /**
-     * Sets if a managed type consists of an embeddable attribute
-     * 
+     * Sets if a managed type consists of an embeddable attribute.
      * 
      * @param field
+     *            the field
      */
     private void onEmbeddableAttribute(Field field)
     {
@@ -1367,8 +1551,10 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
         }
 
     }
-    
+
     /**
+     * Checks for embeddable attribute.
+     * 
      * @return the hasEmbeddableAttribute
      */
     public boolean hasEmbeddableAttribute()

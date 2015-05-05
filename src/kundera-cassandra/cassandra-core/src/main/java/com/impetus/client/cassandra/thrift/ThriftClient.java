@@ -1055,6 +1055,10 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     @Override
     public List executeQuery(Class clazz, List<String> relationalField, boolean isNative, String cqlQuery)
     {
+        if (clazz == null)
+        {
+            return super.executeScalarQuery(cqlQuery);
+        }
         return super.executeSelectQuery(clazz, relationalField, dataHandler, isNative, cqlQuery);
     }
 

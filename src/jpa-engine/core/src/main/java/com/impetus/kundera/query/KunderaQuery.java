@@ -963,8 +963,16 @@ public class KunderaQuery
      */
     public final EntityMetadata getEntityMetadata()
     {
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClass);
-        if (metadata == null)
+        EntityMetadata metadata = null;
+        try
+        {
+            metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClass);
+        }
+        catch (KunderaException e)
+        {
+            logger.info("No Entity class provided, Proceeding as Scalar Query");
+        }
+        if (!this.isNativeQuery && metadata == null)
         {
             throw new KunderaException("Unable to load entity metadata for : " + entityClass);
         }
@@ -1244,6 +1252,17 @@ public class KunderaQuery
     public String getPersistenceUnit()
     {
         return persistenceUnit;
+    }
+
+    /**
+     * Sets the persistence unit.
+     * 
+     * @param persistenceUnit
+     *            the new persistence unit
+     */
+    public void setPersistenceUnit(String persistenceUnit)
+    {
+        this.persistenceUnit = persistenceUnit;
     }
 
     /**

@@ -18,7 +18,7 @@ public class CassandraGeneratedIdCqlTest extends CassandraGeneratedIdTest
     @After
     public void tearDown() throws Exception
     {
-        super.setUp();
+        super.tearDown();
     }
 
 }

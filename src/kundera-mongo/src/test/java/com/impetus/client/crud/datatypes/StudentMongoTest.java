@@ -69,12 +69,17 @@ public class StudentMongoTest extends StudentMongoBase<StudentMongo>
         teardownInternal(persistenceUnit);
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     @PerfTest(invocations = 1)
-    public void executeTests()
+    public void executeTestsForInsert()
     {
         onInsert();
+    }
+
+    @Test
+    @PerfTest(invocations = 1)
+    public void executeTestsForUpdate()
+    {
         onMerge();
     }
 
@@ -97,12 +102,12 @@ public class StudentMongoTest extends StudentMongoBase<StudentMongo>
         }
         catch (InstantiationException e)
         {
-            
+
             Assert.fail(e.getMessage());
         }
         catch (IllegalAccessException e)
         {
-            
+
             Assert.fail(e.getMessage());
         }
 
@@ -607,7 +612,6 @@ public class StudentMongoTest extends StudentMongoBase<StudentMongo>
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertTrue(results.isEmpty());
-
     }
 
     /**
@@ -657,9 +661,18 @@ public class StudentMongoTest extends StudentMongoBase<StudentMongo>
     @Override
     void deleteSchema()
     {
-        em.remove(em.find(StudentMongo.class, studentId1));
-        em.remove(em.find(StudentMongo.class, studentId2));
-        em.remove(em.find(StudentMongo.class, studentId3));
+        StudentMongo s1 = em.find(StudentMongo.class, studentId1);
+        StudentMongo s2 = em.find(StudentMongo.class, studentId1);
+        StudentMongo s3 = em.find(StudentMongo.class, studentId1);
+
+        if (s1 != null)
+            em.remove(s1);
+
+        if (s2 != null)
+            em.remove(s2);
+
+        if (s3 != null)
+            em.remove(s3);
     }
 
 }

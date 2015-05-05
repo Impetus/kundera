@@ -1,5 +1,5 @@
 /*******************************************************************************
- * * Copyright 2012 Impetus Infotech.
+ *  * Copyright 2015 Impetus Infotech.
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.impetus.client.mongodb;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.metamodel.EntityType;
+import javax.xml.bind.DatatypeConverter;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.slf4j.Logger;
@@ -61,17 +64,22 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBEncoder;
 import com.mongodb.DBObject;
 import com.mongodb.DefaultDBEncoder;
+import com.mongodb.MongoException;
 import com.mongodb.WriteConcern;
 import com.mongodb.WriteResult;
+import com.mongodb.gridfs.GridFS;
+import com.mongodb.gridfs.GridFSDBFile;
+import com.mongodb.gridfs.GridFSInputFile;
 import com.mongodb.util.JSON;
 import com.mongodb.util.JSONParseException;
 
 /**
  * Client class for MongoDB database.
  * 
- * @author impetusopensource
+ * @author Devender Yadav
  */
 public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, Batcher, ClientPropertiesSetter
+
 {
     /** The mongo db. */
     private DB mongoDb;
@@ -251,14 +259,36 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClass);
 
-        List<String> relationNames = entityMetadata.getRelationNames();
-
-        BasicDBObject query = new BasicDBObject();
-
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 entityMetadata.getPersistenceUnit());
 
         AbstractManagedType managedType = (AbstractManagedType) metaModel.entity(entityMetadata.getEntityClazz());
+
+        return managedType.hasLobAttribute() ? findGFSEntity(entityMetadata, entityClass, key) : find(entityClass, key,
+                entityMetadata, metaModel, managedType);
+    }
+
+    /**
+     * Find.
+     * 
+     * @param entityClass
+     *            the entity class
+     * @param key
+     *            the key
+     * @param entityMetadata
+     *            the entity metadata
+     * @param metaModel
+     *            the meta model
+     * @param managedType
+     *            the managed type
+     * @return the object
+     */
+    private Object find(Class entityClass, Object key, EntityMetadata entityMetadata, MetamodelImpl metaModel,
+            AbstractManagedType managedType)
+    {
+        List<String> relationNames = entityMetadata.getRelationNames();
+
+        BasicDBObject query = new BasicDBObject();
 
         if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
         {
@@ -331,6 +361,46 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         {
             return enhancedEntity;
         }
+    }
+
+    /**
+     * Find gfs entity.
+     * 
+     * @param entityMetadata
+     *            the entity metadata
+     * @param entityClass
+     *            the entity class
+     * @param key
+     *            the key
+     * @return the object
+     */
+    private Object findGFSEntity(EntityMetadata entityMetadata, Class entityClass, Object key)
+    {
+        GridFSDBFile outputFile = findGridFSDBFile(entityMetadata, key);
+        if (outputFile != null)
+        {
+            Object entity = instantiateEntity(entityClass, null);
+            return handler.getEntityFromGFSDBFile(entityMetadata.getEntityClazz(), entity, entityMetadata, outputFile,
+                    kunderaMetadata);
+        }
+        else
+            return null;
+    }
+
+    /**
+     * Find grid fsdb file.
+     * 
+     * @param entityMetadata
+     *            the entity metadata
+     * @param key
+     *            the key
+     * @return the grid fsdb file
+     */
+    private GridFSDBFile findGridFSDBFile(EntityMetadata entityMetadata, Object key)
+    {
+        DBObject query = new BasicDBObject("metadata.id", key);
+        GridFS gfs = new GridFS(mongoDb, entityMetadata.getTableName());
+        return gfs.findOne(query);
     }
 
     /**
@@ -518,37 +588,43 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     public void delete(Object entity, Object pKey)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entity.getClass());
-
-        // Find the DBObject to remove first
-        BasicDBObject query = new BasicDBObject();
-
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 entityMetadata.getPersistenceUnit());
+        AbstractManagedType managedType = (AbstractManagedType) metaModel.entity(entityMetadata.getEntityClazz());
 
-        if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
+        DBObject query = new BasicDBObject();
+
+        if (managedType.hasLobAttribute())
         {
-            MongoDBUtils.populateCompoundKey(query, entityMetadata, metaModel, pKey);
+            GridFS gfs = new GridFS(mongoDb, entityMetadata.getTableName());
+            query.put("metadata.id", pKey);
+            gfs.remove(query);
         }
+
         else
         {
+            if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
+            {
+                MongoDBUtils.populateCompoundKey(query, entityMetadata, metaModel, pKey);
+            }
+            else
+            {
+                query.put("_id", MongoDBUtils.populateValue(pKey, pKey.getClass()));
+            }
+            // For secondary tables.
+            List<String> secondaryTables = ((DefaultEntityAnnotationProcessor) managedType.getEntityAnnotation())
+                    .getSecondaryTablesName();
+            secondaryTables.add(entityMetadata.getTableName());
 
-            query.put("_id", MongoDBUtils.populateValue(pKey, pKey.getClass()));
+            for (String collectionName : secondaryTables)
+            {
+                KunderaCoreUtils.printQuery("Drop existing collection:" + query, showQuery);
+                DBCollection dbCollection = mongoDb.getCollection(collectionName);
+                dbCollection.remove(query, getWriteConcern(), encoder);
+            }
+
+            getIndexManager().remove(entityMetadata, entity, pKey);
         }
-
-        AbstractManagedType managedType = (AbstractManagedType) metaModel.entity(entityMetadata.getEntityClazz());
-        // For secondary tables.
-        List<String> secondaryTables = ((DefaultEntityAnnotationProcessor) managedType.getEntityAnnotation())
-                .getSecondaryTablesName();
-        secondaryTables.add(entityMetadata.getTableName());
-
-        for (String collectionName : secondaryTables)
-        {
-            KunderaCoreUtils.printQuery("Drop existing collection:" + query, showQuery);
-            DBCollection dbCollection = mongoDb.getCollection(collectionName);
-            dbCollection.remove(query, getWriteConcern(), encoder);
-        }
-
-        getIndexManager().remove(entityMetadata, entity, pKey);
     }
 
     /*
@@ -696,9 +772,105 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     @Override
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
     {
-        Map<String, List<DBObject>> collections = new HashMap<String, List<DBObject>>();
-        collections = onPersist(collections, entity, id, entityMetadata, rlHolders, isUpdate);
-        onFlushCollection(collections);
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                entityMetadata.getPersistenceUnit());
+
+        AbstractManagedType managedType = (AbstractManagedType) metaModel.entity(entityMetadata.getEntityClazz());
+
+        if (managedType.hasLobAttribute())
+        {
+            onPersistGFS(entity, id, entityMetadata, isUpdate);
+        }
+
+        else
+        {
+            Map<String, List<DBObject>> collections = new HashMap<String, List<DBObject>>();
+            collections = onPersist(collections, entity, id, entityMetadata, rlHolders, isUpdate);
+            onFlushCollection(collections);
+        }
+    }
+
+    /**
+     * Save grid fs file.
+     * 
+     * @param gfsInputFile
+     *            the gfs input file
+     */
+    private void saveGridFSFile(GridFSInputFile gfsInputFile, EntityMetadata em)
+    {
+        gfsInputFile.save();
+        log.info("Input GridFS file: " + gfsInputFile.getFilename() + " is saved successfully in " + em.getTableName()
+                + ".chunks and metadata in " + em.getTableName() + ".files.");
+        gfsInputFile.validate();
+        log.info("Input GridFS file: " + gfsInputFile.getFilename() + " is validated.");
+    }
+
+    /**
+     * On persist gfs.
+     * 
+     * @param entity
+     *            the entity
+     * @param id
+     *            the id
+     * @param entityMetadata
+     *            the entity metadata
+     * @param isUpdate
+     *            the is update
+     */
+    private void onPersistGFS(Object entity, Object id, EntityMetadata entityMetadata, boolean isUpdate)
+    {
+        GridFS gfs = new GridFS(mongoDb, entityMetadata.getTableName());
+        if (!isUpdate)
+        {
+            GridFSInputFile gfsInputFle = handler.getGFSInputFileFromEntity(gfs, entityMetadata, entity,
+                    kunderaMetadata);
+            saveGridFSFile(gfsInputFle, entityMetadata);
+        }
+        else
+        {
+            Object val = handler.getLobFromGFSEntity(gfs, entityMetadata, entity, kunderaMetadata);
+            String md5 = calculateMD5(val);
+            GridFSDBFile outputFile = findGridFSDBFile(entityMetadata, id);
+            if (md5.equals(outputFile.getMD5()))
+            {
+                DBObject metadata = handler.getMetadataFromGFSEntity(gfs, entityMetadata, entity, kunderaMetadata);
+                outputFile.setMetaData(metadata);
+                outputFile.save();
+            }
+            else
+            {
+                GridFSInputFile gfsInputFile = handler.getGFSInputFileFromEntity(gfs, entityMetadata, entity,
+                        kunderaMetadata);
+                saveGridFSFile(gfsInputFile, entityMetadata);
+                DBObject query = new BasicDBObject();
+                query.put("_id", outputFile.getId());
+                gfs.remove(query);
+            }
+        }
+    }
+
+    /**
+     * Calculate m d5.
+     * 
+     * @param val
+     *            the val
+     * @return the string
+     */
+    private String calculateMD5(Object val)
+    {
+        MessageDigest md = null;
+        try
+        {
+            md = MessageDigest.getInstance("MD5");
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            log.error("Unable to calculate MD5 for file, Caused By: ", e);
+        }
+        md.update((byte[]) val);
+
+        byte[] digest = md.digest();
+        return DatatypeConverter.printHexBinary(digest).toLowerCase();
     }
 
     /*
@@ -821,6 +993,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         // String documentName = metadata.getTableName();
         Map<String, DBObject> documents = handler.getDocumentFromEntity(metadata, entity, relationHolders,
                 kunderaMetadata);
+
         if (isUpdate)
         {
             for (String documentName : documents.keySet())
@@ -846,6 +1019,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
                     obj.putAll(documents.get(documentName));
 
                     dbCollection.save(obj);
+
                 }
                 else
                 {
@@ -1017,6 +1191,24 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
                     persistenceUnit);
             batchSize = puMetadata.getBatchSize();
         }
+    }
+
+    // @Override
+    // public Object generate()
+    // {
+    // // return auto generated id used by mongodb.
+    // return new ObjectId();
+    // }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getIdGenerator()
+     */
+    @Override
+    public Generator getIdGenerator()
+    {
+        return (Generator) KunderaCoreUtils.createNewInstance(MongoDBIdGenerator.class);
     }
 
     /**
@@ -1237,21 +1429,18 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     {
         DBCollection collection = mongoDb.getCollection(collName);
         KunderaCoreUtils.printQuery("Update collection:" + query, showQuery);
-        WriteResult result = collection.update(query, update);
-        if (result.getError() != null || result.getN() <= 0)
+        WriteResult result = null;
+        try
+        {
+            result = collection.update(query, update);
+        }
+        catch (MongoException ex)
+        {
+            return -1;
+        }
+        if (result.getN() <= 0)
             return -1;
         return result.getN();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#getIdGenerator()
-     */
-    @Override
-    public Generator getIdGenerator()
-    {
-        return (Generator) KunderaCoreUtils.createNewInstance(MongoDBIdGenerator.class);
     }
 
 }

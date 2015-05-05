@@ -177,20 +177,24 @@ public class QueryResolver
      * @return
      */
     public Query getQueryImplementation(String jpaQuery, Class queryClazz,
-            final PersistenceDelegator persistenceDelegator, EntityMetadata metadata)
+            final PersistenceDelegator persistenceDelegator, EntityMetadata metadata, String persistenceUnit)
     {
         KunderaQuery kunderaQuery = new KunderaQuery(jpaQuery, persistenceDelegator.getKunderaMetadata());
         kunderaQuery.isNativeQuery = true;
+        kunderaQuery.setPersistenceUnit(persistenceUnit);
 
         try
         {
-            Field entityClazzField = kunderaQuery.getClass().getDeclaredField("entityClass");
-            if (entityClazzField != null && !entityClazzField.isAccessible())
+            if (metadata != null)
             {
-                entityClazzField.setAccessible(true);
-            }
+                Field entityClazzField = kunderaQuery.getClass().getDeclaredField("entityClass");
+                if (entityClazzField != null && !entityClazzField.isAccessible())
+                {
+                    entityClazzField.setAccessible(true);
+                }
 
-            entityClazzField.set(kunderaQuery, metadata.getEntityClazz());
+                entityClazzField.set(kunderaQuery, metadata.getEntityClazz());
+            }
         }
         catch (Exception e)
         {

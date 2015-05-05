@@ -46,7 +46,7 @@ public class TriangleQueryImpl implements GeospatialQuery
         if (q == null)
             q = new BasicDBObject();
 
-        q.put(geolocationColumnName, new BasicDBObject("$within", new BasicDBObject("$polygon", triangleList)));
+        q.put(geolocationColumnName, new BasicDBObject("$geoWithin", new BasicDBObject("$polygon", triangleList)));
 
         return q;
     }

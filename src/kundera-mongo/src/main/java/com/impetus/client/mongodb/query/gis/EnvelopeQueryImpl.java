@@ -47,7 +47,7 @@ public class EnvelopeQueryImpl implements GeospatialQuery
         if (q == null)
             q = new BasicDBObject();
 
-        q.put(geolocationColumnName, new BasicDBObject("$within", new BasicDBObject("$box", boxList)));
+        q.put(geolocationColumnName, new BasicDBObject("$geoWithin", new BasicDBObject("$box", boxList)));
 
         return q;
     }
