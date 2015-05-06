@@ -6,6 +6,8 @@ package com.impetus.client.mongodb.utils;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Date;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -14,6 +16,10 @@ import java.util.Properties;
 
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
+import javax.xml.bind.DatatypeConverter;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.loader.ClientLoaderException;
@@ -28,11 +34,36 @@ import com.mongodb.DB;
 import com.mongodb.DBObject;
 
 /**
- * @author Kuldeep Mishra
+ * The Class MongoDBUtils.
  * 
+ * @author Kuldeep Mishra
  */
 public class MongoDBUtils
 {
+    /** The Constant logger. */
+    private static final Logger logger = LoggerFactory.getLogger(MongoDBUtils.class);
+
+    /** The Constant METADATA. */
+    public static final String METADATA = "metadata";
+
+    /** The Constant FILES. */
+    public static final String FILES = ".files";
+
+    /** The Constant CHUNKS. */
+    public static final String CHUNKS = ".chunks";
+
+    /**
+     * Populate compound key.
+     * 
+     * @param dbObj
+     *            the db obj
+     * @param m
+     *            the m
+     * @param metaModel
+     *            the meta model
+     * @param id
+     *            the id
+     */
     public static void populateCompoundKey(DBObject dbObj, EntityMetadata m, MetamodelImpl metaModel, Object id)
     {
         EmbeddableType compoundKey = metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
@@ -45,10 +76,15 @@ public class MongoDBUtils
     }
 
     /**
+     * Gets the compound key columns.
+     * 
      * @param m
+     *            the m
      * @param id
+     *            the id
      * @param compoundKey
-     * @param compoundKeyObj
+     *            the compound key
+     * @return the compound key columns
      */
     public static BasicDBObject getCompoundKeyColumns(EntityMetadata m, Object id, EmbeddableType compoundKey)
     {
@@ -72,8 +108,13 @@ public class MongoDBUtils
     }
 
     /**
+     * Populate value.
+     * 
      * @param valObj
-     * @return
+     *            the val obj
+     * @param clazz
+     *            the clazz
+     * @return the object
      */
     public static Object populateValue(Object valObj, Class clazz)
     {
@@ -88,6 +129,13 @@ public class MongoDBUtils
         return valObj;
     }
 
+    /**
+     * Checks if is UT f8 value.
+     * 
+     * @param clazz
+     *            the clazz
+     * @return true, if is UT f8 value
+     */
     private static boolean isUTF8Value(Class<?> clazz)
     {
         return (clazz.isAssignableFrom(BigDecimal.class))
@@ -96,10 +144,15 @@ public class MongoDBUtils
     }
 
     /**
+     * Gets the translated object.
+     * 
      * @param value
+     *            the value
      * @param sourceClass
+     *            the source class
      * @param targetClass
-     * @return
+     *            the target class
+     * @return the translated object
      */
     public static Object getTranslatedObject(Object value, Class<?> sourceClass, Class<?> targetClass)
     {
@@ -164,7 +217,22 @@ public class MongoDBUtils
             throw new KunderaAuthenticationException(errMsg);
         }
     }
-    
+
+    /**
+     * Gets the DB object.
+     * 
+     * @param m
+     *            the m
+     * @param tableName
+     *            the table name
+     * @param dbObjects
+     *            the db objects
+     * @param metaModel
+     *            the meta model
+     * @param id
+     *            the id
+     * @return the DB object
+     */
     public static DBObject getDBObject(EntityMetadata m, String tableName, Map<String, DBObject> dbObjects,
             MetamodelImpl metaModel, Object id)
     {
@@ -185,5 +253,29 @@ public class MongoDBUtils
             dbObj.put("_id", MongoDBUtils.populateValue(id, id.getClass()));
         }
         return dbObj;
+    }
+
+    /**
+     * Calculate m d5.
+     * 
+     * @param val
+     *            the val
+     * @return the string
+     */
+    public static String calculateMD5(Object val)
+    {
+        MessageDigest md = null;
+        try
+        {
+            md = MessageDigest.getInstance("MD5");
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            logger.error("Unable to calculate MD5 for file, Caused By: ", e);
+        }
+        md.update((byte[]) val);
+
+        byte[] digest = md.digest();
+        return DatatypeConverter.printHexBinary(digest).toLowerCase();
     }
 }

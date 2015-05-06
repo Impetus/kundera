@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.io.ByteStreams;
 import com.impetus.client.mongodb.utils.MongoDBUtils;
+import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -204,17 +205,16 @@ public final class DefaultMongoDBDataHandler implements MongoDBDataHandler
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
         AbstractManagedType managedType = (AbstractManagedType) metaModel.entity(m.getEntityClazz());
-        Object rowKey = ((DBObject) outputFile.get("metadata")).get("id");
+        String id = ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName();
+        Object rowKey = ((DBObject) outputFile.get(MongoDBUtils.METADATA)).get(id);
         Class<?> rowKeyValueClass = rowKey.getClass();
-        Class<?> idClass = null;
-        idClass = m.getIdAttribute().getJavaType();
+        Class<?> idClass = m.getIdAttribute().getJavaType();
         rowKey = MongoDBUtils.populateValue(rowKey, idClass);
         rowKey = MongoDBUtils.getTranslatedObject(rowKey, rowKeyValueClass, idClass);
         PropertyAccessorHelper.setId(entity, m, rowKey);
         EntityType entityType = metaModel.entity(entityClazz);
 
         Set<Attribute> columns = entityType.getAttributes();
-
         for (Attribute column : columns)
         {
             boolean isLob = ((Field) column.getJavaMember()).getAnnotation(Lob.class) != null;
@@ -230,15 +230,13 @@ public final class DefaultMongoDBDataHandler implements MongoDBDataHandler
                     catch (IOException e)
                     {
                         log.error("Error while converting inputstream from GridFSDBFile to byte array, Caused by: ", e);
+                        throw new KunderaException(
+                                "Error while converting inputstream from GridFSDBFile to byte array, Caused by: ", e);
                     }
                 }
             }
             else if (!column.equals(m.getIdAttribute()))
-            {
-                String jpaColumnName = ((AbstractAttribute) column).getJPAColumnName();
-
                 DocumentObjectMapper.setFieldValue(outputFile, entity, column, true);
-            }
         }
         return entity;
     }
@@ -360,13 +358,11 @@ public final class DefaultMongoDBDataHandler implements MongoDBDataHandler
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
         AbstractManagedType managedType = (AbstractManagedType) metaModel.entity(m.getEntityClazz());
-
         EntityType entityType = metaModel.entity(m.getEntityClazz());
         GridFSInputFile gridFSInputFile = null;
 
         DBObject gfsMetadata = new BasicDBObject();
-        gfsMetadata.put("id", PropertyAccessorHelper.getId(entity, m));
-        // Populate columns
+
         Set<Attribute> columns = entityType.getAttributes();
         for (Attribute column : columns)
         {
@@ -378,8 +374,7 @@ public final class DefaultMongoDBDataHandler implements MongoDBDataHandler
             }
             else
             {
-                if (!column.equals(m.getIdAttribute()))
-                    DocumentObjectMapper.extractFieldValue(entity, gfsMetadata, column);
+                DocumentObjectMapper.extractFieldValue(entity, gfsMetadata, column);
             }
         }
         gridFSInputFile.setMetaData(gfsMetadata);
@@ -387,7 +382,7 @@ public final class DefaultMongoDBDataHandler implements MongoDBDataHandler
     }
 
     /**
-     * Creates the gfs input file.
+     * Creates the GFS Input file.
      * 
      * @param gfs
      *            the gfs
@@ -411,15 +406,13 @@ public final class DefaultMongoDBDataHandler implements MongoDBDataHandler
             }
             catch (IOException e)
             {
-                log.error("Error while creating GridFS file, Caused by: ", e);
+                log.error("Error while creating GridFS file for \"" + f.getName() + "\". Caused by: ", e);
+                throw new KunderaException("Error while creating GridFS file for \"" + f.getName() + "\". Caused by: ",
+                        e);
             }
         }
-        else if (f.getType().isAssignableFrom(InputStream.class))
-            gridFSInputFile = gfs.createFile((InputStream) obj);
-
         else
-            new UnsupportedOperationException("unsupported data type for Lob object.");
-
+            new UnsupportedOperationException(f.getType().getSimpleName() + " is unsupported Lob object");
         return gridFSInputFile;
     }
 
@@ -621,7 +614,7 @@ public final class DefaultMongoDBDataHandler implements MongoDBDataHandler
     }
 
     /**
-     * Gets the lob from gfs entity.
+     * Gets the lob from GFS entity.
      * 
      * @param gfs
      *            the gfs
@@ -635,26 +628,23 @@ public final class DefaultMongoDBDataHandler implements MongoDBDataHandler
      */
     public Object getLobFromGFSEntity(GridFS gfs, EntityMetadata m, Object entity, KunderaMetadata kunderaMetadata)
     {
-
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
         EntityType entityType = metaModel.entity(m.getEntityClazz());
         Set<Attribute> columns = entityType.getAttributes();
-        Object val = null;
         for (Attribute column : columns)
         {
             boolean isLob = ((Field) column.getJavaMember()).getAnnotation(Lob.class) != null;
             if (isLob)
             {
-                val = PropertyAccessorHelper.getObject(entity, (Field) column.getJavaMember());
-                break;
+                return PropertyAccessorHelper.getObject(entity, (Field) column.getJavaMember());
             }
         }
-        return val;
+        return null;
     }
 
     /**
-     * Gets the metadata from gfs entity.
+     * Gets the metadata from GFS entity.
      * 
      * @param gfs
      *            the gfs
@@ -675,13 +665,11 @@ public final class DefaultMongoDBDataHandler implements MongoDBDataHandler
         EntityType entityType = metaModel.entity(m.getEntityClazz());
 
         DBObject gfsMetadata = new BasicDBObject();
-        gfsMetadata.put("id", PropertyAccessorHelper.getId(entity, m));
-        // Populate columns
         Set<Attribute> columns = entityType.getAttributes();
         for (Attribute column : columns)
         {
             boolean isLob = ((Field) column.getJavaMember()).getAnnotation(Lob.class) != null;
-            if (!isLob && !column.equals(m.getIdAttribute()))
+            if (!isLob)
             {
                 DocumentObjectMapper.extractFieldValue(entity, gfsMetadata, column);
             }
