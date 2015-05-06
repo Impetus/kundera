@@ -26,10 +26,11 @@ import javax.persistence.Persistence;
 
 import junit.framework.Assert;
 
-import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.impetus.client.utils.MongoUtils;
 import com.impetus.kundera.loader.KunderaAuthenticationException;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -40,47 +41,26 @@ import com.mongodb.ServerAddress;
 /**
  * The Class MongoAuthenticationTest.
  * 
- * @author vivek.mishra
+ * @author Devender yadav
  */
-public class MongoAuthenticationTest extends BaseTest
+public class MongoAuthenticationTest
 {
 
-    private EntityManagerFactory emf;
+    private final static String ADMIN_DB = "admin";
 
-    private String pu;
+    private final static String DB = "KunderaAuthTests";
 
-    /**
-     * Creating users.
-     * 
-     */
+    private static String _PU;
+
+    private static EntityManagerFactory emf;
+
+    private static MongoClient m;
+
     @BeforeClass
     public static void setUpBeforeClass() throws Exception
     {
-
-        String dbname = "KunderaAuthTests";
-        String adminDb = "admin";
-        MongoClient m = new MongoClient(new ServerAddress("localhost", 27017));
-
-        DB db = m.getDB(dbname);
-        DB db_admin = m.getDB(adminDb);
-
-        // adding user to "KunderaAuthTests" database
-        Map<String, Object> commandArguments = new BasicDBObject();
-        commandArguments.put("createUser", "kunderaUser");
-        commandArguments.put("pwd", "kunderapassword");
-        String[] roles = { "readWrite" };
-        commandArguments.put("roles", roles);
-        BasicDBObject command = new BasicDBObject(commandArguments);
-        db.command(command);
-
-        // adding user to "admin" database
-        commandArguments = new BasicDBObject();
-        commandArguments.put("createUser", "admin");
-        commandArguments.put("pwd", "password");
-        String[] admin_roles = { "readWriteAnyDatabase" };
-        commandArguments.put("roles", admin_roles);
-        command = new BasicDBObject(commandArguments);
-        db_admin.command(command);
+        m = new MongoClient(new ServerAddress("localhost", 27017));
+        addUsers();
     }
 
     /**
@@ -91,11 +71,9 @@ public class MongoAuthenticationTest extends BaseTest
     @Test
     public void authenticateWithValidCredentials()
     {
-
         try
         {
-
-            pu = "validAuthenticationMongoPu";
+            _PU = "validAuthenticationMongoPu";
             String dbname = "KunderaAuthTests";
             String username = "kunderaUser";
             String password = "kunderapassword";
@@ -110,7 +88,7 @@ public class MongoAuthenticationTest extends BaseTest
             Assert.assertNotNull(db.getCollectionNames());
 
             m.close();
-            emf = Persistence.createEntityManagerFactory(pu);
+            emf = Persistence.createEntityManagerFactory(_PU);
             Assert.assertNotNull(emf);
             EntityManager em = emf.createEntityManager();
             Assert.assertNotNull(em);
@@ -127,12 +105,12 @@ public class MongoAuthenticationTest extends BaseTest
      * Here user is in "admin" database assigned a role readWriteAnyDatabase. So
      * it can access "KunderaAuthTests" database too.
      */
-     @Test
+    @Test
     public void authenticateWithValidCredentialsMultipleDbs()
     {
         try
         {
-            pu = "validAuthenticationMongoPuAdminDb";
+            _PU = "validAuthenticationMongoPuAdminDb";
             String adminDb = "admin";
             String dbname = "KunderaAuthTests";
             String username = "admin";
@@ -149,7 +127,7 @@ public class MongoAuthenticationTest extends BaseTest
             Assert.assertNotNull(db_admin.getCollectionNames());
 
             m.close();
-            emf = Persistence.createEntityManagerFactory(pu);
+            emf = Persistence.createEntityManagerFactory(_PU);
             Assert.assertNotNull(emf);
             EntityManager em = emf.createEntityManager();
             Assert.assertNotNull(em);
@@ -164,13 +142,13 @@ public class MongoAuthenticationTest extends BaseTest
      * Authenticate with invalid credentials.
      * 
      */
-     @Test
+    @Test
     public void authenticateWithInValidCredentials()
     {
         Set<String> collectionList = new HashSet<String>();
         try
         {
-            pu = "validAuthenticationMongoPu";
+            _PU = "validAuthenticationMongoPu";
             String dbname = "KunderaAuthTests";
             String username = "kunderaUser";
             String password = "wrongPassword";
@@ -186,7 +164,7 @@ public class MongoAuthenticationTest extends BaseTest
             Assert.fail("Shouldn't be called");
 
             m.close();
-            emf = Persistence.createEntityManagerFactory(pu);
+            emf = Persistence.createEntityManagerFactory(_PU);
             Assert.assertNotNull(emf);
             EntityManager em = emf.createEntityManager();
             Assert.assertNotNull(em);
@@ -200,14 +178,14 @@ public class MongoAuthenticationTest extends BaseTest
     /**
      * Authenticate with invalid credentials in Persistence Unit.
      */
-     @Test
+    @Test
     public void authenticateWithInValidCredentialsPu()
     {
         EntityManager em = null;
         try
         {
-            pu = "invalidAuthenticationMongoPu";
-            emf = Persistence.createEntityManagerFactory(pu);
+            _PU = "invalidAuthenticationMongoPu";
+            emf = Persistence.createEntityManagerFactory(_PU);
             em = emf.createEntityManager();
             Assert.fail("Shouldn't be called");
         }
@@ -223,39 +201,63 @@ public class MongoAuthenticationTest extends BaseTest
      * No authentication test.
      * 
      */
-     @Test
+    @Test
     public void noAuthenticationTest()
     {
         try
         {
-            pu = "mongoTest";
+            _PU = "mongoTest";
             String dbname = "KunderaAuthTests";
             MongoClient m = new MongoClient(new ServerAddress("localhost", 27017));
             DB db = m.getDB(dbname);
 
             Assert.assertNotNull(db.getCollectionNames());
 
-            emf = Persistence.createEntityManagerFactory(pu);
+            emf = Persistence.createEntityManagerFactory(_PU);
             Assert.assertNotNull(emf);
             EntityManager em = emf.createEntityManager();
             Assert.assertNotNull(em);
         }
         catch (Exception e)
         {
-
             Assert.fail(e.getMessage());
         }
     }
 
-    /**
-     * Tear down.
-     * 
-     * @throws Exception
-     *             the exception
-     */
-    @After
-    public void tearDown() throws Exception
+    @AfterClass
+    public static void tearDownAfterClass() throws Exception
     {
-        // MongoUtils.dropDatabase(emf, pu);
+        dropUsers();
+        MongoUtils.dropDatabase(emf, _PU);
+    }
+
+    private static void addUsers()
+    {
+        DB db = m.getDB(DB);
+        Map<String, Object> commandArguments = new BasicDBObject();
+        commandArguments.put("createUser", "kunderaUser");
+        commandArguments.put("pwd", "kunderapassword");
+        String[] roles = { "readWrite" };
+        commandArguments.put("roles", roles);
+        BasicDBObject command = new BasicDBObject(commandArguments);
+        db.command(command);
+
+        DB db_admin = m.getDB(ADMIN_DB);
+        commandArguments = new BasicDBObject();
+        commandArguments.put("createUser", "admin");
+        commandArguments.put("pwd", "password");
+        String[] admin_roles = { "readWriteAnyDatabase" };
+        commandArguments.put("roles", admin_roles);
+        command = new BasicDBObject(commandArguments);
+        db_admin.command(command);
+    }
+
+    private static void dropUsers()
+    {
+        DB db_admin = m.getDB(ADMIN_DB);
+        db_admin.command(new BasicDBObject("dropUser", "admin"));
+
+        DB db = m.getDB(DB);
+        db.command(new BasicDBObject("dropUser", "kunderaUser"));
     }
 }

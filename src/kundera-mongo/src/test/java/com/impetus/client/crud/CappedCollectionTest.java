@@ -27,6 +27,8 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.crud.entities.MongoDBCappedEntity;
 import com.impetus.client.mongodb.MongoDBClient;
@@ -52,6 +54,8 @@ public class CappedCollectionTest
     private EntityManagerFactory emf;
 
     private EntityManager em;
+
+    private Logger logger = LoggerFactory.getLogger(CappedCollectionTest.class);
 
     /**
      * @throws java.lang.Exception
@@ -169,19 +173,19 @@ public class CappedCollectionTest
 
             catch (SecurityException e)
             {
-
+                logger.error("Error in test, Caused by: .", e.getMessage());
             }
             catch (NoSuchFieldException e)
             {
-
+                logger.error("Error in test, Caused by: .", e.getMessage());
             }
             catch (IllegalArgumentException e)
             {
-
+                logger.error("Error in test, Caused by: .", e.getMessage());
             }
             catch (IllegalAccessException e)
             {
-
+                logger.error("Error in test, Caused by: .", e.getMessage());
             }
         }
     }
