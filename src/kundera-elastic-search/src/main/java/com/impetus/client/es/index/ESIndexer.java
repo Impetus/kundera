@@ -236,15 +236,16 @@ public class ESIndexer implements Indexer
         Map<String, Object> resultMap = new HashMap<>();
         Map<String, Object> aggMap = esResponseReader.parseAggregations(response, kunderaQuery, metaModel,
                 m.getEntityClazz());
+        ListIterable<Expression> selectExpressionOrder = esResponseReader.getSelectExpressionOrder(kunderaQuery);
 
         resultMap.put("aggregations", aggMap);
         resultMap.put("primaryKeys", map);
-        resultMap.put("order", esResponseReader.getSelectExpressionOrder(kunderaQuery).iterator());
+        resultMap.put("order", selectExpressionOrder != null ? selectExpressionOrder.iterator() : null);
         return resultMap;
     }
 
     /**
-     * Gets the select expression list.
+     * Gets the select expression list. k
      * 
      * @param selectExpression
      *            the select expression
