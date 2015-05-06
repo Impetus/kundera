@@ -23,28 +23,31 @@ import javax.persistence.Table;
 
 /**
  * The Class GFSUser.
+ * 
+ * @author Devender Yadav
  */
 @Entity
-@Table(name = "GFS_USER", schema = "GFS@gfs_pu")
+@Table(name = "USER", schema = "GFS@gfs_pu")
 public class GFSUser
 {
-    
+
     /** The user id. */
     @Id
+    @Column(name = "USER_ID")
     private String userId;
 
     /** The name. */
-    @Column
+    @Column(name = "NAME")
     private String name;
 
     /** The profile pic. */
     @Lob
-    @Column
+    @Column(name = "PROFILE_PIC")
     private byte[] profilePic;
 
     /**
      * Gets the user id.
-     *
+     * 
      * @return the user id
      */
     public String getUserId()
@@ -54,8 +57,9 @@ public class GFSUser
 
     /**
      * Sets the user id.
-     *
-     * @param userId the new user id
+     * 
+     * @param userId
+     *            the new user id
      */
     public void setUserId(String userId)
     {
@@ -64,7 +68,7 @@ public class GFSUser
 
     /**
      * Gets the name.
-     *
+     * 
      * @return the name
      */
     public String getName()
@@ -74,8 +78,9 @@ public class GFSUser
 
     /**
      * Sets the name.
-     *
-     * @param name the new name
+     * 
+     * @param name
+     *            the new name
      */
     public void setName(String name)
     {
@@ -84,7 +89,7 @@ public class GFSUser
 
     /**
      * Gets the profile pic.
-     *
+     * 
      * @return the profile pic
      */
     public byte[] getProfilePic()
@@ -94,8 +99,9 @@ public class GFSUser
 
     /**
      * Sets the profile pic.
-     *
-     * @param profilePic the new profile pic
+     * 
+     * @param profilePic
+     *            the new profile pic
      */
     public void setProfilePic(byte[] profilePic)
     {

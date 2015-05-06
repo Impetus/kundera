@@ -19,10 +19,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.Query;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -30,6 +32,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import com.impetus.client.utils.MongoUtils;
 
 /**
  * The Class GridFSTest.
@@ -93,11 +97,12 @@ public class GridFSTest
     @AfterClass
     public static void tearDownAfterClass() throws Exception
     {
+        MongoUtils.dropDatabase(emf, _PU);
         emf.close();
     }
 
     /**
-     * Test crud grid fs.
+     * Test CRUD GridFS.
      * 
      * @throws Exception
      *             the exception
@@ -106,9 +111,29 @@ public class GridFSTest
     public void testCRUDGridFS() throws Exception
     {
         testInsert();
+        testQuery();
         testUpdateNonLobField();
-        testUpdateLobField();
+//        testUpdateLobField();
         testDelete();
+    }
+
+    /**
+     * Test query.
+     */
+    private void testQuery()
+    {
+        String query = "SELECT u FROM GFSUser u WHERE u.userId = '1' and u.name='Dev'";
+        Query qry = em.createQuery(query);
+        List<GFSUser> userList = qry.getResultList();
+        Assert.assertEquals(1, userList.size());
+        GFSUser user = userList.get(0);
+        Assert.assertEquals("1", user.getUserId());
+        Assert.assertEquals("Dev", user.getName());
+
+        query = "SELECT u FROM GFSUser u WHERE u.userId = '1' and u.name='Amit'";
+        qry = em.createQuery(query);
+        userList = qry.getResultList();
+        Assert.assertEquals(true, userList.isEmpty());
     }
 
     /**

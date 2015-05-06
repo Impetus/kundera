@@ -186,7 +186,6 @@ public class MongoDBQuery extends QueryImpl
         catch (Exception e)
         {
             log.error("Error during executing query, Caused by:", e);
-            e.printStackTrace();
             throw new QueryHandlerException(e);
         }
 
@@ -351,6 +350,8 @@ public class MongoDBQuery extends QueryImpl
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
 
+        AbstractManagedType managedType = (AbstractManagedType) metaModel.entity(m.getEntityClazz());
+
         for (Object object : filterClauseQueue)
         {
             boolean isCompositeColumn = false;
@@ -372,63 +373,71 @@ public class MongoDBQuery extends QueryImpl
                 // if alias is still present .. means it is an enclosing
                 // document search.
 
-                if (((AbstractAttribute) m.getIdAttribute()).getJPAColumnName().equalsIgnoreCase(property))
+                if (managedType.hasLobAttribute())
                 {
-                    property = "_id";
-                    f = (Field) m.getIdAttribute().getJavaMember();
-                    if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType())
-                            && value.getClass().isAssignableFrom(f.getType()))
-                    {
-                        EmbeddableType compoundKey = metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
-                        compositeColumns = MongoDBUtils.getCompoundKeyColumns(m, value, compoundKey);
-                        isCompositeColumn = true;
-                        continue;
-                    }
-                }
-                else if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType())
-                        && StringUtils.contains(property, '.'))
-                {
-                    // Means it is a case of composite column.
-                    property = property.substring(property.indexOf(".") + 1);
-                    isCompositeColumn = true;
-                } /*
-                   * if a composite key. "." assuming "." is part of property in
-                   * case of embeddable only
-                   */
-                else if (StringUtils.contains(property, '.'))
-                {
-                    EntityType entity = metaModel.entity(m.getEntityClazz());
-                    StringTokenizer tokenizer = new StringTokenizer(property, ".");
-                    String embeddedAttributeAsStr = tokenizer.nextToken();
-                    String embeddableAttributeAsStr = tokenizer.nextToken();
-                    Attribute embeddedAttribute = entity.getAttribute(embeddedAttributeAsStr);
-                    EmbeddableType embeddableEntity = metaModel.embeddable(((AbstractAttribute) embeddedAttribute)
-                            .getBindableJavaType());
-                    f = (Field) embeddableEntity.getAttribute(embeddableAttributeAsStr).getJavaMember();
-                    property = ((AbstractAttribute) embeddedAttribute).getJPAColumnName()
-                            + "."
-                            + ((AbstractAttribute) embeddableEntity.getAttribute(embeddableAttributeAsStr))
-                                    .getJPAColumnName();
+                    property = "metadata." + property;
+                    value = MongoDBUtils.populateValue(value, value.getClass());
                 }
                 else
                 {
-                    EntityType entity = metaModel.entity(m.getEntityClazz());
-                    String discriminatorColumn = ((AbstractManagedType) entity).getDiscriminatorColumn();
-
-                    if (!property.equals(discriminatorColumn))
+                    if (((AbstractAttribute) m.getIdAttribute()).getJPAColumnName().equalsIgnoreCase(property))
                     {
-                        String fieldName = m.getFieldName(property);
-                        f = (Field) entity.getAttribute(fieldName).getJavaMember();
+                        property = "_id";
+                        f = (Field) m.getIdAttribute().getJavaMember();
+                        if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType())
+                                && value.getClass().isAssignableFrom(f.getType()))
+                        {
+                            EmbeddableType compoundKey = metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
+                            compositeColumns = MongoDBUtils.getCompoundKeyColumns(m, value, compoundKey);
+                            isCompositeColumn = true;
+                            continue;
+                        }
                     }
-                }
+                    else if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType())
+                            && StringUtils.contains(property, '.'))
+                    {
+                        // Means it is a case of composite column.
+                        property = property.substring(property.indexOf(".") + 1);
+                        isCompositeColumn = true;
+                    } /*
+                       * if a composite key. "." assuming "." is part of
+                       * property in case of embeddable only
+                       */
+                    else if (StringUtils.contains(property, '.'))
+                    {
+                        EntityType entity = metaModel.entity(m.getEntityClazz());
+                        StringTokenizer tokenizer = new StringTokenizer(property, ".");
+                        String embeddedAttributeAsStr = tokenizer.nextToken();
+                        String embeddableAttributeAsStr = tokenizer.nextToken();
+                        Attribute embeddedAttribute = entity.getAttribute(embeddedAttributeAsStr);
+                        EmbeddableType embeddableEntity = metaModel.embeddable(((AbstractAttribute) embeddedAttribute)
+                                .getBindableJavaType());
+                        f = (Field) embeddableEntity.getAttribute(embeddableAttributeAsStr).getJavaMember();
+                        property = ((AbstractAttribute) embeddedAttribute).getJPAColumnName()
+                                + "."
+                                + ((AbstractAttribute) embeddableEntity.getAttribute(embeddableAttributeAsStr))
+                                        .getJPAColumnName();
+                    }
+                    else
+                    {
+                        EntityType entity = metaModel.entity(m.getEntityClazz());
+                        String discriminatorColumn = ((AbstractManagedType) entity).getDiscriminatorColumn();
 
-                if (value.getClass().isAssignableFrom(String.class) && f != null
-                        && !f.getType().equals(value.getClass()))
-                {
-                    value = PropertyAccessorFactory.getPropertyAccessor(f).fromString(f.getType().getClass(),
-                            value.toString());
+                        if (!property.equals(discriminatorColumn))
+                        {
+                            String fieldName = m.getFieldName(property);
+                            f = (Field) entity.getAttribute(fieldName).getJavaMember();
+                        }
+                    }
+                    if (value.getClass().isAssignableFrom(String.class) && f != null
+                            && !f.getType().equals(value.getClass()))
+                    {
+                        value = PropertyAccessorFactory.getPropertyAccessor(f).fromString(f.getType().getClass(),
+                                value.toString());
+                    }
+                    value = MongoDBUtils.populateValue(value, value.getClass());
+
                 }
-                value = MongoDBUtils.populateValue(value, value.getClass());
 
                 // Property, if doesn't exist in entity, may be there in a
                 // document embedded within it, so we have to check that
