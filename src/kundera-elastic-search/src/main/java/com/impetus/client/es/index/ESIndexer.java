@@ -239,7 +239,7 @@ public class ESIndexer implements Indexer
 
         resultMap.put("aggregations", aggMap);
         resultMap.put("primaryKeys", map);
-        resultMap.put("order", esResponseReader.getSelectExpressionOrder(kunderaQuery));
+        resultMap.put("order", esResponseReader.getSelectExpressionOrder(kunderaQuery).iterator());
         return resultMap;
     }
 
