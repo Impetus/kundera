@@ -32,17 +32,12 @@ import javax.persistence.TypedQuery;
 
 import junit.framework.Assert;
 
-import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.Column;
-import org.apache.cassandra.thrift.ColumnDef;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.Compression;
 import org.apache.cassandra.thrift.ConsistencyLevel;
-import org.apache.cassandra.thrift.IndexType;
 import org.apache.cassandra.thrift.InvalidRequestException;
-import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.Mutation;
-import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
@@ -132,6 +127,37 @@ public class PersonCassandraESIndexerTest extends BaseTest {
         emf = Persistence.createEntityManagerFactory(_PU, propertyMap);
         em = emf.createEntityManager();
         col = new java.util.HashMap<Object, Object>();
+    }
+    
+    @Test
+    public void indexDeletionTest() throws Exception
+    {
+        Object p1 = prepare("1", 10);
+        Object p2 = prepare("2", 20);
+        Object p3 = prepare("3", 30);
+        Object p4 = prepare("4", 40);
+        em.persist(p1);
+        em.persist(p2);
+        em.persist(p3);
+        em.persist(p4);
+        String query = "Select min(p.age) from PersonESIndexerCassandra p";
+        List resultList = em.createQuery(query).getResultList();
+        Assert.assertEquals(1, resultList.size());
+        Assert.assertEquals(10.0, resultList.get(0));
+        
+        em.remove(p1);
+        Thread.sleep(1000);
+        query = "Select min(p.age) from PersonESIndexerCassandra p";
+        resultList = em.createQuery(query).getResultList();
+        Assert.assertEquals(1, resultList.size());
+        Assert.assertEquals(20.0, resultList.get(0));;
+        
+        em.remove(p2);
+        Thread.sleep(1000);
+        query = "Select min(p.age) from PersonESIndexerCassandra p";
+        resultList = em.createQuery(query).getResultList();
+        Assert.assertEquals(1, resultList.size());
+        Assert.assertEquals(30.0, resultList.get(0));
     }
 
     /**
