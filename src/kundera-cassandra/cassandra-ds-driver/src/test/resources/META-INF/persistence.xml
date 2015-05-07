@@ -1,8 +1,7 @@
-
 <persistence xmlns="http://java.sun.com/xml/ns/persistence"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence
-	https://raw.github.com/impetus-opensource/Kundera/Kundera-2.0.4/kundera-core/src/test/resources/META-INF/persistence_2_0.xsd"
+https://raw.github.com/impetus-opensource/Kundera/Kundera-2.0.4/kundera-core/src/test/resources/META-INF/persistence_2_0.xsd"
 	version="2.0">
 
 	<persistence-unit name="ds_pu">
@@ -71,9 +70,6 @@
 	<persistence-unit name="cassandra_ds_pu">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<class>com.impetus.client.crud.PersonCassandra</class>
-		<class>com.impetus.kundera.client.cassandra.crud.ActivatedPromoCode</class>
-		<class>com.impetus.kundera.client.cassandra.crud.PromoCode</class>
-		<class>com.impetus.kundera.client.cassandra.crud.PromoCodeType</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<property name="kundera.nodes" value="localhost" />
@@ -85,7 +81,7 @@
 				value="com.impetus.kundera.client.cassandra.dsdriver.DSClientFactory" />
 		</properties>
 	</persistence-unit>
-	
+
 	<persistence-unit name="dsscalar_entity">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<class>com.impetus.client.crud.PersonCassandra</class>
@@ -99,8 +95,8 @@
 				value="com.impetus.kundera.client.cassandra.dsdriver.DSClientFactory" />
 		</properties>
 	</persistence-unit>
-	
-		<persistence-unit name="dsscalar">
+
+	<persistence-unit name="dsscalar">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
@@ -114,3 +110,5 @@
 	</persistence-unit>
 
 </persistence>
+
+​
