@@ -432,6 +432,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     @Override
     public void delete(Object entity, Object pKey)
     {
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entity.getClass());
         Object connection = getConnection();
         Pipeline pipeLine = null;
         try
@@ -445,6 +446,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             {
                 onDelete(entity, pKey, connection);
             }
+            getIndexManager().remove(metadata, entity, pKey);
         }
         finally
         {

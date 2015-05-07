@@ -70,7 +70,7 @@ public class ESGroupByTest
             builder.put("path.data", "target/data");
             node = new NodeBuilder().settings(builder).node();
         }
-        
+
         emf = Persistence.createEntityManagerFactory("es-pu");
         em = emf.createEntityManager();
         init();
@@ -163,7 +163,7 @@ public class ESGroupByTest
         testHavingWithAnd();
         testHavingWithOr();
 
-//        testGroupByBuckets();
+        // testGroupByBuckets();
     }
 
     /**
@@ -498,10 +498,10 @@ public class ESGroupByTest
     {
         em.createQuery("delete from PersonES p").executeUpdate();
         waitThread();
-        
+
         em.close();
         emf.close();
-        
+
         if (node != null)
             node.close();
     }

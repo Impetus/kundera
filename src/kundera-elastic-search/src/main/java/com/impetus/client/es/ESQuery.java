@@ -114,8 +114,8 @@ public class ESQuery<E> extends QueryImpl
         FilterBuilder filter = whereExpression == null || whereExpression instanceof NullExpression ? null
                 : esFilterBuilder.populateFilterBuilder(((WhereClause) whereExpression).getConditionalExpression(), m);
 
-        return ((ESClient) client)
-                .executeQuery(filter, buildAggregation(kunderaQuery, m, filter), m, getKunderaQuery());
+        return ((ESClient) client).executeQuery(filter, buildAggregation(kunderaQuery, m, filter), m,
+                getKunderaQuery(), this.maxResult);
     }
 
     /*
@@ -217,7 +217,6 @@ public class ESQuery<E> extends QueryImpl
 
         // To apply filter for where clause
         AggregationBuilder aggregationBuilder = buildWhereAggregations(entityMetadata, filter);
-
         if (KunderaQueryUtils.hasGroupBy(query.getJpqlExpression()))
         {
             TermsBuilder termsBuilder = processGroupByClause(selectStatement.getGroupByClause(), entityMetadata, query);

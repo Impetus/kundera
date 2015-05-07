@@ -1,5 +1,5 @@
 /*******************************************************************************
- * * Copyright 2015 Impetus Infotech.
+ *  * Copyright 2015 Impetus Infotech.
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 import com.impetus.kundera.utils.LuceneCleanupUtilities;
 
 /**
- * @author amitkumar
+ * @author Amit Kumar
  * 
  */
 public class RedisLuceneTest
@@ -60,6 +60,7 @@ public class RedisLuceneTest
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(RedisESIndexerTest.class);
 
+    /** The property map. */
     protected Map<String, String> propertyMap = new HashMap<String, String>();
 
     /**
@@ -95,7 +96,7 @@ public class RedisLuceneTest
     public void crudTestWithLucene()
     {
 
-        logger.info("Crud tests for ES");
+        logger.info("Crud tests for Lucene");
 
         PersonRedis person1 = preparePerson("101", 20);
         PersonRedis person2 = preparePerson("102", 40);
@@ -172,6 +173,87 @@ public class RedisLuceneTest
         persons = q.getResultList();
         Assert.assertNotNull(persons);
         Assert.assertEquals(3, persons.size());
+
+        testFindByGreaterThan();
+
+        testFindByLessThan();
+
+        testFindByBetweenOverNonRowKey();
+
+        qry = "Update PersonRedis p set p.personName= 'Amit Kumar' where p.age = 20";
+        q = em.createQuery(qry);
+        int updateCount = q.executeUpdate();
+
+        Assert.assertEquals(1, updateCount);
+
+        qry = "Select p from PersonRedis p where p.age = 20";
+        q = em.createQuery(qry);
+        persons = q.getResultList();
+
+        Assert.assertNotNull(persons);
+        Assert.assertEquals(1, persons.size());
+        assertEquals("Amit Kumar", persons.get(0).getPersonName());
+        assertEquals(20, persons.get(0).getAge().intValue());
+
+        qry = "delete from PersonRedis p where p.age = 20";
+        q = em.createQuery(qry);
+        int count = q.executeUpdate();
+
+        Assert.assertEquals(1, count);
+        assertNull(em.find(PersonRedis.class, "2"));
+    }
+
+    /**
+     * find by Greater than over rowkey.
+     */
+    private void testFindByGreaterThan()
+    {
+        Query query;
+        List<PersonRedis> results;
+        String findAgeByBetween = "Select p from PersonRedis p where p.age > 17";
+        query = em.createQuery(findAgeByBetween);
+
+        results = query.getResultList();
+
+        Assert.assertEquals(1, results.size());
+        Assert.assertEquals("2", results.get(0).getPersonId());
+        Assert.assertEquals("Amit", results.get(0).getPersonName());
+        Assert.assertEquals(20, results.get(0).getAge().intValue());
+    }
+
+    /**
+     * find by less than over rowkey.
+     */
+    private void testFindByLessThan()
+    {
+        Query query;
+        List<PersonRedis> results;
+        String findAgeByBetween = "Select p from PersonRedis p where p.age < 12";
+        query = em.createQuery(findAgeByBetween);
+
+        results = query.getResultList();
+
+        Assert.assertEquals(1, results.size());
+        Assert.assertEquals("1", results.get(0).getPersonId());
+        Assert.assertEquals("Amit", results.get(0).getPersonName());
+        Assert.assertEquals(10, results.get(0).getAge().intValue());
+    }
+
+    /**
+     * find by between over non rowkey.
+     */
+    private void testFindByBetweenOverNonRowKey()
+    {
+        Query query;
+        List<PersonRedis> results;
+        String findAgeByBetween = "Select p from PersonRedis p where p.age between :min AND :max";
+        query = em.createQuery(findAgeByBetween);
+        query.setParameter("min", 10);
+        query.setParameter("max", 19);
+
+        results = query.getResultList();
+        Assert.assertEquals(2, results.size());
+        Assert.assertEquals("Amit", results.get(0).getPersonName());
     }
 
     private void init()

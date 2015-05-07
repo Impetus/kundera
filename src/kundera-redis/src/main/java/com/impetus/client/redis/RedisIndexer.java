@@ -124,6 +124,7 @@ public class RedisIndexer implements Indexer
         // we need not implement this method for Redis because 
         //redis automatically removes indexes while performing delete
         logger.warn("Removing index is implicitly managed by RedisClient's unindex method");
+        throw new UnsupportedOperationException("Removing index is implicitly managed by RedisClient's unindex method");
     }
 
     /*
@@ -134,8 +135,6 @@ public class RedisIndexer implements Indexer
     @Override
     public void close()
     {
-        // TODO Auto-generated method stub
-
     }
 
     void assignConnection(Object connection)
@@ -165,7 +164,7 @@ public class RedisIndexer implements Indexer
 
     @Override
     public Map<String, Object> search(KunderaMetadata kunderaMetadata, KunderaQuery kunderaQuery,
-            PersistenceDelegator persistenceDelegator, EntityMetadata m)
+            PersistenceDelegator persistenceDelegator, EntityMetadata m, int maxResults)
     {
         throw new KunderaException("Unsupported Method");
     }

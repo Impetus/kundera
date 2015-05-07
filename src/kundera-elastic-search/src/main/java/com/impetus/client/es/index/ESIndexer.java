@@ -26,6 +26,7 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.index.query.FilterBuilder;
+import org.elasticsearch.index.query.FilteredQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
@@ -35,6 +36,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.impetus.client.es.ESQuery;
 import com.impetus.client.es.utils.ESResponseWrapper;
+import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.index.Indexer;
 import com.impetus.kundera.index.IndexerProperties;
@@ -189,43 +191,43 @@ public class ESIndexer implements Indexer
      */
     @Override
     public Map<String, Object> search(KunderaMetadata kunderaMetadata, KunderaQuery kunderaQuery,
-            PersistenceDelegator persistenceDelegator, EntityMetadata m)
+            PersistenceDelegator persistenceDelegator, EntityMetadata m, int maxResults)
     {
         ESQuery query = new ESQuery<>(kunderaQuery, persistenceDelegator, kunderaMetadata);
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
         Expression whereExpression = KunderaQueryUtils.getWhereClause(kunderaQuery.getJpqlExpression());
-        ESResponseWrapper esResponseReader = new ESResponseWrapper();
 
         FilterBuilder filter = whereExpression != null ? query.getEsFilterBuilder().populateFilterBuilder(
                 ((WhereClause) whereExpression).getConditionalExpression(), m) : null;
-        SearchRequestBuilder builder = client.prepareSearch(m.getSchema().toLowerCase()).setTypes(
-                m.getEntityClazz().getSimpleName());
-        AggregationBuilder aggregation = query.buildAggregation(kunderaQuery, m, filter);
 
-        if (aggregation == null)
-        {
-            builder.setPostFilter(filter);
-        }
-        else
-        {
-            builder.addAggregation(aggregation).setPostFilter(filter);
-            if (kunderaQuery.getResult().length == 1)
-            {
-                builder.setSize(0);
-            }
-        }
-        SearchResponse response = null;
-        try
-        {
-            response = builder.execute().actionGet();
-        }
-        catch (ElasticsearchException e)
-        {
-            throw new KunderaException("Aggregations can not performed over non-numeric fields.", e);
-        }
+        FilteredQueryBuilder queryBuilder = QueryBuilders.filteredQuery(null, filter);
+        SearchResponse response = getSearchResponse(kunderaQuery, queryBuilder, filter, query, m, maxResults);
 
+        return buildResultMap(response, kunderaQuery, m, metaModel);
+    }
+
+    /**
+     * Builds the result map.
+     * 
+     * @param esResponseReader
+     *            the es response reader
+     * @param response
+     *            the response
+     * @param query
+     *            the query
+     * @param m
+     *            the m
+     * @param metaModel
+     *            the meta model
+     * @return the map
+     */
+    private Map<String, Object> buildResultMap(SearchResponse response, KunderaQuery query, EntityMetadata m,
+            MetamodelImpl metaModel)
+    {
         Map<String, Object> map = new HashMap<>();
+        ESResponseWrapper esResponseReader = new ESResponseWrapper();
+
         for (SearchHit hit : response.getHits())
         {
             Object id = PropertyAccessorHelper.fromSourceToTargetClass(
@@ -233,15 +235,73 @@ public class ESIndexer implements Indexer
             map.put(hit.getId(), id);
         }
 
-        Map<String, Object> resultMap = new HashMap<>();
-        Map<String, Object> aggMap = esResponseReader.parseAggregations(response, kunderaQuery, metaModel,
-                m.getEntityClazz());
-        ListIterable<Expression> selectExpressionOrder = esResponseReader.getSelectExpressionOrder(kunderaQuery);
+        Map<String, Object> aggMap = esResponseReader.parseAggregations(response, query, metaModel, m.getEntityClazz(),
+                m);
+        ListIterable<Expression> selectExpressionOrder = esResponseReader.getSelectExpressionOrder(query);
 
-        resultMap.put("aggregations", aggMap);
-        resultMap.put("primaryKeys", map);
-        resultMap.put("order", selectExpressionOrder != null ? selectExpressionOrder.iterator() : null);
+        Map<String, Object> resultMap = new HashMap<>();
+        resultMap.put(Constants.AGGREGATIONS, aggMap);
+        resultMap.put(Constants.PRIMARY_KEYS, map);
+        resultMap.put(Constants.SELECT_EXPRESSION_ORDER, selectExpressionOrder);
+
         return resultMap;
+    }
+
+    /**
+     * Gets the search response.
+     * 
+     * @param kunderaQuery
+     *            the kundera query
+     * @param queryBuilder
+     *            the query builder
+     * @param filter
+     *            the filter
+     * @param query
+     *            the query
+     * @param m
+     *            the m
+     * @return the search response
+     */
+    private SearchResponse getSearchResponse(KunderaQuery kunderaQuery, FilteredQueryBuilder queryBuilder,
+            FilterBuilder filter, ESQuery query, EntityMetadata m, int maxResults)
+    {
+        SearchRequestBuilder builder = client.prepareSearch(m.getSchema().toLowerCase()).setTypes(
+                m.getEntityClazz().getSimpleName());
+        AggregationBuilder aggregation = query.buildAggregation(kunderaQuery, m, filter);
+
+        if (aggregation == null)
+        {
+            builder.setQuery(queryBuilder);
+            builder.setSize(maxResults);
+        }
+        else
+        {
+            log.debug("Aggregated query identified");
+            builder.addAggregation(aggregation);
+
+            if (kunderaQuery.getResult().length == 1
+                    || (kunderaQuery.isSelectStatement() && KunderaQueryUtils.hasGroupBy(kunderaQuery
+                            .getJpqlExpression())))
+            {
+                builder.setSize(0);
+            }
+        }
+
+        SearchResponse response = null;
+        log.debug("Query generated: " + builder);
+
+        try
+        {
+            response = builder.execute().actionGet();
+            log.debug("Query execution response: " + response);
+        }
+        catch (ElasticsearchException e)
+        {
+            log.error("Exception occured while executing query on Elasticsearch.", e);
+            throw new KunderaException("Exception occured while executing query on Elasticsearch.", e);
+        }
+
+        return response;
     }
 
     /**

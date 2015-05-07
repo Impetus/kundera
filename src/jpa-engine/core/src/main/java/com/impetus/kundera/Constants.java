@@ -27,7 +27,7 @@ public interface Constants
     /** The Constant ENCODING. */
     public static final String ENCODING = "utf-8";
 
-    /** UTF-8 character set */
+    /** UTF-8 character set. */
     public static final String CHARSET_UTF8 = "UTF-8";
 
     /** The Constant SEPARATOR. */
@@ -69,43 +69,72 @@ public interface Constants
      */
     public final static String JOIN_COLUMNS_FAMILY_NAME = "JoinColumns";
 
+    /** The Constant JOIN_COLUMN_NAME_SEPARATOR. */
     public final static String JOIN_COLUMN_NAME_SEPARATOR = "_";
 
+    /** The Constant NODE_ID_SEPARATOR. */
     public final static String NODE_ID_SEPARATOR = "$";
 
+    /** The Constant RDBMS_CLIENT_FACTORY. */
     public final static String RDBMS_CLIENT_FACTORY = "com.impetus.client.rdbms.RDBMSClientFactory";
 
+    /** The Constant NEO4J_CLIENT_FACTORY. */
     public final static String NEO4J_CLIENT_FACTORY = "com.impetus.client.neo4j.Neo4JClientFactory";
 
+    /** The Constant REDIS_CLIENT_FACTORY. */
     public final static String REDIS_CLIENT_FACTORY = "com.impetus.client.redis.RedisClientFactory";
 
+    /** The Constant DEFAULT_MAX_FETCH_DEPTH. */
     public final static int DEFAULT_MAX_FETCH_DEPTH = 2;
 
+    /** The Constant INDEX_TABLE_SUFFIX. */
     public final static String INDEX_TABLE_SUFFIX = "_INVRTD_IDX";
 
+    /** The Constant INDEX_TABLE_ROW_KEY_DELIMITER. */
     public final static String INDEX_TABLE_ROW_KEY_DELIMITER = ".";
 
+    /** The Constant INDEX_TABLE_EC_DELIMITER. */
     public final static String INDEX_TABLE_EC_DELIMITER = "@SuperColumn:";
 
+    /** The Constant LOADBALANCING_POLICY. */
     public final static String LOADBALANCING_POLICY = "loadbalancing.policy";
 
+    /** The Constant FAILOVER_POLICY. */
     public final static String FAILOVER_POLICY = "failover.policy";
 
+    /** The Constant FAIL_FAST. */
     public final static String FAIL_FAST = "fail.fast";
 
+    /** The Constant ON_FAIL_TRY_ONE_NEXT_AVAILABLE. */
     public final static String ON_FAIL_TRY_ONE_NEXT_AVAILABLE = "on.fail.try.one.next.available";
 
+    /** The Constant ON_FAIL_TRY_ALL_AVAILABLE. */
     public final static String ON_FAIL_TRY_ALL_AVAILABLE = "on.fail.try.all.available";
 
+    /** The Constant RETRY_DELAY. */
     public final static String RETRY_DELAY = "retry.delay";
 
+    /** The Constant RETRY. */
     public final static String RETRY = "retry";
 
+    /** The Constant PERSISTENCE_UNIT_LOCATIION. */
     public final static String PERSISTENCE_UNIT_LOCATIION = "persistenceunit.location";
 
+    /** The Constant DEFAULT_PERSISTENCE_UNIT_LOCATIION. */
     public final static String DEFAULT_PERSISTENCE_UNIT_LOCATIION = "META-INF/persistence.xml";
 
+    /** The Constant SPACE. */
     public final static String SPACE = " ";
 
+    /** The Constant DEFAULT_TIMESTAMP_GENERATOR. */
     public final static String DEFAULT_TIMESTAMP_GENERATOR = "default.timestamp.generator";
+
+    /** The Constant AGGREGATIONS. */
+    public final static String AGGREGATIONS = "aggregations";
+
+    /** The Constant PRIMARY_KEYS. */
+    public final static String PRIMARY_KEYS = "primaryKeys";
+
+    /** The Constant SELECT_EXPRESSION_ORDER. */
+    public final static String SELECT_EXPRESSION_ORDER = "selectExpressionOrder";
 }
