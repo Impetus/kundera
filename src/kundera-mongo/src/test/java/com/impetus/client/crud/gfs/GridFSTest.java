@@ -113,7 +113,7 @@ public class GridFSTest
         testInsert();
         testQuery();
         testUpdateNonLobField();
-//        testUpdateLobField();
+        testUpdateLobField();
         testDelete();
     }
 

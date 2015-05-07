@@ -25,6 +25,7 @@ import java.util.Set;
 import javax.persistence.metamodel.EntityType;
 
 import org.apache.commons.lang.NotImplementedException;
+import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -604,7 +605,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     public List<GridFSDBFile> getGFSDBFiles(BasicDBObject mongoQuery, BasicDBObject sort, String collectionName)
     {
         GridFS gfs = new GridFS(mongoDb, collectionName);
-        return gfs.find(mongoQuery);
+        return gfs.find(mongoQuery, sort);
     }
 
     /*
@@ -821,7 +822,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     }
 
     /**
-     * Save grid fs file.
+     * Save GRID FS file.
      * 
      * @param gfsInputFile
      *            the gfs input file
@@ -831,7 +832,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         try
         {
             DBCollection coll = mongoDb.getCollection(m.getTableName() + MongoDBUtils.FILES);
-            createUniqueIndex(coll, m.getIdAttribute().getName());
+            createUniqueIndex(coll, ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName());
             gfsInputFile.save();
             log.info("Input GridFS file: " + gfsInputFile.getFilename() + " is saved successfully in "
                     + m.getTableName() + MongoDBUtils.CHUNKS + " and metadata in " + m.getTableName()
@@ -875,7 +876,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         if (!isUpdate)
         {
             GridFSInputFile gfsInputFle = handler.getGFSInputFileFromEntity(gfs, entityMetadata, entity,
-                    kunderaMetadata);
+                    kunderaMetadata, isUpdate);
             saveGridFSFile(gfsInputFle, entityMetadata);
         }
         else
@@ -883,6 +884,10 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             Object val = handler.getLobFromGFSEntity(gfs, entityMetadata, entity, kunderaMetadata);
             String md5 = MongoDBUtils.calculateMD5(val);
             GridFSDBFile outputFile = findGridFSDBFile(entityMetadata, id);
+
+            /*
+             * checking MD5 of file to be updated with file saved in DB
+             */
             if (md5.equals(outputFile.getMD5()))
             {
                 DBObject metadata = handler.getMetadataFromGFSEntity(gfs, entityMetadata, entity, kunderaMetadata);
@@ -892,11 +897,17 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             else
             {
                 GridFSInputFile gfsInputFile = handler.getGFSInputFileFromEntity(gfs, entityMetadata, entity,
-                        kunderaMetadata);
+                        kunderaMetadata, isUpdate);
+                DBObject metadata = gfsInputFile.getMetaData();
+                ObjectId updatedId = (ObjectId) metadata.get(((AbstractAttribute) entityMetadata.getIdAttribute())
+                        .getJPAColumnName());
                 saveGridFSFile(gfsInputFile, entityMetadata);
-                DBObject query = new BasicDBObject();
-                query.put("_id", outputFile.getId());
+                DBObject query = new BasicDBObject("_id", outputFile.getId());
                 gfs.remove(query);
+                outputFile = findGridFSDBFile(entityMetadata, updatedId);
+                metadata.put(((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName(), id);
+                outputFile.setMetaData(metadata);
+                outputFile.save();
             }
         }
     }
