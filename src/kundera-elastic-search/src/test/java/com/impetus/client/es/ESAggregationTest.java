@@ -42,7 +42,6 @@ import org.junit.Test;
 
 import com.impetus.client.es.PersonES.Day;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class ESAggregationTest.
  */
@@ -152,6 +151,45 @@ public class ESAggregationTest
         em.persist(person);
     }
 
+    @Test
+    public void testESDeletionIssue() throws InterruptedException
+    {
+        createPerson("5", 20, "Amit", 100.0);
+        createPerson("6", 20, "Amit", 100.0);
+        createPerson("7", 20, "Amit", 100.0);
+        createPerson("8", 20, "Amit", 100.0);
+        createPerson("9", 20, "Amit", 100.0);
+        createPerson("10", 20, "Amit", 100.0);
+        createPerson("11", 20, "Amit", 100.0);
+        createPerson("12", 20, "Amit", 100.0);
+        createPerson("13", 20, "Amit", 100.0);
+        createPerson("14", 20, "Amit", 100.0);
+        createPerson("15", 20, "Amit", 100.0);
+        createPerson("16", 20, "Amit", 100.0);
+        createPerson("17", 20, "Amit", 100.0);
+        createPerson("18", 20, "Amit", 100.0);
+        
+        waitThread();
+
+        PersonES fetchPerson = em.find(PersonES.class, "2");
+        // Assertion for fetching objects
+//        Assert.assertEquals("2", fetchPerson.getPersonId());
+//        Assert.assertEquals("Amit", fetchPerson.getPersonName());
+//        Assert.assertEquals(20, fetchPerson.getAge().intValue());
+        
+//        em.remove(fetchPerson);
+        Query query = em.createQuery("delete from PersonES p"); 
+        query.setMaxResults(100);
+        int count = query.executeUpdate();
+        
+        System.out.println("Count: "+ count);
+        
+        
+        fetchPerson = null;
+        fetchPerson = em.find(PersonES.class, "2");
+        Assert.assertNull(fetchPerson);
+    }
+    
     /**
      * Test aggregation.
      */

@@ -19,6 +19,9 @@ package com.impetus.client.redis;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Transaction;
@@ -40,6 +43,8 @@ public class RedisIndexer implements Indexer
 {
 
     private Object pipeLineOrConnection;
+
+    private static Logger logger = LoggerFactory.getLogger(RedisIndexer.class);
 
     /*
      * (non-Javadoc)
@@ -116,6 +121,9 @@ public class RedisIndexer implements Indexer
     @Override
     public void unIndex(Class entityClazz, Object entity, EntityMetadata metadata, MetamodelImpl metamodel)
     {
+        // we need not implement this method for Redis because 
+        //redis automatically removes indexes while performing delete
+        logger.warn("Removing index is implicitly managed by RedisClient's unindex method");
         throw new UnsupportedOperationException("Removing index is implicitly managed by RedisClient's unindex method");
     }
 

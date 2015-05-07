@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.DiscriminatorColumn;
+import javax.persistence.Lob;
 import javax.persistence.OrderBy;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
@@ -427,6 +428,11 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
                 else if (!attr.isCollection() && !((SingularAttribute) attr).isId())
                 {
 
+                    if (((Field) attr.getJavaMember()).getAnnotation(Lob.class) != null)
+                    {
+                        tableInfo.addLobColumnInfo(((AbstractAttribute) attr).getJPAColumnName());
+                    }
+
                     ColumnInfo columnInfo = getColumn(tableInfo, attr,
                             columns != null ? columns.get(((AbstractAttribute) attr).getJPAColumnName()) : null, null);
                     if (!tableInfo.getColumnMetadatas().contains(columnInfo))
@@ -443,16 +449,15 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
                     cci.setGenericClasses(PropertyAccessorHelper.getGenericClasses((Field) attr.getJavaMember()));
 
                     tableInfo.addCollectionColumnMetadata(cci);
-                    //add if collection column is indexed
+                    // add if collection column is indexed
                     String jpaName = ((AbstractAttribute) attr).getJPAColumnName();
                     PropertyIndex indexedColumn = columns.get(jpaName);
                     if (indexedColumn != null && indexedColumn.getName() != null)
                     {
-                        IndexInfo indexInfo = new IndexInfo(jpaName,
-                                indexedColumn.getMax(), indexedColumn.getMin(), indexedColumn.getIndexType(),
-                                indexedColumn.getName());
+                        IndexInfo indexInfo = new IndexInfo(jpaName, indexedColumn.getMax(), indexedColumn.getMin(),
+                                indexedColumn.getIndexType(), indexedColumn.getName());
                         tableInfo.addToIndexedColumnList(indexInfo);
-//                         Add more if required
+                        // Add more if required
                     }
                 }
                 else if (attr.isCollection()
@@ -464,18 +469,18 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
                     eci.setGenericClasses(PropertyAccessorHelper.getGenericClasses((Field) attr.getJavaMember()));
 
                     tableInfo.addElementCollectionMetadata(eci);
-                    //add if collection column is indexed
+                    // add if collection column is indexed
                     String jpaName = ((AbstractAttribute) attr).getJPAColumnName();
                     PropertyIndex indexedColumn = columns.get(jpaName);
                     if (indexedColumn != null && indexedColumn.getName() != null)
                     {
-                        IndexInfo indexInfo = new IndexInfo(jpaName,
-                                indexedColumn.getMax(), indexedColumn.getMin(), indexedColumn.getIndexType(),
-                                indexedColumn.getName());
+                        IndexInfo indexInfo = new IndexInfo(jpaName, indexedColumn.getMax(), indexedColumn.getMin(),
+                                indexedColumn.getIndexType(), indexedColumn.getName());
                         tableInfo.addToIndexedColumnList(indexInfo);
-//                         Add more if required
+                        // Add more if required
                     }
                 }
+
             }
         }
 

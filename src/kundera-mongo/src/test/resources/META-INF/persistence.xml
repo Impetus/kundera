@@ -34,7 +34,7 @@
 			<property name="kundera.dialect" value="mongodb" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.mongodb.MongoDBClientFactory" />
-			<property name="kundera.ddl.auto.prepare" value="update" />
+			<property name="kundera.ddl.auto.prepare" value="create" />
 		</properties>
 	</persistence-unit>
 

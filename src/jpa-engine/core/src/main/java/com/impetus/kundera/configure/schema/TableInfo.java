@@ -16,7 +16,9 @@
 package com.impetus.kundera.configure.schema;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
@@ -51,6 +53,22 @@ public class TableInfo
 
     /** The element collection metadatas. */
     private List<CollectionColumnInfo> elementCollectionMetadatas;
+
+    private Set<String> lobColumnInfos;
+
+    public Set<String> getLobColumnInfo()
+    {
+        return lobColumnInfos == null ? new HashSet<String>() : lobColumnInfos;
+    }
+
+    public void addLobColumnInfo(String lobColumnInfo)
+    {
+        if (this.lobColumnInfos == null)
+        {
+            this.lobColumnInfos = new HashSet<String>();
+        }
+        lobColumnInfos.add(lobColumnInfo);
+    }
 
     /**
      * Gets the element collection metadatas.

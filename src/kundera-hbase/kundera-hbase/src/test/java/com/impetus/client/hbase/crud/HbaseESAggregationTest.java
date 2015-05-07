@@ -42,7 +42,7 @@ import org.junit.Test;
 import com.impetus.client.hbase.crud.PersonESIndexerHbase.Day;
 
 /**
- * The Class CassandraESAggregationTest.
+ * The Class HBaseESAggregationTest.
  */
 public class HbaseESAggregationTest
 {
@@ -464,6 +464,32 @@ public class HbaseESAggregationTest
         Assert.assertEquals(20.0, resultList.get(0));
     }
 
+    @Test
+    public void indexDeletionTest() throws Exception
+    {
+        init();
+        String query = "Select min(p.age) from PersonESIndexerHbase p";
+        List resultList = em.createQuery(query).getResultList();
+        Assert.assertEquals(1, resultList.size());
+        Assert.assertEquals(10.0, resultList.get(0));
+
+        PersonESIndexerHbase person = em.find(PersonESIndexerHbase.class, "2");
+        em.remove(person);
+        Thread.sleep(1000);
+        query = "Select min(p.age) from PersonESIndexerHbase p";
+        resultList = em.createQuery(query).getResultList();
+        Assert.assertEquals(1, resultList.size());
+        Assert.assertEquals(20.0, resultList.get(0));
+
+        person = em.find(PersonESIndexerHbase.class, "1");
+        em.remove(person);
+        Thread.sleep(1000);
+        query = "Select min(p.age) from PersonESIndexerHbase p";
+        resultList = em.createQuery(query).getResultList();
+        Assert.assertEquals(1, resultList.size());
+        Assert.assertEquals(30.0, resultList.get(0));
+    }
+
     /**
      * Tear down after class.
      * 
@@ -483,10 +509,7 @@ public class HbaseESAggregationTest
     @After
     public void tearDown()
     {
-        em.remove(em.find(PersonESIndexerHbase.class, "1"));
-        em.remove(em.find(PersonESIndexerHbase.class, "2"));
-        em.remove(em.find(PersonESIndexerHbase.class, "3"));
-        em.remove(em.find(PersonESIndexerHbase.class, "4"));
+        em.createQuery("DELETE FROM PersonESIndexerHbase p").executeUpdate();
         em.close();
         emf.close();
     }
