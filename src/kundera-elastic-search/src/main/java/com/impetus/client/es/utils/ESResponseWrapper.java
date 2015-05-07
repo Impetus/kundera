@@ -22,6 +22,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +49,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.AbstractAggregationBuilder;
+import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.InternalAggregations;
 import org.elasticsearch.search.aggregations.bucket.filter.InternalFilter;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
@@ -171,7 +173,7 @@ public final class ESResponseWrapper
     private List parseAggregatedResponse(SearchResponse response, KunderaQuery query, MetamodelImpl metaModel,
             Class clazz, EntityMetadata entityMetadata)
     {
-        List temp = new ArrayList<>(), results = new ArrayList<>();
+        List results, temp = new ArrayList<>();
         InternalAggregations internalAggs = ((InternalFilter) response.getAggregations().getAsMap()
                 .get(ESConstants.AGGREGATION_NAME)).getAggregations();
 
@@ -180,25 +182,13 @@ public final class ESResponseWrapper
             Terms buckets = (Terms) (internalAggs).getAsMap().get(ESConstants.GROUP_BY);
 
             filterBuckets(buckets, query);
-            ListIterable<Expression> iterable = getSelectExpressionOrder(query);
 
-            for (Terms.Bucket entry : buckets.getBuckets())
-            {
-                logger.debug("key [{}], doc_count [{}]", entry.getKey(), entry.getDocCount());
-
-                Iterator<Expression> itr = iterable.iterator();
-                InternalAggregations internalAgg = (InternalAggregations) entry.getAggregations();
-                TopHits topHits = entry.getAggregations().get(ESConstants.TOP_HITS);
-
-                temp = parseRecords(internalAgg, topHits.getHits(), itr, query, metaModel, clazz, entityMetadata);
-                results.add(temp.size() == 1 ? temp.get(0) : temp);
-            }
+            results = onIterateBuckets(buckets, query, metaModel, clazz, entityMetadata);
         }
         else
         {
-            Iterator<Expression> itr = getSelectExpressionOrder(query).iterator();
-
-            temp = parseRecords(internalAggs, response.getHits(), itr, query, metaModel, clazz, entityMetadata);
+            results = new ArrayList<>();
+            temp = buildRecords(internalAggs, response.getHits(), query, metaModel, clazz, entityMetadata);
 
             for (Object value : temp)
             {
@@ -212,14 +202,10 @@ public final class ESResponseWrapper
     }
 
     /**
-     * Parses the records.
+     * On iterate buckets.
      * 
-     * @param internalAgg
-     *            the internal agg
-     * @param topHits
-     *            the top hits
-     * @param itr
-     *            the itr
+     * @param buckets
+     *            the buckets
      * @param query
      *            the query
      * @param metaModel
@@ -230,14 +216,130 @@ public final class ESResponseWrapper
      *            the entity metadata
      * @return the list
      */
-    private List parseRecords(InternalAggregations internalAgg, SearchHits topHits, Iterator<Expression> itr,
-            KunderaQuery query, MetamodelImpl metaModel, Class clazz, EntityMetadata entityMetadata)
+    private List onIterateBuckets(Terms buckets, KunderaQuery query, MetamodelImpl metaModel, Class clazz,
+            EntityMetadata entityMetadata)
     {
-        List temp = new ArrayList<>();
+        List temp, results = new ArrayList<>();
+
+        for (Terms.Bucket entry : buckets.getBuckets())
+        {
+            logger.debug("key [{}], doc_count [{}]", entry.getKey(), entry.getDocCount());
+            Aggregations aggregations = entry.getAggregations();
+            TopHits topHits = aggregations.get(ESConstants.TOP_HITS);
+
+            temp = buildRecords((InternalAggregations) aggregations, topHits.getHits(), query, metaModel, clazz,
+                    entityMetadata);
+            results.add(temp.size() == 1 ? temp.get(0) : temp);
+        }
+
+        return results;
+    }
+
+    /**
+     * Parses the aggregations.
+     * 
+     * @param response
+     *            the response
+     * @param query
+     *            the query
+     * @param metaModel
+     *            the meta model
+     * @param clazz
+     *            the clazz
+     * @param EntityMetadata
+     *            the m
+     * @return the map
+     */
+    public Map<String, Object> parseAggregations(SearchResponse response, KunderaQuery query, MetamodelImpl metaModel,
+            Class clazz, EntityMetadata m)
+    {
+        Map<String, Object> aggregationsMap = new LinkedHashMap<>();
+        if (query.isAggregated() == true && response.getAggregations() != null)
+        {
+            InternalAggregations internalAggs = ((InternalFilter) response.getAggregations().getAsMap()
+                    .get(ESConstants.AGGREGATION_NAME)).getAggregations();
+
+            ListIterable<Expression> iterable = getSelectExpressionOrder(query);
+
+            if (query.isSelectStatement() && KunderaQueryUtils.hasGroupBy(query.getJpqlExpression()))
+            {
+                Terms buckets = (Terms) (internalAggs).getAsMap().get(ESConstants.GROUP_BY);
+
+                filterBuckets(buckets, query);
+
+                for (Terms.Bucket bucket : buckets.getBuckets())
+                {
+                    logger.debug("key [{}], doc_count [{}]", bucket.getKey(), bucket.getDocCount());
+
+                    TopHits topHits = bucket.getAggregations().get(ESConstants.TOP_HITS);
+                    aggregationsMap.put(topHits.getHits().getAt(0).getId(),
+                            buildRecords(iterable, (InternalAggregations) bucket.getAggregations()));
+                }
+            }
+            else
+            {
+                aggregationsMap = buildRecords(iterable, internalAggs);
+            }
+        }
+        return aggregationsMap;
+    }
+
+    /**
+     * Builds the records.
+     * 
+     * @param iterable
+     *            the iterable
+     * @param internalAgg
+     *            the internal agg
+     * @return the map
+     */
+    private Map<String, Object> buildRecords(ListIterable<Expression> iterable, InternalAggregations internalAgg)
+    {
+        Map<String, Object> temp = new HashMap<>();
+        Iterator<Expression> itr = iterable.iterator();
 
         while (itr.hasNext())
         {
             Expression exp = itr.next();
+            if (AggregateFunction.class.isAssignableFrom(exp.getClass()))
+            {
+                Object value = getAggregatedResult(internalAgg, ((AggregateFunction) exp).getIdentifier(), exp);
+                if (!value.toString().equalsIgnoreCase(ESConstants.INFINITY))
+                {
+                    temp.put(exp.toParsedText(), Double.valueOf(value.toString()));
+                }
+            }
+        }
+
+        return temp;
+    }
+
+    /**
+     * Parses the records.
+     * 
+     * @param internalAgg
+     *            the internal agg
+     * @param topHits
+     *            the top hits
+     * @param query
+     *            the query
+     * @param metaModel
+     *            the meta model
+     * @param clazz
+     *            the clazz
+     * @param entityMetadata
+     *            the entity metadata
+     * @return the list
+     */
+    private List buildRecords(InternalAggregations internalAgg, SearchHits topHits, KunderaQuery query,
+            MetamodelImpl metaModel, Class clazz, EntityMetadata entityMetadata)
+    {
+        List temp = new ArrayList<>();
+
+        Iterator<Expression> orderIterator = getSelectExpressionOrder(query).iterator();
+        while (orderIterator.hasNext())
+        {
+            Expression exp = orderIterator.next();
             String text = exp.toActualText();
             String field = KunderaQueryUtils.isAggregatedExpression(exp) ? text.substring(
                     text.indexOf(ESConstants.DOT) + 1, text.indexOf(ESConstants.RIGHT_BRACKET)) : text.substring(
@@ -267,12 +369,12 @@ public final class ESResponseWrapper
         {
             Expression conditionalExpression = ((HavingClause) havingClause).getConditionalExpression();
 
-            for (Iterator<Bucket> itr = buckets.getBuckets().iterator(); itr.hasNext();)
+            for (Iterator<Bucket> bucketIterator = buckets.getBuckets().iterator(); bucketIterator.hasNext();)
             {
-                InternalAggregations internalAgg = (InternalAggregations) itr.next().getAggregations();
+                InternalAggregations internalAgg = (InternalAggregations) bucketIterator.next().getAggregations();
                 if (!isValidBucket(internalAgg, query, conditionalExpression))
                 {
-                    itr.remove();
+                    bucketIterator.remove();
                 }
             }
         }
@@ -437,45 +539,6 @@ public final class ESResponseWrapper
                     .getAt(0).getFields().get(jpaField).getValue();
         }
         return entity;
-    }
-
-    /**
-     * Parses the aggregations.
-     * 
-     * @param response
-     *            the response
-     * @param query
-     *            the query
-     * @param metaModel
-     *            the meta model
-     * @param clazz
-     *            the clazz
-     * @return the map
-     */
-    public Map<String, Object> parseAggregations(SearchResponse response, KunderaQuery query, MetamodelImpl metaModel,
-            Class clazz)
-    {
-        Map<String, Object> aggMap = new HashMap<String, Object>();
-        if (query.isAggregated() == true && response.getAggregations() != null)
-        {
-            InternalAggregations internalAggs = ((InternalFilter) response.getAggregations().getAsMap()
-                    .get(ESConstants.AGGREGATION_NAME)).getAggregations();
-            Iterator<Expression> itr = getSelectExpressionOrder(query).iterator();
-
-            while (itr.hasNext())
-            {
-                Expression exp = itr.next();
-                if (AggregateFunction.class.isAssignableFrom(exp.getClass()))
-                {
-                    Object value = getAggregatedResult(internalAggs, ((AggregateFunction) exp).getIdentifier(), exp);
-                    if (!value.toString().equalsIgnoreCase(ESConstants.INFINITY))
-                    {
-                        aggMap.put(exp.toParsedText(), Double.valueOf(value.toString()));
-                    }
-                }
-            }
-        }
-        return aggMap;
     }
 
     /**

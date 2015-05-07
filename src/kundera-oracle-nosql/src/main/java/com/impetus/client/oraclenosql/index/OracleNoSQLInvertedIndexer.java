@@ -63,7 +63,8 @@ public class OracleNoSQLInvertedIndexer implements Indexer
     private OracleNoSQLDataHandler handler;
 
     @Override
-    public void index(Class entityClazz, EntityMetadata m, Map<String, Object> values, Object entityId, final Class parentClazz)
+    public void index(Class entityClazz, EntityMetadata m, Map<String, Object> values, Object entityId,
+            final Class parentClazz)
     {
         String idColumnName = ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName();
         Object id = values.get(idColumnName);
@@ -93,8 +94,8 @@ public class OracleNoSQLInvertedIndexer implements Indexer
     }
 
     @Override
-    public Map<String, Object> search(String query, Class<?> parentClass,  EntityMetadata parentMetadata, Class<?> childClass, EntityMetadata childMetadata, Object entityId,
-            int start, int count)
+    public Map<String, Object> search(String query, Class<?> parentClass, EntityMetadata parentMetadata,
+            Class<?> childClass, EntityMetadata childMetadata, Object entityId, int start, int count)
     {
         String secIndexName = getIndexTableName(childMetadata);
         String parentIdColumnName = ((AbstractAttribute) parentMetadata.getIdAttribute()).getJPAColumnName();
@@ -129,7 +130,8 @@ public class OracleNoSQLInvertedIndexer implements Indexer
         return results;
     }
 
-    public <E> Set<E> executeQuery(OracleNoSQLQueryInterpreter interpreter, Class<?> entityClass, EntityMetadata entityMetadata)
+    public <E> Set<E> executeQuery(OracleNoSQLQueryInterpreter interpreter, Class<?> entityClass,
+            EntityMetadata entityMetadata)
     {
         String idColumnName = ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName();
         String secIndexName = getIndexTableName(entityMetadata);
@@ -341,10 +343,10 @@ public class OracleNoSQLInvertedIndexer implements Indexer
         return entityMetadata.getIndexName() + OracleNOSQLConstants.SECONDARY_INDEX_SUFFIX;
     }
 
-	@Override
-	public Map<String, Object> search(KunderaMetadata kunderaMetadata,
-			KunderaQuery kunderaQuery,
-			PersistenceDelegator persistenceDelegator, EntityMetadata m) {
-		throw new KunderaException("Unsupported Method");
-	}
+    @Override
+    public Map<String, Object> search(KunderaMetadata kunderaMetadata, KunderaQuery kunderaQuery,
+            PersistenceDelegator persistenceDelegator, EntityMetadata m, int maxResults)
+    {
+        throw new KunderaException("Unsupported Method");
+    }
 }

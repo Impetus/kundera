@@ -66,7 +66,6 @@ import com.impetus.kundera.query.KunderaQuery.UpdateClause;
 import com.impetus.kundera.utils.KunderaCoreUtils;
 import com.impetus.kundera.utils.ReflectUtils;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class QueryImpl.
  * 
@@ -455,46 +454,98 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
      * 
      * @param client
      *            the client
-     * @param m
+     * @param EntityMetadata
      *            the m
      * @return Result list by fetching from ES
      */
     private List populateUsingElasticSearch(Client client, EntityMetadata m)
     {
         Map<String, Object> searchFilter = client.getIndexManager().search(kunderaMetadata, kunderaQuery,
-                persistenceDelegeator, m);
-        Object[] primaryKeys = ((Map<String, Object>) searchFilter.get("primaryKeys")).values()
-                .toArray(new Object[] {});
-        Map<String, Object> aggregations = (Map<String, Object>) searchFilter.get("aggregations");
-        Iterator<Expression> resultOrder = (Iterator<Expression>) searchFilter.get("order");
+                persistenceDelegeator, m, this.maxResult);
+        Object[] primaryKeys = ((Map<String, Object>) searchFilter.get(Constants.PRIMARY_KEYS)).values().toArray(
+                new Object[] {});
+        Map<String, Object> aggregations = (Map<String, Object>) searchFilter.get(Constants.AGGREGATIONS);
+
+        Iterable<Expression> resultOrderIterable = (Iterable<Expression>) searchFilter
+                .get(Constants.SELECT_EXPRESSION_ORDER);
         List<Object> results = new ArrayList<Object>();
 
         if (!kunderaQuery.isAggregated())
         {
             results.addAll(findUsingLucene(m, client, primaryKeys));
-
         }
         else
         {
+            if (KunderaQueryUtils.hasGroupBy(kunderaQuery.getJpqlExpression()))
+            {
+                populateGroupByResponse(aggregations, resultOrderIterable, results, client, m);
+            }
+            else
+            {
+                Iterator<Expression> resultOrder = resultOrderIterable.iterator();
+                while (resultOrder.hasNext())
+                {
+                    Expression expression = (Expression) resultOrder.next();
+
+                    if (AggregateFunction.class.isAssignableFrom(expression.getClass()))
+                    {
+                        if (aggregations.get(expression.toParsedText()) != null)
+                        {
+                            results.add(aggregations.get(expression.toParsedText()));
+                        }
+                    }
+                    else
+                    {
+                        results.addAll(findUsingLucene(m, client, new Object[] { primaryKeys[0] }));
+                    }
+                }
+            }
+        }
+
+        return results;
+    }
+
+    /**
+     * Populate group by response.
+     * 
+     * @param aggregations
+     *            the aggregations
+     * @param resultOrderIterable
+     *            the result order iterable
+     * @param results
+     *            the results
+     * @param client
+     *            the client
+     * @param m
+     *            the m
+     */
+    private void populateGroupByResponse(Map<String, Object> aggregations, Iterable<Expression> resultOrderIterable,
+            List<Object> results, Client client, EntityMetadata m)
+    {
+        List temp;
+        for (String entry : aggregations.keySet())
+        {
+            Object obj = aggregations.get(entry);
+            temp = new ArrayList<>();
+            Iterator<Expression> resultOrder = resultOrderIterable.iterator();
             while (resultOrder.hasNext())
             {
                 Expression expression = (Expression) resultOrder.next();
 
                 if (AggregateFunction.class.isAssignableFrom(expression.getClass()))
                 {
-                    if (aggregations.get(expression.toParsedText()) != null)
+                    if (((Map) obj).get(expression.toParsedText()) != null)
                     {
-                        results.add((Double) aggregations.get(expression.toParsedText()));
+                        temp.add(((Map) obj).get(expression.toParsedText()));
                     }
                 }
                 else
                 {
-                    results.addAll(findUsingLucene(m, client, new Object[] { primaryKeys[0] }));
+                    temp.addAll(findUsingLucene(m, client, new Object[] { entry }));
                 }
             }
+            results.add(temp.size() == 1 ? temp.get(0) : temp);
         }
-        return results;
-
     }
 
     /**

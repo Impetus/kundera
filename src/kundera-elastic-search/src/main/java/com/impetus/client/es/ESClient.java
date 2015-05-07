@@ -299,10 +299,11 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
      *            the entity metadata
      * @param query
      *            the query
+     * @param maxResult
      * @return the list
      */
     public List executeQuery(FilterBuilder filter, AggregationBuilder aggregation, final EntityMetadata entityMetadata,
-            KunderaQuery query)
+            KunderaQuery query, int maxResults)
     {
         String[] fieldsToSelect = query.getResult();
         Class clazz = entityMetadata.getEntityClazz();
@@ -319,6 +320,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
         if (aggregation == null)
         {
             builder.setQuery(queryBuilder);
+            builder.setSize(maxResults);
         }
         else
         {

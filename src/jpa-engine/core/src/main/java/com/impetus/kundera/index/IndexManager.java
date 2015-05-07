@@ -31,12 +31,11 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PropertyIndex;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
-import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
+import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.KunderaQuery;
-import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**
  * Manager responsible to co-ordinate with an Indexer. It is bound with
@@ -89,7 +88,7 @@ public class IndexManager
         {
             if (indexer.getClass().getName().equals(IndexingConstants.LUCENE_INDEXER))
             {
-                ((com.impetus.kundera.index.lucene.Indexer) indexer).unindex(metadata, key, kunderaMetadata,null);
+                ((com.impetus.kundera.index.lucene.Indexer) indexer).unindex(metadata, key, kunderaMetadata, null);
             }
             else
             {
@@ -119,9 +118,9 @@ public class IndexManager
                             metadata.getPersistenceUnit());
                     Object id = PropertyAccessorHelper.getId(entity, metadata);
                     boolean isEmbeddedId = metamodel.isEmbeddable(metadata.getIdAttribute().getBindableJavaType());
-                    
+
                     boolean documentExistsInIndex = ((com.impetus.kundera.index.lucene.Indexer) indexer)
-                            .documentExistsInIndex(metadata, id, kunderaMetadata, isEmbeddedId,clazz);
+                            .documentExistsInIndex(metadata, id, kunderaMetadata, isEmbeddedId, clazz);
 
                     if (documentExistsInIndex)
                     {
@@ -135,7 +134,8 @@ public class IndexManager
                                 .entityExistsInIndex(entity.getClass(), kunderaMetadata, metadata);
                         if (documentExists)
                         {
-                            ((com.impetus.kundera.index.lucene.Indexer) indexer).unindex(metadata, id, kunderaMetadata,clazz);
+                            ((com.impetus.kundera.index.lucene.Indexer) indexer).unindex(metadata, id, kunderaMetadata,
+                                    clazz);
                             ((com.impetus.kundera.index.lucene.Indexer) indexer).flush();
                         }
                         ((com.impetus.kundera.index.lucene.Indexer) indexer).index(metadata, metamodel, entity,
@@ -373,10 +373,11 @@ public class IndexManager
         }
         return new HashMap<String, Object>();
     }
-    
-    public final Map<String, Object> search(KunderaMetadata kunderaMetadata, KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator, EntityMetadata m)
+
+    public final Map<String, Object> search(KunderaMetadata kunderaMetadata, KunderaQuery kunderaQuery,
+            PersistenceDelegator persistenceDelegator, EntityMetadata m, int maxResults)
     {
-    	return indexer.search(kunderaMetadata, kunderaQuery, persistenceDelegator, m);
+        return indexer.search(kunderaMetadata, kunderaQuery, persistenceDelegator, m, maxResults);
     }
 
     /**

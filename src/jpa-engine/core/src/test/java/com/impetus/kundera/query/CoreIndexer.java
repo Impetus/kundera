@@ -12,7 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */package com.impetus.kundera.query;
+ */
+package com.impetus.kundera.query;
 
 import java.util.Map;
 
@@ -25,8 +26,8 @@ import com.impetus.kundera.persistence.PersistenceDelegator;
 /**
  * @author vivek.mishra
  * 
- * Implementation of {@link Indexer} interface.
- *
+ *         Implementation of {@link Indexer} interface.
+ * 
  */
 public class CoreIndexer implements Indexer
 {
@@ -61,12 +62,11 @@ public class CoreIndexer implements Indexer
     {
     }
 
-	@Override
-	public Map<String, Object> search(KunderaMetadata kunderaMetadata,
-			KunderaQuery kunderaQuery,
-			PersistenceDelegator persistenceDelegator, EntityMetadata m) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public Map<String, Object> search(KunderaMetadata kunderaMetadata, KunderaQuery kunderaQuery,
+            PersistenceDelegator persistenceDelegator, EntityMetadata m, int maxResults)
+    {
+        return null;
+    }
 
 }
