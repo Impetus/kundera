@@ -108,6 +108,18 @@ public abstract class ClientBase
         indexNode(node, metadata);
     }
 
+    public void remove(Object entity, Object pKey){
+        delete(entity, pKey);
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entity.getClass());
+        unIndexNode(metadata, entity,pKey);
+    }
+    protected void unIndexNode(EntityMetadata metadata, Object entity, Object pKey)
+    {
+        if(indexManager!=null){
+            indexManager.remove(metadata, entity, pKey);
+        }
+    }
+
     /**
      * @param node
      * @return
@@ -233,6 +245,7 @@ public abstract class ClientBase
      */
     protected abstract void onPersist(EntityMetadata entityMetadata, Object entity, Object id,
             List<RelationHolder> rlHolders);
+    protected abstract void delete(Object entity, Object pKey);
 
     public ClientMetadata getClientMetadata()
     {

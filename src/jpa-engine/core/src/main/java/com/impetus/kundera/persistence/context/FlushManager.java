@@ -478,7 +478,7 @@ public class FlushManager
                         if (node.getOriginalNode() == null)
                         {
                             Object entityId = node.getEntityId();
-                            client.delete(node.getData(), entityId);
+                            client.remove(node.getData(), entityId);
                         }
                         else
                         {

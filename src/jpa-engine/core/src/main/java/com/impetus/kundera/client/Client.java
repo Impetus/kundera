@@ -95,14 +95,14 @@ public interface Client<Q extends Query>
     void close();
 
     /**
-     * Deletes an entity from datastore for a given primary key
+     * Removes an entity from datastore for a given primary key
      * 
      * @param entity
      *            the entity
      * @param pKey
      *            Primary key of entity to be deleted
      */
-    void delete(Object entity, Object pKey);
+    void remove(Object entity, Object pKey);
 
     /**
      * Gets the persistence unit.

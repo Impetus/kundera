@@ -168,6 +168,28 @@ public class HBaseESQueryTest extends HBaseQueryBaseTest
         multiAvgAggregationWithWhere();
         minMaxSumAvgAggregation();
     }
+    
+    @Test
+    public void indexDeletionTest() throws Exception
+    {
+        String query = "Select min(b.pages) from Book b";
+        List resultList = em.createQuery(query).getResultList();
+        assertES(resultList, 100.0);
+        
+        Book book = em.find(Book.class, 1);
+        em.remove(book);
+        Thread.sleep(1000);
+        query = "Select min(b.pages) from Book b";
+        resultList = em.createQuery(query).getResultList();
+        assertES(resultList, 200.0);
+        
+        book = em.find(Book.class, 2);
+        em.remove(book);
+        Thread.sleep(1000);
+        query = "Select min(b.pages) from Book b";
+        resultList = em.createQuery(query).getResultList();
+        assertES(resultList, 300.0);
+    }
 
     /**
      * Min aggregation.
