@@ -623,18 +623,32 @@ public class MongoDBQuery extends QueryImpl
      */
     private BasicDBObject getOrderByClause(final EntityMetadata metadata)
     {
+
         BasicDBObject orderByClause = null;
         Metamodel metaModel = kunderaMetadata.getApplicationMetadata().getMetamodel(metadata.getPersistenceUnit());
         EntityType entityType = metaModel.entity(metadata.getEntityClazz());
+
+        AbstractManagedType managedType = (AbstractManagedType) metaModel.entity(metadata.getEntityClazz());
 
         List<SortOrdering> orders = kunderaQuery.getOrdering();
         if (orders != null)
         {
             orderByClause = new BasicDBObject();
-            for (SortOrdering order : orders)
+            if (!managedType.hasLobAttribute())
             {
-                orderByClause.append(getColumnName(metadata, entityType, order.getColumnName()), order.getOrder()
-                        .equals(SortOrder.ASC) ? 1 : -1);
+                for (SortOrdering order : orders)
+                {
+                    orderByClause.append(getColumnName(metadata, entityType, order.getColumnName()), order.getOrder()
+                            .equals(SortOrder.ASC) ? 1 : -1);
+                }
+            }
+            else
+            {
+                for (SortOrdering order : orders)
+                {
+                    orderByClause.append("metadata." + getColumnName(metadata, entityType, order.getColumnName()),
+                            order.getOrder().equals(SortOrder.ASC) ? 1 : -1);
+                }
             }
         }
 

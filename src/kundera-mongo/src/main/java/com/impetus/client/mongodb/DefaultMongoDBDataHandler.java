@@ -34,6 +34,7 @@ import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.Metamodel;
 
+import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -353,7 +354,7 @@ public final class DefaultMongoDBDataHandler implements MongoDBDataHandler
      * @return the GFS iuput file from entity
      */
     public GridFSInputFile getGFSInputFileFromEntity(GridFS gfs, EntityMetadata m, Object entity,
-            KunderaMetadata kunderaMetadata)
+            KunderaMetadata kunderaMetadata, boolean isUpdate)
     {
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
@@ -374,7 +375,12 @@ public final class DefaultMongoDBDataHandler implements MongoDBDataHandler
             }
             else
             {
-                DocumentObjectMapper.extractFieldValue(entity, gfsMetadata, column);
+                if (isUpdate && column.getName().equals(m.getIdAttribute().getName()))
+                {
+                    gfsMetadata.put(((AbstractAttribute) column).getJPAColumnName(), new ObjectId());
+                }
+                else
+                    DocumentObjectMapper.extractFieldValue(entity, gfsMetadata, column);
             }
         }
         gridFSInputFile.setMetaData(gfsMetadata);
@@ -654,7 +660,7 @@ public final class DefaultMongoDBDataHandler implements MongoDBDataHandler
      *            the entity
      * @param kunderaMetadata
      *            the kundera metadata
-     * @return the metadata from gfs entity
+     * @return the metadata from GFS entity
      */
     public DBObject getMetadataFromGFSEntity(GridFS gfs, EntityMetadata m, Object entity,
             KunderaMetadata kunderaMetadata)
