@@ -52,6 +52,15 @@ public class GridFSTest
     /** The em. */
     private EntityManager em;
 
+    /** The profile pic1. */
+    private byte[] profilePic1;
+
+    /** The profile pic2. */
+    private byte[] profilePic2;
+
+    /** The profile pic3. */
+    private byte[] profilePic3;
+
     /**
      * Sets the up before class.
      * 
@@ -107,11 +116,10 @@ public class GridFSTest
      * @throws Exception
      *             the exception
      */
-    @Test
+     @Test
     public void testCRUDGridFS() throws Exception
     {
         testInsert();
-        testQuery();
         testUpdateNonLobField();
         testUpdateLobField();
         testDelete();
@@ -119,21 +127,81 @@ public class GridFSTest
 
     /**
      * Test query.
+     * 
+     * @throws Exception
+     *             the exception
      */
-    private void testQuery()
+    @Test
+    public void testQuery() throws Exception
     {
-        String query = "SELECT u FROM GFSUser u WHERE u.userId = '1' and u.name='Dev'";
+        profilePic1 = createBinaryData("src/test/resources/pic.jpg", 10);
+        GFSUser user1 = prepareUserObject(1, "Dev", profilePic1);
+
+        profilePic2 = createBinaryData("src/test/resources/pic.jpg", 15);
+        GFSUser user2 = prepareUserObject(2, "PG", profilePic2);
+
+        profilePic3 = createBinaryData("src/test/resources/pic.jpg", 20);
+        GFSUser user3 = prepareUserObject(3, "Amit", profilePic3);
+
+        em.persist(user1);
+        em.persist(user2);
+        em.persist(user3);
+
+        em.clear();
+
+        String query = "SELECT u FROM GFSUser u";
         Query qry = em.createQuery(query);
         List<GFSUser> userList = qry.getResultList();
-        Assert.assertEquals(1, userList.size());
-        GFSUser user = userList.get(0);
-        Assert.assertEquals("1", user.getUserId());
-        Assert.assertEquals("Dev", user.getName());
+        Assert.assertEquals(3, userList.size());
+        assertUsers(userList, true, true, true);
 
-        query = "SELECT u FROM GFSUser u WHERE u.userId = '1' and u.name='Amit'";
+        query = "SELECT u FROM GFSUser u WHERE u.name = 'Dev'";
+        qry = em.createQuery(query);
+        userList = qry.getResultList();
+        GFSUser user = userList.get(0);
+        Assert.assertEquals("Dev", user.getName());
+        Assert.assertEquals(profilePic1.length, user.getProfilePic().length);
+
+        query = "SELECT u FROM GFSUser u WHERE u.name = 'Karthik'";
         qry = em.createQuery(query);
         userList = qry.getResultList();
         Assert.assertEquals(true, userList.isEmpty());
+
+        query = "SELECT u FROM GFSUser u WHERE u.userId = 2";
+        qry = em.createQuery(query);
+        userList = qry.getResultList();
+        user = userList.get(0);
+        Assert.assertEquals("PG", user.getName());
+        Assert.assertEquals(profilePic2.length, user.getProfilePic().length);
+
+        query = "SELECT u FROM GFSUser u WHERE u.userId > 1";
+        qry = em.createQuery(query);
+        userList = qry.getResultList();
+        Assert.assertEquals(2, userList.size());
+        assertUsers(userList, false, true, true);
+
+        query = "SELECT u FROM GFSUser u WHERE u.userId = 2 and u.name = 'PG'";
+        qry = em.createQuery(query);
+        userList = qry.getResultList();
+        Assert.assertEquals(1, userList.size());
+        user = userList.get(0);
+        Assert.assertEquals("PG", user.getName());
+        Assert.assertEquals(profilePic2.length, user.getProfilePic().length);
+
+        query = "SELECT u FROM GFSUser u WHERE u.userId < 3 order by u.name DESC";
+        qry = em.createQuery(query);
+        userList = qry.getResultList();
+        Assert.assertEquals(2, userList.size());
+        assertUsers(userList, true, true, false);
+
+        // remove all users
+        GFSUser u1 = em.find(GFSUser.class, 1);
+        GFSUser u2 = em.find(GFSUser.class, 2);
+        GFSUser u3 = em.find(GFSUser.class, 3);
+        em.clear();
+        em.remove(u1);
+        em.remove(u2);
+        em.remove(u3);
     }
 
     /**
@@ -142,14 +210,12 @@ public class GridFSTest
     private void testInsert()
     {
         byte[] profilePic = createBinaryData("src/test/resources/pic.jpg", 20);
-        GFSUser user = prepareUserObject("1", "Dev", profilePic);
+        GFSUser user = prepareUserObject(1, "Dev", profilePic);
         em.persist(user);
 
         em.clear();
 
-        GFSUser u = em.find(GFSUser.class, "1");
-        Assert.assertNotNull(u);
-        Assert.assertEquals("1", u.getUserId());
+        GFSUser u = em.find(GFSUser.class, 1);
         Assert.assertEquals("Dev", u.getName());
         Assert.assertEquals(profilePic.length, u.getProfilePic().length);
     }
@@ -159,16 +225,15 @@ public class GridFSTest
      */
     private void testUpdateNonLobField()
     {
-        GFSUser user = em.find(GFSUser.class, "1");
+        GFSUser user = em.find(GFSUser.class, 1);
         user.setName("Devender");
         em.merge(user);
 
         em.clear();
 
-        GFSUser u1 = em.find(GFSUser.class, "1");
+        GFSUser u1 = em.find(GFSUser.class, 1);
 
         Assert.assertNotNull(u1);
-        Assert.assertEquals("1", u1.getUserId());
         Assert.assertEquals("Devender", u1.getName());
     }
 
@@ -177,7 +242,7 @@ public class GridFSTest
      */
     private void testUpdateLobField()
     {
-        GFSUser user = em.find(GFSUser.class, "1");
+        GFSUser user = em.find(GFSUser.class, 1);
         byte[] profilePic = createBinaryData("src/test/resources/pic.jpg", 15);
         user.setProfilePic(profilePic);
 
@@ -185,10 +250,9 @@ public class GridFSTest
 
         em.clear();
 
-        GFSUser u = em.find(GFSUser.class, "1");
+        GFSUser u = em.find(GFSUser.class, 1);
 
         Assert.assertNotNull(u);
-        Assert.assertEquals("1", u.getUserId());
         Assert.assertEquals("Devender", u.getName());
         Assert.assertEquals(profilePic.length, u.getProfilePic().length);
     }
@@ -198,10 +262,10 @@ public class GridFSTest
      */
     private void testDelete()
     {
-        GFSUser user = em.find(GFSUser.class, "1");
+        GFSUser user = em.find(GFSUser.class, 1);
         em.remove(user);
         em.clear();
-        GFSUser u = em.find(GFSUser.class, "1");
+        GFSUser u = em.find(GFSUser.class, 1);
         Assert.assertNull(u);
     }
 
@@ -216,7 +280,7 @@ public class GridFSTest
      *            the profile pic
      * @return the GFS user
      */
-    private GFSUser prepareUserObject(String userID, String name, byte[] profilePic)
+    private GFSUser prepareUserObject(int userID, String name, byte[] profilePic)
     {
         GFSUser user = new GFSUser();
         user.setUserId(userID);
@@ -255,6 +319,47 @@ public class GridFSTest
         }
 
         return multipliedData;
+    }
+
+    /**
+     * Assert users.
+     * 
+     * @param userList
+     *            the user list
+     * @param foundUser1
+     *            the found user1
+     * @param foundUser2
+     *            the found user2
+     * @param foundUser3
+     *            the found user3
+     */
+    private void assertUsers(List<GFSUser> userList, boolean foundUser1, boolean foundUser2, boolean foundUser3)
+    {
+        for (GFSUser user : userList)
+        {
+            if (user.getUserId() == 1)
+            {
+                Assert.assertEquals("Dev", user.getName());
+                Assert.assertEquals(profilePic1.length, user.getProfilePic().length);
+            }
+
+            else if (user.getUserId() == 2)
+            {
+                Assert.assertEquals("PG", user.getName());
+                Assert.assertEquals(profilePic2.length, user.getProfilePic().length);
+            }
+
+            else if (user.getUserId() == 3)
+            {
+                Assert.assertEquals("Amit", user.getName());
+                Assert.assertEquals(profilePic3.length, user.getProfilePic().length);
+            }
+
+            else
+            {
+                Assert.fail();
+            }
+        }
     }
 
 }

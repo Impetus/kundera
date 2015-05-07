@@ -375,8 +375,20 @@ public class MongoDBQuery extends QueryImpl
 
                 if (managedType.hasLobAttribute())
                 {
-                    property = "metadata." + property;
+                    EntityType entity = metaModel.entity(m.getEntityClazz());
+                    String fieldName = m.getFieldName(property);
+                    
+                    f = (Field) entity.getAttribute(fieldName).getJavaMember();
+
+                    if (value.getClass().isAssignableFrom(String.class) && f != null
+                            && !f.getType().equals(value.getClass()))
+                    {
+                        value = PropertyAccessorFactory.getPropertyAccessor(f).fromString(f.getType().getClass(),
+                                value.toString());
+                    }
                     value = MongoDBUtils.populateValue(value, value.getClass());
+                    
+                    property = "metadata." + property;
                 }
                 else
                 {
