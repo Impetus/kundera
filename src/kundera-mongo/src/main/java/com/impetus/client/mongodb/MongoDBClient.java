@@ -863,14 +863,14 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      * 
      * @param entity
      *            the entity
-     * @param id
-     *            the id
+     * @param entityId
+     *            the entityId
      * @param entityMetadata
      *            the entity metadata
      * @param isUpdate
      *            the is update
      */
-    private void onPersistGFS(Object entity, Object id, EntityMetadata entityMetadata, boolean isUpdate)
+    private void onPersistGFS(Object entity, Object entityId, EntityMetadata entityMetadata, boolean isUpdate)
     {
         GridFS gfs = new GridFS(mongoDb, entityMetadata.getTableName());
         if (!isUpdate)
@@ -883,11 +883,9 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         {
             Object val = handler.getLobFromGFSEntity(gfs, entityMetadata, entity, kunderaMetadata);
             String md5 = MongoDBUtils.calculateMD5(val);
-            GridFSDBFile outputFile = findGridFSDBFile(entityMetadata, id);
+            GridFSDBFile outputFile = findGridFSDBFile(entityMetadata, entityId);
 
-            /*
-             * checking MD5 of file to be updated with file saved in DB
-             */
+            // checking MD5 of the file to be updated with the file saved in DB
             if (md5.equals(outputFile.getMD5()))
             {
                 DBObject metadata = handler.getMetadataFromGFSEntity(gfs, entityMetadata, entity, kunderaMetadata);
@@ -896,17 +894,29 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             }
             else
             {
+                // GFSInput file is created corresponding to the entity to be
+                // merged with a new ObjectID()
                 GridFSInputFile gfsInputFile = handler.getGFSInputFileFromEntity(gfs, entityMetadata, entity,
                         kunderaMetadata, isUpdate);
+                ObjectId updatedId = (ObjectId) gfsInputFile.getId();
                 DBObject metadata = gfsInputFile.getMetaData();
-                ObjectId updatedId = (ObjectId) metadata.get(((AbstractAttribute) entityMetadata.getIdAttribute())
-                        .getJPAColumnName());
+
+                // updated file is saved in DB
                 saveGridFSFile(gfsInputFile, entityMetadata);
+
+                // last version of file is deleted
                 DBObject query = new BasicDBObject("_id", outputFile.getId());
                 gfs.remove(query);
-                outputFile = findGridFSDBFile(entityMetadata, updatedId);
-                metadata.put(((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName(), id);
+
+                // newly added file is found using its _id
+                outputFile = gfs.findOne(updatedId);
+
+                // Id of entity (which is saved in metadata) is updated to its
+                // actual Id
+                metadata.put(((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName(), entityId);
                 outputFile.setMetaData(metadata);
+
+                // output file is updated
                 outputFile.save();
             }
         }
