@@ -29,12 +29,20 @@ import java.util.Set;
 
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.Metamodel;
 import javax.persistence.metamodel.SingularAttribute;
 
 import org.eclipse.persistence.jpa.jpql.parser.AggregateFunction;
+import org.eclipse.persistence.jpa.jpql.parser.AndExpression;
 import org.eclipse.persistence.jpa.jpql.parser.CollectionExpression;
+import org.eclipse.persistence.jpa.jpql.parser.ComparisonExpression;
 import org.eclipse.persistence.jpa.jpql.parser.Expression;
+import org.eclipse.persistence.jpa.jpql.parser.HavingClause;
+import org.eclipse.persistence.jpa.jpql.parser.LogicalExpression;
+import org.eclipse.persistence.jpa.jpql.parser.NullExpression;
+import org.eclipse.persistence.jpa.jpql.parser.OrExpression;
 import org.eclipse.persistence.jpa.jpql.parser.SelectClause;
+import org.eclipse.persistence.jpa.jpql.utility.iterable.ListIterable;
 import org.eclipse.persistence.jpa.jpql.utility.iterable.SnapshotCloneListIterable;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
@@ -42,10 +50,13 @@ import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.AbstractAggregationBuilder;
 import org.elasticsearch.search.aggregations.InternalAggregations;
 import org.elasticsearch.search.aggregations.bucket.filter.InternalFilter;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
 import org.elasticsearch.search.aggregations.metrics.avg.InternalAvg;
 import org.elasticsearch.search.aggregations.metrics.max.InternalMax;
 import org.elasticsearch.search.aggregations.metrics.min.InternalMin;
 import org.elasticsearch.search.aggregations.metrics.sum.InternalSum;
+import org.elasticsearch.search.aggregations.metrics.tophits.TopHits;
 import org.elasticsearch.search.aggregations.metrics.valuecount.InternalValueCount;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +83,7 @@ import com.impetus.kundera.utils.KunderaCoreUtils;
 public final class ESResponseWrapper
 {
     /** log for this class. */
-    private static Logger log = LoggerFactory.getLogger(ESResponseWrapper.class);
+    private static Logger logger = LoggerFactory.getLogger(ESResponseWrapper.class);
 
     /**
      * Parses the response.
@@ -96,7 +107,8 @@ public final class ESResponseWrapper
     public List parseResponse(SearchResponse response, AbstractAggregationBuilder aggregation, String[] fieldsToSelect,
             MetamodelImpl metaModel, Class clazz, final EntityMetadata entityMetadata, KunderaQuery query)
     {
-        log.debug("Response of query: " + response);
+        logger.debug("Response of query: " + response);
+
         List results = new ArrayList();
         EntityType entityType = metaModel.entity(clazz);
 
@@ -131,18 +143,12 @@ public final class ESResponseWrapper
             }
             else
             {
-                Object entity = null;
-                for (SearchHit hit : hits.getHits())
-                {
-                    entity = KunderaCoreUtils.createNewInstance(clazz);
-                    Map<String, Object> hitResult = hit.sourceAsMap();
-                    results.add(wrap(hitResult, entityType, entity, entityMetadata, false));
-                }
+                results = getEntityObjects(clazz, entityMetadata, entityType, hits);
             }
         }
         else
         {
-            results = parseAggregatedResponse(response, query, metaModel, clazz);
+            results = parseAggregatedResponse(response, query, metaModel, clazz, entityMetadata);
         }
         return results;
     }
@@ -158,39 +164,279 @@ public final class ESResponseWrapper
      *            the meta model
      * @param clazz
      *            the clazz
+     * @param entityMetadata
+     *            the entity metadata
      * @return the list
      */
     private List parseAggregatedResponse(SearchResponse response, KunderaQuery query, MetamodelImpl metaModel,
-            Class clazz)
+            Class clazz, EntityMetadata entityMetadata)
     {
         List temp = new ArrayList<>(), results = new ArrayList<>();
         InternalAggregations internalAggs = ((InternalFilter) response.getAggregations().getAsMap()
-                .get(ESConstants.aggName)).getAggregations();
-        Iterator<Expression> itr = getSelectExpressionOrder(query);
+                .get(ESConstants.AGGREGATION_NAME)).getAggregations();
+
+        if (query.isSelectStatement() && KunderaQueryUtils.hasGroupBy(query.getJpqlExpression()))
+        {
+            Terms buckets = (Terms) (internalAggs).getAsMap().get(ESConstants.GROUP_BY);
+
+            filterBuckets(buckets, query);
+            ListIterable<Expression> iterable = getSelectExpressionOrder(query);
+
+            for (Terms.Bucket entry : buckets.getBuckets())
+            {
+                logger.debug("key [{}], doc_count [{}]", entry.getKey(), entry.getDocCount());
+
+                Iterator<Expression> itr = iterable.iterator();
+                InternalAggregations internalAgg = (InternalAggregations) entry.getAggregations();
+                TopHits topHits = entry.getAggregations().get(ESConstants.TOP_HITS);
+
+                temp = parseRecords(internalAgg, topHits.getHits(), itr, query, metaModel, clazz, entityMetadata);
+                results.add(temp.size() == 1 ? temp.get(0) : temp);
+            }
+        }
+        else
+        {
+            Iterator<Expression> itr = getSelectExpressionOrder(query).iterator();
+
+            temp = parseRecords(internalAggs, response.getHits(), itr, query, metaModel, clazz, entityMetadata);
+
+            for (Object value : temp)
+            {
+                if (!value.toString().equalsIgnoreCase(ESConstants.INFINITY))
+                {
+                    results.add(value);
+                }
+            }
+        }
+        return results;
+    }
+
+    /**
+     * Parses the records.
+     * 
+     * @param internalAgg
+     *            the internal agg
+     * @param topHits
+     *            the top hits
+     * @param itr
+     *            the itr
+     * @param query
+     *            the query
+     * @param metaModel
+     *            the meta model
+     * @param clazz
+     *            the clazz
+     * @param entityMetadata
+     *            the entity metadata
+     * @return the list
+     */
+    private List parseRecords(InternalAggregations internalAgg, SearchHits topHits, Iterator<Expression> itr,
+            KunderaQuery query, MetamodelImpl metaModel, Class clazz, EntityMetadata entityMetadata)
+    {
+        List temp = new ArrayList<>();
 
         while (itr.hasNext())
         {
             Expression exp = itr.next();
             String text = exp.toActualText();
             String field = KunderaQueryUtils.isAggregatedExpression(exp) ? text.substring(
-                    text.indexOf(ESConstants.dot) + 1, text.indexOf(ESConstants.rightBracket)) : text.substring(
-                    text.indexOf(ESConstants.dot) + 1, text.length());
+                    text.indexOf(ESConstants.DOT) + 1, text.indexOf(ESConstants.RIGHT_BRACKET)) : text.substring(
+                    text.indexOf(ESConstants.DOT) + 1, text.length());
 
-            temp.add(KunderaQueryUtils.isAggregatedExpression(exp) ? getAggregatedResult(internalAggs,
-                    ((AggregateFunction) exp).getIdentifier(), text, exp) : response.getHits().getAt(0).getFields()
-                    .get(((AbstractAttribute) metaModel.entity(clazz).getAttribute(field)).getJPAColumnName())
-                    .getValue());
-
+            temp.add(KunderaQueryUtils.isAggregatedExpression(exp) ? getAggregatedResult(internalAgg,
+                    ((AggregateFunction) exp).getIdentifier(), exp) : getFirstResult(query, field, topHits, clazz,
+                    metaModel, entityMetadata));
         }
+        return temp;
+    }
 
-        for (Object value : temp)
+    /**
+     * Filter buckets.
+     * 
+     * @param buckets
+     *            the buckets
+     * @param query
+     *            the query
+     * @return the terms
+     */
+    private Terms filterBuckets(Terms buckets, KunderaQuery query)
+    {
+        Expression havingClause = query.getSelectStatement().getHavingClause();
+
+        if (!(havingClause instanceof NullExpression) && havingClause != null)
         {
-            if (!value.toString().equalsIgnoreCase(ESConstants.infinity))
+            Expression conditionalExpression = ((HavingClause) havingClause).getConditionalExpression();
+
+            for (Iterator<Bucket> itr = buckets.getBuckets().iterator(); itr.hasNext();)
             {
-                results.add(value);
+                InternalAggregations internalAgg = (InternalAggregations) itr.next().getAggregations();
+                if (!isValidBucket(internalAgg, query, conditionalExpression))
+                {
+                    itr.remove();
+                }
             }
         }
-        return results;
+        return buckets;
+    }
+
+    /**
+     * Checks if is valid bucket.
+     * 
+     * @param internalAgg
+     *            the internal agg
+     * @param query
+     *            the query
+     * @param conditionalExpression
+     *            the conditional expression
+     * @return true, if is valid bucket
+     */
+    private boolean isValidBucket(InternalAggregations internalAgg, KunderaQuery query, Expression conditionalExpression)
+    {
+        if (conditionalExpression instanceof ComparisonExpression)
+        {
+            Expression expression = ((ComparisonExpression) conditionalExpression).getLeftExpression();
+            Object leftValue = getAggregatedResult(internalAgg, ((AggregateFunction) expression).getIdentifier(),
+                    expression);
+
+            String rightValue = ((ComparisonExpression) conditionalExpression).getRightExpression().toParsedText();
+            return validateBucket(leftValue.toString(), rightValue,
+                    ((ComparisonExpression) conditionalExpression).getIdentifier());
+        }
+        else if (LogicalExpression.class.isAssignableFrom(conditionalExpression.getClass()))
+        {
+            Expression leftExpression = null, rightExpression = null;
+            if (conditionalExpression instanceof AndExpression)
+            {
+                AndExpression andExpression = (AndExpression) conditionalExpression;
+                leftExpression = andExpression.getLeftExpression();
+                rightExpression = andExpression.getRightExpression();
+            }
+            else
+            {
+                OrExpression orExpression = (OrExpression) conditionalExpression;
+                leftExpression = orExpression.getLeftExpression();
+                rightExpression = orExpression.getRightExpression();
+            }
+
+            return validateBucket(isValidBucket(internalAgg, query, leftExpression),
+                    isValidBucket(internalAgg, query, rightExpression),
+                    ((LogicalExpression) conditionalExpression).getIdentifier());
+        }
+        else
+        {
+            logger.error("Expression " + conditionalExpression + " in having clause is not supported in Kundera");
+            throw new UnsupportedOperationException(conditionalExpression
+                    + " in having clause is not supported in Kundera");
+        }
+    }
+
+    /**
+     * Validate bucket.
+     * 
+     * @param left
+     *            the left
+     * @param right
+     *            the right
+     * @param logicalOperation
+     *            the logical operation
+     * @return true, if successful
+     */
+    private boolean validateBucket(boolean left, boolean right, String logicalOperation)
+    {
+        logger.debug("Logical opertation " + logicalOperation + " found in having clause");
+        if (Expression.AND.equalsIgnoreCase(logicalOperation))
+        {
+            return left && right;
+        }
+        else if (Expression.OR.equalsIgnoreCase(logicalOperation))
+        {
+            return left || right;
+        }
+        else
+        {
+            logger.error(logicalOperation + " in having clause is not supported in Kundera");
+            throw new UnsupportedOperationException(logicalOperation + " in having clause is not supported in Kundera");
+        }
+    }
+
+    /**
+     * Validate bucket.
+     * 
+     * @param left
+     *            the left
+     * @param right
+     *            the right
+     * @param operator
+     *            the operator
+     * @return true, if successful
+     */
+    private boolean validateBucket(String left, String right, String operator)
+    {
+        Double leftValue = Double.valueOf(left);
+        Double rightValue = Double.valueOf(right);
+
+        logger.debug("Comparison expression " + operator + "found with left value: " + left + " right value: " + right);
+
+        if (Expression.GREATER_THAN.equals(operator))
+        {
+            return leftValue > rightValue;
+        }
+        else if (Expression.GREATER_THAN_OR_EQUAL.equals(operator))
+        {
+            return leftValue >= rightValue;
+        }
+        else if (Expression.LOWER_THAN.equals(operator))
+        {
+            return leftValue < rightValue;
+        }
+        else if (Expression.LOWER_THAN_OR_EQUAL.equals(operator))
+        {
+            return leftValue <= rightValue;
+        }
+        else if (Expression.EQUAL.equals(operator))
+        {
+            return leftValue == rightValue;
+        }
+        else
+        {
+            logger.error(operator + " in having clause is not supported in Kundera");
+            throw new UnsupportedOperationException(operator + " in having clause is not supported in Kundera");
+        }
+    }
+
+    /**
+     * Gets the first result.
+     * 
+     * @param query
+     *            the query
+     * @param field
+     *            the field
+     * @param hits
+     *            the hits
+     * @param clazz
+     *            the clazz
+     * @param metaModel
+     *            the meta model
+     * @param entityMetadata
+     *            the entity metadata
+     * @return the first
+     */
+    private Object getFirstResult(KunderaQuery query, String field, SearchHits hits, Class clazz, Metamodel metaModel,
+            EntityMetadata entityMetadata)
+    {
+        Object entity;
+
+        if (query.getEntityAlias().equals(field))
+        {
+            entity = getEntityObjects(clazz, entityMetadata, metaModel.entity(clazz), hits).get(0);
+        }
+        else
+        {
+            String jpaField = ((AbstractAttribute) metaModel.entity(clazz).getAttribute(field)).getJPAColumnName();
+            entity = query.getSelectStatement().hasGroupByClause() ? hits.getAt(0).sourceAsMap().get(jpaField) : hits
+                    .getAt(0).getFields().get(jpaField).getValue();
+        }
+        return entity;
     }
 
     /**
@@ -213,17 +459,16 @@ public final class ESResponseWrapper
         if (query.isAggregated() == true && response.getAggregations() != null)
         {
             InternalAggregations internalAggs = ((InternalFilter) response.getAggregations().getAsMap()
-                    .get(ESConstants.aggName)).getAggregations();
-            Iterator<Expression> itr = getSelectExpressionOrder(query);
+                    .get(ESConstants.AGGREGATION_NAME)).getAggregations();
+            Iterator<Expression> itr = getSelectExpressionOrder(query).iterator();
 
             while (itr.hasNext())
             {
                 Expression exp = itr.next();
                 if (AggregateFunction.class.isAssignableFrom(exp.getClass()))
                 {
-                    Object value = getAggregatedResult(internalAggs, ((AggregateFunction) exp).getIdentifier(),
-                            exp.toParsedText(), exp);
-                    if (!value.toString().equalsIgnoreCase(ESConstants.infinity))
+                    Object value = getAggregatedResult(internalAggs, ((AggregateFunction) exp).getIdentifier(), exp);
+                    if (!value.toString().equalsIgnoreCase(ESConstants.INFINITY))
                     {
                         aggMap.put(exp.toParsedText(), Double.valueOf(value.toString()));
                     }
@@ -240,14 +485,11 @@ public final class ESResponseWrapper
      *            the internal aggs
      * @param identifier
      *            the identifier
-     * @param field
-     *            the field
      * @param exp
      *            the exp
      * @return the aggregated result
      */
-    private Object getAggregatedResult(InternalAggregations internalAggs, String identifier, String field,
-            Expression exp)
+    private Object getAggregatedResult(InternalAggregations internalAggs, String identifier, Expression exp)
     {
         switch (identifier)
         {
@@ -423,7 +665,7 @@ public final class ESResponseWrapper
      *            the query
      * @return the select expression order
      */
-    public Iterator<Expression> getSelectExpressionOrder(KunderaQuery query)
+    public ListIterable<Expression> getSelectExpressionOrder(KunderaQuery query)
     {
         if (!KunderaQueryUtils.isSelectStatement(query.getJpqlExpression()))
         {
@@ -438,11 +680,40 @@ public final class ESResponseWrapper
         {
             list = new LinkedList<Expression>();
             list.add(selectExpression);
-            return new SnapshotCloneListIterable<Expression>(list).iterator();
+            return new SnapshotCloneListIterable<Expression>(list);
         }
         else
         {
-            return selectExpression.children().iterator();
+            return selectExpression.children();
         }
+    }
+
+    /**
+     * Gets the entity objects.
+     * 
+     * @param clazz
+     *            the clazz
+     * @param entityMetadata
+     *            the entity metadata
+     * @param entityType
+     *            the entity type
+     * @param hits
+     *            the hits
+     * @return the entity objects
+     */
+    private List getEntityObjects(Class clazz, final EntityMetadata entityMetadata, EntityType entityType,
+            SearchHits hits)
+    {
+        List results = new ArrayList();
+
+        Object entity = null;
+        for (SearchHit hit : hits.getHits())
+        {
+            entity = KunderaCoreUtils.createNewInstance(clazz);
+            Map<String, Object> hitResult = hit.sourceAsMap();
+            results.add(wrap(hitResult, entityType, entity, entityMetadata, false));
+        }
+
+        return results;
     }
 }

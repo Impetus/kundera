@@ -13,7 +13,7 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.client.crud.gfs;
+package com.impetus.client.mongodb.schemamanager;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -22,89 +22,88 @@ import javax.persistence.Lob;
 import javax.persistence.Table;
 
 /**
- * The Class GFSUser.
+ * The Class MongoGFSBookEntity.
  * 
  * @author Devender Yadav
  */
 @Entity
-@Table(name = "USER", schema = "GFS@gfs_pu")
-public class GFSUser
+@Table(name = "GFS_BOOK", schema = "KunderaMongoSchemaGeneration@mongoSchemaGenerationTest")
+public class MongoGFSBookEntity
 {
 
-    /** The user id. */
+    /** The id. */
     @Id
-    @Column(name = "USER_ID")
-    private String userId;
+    private String id;
 
-    /** The name. */
-    @Column(name = "NAME")
-    private String name;
+    /** The title. */
+    @Column
+    private String title;
 
-    /** The profile pic. */
+    /** The pdf file. */
     @Lob
-    @Column(name = "PROFILE_PIC")
-    private byte[] profilePic;
+    private byte[] pdfFile;
 
     /**
-     * Gets the user id.
+     * Gets the id.
      * 
-     * @return the user id
+     * @return the id
      */
-    public String getUserId()
+    public String getId()
     {
-        return userId;
+        return id;
     }
 
     /**
-     * Sets the user id.
+     * Sets the id.
      * 
-     * @param userId
-     *            the new user id
+     * @param id
+     *            the new id
      */
-    public void setUserId(String userId)
+    public void setId(String id)
     {
-        this.userId = userId;
+        this.id = id;
     }
 
     /**
-     * Gets the name.
+     * Gets the title.
      * 
-     * @return the name
+     * @return the title
      */
-    public String getName()
+    public String getTitle()
     {
-        return name;
+        return title;
     }
 
     /**
-     * Sets the name.
+     * Sets the title.
      * 
-     * @param name
-     *            the new name
+     * @param title
+     *            the new title
      */
-    public void setName(String name)
+    public void setTitle(String title)
     {
-        this.name = name;
+        this.title = title;
     }
 
     /**
-     * Gets the profile pic.
+     * Gets the pdf file.
      * 
-     * @return the profile pic
+     * @return the pdf file
      */
-    public byte[] getProfilePic()
+    public byte[] getPdfFile()
     {
-        return profilePic;
+        return pdfFile;
     }
 
     /**
-     * Sets the profile pic.
+     * Sets the pdf file.
      * 
-     * @param profilePic
-     *            the new profile pic
+     * @param pdfFile
+     *            the new pdf file
      */
-    public void setProfilePic(byte[] profilePic)
+    public void setPdfFile(byte[] pdfFile)
     {
-        this.profilePic = profilePic;
+        this.pdfFile = pdfFile;
     }
+
 }

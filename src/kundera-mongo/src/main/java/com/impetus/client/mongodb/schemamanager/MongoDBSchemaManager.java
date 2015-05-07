@@ -28,6 +28,7 @@ import com.impetus.client.mongodb.MongoDBConstants;
 import com.impetus.client.mongodb.config.MongoDBPropertyReader;
 import com.impetus.client.mongodb.index.IndexType;
 import com.impetus.client.mongodb.utils.MongoDBUtils;
+import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.configure.schema.ColumnInfo;
 import com.impetus.kundera.configure.schema.EmbeddedColumnInfo;
 import com.impetus.kundera.configure.schema.IndexInfo;
@@ -93,10 +94,23 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
         {
             for (TableInfo tableInfo : tableInfos)
             {
-                coll = db.getCollection(tableInfo.getTableName());
-                coll.drop();
-
-                KunderaCoreUtils.printQuery("Drop collection:" + tableInfo.getTableName(), showQuery);
+                if (tableInfo.getLobColumnInfo().isEmpty())
+                {
+                    coll = db.getCollection(tableInfo.getTableName());
+                    coll.drop();
+                    KunderaCoreUtils.printQuery("Drop collection:" + tableInfo.getTableName(), showQuery);
+                }
+                else
+                {
+                    coll = db.getCollection(tableInfo.getTableName() + MongoDBUtils.FILES);
+                    coll.drop();
+                    KunderaCoreUtils.printQuery("Drop collection:" + tableInfo.getTableName() + MongoDBUtils.FILES,
+                            showQuery);
+                    coll = db.getCollection(tableInfo.getTableName() + MongoDBUtils.CHUNKS);
+                    coll.drop();
+                    KunderaCoreUtils.printQuery("Drop collection:" + tableInfo.getTableName() + MongoDBUtils.CHUNKS,
+                            showQuery);
+                }
             }
         }
         db = null;
@@ -114,19 +128,53 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
         {
             DBObject options = setCollectionProperties(tableInfo);
             DB db = mongo.getDB(databaseName);
-            if (db.collectionExists(tableInfo.getTableName()))
-            {
-                db.getCollection(tableInfo.getTableName()).drop();
 
-                KunderaCoreUtils.printQuery("Drop existing collection:" + tableInfo.getTableName(), showQuery);
+            if (tableInfo.getLobColumnInfo().isEmpty())
+            {
+                if (db.collectionExists(tableInfo.getTableName()))
+                {
+                    db.getCollection(tableInfo.getTableName()).drop();
+
+                    KunderaCoreUtils.printQuery("Drop existing collection: " + tableInfo.getTableName(), showQuery);
+                }
+                DBCollection collection = db.createCollection(tableInfo.getTableName(), options);
+                KunderaCoreUtils.printQuery("Create collection: " + tableInfo.getTableName(), showQuery);
+
+                boolean isCappedCollection = isCappedCollection(tableInfo);
+                if (!isCappedCollection)
+                {
+                    createIndexes(tableInfo, collection);
+                }
             }
-            DBCollection collection = db.createCollection(tableInfo.getTableName(), options);
-
-            KunderaCoreUtils.printQuery("Create collection:" + tableInfo.getTableName(), showQuery);
-            boolean isCappedCollection = isCappedCollection(tableInfo);
-            if (!isCappedCollection)
+            else
             {
-                createIndexes(tableInfo, collection);
+                /*
+                 * In GridFS we have 2 collections. TABLE_NAME.chunks for
+                 * storing chunks of data and TABLE_NAME.MongoDBUtils.FILES for
+                 * storing it's metadata.
+                 */
+                checkMultipleLobs(tableInfo);
+                if (db.collectionExists(tableInfo.getTableName() + MongoDBUtils.FILES))
+                {
+                    db.getCollection(tableInfo.getTableName() + MongoDBUtils.FILES).drop();
+                    KunderaCoreUtils.printQuery(
+                            "Drop existing Grid FS Metadata collection: " + tableInfo.getTableName()
+                                    + MongoDBUtils.FILES, showQuery);
+                }
+
+                if (db.collectionExists(tableInfo.getTableName() + MongoDBUtils.CHUNKS))
+                {
+                    db.getCollection(tableInfo.getTableName() + MongoDBUtils.CHUNKS).drop();
+                    KunderaCoreUtils.printQuery("Drop existing Grid FS data collection: " + tableInfo.getTableName()
+                            + MongoDBUtils.CHUNKS, showQuery);
+                }
+                coll = db.createCollection(tableInfo.getTableName() + MongoDBUtils.FILES, options);
+                createUniqueIndex(coll, tableInfo.getIdColumnName());
+                KunderaCoreUtils.printQuery("Create collection: " + tableInfo.getTableName() + MongoDBUtils.FILES,
+                        showQuery);
+                db.createCollection(tableInfo.getTableName() + MongoDBUtils.CHUNKS, options);
+                KunderaCoreUtils.printQuery("Create collection: " + tableInfo.getTableName() + MongoDBUtils.CHUNKS,
+                        showQuery);
 
             }
         }
@@ -156,17 +204,39 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
             DBObject options = setCollectionProperties(tableInfo);
             DB db = mongo.getDB(databaseName);
             DBCollection collection = null;
-            if (!db.collectionExists(tableInfo.getTableName()))
+            if (tableInfo.getLobColumnInfo().isEmpty())
             {
-                collection = db.createCollection(tableInfo.getTableName(), options);
-                KunderaCoreUtils.printQuery("Create collection:" + tableInfo.getTableName(), showQuery);
-            }
-            collection = collection != null ? collection : db.getCollection(tableInfo.getTableName());
+                if (!db.collectionExists(tableInfo.getTableName()))
+                {
+                    collection = db.createCollection(tableInfo.getTableName(), options);
+                    KunderaCoreUtils.printQuery("Create collection: " + tableInfo.getTableName(), showQuery);
+                }
 
-            boolean isCappedCollection = isCappedCollection(tableInfo);
-            if (!isCappedCollection)
+                collection = collection != null ? collection : db.getCollection(tableInfo.getTableName());
+
+                boolean isCappedCollection = isCappedCollection(tableInfo);
+                if (!isCappedCollection)
+                {
+                    createIndexes(tableInfo, collection);
+                }
+            }
+            else
             {
-                createIndexes(tableInfo, collection);
+                checkMultipleLobs(tableInfo);
+                if (!db.collectionExists(tableInfo.getTableName() + MongoDBUtils.FILES))
+                {
+                    coll = db.createCollection(tableInfo.getTableName() + MongoDBUtils.FILES, options);
+                    createUniqueIndex(coll, tableInfo.getIdColumnName());
+                    KunderaCoreUtils.printQuery("Create collection: " + tableInfo.getTableName() + MongoDBUtils.FILES,
+                            showQuery);
+                }
+
+                if (!db.collectionExists(tableInfo.getTableName() + MongoDBUtils.CHUNKS))
+                {
+                    db.createCollection(tableInfo.getTableName() + MongoDBUtils.CHUNKS, options);
+                    KunderaCoreUtils.printQuery("Create collection: " + tableInfo.getTableName() + MongoDBUtils.CHUNKS,
+                            showQuery);
+                }
             }
         }
     }
@@ -182,7 +252,6 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
         db = mongo.getDB(databaseName);
         if (db == null)
         {
-
             logger.error("Database " + databaseName + "does not exist");
             throw new SchemaGenerationException("database " + databaseName + "does not exist", "mongoDb", databaseName);
         }
@@ -190,12 +259,36 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
         {
             for (TableInfo tableInfo : tableInfos)
             {
-                if (!db.collectionExists(tableInfo.getTableName()))
+                if (tableInfo.getLobColumnInfo().isEmpty())
                 {
-                    logger.error("Collection " + tableInfo.getTableName() + "does not exist in db " + db.getName());
-                    throw new SchemaGenerationException("Collection " + tableInfo.getTableName()
-                            + " does not exist in db " + db.getName(), "mongoDb", databaseName,
-                            tableInfo.getTableName());
+                    if (!db.collectionExists(tableInfo.getTableName()))
+                    {
+                        logger.error("Collection " + tableInfo.getTableName() + "does not exist in db " + db.getName());
+                        throw new SchemaGenerationException("Collection " + tableInfo.getTableName()
+                                + " does not exist in db " + db.getName(), "mongoDb", databaseName,
+                                tableInfo.getTableName());
+                    }
+                }
+                else
+                {
+                    checkMultipleLobs(tableInfo);
+                    if (!db.collectionExists(tableInfo.getTableName() + MongoDBUtils.FILES))
+                    {
+                        logger.error("Collection " + tableInfo.getTableName() + MongoDBUtils.FILES
+                                + "does not exist in db " + db.getName());
+                        throw new SchemaGenerationException("Collection " + tableInfo.getTableName()
+                                + " does not exist in db " + db.getName(), "mongoDb", databaseName,
+                                tableInfo.getTableName());
+                    }
+                    if (!db.collectionExists(tableInfo.getTableName() + MongoDBUtils.CHUNKS))
+                    {
+                        logger.error("Collection " + tableInfo.getTableName() + MongoDBUtils.CHUNKS
+                                + "does not exist in db " + db.getName());
+                        throw new SchemaGenerationException("Collection " + tableInfo.getTableName()
+                                + " does not exist in db " + db.getName(), "mongoDb", databaseName,
+                                tableInfo.getTableName());
+                    }
+
                 }
             }
         }
@@ -254,7 +347,7 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
     {
         boolean isCappedCollection = isCappedCollection(tableInfo);
         DBObject options = new BasicDBObject();
-        if (isCappedCollection)
+        if ((tableInfo.getLobColumnInfo().isEmpty() || tableInfo.getLobColumnInfo() == null) && isCappedCollection)
         {
             int collectionSize = MongoDBPropertyReader.msmd != null ? MongoDBPropertyReader.msmd.getCollectionSize(
                     databaseName, tableInfo.getTableName()) : 100000;
@@ -272,9 +365,8 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
      */
     protected boolean isCappedCollection(TableInfo tableInfo)
     {
-        boolean isCappedCollection = MongoDBPropertyReader.msmd != null ? MongoDBPropertyReader.msmd
-                .isCappedCollection(databaseName, tableInfo.getTableName()) : false;
-        return isCappedCollection;
+        return MongoDBPropertyReader.msmd != null ? MongoDBPropertyReader.msmd.isCappedCollection(databaseName,
+                tableInfo.getTableName()) : false;
     }
 
     /**
@@ -370,6 +462,17 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
         }
         keys.put(columnName, 1);
         return;
+    }
+
+    private void checkMultipleLobs(TableInfo tableInfo)
+    {
+        if (tableInfo.getLobColumnInfo().size() > 1)
+            throw new KunderaException("Multiple Lob fields in a single Entity are not supported in Kundera");
+    }
+
+    private void createUniqueIndex(DBCollection coll, String id)
+    {
+        coll.createIndex(new BasicDBObject("metadata." + id, 1), new BasicDBObject("unique", true));
     }
 
     @Override

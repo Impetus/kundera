@@ -524,8 +524,43 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
     public List executeQuery(Class clazz, List<String> relationalField, boolean isNative, String cqlQuery)
     {
         ResultSet rSet = (ResultSet) this.execute(cqlQuery, null);
+        if (clazz == null)
+        {
+            return iterateAndReturn(rSet);
+        }
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, clazz);
         return iterateAndReturn(rSet, clazz, metadata);
+    }
+
+    /**
+     * Iterate and return.
+     * 
+     * @param rSet
+     *            the r set
+     * @return the list
+     */
+    private List iterateAndReturn(ResultSet rSet)
+    {
+        Iterator<Row> rowIter = rSet.iterator();
+        List results = new ArrayList();
+
+        while (rowIter.hasNext())
+        {
+            Row row = rowIter.next();
+            ColumnDefinitions columnDefs = row.getColumnDefinitions();
+            Iterator<Definition> columnDefIter = columnDefs.iterator();
+            Map rowData = new HashMap();
+            while (columnDefIter.hasNext())
+            {
+                Definition columnDef = columnDefIter.next();
+                rowData.put(
+                        columnDef.getName(),
+                        DSClientUtilities.assign(row, null, null, columnDef.getType().getName(), null,
+                                columnDef.getName(), null, null));
+            }
+            results.add(rowData);
+        }
+        return results;
     }
 
     /*

@@ -94,7 +94,7 @@ public class MongoDBSchemaManagerTest
 
         Map props = new HashMap();
         props.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "update");
-        
+
         emf = Persistence.createEntityManagerFactory(persistenceUnit, props);
         em = emf.createEntityManager();
 
@@ -136,6 +136,14 @@ public class MongoDBSchemaManagerTest
             }
         }
         Assert.assertEquals(4, count);
+
+        collection = db.getCollection("GFS_BOOK.files");
+        Assert.assertEquals(ReadPreference.primary(), collection.getReadPreference());
+        Assert.assertNotNull(collection.getIndexInfo());
+
+        collection = db.getCollection("GFS_BOOK.chunks");
+        Assert.assertEquals(ReadPreference.primary(), collection.getReadPreference());
+        Assert.assertNotNull(collection.getIndexInfo());
     }
 
     /**
@@ -186,6 +194,14 @@ public class MongoDBSchemaManagerTest
             }
         }
         Assert.assertEquals(4, count);
+
+        collection = db.getCollection("GFS_BOOK.files");
+        Assert.assertEquals(ReadPreference.primary(), collection.getReadPreference());
+        Assert.assertNotNull(collection.getIndexInfo());
+
+        collection = db.getCollection("GFS_BOOK.chunks");
+        Assert.assertEquals(ReadPreference.primary(), collection.getReadPreference());
+        Assert.assertNotNull(collection.getIndexInfo());
     }
 
     @Test
@@ -255,6 +271,12 @@ public class MongoDBSchemaManagerTest
         MongoDBClientFactory clientFactory = (MongoDBClientFactory) ClientResolver.getClientFactory(persistenceUnit);
         clientFactory.getSchemaManager(null).dropSchema();
         DBCollection collection = db.getCollection("MongoDBEntitySimple");
+        Assert.assertTrue(collection.getIndexInfo().isEmpty());
+        Assert.assertEquals(0, collection.getCount());
+        collection = db.getCollection("GFS_BOOK.files");
+        Assert.assertTrue(collection.getIndexInfo().isEmpty());
+        Assert.assertEquals(0, collection.getCount());
+        collection = db.getCollection("GFS_BOOK.chunks");
         Assert.assertTrue(collection.getIndexInfo().isEmpty());
         Assert.assertEquals(0, collection.getCount());
     }

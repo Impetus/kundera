@@ -238,7 +238,7 @@ public class ESFilterBuilder
      */
     private String getField(String fieldValue)
     {
-        return fieldValue.substring(fieldValue.indexOf(ESConstants.dot) + 1, fieldValue.length());
+        return fieldValue.substring(fieldValue.indexOf(ESConstants.DOT) + 1, fieldValue.length());
     }
 
     /**
@@ -475,8 +475,8 @@ public class ESFilterBuilder
                 metadata.getPersistenceUnit())).entity(metadata.getEntityClazz()).getAttribute(clause.getProperty()))
                 .getJPAColumnName();
 
-        String likePattern = value.contains(ESConstants.percentage) ? value.replaceAll(ESConstants.percentage,
-                ESConstants.asterisk) : ESConstants.asterisk + value + ESConstants.asterisk;
+        String likePattern = value.contains(ESConstants.PERCENTAGE) ? value.replaceAll(ESConstants.PERCENTAGE,
+                ESConstants.ASTERISK) : ESConstants.ASTERISK + value + ESConstants.ASTERISK;
 
         QueryBuilder queryBuilder = null;
         if (condition.equals(Expression.LIKE))

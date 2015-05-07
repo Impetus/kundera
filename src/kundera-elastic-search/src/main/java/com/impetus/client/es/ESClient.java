@@ -93,7 +93,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
     private EntityReader reader;
 
     /** log for this class. */
-    private static Logger log = LoggerFactory.getLogger(ESClient.class);
+    private static Logger logger = LoggerFactory.getLogger(ESClient.class);
 
     /** list of nodes for batch processing. */
     private List<Node> nodes = new ArrayList<Node>();
@@ -263,12 +263,12 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
         }
         catch (InterruptedException iex)
         {
-            log.error("Error while find record of {}, Caused by :.", entityClass.getSimpleName(), iex);
+            logger.error("Error while find record of {}, Caused by :.", entityClass.getSimpleName(), iex);
             throw new PersistenceException(iex);
         }
         catch (ExecutionException eex)
         {
-            log.error("Error while find record of {}, Caused by :.", entityClass.getSimpleName(), eex);
+            logger.error("Error while find record of {}, Caused by :.", entityClass.getSimpleName(), eex);
             throw new PersistenceException(eex);
         }
 
@@ -310,8 +310,6 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 entityMetadata.getPersistenceUnit());
 
-        EntityType entityType = metaModel.entity(clazz);
-
         FilteredQueryBuilder queryBuilder = QueryBuilders.filteredQuery(null, filter);
         SearchRequestBuilder builder = txClient.prepareSearch(entityMetadata.getSchema().toLowerCase()).setTypes(
                 entityMetadata.getTableName());
@@ -324,23 +322,27 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
         }
         else
         {
+            logger.debug("Aggregated query identified");
             builder.addAggregation(aggregation);
 
-            if (fieldsToSelect.length == 1)
+            if (fieldsToSelect.length == 1
+                    || (query.isSelectStatement() && query.getSelectStatement().hasGroupByClause()))
             {
                 builder.setSize(0);
             }
         }
 
         SearchResponse response = null;
-        log.debug("Query generated: " + builder);
+        logger.debug("Query generated: " + builder);
 
         try
         {
             response = builder.execute().actionGet();
+            logger.debug("Query execution response: " + response);
         }
         catch (ElasticsearchException e)
         {
+            logger.error("Exception occured while executing query on Elasticsearch.", e);
             throw new KunderaException("Exception occured while executing query on Elasticsearch.", e);
         }
 
@@ -365,8 +367,10 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
     {
         if (fieldsToSelect != null && fieldsToSelect.length > 1 && !(fieldsToSelect[1] == null))
         {
+            logger.debug("Fields added in query are: ");
             for (int i = 1; i < fieldsToSelect.length; i++)
             {
+                logger.debug(i + " : " + fieldsToSelect[i]);
                 builder = builder
                         .addField(((AbstractAttribute) metaModel.entity(clazz).getAttribute(fieldsToSelect[i]))
                                 .getJPAColumnName());
@@ -437,12 +441,12 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
             }
             catch (InterruptedException iex)
             {
-                log.error("Error while deleting record of {}, Caused by :.", pKey, iex);
+                logger.error("Error while deleting record of {}, Caused by :.", pKey, iex);
                 throw new PersistenceException(iex);
             }
             catch (ExecutionException eex)
             {
-                log.error("Error while deleting record of {}, Caused by :.", pKey, eex);
+                logger.error("Error while deleting record of {}, Caused by :.", pKey, eex);
                 throw new PersistenceException(eex);
             }
         }
@@ -645,12 +649,12 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
         }
         catch (InterruptedException iex)
         {
-            log.error("Error while find record of {}, Caused by :.", entityClazz.getSimpleName(), iex);
+            logger.error("Error while find record of {}, Caused by :.", entityClazz.getSimpleName(), iex);
             throw new PersistenceException(iex);
         }
         catch (ExecutionException eex)
         {
-            log.error("Error while find record of {}, Caused by :.", entityClazz.getSimpleName(), eex);
+            logger.error("Error while find record of {}, Caused by :.", entityClazz.getSimpleName(), eex);
             throw new PersistenceException(eex);
         }
 

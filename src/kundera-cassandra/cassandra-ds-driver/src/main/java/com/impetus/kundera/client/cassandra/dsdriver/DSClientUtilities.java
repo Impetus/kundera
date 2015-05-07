@@ -124,7 +124,7 @@ public final class DSClientUtilities
         case BLOB:
         case CUSTOM:
             retVal = row.getBytes(columnName);
-            if (retVal != null)
+            if (member != null && retVal != null && entity != null)
             {
                 PropertyAccessorHelper.set(entity, member, ((ByteBuffer) retVal).array());
                 // setFieldValue(entity, member, retVal);

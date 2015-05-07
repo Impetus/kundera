@@ -15,17 +15,24 @@
  ******************************************************************************/
 package com.impetus.client.es;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Query;
 import javax.persistence.metamodel.EntityType;
 
 import org.eclipse.persistence.jpa.jpql.parser.AggregateFunction;
+import org.eclipse.persistence.jpa.jpql.parser.AndExpression;
 import org.eclipse.persistence.jpa.jpql.parser.CollectionExpression;
+import org.eclipse.persistence.jpa.jpql.parser.ComparisonExpression;
 import org.eclipse.persistence.jpa.jpql.parser.Expression;
+import org.eclipse.persistence.jpa.jpql.parser.GroupByClause;
+import org.eclipse.persistence.jpa.jpql.parser.HavingClause;
 import org.eclipse.persistence.jpa.jpql.parser.IdentificationVariable;
 import org.eclipse.persistence.jpa.jpql.parser.NullExpression;
+import org.eclipse.persistence.jpa.jpql.parser.OrExpression;
 import org.eclipse.persistence.jpa.jpql.parser.SelectClause;
 import org.eclipse.persistence.jpa.jpql.parser.SelectStatement;
 import org.eclipse.persistence.jpa.jpql.parser.StateFieldPathExpression;
@@ -36,7 +43,11 @@ import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
 import org.elasticsearch.search.aggregations.metrics.MetricsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.tophits.TopHitsBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -59,9 +70,14 @@ import com.impetus.kundera.query.QueryImpl;
 
 public class ESQuery<E> extends QueryImpl
 {
-
     /** The es filter builder. */
     private ESFilterBuilder esFilterBuilder;
+
+    /** The aggregations key list. */
+    private Set<String> aggregationsKeySet;
+
+    /** The log. */
+    private static Logger logger = LoggerFactory.getLogger(ESClient.class);
 
     /**
      * Instantiates a new ES query.
@@ -181,7 +197,7 @@ public class ESQuery<E> extends QueryImpl
     @Override
     protected List findUsingLucene(EntityMetadata m, Client client)
     {
-        throw new UnsupportedOperationException("select colummn via lucene is unsupported in couchdb");
+        throw new UnsupportedOperationException("select colummn via lucene is unsupported in Elasticsearch");
     }
 
     /**
@@ -197,8 +213,149 @@ public class ESQuery<E> extends QueryImpl
      */
     public AggregationBuilder buildAggregation(KunderaQuery query, EntityMetadata entityMetadata, FilterBuilder filter)
     {
-        return (query.getSelectStatement() != null) ? query.isAggregated() ? buildSelectAggregations(
-                query.getSelectStatement(), entityMetadata, filter) : null : null;
+        SelectStatement selectStatement = query.getSelectStatement();
+
+        // To apply filter for where clause
+        AggregationBuilder aggregationBuilder = buildWhereAggregations(entityMetadata, filter);
+
+        if (KunderaQueryUtils.hasGroupBy(query.getJpqlExpression()))
+        {
+            TermsBuilder termsBuilder = processGroupByClause(selectStatement.getGroupByClause(), entityMetadata, query);
+            aggregationBuilder.subAggregation(termsBuilder);
+        }
+        else
+        {
+            if (KunderaQueryUtils.hasHaving(query.getJpqlExpression()))
+            {
+                logger.debug("Identified having clause without group by, Throwing not supported operation Exception");
+                throw new UnsupportedOperationException(
+                        "Currently, Having clause without group by caluse is not supported.");
+            }
+            else
+            {
+                aggregationBuilder = (selectStatement != null) ? query.isAggregated() ? buildSelectAggregations(
+                        aggregationBuilder, selectStatement, entityMetadata) : null : null;
+            }
+        }
+        return aggregationBuilder;
+    }
+
+    /**
+     * Adds the having clauses.
+     * 
+     * @param havingExpression
+     *            the having expression
+     * @param aggregationBuilder
+     *            the aggregation builder
+     * @param entityMetadata
+     *            the entity metadata
+     * @return the aggregation builder
+     */
+    private AggregationBuilder addHavingClause(Expression havingExpression, AggregationBuilder aggregationBuilder,
+            EntityMetadata entityMetadata)
+    {
+        if (havingExpression instanceof ComparisonExpression)
+        {
+            Expression expression = ((ComparisonExpression) havingExpression).getLeftExpression();
+            if (!isAggregationExpression(expression))
+            {
+                logger.error("Having clause conditions over non metric aggregated are not supported.");
+                throw new UnsupportedOperationException(
+                        "Currently, Having clause without Metric aggregations are not supported.");
+            }
+
+            return checkIfKeyExists(expression.toParsedText()) ? aggregationBuilder
+                    .subAggregation(getMetricsAggregation(expression, entityMetadata)) : aggregationBuilder;
+        }
+        else if (havingExpression instanceof AndExpression)
+        {
+            AndExpression andExpression = (AndExpression) havingExpression;
+            addHavingClause(andExpression.getLeftExpression(), aggregationBuilder, entityMetadata);
+            addHavingClause(andExpression.getRightExpression(), aggregationBuilder, entityMetadata);
+
+            return aggregationBuilder;
+        }
+        else if (havingExpression instanceof OrExpression)
+        {
+            OrExpression orExpression = (OrExpression) havingExpression;
+            addHavingClause(orExpression.getLeftExpression(), aggregationBuilder, entityMetadata);
+            addHavingClause(orExpression.getRightExpression(), aggregationBuilder, entityMetadata);
+
+            return aggregationBuilder;
+        }
+        else
+        {
+            throw new UnsupportedOperationException(havingExpression + "not supported in having clause.");
+        }
+    }
+
+    /**
+     * Process group by clause.
+     * 
+     * @param expression
+     *            the expression
+     * @param entityMetadata
+     *            the entity metadata
+     * @param query
+     *            the query
+     * @return the terms builder
+     */
+    private TermsBuilder processGroupByClause(Expression expression, EntityMetadata entityMetadata, KunderaQuery query)
+    {
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                entityMetadata.getPersistenceUnit());
+        Expression groupByClause = ((GroupByClause) expression).getGroupByItems();
+
+        if (groupByClause instanceof CollectionExpression)
+        {
+            logger.error("More than one item found in group by clause.");
+            throw new UnsupportedOperationException("Currently, Group By on more than one field is not supported.");
+        }
+
+        String jPAField = getJPAColumnName(groupByClause.toParsedText(), entityMetadata, metaModel);
+
+        SelectStatement selectStatement = query.getSelectStatement();
+
+        // To apply terms and tophits aggregation to serve group by
+        TermsBuilder termsBuilder = AggregationBuilders.terms(ESConstants.GROUP_BY).field(jPAField).size(0);
+
+        // Hard coded value for a max number of record that a group can contain.
+        TopHitsBuilder topHitsBuilder = getTopHitsAggregation(selectStatement, null, entityMetadata);
+        termsBuilder.subAggregation(topHitsBuilder);
+
+        // To apply the metric aggregations (Min, max... etc) in select clause
+        buildSelectAggregations(termsBuilder, query.getSelectStatement(), entityMetadata);
+
+        if (KunderaQueryUtils.hasHaving(query.getJpqlExpression()))
+        {
+            addHavingClause(((HavingClause) selectStatement.getHavingClause()).getConditionalExpression(),
+                    termsBuilder, entityMetadata);
+        }
+
+        return termsBuilder;
+    }
+
+    /**
+     * Gets the top hits aggregation.
+     * 
+     * @param selectStatement
+     *            the select statement
+     * @param size
+     *            the size
+     * @param entityMetadata
+     *            the entity metadata
+     * @return the top hits aggregation
+     */
+    private TopHitsBuilder getTopHitsAggregation(SelectStatement selectStatement, Integer size,
+            EntityMetadata entityMetadata)
+    {
+        TopHitsBuilder topHitsBuilder = AggregationBuilders.topHits(ESConstants.TOP_HITS);
+        if (size != null)
+        {
+            topHitsBuilder.setSize(size);
+        }
+
+        return topHitsBuilder;
     }
 
     /**
@@ -213,7 +370,8 @@ public class ESQuery<E> extends QueryImpl
     private FilterAggregationBuilder buildWhereAggregations(EntityMetadata entityMetadata, FilterBuilder filter)
     {
         filter = filter != null ? filter : FilterBuilders.matchAllFilter();
-        FilterAggregationBuilder filteragg = AggregationBuilders.filter(ESConstants.aggName).filter(filter);
+        FilterAggregationBuilder filteragg = AggregationBuilders.filter(ESConstants.AGGREGATION_NAME).filter(filter);
+
         return filteragg;
     }
 
@@ -228,10 +386,9 @@ public class ESQuery<E> extends QueryImpl
      *            the filter
      * @return the filter aggregation builder
      */
-    private AggregationBuilder buildSelectAggregations(SelectStatement selectStatement, EntityMetadata entityMetadata,
-            FilterBuilder filter)
+    private AggregationBuilder buildSelectAggregations(AggregationBuilder aggregationBuilder,
+            SelectStatement selectStatement, EntityMetadata entityMetadata)
     {
-        AggregationBuilder aggregationBuilder = buildWhereAggregations(entityMetadata, filter);
         Expression expression = ((SelectClause) selectStatement.getSelectClause()).getSelectExpression();
 
         if (expression instanceof CollectionExpression)
@@ -241,7 +398,7 @@ public class ESQuery<E> extends QueryImpl
         }
         else
         {
-            if (isAggregationExpression(expression))
+            if (isAggregationExpression(expression) && checkIfKeyExists(expression.toParsedText()))
                 aggregationBuilder.subAggregation(getMetricsAggregation(expression, entityMetadata));
         }
         return aggregationBuilder;
@@ -265,7 +422,7 @@ public class ESQuery<E> extends QueryImpl
         ListIterable<Expression> functionlist = collectionExpression.children();
         for (Expression function : functionlist)
         {
-            if (isAggregationExpression(function))
+            if (isAggregationExpression(function) && checkIfKeyExists(function.toParsedText()))
             {
                 aggregationBuilder.subAggregation(getMetricsAggregation(function, entityMetadata));
             }
@@ -287,7 +444,7 @@ public class ESQuery<E> extends QueryImpl
         AggregateFunction function = (AggregateFunction) expression;
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 entityMetadata.getPersistenceUnit());
-        String jPAColumnName = getJPACOlumnName(function.toParsedText(), entityMetadata, metaModel);
+        String jPAColumnName = getJPAColumnName(function.toParsedText(), entityMetadata, metaModel);
 
         MetricsAggregationBuilder aggregationBuilder = null;
 
@@ -335,20 +492,34 @@ public class ESQuery<E> extends QueryImpl
      *            the meta model
      * @return the JPA column name
      */
-    private String getJPACOlumnName(String field, EntityMetadata entityMetadata, MetamodelImpl metaModel)
+    private String getJPAColumnName(String field, EntityMetadata entityMetadata, MetamodelImpl metaModel)
     {
-        String fieldValue = null;
-
         if (field.indexOf('.') > 0)
         {
             return ((AbstractAttribute) metaModel.entity(entityMetadata.getEntityClazz()).getAttribute(
-                    field.substring(field.indexOf(ESConstants.dot) + 1, field.indexOf(ESConstants.rightBracket))))
-                    .getJPAColumnName();
+                    field.substring(field.indexOf(ESConstants.DOT) + 1,
+                            field.indexOf(ESConstants.RIGHT_BRACKET) > 0 ? field.indexOf(ESConstants.RIGHT_BRACKET)
+                                    : field.length()))).getJPAColumnName();
         }
         else
         {
             return ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName();
         }
+    }
 
+    /**
+     * Checks whether key exist in ES Query.
+     * 
+     * @param key
+     *            the key
+     * @return true, if is new key
+     */
+    private boolean checkIfKeyExists(String key)
+    {
+        if (aggregationsKeySet == null)
+        {
+            aggregationsKeySet = new HashSet<String>();
+        }
+        return aggregationsKeySet.add(key);
     }
 }
