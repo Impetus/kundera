@@ -21,8 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-import javax.persistence.PersistenceException;
-
 import com.impetus.client.mongodb.DefaultMongoDBDataHandler;
 import com.impetus.client.mongodb.MongoDBClient;
 import com.impetus.kundera.client.Client;
@@ -31,6 +29,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.IResultIterator;
+import com.impetus.kundera.utils.KunderaCoreUtils;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
@@ -122,22 +121,11 @@ class ResultIterator<E> implements IResultIterator<E>
      */
     private E instantiateEntity(Class<?> entityClazz, Object entity)
     {
-        try
+        if (entity == null)
         {
-            if (entity == null)
-            {
-                return (E) entityClazz.newInstance();
-            }
-            return (E) entity;
+            return (E) KunderaCoreUtils.createNewInstance(entityClazz);
         }
-        catch (InstantiationException e)
-        {
-            throw new PersistenceException("Error while instantiating entity " + entityClazz + ".", e);
-        }
-        catch (IllegalAccessException e)
-        {
-            throw new PersistenceException("Error while instantiating entity " + entityClazz + ".", e);
-        }
+        return (E) entity;
     }
 
     @Override

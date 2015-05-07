@@ -34,7 +34,7 @@ public class GFSUser
     /** The user id. */
     @Id
     @Column(name = "USER_ID")
-    private String userId;
+    private int userId;
 
     /** The name. */
     @Column(name = "NAME")
@@ -50,7 +50,7 @@ public class GFSUser
      * 
      * @return the user id
      */
-    public String getUserId()
+    public int getUserId()
     {
         return userId;
     }
@@ -61,7 +61,7 @@ public class GFSUser
      * @param userId
      *            the new user id
      */
-    public void setUserId(String userId)
+    public void setUserId(int userId)
     {
         this.userId = userId;
     }
