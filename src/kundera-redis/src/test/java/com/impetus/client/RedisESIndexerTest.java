@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import com.impetus.client.entities.Month;
 import com.impetus.client.entities.PersonRedis;
 import com.impetus.client.entities.PersonRedis.Day;
+import com.impetus.kundera.utils.LuceneCleanupUtilities;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -90,6 +91,7 @@ public class RedisESIndexerTest
     public static void tearDownAfterClass() throws Exception
     {
         node.close();
+        LuceneCleanupUtilities.cleanDir("target/data");
     }
 
     /**
@@ -235,12 +237,12 @@ public class RedisESIndexerTest
     @Test
     public void indexDeletionTest() throws Exception
     {
-        Thread.sleep(1000);
         // persist record.
         em.persist(preparePerson("Amit","1", 20));
         em.persist(preparePerson("Amit","2", 30));
         em.persist(preparePerson("Amit","3", 40));
         em.persist(preparePerson("Amit","4", 50));
+        Thread.sleep(1000);
         
         String query = "Select min(p.age) from PersonRedis p";
         List resultList = em.createQuery(query).getResultList();
