@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
+import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
@@ -207,7 +208,8 @@ public class CouchDBClientFactory extends GenericClientFactory
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
-        return new CouchDBClient(httpClient, httpHost, reader, persistenceUnit, externalProperties, clientMetadata, kunderaMetadata);
+        return new CouchDBClient(this, httpClient, httpHost, reader, persistenceUnit, externalProperties,
+                clientMetadata, kunderaMetadata);
     }
 
     @Override
@@ -231,5 +233,15 @@ public class CouchDBClientFactory extends GenericClientFactory
                     .getPersistenceUnitMetadata(getPersistenceUnit()));
             propertyReader.read(getPersistenceUnit());
         }
+    }
+
+    /**
+     * Gets the index manager.
+     * 
+     * @return the index manager
+     */
+    public IndexManager getIndexManager()
+    {
+        return indexManager;
     }
 }

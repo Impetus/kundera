@@ -28,12 +28,26 @@ table create -name PERSON
 add-field -type string -name PERSON_ID
 add-field -type string -name PERSON_NAME
 add-field -type integer -name AGE
+add-field -type double -name SALARY
+add-field -type string -name ENUM
 primary-key -field PERSON_ID
 exit
 plan add-table -name PERSON -wait
 plan add-index -name age -table PERSON -field AGE -wait
 plan add-index -name personName -table PERSON -field PERSON_NAME -wait
 plan add-index -name personId_age -table PERSON -field PERSON_ID -field AGE -wait
+plan add-index -name salary -table PERSON -field SALARY -wait
+
+table create -name PERSON_KV_STORE
+add-field -type string -name PERSON_ID
+add-field -type string -name PERSON_NAME
+add-field -type integer -name AGE
+primary-key -field PERSON_ID
+exit
+plan add-table -name PERSON_KV_STORE -wait
+plan add-index -name age -table PERSON_KV_STORE -field AGE -wait
+plan add-index -name personName -table PERSON_KV_STORE -field PERSON_NAME -wait
+plan add-index -name personId_age -table PERSON_KV_STORE -field PERSON_ID -field AGE -wait
 
 table create -name USER_PROFILE
 add-field -type integer -name USER_ID

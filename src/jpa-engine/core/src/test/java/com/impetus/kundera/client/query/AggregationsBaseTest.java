@@ -115,7 +115,7 @@ public abstract class AggregationsBaseTest
     {
         person = new Person();
         person.setAge(age);
-        person.setDay(Day.FRIDAY);
+//        person.setDay(Day.FRIDAY);
         person.setPersonId(id);
         person.setPersonName(name);
         person.setSalary(salary);
