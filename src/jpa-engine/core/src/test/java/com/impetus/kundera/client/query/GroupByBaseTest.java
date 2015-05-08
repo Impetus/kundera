@@ -26,8 +26,6 @@ import javax.persistence.Query;
 
 import junit.framework.Assert;
 
-import org.junit.AfterClass;
-
 import com.impetus.kundera.query.Person;
 import com.impetus.kundera.query.Person.Day;
 
@@ -216,15 +214,15 @@ public abstract class GroupByBaseTest
 
         Assert.assertEquals(2, resultList.size());
 
-        Person result = (Person) (resultList.get(0));
-        Assert.assertEquals(10, result.getAge().intValue());
-        Assert.assertEquals("AK", result.getPersonName());
-        Assert.assertEquals("5", result.getPersonId());
+        List result = (List) resultList.get(0);
+        Assert.assertEquals(10, result.get(0));
+        Assert.assertEquals("AK", result.get(1));
+        Assert.assertEquals("5", result.get(2));
 
-        result = (Person) (resultList.get(1));
-        Assert.assertEquals(20, result.getAge().intValue());
-        Assert.assertEquals("D", result.getPersonName());
-        Assert.assertEquals("6", result.getPersonId());
+        result = (List) resultList.get(1);
+        Assert.assertEquals(20, result.get(0));
+        Assert.assertEquals("D", result.get(1));
+        Assert.assertEquals("6", result.get(2));
     }
 
     /**
@@ -408,19 +406,19 @@ public abstract class GroupByBaseTest
 
         List result = (List) resultList.get(0);
         Assert.assertEquals(60.0, result.get(0));
-        Assert.assertEquals(2, ((Long) result.get(1)).intValue());
+        Assert.assertEquals(2.0, result.get(1));
 
         result = (List) resultList.get(1);
         Assert.assertEquals(80.0, result.get(0));
-        Assert.assertEquals(2, ((Long) result.get(1)).intValue());
+        Assert.assertEquals(2.0, result.get(1));
 
         result = (List) resultList.get(2);
         Assert.assertEquals(10.0, result.get(0));
-        Assert.assertEquals(1, ((Long) result.get(1)).intValue());
+        Assert.assertEquals(1.0, result.get(1));
 
         result = (List) resultList.get(3);
         Assert.assertEquals(20.0, result.get(0));
-        Assert.assertEquals(1, ((Long) result.get(1)).intValue());
+        Assert.assertEquals(1.0, result.get(1));
     }
 
     /**

@@ -523,8 +523,10 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
             List<Object> results, Client client, EntityMetadata m)
     {
         List temp;
+        Object entity = null;
         for (String entry : aggregations.keySet())
         {
+            entity = null;
             Object obj = aggregations.get(entry);
             temp = new ArrayList<>();
             Iterator<Expression> resultOrder = resultOrderIterable.iterator();
@@ -541,10 +543,44 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
                 }
                 else
                 {
-                    temp.addAll(findUsingLucene(m, client, new Object[] { entry }));
+                    if (entity == null)
+                    {
+                        entity = findUsingLucene(m, client, new Object[] { entry }).get(0);
+                    }
+                    temp.add(getEntityFieldValue(m, entity, expression.toParsedText()));
                 }
             }
             results.add(temp.size() == 1 ? temp.get(0) : temp);
+        }
+    }
+
+    /**
+     * Gets the entity field value.
+     * 
+     * @param entityMetadata
+     *            the entity metadata
+     * @param entity
+     *            the entity
+     * @param field
+     *            the field
+     * @return the entity field value
+     */
+    private Object getEntityFieldValue(EntityMetadata entityMetadata, Object entity, String field)
+    {
+        Class clazz = entityMetadata.getEntityClazz();
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                entityMetadata.getPersistenceUnit());
+        EntityType entityType = metaModel.entity(clazz);
+
+        if (field.indexOf(".") > 0)
+        {
+            String fieldName = field.substring(field.indexOf(".") + 1, field.length());
+            Attribute attribute = entityType.getAttribute(fieldName);
+            return PropertyAccessorHelper.getObject(entity, (Field) attribute.getJavaMember());
+        }
+        else
+        {
+            return entity;
         }
     }
 
