@@ -122,13 +122,15 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
      * @param kunderaMetadata
      *            the kundera metadata
      */
-    public CouchDBClient(HttpClient client, HttpHost httpHost, EntityReader reader, String persistenceUnit,
-            Map<String, Object> externalProperties, ClientMetadata clientMetadata, final KunderaMetadata kunderaMetadata)
+    public CouchDBClient(CouchDBClientFactory factory, HttpClient client, HttpHost httpHost, EntityReader reader,
+            String persistenceUnit, Map<String, Object> externalProperties, ClientMetadata clientMetadata,
+            final KunderaMetadata kunderaMetadata)
     {
         super(kunderaMetadata, externalProperties, persistenceUnit);
         this.httpClient = client;
         this.httpHost = httpHost;
         this.reader = reader;
+        this.indexManager = factory.getIndexManager();
         this.clientMetadata = clientMetadata;
         this.setBatchSize(persistenceUnit, externalProperties);
     }

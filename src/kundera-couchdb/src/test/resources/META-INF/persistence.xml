@@ -17,7 +17,7 @@
 				value="com.impetus.client.couchdb.CouchDBClientFactory" />
 		</properties>
 	</persistence-unit>
-	
+
 	<persistence-unit name="couchdb_assoc">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<class>com.impetus.kundera.client.crud.associations.MobileHandset</class>
@@ -64,6 +64,24 @@
 			<property name="kundera.ddl.auto.prepare" value="create" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.couchdb.CouchDBClientFactory" />
+
+		</properties>
+	</persistence-unit>
+
+	<persistence-unit name="couchdbESAggragation_pu">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.kundera.query.Person</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="5984" />
+			<property name="kundera.keyspace" value="couchdatabase" />
+			<property name="kundera.dialect" value="couchdb" />
+			<property name="kundera.client" value="couchdb" />
+			<property name="kundera.ddl.auto.prepare" value="create" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.couchdb.CouchDBClientFactory" />
+			<property name="kundera.indexer.class" value="com.impetus.client.es.index.ESIndexer" />
 		</properties>
 	</persistence-unit>
 </persistence>

@@ -29,7 +29,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.EnhanceEntity;
+import com.impetus.kundera.metadata.MetadataUtils;
+import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
@@ -52,7 +55,8 @@ public class CouchDBQuery extends QueryImpl
 {
     private static final Logger log = LoggerFactory.getLogger(CouchDBQuery.class);
 
-    public CouchDBQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator, final KunderaMetadata kunderaMetadata)
+    public CouchDBQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator,
+            final KunderaMetadata kunderaMetadata)
     {
         super(kunderaQuery, persistenceDelegator, kunderaMetadata);
     }
@@ -63,8 +67,18 @@ public class CouchDBQuery extends QueryImpl
     @Override
     protected List populateEntities(EntityMetadata m, Client client)
     {
-        CouchDBQueryInterpreter interpreter = onTranslation(getKunderaQuery().getFilterClauseQueue(), m);
-        return ((CouchDBClient) client).createAndExecuteQuery(interpreter);
+
+        ClientMetadata clientMetadata = ((ClientBase) client).getClientMetadata();
+
+        if (!MetadataUtils.useSecondryIndex(clientMetadata) && (clientMetadata.getIndexImplementor() != null))
+        {
+            return populateUsingLucene(m, client, null, kunderaQuery.getResult());
+        }
+        else
+        {
+            CouchDBQueryInterpreter interpreter = onTranslation(getKunderaQuery().getFilterClauseQueue(), m);
+            return ((CouchDBClient) client).createAndExecuteQuery(interpreter);
+        }
     }
 
     /**
@@ -241,12 +255,12 @@ public class CouchDBQuery extends QueryImpl
         }
         return interpreter;
     }
-    
+
     @Override
     protected List findUsingLucene(EntityMetadata m, Client client)
     {
-       throw new UnsupportedOperationException("select colummn via lucene is unsupported in couchdb");
+        CouchDBQueryInterpreter interpreter = onTranslation(getKunderaQuery().getFilterClauseQueue(), m);
+        return ((CouchDBClient) client).createAndExecuteQuery(interpreter);
     }
 
-    
 }
