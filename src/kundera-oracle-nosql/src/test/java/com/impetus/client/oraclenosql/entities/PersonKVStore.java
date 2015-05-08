@@ -42,7 +42,7 @@ plan add-table -name PERSON -wait
  * @author amresh.singh
  */
 @Entity
-@Table(name = "PERSON", schema = "OracleNoSqlTests@twikvstore")
+@Table(name = "PERSON_KV_STORE", schema = "OracleNoSqlTests@twikvstore")
 @IndexCollection(columns = { @Index(indexName = "personName", name = "personName"),
         @Index(indexName = "age", name = "age"),
         @Index(indexName = "personId_age", name = "personId,age", type = "composite") })

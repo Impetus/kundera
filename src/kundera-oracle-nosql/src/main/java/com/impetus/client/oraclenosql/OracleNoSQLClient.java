@@ -334,8 +334,6 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
 
         tableAPI.delete(key, null, null);
         KunderaCoreUtils.printQuery("Delete data from " + entityMetadata.getTableName() + " for PK " + pKey, showQuery);
-
-        getIndexManager().remove(entityMetadata, entity, pKey);
     }
 
     /**

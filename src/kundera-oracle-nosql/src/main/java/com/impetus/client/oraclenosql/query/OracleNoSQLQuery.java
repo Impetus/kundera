@@ -68,8 +68,6 @@ public class OracleNoSQLQuery extends QueryImpl
             log.debug("Populating entities for JPA query on OracleNOSQL");
         }
 
-        Set<Object> results = new HashSet<Object>();
-
         OracleNoSQLQueryInterpreter interpreter = translateQuery(getKunderaQuery().getFilterClauseQueue(), m);
 
         ClientMetadata clientMetadata = ((ClientBase) client).getClientMetadata();
@@ -78,18 +76,13 @@ public class OracleNoSQLQuery extends QueryImpl
                 && !(clientMetadata.getIndexImplementor() != null && clientMetadata.getIndexImplementor().equals(
                         OracleNoSQLInvertedIndexer.class.getName())))
         {
-            results.addAll(populateUsingLucene(m, client, null, interpreter.getSelectColumns()));
+            return populateUsingLucene(m, client, null, interpreter.getSelectColumns());
         }
         else
         {
-            results.addAll((List<Object>) ((OracleNoSQLClient) client).executeQuery(m.getEntityClazz(), interpreter,
-                    null));
+            return (List<Object>) ((OracleNoSQLClient) client).executeQuery(m.getEntityClazz(), interpreter,
+                    null);
         }
-
-        List<Object> output = new ArrayList<Object>();
-        output.addAll(results);
-
-        return output;
     }
 
     @Override
