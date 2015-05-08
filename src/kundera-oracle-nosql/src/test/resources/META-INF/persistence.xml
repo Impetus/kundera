@@ -103,7 +103,6 @@
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.oraclenosql.OracleNoSQLClientFactory" />
 			<property name="kundera.keyspace" value="OracleNoSqlTests" />
-			<property name="kundera.show.query" value="true" />
 			<property name="kundera.dialect" value="kvstore" />
 			<property name="kundera.client" value="kvstore" />
 			<property name="kundera.ddl.auto.prepare" value="create" />
