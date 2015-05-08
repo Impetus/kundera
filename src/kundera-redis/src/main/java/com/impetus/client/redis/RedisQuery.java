@@ -16,8 +16,8 @@
 package com.impetus.client.redis;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
@@ -78,7 +78,7 @@ public class RedisQuery extends QueryImpl
          * 
          */
 
-        Set<Object> results = new HashSet<Object>();
+        Set<Object> results = new LinkedHashSet<Object>();
 
         ClientMetadata clientMetadata = ((ClientBase) client).getClientMetadata();
 
