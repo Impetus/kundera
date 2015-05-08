@@ -194,7 +194,7 @@ public class Neo4JQuery extends QueryImpl
                         }
                         else
                         {
-                            sb.append(items.get(0).toString().replaceAll("[,]", "").replaceAll("[']", "\""));
+                            sb.append("(").append(items.get(0).toString().replaceAll("[,]", "").replaceAll("[']", "\"")).append(")");
                         }
                         appended = true;
                     }

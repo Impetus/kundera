@@ -134,12 +134,12 @@ public class HbaseShowQueryTest
 
             Query findQuery = em.createQuery("Select p from UserInfo p where p.userId=\"PK_1\"");
             findQuery.getResultList();
-            expectedQuery[0] = "Fetch data from user_info for userId = [\"PK_1\"]";
+            expectedQuery[0] = "Fetch data from user_info for userId = [PK_1]";
             System.setOut(printStream);
 
-            findQuery = em.createQuery("Select p from UserInfo p where p.userId=\"Shahid\"");
+            findQuery = em.createQuery("Select p from UserInfo p where p.userId=Shahid");
             findQuery.getResultList();
-            expectedQuery[1] = "Fetch data from user_info for userId = [\"Shahid\"]";
+            expectedQuery[1] = "Fetch data from user_info for userId = [Shahid]";
             System.setOut(printStream);
 
             findQuery = em.createQuery("Select p from UserInfo p where p.age between 32 and 35");

@@ -160,7 +160,7 @@ public class ESFilterBuilder
 
         log.debug("Pattern value for field " + field + " is: " + patternValue);
         FilterBuilder filterBuilder = getQueryBuilder(kunderaQuery.new FilterClause(jpaField, Expression.LIKE,
-                likePattern), metadata);
+                likePattern, field), metadata);
 
         return filterBuilder;
     }
@@ -182,7 +182,7 @@ public class ESFilterBuilder
         log.debug("IN query parameters for field " + property + " is: " + inItemsParameter);
         Iterable inItemsIterable = getInValuesCollection(inItemsParameter);
 
-        return getFilter(kunderaQuery.new FilterClause(property, Expression.IN, inItemsIterable), metadata);
+        return getFilter(kunderaQuery.new FilterClause(property, Expression.IN, inItemsIterable, property), metadata);
     }
 
     /**
@@ -262,8 +262,8 @@ public class ESFilterBuilder
                 + upperBoundExpression);
 
         return new AndFilterBuilder(getFilter(kunderaQuery.new FilterClause(field, Expression.GREATER_THAN_OR_EQUAL,
-                lowerBoundExpression), m), getFilter(kunderaQuery.new FilterClause(field,
-                Expression.LOWER_THAN_OR_EQUAL, upperBoundExpression), m));
+                lowerBoundExpression, field), m), getFilter(kunderaQuery.new FilterClause(field,
+                Expression.LOWER_THAN_OR_EQUAL, upperBoundExpression,field), m));
     }
 
     /**
@@ -401,7 +401,7 @@ public class ESFilterBuilder
         Object value = (rightExpression instanceof InputParameter) ? kunderaQuery.getParametersMap().get(
                 (rightExpression).toParsedText()) : rightExpression.toParsedText();
 
-        return (condition != null && property != null) ? kunderaQuery.new FilterClause(property, condition, value)
+        return (condition != null && property != null) ? kunderaQuery.new FilterClause(property, condition, value, property)
                 : null;
     }
 

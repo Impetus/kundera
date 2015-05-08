@@ -613,17 +613,17 @@ public class PersonMongoTest extends BaseTest
         Object p1 = prepareMongoInstance("1", 10);
         em.persist(p1);
 
-        String updateFunc = "UPDATE PersonMongo set age = INCREMENT(1) where personId = :personId";
+        String updateFunc = "UPDATE PersonMongo p set p.age = INCREMENT(1) where p.personId = :personId";
         Query q = em.createQuery(updateFunc);
         q.setParameter("personId", "1");
         Assert.assertEquals(1, q.executeUpdate());
 
-        updateFunc = "UPDATE PersonMongo set age = DECREMENT(1) where personId = :personId";
+        updateFunc = "UPDATE PersonMongo set p.age = DECREMENT(1) where p.personId = :personId";
         q = em.createQuery(updateFunc);
         q.setParameter("personId", "1");
         Assert.assertEquals(1, q.executeUpdate());
 
-        updateFunc = "UPDATE PersonMongo set age = DECREMENT(2)";
+        updateFunc = "UPDATE PersonMongo p set p.age = DECREMENT(2)";
         q = em.createQuery(updateFunc);
         Assert.assertEquals(1, q.executeUpdate());
 
@@ -635,7 +635,7 @@ public class PersonMongoTest extends BaseTest
         Assert.assertNotNull(results);
         Assert.assertEquals(new Integer(8), results.get(0).getAge());
 
-        updateFunc = "UPDATE PersonMongo set age = INCREMENT(5)";
+        updateFunc = "UPDATE PersonMongo p set p.age = INCREMENT(5)";
         q = em.createQuery(updateFunc);
         Assert.assertEquals(1, q.executeUpdate());
 
@@ -659,7 +659,7 @@ public class PersonMongoTest extends BaseTest
         em.persist(p3);
 
         String query = "Select p from PersonMongo p where p.personName <> :name and p.age NOT IN :ageList"
-                + " and (personId = :personId)";
+                + " and (p.personId = :personId)";
         Query q = em.createQuery(query);
         q.setParameter("name", "vivek");
         q.setParameter("ageList", new ArrayList<Integer>()
@@ -675,7 +675,7 @@ public class PersonMongoTest extends BaseTest
         Assert.assertEquals(0, results.size());
 
         query = "Select p from PersonMongo p where (p.personName = :name and p.age NOT IN :ageList)"
-                + " and (personId = :personId)";
+                + " and (p.personId = :personId)";
         q = em.createQuery(query);
         q.setParameter("name", "vivek");
         q.setParameter("ageList", new ArrayList<Integer>()
@@ -706,7 +706,7 @@ public class PersonMongoTest extends BaseTest
         em.persist(p3);
 
         String query = "Select p from PersonMongo p where (p.personName = :name OR p.age NOT IN :ageList)"
-                + " AND (personId = :personId)";
+                + " AND (p.personId = :personId)";
         Query q = em.createQuery(query);
         q.setParameter("name", "vivek");
         q.setParameter("ageList", new ArrayList<Integer>()
@@ -722,7 +722,7 @@ public class PersonMongoTest extends BaseTest
         Assert.assertEquals(0, results.size());
 
         query = "Select p from PersonMongo p where (p.personName = :name AND p.age NOT IN :ageList)"
-                + " OR (personId = :personId)";
+                + " OR (p.personId = :personId)";
         q = em.createQuery(query);
         q.setParameter("name", "vivek");
         q.setParameter("ageList", new ArrayList<Integer>()
@@ -738,7 +738,7 @@ public class PersonMongoTest extends BaseTest
         Assert.assertEquals(3, results.size());
 
         query = "Select p from PersonMongo p where (p.personName = :name OR p.age NOT IN :ageList)"
-                + " OR (personId = :personId) ORDER BY p.age";
+                + " OR (p.personId = :personId) ORDER BY p.age";
         q = em.createQuery(query);
         q.setParameter("name", "vivek");
         q.setParameter("ageList", new ArrayList<Integer>()
@@ -780,7 +780,7 @@ public class PersonMongoTest extends BaseTest
         Assert.assertEquals(2, results.size());
 
         query = "Select p from PersonMongo p where (p.personName = :name and p.age NOT IN :ageList)"
-                + " and (personId = :personId)";
+                + " and (p.personId = :personId)";
         q = em.createQuery(query);
         q.setFirstResult(0);
         q.setMaxResults(3);

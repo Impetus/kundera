@@ -99,13 +99,13 @@ public class OracleNosqlShowQueryTest extends OracleNoSQLTestBase
 
             Query findQuery = em.createQuery("Select p from UserInformation p where p.id=\"PK_1\"");
             findQuery.getResultList();
-            expectedQuery[0] = "Fetch data from UserInformation for PK \"PK_1\"";
+            expectedQuery[0] = "Fetch data from UserInformation for PK PK_1";
             System.setOut(printStream);
 
             // and query is not supported in oracle nosql
-            findQuery = em.createQuery("Select p from UserInformation p where p.id=\"Shahid\"");
+            findQuery = em.createQuery("Select p from UserInformation p where p.id=Shahid");
             findQuery.getResultList();
-            expectedQuery[1] = "Fetch data from UserInformation for PK \"Shahid\"";
+            expectedQuery[1] = "Fetch data from UserInformation for PK Shahid";
             System.setOut(printStream);
 
             br = new BufferedReader(new FileReader("showQuery.log"));
@@ -196,14 +196,14 @@ public class OracleNosqlShowQueryTest extends OracleNoSQLTestBase
 
             Query findQuery = em.createQuery("Select p from UserInformation p where p.id=\"PK_1\"");
             findQuery.getResultList();
-            expectedQuery[0] = "Fetch data from UserInformation for PK \"PK_1\"";
+            expectedQuery[0] = "Fetch data from UserInformation for PK PK_1";
             System.setOut(printStream);
             
 
             // and query is not supported in oracle nosql
             findQuery = em.createQuery("Select p from UserInformation p where p.id=\"Shahid\"");
             findQuery.getResultList();
-            expectedQuery[1] = "Fetch data from UserInformation for PK \"Shahid\"";
+            expectedQuery[1] = "Fetch data from UserInformation for PK Shahid";
             System.setOut(printStream);
 
             br = new BufferedReader(new FileReader("showQuery.log"));

@@ -273,12 +273,12 @@ public abstract class BaseTest
     protected <E extends Object> void assertOnMerge(EntityManager em, String clazz, E e, String oldName,
             String newName, String fieldName)
     {
-        Query q = em.createQuery("Select p from " + clazz + " p where p." + fieldName + " = " + oldName);
+        Query q = em.createQuery("Select p from " + clazz + " p where p." + fieldName + " = '" + oldName+"'");
         List<E> results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(2, results.size());
 
-        q = em.createQuery("Select p from " + clazz + " p where p." + fieldName + " = " + newName);
+        q = em.createQuery("Select p from " + clazz + " p where p." + fieldName + " = '" + newName+"'");
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(1, results.size());
