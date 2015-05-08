@@ -320,6 +320,7 @@
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<class>com.impetus.client.esindexer.PersonESIndexerCassandra</class>
 		<class>com.impetus.client.esindexer.PersonESIndexerCassandraUUID</class>
+		<class>com.impetus.kundera.query.Person</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<property name="kundera.nodes" value="localhost" />
