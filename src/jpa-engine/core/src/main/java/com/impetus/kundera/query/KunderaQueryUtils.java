@@ -56,7 +56,6 @@ import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 
-
 /**
  * 
  * @author Amit Kumar
@@ -242,8 +241,15 @@ public final class KunderaQueryUtils
         else if (InputParameter.class.isAssignableFrom(exp.getClass()))
         {
             InputParameter ip = (InputParameter) exp;
-            return ip.getParameter();
-        }
+            if (kunderaQuery.getParametersMap().containsKey(ip.getParameter()))
+            {
+                return kunderaQuery.getParametersMap().get(ip.getParameter());
+            }
+            else
+            {
+                return ip.getParameter();
+            }
+         }
         else if (KeywordExpression.class.isAssignableFrom(exp.getClass()))
         {
             KeywordExpression keyWordExp = (KeywordExpression) exp;
@@ -289,7 +295,7 @@ public final class KunderaQueryUtils
      *            the m
      * @param useLuceneOrES
      *            the use lucene or es
-     * @param kunderaMetadata 
+     * @param kunderaMetadata
      * @return the list
      */
     public static List<Map<String, Object>> readSelectClause(Expression selectExpression, EntityMetadata m,
@@ -431,7 +437,6 @@ public final class KunderaQueryUtils
     public static void onSubExpression(Expression expression, EntityMetadata m, KunderaMetadata kunderaMetadata,
             KunderaQuery kunderaQuery)
     {
-        SubExpression subExp = (SubExpression) expression;
         kunderaQuery.addFilterClause("(");
         traverse(((SubExpression) expression).getExpression(), m, kunderaMetadata, kunderaQuery, true);
         kunderaQuery.addFilterClause(")");
@@ -454,9 +459,11 @@ public final class KunderaQueryUtils
         Map<String, Object> map = KunderaQueryUtils.setFieldClazzAndColumnFamily(sfpExp, m, kunderaMetadata);
         String columnName = (String) map.get(Constants.COL_NAME);
         String fieldName = (String) map.get(Constants.FIELD_NAME);
-        kunderaQuery.addFilterClause(columnName, Expression.GREATER_THAN_OR_EQUAL, betweenExp.getLowerBoundExpression().toActualText(), fieldName);
+        kunderaQuery.addFilterClause(columnName, Expression.GREATER_THAN_OR_EQUAL, betweenExp.getLowerBoundExpression()
+                .toActualText(), fieldName);
         kunderaQuery.addFilterClause("AND");
-        kunderaQuery.addFilterClause(columnName, Expression.LOWER_THAN_OR_EQUAL, betweenExp.getUpperBoundExpression().toActualText(), fieldName);
+        kunderaQuery.addFilterClause(columnName, Expression.LOWER_THAN_OR_EQUAL, betweenExp.getUpperBoundExpression()
+                .toActualText(), fieldName);
 
         return map;
 
@@ -520,8 +527,8 @@ public final class KunderaQueryUtils
         InExpression inExp = (InExpression) expression;
         StateFieldPathExpression sfpExp = (StateFieldPathExpression) inExp.getExpression();
         Map<String, Object> map = KunderaQueryUtils.setFieldClazzAndColumnFamily(sfpExp, m, kunderaMetadata);
-        kunderaQuery.addFilterClause((String) map.get(Constants.COL_NAME), inExp.getIdentifier(),
-                inExp.getInItems(), (String) map.get(Constants.FIELD_NAME));
+        kunderaQuery.addFilterClause((String) map.get(Constants.COL_NAME), inExp.getIdentifier(), inExp.getInItems(),
+                (String) map.get(Constants.FIELD_NAME));
         return map;
     }
 
@@ -547,8 +554,8 @@ public final class KunderaQueryUtils
         String condition = compExp.getIdentifier();
         StateFieldPathExpression sfpExp = (StateFieldPathExpression) compExp.getLeftExpression();
         Map<String, Object> map = KunderaQueryUtils.setFieldClazzAndColumnFamily(sfpExp, m, kunderaMetadata);
-        Object value = KunderaQueryUtils.getValue(compExp.getRightExpression(),
-                (Class) map.get(Constants.FIELD_CLAZZ), kunderaQuery);
+        Object value = KunderaQueryUtils.getValue(compExp.getRightExpression(), (Class) map.get(Constants.FIELD_CLAZZ),
+                kunderaQuery);
         kunderaQuery.addFilterClause((String) map.get(Constants.COL_NAME), condition, value,
                 (String) map.get(Constants.FIELD_NAME));
         return map;
