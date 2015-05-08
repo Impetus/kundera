@@ -50,11 +50,16 @@ https://raw.github.com/impetus-opensource/Kundera/Kundera-2.0.4/kundera-core/src
 
 	<persistence-unit name="ds_composite_pu">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
-		<class>com.impetus.client.cassandra.crud.compositeType.association.CassandraEmbeddedAssociation</class>
-		<class>com.impetus.client.cassandra.crud.compositeType.association.UserInfo</class>
-		<class>com.impetus.kundera.client.cassandra.composite.PrimeUserDataType</class>
-		<class>com.impetus.kundera.client.cassandra.composite.PrimeUser</class>
-		<class>com.impetus.kundera.client.cassandra.composite.DSEmbeddedAssociation</class>
+		<class>com.impetus.client.cassandra.crud.compositeType.association.CassandraEmbeddedAssociation
+		</class>
+		<class>com.impetus.client.cassandra.crud.compositeType.association.UserInfo
+		</class>
+		<class>com.impetus.kundera.client.cassandra.composite.PrimeUserDataType
+		</class>
+		<class>com.impetus.kundera.client.cassandra.composite.PrimeUser
+		</class>
+		<class>com.impetus.kundera.client.cassandra.composite.DSEmbeddedAssociation
+		</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<property name="kundera.nodes" value="localhost" />
@@ -110,5 +115,3 @@ https://raw.github.com/impetus-opensource/Kundera/Kundera-2.0.4/kundera-core/src
 	</persistence-unit>
 
 </persistence>
-
-​
