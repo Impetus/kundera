@@ -15,13 +15,47 @@
  ******************************************************************************/
 package com.impetus.kundera.query;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+
+import javax.persistence.metamodel.EmbeddableType;
+import javax.persistence.metamodel.EntityType;
+
 import org.eclipse.persistence.jpa.jpql.parser.AggregateFunction;
+import org.eclipse.persistence.jpa.jpql.parser.BetweenExpression;
+import org.eclipse.persistence.jpa.jpql.parser.CollectionExpression;
+import org.eclipse.persistence.jpa.jpql.parser.ComparisonExpression;
 import org.eclipse.persistence.jpa.jpql.parser.DeleteStatement;
 import org.eclipse.persistence.jpa.jpql.parser.Expression;
+import org.eclipse.persistence.jpa.jpql.parser.IdentificationVariable;
+import org.eclipse.persistence.jpa.jpql.parser.InExpression;
+import org.eclipse.persistence.jpa.jpql.parser.InputParameter;
 import org.eclipse.persistence.jpa.jpql.parser.JPQLExpression;
+import org.eclipse.persistence.jpa.jpql.parser.KeywordExpression;
+import org.eclipse.persistence.jpa.jpql.parser.LikeExpression;
+import org.eclipse.persistence.jpa.jpql.parser.LogicalExpression;
+import org.eclipse.persistence.jpa.jpql.parser.NumericLiteral;
 import org.eclipse.persistence.jpa.jpql.parser.SelectStatement;
+import org.eclipse.persistence.jpa.jpql.parser.StateFieldPathExpression;
+import org.eclipse.persistence.jpa.jpql.parser.StringLiteral;
+import org.eclipse.persistence.jpa.jpql.parser.SubExpression;
 import org.eclipse.persistence.jpa.jpql.parser.UpdateStatement;
 import org.eclipse.persistence.jpa.jpql.parser.WhereClause;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.impetus.kundera.Constants;
+import com.impetus.kundera.KunderaException;
+import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.metadata.model.type.AbstractManagedType;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
+import com.impetus.kundera.property.PropertyAccessorFactory;
+
 
 /**
  * 
@@ -29,6 +63,9 @@ import org.eclipse.persistence.jpa.jpql.parser.WhereClause;
  */
 public final class KunderaQueryUtils
 {
+    /** the log used by this class. */
+    private static Logger logger = LoggerFactory.getLogger(KunderaQueryUtils.class);
+
     /**
      * Gets the where clause.
      * 
@@ -168,16 +205,353 @@ public final class KunderaQueryUtils
     {
         return jpqlExpression.getQueryStatement().getClass().isAssignableFrom(UpdateStatement.class);
     }
-    
-    
+
     /**
      * Checks if is aggregated expression.
-     *
-     * @param expression the expression
+     * 
+     * @param expression
+     *            the expression
      * @return true, if is aggregated expression
      */
     public static boolean isAggregatedExpression(Expression expression)
     {
         return AggregateFunction.class.isAssignableFrom(expression.getClass());
     }
+
+    /**
+     * Gets the value.
+     * 
+     * @param exp
+     *            the exp
+     * @param clazz
+     *            the clazz
+     * @return the value
+     */
+    public static Object getValue(Expression exp, Class clazz, KunderaQuery kunderaQuery)
+    {
+        if (StringLiteral.class.isAssignableFrom(exp.getClass()))
+        {
+            return ((StringLiteral) exp).getUnquotedText();
+
+        }
+        else if (NumericLiteral.class.isAssignableFrom(exp.getClass()))
+        {
+            return PropertyAccessorFactory.getPropertyAccessor(clazz).fromString(clazz,
+                    ((NumericLiteral) exp).getText());
+        }
+        else if (InputParameter.class.isAssignableFrom(exp.getClass()))
+        {
+            InputParameter ip = (InputParameter) exp;
+            return ip.getParameter();
+        }
+        else if (KeywordExpression.class.isAssignableFrom(exp.getClass()))
+        {
+            KeywordExpression keyWordExp = (KeywordExpression) exp;
+            return PropertyAccessorFactory.getPropertyAccessor(clazz).fromString(clazz,
+                    keyWordExp.getActualIdentifier());
+        }
+        else if (IdentificationVariable.class.isAssignableFrom(exp.getClass()))
+        {
+            IdentificationVariable idvExp = (IdentificationVariable) exp;
+            return idvExp.getText();
+        }
+        else
+        {
+            logger.warn("Arithmetic expression is not supported ");
+            throw new KunderaException("Arithmetic expression is not supported currently");
+        }
+    }
+
+    /**
+     * Adds the to output columns.
+     * 
+     * @param selectExpression
+     *            the select expression
+     * @param m
+     *            the m
+     * @param columnsToOutput
+     *            the columns to output
+     */
+    private static void addToOutputColumns(Expression selectExpression, EntityMetadata m,
+            List<Map<String, Object>> columnsToOutput)
+    {
+
+        Map<String, Object> map = setFieldClazzAndColumnFamily(selectExpression, m, null);
+        columnsToOutput.add(map);
+    }
+
+    /**
+     * Read select clause.
+     * 
+     * @param selectExpression
+     *            the select expression
+     * @param m
+     *            the m
+     * @param useLuceneOrES
+     *            the use lucene or es
+     * @return the list
+     */
+    public static List<Map<String, Object>> readSelectClause(Expression selectExpression, EntityMetadata m,
+            Boolean useLuceneOrES)
+    {
+        List<Map<String, Object>> columnsToOutput = new ArrayList<Map<String, Object>>();
+        if (StateFieldPathExpression.class.isAssignableFrom(selectExpression.getClass()))
+        {
+            StateFieldPathExpression sfpExp = (StateFieldPathExpression) selectExpression;
+
+            addToOutputColumns(selectExpression, m, columnsToOutput);
+        }
+        else if (CollectionExpression.class.isAssignableFrom(selectExpression.getClass()))
+        {
+            CollectionExpression collExp = (CollectionExpression) selectExpression;
+            ListIterator<Expression> itr = collExp.children().iterator();
+            while (itr.hasNext())
+            {
+                Expression exp = itr.next();
+                if (StateFieldPathExpression.class.isAssignableFrom(exp.getClass()))
+                {
+                    addToOutputColumns(exp, m, columnsToOutput);
+                }
+            }
+        }
+        return columnsToOutput;
+    }
+
+    /**
+     * Sets the fieldclazz and colfamily.
+     * 
+     * @param expression
+     *            the expression
+     * @param m
+     *            the m
+     * @return the map
+     */
+    public static Map<String, Object> setFieldClazzAndColumnFamily(Expression expression, EntityMetadata m,
+            final KunderaMetadata kunderaMetadata)
+    {
+        StateFieldPathExpression sfpExp = (StateFieldPathExpression) expression;
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                m.getPersistenceUnit());
+
+        EntityType entity = metaModel.entity(m.getEntityClazz());
+        String discriminatorColumn = ((AbstractManagedType) entity).getDiscriminatorColumn();
+        Class fieldClazz = String.class;
+        String colFamily = m.getTableName();
+        String colName = null;
+        String dbColName = null;
+        Map<String, Object> map = new HashMap<String, Object>();
+
+        boolean isEmbeddable = false;
+        int count = 1;
+        String fieldName = sfpExp.getPath(count++);
+
+        AbstractAttribute attrib = (AbstractAttribute) entity.getAttribute(fieldName);
+        isEmbeddable = metaModel.isEmbeddable(attrib.getBindableJavaType());
+        while (sfpExp.pathSize() > count)
+        {
+            if (isEmbeddable)
+            {
+                EmbeddableType embeddableType = metaModel.embeddable(attrib.getBindableJavaType());
+                String attName = sfpExp.getPath(count++);
+                fieldName = fieldName + "." + attName;
+                attrib = (AbstractAttribute) embeddableType.getAttribute(attName);
+                isEmbeddable = metaModel.isEmbeddable(attrib.getBindableJavaType());
+
+            }
+            colName = fieldName;
+        }
+
+        if (!sfpExp.getPath(count - 1).equals(discriminatorColumn))
+        {
+            fieldClazz = attrib.getBindableJavaType();
+            colFamily = attrib.getTableName() != null ? attrib.getTableName() : m.getTableName();
+            dbColName = attrib.getJPAColumnName();
+            colName = colName != null ? colName : attrib.getJPAColumnName();
+
+        }
+
+        map.put(Constants.FIELD_CLAZZ, fieldClazz);
+        map.put(Constants.COL_FAMILY, colFamily);
+        map.put(Constants.COL_NAME, colName);
+        map.put(Constants.FIELD_NAME, fieldName);
+        map.put(Constants.IS_EMBEDDABLE, isEmbeddable);
+        map.put(Constants.DB_COL_NAME, dbColName);
+        return map;
+    }
+
+    /**
+     * Traverse.
+     * 
+     * @param expression
+     *            the expression
+     * @param m
+     *            the m
+     * @param idColumn
+     *            the id column
+     * @return the filter
+     */
+    public static void traverse(Expression expression, EntityMetadata m, KunderaMetadata kunderaMetadata,
+            KunderaQuery kunderaQuery, boolean isSubExpression)
+    {
+
+        if (ComparisonExpression.class.isAssignableFrom(expression.getClass()))
+        {
+            onComparisonExpression(expression, m, kunderaMetadata, kunderaQuery);
+        }
+        else if (LogicalExpression.class.isAssignableFrom(expression.getClass()))
+        {
+            onLogicalExpression(expression, m, kunderaMetadata, kunderaQuery);
+        }
+        else if (InExpression.class.isAssignableFrom(expression.getClass()))
+        {
+            onInExpression(expression, m, kunderaMetadata, kunderaQuery);
+        }
+        else if (LikeExpression.class.isAssignableFrom(expression.getClass()))
+        {
+            onLikeExpression(expression, m, kunderaMetadata, kunderaQuery);
+        }
+        else if (BetweenExpression.class.isAssignableFrom(expression.getClass()))
+        {
+            onBetweenExpression(expression, m, kunderaMetadata, kunderaQuery);
+        }
+        else if (SubExpression.class.isAssignableFrom(expression.getClass()))
+        {
+            onSubExpression(expression, m, kunderaMetadata, kunderaQuery);
+        }
+
+    }
+
+    /**
+     * @param expression
+     * @param m
+     * @param kunderaMetadata
+     * @param kunderaQuery
+     */
+    public static void onSubExpression(Expression expression, EntityMetadata m, KunderaMetadata kunderaMetadata,
+            KunderaQuery kunderaQuery)
+    {
+        SubExpression subExp = (SubExpression) expression;
+        kunderaQuery.addFilterClause("(");
+        traverse(((SubExpression) expression).getExpression(), m, kunderaMetadata, kunderaQuery, true);
+        kunderaQuery.addFilterClause(")");
+
+    }
+
+    /**
+     * @param expression
+     * @param m
+     * @param kunderaMetadata
+     * @param kunderaQuery
+     * @return
+     */
+    public static Map<String, Object> onBetweenExpression(Expression expression, EntityMetadata m,
+            KunderaMetadata kunderaMetadata, KunderaQuery kunderaQuery)
+    {
+        BetweenExpression betweenExp = (BetweenExpression) expression;
+        StateFieldPathExpression sfpExp = (StateFieldPathExpression) betweenExp.getExpression();
+
+        Map<String, Object> map = KunderaQueryUtils.setFieldClazzAndColumnFamily(sfpExp, m, kunderaMetadata);
+        String columnName = (String) map.get(Constants.COL_NAME);
+        String fieldName = (String) map.get(Constants.FIELD_NAME);
+        kunderaQuery.addFilterClause(columnName, Expression.GREATER_THAN_OR_EQUAL, betweenExp.getLowerBoundExpression().toActualText(), fieldName);
+        kunderaQuery.addFilterClause("AND");
+        kunderaQuery.addFilterClause(columnName, Expression.LOWER_THAN_OR_EQUAL, betweenExp.getUpperBoundExpression().toActualText(), fieldName);
+
+        return map;
+
+    }
+
+    /**
+     * @param expression
+     * @param m
+     * @param kunderaMetadata
+     * @param kunderaQuery
+     * @return
+     */
+    public static Map<String, Object> onLikeExpression(Expression expression, EntityMetadata m,
+            KunderaMetadata kunderaMetadata, KunderaQuery kunderaQuery)
+    {
+        LikeExpression likeExp = (LikeExpression) expression;
+        StateFieldPathExpression sfpExp = (StateFieldPathExpression) likeExp.getStringExpression();
+        Map<String, Object> map = KunderaQueryUtils.setFieldClazzAndColumnFamily(sfpExp, m, kunderaMetadata);
+        kunderaQuery.addFilterClause((String) map.get(Constants.COL_NAME), likeExp.getIdentifier(), likeExp
+                .getPatternValue().toActualText(), (String) map.get(Constants.FIELD_NAME));
+        return map;
+
+    }
+
+    /**
+     * On logical expression.
+     * 
+     * @param expression
+     *            the expression
+     * @param m
+     *            the m
+     * @param idColumn
+     *            the id column
+     * @return the filter
+     */
+    public static void onLogicalExpression(Expression expression, EntityMetadata m, KunderaMetadata kunderaMetadata,
+            KunderaQuery kunderaQuery)
+    {
+        traverse(((LogicalExpression) expression).getLeftExpression(), m, kunderaMetadata, kunderaQuery, false);
+        kunderaQuery.addFilterClause(((LogicalExpression) expression).getIdentifier());
+        traverse(((LogicalExpression) expression).getRightExpression(), m, kunderaMetadata, kunderaQuery, false);
+    }
+
+    /**
+     * On in expression.
+     * 
+     * @param expression
+     *            the expression
+     * @param m
+     *            the m
+     * @param idColumn
+     *            the id column
+     * @param isIdColumn
+     *            the is id column
+     * @return
+     * @return the filter
+     */
+    public static Map<String, Object> onInExpression(Expression expression, EntityMetadata m,
+            KunderaMetadata kunderaMetadata, KunderaQuery kunderaQuery)
+    {
+        InExpression inExp = (InExpression) expression;
+        StateFieldPathExpression sfpExp = (StateFieldPathExpression) inExp.getExpression();
+        Map<String, Object> map = KunderaQueryUtils.setFieldClazzAndColumnFamily(sfpExp, m, kunderaMetadata);
+        kunderaQuery.addFilterClause((String) map.get(Constants.COL_NAME), inExp.getIdentifier(),
+                inExp.getInItems(), (String) map.get(Constants.FIELD_NAME));
+        return map;
+    }
+
+    /**
+     * On comparison expression.
+     * 
+     * @param expression
+     *            the expression
+     * @param m
+     *            the m
+     * @param idColumn
+     *            the id column
+     * @param isIdColumn
+     *            the is id column
+     * @return
+     * @return the filter
+     */
+    public static Map<String, Object> onComparisonExpression(Expression expression, EntityMetadata m,
+            KunderaMetadata kunderaMetadata, KunderaQuery kunderaQuery)
+    {
+        ComparisonExpression compExp = (ComparisonExpression) expression;
+
+        String condition = compExp.getIdentifier();
+        StateFieldPathExpression sfpExp = (StateFieldPathExpression) compExp.getLeftExpression();
+        Map<String, Object> map = KunderaQueryUtils.setFieldClazzAndColumnFamily(sfpExp, m, kunderaMetadata);
+        Object value = KunderaQueryUtils.getValue(compExp.getRightExpression(),
+                (Class) map.get(Constants.FIELD_CLAZZ), kunderaQuery);
+        kunderaQuery.addFilterClause((String) map.get(Constants.COL_NAME), condition, value,
+                (String) map.get(Constants.FIELD_NAME));
+        return map;
+
+    }
+
 }

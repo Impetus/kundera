@@ -44,15 +44,14 @@ import org.eclipse.persistence.jpa.jpql.parser.JPQLExpression;
 import org.eclipse.persistence.jpa.jpql.parser.JPQLGrammar;
 import org.eclipse.persistence.jpa.jpql.parser.SelectStatement;
 import org.eclipse.persistence.jpa.jpql.parser.UpdateStatement;
+import org.eclipse.persistence.jpa.jpql.parser.WhereClause;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
-import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
-import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 
@@ -70,16 +69,6 @@ public class KunderaQuery
 
     /** The Constant INTRA_CLAUSE_OPERATORS. */
     public static final String[] INTRA_CLAUSE_OPERATORS = { "=", "LIKE", "IN", ">", ">=", "<", "<=", "<>", "NOT IN" };
-
-    /** The INTER pattern. */
-    private static final Pattern INTER_CLAUSE_PATTERN = Pattern
-            .compile(
-                    "(\\band\\b|\\bor\\b|\\bbetween\\b|\\s\\b^[!?IN]\\s\\b(\\s\\b)|\\s\\b^[!?NOT IN]\\s\\b(\\s\\b|\\s\\b(\\s\\b)))(?=(?:(?:[^']*[^'\"]'){2})*[^']*$)",
-                    Pattern.CASE_INSENSITIVE);
-
-    /** The INTRA pattern. */
-    private static final Pattern INTRA_CLAUSE_PATTERN = Pattern.compile(
-            "=|\\s\\blike\\b|\\bnot in\\b|\\bin\\b|<>|>=|>|<=|<|\\s\\bset", Pattern.CASE_INSENSITIVE);
 
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(KunderaQuery.class);
@@ -643,84 +632,21 @@ public class KunderaQuery
             addDiscriminatorClause(clauses, entityType);
             return;
         }
+        WhereClause whereClause = KunderaQueryUtils.getWhereClause(getJpqlExpression());
 
-        List<String> clauses = tokenize(filter, INTER_CLAUSE_PATTERN, true);
-        clauses = parseFilterForBetweenClause(clauses);
-        // clauses must be alternate Inter and Intra combination, starting with
-        // Intra.
-        boolean newClause = true;
+        KunderaQueryUtils.traverse(whereClause.getConditionalExpression(), metadata, kunderaMetadata, this, false);
 
-        for (String clause : clauses)
+        for (Object filterClause : filtersQueue)
         {
-            if (Arrays.asList(INTER_CLAUSE_OPERATORS).contains(clause.toUpperCase().trim())
-                    || (clause.startsWith("(") && clause.endsWith(")")))
+
+            if (!(filterClause instanceof String))
             {
-                filtersQueue.add(clause.toUpperCase().trim());
-                newClause = true;
+                onTypedParameter(((FilterClause) filterClause));
             }
-            else if (newClause)
-            {
-                List<String> tokens = tokenize(clause, INTRA_CLAUSE_PATTERN, false);
 
-                if (tokens.size() != 3)
-                {
-                    throw new PersistenceException("bad jpa query: " + clause);
-                }
-
-                // strip alias from property name
-                String property = tokens.get(0);
-                if (property.indexOf(".") > 0)
-                {
-                    property = property.substring((entityAlias + ".").length());
-                }
-
-                String columnName = null;
-                try
-                {
-                    columnName = ((AbstractAttribute) entityType.getAttribute(property)).getJPAColumnName();
-                }
-                catch (IllegalArgumentException iaex)
-                {
-                    logger.warn("No column found by this name : " + property + " checking for embeddedfield");
-                }
-                // where condition may be for search within embedded object
-                if (columnName == null && property.indexOf(".") >= 0)
-                {
-                    String enclosingEmbeddedField = MetadataUtils.getEnclosingEmbeddedFieldName(metadata, property,
-                            true, kunderaMetadata);
-                    if (enclosingEmbeddedField != null)
-                    {
-                        columnName = property;
-                    }
-                }
-
-                if (columnName == null)
-                {
-                    logger.error("No column found by this name : " + property);
-                    throw new JPQLParseException("No column found by this name : " + property + ". Check your query.");
-                }
-
-                String condition = tokens.get(1);
-                if (!Arrays.asList(INTRA_CLAUSE_OPERATORS).contains(condition.toUpperCase().trim()))
-                {
-                    throw new JPQLParseException("Bad JPA query: " + clause);
-                }
-
-                FilterClause filterClause = new FilterClause(
-
-                columnName, condition, tokens.get(2));
-                filtersQueue.add(filterClause);
-
-                onTypedParameter(tokens, filterClause, property);
-                newClause = false;
-            }
-            else
-            {
-                throw new JPQLParseException("bad jpa query: " + clause);
-            }
         }
 
-        addDiscriminatorClause(clauses, entityType);
+        addDiscriminatorClause(null, entityType);
     }
 
     private void addDiscriminatorClause(List<String> clauses, EntityType entityType)
@@ -732,12 +658,12 @@ public class KunderaQuery
 
             if (discrColumn != null && discrValue != null)
             {
-                if (!clauses.isEmpty())
+                if (clauses != null && !clauses.isEmpty())
                 {
                     filtersQueue.add("AND");
                 }
 
-                FilterClause filterClause = new FilterClause(discrColumn, "=", discrValue);
+                FilterClause filterClause = new FilterClause(discrColumn, "=", discrValue, discrColumn);
                 filtersQueue.add(filterClause);
             }
         }
@@ -776,17 +702,20 @@ public class KunderaQuery
      * @param filterClause
      *            filter clauses.
      */
-    private void onTypedParameter(List<String> tokens, FilterClause filterClause, String fieldName)
+    private void onTypedParameter(FilterClause filterClause)
     {
-        if (tokens.get(2) != null && tokens.get(2).startsWith(":"))
+
+        if (filterClause.value != null && filterClause.value.get(0).toString().startsWith(":"))
         {
-            addTypedParameter(Type.NAMED, tokens.get(2), filterClause);
-            filterJPAParameterInfo(Type.NAMED, tokens.get(2).substring(1), fieldName);
+            addTypedParameter(Type.NAMED, filterClause.value.get(0).toString(), filterClause);
+            filterJPAParameterInfo(Type.NAMED, filterClause.value.get(0).toString().substring(1),
+                    filterClause.fieldName);
         }
-        else if (tokens.get(2) != null && tokens.get(2).startsWith("?"))
+        else if (filterClause.value.toString() != null && filterClause.value.get(0).toString().startsWith("?"))
         {
-            addTypedParameter(Type.INDEXED, tokens.get(2), filterClause);
-            filterJPAParameterInfo(Type.INDEXED, tokens.get(2).substring(1), fieldName);
+            addTypedParameter(Type.INDEXED, filterClause.value.get(0).toString(), filterClause);
+            filterJPAParameterInfo(Type.INDEXED, filterClause.value.get(0).toString().substring(1),
+                    filterClause.fieldName);
         }
     }
 
@@ -847,10 +776,14 @@ public class KunderaQuery
         }
     }
 
+    /**
+     * @param type
+     * @param name
+     * @param fieldName
+     */
     private void filterJPAParameterInfo(Type type, String name, String fieldName)
     {
         String attributeName = getAttributeName(fieldName);
-
         Attribute entityAttribute = ((MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 persistenceUnit)).getEntityAttribute(entityClass, attributeName);
         Class fieldType = entityAttribute.getJavaType();
@@ -865,6 +798,10 @@ public class KunderaQuery
         }
     }
 
+    /**
+     * @param fieldName
+     * @return
+     */
     private String getAttributeName(String fieldName)
     {
         String attributeName = fieldName;
@@ -1001,6 +938,17 @@ public class KunderaQuery
         /** The condition. */
         private String condition;
 
+        /** The condition. */
+        private String fieldName;
+
+        /**
+         * @return the fieldName
+         */
+        public String getFieldName()
+        {
+            return fieldName;
+        }
+
         /** The value. */
         private List<Object> value = new ArrayList<Object>();
 
@@ -1014,11 +962,12 @@ public class KunderaQuery
          * @param value
          *            the value
          */
-        public FilterClause(String property, String condition, Object value)
+        public FilterClause(String property, String condition, Object value, String fieldName)
         {
             super();
             this.property = property;
             this.condition = condition.trim();
+            this.fieldName = fieldName;
             if (value instanceof Collection)
             {
                 for (Object valueObject : (Collection) value)
@@ -1102,6 +1051,8 @@ public class KunderaQuery
             builder.append(condition);
             builder.append(", value=");
             builder.append(value);
+            builder.append(", fieldName=");
+            builder.append(fieldName);
             builder.append("]");
             return builder.toString();
         }
@@ -1176,62 +1127,6 @@ public class KunderaQuery
         builder.append(filtersQueue);
         builder.append("]");
         return builder.toString();
-    }
-
-    // helper method
-    /**
-     * Tokenize.
-     * 
-     * @param where
-     *            the where
-     * @param pattern
-     *            the pattern
-     * @return the list
-     */
-    private static List<String> tokenize(String where, Pattern pattern, boolean isInterClause)
-    {
-        List<String> split = new ArrayList<String>();
-        Matcher matcher = pattern.matcher(where);
-        int lastIndex = 0;
-        String s;
-        while (matcher.find())
-        {
-            s = where.substring(lastIndex, matcher.start()).trim();
-            addSplit(isInterClause, split, s);
-            s = matcher.group();
-            if (s.equalsIgnoreCase("AND") || s.equalsIgnoreCase("OR") || s.equalsIgnoreCase("BETWEEN"))
-                s = " " + s + " ";
-            // if next group starts with "(" and last record in split ends with
-            // IN on NOT IN, append in previous split only.
-            split.add(s.toUpperCase());
-            lastIndex = matcher.end();
-            if (!isInterClause)
-                break;
-            // count++;
-        }
-        s = where.substring(lastIndex).trim();
-        if (!s.equals(""))
-        {
-            if (isInterClause)
-            {
-                if (s.startsWith("(") && s.endsWith(")"))
-                {
-                    split.add("(");
-                    split.add(s.substring(s.indexOf("(") + 1, s.lastIndexOf(")")));
-                    split.add(")");
-                }
-                else
-                {
-                    split.add(s);
-                }
-            }
-            else
-            {
-                split.add(s);
-
-            }
-        }
-        return split;
     }
 
     /**
@@ -1379,12 +1274,46 @@ public class KunderaQuery
         return !updateClauseQueue.isEmpty();
     }
 
+    /**
+     * @param property
+     * @param value
+     */
     public void addUpdateClause(final String property, final String value)
     {
         UpdateClause updateClause = new UpdateClause(property.trim(), value.trim());
         updateClauseQueue.add(updateClause);
         addTypedParameter(value.trim().startsWith("?") ? Type.INDEXED : value.trim().startsWith(":") ? Type.NAMED
                 : null, property, updateClause);
+    }
+
+    /**
+     * @param property
+     * @param condition
+     * @param value
+     * @param fieldName
+     */
+    public void addFilterClause(final String property, final String condition, final Object value,
+            final String fieldName)
+    {
+        if (property != null && condition != null)
+        {
+            FilterClause filterClause = new FilterClause(property.trim(), condition.trim(), value, fieldName);
+            filtersQueue.add(filterClause);
+        }
+        else
+        {
+            filtersQueue.add(property);
+        }
+    }
+
+    /**
+     * @param filterClause
+     */
+    public void addFilterClause(Object filterClause)
+    {
+
+        filtersQueue.add(filterClause);
+
     }
 
     /**
@@ -1403,44 +1332,6 @@ public class KunderaQuery
     public String getJPAQuery()
     {
         return this.jpaQuery;
-    }
-
-    /**
-     * Return parsed token string.
-     * 
-     * @param tokens
-     *            inter claues token string.
-     * @param indexName
-     *            table name
-     * @return tokens converted to "<=" and ">=" clause
-     */
-    private List<String> parseFilterForBetweenClause(List<String> tokens)
-    {
-        // There should be whitespace on bothside of keyword between.
-        final String between = " BETWEEN ";
-
-        if (tokens.contains(between))
-        {
-            // change token set to parse and compile.
-            int idxOfBetween = tokens.indexOf(between);
-            String property = tokens.get(idxOfBetween - 1);
-            Matcher match = INTRA_CLAUSE_PATTERN.matcher(property);
-            // in case any intra clause given along with column name.
-            if (match.find())
-            {
-                logger.error("bad jpa query:");
-                throw new JPQLParseException("invalid column name" + property);
-            }
-            String minValue = tokens.get(idxOfBetween + 1);
-            String maxValue = tokens.get(idxOfBetween + 3);
-
-            tokens.set(idxOfBetween + 1, property + ">=" + minValue);
-            tokens.set(idxOfBetween + 3, property + "<=" + maxValue);
-            tokens.remove(idxOfBetween - 1);
-            tokens.remove(idxOfBetween - 1);
-        }
-
-        return tokens;
     }
 
     private class TypedParameter
@@ -1641,37 +1532,4 @@ public class KunderaQuery
         return value;
     }
 
-    private static void addSplit(boolean isInterClause, List<String> split, String s)
-    {
-        if (!s.equals(""))
-        {
-
-            if (isInterClause)
-            {
-                if (s.startsWith("(") && s.endsWith(")"))
-                {
-                    split.add("(");
-                    split.add(s.substring(s.indexOf("(") + 1, s.lastIndexOf(")")));
-                    split.add(")");
-                }
-                else if (s.startsWith("("))
-                {
-                    split.add("(");
-                    split.add(s.substring(s.indexOf("(") + 1));
-                }
-                else if (s.endsWith(")"))
-                {
-                    split.add(s.substring(0, s.lastIndexOf(")")));
-                }
-                else
-                {
-                    split.add(s);
-                }
-            }
-            else
-            {
-                split.add(s);
-            }
-        }
-    }
 }

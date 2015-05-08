@@ -137,4 +137,22 @@ public interface Constants
 
     /** The Constant SELECT_EXPRESSION_ORDER. */
     public final static String SELECT_EXPRESSION_ORDER = "selectExpressionOrder";
+
+    /** The Constant COL_FAMILY. */
+    public static final String COL_FAMILY = "colFamily";
+
+    /** The Constant DB COL_NAME. */
+    public static final String DB_COL_NAME = "dbColumn";
+
+    /** The Constant COL_NAME. */
+    public static final String COL_NAME = "colName";
+
+    /** The Constant IS_EMBEDDABLE. */
+    public static final String IS_EMBEDDABLE = "isEmbeddable";
+
+    /** The Constant FIELD_CLAZZ. */
+    public static final String FIELD_CLAZZ = "fieldClazz";
+
+    /** The Constant FIELD_NAME. */
+    public static final String FIELD_NAME = "fieldName";
 }

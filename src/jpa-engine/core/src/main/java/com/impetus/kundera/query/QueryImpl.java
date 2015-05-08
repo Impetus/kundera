@@ -387,7 +387,7 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
 
         for (Object primaryKey : primaryKeys)
         {
-            FilterClause filterClause = kunderaQuery.new FilterClause(columnName, equals, primaryKey);
+            FilterClause filterClause = kunderaQuery.new FilterClause(columnName, equals, primaryKey, idField);
             kunderaQuery.setFilter(kunderaQuery.getEntityAlias() + "." + columnName + " = " + primaryKey);
             queue.clear();
             queue.add(filterClause);

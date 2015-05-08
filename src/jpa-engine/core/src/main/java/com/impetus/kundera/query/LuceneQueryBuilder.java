@@ -114,7 +114,9 @@ public final class LuceneQueryBuilder
 
             case IN:
                 builder.append(":");
+                builder.append("(");
                 builder.append(value);
+                builder.append(")");
                 break;
 
             default:
