@@ -172,6 +172,7 @@ public class HBaseESQueryTest extends HBaseQueryBaseTest
     @Test
     public void indexDeletionTest() throws Exception
     {
+        Thread.sleep(1000);
         String query = "Select min(b.pages) from Book b";
         List resultList = em.createQuery(query).getResultList();
         assertES(resultList, 100.0);

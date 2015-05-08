@@ -18,6 +18,8 @@
  */
 package com.impetus.client.hbase.crud;
 
+import java.util.List;
+
 import javax.persistence.Persistence;
 
 import org.elasticsearch.common.settings.ImmutableSettings;
@@ -25,11 +27,13 @@ import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.impetus.kundera.client.query.AggregationsBaseTest;
+import com.impetus.kundera.query.Person;
 
 /**
  * The Class HBaseESAggregationTest.
@@ -80,6 +84,33 @@ public class HbaseESAggregationTest extends AggregationsBaseTest
     public void test()
     {
         testAggregation();
+    }
+
+    @Test
+    public void indexDeletionTest() throws Exception
+    {
+        init();
+        Thread.sleep(1000);
+        String query = "Select min(p.age) from Person p";
+        List resultList = em.createQuery(query).getResultList();
+        Assert.assertEquals(1, resultList.size());
+        Assert.assertEquals(10.0, resultList.get(0));
+
+        Person person = em.find(Person.class, "2");
+        em.remove(person);
+        Thread.sleep(1000);
+        query = "Select min(p.age) from Person p";
+        resultList = em.createQuery(query).getResultList();
+        Assert.assertEquals(1, resultList.size());
+        Assert.assertEquals(20.0, resultList.get(0));
+
+        person = em.find(Person.class, "1");
+        em.remove(person);
+        Thread.sleep(1000);
+        query = "Select min(p.age) from Person p";
+        resultList = em.createQuery(query).getResultList();
+        Assert.assertEquals(1, resultList.size());
+        Assert.assertEquals(30.0, resultList.get(0));
     }
 
     @Override

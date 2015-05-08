@@ -132,6 +132,8 @@ public class PersonCassandraESIndexerTest extends BaseTest {
     @Test
     public void indexDeletionTest() throws Exception
     {
+        em.createQuery("DELETE FROM PersonESIndexerCassandra p").executeUpdate();
+        Thread.sleep(1000);
         Object p1 = prepare("1", 10);
         Object p2 = prepare("2", 20);
         Object p3 = prepare("3", 30);
@@ -140,6 +142,7 @@ public class PersonCassandraESIndexerTest extends BaseTest {
         em.persist(p2);
         em.persist(p3);
         em.persist(p4);
+        Thread.sleep(1000);
         String query = "Select min(p.age) from PersonESIndexerCassandra p";
         List resultList = em.createQuery(query).getResultList();
         Assert.assertEquals(1, resultList.size());
@@ -158,6 +161,8 @@ public class PersonCassandraESIndexerTest extends BaseTest {
         resultList = em.createQuery(query).getResultList();
         Assert.assertEquals(1, resultList.size());
         Assert.assertEquals(30.0, resultList.get(0));
+        
+        em.createQuery("DELETE FROM PersonESIndexerCassandra p").executeUpdate();
     }
 
     /**
