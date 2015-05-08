@@ -46,6 +46,8 @@
 
 	<persistence-unit name="redisElasticSearch_pu">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.kundera.query.Person</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<property name="kundera.nodes" value="localhost" />
 			<!-- <property name="kundera.nodes" value="192.168.145.168" /> -->
