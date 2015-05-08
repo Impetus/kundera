@@ -572,7 +572,7 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
                 entityMetadata.getPersistenceUnit());
         EntityType entityType = metaModel.entity(clazz);
 
-        if (field.indexOf(".") > 0)
+        if (field.indexOf(".") > 0 && entityMetadata.getEntityClazz().equals(entity.getClass()))
         {
             String fieldName = field.substring(field.indexOf(".") + 1, field.length());
             Attribute attribute = entityType.getAttribute(fieldName);
@@ -580,7 +580,17 @@ public abstract class QueryImpl<E> implements Query, com.impetus.kundera.query.Q
         }
         else
         {
-            return entity;
+            // for hbase v2 client (sends arraylist for specific fields)
+            if (entity instanceof ArrayList)
+            {
+                Object element = ((ArrayList) entity).get(0);
+                ((ArrayList) entity).remove(0);
+                return element;
+            }
+            else
+            {
+                return entity;
+            }
         }
     }
 
