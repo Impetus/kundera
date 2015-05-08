@@ -106,7 +106,7 @@ public abstract class GroupByBaseTest
         person.setPersonId(id);
         person.setPersonName(name);
         person.setSalary(salary);
-        person.setDay(Day.FRIDAY);
+//        person.setDay(Day.FRIDAY);
         em.persist(person);
     }
 
