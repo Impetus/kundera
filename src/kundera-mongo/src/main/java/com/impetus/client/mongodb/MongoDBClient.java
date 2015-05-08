@@ -875,9 +875,9 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         GridFS gfs = new GridFS(mongoDb, entityMetadata.getTableName());
         if (!isUpdate)
         {
-            GridFSInputFile gfsInputFle = handler.getGFSInputFileFromEntity(gfs, entityMetadata, entity,
+            GridFSInputFile gfsInputFile = handler.getGFSInputFileFromEntity(gfs, entityMetadata, entity,
                     kunderaMetadata, isUpdate);
-            saveGridFSFile(gfsInputFle, entityMetadata);
+            saveGridFSFile(gfsInputFile, entityMetadata);
         }
         else
         {

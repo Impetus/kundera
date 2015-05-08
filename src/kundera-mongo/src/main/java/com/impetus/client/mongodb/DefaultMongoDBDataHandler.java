@@ -205,7 +205,6 @@ public final class DefaultMongoDBDataHandler implements MongoDBDataHandler
     {
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
-        AbstractManagedType managedType = (AbstractManagedType) metaModel.entity(m.getEntityClazz());
         String id = ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName();
         Object rowKey = ((DBObject) outputFile.get(MongoDBUtils.METADATA)).get(id);
         Class<?> rowKeyValueClass = rowKey.getClass();
@@ -358,7 +357,6 @@ public final class DefaultMongoDBDataHandler implements MongoDBDataHandler
     {
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
-        AbstractManagedType managedType = (AbstractManagedType) metaModel.entity(m.getEntityClazz());
         EntityType entityType = metaModel.entity(m.getEntityClazz());
         GridFSInputFile gridFSInputFile = null;
 
