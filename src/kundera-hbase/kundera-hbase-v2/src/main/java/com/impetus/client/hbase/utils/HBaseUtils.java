@@ -296,7 +296,7 @@ public final class HBaseUtils
         if (colToOutput != null && colToOutput.size() == 1)
         {
             String idCol = ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName();
-            return idCol.equals(colToOutput.get(0).get(Constants.COL_NAME)) && !(boolean) colToOutput.get(0).get(Constants.IS_EMBEDDABLE);
+            return idCol.equals(colToOutput.get(0).get(Constants.DB_COL_NAME)) && !(boolean) colToOutput.get(0).get(Constants.IS_EMBEDDABLE);
         }
         else
         {
