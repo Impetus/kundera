@@ -206,8 +206,8 @@ public class StudentHBaseDateTest extends Base
         Query q;
         List<StudentHBaseDate> students;
         em = emf.createEntityManager();
-        query = "Select s From StudentHBaseDate s where s.id between " + getMinValue(Date.class) + " and "
-                + getMaxValue(Date.class);
+        query = "Select s From StudentHBaseDate s where s.id between '" + getMinValue(Date.class) + "' and '"
+                + getMaxValue(Date.class)+"'";
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);

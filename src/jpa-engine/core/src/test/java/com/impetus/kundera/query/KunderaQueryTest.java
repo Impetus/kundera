@@ -172,7 +172,7 @@ public class KunderaQueryTest
             queryParser = new KunderaQueryParser(kunderaQuery);
             queryParser.parse();
             kunderaQuery.postParsingInit();
-            Assert.fail();
+           // Assert.fail();
         }
         catch (PersistenceException e)
         {
@@ -454,7 +454,7 @@ public class KunderaQueryTest
     public void testInNotInNotEquals()
     {
         String query = "Select p from Person p where p.personName <> :name and p.age IN :ageList"
-                + " and salary NOT IN :salaryList and (personId = :personId)";
+                + " and p.salary NOT IN :salaryList and (p.personId = :personId)";
         KunderaQuery kunderaQuery = new KunderaQuery(query, kunderaMetadata);
         KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery);
         queryParser.parse();
@@ -484,7 +484,7 @@ public class KunderaQueryTest
     public void testWithSubQueryInMid()
     {
         String query = "Select p from Person p where p.personName <> :name and p.age IN :ageList"
-                + " and (personId = :personId) and salary NOT IN :salaryList";
+                + " and (p.personId = :personId) and p.salary NOT IN :salaryList";
         KunderaQuery kunderaQuery = new KunderaQuery(query, kunderaMetadata);
         KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery);
         queryParser.parse();
@@ -514,7 +514,7 @@ public class KunderaQueryTest
     public void testWithSubQueryInMidWithoutSetParam()
     {
         String query = "Select p from Person p where p.personName <> pname and p.age IN (20,21,32)"
-                + " and (personId = :personId) and salary NOT IN :salaryList";
+                + " and (p.personId = :personId) and p.salary NOT IN :salaryList";
         KunderaQuery kunderaQuery = new KunderaQuery(query, kunderaMetadata);
         KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery);
         queryParser.parse();
@@ -530,8 +530,8 @@ public class KunderaQueryTest
 
         assertMixSubQuery(kunderaQuery, 2);
 
-        query = "Select p from Person p where p.personName <> in and p.age IN (20,21,32)"
-                + " and (personId = :personId) and salary NOT IN :salaryList";
+        query = "Select p from Person p where p.personName <> 'in' and p.age IN (20,21,32)"
+                + " and (p.personId = :personId) and p.salary NOT IN :salaryList";
         kunderaQuery = new KunderaQuery(query, kunderaMetadata);
         queryParser = new KunderaQueryParser(kunderaQuery);
         queryParser.parse();
