@@ -51,6 +51,7 @@ import com.impetus.client.hbase.Writer;
 import com.impetus.client.hbase.service.HBaseReader;
 import com.impetus.client.hbase.service.HBaseWriter;
 import com.impetus.client.hbase.utils.HBaseUtils;
+import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
@@ -850,20 +851,20 @@ public class HBaseDataHandler implements DataHandler
             for (Map<String, Object> map : columnsToOutput)
             {
                 Object obj;
-                String colDataKey = HBaseUtils.getColumnDataKey((String) map.get(HBaseUtils.COL_FAMILY),
-                        (String) map.get(HBaseUtils.COL_NAME));
-                if ((boolean) map.get(HBaseUtils.IS_EMBEDDABLE))
+                String colDataKey = HBaseUtils.getColumnDataKey((String) map.get(Constants.COL_FAMILY),
+                        (String) map.get(Constants.COL_NAME));
+                if ((boolean) map.get(Constants.IS_EMBEDDABLE))
                 {
-                    Class embedClazz = (Class) map.get(HBaseUtils.FIELD_CLAZZ);
+                    Class embedClazz = (Class) map.get(Constants.FIELD_CLAZZ);
                     obj = populateEmbeddableObject(data, KunderaCoreUtils.createNewInstance(embedClazz), m, embedClazz);
                 }
-                else if (isIdCol(m, (String) map.get(HBaseUtils.COL_NAME)))
+                else if (isIdCol(m, (String) map.get(Constants.COL_NAME)))
                 {
-                    obj = HBaseUtils.fromBytes(data.getRowKey(), (Class) map.get(HBaseUtils.FIELD_CLAZZ));
+                    obj = HBaseUtils.fromBytes(data.getRowKey(), (Class) map.get(Constants.FIELD_CLAZZ));
                 }
                 else
                 {
-                    obj = HBaseUtils.fromBytes(columns.get(colDataKey), (Class) map.get(HBaseUtils.FIELD_CLAZZ));
+                    obj = HBaseUtils.fromBytes(columns.get(colDataKey), (Class) map.get(Constants.FIELD_CLAZZ));
                 }
                 result.add(obj);
             }

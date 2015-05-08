@@ -22,6 +22,7 @@ import java.util.Map;
 import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp;
 import org.apache.hadoop.hbase.util.Bytes;
 
+import com.impetus.kundera.Constants;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
@@ -38,19 +39,7 @@ public final class HBaseUtils
     /** The Constant AUTO_ID_ROW. */
     public static final String AUTO_ID_ROW = "kunderaAutoIdRow";
 
-    /** The Constant COL_FAMILY. */
-    public static final String COL_FAMILY = "colFamily";
-
-    /** The Constant COL_NAME. */
-    public static final String COL_NAME = "colName";
-
-    /** The Constant IS_EMBEDDABLE. */
-    public static final String IS_EMBEDDABLE = "isEmbeddable";
-
-    /** The Constant FIELD_CLAZZ. */
-    public static final String FIELD_CLAZZ = "fieldClazz";
-
-    /** The Constant DELIM. */
+     /** The Constant DELIM. */
     public static final String DELIM = "#";
 
     /** The Constant EQUALS. */
@@ -307,7 +296,7 @@ public final class HBaseUtils
         if (colToOutput != null && colToOutput.size() == 1)
         {
             String idCol = ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName();
-            return idCol.equals(colToOutput.get(0).get(COL_NAME)) && !(boolean) colToOutput.get(0).get(IS_EMBEDDABLE);
+            return idCol.equals(colToOutput.get(0).get(Constants.COL_NAME)) && !(boolean) colToOutput.get(0).get(Constants.IS_EMBEDDABLE);
         }
         else
         {
