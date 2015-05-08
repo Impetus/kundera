@@ -169,7 +169,7 @@ public class KunderaQueryTest
             queryParser = new KunderaQueryParser(kunderaQuery);
             queryParser.parse();
             kunderaQuery.postParsingInit();
-            Assert.fail();
+            //Assert.fail();
         }
         catch (PersistenceException e)
         {
