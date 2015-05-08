@@ -57,6 +57,7 @@ import org.slf4j.LoggerFactory;
 import com.impetus.client.hbase.HBaseClient;
 import com.impetus.client.hbase.HBaseEntityReader;
 import com.impetus.client.hbase.utils.HBaseUtils;
+import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
@@ -305,64 +306,13 @@ public class HBaseQuery extends QueryImpl
             {
                 SelectStatement selectStatement = kunderaQuery.getSelectStatement();
                 SelectClause selectClause = (SelectClause) selectStatement.getSelectClause();
-                return readSelectClause(selectClause.getSelectExpression(), m, useLuceneOrES);
+                return KunderaQueryUtils.readSelectClause(selectClause.getSelectExpression(), m, useLuceneOrES, kunderaMetadata);
             }
             return new ArrayList();
         }
 
-        /**
-         * Read select clause.
-         * 
-         * @param selectExpression
-         *            the select expression
-         * @param m
-         *            the m
-         * @param useLuceneOrES
-         *            the use lucene or es
-         * @return the list
-         */
-        private List<Map<String, Object>> readSelectClause(Expression selectExpression, EntityMetadata m,
-                Boolean useLuceneOrES)
-        {
-            List<Map<String, Object>> columnsToOutput = new ArrayList<Map<String, Object>>();
-            if (StateFieldPathExpression.class.isAssignableFrom(selectExpression.getClass()))
-            {
-                addToOutputColumns(selectExpression, m, columnsToOutput);
-            }
-            else if (CollectionExpression.class.isAssignableFrom(selectExpression.getClass()))
-            {
-                CollectionExpression collExp = (CollectionExpression) selectExpression;
-                ListIterator<Expression> itr = collExp.children().iterator();
-                while (itr.hasNext())
-                {
-                    Expression exp = itr.next();
-                    if (StateFieldPathExpression.class.isAssignableFrom(exp.getClass()))
-                    {
-                        addToOutputColumns(exp, m, columnsToOutput);
-                    }
-                }
-            }
-            return columnsToOutput;
-        }
-
-        /**
-         * Adds the to output columns.
-         * 
-         * @param selectExpression
-         *            the select expression
-         * @param m
-         *            the m
-         * @param columnsToOutput
-         *            the columns to output
-         */
-        private void addToOutputColumns(Expression selectExpression, EntityMetadata m,
-                List<Map<String, Object>> columnsToOutput)
-        {
-            StateFieldPathExpression sfpExp = (StateFieldPathExpression) selectExpression;
-            Map<String, Object> map = setFieldClazzAndColumnFamily(sfpExp, m);
-            columnsToOutput.add(map);
-        }
-
+       
+        
         /**
          * Translate.
          * 
@@ -490,24 +440,24 @@ public class HBaseQuery extends QueryImpl
         private Filter onComparisonExpression(Expression expression, EntityMetadata m, String idColumn,
                 Boolean isIdColumn)
         {
-            ComparisonExpression compExp = (ComparisonExpression) expression;
-            String condition = compExp.getIdentifier();
-            StateFieldPathExpression sfpExp = (StateFieldPathExpression) compExp.getLeftExpression();
-            Map<String, Object> map = setFieldClazzAndColumnFamily(sfpExp, m);
-            Class fieldClazz = (Class) map.get(HBaseUtils.FIELD_CLAZZ);
-            String colFamily = (String) map.get(HBaseUtils.COL_FAMILY);
-            String columnName = (String) map.get(HBaseUtils.COL_NAME);
+
+            Map<String, Object>map = KunderaQueryUtils.onComparisonExpression(expression,m, kunderaMetadata, getKunderaQuery());
+            Class fieldClazz = (Class) map.get(Constants.FIELD_CLAZZ);
+            String colFamily = (String) map.get(Constants.COL_FAMILY);
+            String columnName = (String) map.get(Constants.DB_COL_NAME);
+           
             isIdColumn = idColumn.equalsIgnoreCase(columnName);
-            Object value = getValue(compExp.getRightExpression(), fieldClazz);
+            
+            Object value = KunderaQueryUtils.getValue(((ComparisonExpression) expression).getRightExpression(), fieldClazz, kunderaQuery);
             if (!isEmbeddable(map))
             {
                 byte[] valueInBytes = getValueInBytes(value, fieldClazz, isIdColumn, m);
-                return createNewFilter(condition, Bytes.toBytes(colFamily), Bytes.toBytes(columnName), valueInBytes,
+                return createNewFilter(((ComparisonExpression) expression).getIdentifier(), Bytes.toBytes(colFamily), Bytes.toBytes(columnName), valueInBytes,
                         isIdColumn);
             }
             else
             {
-                return createFilterForEmbeddables(condition, isIdColumn, m, fieldClazz, value);
+                return createFilterForEmbeddables(((ComparisonExpression) expression).getIdentifier(), isIdColumn, m, fieldClazz, value);
             }
         }
 
@@ -602,7 +552,7 @@ public class HBaseQuery extends QueryImpl
          */
         private boolean isEmbeddable(Map<String, Object> map)
         {
-            return (boolean) map.get(HBaseUtils.IS_EMBEDDABLE);
+            return (boolean) map.get(Constants.IS_EMBEDDABLE);
         }
 
         /**
@@ -647,14 +597,12 @@ public class HBaseQuery extends QueryImpl
          */
         private Filter onInExpression(Expression expression, EntityMetadata m, String idColumn, Boolean isIdColumn)
         {
-            InExpression inExp = (InExpression) expression;
-            StateFieldPathExpression sfpExp = (StateFieldPathExpression) inExp.getExpression();
-            Map<String, Object> map = setFieldClazzAndColumnFamily(sfpExp, m);
-            Class fieldClazz = (Class) map.get(HBaseUtils.FIELD_CLAZZ);
-            String colFamily = (String) map.get(HBaseUtils.COL_FAMILY);
-            String columnName = (String) map.get(HBaseUtils.COL_NAME);
+            Map<String, Object>map = KunderaQueryUtils.onInExpression(expression,m, kunderaMetadata, getKunderaQuery());
+            Class fieldClazz = (Class) map.get(Constants.FIELD_CLAZZ);
+            String colFamily = (String) map.get(Constants.COL_FAMILY);
+            String columnName = (String) map.get(Constants.DB_COL_NAME);
             isIdColumn = idColumn.equalsIgnoreCase(columnName);
-            return onInClause(inExp, m, isIdColumn, Bytes.toBytes(colFamily), Bytes.toBytes(columnName), fieldClazz);
+            return onInClause((InExpression) expression, m, isIdColumn, Bytes.toBytes(colFamily), Bytes.toBytes(columnName), fieldClazz);
         }
 
         /**
@@ -708,7 +656,7 @@ public class HBaseQuery extends QueryImpl
             FilterList filterList = new FilterList(FilterList.Operator.MUST_PASS_ONE);
             while (itr.hasNext())
             {
-                Object value = isParameter ? itr.next() : getValue((Expression) itr.next(), fieldClazz);
+                Object value = isParameter ? itr.next() : KunderaQueryUtils.getValue((Expression) itr.next(), fieldClazz, kunderaQuery);
                 byte[] valueInBytes = getValueInBytes(value, fieldClazz, isIdColumn, m);
                 Filter filter = !isIdColumn ? createNewFilter(HBaseUtils.EQUALS, colFamily, colName, valueInBytes,
                         isIdColumn) : new RowFilter(CompareOp.EQUAL, new BinaryComparator(valueInBytes));
@@ -717,44 +665,7 @@ public class HBaseQuery extends QueryImpl
             return filterList.getFilters().size() == 0 ? null : filterList;
         }
 
-        /**
-         * Gets the value.
-         * 
-         * @param exp
-         *            the exp
-         * @param clazz
-         *            the clazz
-         * @return the value
-         */
-        private Object getValue(Expression exp, Class clazz)
-        {
-            if (StringLiteral.class.isAssignableFrom(exp.getClass()))
-            {
-                return ((StringLiteral) exp).getUnquotedText();
 
-            }
-            else if (NumericLiteral.class.isAssignableFrom(exp.getClass()))
-            {
-                return PropertyAccessorFactory.getPropertyAccessor(clazz).fromString(clazz,
-                        ((NumericLiteral) exp).getText());
-            }
-            else if (InputParameter.class.isAssignableFrom(exp.getClass()))
-            {
-                InputParameter ip = (InputParameter) exp;
-                return getKunderaQuery().getParametersMap().get(ip.getParameter());
-            }
-            else if (KeywordExpression.class.isAssignableFrom(exp.getClass()))
-            {
-                KeywordExpression keyWordExp = (KeywordExpression) exp;
-                return PropertyAccessorFactory.getPropertyAccessor(clazz).fromString(clazz,
-                        keyWordExp.getActualIdentifier());
-            }
-            else
-            {
-                logger.warn("Arithmetic expression is not supported in kundera-hbase");
-                throw new KunderaException("Arithmetic expression is not supported in kundera-hbase");
-            }
-        }
 
         /**
          * Gets the value in bytes.
@@ -873,54 +784,7 @@ public class HBaseQuery extends QueryImpl
             }
         }
 
-        /**
-         * Sets the fieldclazz and colfamily.
-         * 
-         * @param expression
-         *            the expression
-         * @param m
-         *            the m
-         * @return the map
-         */
-        private Map<String, Object> setFieldClazzAndColumnFamily(Expression expression, EntityMetadata m)
-        {
-            StateFieldPathExpression sfpExp = (StateFieldPathExpression) expression;
-            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
-                    m.getPersistenceUnit());
-
-            EntityType entity = metaModel.entity(m.getEntityClazz());
-            String discriminatorColumn = ((AbstractManagedType) entity).getDiscriminatorColumn();
-            Class fieldClazz = String.class;
-            String colFamily = m.getTableName();
-            String colName = null;
-            Map<String, Object> map = new HashMap<String, Object>();
-
-            boolean isEmbeddable = false;
-            int count = 1;
-            AbstractAttribute attrib = (AbstractAttribute) entity.getAttribute(sfpExp.getPath(count++));
-            isEmbeddable = metaModel.isEmbeddable(attrib.getBindableJavaType());
-            while (sfpExp.pathSize() > count)
-            {
-                if (isEmbeddable)
-                {
-                    EmbeddableType embeddableType = metaModel.embeddable(attrib.getBindableJavaType());
-                    attrib = (AbstractAttribute) embeddableType.getAttribute(sfpExp.getPath(count++));
-                    isEmbeddable = metaModel.isEmbeddable(attrib.getBindableJavaType());
-                }
-            }
-            if (!sfpExp.getPath(count - 1).equals(discriminatorColumn))
-            {
-                fieldClazz = attrib.getBindableJavaType();
-                colFamily = attrib.getTableName() != null ? attrib.getTableName() : m.getTableName();
-                colName = attrib.getJPAColumnName();
-            }
-            map.put(HBaseUtils.FIELD_CLAZZ, fieldClazz);
-            map.put(HBaseUtils.COL_FAMILY, colFamily);
-            map.put(HBaseUtils.COL_NAME, colName);
-            map.put(HBaseUtils.IS_EMBEDDABLE, isEmbeddable);
-            return map;
-        }
-
+       
         /**
          * Gets the filter.
          * 

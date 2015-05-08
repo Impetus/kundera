@@ -273,10 +273,10 @@ public final class KunderaQueryUtils
      *            the columns to output
      */
     private static void addToOutputColumns(Expression selectExpression, EntityMetadata m,
-            List<Map<String, Object>> columnsToOutput)
+            List<Map<String, Object>> columnsToOutput, KunderaMetadata kunderaMetadata)
     {
 
-        Map<String, Object> map = setFieldClazzAndColumnFamily(selectExpression, m, null);
+        Map<String, Object> map = setFieldClazzAndColumnFamily(selectExpression, m, kunderaMetadata);
         columnsToOutput.add(map);
     }
 
@@ -289,17 +289,18 @@ public final class KunderaQueryUtils
      *            the m
      * @param useLuceneOrES
      *            the use lucene or es
+     * @param kunderaMetadata 
      * @return the list
      */
     public static List<Map<String, Object>> readSelectClause(Expression selectExpression, EntityMetadata m,
-            Boolean useLuceneOrES)
+            Boolean useLuceneOrES, KunderaMetadata kunderaMetadata)
     {
         List<Map<String, Object>> columnsToOutput = new ArrayList<Map<String, Object>>();
         if (StateFieldPathExpression.class.isAssignableFrom(selectExpression.getClass()))
         {
             StateFieldPathExpression sfpExp = (StateFieldPathExpression) selectExpression;
 
-            addToOutputColumns(selectExpression, m, columnsToOutput);
+            addToOutputColumns(selectExpression, m, columnsToOutput, kunderaMetadata);
         }
         else if (CollectionExpression.class.isAssignableFrom(selectExpression.getClass()))
         {
@@ -310,7 +311,7 @@ public final class KunderaQueryUtils
                 Expression exp = itr.next();
                 if (StateFieldPathExpression.class.isAssignableFrom(exp.getClass()))
                 {
-                    addToOutputColumns(exp, m, columnsToOutput);
+                    addToOutputColumns(exp, m, columnsToOutput, kunderaMetadata);
                 }
             }
         }
