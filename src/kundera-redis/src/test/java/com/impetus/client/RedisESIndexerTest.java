@@ -40,7 +40,6 @@ import com.impetus.client.entities.PersonRedis;
 import com.impetus.client.entities.PersonRedis.Day;
 import com.impetus.kundera.utils.LuceneCleanupUtilities;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class RedisESIndexerTest.
  * 
@@ -118,7 +117,7 @@ public class RedisESIndexerTest
     public void tearDown() throws Exception
     {
 
-         purge();
+        purge();
         emf.close();
     }
 
@@ -130,7 +129,7 @@ public class RedisESIndexerTest
     {
 
         logger.info("Crud tests for ES");
-        PersonRedis person2 = preparePerson("Amit","2", 40);
+        PersonRedis person2 = preparePerson("Amit", "2", 40);
 
         // Persist records
         em.persist(person2);
@@ -164,12 +163,12 @@ public class RedisESIndexerTest
      * Test like.
      */
     @Test
-    //Need to enable the support
+    // Need to enable the support
     public void testLike()
     {
-        PersonRedis person = preparePerson("Amit",ROW_KEY, 32);
+        PersonRedis person = preparePerson("Amit", ROW_KEY, 32);
         em.persist(person);
-        person = preparePerson("Devender",ROW_KEY + 1, 34);
+        person = preparePerson("Devender", ROW_KEY + 1, 34);
         em.persist(person);
         waitThread(5);
 
@@ -196,11 +195,11 @@ public class RedisESIndexerTest
         List<PersonRedis> results;
 
         // persist record.
-        PersonRedis person = preparePerson("Amit",ROW_KEY, 32);
+        PersonRedis person = preparePerson("Amit", ROW_KEY, 32);
         em.persist(person);
-        person = preparePerson("Amit",ROW_KEY + 1, 34);
+        person = preparePerson("Amit", ROW_KEY + 1, 34);
         em.persist(person);
-        person = preparePerson("Amit",ROW_KEY + 3, 29);
+        person = preparePerson("Amit", ROW_KEY + 3, 29);
         em.persist(person);
 
         waitThread(10);
@@ -233,17 +232,17 @@ public class RedisESIndexerTest
 
         testDelete();
     }
-    
+
     @Test
     public void indexDeletionTest() throws Exception
     {
         // persist record.
-        em.persist(preparePerson("Amit","1", 20));
-        em.persist(preparePerson("Amit","2", 30));
-        em.persist(preparePerson("Amit","3", 40));
-        em.persist(preparePerson("Amit","4", 50));
+        em.persist(preparePerson("Amit", "1", 20));
+        em.persist(preparePerson("Amit", "2", 30));
+        em.persist(preparePerson("Amit", "3", 40));
+        em.persist(preparePerson("Amit", "4", 50));
         Thread.sleep(1000);
-        
+
         String query = "Select min(p.age) from PersonRedis p";
         List resultList = em.createQuery(query).getResultList();
         Assert.assertEquals(1, resultList.size());
@@ -364,7 +363,7 @@ public class RedisESIndexerTest
         Assert.assertNotNull(results.get(0).getPersonId());
         Assert.assertNotNull(results.get(0).getPersonName());
         Assert.assertNotNull(results.get(0).getAge());
-      
+
     }
 
     /**
@@ -566,7 +565,7 @@ public class RedisESIndexerTest
      *            the age
      * @return the person redis
      */
-    private PersonRedis preparePerson(String pname , String rowId, int age)
+    private PersonRedis preparePerson(String pname, String rowId, int age)
     {
 
         PersonRedis o = new PersonRedis();
