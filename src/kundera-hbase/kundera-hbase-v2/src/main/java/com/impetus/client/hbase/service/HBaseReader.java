@@ -132,15 +132,6 @@ public class HBaseReader implements Reader
         {
             scan.setFilter(filter);
         }
-        // if (columnsToOutput != null && !columnsToOutput.isEmpty())
-        // {
-        // for (Map<String, Object> map : columnsToOutput)
-        // {
-        // String family = (String) map.get(HBaseUtils.COL_FAMILY);
-        // String qualifier = (String) map.get(HBaseUtils.COL_NAME);
-        // scan.addColumn(Bytes.toBytes(family), Bytes.toBytes(qualifier));
-        // }
-        // }
     }
 
     /**

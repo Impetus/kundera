@@ -852,13 +852,13 @@ public class HBaseDataHandler implements DataHandler
             {
                 Object obj;
                 String colDataKey = HBaseUtils.getColumnDataKey((String) map.get(Constants.COL_FAMILY),
-                        (String) map.get(Constants.COL_NAME));
+                        (String) map.get(Constants.DB_COL_NAME));
                 if ((boolean) map.get(Constants.IS_EMBEDDABLE))
                 {
                     Class embedClazz = (Class) map.get(Constants.FIELD_CLAZZ);
                     obj = populateEmbeddableObject(data, KunderaCoreUtils.createNewInstance(embedClazz), m, embedClazz);
                 }
-                else if (isIdCol(m, (String) map.get(Constants.COL_NAME)))
+                else if (isIdCol(m, (String) map.get(Constants.DB_COL_NAME)))
                 {
                     obj = HBaseUtils.fromBytes(data.getRowKey(), (Class) map.get(Constants.FIELD_CLAZZ));
                 }
