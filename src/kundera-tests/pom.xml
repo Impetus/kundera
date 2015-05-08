@@ -3,11 +3,11 @@
 	<parent>
 		<groupId>com.impetus</groupId>
 		<artifactId>kundera</artifactId>
-		<version>3.0-SNAPSHOT</version>
+		<version>2.17</version>
 	</parent>
 	<groupId>com.impetus.kundera</groupId>
 	<artifactId>kundera-tests</artifactId>
-	<version>3.0-SNAPSHOT</version>
+	<version>2.17</version>
 	<packaging>jar</packaging>
 
 	<name>kundera-tests</name>
@@ -272,7 +272,7 @@
 		<dependency>
 			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-cassandra</artifactId>
-			<version>3.0-SNAPSHOT</version>
+			<version>2.17</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>httpclient</artifactId>
@@ -283,12 +283,12 @@
 		<dependency>
 			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-mongo</artifactId>
-			<version>3.0-SNAPSHOT</version>
+			<version>2.17</version>
 		</dependency>
 		<dependency>
 			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-hbase</artifactId>
-			<version>3.0-SNAPSHOT</version>
+			<version>2.17</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.apache.thrift</groupId>
@@ -303,40 +303,40 @@
 		<dependency>
 			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-rdbms</artifactId>
-			<version>3.0-SNAPSHOT</version>
+			<version>2.17</version>
 		</dependency>
 		<dependency>
 			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-rest</artifactId>
-			<version>3.0-SNAPSHOT</version>
+			<version>2.17</version>
 		</dependency>
 		<dependency>
 			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-oracle-nosql</artifactId>
-			<version>3.0-SNAPSHOT</version>
+			<version>2.17</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-redis</artifactId>
-			<version>3.0-SNAPSHOT</version>
+			<version>2.17</version>
 		</dependency>
 		<dependency>
 			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-neo4j</artifactId>
-			<version>3.0-SNAPSHOT</version>
+			<version>2.17</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-couchdb</artifactId>
-			<version>3.0-SNAPSHOT</version>
+			<version>2.17</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-elastic-search</artifactId>
-			<version>3.0-SNAPSHOT</version>
+			<version>2.17</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.apache.lucene</groupId>
