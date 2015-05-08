@@ -124,7 +124,6 @@ public class RedisIndexer implements Indexer
         // we need not implement this method for Redis because 
         //redis automatically removes indexes while performing delete
         logger.warn("Removing index is implicitly managed by RedisClient's unindex method");
-        throw new UnsupportedOperationException("Removing index is implicitly managed by RedisClient's unindex method");
     }
 
     /*
