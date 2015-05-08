@@ -56,6 +56,7 @@
 		<class>com.impetus.client.hbase.validator.BookEntity</class>
 		<class>com.impetus.client.query.Student</class>
 		<class>com.impetus.client.hbase.crud.compositetype.HBasePrimeUser</class>
+		<class>com.impetus.kundera.query.Person</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<property name="kundera.nodes" value="localhost" />
@@ -224,7 +225,7 @@
 			<property name="kundera.client.lookup.class" value="com.impetus.client.hbase.HBaseClientFactory" />
 		</properties>
 	</persistence-unit>
-		<persistence-unit name="entityWithoutFieldTest">
+	<persistence-unit name="entityWithoutFieldTest">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<class>com.impetus.kundera.metadata.mappedsuperclass.MappedPerson</class>
 		<class>com.impetus.kundera.metadata.mappedsuperclass.Person</class>
