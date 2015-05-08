@@ -214,7 +214,7 @@ public class HBaseESQueryTest extends HBaseQueryBaseTest
         }
         catch (Exception ex)
         {
-            Assert.assertEquals("Aggregations can not performed over non-numeric fields.", ex.getMessage());
+            Assert.assertEquals("Exception occured while executing query on Elasticsearch.", ex.getMessage());
         }
     }
 
