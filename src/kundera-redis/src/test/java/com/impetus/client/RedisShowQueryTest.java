@@ -131,14 +131,14 @@ public class RedisShowQueryTest
             printStream = new PrintStream(new FileOutputStream(file));
             System.setOut(printStream);
 
-            Query findQuery = em.createQuery("Select p from UserInformation p where p.id=\"PK_1\"");
+            Query findQuery = em.createQuery("Select p from UserInformation p where p.id=PK_1");
             findQuery.getResultList();
-            expectedQuery[0] = "Fetch data from UserInformation for PK \"PK_1\"";
+            expectedQuery[0] = "Fetch data from UserInformation for PK PK_1";
             System.setOut(printStream);
 
-            findQuery = em.createQuery("Select p from UserInformation p where p.id=\"Shahid\"");
+            findQuery = em.createQuery("Select p from UserInformation p where p.id=Shahid");
             findQuery.getResultList();
-            expectedQuery[1] = "Fetch data from UserInformation for PK \"Shahid\"";
+            expectedQuery[1] = "Fetch data from UserInformation for PK Shahid";
             System.setOut(printStream);
 
             findQuery = em.createQuery("Select p from UserInformation p where p.age between 32 and 35");

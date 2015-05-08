@@ -94,19 +94,13 @@ public class RedisQueryTest
         // Find without where clause.
         String findWithOutWhereClause = "Select p from PersonRedis p";
         Query query = em.createQuery(findWithOutWhereClause);
-                
         List<PersonRedis> results = query.getResultList();
         Assert.assertEquals(3, results.size());
 
         // find by key.
-        String findById = "Select p from PersonRedis p where p.age  0";
+        String findById = "Select p from PersonRedis p where p.personId=:personId";
         query = em.createQuery(findById);
-//        query.setParameter("personId", ROW_KEY);
-        
-
-        query.setFirstResult(1);
-        query.setMaxResults(2);
-        
+        query.setParameter("personId", ROW_KEY);
         results = query.getResultList();
         Assert.assertEquals(1, results.size());
         Assert.assertEquals(originalName, results.get(0).getPersonName());
@@ -201,6 +195,8 @@ public class RedisQueryTest
         // More than TWO AND clause
         // OR Clause
 
+        // Find without where clause on SELECTIVE COLUMN
+        // TODOOOOOOOOOOOOOOOOOOOOOOO.
         String findSelective = "Select p.age from PersonRedis p";
         query = em.createQuery(findSelective);
         results = query.getResultList();
