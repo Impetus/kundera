@@ -65,7 +65,7 @@ public class HBaseESQueryTest extends HBaseQueryBaseTest
         propertyMap.put("kundera.indexer.class", "com.impetus.client.es.index.ESIndexer");
         emf = Persistence.createEntityManagerFactory(HBASE_PU, propertyMap);
 
-        if (!checkIfServerRunning())
+        //if (!checkIfServerRunning())
         {
             ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder();
 
@@ -84,6 +84,7 @@ public class HBaseESQueryTest extends HBaseQueryBaseTest
     {
         em = emf.createEntityManager();
         persistBooks();
+        
     }
 
     /*
