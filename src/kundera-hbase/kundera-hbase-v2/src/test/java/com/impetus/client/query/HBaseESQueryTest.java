@@ -70,9 +70,9 @@ public class HBaseESQueryTest extends HBaseQueryBaseTest
             ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder();
 
             builder.put("path.data", "target/data");
-            new NodeBuilder().settings(builder).node();
+            node = new NodeBuilder().settings(builder).node();
         }
-    }
+    } 
 
     /*
      * (non-Javadoc)
