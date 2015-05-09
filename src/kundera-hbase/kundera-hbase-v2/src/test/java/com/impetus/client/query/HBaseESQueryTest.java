@@ -63,7 +63,7 @@ public class HBaseESQueryTest extends HBaseQueryBaseTest
     {
 
         propertyMap.put("kundera.indexer.class", "com.impetus.client.es.index.ESIndexer");
-        emf = Persistence.createEntityManagerFactory(HBASE_PU, propertyMap);
+        
 
         //if (!checkIfServerRunning())
         {
@@ -82,6 +82,7 @@ public class HBaseESQueryTest extends HBaseQueryBaseTest
     @Before
     public void setUp() throws Exception
     {
+    	emf = Persistence.createEntityManagerFactory(HBASE_PU, propertyMap);
         em = emf.createEntityManager();
         persistBooks();
         
@@ -97,6 +98,8 @@ public class HBaseESQueryTest extends HBaseQueryBaseTest
     {
         deleteBooks();
         em.close();
+        emf.close();
+        emf = null;
     }
 
     /**
@@ -110,8 +113,7 @@ public class HBaseESQueryTest extends HBaseQueryBaseTest
     {
         if (node != null)
             node.close();
-        emf.close();
-        emf = null;
+        
         HBaseTestingUtils.dropSchema(SCHEMA);
         LuceneCleanupUtilities.cleanDir("target/data");
     }
