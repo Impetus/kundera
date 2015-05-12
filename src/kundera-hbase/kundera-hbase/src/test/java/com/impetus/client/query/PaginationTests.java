@@ -72,16 +72,30 @@ public class PaginationTests extends BaseTest
     @Test
     public void chunkScrollTest() throws Exception
     {
+        //without where clause
         int chunkSize = 50;
         Query query = (Query) em.createQuery("Select p from PersonHBase p", PersonHBase.class);
         query.setFetchSize(1000);
         Iterator<PersonHBase> iter = query.iterate();
         IResultIterator<PersonHBase> iIter = (IResultIterator<PersonHBase>) iter;
+        assertScrolling(chunkSize, iIter);
+        
+        //with where clause
+        String name = "vivek";
+        query = (Query) em.createQuery("Select p from PersonHBase p where p.personName = '"+name+"'", PersonHBase.class);
+        query.setFetchSize(1000);
+        iter = query.iterate();
+        iIter = (IResultIterator<PersonHBase>) iter;
+        assertScrolling(chunkSize, iIter);
+    }
+
+    private void assertScrolling(int chunkSize, IResultIterator<PersonHBase> iIter)
+    {
         while (iIter.hasNext())
         {
             List<PersonHBase> result = iIter.next(chunkSize);
             Assert.assertNotNull(result);
-            Assert.assertEquals(50, result.size());
+            Assert.assertEquals(chunkSize, result.size());
         }
     }
 
