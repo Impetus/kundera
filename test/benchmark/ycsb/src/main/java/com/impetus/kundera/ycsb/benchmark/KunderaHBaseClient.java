@@ -25,12 +25,14 @@ import java.util.Vector;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.Query;
 
 import com.impetus.kundera.ycsb.entities.HBaseUser;
 import com.yahoo.ycsb.ByteIterator;
 import com.yahoo.ycsb.DB;
 import com.yahoo.ycsb.DBException;
 import com.yahoo.ycsb.StringByteIterator;
+
 import common.Logger;
 
 /**
@@ -95,6 +97,8 @@ public class KunderaHBaseClient extends DB
         }*/
         try
         {
+            Query qry = em.createQuery("select h from HBaseUser h where h.name = :key");
+            qry.setParameter("key", key);
             Object o = em.find(HBaseUser.class, key);
             assert o != null;
             /*j++;

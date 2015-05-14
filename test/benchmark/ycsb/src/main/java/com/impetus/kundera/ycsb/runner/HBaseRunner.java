@@ -92,12 +92,14 @@ public class HBaseRunner extends YCSBRunner
     {
         Map<String, Double> delta = new HashMap<String, Double>();
 
-        double kunderaHBaseToNativeDelta = ((timeTakenByClient.get(clients[1]).doubleValue() - timeTakenByClient.get(
+        delta.put("throughput of " + clients[1] + " = ", timeTakenByClient.get(clients[1]).doubleValue());
+        delta.put("throughput of " + clients[2] + " = ", timeTakenByClient.get(clients[2]).doubleValue());
+        double kunderaHBaseToPhoenixDelta = ((timeTakenByClient.get(clients[1]).doubleValue() - timeTakenByClient.get(
                 clients[0]).doubleValue())
                 / timeTakenByClient.get(clients[1]).doubleValue() * 100);
-        delta.put("kunderaHBaseToNativeDelta", kunderaHBaseToNativeDelta);
+        delta.put("kunderaHBaseToPhoenixDelta ==> ", kunderaHBaseToPhoenixDelta);
 
-        if (kunderaHBaseToNativeDelta > 8.00)
+        if (kunderaHBaseToPhoenixDelta > 8.00)
         {
             MailUtils.sendMail(delta, isUpdate ? "update" : runType, "hbase");
         } else

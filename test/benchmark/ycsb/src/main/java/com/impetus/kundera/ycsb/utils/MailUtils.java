@@ -69,11 +69,11 @@ public class MailUtils
         {
             if (mailBody == null)
             {
-                mailBody = key + " Performance Delta ==> " + delta.get(key) + " \n";
+                mailBody = key + delta.get(key) + " \n";
             }
             else
             {
-                mailBody = mailBody + key + " Performance Delta ==> " + delta.get(key) + " \n";
+                mailBody = mailBody + key + delta.get(key) + " \n";
             }
         }
         mail.setText(mailBody);
