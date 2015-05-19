@@ -106,6 +106,18 @@ import com.impetus.kundera.utils.ReflectUtils;
 public class CassandraSchemaManager extends AbstractSchemaManager implements SchemaManager
 {
 
+    /** The Constant STR_GT. */
+    private static final String STR_GT = ">";
+
+    /** The Constant ESC_QUOTE. */
+    private static final String ESC_QUOTE = "\"";
+
+    /** The Constant STR_LT. */
+    private static final String STR_LT = "<";
+
+    /** The Constant SPACE_COMMA. */
+    private static final String SPACE_COMMA = " ,";
+
     /** The Constant STANDARDCOLUMNFAMILY. */
     private static final String STANDARDCOLUMNFAMILY = "Standard";
 
@@ -349,7 +361,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         String createKeyspace = CQLTranslator.CREATE_KEYSPACE;
         String placement_strategy = csmd.getPlacement_strategy(databaseName);
         String replication_conf = CQLTranslator.SIMPLE_REPLICATION;
-        createKeyspace = createKeyspace.replace("$KEYSPACE", "\"" + databaseName + "\"");
+        createKeyspace = createKeyspace.replace("$KEYSPACE", ESC_QUOTE + databaseName + ESC_QUOTE);
 
         Schema schema = CassandraPropertyReader.csmd.getSchema(databaseName);
 
@@ -765,7 +777,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 String dataType = CassandraValidationClassMapper.getValidationClass(tableInfo.getTableIdType(), true);
                 String cqlType = translator.getCQLType(dataType);
                 translator.appendColumnName(queryBuilder, tableInfo.getIdColumnName(), cqlType);
-                queryBuilder.append(" ,");
+                queryBuilder.append(SPACE_COMMA);
             }
 
             queryBuilder = replaceColumnsAndStripLastChar(columnFamilyQuery, queryBuilder);
@@ -798,7 +810,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             else
             {
                 queryBuilder = new StringBuilder(StringUtils.replace(queryBuilder.toString(), CQLTranslator.COLUMNS,
-                        "\"" + tableInfo.getIdColumnName() + "\""));
+                        ESC_QUOTE + tableInfo.getIdColumnName() + ESC_QUOTE));
             }
 
             // set column family properties defined in configuration
@@ -849,11 +861,11 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 genericTypesBuilder = new StringBuilder();
                 if (MapType.class.getSimpleName().equals(dataType) && genericClasses.size() == 2)
                 {
-                    genericTypesBuilder.append("<");
+                    genericTypesBuilder.append(STR_LT);
                     if (genericClasses.get(0).getAnnotation(Embeddable.class) != null)
                     {
-                        String frozenKey = CQLTranslator.FROZEN + "<\"" + genericClasses.get(0).getSimpleName()
-                                + "\"> ";
+                        String frozenKey = CQLTranslator.FROZEN + STR_LT + ESC_QUOTE
+                                + genericClasses.get(0).getSimpleName() + ESC_QUOTE + STR_GT;
                         genericTypesBuilder.append(frozenKey);
                     }
                     else
@@ -862,11 +874,11 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                                 true);
                         genericTypesBuilder.append(translator.getCQLType(keyDataType));
                     }
-                    genericTypesBuilder.append(",");
+                    genericTypesBuilder.append(SPACE_COMMA);
                     if (genericClasses.get(1).getAnnotation(Embeddable.class) != null)
                     {
-                        String frozenKey = CQLTranslator.FROZEN + "<\"" + genericClasses.get(1).getSimpleName()
-                                + "\"> ";
+                        String frozenKey = CQLTranslator.FROZEN + STR_LT + ESC_QUOTE
+                                + genericClasses.get(1).getSimpleName() + ESC_QUOTE + STR_GT;
                         genericTypesBuilder.append(frozenKey);
                     }
                     else
@@ -875,17 +887,17 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                                 true);
                         genericTypesBuilder.append(translator.getCQLType(keyDataType));
                     }
-                    genericTypesBuilder.append(">");
+                    genericTypesBuilder.append(STR_GT);
                 }
                 else if ((ListType.class.getSimpleName().equals(dataType) || SetType.class.getSimpleName().equals(
                         dataType))
                         && genericClasses.size() == 1)
                 {
-                    genericTypesBuilder.append("<");
+                    genericTypesBuilder.append(STR_LT);
                     if (genericClasses.get(0).getAnnotation(Embeddable.class) != null)
                     {
-                        String frozenKey = CQLTranslator.FROZEN + "<\"" + genericClasses.get(0).getSimpleName()
-                                + "\"> ";
+                        String frozenKey = CQLTranslator.FROZEN + STR_LT + ESC_QUOTE
+                                + genericClasses.get(0).getSimpleName() + ESC_QUOTE + STR_GT;
                         genericTypesBuilder.append(frozenKey);
                     }
                     else
@@ -894,7 +906,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                                 true);
                         genericTypesBuilder.append(translator.getCQLType(keyDataType));
                     }
-                    genericTypesBuilder.append(">");
+                    genericTypesBuilder.append(STR_GT);
                 }
                 else
                 {
@@ -909,7 +921,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             }
 
             translator.appendColumnName(queryBuilder, collectionColumnName, collectionCqlType);
-            queryBuilder.append(" ,");
+            queryBuilder.append(SPACE_COMMA);
 
         }
 
@@ -924,16 +936,15 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      *            the table info
      * @param queryBuilder
      *            the query builder
-     * @throws Exception
-     *             the exception
      */
     private void onEmbeddedColumns(CQLTranslator translator, TableInfo tableInfo, StringBuilder queryBuilder)
     {
         List<EmbeddedColumnInfo> embeddedColumns = tableInfo.getEmbeddedColumnMetadatas();
         for (EmbeddedColumnInfo embColInfo : embeddedColumns)
         {
-            String cqlType = CQLTranslator.FROZEN + "<\"" + embColInfo.getEmbeddable().getJavaType().getSimpleName()
-                    + "\">, ";
+            String cqlType = CQLTranslator.FROZEN + STR_LT + ESC_QUOTE
+                    + embColInfo.getEmbeddable().getJavaType().getSimpleName() + ESC_QUOTE + STR_GT
+                    + translator.COMMA_STR;
             translator.appendColumnName(queryBuilder, embColInfo.getEmbeddedColumnName(), cqlType);
         }
     }
@@ -981,10 +992,10 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                     if (columnAttribute.getJavaType().isAnnotationPresent(Embeddable.class))
                     {
                         // handle embeddable
-                        String cqlType = CQLTranslator.FROZEN + "<\"" + columnAttribute.getJavaType().getSimpleName()
-                                + "\"> ";
+                        String cqlType = CQLTranslator.FROZEN + STR_LT + ESC_QUOTE
+                                + columnAttribute.getJavaType().getSimpleName() + ESC_QUOTE + STR_GT;
                         translator.appendColumnName(typeQueryBuilder, columnAttribute.getName(), cqlType);
-                        typeQueryBuilder.append(" ,");
+                        typeQueryBuilder.append(SPACE_COMMA);
                         childEmb.add(columnAttribute.getJavaType().getSimpleName());
                     }
                     else if (columnAttribute.isCollection())
@@ -1005,13 +1016,13 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                         // check for JPA names
                         translator.appendColumnName(typeQueryBuilder,
                                 ((AbstractAttribute) columnAttribute).getJPAColumnName(), cqlType);
-                        typeQueryBuilder.append(" ,");
+                        typeQueryBuilder.append(SPACE_COMMA);
 
                     }
 
                 }
                 typeQueryBuilder = replaceColumnsAndStripLastChar(typeQuery, typeQueryBuilder);
-                typeQueryBuilder.append(")");
+                typeQueryBuilder.append(CQLTranslator.CLOSE_BRACKET);
                 embNametoUDTQuery.put(embeddedColumn.getJavaType().getSimpleName(), typeQueryBuilder.toString());
                 embNametoDependentList.put(embeddedColumn.getJavaType().getSimpleName(), childEmb);
                 // run query final
@@ -1051,10 +1062,11 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             genericTypesBuilder = new StringBuilder();
             if (MapType.class.getSimpleName().equals(dataType) && genericClasses.size() == 2)
             {
-                genericTypesBuilder.append("<");
+                genericTypesBuilder.append(STR_LT);
                 if (genericClasses.get(0).getAnnotation(Embeddable.class) != null)
                 {
-                    String frozenKey = CQLTranslator.FROZEN + "<\"" + genericClasses.get(0).getSimpleName() + "\"> ";
+                    String frozenKey = CQLTranslator.FROZEN + STR_LT + ESC_QUOTE
+                            + genericClasses.get(0).getSimpleName() + ESC_QUOTE + STR_GT;
                     genericTypesBuilder.append(frozenKey);
                 }
                 else
@@ -1062,10 +1074,11 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                     String keyDataType = CassandraValidationClassMapper.getValidationClass(genericClasses.get(0), true);
                     genericTypesBuilder.append(translator.getCQLType(keyDataType));
                 }
-                genericTypesBuilder.append(",");
+                genericTypesBuilder.append(SPACE_COMMA);
                 if (genericClasses.get(1).getAnnotation(Embeddable.class) != null)
                 {
-                    String frozenKey = CQLTranslator.FROZEN + "<\"" + genericClasses.get(1).getSimpleName() + "\"> ";
+                    String frozenKey = CQLTranslator.FROZEN + STR_LT + ESC_QUOTE
+                            + genericClasses.get(1).getSimpleName() + ESC_QUOTE + STR_GT;
                     genericTypesBuilder.append(frozenKey);
                 }
                 else
@@ -1073,15 +1086,16 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                     String keyDataType = CassandraValidationClassMapper.getValidationClass(genericClasses.get(1), true);
                     genericTypesBuilder.append(translator.getCQLType(keyDataType));
                 }
-                genericTypesBuilder.append(">");
+                genericTypesBuilder.append(STR_GT);
             }
             else if ((ListType.class.getSimpleName().equals(dataType) || SetType.class.getSimpleName().equals(dataType))
                     && genericClasses.size() == 1)
             {
-                genericTypesBuilder.append("<");
+                genericTypesBuilder.append(STR_LT);
                 if (genericClasses.get(0).getAnnotation(Embeddable.class) != null)
                 {
-                    String frozenKey = CQLTranslator.FROZEN + "<\"" + genericClasses.get(0).getSimpleName() + "\"> ";
+                    String frozenKey = CQLTranslator.FROZEN + STR_LT + ESC_QUOTE
+                            + genericClasses.get(0).getSimpleName() + ESC_QUOTE + STR_GT;
                     genericTypesBuilder.append(frozenKey);
                 }
                 else
@@ -1089,7 +1103,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                     String keyDataType = CassandraValidationClassMapper.getValidationClass(genericClasses.get(0), true);
                     genericTypesBuilder.append(translator.getCQLType(keyDataType));
                 }
-                genericTypesBuilder.append(">");
+                genericTypesBuilder.append(STR_GT);
             }
             else
             {
@@ -1105,7 +1119,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
 
         translator.appendColumnName(typeQueryBuilder, collectionColumnName, collectionCqlType);
-        typeQueryBuilder.append(" ,");
+        typeQueryBuilder.append(SPACE_COMMA);
 
     }
 
@@ -1184,9 +1198,25 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         {
             if (!ReflectUtils.isTransientOrStatic(f))
             {
-                Attribute attribute = compoEmbeddableType.getAttribute(f.getName());
-                translator.appendColumnName(queryBuilder, ((AbstractAttribute) attribute).getJPAColumnName());
-                queryBuilder.append(" ,");
+                if (f.getType().isAnnotationPresent(Embeddable.class))
+                { // compound partition key
+                    MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                            puMetadata.getPersistenceUnitName());
+                    queryBuilder.append(translator.OPEN_BRACKET);
+                    queryBuilder.append(translator.SPACE_STRING);
+                    appendPrimaryKey(translator, (EmbeddableType) metaModel.embeddable(f.getType()), f.getType()
+                            .getDeclaredFields(), queryBuilder);
+                    queryBuilder.deleteCharAt(queryBuilder.length() - 1);
+                    queryBuilder.append(translator.CLOSE_BRACKET);
+                    queryBuilder.append(SPACE_COMMA);
+
+                }
+                else
+                {
+                    Attribute attribute = compoEmbeddableType.getAttribute(f.getName());
+                    translator.appendColumnName(queryBuilder, ((AbstractAttribute) attribute).getJPAColumnName());
+                    queryBuilder.append(SPACE_COMMA);
+                }
             }
         }
     }
@@ -1455,6 +1485,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     private void onCompositeColumns(CQLTranslator translator, List<ColumnInfo> compositeColumns,
             StringBuilder queryBuilder, List<ColumnInfo> columns, boolean isCounterColumnFamily)
     {
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                puMetadata.getPersistenceUnitName());
         for (ColumnInfo colInfo : compositeColumns)
         {
             if (columns == null || (columns != null && !columns.contains(colInfo)))
@@ -1463,16 +1495,51 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 if (isCounterColumnFamily)
                 {
                     cqlType = "counter";
+                    translator.appendColumnName(queryBuilder, colInfo.getColumnName(), cqlType);
+                    queryBuilder.append(SPACE_COMMA);
+                }
+                // check for composite partition keys #734
+                else if (colInfo.getType().isAnnotationPresent(Embeddable.class))
+                {
+                    EmbeddableType embeddedObject = (EmbeddableType) metaModel.embeddable(colInfo.getType());
+                    for (Field embeddedColumn : colInfo.getType().getDeclaredFields())
+                    {
+                        if (!ReflectUtils.isTransientOrStatic(embeddedColumn))
+                        {
+                            validateAndAppendColumnName(translator, queryBuilder,
+                                    ((AbstractAttribute) embeddedObject.getAttribute(embeddedColumn.getName()))
+                                            .getJPAColumnName(), embeddedColumn.getType());
+                        }
+                    }
+
                 }
                 else
                 {
-                    String dataType = CassandraValidationClassMapper.getValidationClass(colInfo.getType(), true);
-                    cqlType = translator.getCQLType(dataType);
+                    validateAndAppendColumnName(translator, queryBuilder, colInfo.getColumnName(), colInfo.getType());
                 }
-                translator.appendColumnName(queryBuilder, colInfo.getColumnName(), cqlType);
-                queryBuilder.append(" ,");
+
             }
         }
+    }
+
+    /**
+     * Validate and append column name.
+     * 
+     * @param translator
+     *            the translator
+     * @param queryBuilder
+     *            the query builder
+     * @param b
+     *            the b
+     * @param clazz
+     *            the clazz
+     */
+    private void validateAndAppendColumnName(CQLTranslator translator, StringBuilder queryBuilder, String b,
+            Class<?> clazz)
+    {
+        String dataType = CassandraValidationClassMapper.getValidationClass(clazz, true);
+        translator.appendColumnName(queryBuilder, b, translator.getCQLType(dataType));
+        queryBuilder.append(SPACE_COMMA);
     }
 
     /**
@@ -1506,24 +1573,24 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 genericTypesBuilder = new StringBuilder();
                 if (MapType.class.getSimpleName().equals(dataType) && genericClasses.size() == 2)
                 {
-                    genericTypesBuilder.append("<");
+                    genericTypesBuilder.append(STR_LT);
                     String keyDataType = CassandraValidationClassMapper.getValidationClass(genericClasses.get(0), true);
                     genericTypesBuilder.append(translator.getCQLType(keyDataType));
-                    genericTypesBuilder.append(",");
+                    genericTypesBuilder.append(SPACE_COMMA);
                     String valueDataType = CassandraValidationClassMapper.getValidationClass(genericClasses.get(1),
                             true);
                     genericTypesBuilder.append(translator.getCQLType(valueDataType));
-                    genericTypesBuilder.append(">");
+                    genericTypesBuilder.append(STR_GT);
                 }
                 else if ((ListType.class.getSimpleName().equals(dataType) || SetType.class.getSimpleName().equals(
                         dataType))
                         && genericClasses.size() == 1)
                 {
-                    genericTypesBuilder.append("<");
+                    genericTypesBuilder.append(STR_LT);
                     String valueDataType = CassandraValidationClassMapper.getValidationClass(genericClasses.get(0),
                             true);
                     genericTypesBuilder.append(translator.getCQLType(valueDataType));
-                    genericTypesBuilder.append(">");
+                    genericTypesBuilder.append(STR_GT);
                 }
                 else
                 {
@@ -1538,7 +1605,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             }
 
             translator.appendColumnName(queryBuilder, collectionColumnName, collectionCqlType);
-            queryBuilder.append(" ,");
+            queryBuilder.append(SPACE_COMMA);
 
         }
     }
