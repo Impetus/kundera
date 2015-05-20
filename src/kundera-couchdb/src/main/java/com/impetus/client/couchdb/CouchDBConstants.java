@@ -23,15 +23,25 @@ package com.impetus.client.couchdb;
  */
 public interface CouchDBConstants
 {
+
+    /** The Constant PROTOCOL. */
     public static final String PROTOCOL = "http";
 
-    public static final String URL_SAPRATOR = "/";
+    /** The Constant URL_SEPARATOR. */
+    public static final String URL_SEPARATOR = "/";
 
-    public static final String DESIGN = "_design" + URL_SAPRATOR;
+    /** The Constant DESIGN. */
+    public static final String DESIGN = "_design" + URL_SEPARATOR;
 
-    public static final String VIEW = URL_SAPRATOR + "_view" + URL_SAPRATOR;
+    /** The Constant VIEW. */
+    public static final String VIEW = URL_SEPARATOR + "_view" + URL_SEPARATOR;
 
+    /** The Constant LANGUAGE. */
     public static final String LANGUAGE = "javascript";
 
+    /** The Constant LINE_SEP. */
     public static final String LINE_SEP = System.getProperty("line.separator");
+
+    /** The Constant FIELDS. */
+    public static final String FIELDS = "fields";
 }

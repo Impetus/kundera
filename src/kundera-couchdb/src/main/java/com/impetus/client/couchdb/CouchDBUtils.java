@@ -57,12 +57,15 @@ import com.impetus.kundera.KunderaException;
 public class CouchDBUtils
 {
 
+    /** The Constant log. */
     private static final Logger log = LoggerFactory.getLogger(CouchDBUtils.class);
 
     /**
+     * Gets the context.
      * 
      * @param httpHost
-     * @return
+     *            the http host
+     * @return the context
      */
     public static HttpContext getContext(HttpHost httpHost)
     {
@@ -75,8 +78,10 @@ public class CouchDBUtils
     }
 
     /**
+     * Close content.
      * 
      * @param response
+     *            the response
      */
     public static void closeContent(HttpResponse response)
     {
@@ -95,10 +100,14 @@ public class CouchDBUtils
     }
 
     /**
+     * Creates the view.
      * 
      * @param views
+     *            the views
      * @param columnName
+     *            the column name
      * @param columns
+     *            the columns
      */
     static void createView(Map<String, MapReduce> views, String columnName, List<String> columns)
     {
@@ -137,9 +146,11 @@ public class CouchDBUtils
     }
 
     /**
+     * Append quotes.
      * 
      * @param value
-     * @return
+     *            the value
+     * @return the object
      */
     static Object appendQuotes(Object value)
     {
@@ -155,15 +166,30 @@ public class CouchDBUtils
     }
 
     /**
+     * Creates the design document if not exist.
      * 
-     * @param interpreter
-     * @param m
+     * @param httpClient
+     *            the http client
+     * @param httpHost
+     *            the http host
+     * @param gson
+     *            the gson
+     * @param tableName
+     *            the table name
+     * @param schemaName
+     *            the schema name
      * @param viewName
+     *            the view name
      * @param columns
+     *            the columns
      * @throws URISyntaxException
+     *             the URI syntax exception
      * @throws UnsupportedEncodingException
+     *             the unsupported encoding exception
      * @throws IOException
+     *             Signals that an I/O exception has occurred.
      * @throws ClientProtocolException
+     *             the client protocol exception
      */
     public static void createDesignDocumentIfNotExist(HttpClient httpClient, HttpHost httpHost, Gson gson,
             String tableName, String schemaName, String viewName, List<String> columns) throws URISyntaxException,
@@ -187,7 +213,7 @@ public class CouchDBUtils
         if (designDocument.get_rev() == null)
         {
             uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-                    CouchDBConstants.URL_SAPRATOR + schemaName.toLowerCase() + CouchDBConstants.URL_SAPRATOR + id,
+                    CouchDBConstants.URL_SEPARATOR + schemaName.toLowerCase() + CouchDBConstants.URL_SEPARATOR + id,
                     null, null);
         }
         else
@@ -195,7 +221,7 @@ public class CouchDBUtils
             StringBuilder builder = new StringBuilder("rev=");
             builder.append(designDocument.get_rev());
             uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-                    CouchDBConstants.URL_SAPRATOR + schemaName.toLowerCase() + CouchDBConstants.URL_SAPRATOR + id,
+                    CouchDBConstants.URL_SEPARATOR + schemaName.toLowerCase() + CouchDBConstants.URL_SEPARATOR + id,
                     builder.toString(), null);
         }
         HttpPut put = new HttpPut(uri);
@@ -215,9 +241,19 @@ public class CouchDBUtils
     }
 
     /**
+     * Gets the design document.
      * 
-     * @param m
-     * @return
+     * @param httpClient
+     *            the http client
+     * @param httpHost
+     *            the http host
+     * @param gson
+     *            the gson
+     * @param tableName
+     *            the table name
+     * @param schemaName
+     *            the schema name
+     * @return the design document
      */
     private static CouchDBDesignDocument getDesignDocument(HttpClient httpClient, HttpHost httpHost, Gson gson,
             String tableName, String schemaName)
@@ -227,7 +263,7 @@ public class CouchDBUtils
         {
             String id = CouchDBConstants.DESIGN + tableName;
             URI uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-                    CouchDBConstants.URL_SAPRATOR + schemaName.toLowerCase() + CouchDBConstants.URL_SAPRATOR + id,
+                    CouchDBConstants.URL_SEPARATOR + schemaName.toLowerCase() + CouchDBConstants.URL_SEPARATOR + id,
                     null, null);
             HttpGet get = new HttpGet(uri);
             get.addHeader("Accept", "application/json");

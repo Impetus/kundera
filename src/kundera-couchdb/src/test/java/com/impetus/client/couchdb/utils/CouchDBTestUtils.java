@@ -51,17 +51,21 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 
 /**
+ * The Class CouchDBTestUtils.
  * 
  * @author Kuldeep Mishra
- * 
  */
 public class CouchDBTestUtils
 {
+
     /**
+     * Initiate http client.
      * 
      * @param kunderaMetadata
+     *            the kundera metadata
      * @param persistenceUnit
-     * @return
+     *            the persistence unit
+     * @return the http client
      */
     public static HttpClient initiateHttpClient(final KunderaMetadata kunderaMetadata, String persistenceUnit)
     {
@@ -116,10 +120,14 @@ public class CouchDBTestUtils
     }
 
     /**
+     * Creates the database.
      * 
      * @param databaseName
+     *            the database name
      * @param client
+     *            the client
      * @param httpHost
+     *            the http host
      */
     public static void createDatabase(String databaseName, HttpClient client, HttpHost httpHost)
     {
@@ -127,7 +135,7 @@ public class CouchDBTestUtils
         try
         {
             URI uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-                    CouchDBConstants.URL_SAPRATOR + databaseName, null, null);
+                    CouchDBConstants.URL_SEPARATOR + databaseName, null, null);
             HttpPut put = new HttpPut(uri);
             response = client.execute(httpHost, put, CouchDBUtils.getContext(httpHost));
         }
@@ -150,10 +158,14 @@ public class CouchDBTestUtils
     }
 
     /**
+     * Drop database.
      * 
      * @param databaseName
+     *            the database name
      * @param client
+     *            the client
      * @param httpHost
+     *            the http host
      */
     public static void dropDatabase(String databaseName, HttpClient client, HttpHost httpHost)
     {
@@ -161,7 +173,7 @@ public class CouchDBTestUtils
         try
         {
             URI uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-                    CouchDBConstants.URL_SAPRATOR + databaseName, null, null);
+                    CouchDBConstants.URL_SEPARATOR + databaseName, null, null);
             HttpDelete delete = new HttpDelete(uri);
 
             response = client.execute(httpHost, delete, CouchDBUtils.getContext(httpHost));
@@ -185,15 +197,24 @@ public class CouchDBTestUtils
     }
 
     /**
+     * Creates the views.
      * 
      * @param columns
+     *            the columns
      * @param tableName
+     *            the table name
      * @param httpHost
+     *            the http host
      * @param databaseName
+     *            the database name
      * @param httpClient
+     *            the http client
      * @throws URISyntaxException
+     *             the URI syntax exception
      * @throws ClientProtocolException
+     *             the client protocol exception
      * @throws IOException
+     *             Signals that an I/O exception has occurred.
      */
     public static void createViews(String[] columns, String tableName, HttpHost httpHost, String databaseName,
             HttpClient httpClient) throws URISyntaxException, ClientProtocolException, IOException

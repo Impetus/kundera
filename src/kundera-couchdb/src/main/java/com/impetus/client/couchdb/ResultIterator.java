@@ -32,41 +32,69 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.IResultIterator;
 
 /**
+ * The Class ResultIterator.
+ * 
  * @author kuldeep.mishra .
  * 
  *         Implementation of CouchDB result iteration.
- * 
  * @param <E>
+ *            the element type
  */
 class ResultIterator<E> implements IResultIterator<E>
 {
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(ResultIterator.class);
 
+    /** The m. */
     private EntityMetadata m;
 
+    /** The client. */
     private CouchDBClient client;
 
+    /** The fetch size. */
     private int fetchSize;
 
+    /** The persistence delegator. */
     private PersistenceDelegator persistenceDelegator;
 
+    /** The _id. */
     private String _id;
 
+    /** The q. */
     private StringBuilder q = new StringBuilder();
 
+    /** The interpreter. */
     private CouchDBQueryInterpreter interpreter;
 
+    /** The skip counter. */
     private int skipCounter = 0;
 
+    /** The count. */
     private int count = 0;
 
+    /** The current object. */
     private E currentObject = null;
 
+    /** The scroll complete. */
     private boolean scrollComplete = false;
 
+    /** The results. */
     private List results = new ArrayList();
 
+    /**
+     * Instantiates a new result iterator.
+     * 
+     * @param client
+     *            the client
+     * @param m
+     *            the m
+     * @param pd
+     *            the pd
+     * @param interpreter
+     *            the interpreter
+     * @param fetchSize
+     *            the fetch size
+     */
     public ResultIterator(CouchDBClient client, EntityMetadata m, PersistenceDelegator pd,
             CouchDBQueryInterpreter interpreter, Integer fetchSize)
     {
@@ -78,11 +106,14 @@ class ResultIterator<E> implements IResultIterator<E>
         onQuery();
     }
 
+    /**
+     * On query.
+     */
     private void onQuery()
     {
         try
         {
-            _id = CouchDBConstants.URL_SAPRATOR + m.getSchema() + CouchDBConstants.URL_SAPRATOR + "_design/"
+            _id = CouchDBConstants.URL_SEPARATOR + m.getSchema() + CouchDBConstants.URL_SEPARATOR + "_design/"
                     + m.getTableName() + "/_view/";
             _id = client.createQuery(interpreter, m, q, _id);
 
@@ -94,10 +125,15 @@ class ResultIterator<E> implements IResultIterator<E>
         }
         catch (Exception e)
         {
-            
+
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.util.Iterator#hasNext()
+     */
     @Override
     public boolean hasNext()
     {
@@ -111,6 +147,11 @@ class ResultIterator<E> implements IResultIterator<E>
         return false;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.util.Iterator#next()
+     */
     @Override
     public E next()
     {
@@ -126,6 +167,11 @@ class ResultIterator<E> implements IResultIterator<E>
         }
     }
 
+    /**
+     * Fetch object.
+     * 
+     * @return the e
+     */
     private E fetchObject()
     {
         try
@@ -141,7 +187,7 @@ class ResultIterator<E> implements IResultIterator<E>
             {
                 q.append(currentSkip);
             }
-            client.executeQuery(q, _id, m, results);
+            client.executeQueryAndGetResults(q, _id, m, results, interpreter);
             skipCounter++;
         }
         catch (Exception e)
@@ -165,18 +211,39 @@ class ResultIterator<E> implements IResultIterator<E>
         return null;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.util.Iterator#remove()
+     */
     @Override
     public void remove()
     {
         throw new UnsupportedOperationException("remove method is not supported over pagination");
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.query.IResultIterator#next(int)
+     */
     @Override
     public List<E> next(int chunkSize)
     {
         throw new UnsupportedOperationException("fetch in chunks is not yet supported");
     }
 
+    /**
+     * Sets the relation entities.
+     * 
+     * @param enhanceEntity
+     *            the enhance entity
+     * @param client
+     *            the client
+     * @param m
+     *            the m
+     * @return the e
+     */
     private E setRelationEntities(Object enhanceEntity, Client client, EntityMetadata m)
     {
         // Enhance entities can contain or may not contain relation.
@@ -192,7 +259,7 @@ class ResultIterator<E> implements IResultIterator<E>
             EnhanceEntity ee = (EnhanceEntity) enhanceEntity;
 
             result = (E) client.getReader().recursivelyFindEntities(ee.getEntity(), ee.getRelations(), m,
-                    persistenceDelegator, false, new HashMap<Object,Object>());
+                    persistenceDelegator, false, new HashMap<Object, Object>());
         }
         return result;
     }

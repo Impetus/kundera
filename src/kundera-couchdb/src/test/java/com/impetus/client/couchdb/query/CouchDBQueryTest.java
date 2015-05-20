@@ -48,6 +48,8 @@ public class CouchDBQueryTest extends CouchDBBase
     /** The emf. */
     private EntityManagerFactory emf;
 
+    private EntityManager em;
+
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(CouchDBQueryTest.class);
 
@@ -58,7 +60,9 @@ public class CouchDBQueryTest extends CouchDBBase
     public void setUp() throws Exception
     {
         emf = Persistence.createEntityManagerFactory(pu);
-        super.setUpBase(((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());
+        em = emf.createEntityManager();
+        super.setUpBase(((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance());
+        init();
     }
 
     @Test
@@ -66,29 +70,7 @@ public class CouchDBQueryTest extends CouchDBBase
     {
         logger.info("On testPopulateEntities");
 
-        EntityManager em = emf.createEntityManager();
-
         final String originalName = "vivek";
-
-        // persist record.
-        PersonCouchDB object = new PersonCouchDB();
-        object.setAge(32);
-        object.setPersonId(ROW_KEY);
-        object.setPersonName(originalName);
-
-        em.persist(object);
-
-        object.setAge(34);
-        object.setPersonId(ROW_KEY + 1);
-        object.setPersonName(originalName);
-
-        em.persist(object);
-
-        object.setAge(29);
-        object.setPersonId(ROW_KEY + 3);
-        object.setPersonName(originalName);
-
-        em.persist(object);
 
         // Find without where clause.
         String findWithOutWhereClause = "Select p from PersonCouchDB p";
@@ -196,6 +178,55 @@ public class CouchDBQueryTest extends CouchDBBase
         results = query.getResultList();
         Assert.assertNotNull(results);
         Assert.assertTrue(results.isEmpty());
+    }
+
+    @Test
+    public void testSelectedFields()
+    {
+        /*
+         * Test for selecting specific fields IMPORTANT NOTE: Selecting specific
+         * fields with 'WHERE' clause is yet not supported. It works only
+         * without 'WHERE' clause.
+         */
+
+        logger.info("On testSelectedFields");
+
+        final String originalName = "vivek";
+
+        Query query = em.createQuery("Select p.age from PersonCouchDB p");
+        List results = query.getResultList();
+        Assert.assertEquals(3, results.size());
+        int age = (int) results.get(0);
+        Assert.assertTrue(age == 29 || age == 32 || age == 34);
+        age = (int) results.get(1);
+        Assert.assertTrue(age == 29 || age == 32 || age == 34);
+        age = (int) results.get(2);
+        Assert.assertTrue(age == 29 || age == 32 || age == 34);
+
+        query = em.createQuery("Select p.age, p.personName from PersonCouchDB p");
+        results = query.getResultList();
+        Assert.assertEquals(3, results.size());
+        Assert.assertEquals(2, ((List) results.get(0)).size());
+        age = (int) ((List) results.get(0)).get(0);
+        Assert.assertTrue(age == 29 || age == 32 || age == 34);
+        Assert.assertEquals("vivek", (String) ((List) results.get(0)).get(1));
+    }
+
+    private void init()
+    {
+        String name = "vivek";
+        persistObject(name, 32, ROW_KEY);
+        persistObject(name, 34, ROW_KEY + 1);
+        persistObject(name, 29, ROW_KEY + 3);
+    }
+
+    private void persistObject(String name, int age, String id)
+    {
+        PersonCouchDB object = new PersonCouchDB();
+        object.setAge(age);
+        object.setPersonId(id);
+        object.setPersonName(name);
+        em.persist(object);
     }
 
     /**
