@@ -50,14 +50,14 @@
 		<class>com.impetus.client.entities.PersonRedis</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
-<!-- 			<property name="kundera.nodes" value="localhost" /> -->
-			<property name="kundera.nodes" value="192.168.41.70" />
+		<property name="kundera.nodes" value="localhost" />
+			<!-- <property name="kundera.nodes" value="192.168.145.168" /> -->
 			<property name="kundera.port" value="6379" />
 			<property name="kundera.keyspace" value="RedisKES" />
 			<property name="kundera.dialect" value="redis" />
 			<property name="kundera.client" value="redis" />
 			<property name="kundera.client.lookup.class" value="com.impetus.client.redis.RedisClientFactory" />
-<!-- 			<property name="kundera.password" value="Kundera@123" /> -->
+			<property name="kundera.password" value="Kundera@123" />
 			<property name="kundera.transaction.resource.class" value="com.impetus.client.redis.RedisTransaction" />
 			<property name="kundera.indexer.class" value="com.impetus.client.es.index.ESIndexer" />
 		</properties>

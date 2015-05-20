@@ -45,7 +45,7 @@ public class EntityWithMultiplePartitionKeyTest
 
     protected static String _PU = "compositedatatype";
 
-    private EntityManagerFactory emf;
+    protected EntityManagerFactory emf;
 
     private static final String _keyspace = "CompositeCassandra";
 
