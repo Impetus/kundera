@@ -20,13 +20,14 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientPropertiesSetter;
 import com.mongodb.DBEncoder;
 import com.mongodb.WriteConcern;
 
 /**
- * MongoDB implementation of {@link ClientPropertiesSetter}
+ * MongoDB implementation of {@link ClientPropertiesSetter}.
  * 
  * @author amresh.singh
  */
@@ -35,14 +36,29 @@ public class MongoDBClientProperties
     /** log for this class. */
     private static Logger log = LoggerFactory.getLogger(MongoDBClientProperties.class);
 
+    /** The Constant WRITE_CONCERN. */
     public static final String WRITE_CONCERN = "write.concern";
 
+    /** The Constant DB_ENCODER. */
     public static final String DB_ENCODER = "db.encoder";
 
+    /** The Constant BATCH_SIZE. */
     public static final String BATCH_SIZE = "batch.size";
 
+    /** The Constant ORDERED_BULK_OPERATION. */
+    public static final String ORDERED_BULK_OPERATION = "ordered.bulk.operation";
+
+    /** The mongo db client. */
     private MongoDBClient mongoDBClient;
 
+    /**
+     * Populate client properties.
+     * 
+     * @param client
+     *            the client
+     * @param properties
+     *            the properties
+     */
     public void populateClientProperties(Client client, Map<String, Object> properties)
     {
         this.mongoDBClient = (MongoDBClient) client;
@@ -66,6 +82,23 @@ public class MongoDBClientProperties
                     {
                         setBatchSize(value);
                     }
+                    else if (key.equals(ORDERED_BULK_OPERATION))
+                    {
+                        try
+                        {
+                            this.mongoDBClient.setOrderedBulkOperation((boolean) value);
+                        }
+                        catch (ClassCastException ex)
+                        {
+                            log.error(
+                                    "only boolean value is supported for ORDERED_BULK_OPERATION property. Caused By: ",
+                                    ex);
+                            throw new KunderaException(
+                                    "only boolean value is supported for ORDERED_BULK_OPERATION property. Caused By: ",
+                                    ex);
+
+                        }
+                    }
                 }
                 // Add more properties as needed
             }
@@ -73,7 +106,10 @@ public class MongoDBClientProperties
     }
 
     /**
-     * set batch size
+     * set batch size.
+     * 
+     * @param value
+     *            the new batch size
      */
     private void setBatchSize(Object value)
     {
@@ -88,7 +124,13 @@ public class MongoDBClientProperties
     }
 
     /**
-     * check key value map not null
+     * check key value map not null.
+     * 
+     * @param key
+     *            the key
+     * @param value
+     *            the value
+     * @return true, if successful
      */
     private boolean checkNull(String key, Object value)
     {
