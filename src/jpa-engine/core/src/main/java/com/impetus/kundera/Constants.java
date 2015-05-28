@@ -155,4 +155,35 @@ public interface Constants
 
     /** The Constant FIELD_NAME. */
     public static final String FIELD_NAME = "fieldName";
+
+    /** The Constant ESCAPE_QUOTE. */
+    public static final String ESCAPE_QUOTE = "\"";
+
+    /** The Constant OPEN_SQUARE_BRACKET. */
+    public static final String OPEN_SQUARE_BRACKET = "[";
+
+    /** The Constant CLOSE_SQUARE_BRACKET. */
+    public static final String CLOSE_SQUARE_BRACKET = "]";
+
+    /** The Constant OPEN_CURLY_BRACKET. */
+    public static final String OPEN_CURLY_BRACKET = "{";
+
+    /** The Constant COMMA. */
+    public static final String COMMA = ",";
+
+    /** The Constant CLOSE_CURLY_BRACKET. */
+    public static final String CLOSE_CURLY_BRACKET = "}";
+
+    /** The Constant COLON. */
+    public static final String COLON = ":";
+
+    /** The Constant STR_GT. */
+    public static final String STR_GT = ">";
+
+    /** The Constant STR_LT. */
+    public static final String STR_LT = "<";
+
+    /** The Constant SPACE_COMMA. */
+    public static final String SPACE_COMMA = " ,";
+
 }
