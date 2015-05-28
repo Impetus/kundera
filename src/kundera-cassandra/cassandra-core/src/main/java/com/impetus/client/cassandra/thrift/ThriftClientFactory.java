@@ -172,7 +172,7 @@ public class ThriftClientFactory extends CassandraClientFactory
             prop.setPort(host.getPort());
             prop.setKeySpace(keyspace);
 
-            CassandraUtilities.setPoolConfigPolicy((CassandraHost) host, prop);
+            prop = CassandraUtilities.setPoolConfigPolicy((CassandraHost) host, prop);
             try
             {
                 ConnectionPool pool = new ConnectionPool(prop);
