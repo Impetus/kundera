@@ -33,6 +33,8 @@ import org.eclipse.persistence.jpa.jpql.parser.HavingClause;
 import org.eclipse.persistence.jpa.jpql.parser.IdentificationVariable;
 import org.eclipse.persistence.jpa.jpql.parser.NullExpression;
 import org.eclipse.persistence.jpa.jpql.parser.OrExpression;
+import org.eclipse.persistence.jpa.jpql.parser.OrderByClause;
+import org.eclipse.persistence.jpa.jpql.parser.OrderByItem;
 import org.eclipse.persistence.jpa.jpql.parser.SelectClause;
 import org.eclipse.persistence.jpa.jpql.parser.SelectStatement;
 import org.eclipse.persistence.jpa.jpql.parser.StateFieldPathExpression;
@@ -43,6 +45,7 @@ import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
 import org.elasticsearch.search.aggregations.metrics.MetricsAggregationBuilder;
 import org.elasticsearch.search.aggregations.metrics.tophits.TopHitsBuilder;
@@ -52,13 +55,13 @@ import org.slf4j.LoggerFactory;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
-import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.KunderaQueryUtils;
 import com.impetus.kundera.query.QueryImpl;
+import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**
  * The Class ESQuery.
@@ -226,7 +229,7 @@ public class ESQuery<E> extends QueryImpl
         {
             if (KunderaQueryUtils.hasHaving(query.getJpqlExpression()))
             {
-                logger.debug("Identified having clause without group by, Throwing not supported operation Exception");
+                logger.error("Identified having clause without group by, Throwing not supported operation Exception");
                 throw new UnsupportedOperationException(
                         "Currently, Having clause without group by caluse is not supported.");
             }
@@ -236,6 +239,7 @@ public class ESQuery<E> extends QueryImpl
                         aggregationBuilder, selectStatement, entityMetadata) : null : null;
             }
         }
+
         return aggregationBuilder;
     }
 
@@ -284,6 +288,7 @@ public class ESQuery<E> extends QueryImpl
         }
         else
         {
+            logger.error(havingExpression + "not supported in having clause.");
             throw new UnsupportedOperationException(havingExpression + "not supported in having clause.");
         }
     }
@@ -311,11 +316,10 @@ public class ESQuery<E> extends QueryImpl
             throw new UnsupportedOperationException("Currently, Group By on more than one field is not supported.");
         }
 
-        String jPAField = getJPAColumnName(groupByClause.toParsedText(), entityMetadata, metaModel);
-
         SelectStatement selectStatement = query.getSelectStatement();
 
         // To apply terms and tophits aggregation to serve group by
+        String jPAField = KunderaCoreUtils.getJPAColumnName(groupByClause.toParsedText(), entityMetadata, metaModel);
         TermsBuilder termsBuilder = AggregationBuilders.terms(ESConstants.GROUP_BY).field(jPAField).size(0);
 
         // Hard coded value for a max number of record that a group can contain.
@@ -331,7 +335,43 @@ public class ESQuery<E> extends QueryImpl
                     termsBuilder, entityMetadata);
         }
 
+        if (KunderaQueryUtils.hasOrderBy(query.getJpqlExpression()))
+        {
+            processOrderByClause(termsBuilder, KunderaQueryUtils.getOrderByClause(query.getJpqlExpression()),
+                    groupByClause, entityMetadata);
+        }
+
         return termsBuilder;
+    }
+
+    /**
+     * Process order by clause.
+     * 
+     * @param termsBuilder
+     *            the terms builder
+     * @param orderByExpression
+     *            the order by expression
+     * @param groupByClause
+     *            the group by clause
+     * @param entityMetadata
+     *            the entity metadata
+     */
+    private void processOrderByClause(TermsBuilder termsBuilder, Expression orderByExpression,
+            Expression groupByClause, EntityMetadata entityMetadata)
+    {
+        Expression orderByClause = (OrderByClause) orderByExpression;
+        OrderByItem orderByItems = (OrderByItem) ((OrderByClause) orderByClause).getOrderByItems();
+
+        if (orderByClause instanceof CollectionExpression
+                || !(orderByItems.getExpression().toParsedText().equalsIgnoreCase(groupByClause.toParsedText())))
+        {
+            logger.error("Order by and group by on different field are not supported simultaneously");
+            throw new UnsupportedOperationException(
+                    "Order by and group by on different field are not supported simultaneously");
+        }
+
+        String ordering = orderByItems.getOrdering().toString();
+        termsBuilder.order(Terms.Order.term(!ordering.equalsIgnoreCase(Expression.DESC)));
     }
 
     /**
@@ -443,7 +483,7 @@ public class ESQuery<E> extends QueryImpl
         AggregateFunction function = (AggregateFunction) expression;
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 entityMetadata.getPersistenceUnit());
-        String jPAColumnName = getJPAColumnName(function.toParsedText(), entityMetadata, metaModel);
+        String jPAColumnName = KunderaCoreUtils.getJPAColumnName(function.toParsedText(), entityMetadata, metaModel);
 
         MetricsAggregationBuilder aggregationBuilder = null;
 
@@ -478,32 +518,6 @@ public class ESQuery<E> extends QueryImpl
     private boolean isAggregationExpression(Expression expression)
     {
         return !(expression instanceof StateFieldPathExpression || expression instanceof IdentificationVariable);
-    }
-
-    /**
-     * Gets the JPA column name.
-     * 
-     * @param field
-     *            the field
-     * @param entityMetadata
-     *            the entity metadata
-     * @param metaModel
-     *            the meta model
-     * @return the JPA column name
-     */
-    private String getJPAColumnName(String field, EntityMetadata entityMetadata, MetamodelImpl metaModel)
-    {
-        if (field.indexOf('.') > 0)
-        {
-            return ((AbstractAttribute) metaModel.entity(entityMetadata.getEntityClazz()).getAttribute(
-                    field.substring(field.indexOf(ESConstants.DOT) + 1,
-                            field.indexOf(ESConstants.RIGHT_BRACKET) > 0 ? field.indexOf(ESConstants.RIGHT_BRACKET)
-                                    : field.length()))).getJPAColumnName();
-        }
-        else
-        {
-            return ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName();
-        }
     }
 
     /**

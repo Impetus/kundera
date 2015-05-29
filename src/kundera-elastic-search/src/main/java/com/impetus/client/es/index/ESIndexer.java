@@ -3,7 +3,7 @@ package com.impetus.client.es.index;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -11,11 +11,10 @@ import java.util.Properties;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.eclipse.persistence.jpa.jpql.parser.CollectionExpression;
 import org.eclipse.persistence.jpa.jpql.parser.Expression;
+import org.eclipse.persistence.jpa.jpql.parser.OrderByItem;
 import org.eclipse.persistence.jpa.jpql.parser.WhereClause;
 import org.eclipse.persistence.jpa.jpql.utility.iterable.ListIterable;
-import org.eclipse.persistence.jpa.jpql.utility.iterable.SnapshotCloneListIterable;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.ListenableActionFuture;
 import org.elasticsearch.action.delete.DeleteResponse;
@@ -30,10 +29,12 @@ import org.elasticsearch.index.query.FilteredQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.impetus.client.es.ESConstants;
 import com.impetus.client.es.ESQuery;
 import com.impetus.client.es.utils.ESResponseWrapper;
 import com.impetus.kundera.Constants;
@@ -50,6 +51,7 @@ import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.KunderaQueryUtils;
+import com.impetus.kundera.utils.KunderaCoreUtils;
 import com.thoughtworks.xstream.XStream;
 
 /**
@@ -202,7 +204,8 @@ public class ESIndexer implements Indexer
                 ((WhereClause) whereExpression).getConditionalExpression(), m) : null;
 
         FilteredQueryBuilder queryBuilder = QueryBuilders.filteredQuery(null, filter);
-        SearchResponse response = getSearchResponse(kunderaQuery, queryBuilder, filter, query, m, maxResults);
+        SearchResponse response = getSearchResponse(kunderaQuery, queryBuilder, filter, query, m, maxResults,
+                kunderaMetadata);
 
         return buildResultMap(response, kunderaQuery, m, metaModel);
     }
@@ -225,7 +228,7 @@ public class ESIndexer implements Indexer
     private Map<String, Object> buildResultMap(SearchResponse response, KunderaQuery query, EntityMetadata m,
             MetamodelImpl metaModel)
     {
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new LinkedHashMap<>();
         ESResponseWrapper esResponseReader = new ESResponseWrapper();
 
         for (SearchHit hit : response.getHits())
@@ -260,10 +263,11 @@ public class ESIndexer implements Indexer
      *            the query
      * @param m
      *            the m
+     * @param kunderaMetadata
      * @return the search response
      */
     private SearchResponse getSearchResponse(KunderaQuery kunderaQuery, FilteredQueryBuilder queryBuilder,
-            FilterBuilder filter, ESQuery query, EntityMetadata m, int maxResults)
+            FilterBuilder filter, ESQuery query, EntityMetadata m, int maxResults, KunderaMetadata kunderaMetadata)
     {
         SearchRequestBuilder builder = client.prepareSearch(m.getSchema().toLowerCase()).setTypes(
                 m.getEntityClazz().getSimpleName());
@@ -273,6 +277,7 @@ public class ESIndexer implements Indexer
         {
             builder.setQuery(queryBuilder);
             builder.setSize(maxResults);
+            addSortOrder(builder, kunderaQuery, m, kunderaMetadata);
         }
         else
         {
@@ -302,29 +307,6 @@ public class ESIndexer implements Indexer
         }
 
         return response;
-    }
-
-    /**
-     * Gets the select expression list. k
-     * 
-     * @param selectExpression
-     *            the select expression
-     * @return the select expression list
-     */
-    private ListIterable<Expression> getSelectExpressionList(Expression selectExpression)
-    {
-        List<Expression> list;
-
-        if (!(selectExpression instanceof CollectionExpression))
-        {
-            list = new LinkedList<Expression>();
-            list.add(selectExpression);
-            return new SnapshotCloneListIterable<Expression>(list);
-        }
-        else
-        {
-            return selectExpression.children();
-        }
     }
 
     /*
@@ -436,5 +418,37 @@ public class ESIndexer implements Indexer
         stream.alias("indexerProperties", IndexerProperties.class);
         stream.alias("node", IndexerProperties.Node.class);
         return stream;
+    }
+
+    /**
+     * Adds the sort order.
+     * 
+     * @param builder
+     *            the builder
+     * @param query
+     *            the query
+     * @param entityMetadata
+     *            the entity metadata
+     * @param kunderaMetadata
+     */
+    private void addSortOrder(SearchRequestBuilder builder, KunderaQuery query, EntityMetadata entityMetadata,
+            KunderaMetadata kunderaMetadata)
+    {
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                entityMetadata.getPersistenceUnit());
+        List<OrderByItem> orderList = KunderaQueryUtils.getOrderByItems(query.getJpqlExpression());
+
+        for (OrderByItem orderByItem : orderList)
+        {
+            String ordering = orderByItem.getOrdering().toString();
+
+            if (ordering.equalsIgnoreCase(ESConstants.DEFAULT))
+            {
+                ordering = Expression.ASC;
+            }
+
+            builder.addSort(KunderaCoreUtils.getJPAColumnName(orderByItem.getExpression().toParsedText(),
+                    entityMetadata, metaModel), SortOrder.valueOf(ordering));
+        }
     }
 }
