@@ -690,4 +690,29 @@ public class KunderaCoreUtils
         }
     }
 
+    /**
+     * Gets the JPA column name.
+     * 
+     * @param field
+     *            the field
+     * @param entityMetadata
+     *            the entity metadata
+     * @param metaModel
+     *            the meta model
+     * @return the JPA column name
+     */
+    public static String getJPAColumnName(String field, EntityMetadata entityMetadata, MetamodelImpl metaModel)
+    {
+        if (field.indexOf('.') > 0)
+        {
+            return ((AbstractAttribute) metaModel.entity(entityMetadata.getEntityClazz()).getAttribute(
+                    field.substring(field.indexOf('.') + 1,
+                            field.indexOf(')') > 0 ? field.indexOf(')') : field.length()))).getJPAColumnName();
+        }
+        else
+        {
+            return ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName();
+        }
+    }
+
 }

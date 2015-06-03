@@ -58,6 +58,8 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.utils.KunderaCoreUtils;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
+import com.mongodb.BulkWriteException;
+import com.mongodb.BulkWriteOperation;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
@@ -98,6 +100,18 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
     /** The batch size. */
     private int batchSize;
+
+    private boolean orderedBulkOperation;
+
+    public boolean isOrderedBulkOperation()
+    {
+        return orderedBulkOperation;
+    }
+
+    public void setOrderedBulkOperation(boolean orderedBulkOperation)
+    {
+        this.orderedBulkOperation = orderedBulkOperation;
+    }
 
     /** The write concern. */
     private WriteConcern writeConcern = null;
@@ -972,7 +986,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     @Override
     public int executeBatch()
     {
-        Map<String, List<DBObject>> collections = new HashMap<String, List<DBObject>>();
+        Map<String, BulkWriteOperation> bulkWriteOperationMap = new HashMap<String, BulkWriteOperation>();
+        int size = 0;
         for (Node node : nodes)
         {
             if (node.isDirty())
@@ -988,18 +1003,74 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
                     List<RelationHolder> relationHolders = getRelationHolders(node);
                     EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
                             node.getDataClass());
-                    collections = onPersist(collections, node.getData(), node.getEntityId(), metadata, relationHolders,
-                            node.isUpdate());
+                    Map<String, DBObject> documents = handler.getDocumentFromEntity(metadata, node.getData(),
+                            relationHolders, kunderaMetadata);
+                    for (String tableName : documents.keySet())
+                    {
+                        if (!bulkWriteOperationMap.containsKey(tableName))
+                        {
+                            DBCollection collection = mongoDb.getCollection(tableName);
+                            BulkWriteOperation builder = null;
+                            if (isOrderedBulkOperation())
+                            {
+                                builder = collection.initializeOrderedBulkOperation();
+                            }
+                            else
+                            {
+                                builder = collection.initializeUnorderedBulkOperation();
+                            }
+                            bulkWriteOperationMap.put(tableName, builder);
+                        }
+
+                        if (!node.isUpdate())
+                        {
+                            bulkWriteOperationMap.get(tableName).insert(documents.get(tableName));
+                        }
+
+                        else
+                        {
+                            bulkWriteOperationMap.get(tableName).find(new BasicDBObject("_id", node.getEntityId()))
+                                    .upsert().replaceOne(documents.get(tableName));
+                        }
+                        size++;
+                    }
                     indexNode(node, metadata);
                 }
                 node.handlePostEvent();
             }
         }
-        if (!collections.isEmpty())
+        onFlushBatch(bulkWriteOperationMap);
+        return size;
+    }
+
+    /**
+     * On flush batch.
+     *
+     * @param bulkWriteOperationMap the bulk write operation map
+     */
+    private void onFlushBatch(Map<String, BulkWriteOperation> bulkWriteOperationMap)
+    {
+        if (!bulkWriteOperationMap.isEmpty())
         {
-            onFlushCollection(collections);
+            for (BulkWriteOperation builder : bulkWriteOperationMap.values())
+            {
+                try
+                {
+                    builder.execute(getWriteConcern());
+                }
+                catch (BulkWriteException bwex)
+                {
+                    log.error("Batch insertion is not performed due to error in write command. Caused By: ", bwex);
+                    throw new KunderaException(
+                            "Batch insertion is not performed due to error in write command. Caused By: ", bwex);
+                }
+                catch (MongoException mex)
+                {
+                    log.error("Batch insertion is not performed. Caused By: ", mex);
+                    throw new KunderaException("Batch insertion is not performed. Caused By: ", mex);
+                }
+            }
         }
-        return collections.size();
     }
 
     /**
@@ -1039,7 +1110,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             EntityMetadata metadata, List<RelationHolder> relationHolders, boolean isUpdate)
     {
         persistenceUnit = metadata.getPersistenceUnit();
-        // String documentName = metadata.getTableName();
         Map<String, DBObject> documents = handler.getDocumentFromEntity(metadata, entity, relationHolders,
                 kunderaMetadata);
 
@@ -1062,18 +1132,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
                 }
                 DBCollection dbCollection = mongoDb.getCollection(documentName);
                 KunderaCoreUtils.printQuery("Persist collection:" + documentName, showQuery);
-                DBObject obj = dbCollection.findOne(query);
-                if (obj != null)
-                {
-                    obj.putAll(documents.get(documentName));
 
-                    dbCollection.save(obj);
-
-                }
-                else
-                {
-                    dbCollection.save(documents.get(documentName));
-                }
+                dbCollection.save(documents.get(documentName));
             }
         }
         else

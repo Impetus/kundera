@@ -456,8 +456,7 @@ public class KunderaQueryParser
             }
 
             int aggregationCount = countAggregation(selectClause.getSelectExpression());
-            query.setAggregated(aggregationCount > 0 || query.getSelectStatement().hasGroupByClause()
-                    || query.getSelectStatement().hasOrderByClause());
+            query.setAggregated(aggregationCount > 0 || query.getSelectStatement().hasGroupByClause());
             int count = 0, aggCounter = 0, resultSize = size + 1 - aggregationCount;
             if (resultSize == 0)
             {

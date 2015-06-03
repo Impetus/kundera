@@ -28,6 +28,8 @@ import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 
+import org.eclipse.persistence.jpa.jpql.parser.Expression;
+import org.eclipse.persistence.jpa.jpql.parser.OrderByItem;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
@@ -49,6 +51,7 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,6 +77,7 @@ import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.KunderaQuery;
+import com.impetus.kundera.query.KunderaQueryUtils;
 import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**
@@ -321,6 +325,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
         {
             builder.setQuery(queryBuilder);
             builder.setSize(maxResults);
+            addSortOrder(builder, query, entityMetadata);
         }
         else
         {
@@ -350,6 +355,37 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
 
         return esResponseReader.parseResponse(response, aggregation, fieldsToSelect, metaModel, clazz, entityMetadata,
                 query);
+    }
+
+    /**
+     * Adds the sort order.
+     * 
+     * @param builder
+     *            the builder
+     * @param query
+     *            the query
+     * @param entityMetadata
+     *            the entity metadata
+     */
+    private void addSortOrder(SearchRequestBuilder builder, KunderaQuery query, EntityMetadata entityMetadata)
+    {
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                entityMetadata.getPersistenceUnit());
+
+        List<OrderByItem> orderList = KunderaQueryUtils.getOrderByItems(query.getJpqlExpression());
+
+        for (OrderByItem orderByItem : orderList)
+        {
+            String ordering = orderByItem.getOrdering().toString();
+
+            if (ordering.equalsIgnoreCase(ESConstants.DEFAULT))
+            {
+                ordering = Expression.ASC;
+            }
+
+            builder.addSort(KunderaCoreUtils.getJPAColumnName(orderByItem.getExpression().toParsedText(),
+                    entityMetadata, metaModel), SortOrder.valueOf(ordering));
+        }
     }
 
     /**

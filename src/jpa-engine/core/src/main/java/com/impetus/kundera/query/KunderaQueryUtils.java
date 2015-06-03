@@ -17,6 +17,7 @@ package com.impetus.kundera.query;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -38,6 +39,8 @@ import org.eclipse.persistence.jpa.jpql.parser.KeywordExpression;
 import org.eclipse.persistence.jpa.jpql.parser.LikeExpression;
 import org.eclipse.persistence.jpa.jpql.parser.LogicalExpression;
 import org.eclipse.persistence.jpa.jpql.parser.NumericLiteral;
+import org.eclipse.persistence.jpa.jpql.parser.OrderByClause;
+import org.eclipse.persistence.jpa.jpql.parser.OrderByItem;
 import org.eclipse.persistence.jpa.jpql.parser.SelectStatement;
 import org.eclipse.persistence.jpa.jpql.parser.StateFieldPathExpression;
 import org.eclipse.persistence.jpa.jpql.parser.StringLiteral;
@@ -94,6 +97,24 @@ public final class KunderaQueryUtils
             }
         }
         return whereClause;
+    }
+
+    /**
+     * Gets the order by clause.
+     * 
+     * @param jpqlExpression
+     *            the jpql expression
+     * @return the order by clause
+     */
+    public static OrderByClause getOrderByClause(JPQLExpression jpqlExpression)
+    {
+        OrderByClause orderByClause = null;
+
+        if (hasOrderBy(jpqlExpression))
+        {
+            orderByClause = (OrderByClause) ((SelectStatement) jpqlExpression.getQueryStatement()).getOrderByClause();
+        }
+        return orderByClause;
     }
 
     /**
@@ -249,7 +270,7 @@ public final class KunderaQueryUtils
             {
                 return ip.getParameter();
             }
-         }
+        }
         else if (KeywordExpression.class.isAssignableFrom(exp.getClass()))
         {
             KeywordExpression keyWordExp = (KeywordExpression) exp;
@@ -562,4 +583,36 @@ public final class KunderaQueryUtils
 
     }
 
+    /**
+     * Gets the order by items.
+     * 
+     * @param jpqlExpression
+     *            the jpql expression
+     * @return the order by items
+     */
+    public static List<OrderByItem> getOrderByItems(JPQLExpression jpqlExpression)
+    {
+        List<OrderByItem> orderList = new LinkedList<>();
+
+        if (hasOrderBy(jpqlExpression))
+        {
+            Expression orderByItems = getOrderByClause(jpqlExpression).getOrderByItems();
+
+            if (orderByItems instanceof CollectionExpression)
+            {
+                ListIterator<Expression> iterator = orderByItems.children().iterator();
+                while (iterator.hasNext())
+                {
+                    OrderByItem orderByItem = (OrderByItem) iterator.next();
+                    orderList.add(orderByItem);
+                }
+            }
+            else
+            {
+                orderList.add((OrderByItem) orderByItems);
+            }
+        }
+
+        return orderList;
+    }
 }
