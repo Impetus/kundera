@@ -42,13 +42,15 @@ public class StudentCouchDBTimestampTest extends CouchDBBase
     @Before
     public void setUp() throws Exception
     {
-        emf = Persistence.createEntityManagerFactory(pu);super.setUpBase(((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());     
+        emf = Persistence.createEntityManagerFactory(pu);
+        super.setUpBase(((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance());
     }
 
     @After
     public void tearDown() throws Exception
     {
-        emf.close();     super.dropDatabase();
+        emf.close();
+        super.dropDatabase();
     }
 
     @Test
@@ -105,8 +107,7 @@ public class StudentCouchDBTimestampTest extends CouchDBBase
     {
         EntityManager em = emf.createEntityManager();
 
-        StudentCouchDBTimestamp studentMax = em.find(StudentCouchDBTimestamp.class,
-                getMaxValue(Timestamp.class));
+        StudentCouchDBTimestamp studentMax = em.find(StudentCouchDBTimestamp.class, getMaxValue(Timestamp.class));
         Assert.assertNotNull(studentMax);
         Assert.assertEquals(getMaxValue(short.class), studentMax.getAge());
         Assert.assertEquals(getMaxValue(String.class), studentMax.getName());
@@ -116,8 +117,7 @@ public class StudentCouchDBTimestampTest extends CouchDBBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCouchDBTimestamp studentMin = em.find(StudentCouchDBTimestamp.class,
-                getMinValue(Timestamp.class));
+        StudentCouchDBTimestamp studentMin = em.find(StudentCouchDBTimestamp.class, getMinValue(Timestamp.class));
         Assert.assertNotNull(studentMin);
         Assert.assertEquals(getMinValue(short.class), studentMin.getAge());
         Assert.assertEquals(getMinValue(String.class), studentMin.getName());
@@ -127,8 +127,7 @@ public class StudentCouchDBTimestampTest extends CouchDBBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCouchDBTimestamp student = em.find(StudentCouchDBTimestamp.class,
-                getRandomValue(Timestamp.class));
+        StudentCouchDBTimestamp student = em.find(StudentCouchDBTimestamp.class, getRandomValue(Timestamp.class));
         Assert.assertNotNull(student);
         Assert.assertEquals(getRandomValue(short.class), student.getAge());
         Assert.assertEquals(getRandomValue(String.class), student.getName());
@@ -150,8 +149,7 @@ public class StudentCouchDBTimestampTest extends CouchDBBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCouchDBTimestamp newStudent = em.find(StudentCouchDBTimestamp.class,
-                getMaxValue(Timestamp.class));
+        StudentCouchDBTimestamp newStudent = em.find(StudentCouchDBTimestamp.class, getMaxValue(Timestamp.class));
         Assert.assertNotNull(newStudent);
         Assert.assertEquals(getMaxValue(short.class), newStudent.getAge());
         Assert.assertEquals("Kuldeep", newStudent.getName());
@@ -308,8 +306,7 @@ public class StudentCouchDBTimestampTest extends CouchDBBase
     {
         EntityManager em = emf.createEntityManager();
 
-        StudentCouchDBTimestamp studentMax = em.find(StudentCouchDBTimestamp.class,
-                getMaxValue(Timestamp.class));
+        StudentCouchDBTimestamp studentMax = em.find(StudentCouchDBTimestamp.class, getMaxValue(Timestamp.class));
         Assert.assertNotNull(studentMax);
         Assert.assertEquals(getMaxValue(short.class), studentMax.getAge());
         Assert.assertEquals("Kuldeep", studentMax.getName());
@@ -339,8 +336,7 @@ public class StudentCouchDBTimestampTest extends CouchDBBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCouchDBTimestamp newStudent = em.find(StudentCouchDBTimestamp.class,
-                getRandomValue(Timestamp.class));
+        StudentCouchDBTimestamp newStudent = em.find(StudentCouchDBTimestamp.class, getRandomValue(Timestamp.class));
         Assert.assertNull(newStudent);
         em.close();
     }
@@ -360,8 +356,7 @@ public class StudentCouchDBTimestampTest extends CouchDBBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCouchDBTimestamp newStudent = em.find(StudentCouchDBTimestamp.class,
-                getRandomValue(Timestamp.class));
+        StudentCouchDBTimestamp newStudent = em.find(StudentCouchDBTimestamp.class, getRandomValue(Timestamp.class));
         Assert.assertNotNull(newStudent);
         Assert.assertEquals(getRandomValue(short.class), newStudent.getAge());
         Assert.assertEquals("Vivek", newStudent.getName());

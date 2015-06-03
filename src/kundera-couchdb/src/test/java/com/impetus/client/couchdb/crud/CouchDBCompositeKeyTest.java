@@ -33,7 +33,7 @@ public class CouchDBCompositeKeyTest
 
     @Before
     public void setUp() throws Exception
-    {        
+    {
         emf = Persistence.createEntityManagerFactory(COUCHDB_PU);
     }
 
@@ -111,7 +111,9 @@ public class CouchDBCompositeKeyTest
         }
         catch (Exception e)
         {
-            Assert.assertEquals("com.impetus.kundera.query.QueryHandlerException: There should be each and every field of composite key.", e.getMessage());
+            Assert.assertEquals(
+                    "com.impetus.kundera.query.QueryHandlerException: There should be each and every field of composite key.",
+                    e.getMessage());
         }
 
         CouchDBPrimeUser found = em.find(CouchDBPrimeUser.class, compoundKey);

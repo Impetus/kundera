@@ -34,11 +34,25 @@ import com.impetus.kundera.query.KunderaQuery;
 public class CouchDBEntityReader extends AbstractEntityReader implements EntityReader
 {
 
+    /**
+     * Instantiates a new couch db entity reader.
+     * 
+     * @param kunderaMetadata
+     *            the kundera metadata
+     */
     public CouchDBEntityReader(final KunderaMetadata kunderaMetadata)
     {
         super(kunderaMetadata);
     }
 
+    /**
+     * Instantiates a new couch db entity reader.
+     * 
+     * @param kunderaQuery
+     *            the kundera query
+     * @param kunderaMetadata
+     *            the kundera metadata
+     */
     public CouchDBEntityReader(KunderaQuery kunderaQuery, final KunderaMetadata kunderaMetadata)
     {
         super(kunderaMetadata);

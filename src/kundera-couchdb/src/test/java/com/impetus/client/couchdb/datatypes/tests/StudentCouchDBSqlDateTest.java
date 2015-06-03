@@ -42,7 +42,7 @@ public class StudentCouchDBSqlDateTest extends CouchDBBase
     public void setUp() throws Exception
     {
         emf = Persistence.createEntityManagerFactory(pu);
-        super.setUpBase(((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());
+        super.setUpBase(((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance());
     }
 
     @After

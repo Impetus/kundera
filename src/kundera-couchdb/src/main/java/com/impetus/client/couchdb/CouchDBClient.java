@@ -944,7 +944,11 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         {
             response = getResponse(q, _id);
             JsonArray array = getJsonFromResponse(response);
-            if (interpreter != null && interpreter.getColumns() != null && interpreter.getColumns().length != 0)
+            if (interpreter != null && interpreter.isAggregation())
+            {
+                setAggregatedValuesInResult(results, interpreter, array);
+            }
+            else if (interpreter != null && interpreter.getColumns() != null && interpreter.getColumns().length != 0)
             {
                 setSpecificFieldsInResult(interpreter.getColumnsToOutput(), m, results, array);
             }
@@ -956,6 +960,28 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
         finally
         {
             CouchDBUtils.closeContent(response);
+        }
+    }
+
+    /**
+     * Sets the aggregated values in result.
+     * 
+     * @param results
+     *            the results
+     * @param interpreter
+     *            the interpreter
+     * @param array
+     *            the array
+     */
+    private void setAggregatedValuesInResult(List results, CouchDBQueryInterpreter interpreter, JsonArray array)
+    {
+        for (JsonElement json : array)
+        {
+            JsonElement value = json.getAsJsonObject().get("value");
+            if (interpreter.getAggregationType().equals(CouchDBConstants.COUNT))
+                results.add(value.getAsInt());
+            else
+                results.add(value.getAsDouble());
         }
     }
 
@@ -1101,7 +1127,24 @@ public class CouchDBClient extends ClientBase implements Client<CouchDBQuery>, B
     String createQuery(CouchDBQueryInterpreter interpreter, EntityMetadata m, StringBuilder q, String _id)
             throws URISyntaxException, UnsupportedEncodingException, IOException, ClientProtocolException
     {
-        if (!interpreter.isRangeQuery() && interpreter.getOperator() != null
+        if (interpreter.isAggregation())
+        {
+            _id = CouchDBConstants.URL_SEPARATOR + m.getSchema().toLowerCase() + CouchDBConstants.URL_SEPARATOR
+                    + CouchDBConstants.DESIGN + CouchDBConstants.AGGREGATIONS + CouchDBConstants.VIEW
+                    + interpreter.getAggregationType();
+            if (interpreter.getAggregationColumn() != null)
+            {
+                q.append("key=");
+                q.append("\"" + interpreter.getAggregationColumn() + "_" + m.getTableName() + "\"");
+
+            }
+            else
+            {
+                q.append("key=" + "\"" + CouchDBConstants.ALL + "_" + m.getTableName() + "\"");
+            }
+            q.append("&group=true");
+        }
+        else if (!interpreter.isRangeQuery() && interpreter.getOperator() != null
                 && interpreter.getOperator().equalsIgnoreCase("AND"))
         {
             StringBuilder viewName = new StringBuilder();

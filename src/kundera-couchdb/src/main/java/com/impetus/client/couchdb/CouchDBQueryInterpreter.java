@@ -75,6 +75,15 @@ public class CouchDBQueryInterpreter
     /** The columns to output. */
     private List<Map<String, Object>> columnsToOutput;
 
+    /** The is aggregation. */
+    private boolean isAggregation = false;
+
+    /** The aggregation type. */
+    private String aggregationType;
+
+    /** The aggregation column. */
+    private String aggregationColumn = null;
+
     /**
      * Instantiates a new couch db query interpreter.
      * 
@@ -412,4 +421,66 @@ public class CouchDBQueryInterpreter
         this.columnsToOutput = columnsToOutput;
     }
 
+    /**
+     * Checks if is aggregation.
+     * 
+     * @return true, if is aggregation
+     */
+    public boolean isAggregation()
+    {
+        return isAggregation;
+    }
+
+    /**
+     * Sets the aggregation.
+     * 
+     * @param isAggregation
+     *            the new aggregation
+     */
+    public void setAggregation(boolean isAggregation)
+    {
+        this.isAggregation = isAggregation;
+    }
+
+    /**
+     * Gets the aggregation type.
+     * 
+     * @return the aggregation type
+     */
+    public String getAggregationType()
+    {
+        return aggregationType;
+    }
+
+    /**
+     * Sets the aggregation type.
+     * 
+     * @param type
+     *            the new aggregation type
+     */
+    public void setAggregationType(String type)
+    {
+        this.aggregationType = type;
+    }
+
+    /**
+     * Gets the aggregation column.
+     * 
+     * @return the aggregation column
+     */
+    public String getAggregationColumn()
+    {
+        return aggregationColumn;
+    }
+
+    /**
+     * Sets the aggregation column.
+     * 
+     * @param aggregationColumn
+     *            the new aggregation column
+     */
+    public void setAggregationColumn(String aggregationColumn)
+    {
+        this.aggregationColumn = aggregationColumn;
+    }
 }

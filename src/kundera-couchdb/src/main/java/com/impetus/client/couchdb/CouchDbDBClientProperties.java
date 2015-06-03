@@ -23,19 +23,29 @@ import org.slf4j.LoggerFactory;
 import com.impetus.kundera.client.Client;
 
 /**
+ * The Class CouchDbDBClientProperties.
  * 
  * @author Kuldeep Mishra
- *
  */
 public class CouchDbDBClientProperties
 {
     /** log for this class. */
     private static Logger log = LoggerFactory.getLogger(CouchDbDBClientProperties.class);
 
+    /** The Constant BATCH_SIZE. */
     public static final String BATCH_SIZE = "batch.size";
 
+    /** The couch db client. */
     private CouchDBClient couchDBClient;
 
+    /**
+     * Populate client properties.
+     * 
+     * @param client
+     *            the client
+     * @param properties
+     *            the properties
+     */
     public void populateClientProperties(Client client, Map<String, Object> properties)
     {
         this.couchDBClient = (CouchDBClient) client;
@@ -58,7 +68,10 @@ public class CouchDbDBClientProperties
     }
 
     /**
-     * set batch size
+     * set batch size.
+     * 
+     * @param value
+     *            the new batch size
      */
     private void setBatchSize(Object value)
     {
@@ -73,7 +86,13 @@ public class CouchDbDBClientProperties
     }
 
     /**
-     * check key value map not null
+     * check key value map not null.
+     * 
+     * @param key
+     *            the key
+     * @param value
+     *            the value
+     * @return true, if successful
      */
     private boolean checkNull(String key, Object value)
     {

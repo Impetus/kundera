@@ -44,4 +44,28 @@ public interface CouchDBConstants
 
     /** The Constant FIELDS. */
     public static final String FIELDS = "fields";
+
+    /** The Constant COUNT. */
+    public static final String COUNT = "count";
+
+    /** The Constant ALL. */
+    public static final String ALL = "ALL";
+
+    /** The Constant SUM. */
+    public static final String SUM = "sum";
+
+    /** The Constant MAX. */
+    public static final String MAX = "max";
+
+    /** The Constant MIN. */
+    public static final String MIN = "min";
+
+    /** The Constant AVG. */
+    public static final String AVG = "avg";
+
+    /** The Constant ENTITYNAME. */
+    public static final String ENTITYNAME = "ENTITYNAME";
+
+    /** The Constant AGGREGATIONS. */
+    public static final String AGGREGATIONS = "aggregations";
 }

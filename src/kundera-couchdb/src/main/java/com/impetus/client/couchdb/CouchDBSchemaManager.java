@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -359,6 +360,11 @@ public class CouchDBSchemaManager extends AbstractSchemaManager implements Schem
                     CouchDBUtils.closeContent(response);
                 }
             }
+            // creating views for various aggregations in the following
+            // order:
+            // -- COUNT SUM MAX MIN AVG
+            // IMPORTANT: The aggregations does not support WHERE clause
+            createDesignDocForAggregations();
         }
         catch (Exception e)
         {
@@ -418,11 +424,60 @@ public class CouchDBSchemaManager extends AbstractSchemaManager implements Schem
                     CouchDBUtils.closeContent(response);
                 }
             }
+            // creating views for various aggregations in the following
+            // order:
+            // -- COUNT SUM MAX MIN AVG
+            // IMPORTANT: The aggregations does not support WHERE clause
+            createDesignDocForAggregations();
+
         }
         catch (Exception e)
         {
             logger.error("Error while creating database {} , caused by {}.", databaseName, e);
             throw new SchemaGenerationException("Error while creating database", e, "couchDB");
+        }
+    }
+
+    /**
+     * Creates the design doc for aggregations.
+     * 
+     * @throws URISyntaxException
+     *             the URI syntax exception
+     * @throws UnsupportedEncodingException
+     *             the unsupported encoding exception
+     * @throws IOException
+     *             Signals that an I/O exception has occurred.
+     * @throws ClientProtocolException
+     *             the client protocol exception
+     */
+    private void createDesignDocForAggregations() throws URISyntaxException, UnsupportedEncodingException, IOException,
+            ClientProtocolException
+    {
+        HttpResponse response = null;
+        URI uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
+                CouchDBConstants.URL_SEPARATOR + databaseName.toLowerCase() + CouchDBConstants.URL_SEPARATOR
+                        + "_design/" + CouchDBConstants.AGGREGATIONS, null, null);
+        HttpPut put = new HttpPut(uri);
+
+        CouchDBDesignDocument designDocument = new CouchDBDesignDocument();
+        Map<String, MapReduce> views = new HashMap<String, CouchDBDesignDocument.MapReduce>();
+        designDocument.setLanguage(CouchDBConstants.LANGUAGE);
+        createViewForCount(views);
+        createViewForSum(views);
+        createViewForMax(views);
+        createViewForMin(views);
+        createViewForAvg(views);
+        designDocument.setViews(views);
+        String jsonObject = gson.toJson(designDocument);
+        StringEntity entity = new StringEntity(jsonObject);
+        put.setEntity(entity);
+        try
+        {
+            response = httpClient.execute(httpHost, put, CouchDBUtils.getContext(httpHost));
+        }
+        finally
+        {
+            CouchDBUtils.closeContent(response);
         }
     }
 
@@ -439,6 +494,97 @@ public class CouchDBSchemaManager extends AbstractSchemaManager implements Schem
             MapReduce mapr = new MapReduce();
             mapr.setMap("function(doc){for(field in doc){emit(field, doc[field]);}}");
             views.put(CouchDBConstants.FIELDS, mapr);
+        }
+    }
+
+    /**
+     * Creates the view for count.
+     * 
+     * @param views
+     *            the views
+     */
+    private void createViewForCount(Map<String, MapReduce> views)
+    {
+        if (views.get(CouchDBConstants.COUNT) == null)
+        {
+            MapReduce mapr = new MapReduce();
+            mapr.setMap("function(doc){" + "for(field in doc){if(field!=\"" + CouchDBConstants.ENTITYNAME
+                    + "\"){var o = doc[field];emit(field+\"_\"+doc." + CouchDBConstants.ENTITYNAME + ", o);" + "}}"
+                    + "emit(\"" + CouchDBConstants.ALL + "_\"+doc." + CouchDBConstants.ENTITYNAME + ", null);}");
+            mapr.setReduce("function(keys, values){return values.length;}");
+            views.put(CouchDBConstants.COUNT, mapr);
+        }
+    }
+
+    /**
+     * Creates the view for sum.
+     * 
+     * @param views
+     *            the views
+     */
+    private void createViewForSum(Map<String, MapReduce> views)
+    {
+        if (views.get(CouchDBConstants.SUM) == null)
+        {
+            MapReduce mapr = new MapReduce();
+            mapr.setMap("function(doc){for(field in doc){var o = doc[field];if(typeof(o)==\"number\")emit(field+\"_\"+doc."
+                    + CouchDBConstants.ENTITYNAME + ", o);}}");
+            mapr.setReduce("function(keys, values){return sum(values);}");
+            views.put(CouchDBConstants.SUM, mapr);
+        }
+    }
+
+    /**
+     * Creates the view for max.
+     * 
+     * @param views
+     *            the views
+     */
+    private void createViewForMax(Map<String, MapReduce> views)
+    {
+        if (views.get(CouchDBConstants.MAX) == null)
+        {
+            MapReduce mapr = new MapReduce();
+            mapr.setMap("function(doc){for(field in doc){var o = doc[field];if(typeof(o)==\"number\")emit(field+\"_\"+doc."
+                    + CouchDBConstants.ENTITYNAME + ", o);}}");
+            mapr.setReduce("function(keys, values){return Math.max.apply(Math, values);}");
+            views.put(CouchDBConstants.MAX, mapr);
+        }
+    }
+
+    /**
+     * Creates the view for min.
+     * 
+     * @param views
+     *            the views
+     */
+    private void createViewForMin(Map<String, MapReduce> views)
+    {
+        if (views.get(CouchDBConstants.MIN) == null)
+        {
+            MapReduce mapr = new MapReduce();
+            mapr.setMap("function(doc){for(field in doc){var o = doc[field];if(typeof(o)==\"number\")emit(field+\"_\"+doc."
+                    + CouchDBConstants.ENTITYNAME + ", o);}}");
+            mapr.setReduce("function(keys, values){return Math.min.apply(Math, values);}");
+            views.put(CouchDBConstants.MIN, mapr);
+        }
+    }
+
+    /**
+     * Creates the view for avg.
+     * 
+     * @param views
+     *            the views
+     */
+    private void createViewForAvg(Map<String, MapReduce> views)
+    {
+        if (views.get(CouchDBConstants.AVG) == null)
+        {
+            MapReduce mapr = new MapReduce();
+            mapr.setMap("function(doc){for(field in doc){var o = doc[field];if(typeof(o)==\"number\")emit(field+\"_\"+doc."
+                    + CouchDBConstants.ENTITYNAME + ", o);}}");
+            mapr.setReduce("function(keys, values){return sum(values)/values.length;}");
+            views.put(CouchDBConstants.AVG, mapr);
         }
     }
 

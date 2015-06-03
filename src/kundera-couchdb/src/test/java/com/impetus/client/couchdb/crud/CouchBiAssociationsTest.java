@@ -23,11 +23,10 @@ import com.impetus.kundera.client.crud.associations.AssociationsBiDirectionalBas
 
 /**
  * @author Pragalbh Garg
- *
+ * 
  */
 public class CouchBiAssociationsTest extends AssociationsBiDirectionalBase
 {
-
 
     @Before
     public void setUp() throws Exception

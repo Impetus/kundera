@@ -36,7 +36,8 @@ import com.impetus.client.couchdb.entities.PersonCouchMTM;
  * @author impadmin
  * 
  */
-public class CouchMTMTest {
+public class CouchMTMTest
+{
     private EntityManagerFactory emf;
 
     private EntityManager em;
@@ -45,7 +46,8 @@ public class CouchMTMTest {
      * @throws java.lang.Exception
      */
     @Before
-    public void setUp() throws Exception {
+    public void setUp() throws Exception
+    {
         emf = Persistence.createEntityManagerFactory("couchdb_pu");
         em = getNewEM();
     }
@@ -54,13 +56,15 @@ public class CouchMTMTest {
      * @throws java.lang.Exception
      */
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() throws Exception
+    {
         em.close();
         emf.close();
     }
 
     @Test
-    public void testCRUD() {
+    public void testCRUD()
+    {
         AddressCouchMTM address1 = new AddressCouchMTM();
         address1.setAddressId("a");
         address1.setStreet("sector 11");
@@ -104,11 +108,15 @@ public class CouchMTMTest {
         Assert.assertEquals("Kuldeep", foundPerson1.getPersonName());
 
         int counter = 0;
-        for (AddressCouchMTM address : foundPerson1.getAddresses()) {
-            if (address.getAddressId().equals("a")) {
+        for (AddressCouchMTM address : foundPerson1.getAddresses())
+        {
+            if (address.getAddressId().equals("a"))
+            {
                 counter++;
                 Assert.assertEquals("sector 11", address.getStreet());
-            } else {
+            }
+            else
+            {
                 Assert.assertEquals("b", address.getAddressId());
                 Assert.assertEquals("sector 12", address.getStreet());
                 counter++;
@@ -122,11 +130,15 @@ public class CouchMTMTest {
         Assert.assertEquals("vivek", foundPerson2.getPersonName());
 
         counter = 0;
-        for (AddressCouchMTM address : foundPerson2.getAddresses()) {
-            if (address.getAddressId().equals("b")) {
+        for (AddressCouchMTM address : foundPerson2.getAddresses())
+        {
+            if (address.getAddressId().equals("b"))
+            {
                 counter++;
                 Assert.assertEquals("sector 12", address.getStreet());
-            } else {
+            }
+            else
+            {
                 Assert.assertEquals("c", address.getAddressId());
                 Assert.assertEquals("sector 13", address.getStreet());
                 counter++;
@@ -149,11 +161,15 @@ public class CouchMTMTest {
         Assert.assertEquals("KK", foundPerson1.getPersonName());
 
         counter = 0;
-        for (AddressCouchMTM address : foundPerson1.getAddresses()) {
-            if (address.getAddressId().equals("a")) {
+        for (AddressCouchMTM address : foundPerson1.getAddresses())
+        {
+            if (address.getAddressId().equals("a"))
+            {
                 counter++;
                 Assert.assertEquals("sector 11", address.getStreet());
-            } else {
+            }
+            else
+            {
                 Assert.assertEquals("b", address.getAddressId());
                 Assert.assertEquals("sector 12", address.getStreet());
                 counter++;
@@ -167,11 +183,15 @@ public class CouchMTMTest {
         Assert.assertEquals("vives", foundPerson2.getPersonName());
 
         counter = 0;
-        for (AddressCouchMTM address : foundPerson2.getAddresses()) {
-            if (address.getAddressId().equals("b")) {
+        for (AddressCouchMTM address : foundPerson2.getAddresses())
+        {
+            if (address.getAddressId().equals("b"))
+            {
                 counter++;
                 Assert.assertEquals("sector 12", address.getStreet());
-            } else {
+            }
+            else
+            {
                 Assert.assertEquals("c", address.getAddressId());
                 Assert.assertEquals("sector 13", address.getStreet());
                 counter++;
@@ -189,7 +209,8 @@ public class CouchMTMTest {
     }
 
     @Test
-    public void testQuery() {
+    public void testQuery()
+    {
         AddressCouchMTM address1 = new AddressCouchMTM();
         address1.setAddressId("a");
         address1.setStreet("sector 11");
@@ -230,33 +251,45 @@ public class CouchMTMTest {
         List<PersonCouchMTM> results = q.getResultList();
         Assert.assertEquals(2, results.size());
 
-        for (PersonCouchMTM foundPerson : results) {
-            if (foundPerson.getPersonId().equals("1")) {
+        for (PersonCouchMTM foundPerson : results)
+        {
+            if (foundPerson.getPersonId().equals("1"))
+            {
 
                 Assert.assertEquals("Kuldeep", foundPerson.getPersonName());
                 Assert.assertEquals(2, foundPerson.getAddresses().size());
 
-                for (AddressCouchMTM address : foundPerson.getAddresses()) {
-                    if (address.getAddressId().equals("a")) {
+                for (AddressCouchMTM address : foundPerson.getAddresses())
+                {
+                    if (address.getAddressId().equals("a"))
+                    {
 
                         Assert.assertEquals("sector 11", address.getStreet());
-                    } else {
+                    }
+                    else
+                    {
                         Assert.assertEquals("b", address.getAddressId());
                         Assert.assertEquals("sector 12", address.getStreet());
 
                     }
                 }
 
-            } else if (foundPerson.getPersonId().equals("2")) {
+            }
+            else if (foundPerson.getPersonId().equals("2"))
+            {
 
                 Assert.assertEquals("vivek", foundPerson.getPersonName());
                 Assert.assertEquals(2, foundPerson.getAddresses().size());
 
-                for (AddressCouchMTM address : foundPerson.getAddresses()) {
-                    if (address.getAddressId().equals("b")) {
+                for (AddressCouchMTM address : foundPerson.getAddresses())
+                {
+                    if (address.getAddressId().equals("b"))
+                    {
 
                         Assert.assertEquals("sector 12", address.getStreet());
-                    } else {
+                    }
+                    else
+                    {
                         Assert.assertEquals("c", address.getAddressId());
                         Assert.assertEquals("sector 13", address.getStreet());
 
@@ -268,8 +301,10 @@ public class CouchMTMTest {
 
     }
 
-    private EntityManager getNewEM() {
-        if (em != null && em.isOpen()) {
+    private EntityManager getNewEM()
+    {
+        if (em != null && em.isOpen())
+        {
             em.close();
         }
         return em = emf.createEntityManager();

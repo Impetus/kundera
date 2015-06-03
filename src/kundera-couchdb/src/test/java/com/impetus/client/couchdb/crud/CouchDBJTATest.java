@@ -77,7 +77,7 @@ public class CouchDBJTATest extends CouchDBBase
         emf = Persistence.createEntityManagerFactory("couchdbJTA_pu");
 
         pu = "couchdbJTA_pu";
-        super.setUpBase(((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());
+        super.setUpBase(((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance());
         em = emf.createEntityManager();
     }
 

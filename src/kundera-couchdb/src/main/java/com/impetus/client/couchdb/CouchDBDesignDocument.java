@@ -25,37 +25,74 @@ import java.util.Map;
  */
 public class CouchDBDesignDocument
 {
+
+    /** The _rev. */
     private String _rev;
 
+    /** The language. */
     private String language;
 
+    /** The views. */
     private Map<String, MapReduce> views;
 
+    /**
+     * Gets the language.
+     * 
+     * @return the language
+     */
     public String getLanguage()
     {
         return language;
     }
 
+    /**
+     * Gets the views.
+     * 
+     * @return the views
+     */
     public Map<String, MapReduce> getViews()
     {
         return views;
     }
 
+    /**
+     * Sets the language.
+     * 
+     * @param language
+     *            the new language
+     */
     public void setLanguage(String language)
     {
         this.language = language;
     }
 
+    /**
+     * Sets the views.
+     * 
+     * @param views
+     *            the views
+     */
     public void setViews(Map<String, MapReduce> views)
     {
         this.views = views;
     }
 
+    /**
+     * Gets the _rev.
+     * 
+     * @return the _rev
+     */
     public String get_rev()
     {
         return _rev;
     }
 
+    /**
+     * Sets the _rev.
+     * 
+     * @param _rev
+     *            the new _rev
+     */
     public void set_rev(String _rev)
     {
         this._rev = _rev;
@@ -68,25 +105,50 @@ public class CouchDBDesignDocument
      */
     public static class MapReduce
     {
+
+        /** The map. */
         private String map;
 
+        /** The reduce. */
         private String reduce;
 
+        /**
+         * Gets the map.
+         * 
+         * @return the map
+         */
         public String getMap()
         {
             return map;
         }
 
+        /**
+         * Gets the reduce.
+         * 
+         * @return the reduce
+         */
         public String getReduce()
         {
             return reduce;
         }
 
+        /**
+         * Sets the map.
+         * 
+         * @param map
+         *            the new map
+         */
         public void setMap(String map)
         {
             this.map = map;
         }
 
+        /**
+         * Sets the reduce.
+         * 
+         * @param reduce
+         *            the new reduce
+         */
         public void setReduce(String reduce)
         {
             this.reduce = reduce;

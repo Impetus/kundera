@@ -30,7 +30,6 @@ import org.junit.Test;
 import com.impetus.client.couchdb.entities.AddressCouchMTO;
 import com.impetus.client.couchdb.entities.PersonCouchMTO;
 
-
 public class CouchMTOTest
 {
     private EntityManagerFactory emf;
@@ -130,7 +129,7 @@ public class CouchMTOTest
         Assert.assertNull(foundPerson1);
         Assert.assertNull(foundPerson2);
     }
-    
+
     @Test
     public void testQuery()
     {
@@ -158,8 +157,10 @@ public class CouchMTOTest
         List<PersonCouchMTO> results = q.getResultList();
         Assert.assertEquals(2, results.size());
 
-        for (PersonCouchMTO foundPerson : results) {
-            if (foundPerson.getPersonId().equals("1")) {
+        for (PersonCouchMTO foundPerson : results)
+        {
+            if (foundPerson.getPersonId().equals("1"))
+            {
 
                 Assert.assertNotNull(foundPerson);
                 Assert.assertNotNull(foundPerson.getAddress());
@@ -167,10 +168,11 @@ public class CouchMTOTest
                 Assert.assertEquals("Kuldeep", foundPerson.getPersonName());
                 Assert.assertEquals("a", foundPerson.getAddress().getAddressId());
                 Assert.assertEquals("sector 11", foundPerson.getAddress().getStreet());
-                
 
-            } else if (foundPerson.getPersonId().equals("2")) {
-                
+            }
+            else if (foundPerson.getPersonId().equals("2"))
+            {
+
                 Assert.assertNotNull(foundPerson);
                 Assert.assertNotNull(foundPerson.getAddress());
                 Assert.assertEquals("2", foundPerson.getPersonId());
@@ -181,10 +183,8 @@ public class CouchMTOTest
         }
         em.remove(person1);
         em.remove(person2);
-    
-    
-    }
 
+    }
 
     private EntityManager getNewEM()
     {

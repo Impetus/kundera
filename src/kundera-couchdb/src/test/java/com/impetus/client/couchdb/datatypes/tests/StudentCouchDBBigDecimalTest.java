@@ -41,7 +41,7 @@ public class StudentCouchDBBigDecimalTest extends CouchDBBase
     public void setUp() throws Exception
     {
         emf = Persistence.createEntityManagerFactory(pu);
-        super.setUpBase(((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());
+        super.setUpBase(((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance());
     }
 
     @After
@@ -55,9 +55,10 @@ public class StudentCouchDBBigDecimalTest extends CouchDBBase
     @Test
     public void testDummy()
     {
-        
+
     }
-//    @Test
+
+    // @Test
     public void testExecuteUseSameEm()
     {
         testPersist(true);
@@ -68,7 +69,7 @@ public class StudentCouchDBBigDecimalTest extends CouchDBBase
         testDelete(true);
     }
 
-//    @Test
+    // @Test
     public void testExecute()
     {
         testPersist(false);

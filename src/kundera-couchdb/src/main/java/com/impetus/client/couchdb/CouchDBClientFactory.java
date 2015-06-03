@@ -60,10 +60,18 @@ public class CouchDBClientFactory extends GenericClientFactory
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(CouchDBClientFactory.class);
 
+    /** The http client. */
     private HttpClient httpClient;
 
+    /** The http host. */
     private HttpHost httpHost;
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.loader.ClientFactory#getSchemaManager(java.util.Map)
+     */
     @Override
     public SchemaManager getSchemaManager(Map<String, Object> puProperties)
     {
@@ -76,6 +84,11 @@ public class CouchDBClientFactory extends GenericClientFactory
         return schemaManager;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.loader.ClientLifeCycleManager#destroy()
+     */
     @Override
     public void destroy()
     {
@@ -93,6 +106,12 @@ public class CouchDBClientFactory extends GenericClientFactory
 
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.loader.GenericClientFactory#initialize(java.util.Map)
+     */
     @Override
     public void initialize(Map<String, Object> externalProperty)
     {
@@ -101,6 +120,12 @@ public class CouchDBClientFactory extends GenericClientFactory
         setExternalProperties(externalProperty);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.loader.GenericClientFactory#createPoolOrConnection()
+     */
     @Override
     protected Object createPoolOrConnection()
     {
@@ -205,6 +230,13 @@ public class CouchDBClientFactory extends GenericClientFactory
         return httpClient;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.loader.GenericClientFactory#instantiateClient(java
+     * .lang.String)
+     */
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
@@ -212,12 +244,24 @@ public class CouchDBClientFactory extends GenericClientFactory
                 clientMetadata, kunderaMetadata);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.loader.GenericClientFactory#isThreadSafe()
+     */
     @Override
     public boolean isThreadSafe()
     {
         return false;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.loader.GenericClientFactory#initializeLoadBalancer
+     * (java.lang.String)
+     */
     @Override
     protected void initializeLoadBalancer(String loadBalancingPolicyName)
     {
@@ -225,6 +269,9 @@ public class CouchDBClientFactory extends GenericClientFactory
                 + this.getClass().getSimpleName());
     }
 
+    /**
+     * Initialize property reader.
+     */
     private void initializePropertyReader()
     {
         if (propertyReader == null)
