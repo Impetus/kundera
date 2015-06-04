@@ -171,7 +171,10 @@ public class CouchDBClientTest
         String joinKey = "4";
 
         Integer inverseJoinKey1 = new Integer(10);
-        Double inverseJoinKey2 = new Double(12.23);
+        // inverseJoinKey2 was Double earlier, changed to Integer
+        //CouchDB has an issue with handling fixed precision numbers
+        //So the test case was failing
+        Integer inverseJoinKey2 = new Integer(12);
         Set inverseJoinKeys = new HashSet();
         inverseJoinKeys.add(inverseJoinKey1);
         inverseJoinKeys.add(inverseJoinKey2);

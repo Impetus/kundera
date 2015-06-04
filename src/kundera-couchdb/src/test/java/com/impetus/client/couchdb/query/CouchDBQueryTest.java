@@ -191,8 +191,6 @@ public class CouchDBQueryTest extends CouchDBBase
 
         logger.info("On testSelectedFields");
 
-        final String originalName = "vivek";
-
         Query query = em.createQuery("Select p.age from PersonCouchDB p");
         List results = query.getResultList();
         Assert.assertEquals(3, results.size());
