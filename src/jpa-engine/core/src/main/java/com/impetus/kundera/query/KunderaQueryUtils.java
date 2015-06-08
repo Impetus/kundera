@@ -366,7 +366,6 @@ public final class KunderaQueryUtils
         Class fieldClazz = String.class;
         String colFamily = m.getTableName();
         String colName = null;
-        String dbColName = null;
         Map<String, Object> map = new HashMap<String, Object>();
 
         boolean isEmbeddable = false;
@@ -374,6 +373,7 @@ public final class KunderaQueryUtils
         String fieldName = sfpExp.getPath(count++);
 
         AbstractAttribute attrib = (AbstractAttribute) entity.getAttribute(fieldName);
+        String dbColName = attrib.getJPAColumnName();
         isEmbeddable = metaModel.isEmbeddable(attrib.getBindableJavaType());
         while (sfpExp.pathSize() > count)
         {
@@ -384,7 +384,7 @@ public final class KunderaQueryUtils
                 fieldName = fieldName + "." + attName;
                 attrib = (AbstractAttribute) embeddableType.getAttribute(attName);
                 isEmbeddable = metaModel.isEmbeddable(attrib.getBindableJavaType());
-
+                dbColName+=("."+attrib.getJPAColumnName());
             }
             colName = fieldName;
         }
@@ -393,7 +393,6 @@ public final class KunderaQueryUtils
         {
             fieldClazz = attrib.getBindableJavaType();
             colFamily = attrib.getTableName() != null ? attrib.getTableName() : m.getTableName();
-            dbColName = attrib.getJPAColumnName();
             colName = colName != null ? colName : attrib.getJPAColumnName();
 
         }
