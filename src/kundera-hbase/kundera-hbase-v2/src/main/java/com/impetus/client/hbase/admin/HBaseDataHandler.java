@@ -583,9 +583,6 @@ public class HBaseDataHandler implements DataHandler
             {
                 String columnName = ((AbstractAttribute) attribute).getJPAColumnName();
                 columnName = count != -1 ? prefix + columnName + HBaseUtils.DELIM + count : prefix + columnName;
-                // columnName = count != -1 ? prefix + HBaseUtils.DELIM +
-                // columnName + HBaseUtils.DELIM + count
-                // : columnName;
                 String idColName = ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName();
                 String colFamily = ((AbstractAttribute) attribute).getTableName() != null ? ((AbstractAttribute) attribute)
                         .getTableName() : m.getTableName();
