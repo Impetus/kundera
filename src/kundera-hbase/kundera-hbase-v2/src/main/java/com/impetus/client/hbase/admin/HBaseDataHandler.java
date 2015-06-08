@@ -859,7 +859,8 @@ public class HBaseDataHandler implements DataHandler
                 if ((boolean) map.get(Constants.IS_EMBEDDABLE))
                 {
                     Class embedClazz = (Class) map.get(Constants.FIELD_CLAZZ);
-                    obj = populateEmbeddableObject(data, KunderaCoreUtils.createNewInstance(embedClazz), m, embedClazz);
+                    String prefix = (String) map.get(Constants.DB_COL_NAME) + HBaseUtils.DOT;
+                    obj = populateEmbeddableObject(data, KunderaCoreUtils.createNewInstance(embedClazz), m, embedClazz, prefix);
                 }
                 else if (isIdCol(m, (String) map.get(Constants.DB_COL_NAME)))
                 {
@@ -904,14 +905,15 @@ public class HBaseDataHandler implements DataHandler
      *            the m
      * @param clazz
      *            the clazz
+     * @param prefix 
      * @return the object
      */
-    private Object populateEmbeddableObject(HBaseDataWrapper data, Object obj, EntityMetadata m, Class clazz)
+    private Object populateEmbeddableObject(HBaseDataWrapper data, Object obj, EntityMetadata m, Class clazz, String prefix)
     {
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
         Set<Attribute> attributes = metaModel.embeddable(clazz).getAttributes();
-        writeValuesToEntity(obj, data, m, metaModel, attributes, null, null, -1, null);
+        writeValuesToEntity(obj, data, m, metaModel, attributes, null, null, -1, prefix);
         return obj;
     }
 
