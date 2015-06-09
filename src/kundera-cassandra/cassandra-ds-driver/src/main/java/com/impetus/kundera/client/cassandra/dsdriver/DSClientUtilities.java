@@ -61,15 +61,23 @@ public final class DSClientUtilities
     /**
      * assign value to provided entity instance else return value of mapped java
      * type.
-     *
-     * @param row            DS row
-     * @param entity            JPA entity
-     * @param metadata            entity's metadata
-     * @param dataType            data type
-     * @param entityType            entity type from metamodel
-     * @param columnName            jpa column name
-     * @param member the member
-     * @param metamodel the metamodel
+     * 
+     * @param row
+     *            DS row
+     * @param entity
+     *            JPA entity
+     * @param metadata
+     *            entity's metadata
+     * @param dataType
+     *            data type
+     * @param entityType
+     *            entity type from metamodel
+     * @param columnName
+     *            jpa column name
+     * @param member
+     *            the member
+     * @param metamodel
+     *            the metamodel
      * @return modified entity instance with data type value. If entity is null
      *         then returns value of mapped java class.
      */
@@ -127,45 +135,38 @@ public final class DSClientUtilities
             if (member != null && retVal != null && entity != null)
             {
                 PropertyAccessorHelper.set(entity, member, ((ByteBuffer) retVal).array());
-                // setFieldValue(entity, member, retVal);
             }
             break;
 
         case BOOLEAN:
             retVal = row.getBool(columnName);
             setFieldValue(entity, member, retVal);
-            // PropertyAccessorHelper.set(entity, member, retVal);
             break;
 
         case BIGINT:
         case COUNTER:
             retVal = row.getLong(columnName);
             setFieldValue(entity, member, retVal);
-            // PropertyAccessorHelper.set(entity, member, retVal);
             break;
 
         case DECIMAL:
             retVal = row.getDecimal(columnName);
             setFieldValue(entity, member, retVal);
-            // PropertyAccessorHelper.set(entity, member, retVal);
             break;
 
         case DOUBLE:
             retVal = row.getDouble(columnName);
             setFieldValue(entity, member, retVal);
-            // PropertyAccessorHelper.set(entity, member, retVal);
             break;
 
         case FLOAT:
             retVal = row.getFloat(columnName);
             setFieldValue(entity, member, retVal);
-            // PropertyAccessorHelper.set(entity, member, retVal);
             break;
 
         case INET:
             retVal = row.getInet(columnName);
             setFieldValue(entity, member, retVal);
-            // PropertyAccessorHelper.set(entity, member, retVal);
             break;
 
         case INT:
@@ -230,9 +231,6 @@ public final class DSClientUtilities
                             metamodel));
                 }
             }
-            // retVal = row.getList(columnName,
-            // listAttributeTypeClass.isAssignableFrom(byte[].class)?
-            // ByteBuffer.class:listAttributeTypeClass);
 
             if (retVal != null && !((List) retVal).isEmpty() && !isElementCollectionList)
             {
@@ -260,9 +258,6 @@ public final class DSClientUtilities
 
         case SET:
             Class setAttributeTypeClass = PropertyAccessorHelper.getGenericClass(member);
-            // retVal = row.getList(columnName,
-            // setAttributeTypeClass.isAssignableFrom(byte[].class)?
-            // ByteBuffer.class:setAttributeTypeClass);
             Class setClazz = null;
             boolean isElementCollectionSet = false;
             if (setAttributeTypeClass.isAssignableFrom(byte[].class))
@@ -291,9 +286,6 @@ public final class DSClientUtilities
                 }
             }
 
-            // retVal = row.getSet(columnName,
-            // setAttributeTypeClass.isAssignableFrom(byte[].class)?
-            // ByteBuffer.class:setAttributeTypeClass);
             if (retVal != null && !((Set) retVal).isEmpty() && !isElementCollectionSet)
             {
                 if (setAttributeTypeClass.isAssignableFrom(byte[].class))
@@ -315,7 +307,6 @@ public final class DSClientUtilities
             {
                 PropertyAccessorHelper.set(entity, member, resultSet);
             }
-            // PropertyAccessorHelper.set(entity, member, retVal);
             break;
         /*
          * ASCII, BIGINT, BLOB, BOOLEAN, COUNTER, DECIMAL, DOUBLE, FLOAT, INET,
@@ -362,17 +353,6 @@ public final class DSClientUtilities
                 }
             }
 
-            // retVal = row.getMap(columnName,
-            // mapGenericClasses.get(0).isAssignableFrom(byte[].class) ?
-            // ByteBuffer.class
-            // : mapGenericClasses.get(0), /*
-            // * mapGenericClasses.get(
-            // * 0),
-            // */
-            // mapGenericClasses.get(1).isAssignableFrom(byte[].class) ?
-            // ByteBuffer.class
-            // : mapGenericClasses.get(1));
-
             boolean isByteBuffer = mapGenericClasses.get(0).isAssignableFrom(byte[].class)
                     || mapGenericClasses.get(1).isAssignableFrom(byte[].class);
 
@@ -412,11 +392,15 @@ public final class DSClientUtilities
 
     /**
      * Sets the udt value.
-     *
-     * @param entity the entity
-     * @param embeddedClass the embedded class
-     * @param udt the udt
-     * @param metaModel the meta model
+     * 
+     * @param entity
+     *            the entity
+     * @param embeddedClass
+     *            the embedded class
+     * @param udt
+     *            the udt
+     * @param metaModel
+     *            the meta model
      * @return the object
      */
     private static Object setUDTValue(Object entity, Class embeddedClass, UDTValue udt, MetamodelImpl metaModel)
@@ -436,8 +420,8 @@ public final class DSClientUtilities
             }
             else
             {
-                setBasicValue(embeddedObject, embeddableColumn, ((AbstractAttribute) subAttribute).getJPAColumnName(), udt,
-                        CassandraDataTranslator.getCassandraDataTypeClass(embeddableColumn.getType()), metaModel);
+                setBasicValue(embeddedObject, embeddableColumn, ((AbstractAttribute) subAttribute).getJPAColumnName(),
+                        udt, CassandraDataTranslator.getCassandraDataTypeClass(embeddableColumn.getType()), metaModel);
             }
 
         }
@@ -447,13 +431,19 @@ public final class DSClientUtilities
 
     /**
      * Sets the basic value.
-     *
-     * @param entity the entity
-     * @param member the member
-     * @param columnName the column name
-     * @param row the row
-     * @param dataType the data type
-     * @param metamodel the metamodel
+     * 
+     * @param entity
+     *            the entity
+     * @param member
+     *            the member
+     * @param columnName
+     *            the column name
+     * @param row
+     *            the row
+     * @param dataType
+     *            the data type
+     * @param metamodel
+     *            the metamodel
      */
     private static void setBasicValue(Object entity, Field member, String columnName, UDTValue row,
             CassandraType dataType, MetamodelImpl metamodel)
@@ -467,45 +457,41 @@ public final class DSClientUtilities
             if (retVal != null)
             {
                 PropertyAccessorHelper.set(entity, member, ((ByteBuffer) retVal).array());
-                // setFieldValue(entity, member, retVal);
             }
             break;
 
         case BOOLEAN:
             retVal = row.getBool(columnName);
             setFieldValue(entity, member, retVal);
-            // PropertyAccessorHelper.set(entity, member, retVal);
             break;
 
         case BIGINT:
+            // bigints in embeddables and element collections are mapped/defined
+            // by Long
+        case LONG:
         case COUNTER:
             retVal = row.getLong(columnName);
             setFieldValue(entity, member, retVal);
-            // PropertyAccessorHelper.set(entity, member, retVal);
             break;
 
         case DECIMAL:
             retVal = row.getDecimal(columnName);
             setFieldValue(entity, member, retVal);
-            // PropertyAccessorHelper.set(entity, member, retVal);
             break;
 
         case DOUBLE:
             retVal = row.getDouble(columnName);
             setFieldValue(entity, member, retVal);
-            // PropertyAccessorHelper.set(entity, member, retVal);
             break;
 
         case FLOAT:
             retVal = row.getFloat(columnName);
             setFieldValue(entity, member, retVal);
-            // PropertyAccessorHelper.set(entity, member, retVal);
             break;
 
         case INET:
             retVal = row.getInet(columnName);
             setFieldValue(entity, member, retVal);
-            // PropertyAccessorHelper.set(entity, member, retVal);
             break;
 
         case INT:
@@ -573,9 +559,6 @@ public final class DSClientUtilities
                             metamodel));
                 }
             }
-            // retVal = row.getList(columnName,
-            // listAttributeTypeClass.isAssignableFrom(byte[].class)?
-            // ByteBuffer.class:listAttributeTypeClass);
 
             if (retVal != null && !((List) retVal).isEmpty() && !isElementCollectionList)
             {
@@ -603,9 +586,6 @@ public final class DSClientUtilities
 
         case SET:
             Class setAttributeTypeClass = PropertyAccessorHelper.getGenericClass(member);
-            // retVal = row.getList(columnName,
-            // setAttributeTypeClass.isAssignableFrom(byte[].class)?
-            // ByteBuffer.class:setAttributeTypeClass);
             Class setClazz = null;
             boolean isElementCollectionSet = false;
             if (setAttributeTypeClass.isAssignableFrom(byte[].class))
@@ -634,9 +614,6 @@ public final class DSClientUtilities
                 }
             }
 
-            // retVal = row.getSet(columnName,
-            // setAttributeTypeClass.isAssignableFrom(byte[].class)?
-            // ByteBuffer.class:setAttributeTypeClass);
             if (retVal != null && !((Set) retVal).isEmpty() && !isElementCollectionSet)
             {
                 if (setAttributeTypeClass.isAssignableFrom(byte[].class))
@@ -658,7 +635,6 @@ public final class DSClientUtilities
             {
                 PropertyAccessorHelper.set(entity, member, resultSet);
             }
-            // PropertyAccessorHelper.set(entity, member, retVal);
             break;
         /*
          * ASCII, BIGINT, BLOB, BOOLEAN, COUNTER, DECIMAL, DOUBLE, FLOAT, INET,
@@ -705,17 +681,6 @@ public final class DSClientUtilities
                 }
             }
 
-            // retVal = row.getMap(columnName,
-            // mapGenericClasses.get(0).isAssignableFrom(byte[].class) ?
-            // ByteBuffer.class
-            // : mapGenericClasses.get(0), /*
-            // * mapGenericClasses.get(
-            // * 0),
-            // */
-            // mapGenericClasses.get(1).isAssignableFrom(byte[].class) ?
-            // ByteBuffer.class
-            // : mapGenericClasses.get(1));
-
             boolean isByteBuffer = mapGenericClasses.get(0).isAssignableFrom(byte[].class)
                     || mapGenericClasses.get(1).isAssignableFrom(byte[].class);
 
@@ -743,19 +708,17 @@ public final class DSClientUtilities
                 PropertyAccessorHelper.set(entity, member, resultMap);
             }
             break;
-        // case UDT:
-        // retVal = row.getUDTValue(columnName);
-        // setUDTValue(entity, member, (UDTValue) retVal, metamodel);
-        // PropertyAccessorHelper.set(entity,member,retVal);
         }
 
     }
 
     /**
      * Sets the int value.
-     *
-     * @param member the member
-     * @param retVal the ret val
+     * 
+     * @param member
+     *            the member
+     * @param retVal
+     *            the ret val
      * @return the object
      */
     private static Object setIntValue(Field member, Object retVal)
@@ -776,10 +739,13 @@ public final class DSClientUtilities
 
     /**
      * Sets the text value.
-     *
-     * @param entity the entity
-     * @param member the member
-     * @param retVal the ret val
+     * 
+     * @param entity
+     *            the entity
+     * @param member
+     *            the member
+     * @param retVal
+     *            the ret val
      * @return the object
      */
     private static Object setTextValue(Object entity, Field member, Object retVal)
@@ -802,10 +768,13 @@ public final class DSClientUtilities
 
     /**
      * Sets the field value.
-     *
-     * @param entity the entity
-     * @param member the member
-     * @param retVal the ret val
+     * 
+     * @param entity
+     *            the entity
+     * @param member
+     *            the member
+     * @param retVal
+     *            the ret val
      */
     private static void setFieldValue(Object entity, Field member, Object retVal)
     {

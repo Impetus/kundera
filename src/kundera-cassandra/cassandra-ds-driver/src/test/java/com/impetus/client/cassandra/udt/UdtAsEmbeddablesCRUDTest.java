@@ -643,7 +643,7 @@ public class UdtAsEmbeddablesCRUDTest
         personalDetails.setAddresses(addresses);
 
         Phone phone = new Phone();
-        phone.setNumber("9988776655");
+        phone.setNumber(9988776655l);
         String elements[] = { "personal", "main", "indore" };
         phone.setTags(new HashSet<String>(Arrays.asList(elements)));
         List<Phone> phoneList = new ArrayList<Phone>();

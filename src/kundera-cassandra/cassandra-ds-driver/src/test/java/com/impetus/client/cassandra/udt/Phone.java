@@ -33,7 +33,7 @@ public class Phone
     
     /** The number. */
     @Column
-    private String number;
+    private Long number;
 
      /** The tags. */
      @Column
@@ -52,7 +52,7 @@ public class Phone
      *
      * @return the number
      */
-    public String getNumber()
+    public Long getNumber()
     {
         return number;
     }
@@ -62,7 +62,7 @@ public class Phone
      *
      * @param number the new number
      */
-    public void setNumber(String number)
+    public void setNumber(Long number)
     {
         this.number = number;
     }
