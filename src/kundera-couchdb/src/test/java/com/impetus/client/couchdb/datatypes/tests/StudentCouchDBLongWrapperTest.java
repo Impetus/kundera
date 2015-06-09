@@ -41,13 +41,14 @@ public class StudentCouchDBLongWrapperTest extends CouchDBBase
     public void setUp() throws Exception
     {
         emf = Persistence.createEntityManagerFactory(pu);
-        super.setUpBase(((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());
+        super.setUpBase(((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance());
     }
 
     @After
     public void tearDown() throws Exception
     {
-        emf.close();     super.dropDatabase();
+        emf.close();
+        super.dropDatabase();
 
     }
 
@@ -244,7 +245,8 @@ public class StudentCouchDBLongWrapperTest extends CouchDBBase
         List<StudentCouchDBLongWrapper> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentOracleNoSQLLongWrapper s where s.name = Kuldeep and s.age > " + getMinValue(short.class);
+        query = "Select s From StudentOracleNoSQLLongWrapper s where s.name = Kuldeep and s.age > "
+                + getMinValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -270,8 +272,8 @@ public class StudentCouchDBLongWrapperTest extends CouchDBBase
         List<StudentCouchDBLongWrapper> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentOracleNoSQLLongWrapper s where s.name = Kuldeep and s.age > " + getMinValue(short.class)
-                + " and s.age <= " + getMaxValue(short.class);
+        query = "Select s From StudentOracleNoSQLLongWrapper s where s.name = Kuldeep and s.age > "
+                + getMinValue(short.class) + " and s.age <= " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -395,8 +397,8 @@ public class StudentCouchDBLongWrapperTest extends CouchDBBase
         List<StudentCouchDBLongWrapper> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentOracleNoSQLLongWrapper s where s.name = Amresh and s.age > " + getMinValue(short.class)
-                + " and s.age < " + getMaxValue(short.class);
+        query = "Select s From StudentOracleNoSQLLongWrapper s where s.name = Amresh and s.age > "
+                + getMinValue(short.class) + " and s.age < " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);

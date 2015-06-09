@@ -261,7 +261,7 @@ public class HBaseDataHandler implements DataHandler
         }
         HBaseRow hbaseRow = new HBaseRow(rowId, new ArrayList<HBaseCell>());
         // handle attributes and embeddables
-        createCellsAndAddToRow(entity, metaModel, attributes, hbaseRow, m, -1, null);
+        createCellsAndAddToRow(entity, metaModel, attributes, hbaseRow, m, -1, "");
         // handle relations
         if (relations != null && !relations.isEmpty())
         {
@@ -344,17 +344,18 @@ public class HBaseDataHandler implements DataHandler
         AbstractAttribute idCol = (AbstractAttribute) m.getIdAttribute();
         for (Attribute attribute : attributes)
         {
-            Class clazz = ((AbstractAttribute) attribute).getBindableJavaType();
+            AbstractAttribute absAttrib = (AbstractAttribute) attribute;
+            Class clazz = absAttrib.getBindableJavaType();
             if (metaModel.isEmbeddable(clazz))
             {
-                Set<Attribute> attribEmbeddables = metaModel.embeddable(
-                        ((AbstractAttribute) attribute).getBindableJavaType()).getAttributes();
+                Set<Attribute> attribEmbeddables = metaModel.embeddable(absAttrib.getBindableJavaType())
+                        .getAttributes();
                 Object embeddedField = PropertyAccessorHelper.getObject(entity, (Field) attribute.getJavaMember());
                 if (attribute.isCollection() && embeddedField != null)
                 {
                     int newCount = count + 1;
-                    String newPrefix = prefix != null ? prefix + HBaseUtils.DELIM + attribute.getName() : attribute
-                            .getName();
+                    String newPrefix = prefix != "" ? prefix + absAttrib.getJPAColumnName() + HBaseUtils.DELIM
+                            : absAttrib.getJPAColumnName() + HBaseUtils.DELIM;
                     List listOfEmbeddables = (List) embeddedField;
                     addColumnForCollectionSize(hbaseRow, listOfEmbeddables.size(), newPrefix, m.getTableName());
                     for (Object obj : listOfEmbeddables)
@@ -364,16 +365,16 @@ public class HBaseDataHandler implements DataHandler
                 }
                 else
                 {
-                    createCellsAndAddToRow(embeddedField, metaModel, attribEmbeddables, hbaseRow, m, -1, prefix);
+                    String newPrefix = prefix != "" ? prefix + absAttrib.getJPAColumnName() + HBaseUtils.DOT
+                            : absAttrib.getJPAColumnName() + HBaseUtils.DOT;
+                    createCellsAndAddToRow(embeddedField, metaModel, attribEmbeddables, hbaseRow, m, -1, newPrefix);
                 }
             }
             else if (!attribute.isCollection() && !attribute.isAssociation())
             {
-                String columnFamily = ((AbstractAttribute) attribute).getTableName() != null ? ((AbstractAttribute) attribute)
-                        .getTableName() : m.getTableName();
-                String columnName = ((AbstractAttribute) attribute).getJPAColumnName();
-                columnName = count != -1 ? prefix + HBaseUtils.DELIM + columnName + HBaseUtils.DELIM + count
-                        : columnName;
+                String columnFamily = absAttrib.getTableName() != null ? absAttrib.getTableName() : m.getTableName();
+                String columnName = absAttrib.getJPAColumnName();
+                columnName = count != -1 ? prefix + columnName + HBaseUtils.DELIM + count : prefix + columnName;
                 Object value = PropertyAccessorHelper.getObject(entity, (Field) attribute.getJavaMember());
                 HBaseCell hbaseCell = new HBaseCell(columnFamily, columnName, value);
                 if (!idCol.getName().equals(attribute.getName()) && value != null)
@@ -386,7 +387,7 @@ public class HBaseDataHandler implements DataHandler
 
     private void addColumnForCollectionSize(HBaseRow hbaseRow, int size, String prefix, String colFamily)
     {
-        String columnName = prefix + HBaseUtils.DELIM + HBaseUtils.SIZE;
+        String columnName = prefix + HBaseUtils.SIZE;
         HBaseCell hbaseCell = new HBaseCell(colFamily, columnName, size);
         hbaseRow.addCell(hbaseCell);
     }
@@ -531,7 +532,7 @@ public class HBaseDataHandler implements DataHandler
             EntityType entityType = metaModel.entity(m.getEntityClazz());
             Set<Attribute> attributes = ((AbstractManagedType) entityType).getAttributes();
 
-            writeValuesToEntity(entity, hbaseData, m, metaModel, attributes, m.getRelationNames(), relations, -1, null);
+            writeValuesToEntity(entity, hbaseData, m, metaModel, attributes, m.getRelationNames(), relations, -1, "");
             if (!relations.isEmpty())
             {
                 return new EnhanceEntity(entity, rowKey, relations);
@@ -581,8 +582,7 @@ public class HBaseDataHandler implements DataHandler
             else if (!attribute.isCollection())
             {
                 String columnName = ((AbstractAttribute) attribute).getJPAColumnName();
-                columnName = count != -1 ? prefix + HBaseUtils.DELIM + columnName + HBaseUtils.DELIM + count
-                        : columnName;
+                columnName = count != -1 ? prefix + columnName + HBaseUtils.DELIM + count : prefix + columnName;
                 String idColName = ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName();
                 String colFamily = ((AbstractAttribute) attribute).getTableName() != null ? ((AbstractAttribute) attribute)
                         .getTableName() : m.getTableName();
@@ -628,21 +628,24 @@ public class HBaseDataHandler implements DataHandler
         Object embeddedField = KunderaCoreUtils.createNewInstance(javaType);
         if (!attribute.isCollection())
         {
-            writeValuesToEntity(embeddedField, hbaseData, m, metaModel, attribEmbeddables, null, null, -1, prefix);
+            String newPrefix = prefix != "" ? prefix + ((AbstractAttribute) attribute).getJPAColumnName()
+                    + HBaseUtils.DOT : ((AbstractAttribute) attribute).getJPAColumnName() + HBaseUtils.DOT;
+            writeValuesToEntity(embeddedField, hbaseData, m, metaModel, attribEmbeddables, null, null, -1, newPrefix);
             PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), embeddedField);
         }
         else
         {
             int newCount = count + 1;
-            String newPrefix = prefix != null ? prefix + HBaseUtils.DELIM + attribute.getName() : attribute.getName();
+            String newPrefix = prefix != "" ? prefix + ((AbstractAttribute) attribute).getJPAColumnName()
+                    + HBaseUtils.DELIM : ((AbstractAttribute) attribute).getJPAColumnName() + HBaseUtils.DELIM;
             List embeddedCollection = new ArrayList();
             int size = Bytes.toInt(hbaseData.getColumnValue(HBaseUtils.getColumnDataKey(m.getTableName(), newPrefix
-                    + HBaseUtils.DELIM + HBaseUtils.SIZE)));
+                    + HBaseUtils.SIZE)));
             while (size != newCount)
             {
                 embeddedField = KunderaCoreUtils.createNewInstance(javaType);
-                writeValuesToEntity(embeddedField, hbaseData, m, metaModel, attribEmbeddables, null,
-                        null, newCount++, newPrefix);
+                writeValuesToEntity(embeddedField, hbaseData, m, metaModel, attribEmbeddables, null, null, newCount++,
+                        newPrefix);
                 embeddedCollection.add(embeddedField);
             }
             PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), embeddedCollection);
@@ -856,7 +859,8 @@ public class HBaseDataHandler implements DataHandler
                 if ((boolean) map.get(Constants.IS_EMBEDDABLE))
                 {
                     Class embedClazz = (Class) map.get(Constants.FIELD_CLAZZ);
-                    obj = populateEmbeddableObject(data, KunderaCoreUtils.createNewInstance(embedClazz), m, embedClazz);
+                    String prefix = (String) map.get(Constants.DB_COL_NAME) + HBaseUtils.DOT;
+                    obj = populateEmbeddableObject(data, KunderaCoreUtils.createNewInstance(embedClazz), m, embedClazz, prefix);
                 }
                 else if (isIdCol(m, (String) map.get(Constants.DB_COL_NAME)))
                 {
@@ -901,14 +905,15 @@ public class HBaseDataHandler implements DataHandler
      *            the m
      * @param clazz
      *            the clazz
+     * @param prefix 
      * @return the object
      */
-    private Object populateEmbeddableObject(HBaseDataWrapper data, Object obj, EntityMetadata m, Class clazz)
+    private Object populateEmbeddableObject(HBaseDataWrapper data, Object obj, EntityMetadata m, Class clazz, String prefix)
     {
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
         Set<Attribute> attributes = metaModel.embeddable(clazz).getAttributes();
-        writeValuesToEntity(obj, data, m, metaModel, attributes, null, null, -1, null);
+        writeValuesToEntity(obj, data, m, metaModel, attributes, null, null, -1, prefix);
         return obj;
     }
 

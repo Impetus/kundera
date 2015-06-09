@@ -56,9 +56,9 @@ public class ResultIteratorTest extends CouchDBBase
     @Before
     public void setUp() throws Exception
     {
-        
+
         emf = Persistence.createEntityManagerFactory("couchdb_pu");
-        super.setUpBase(((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());
+        super.setUpBase(((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance());
         em = emf.createEntityManager();
     }
 
@@ -170,19 +170,23 @@ public class ResultIteratorTest extends CouchDBBase
 
         assertOnScroll(queryWithLTClause, 1);
 
-//        Don't uncomment it, because only one and clause is supported as of now.  
-        
-//        final String queryWithGTClause = "Select p from PersonCouchDB p where p.personName = vivek and p.age >= 15";
-//
-//        assertOnScroll(queryWithGTClause, 2);
-//
-//        final String queryWithLTGTClause = "Select p from PersonCouchDB p where p.personName = vivek and p.age > 10 and p.age < 20";
-//
-//        assertOnScroll(queryWithLTGTClause, 1);
-//
-//        final String queryWithLTGTEClause = "Select p from PersonCouchDB p where p.personName = vivek and p.age >= 10 and p.age < 20";
-//
-//        assertOnScroll(queryWithLTGTEClause, 2);
+        // Don't uncomment it, because only one and clause is supported as of
+        // now.
+
+        // final String queryWithGTClause =
+        // "Select p from PersonCouchDB p where p.personName = vivek and p.age >= 15";
+        //
+        // assertOnScroll(queryWithGTClause, 2);
+        //
+        // final String queryWithLTGTClause =
+        // "Select p from PersonCouchDB p where p.personName = vivek and p.age > 10 and p.age < 20";
+        //
+        // assertOnScroll(queryWithLTGTClause, 1);
+        //
+        // final String queryWithLTGTEClause =
+        // "Select p from PersonCouchDB p where p.personName = vivek and p.age >= 10 and p.age < 20";
+        //
+        // assertOnScroll(queryWithLTGTEClause, 2);
 
         String queryWithIdClause = "Select p from PersonCouchDB p where p.personId = '2' ";
         assertOnScroll(queryWithIdClause, 1);

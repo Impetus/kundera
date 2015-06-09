@@ -50,23 +50,32 @@ import com.impetus.kundera.utils.KunderaCoreUtils;
 import com.impetus.kundera.utils.ReflectUtils;
 
 /**
- * Object mapper for json
+ * Object mapper for json.
  * 
  * @author Kuldeep Mishra
- * 
  */
 public class CouchDBObjectMapper
 {
+
+    /** The Constant log. */
     private static final Logger log = LoggerFactory.getLogger(CouchDBObjectMapper.class);
 
     /**
+     * Gets the json of entity.
      * 
      * @param m
+     *            the m
      * @param entity
+     *            the entity
      * @param id
+     *            the id
      * @param relations
-     * @return
+     *            the relations
+     * @param kunderaMetadata
+     *            the kundera metadata
+     * @return the json of entity
      * @throws OperationNotSupportedException
+     *             the operation not supported exception
      */
     static JsonObject getJsonOfEntity(EntityMetadata m, Object entity, Object id, List<RelationHolder> relations,
             final KunderaMetadata kunderaMetadata) throws OperationNotSupportedException
@@ -142,15 +151,23 @@ public class CouchDBObjectMapper
                         getJsonPrimitive(rh.getRelationValue(), rh.getRelationValue().getClass()));
             }
         }
+        jsonObject.add(CouchDBConstants.ENTITYNAME, new JsonPrimitive(m.getTableName()));
         return jsonObject;
     }
 
     /**
+     * On embeddable.
      * 
      * @param entityType
+     *            the entity type
      * @param column
-     * @param m
+     *            the column
      * @param entity
+     *            the entity
+     * @param embeddableType
+     *            the embeddable type
+     * @param jsonObject
+     *            the json object
      */
     private static void onEmbeddable(EntityType entityType, Attribute column, Object entity,
             EmbeddableType embeddableType, JsonObject jsonObject)
@@ -162,10 +179,13 @@ public class CouchDBObjectMapper
     }
 
     /**
+     * Gets the json object.
      * 
      * @param columns
+     *            the columns
      * @param object
-     * @return
+     *            the object
+     * @return the json object
      */
     private static JsonObject getJsonObject(Set<Attribute> columns, Object object)
     {
@@ -182,6 +202,17 @@ public class CouchDBObjectMapper
         return jsonObject;
     }
 
+    /**
+     * Gets the json object.
+     * 
+     * @param declaredFields
+     *            the declared fields
+     * @param embeddableType
+     *            the embeddable type
+     * @param embeddedObject
+     *            the embedded object
+     * @return the json object
+     */
     private static JsonElement getJsonObject(Field[] declaredFields, EmbeddableType embeddableType,
             Object embeddedObject)
     {
@@ -201,12 +232,19 @@ public class CouchDBObjectMapper
     }
 
     /**
+     * Gets the entity from json.
      * 
      * @param entityClass
+     *            the entity class
      * @param m
+     *            the m
      * @param jsonObj
+     *            the json obj
      * @param relations
-     * @return
+     *            the relations
+     * @param kunderaMetadata
+     *            the kundera metadata
+     * @return the entity from json
      */
     static Object getEntityFromJson(Class<?> entityClass, EntityMetadata m, JsonObject jsonObj, List<String> relations,
             final KunderaMetadata kunderaMetadata)
@@ -310,6 +348,16 @@ public class CouchDBObjectMapper
         }
     }
 
+    /**
+     * Sets the field value.
+     * 
+     * @param entity
+     *            the entity
+     * @param column
+     *            the column
+     * @param value
+     *            the value
+     */
     private static void setFieldValue(Object entity, Attribute column, JsonElement value)
     {
         if (column.getJavaType().isAssignableFrom(byte[].class))
@@ -328,12 +376,20 @@ public class CouchDBObjectMapper
     }
 
     /**
+     * On via embeddable.
+     * 
      * @param entityType
+     *            the entity type
      * @param column
+     *            the column
      * @param m
+     *            the m
      * @param entity
+     *            the entity
      * @param embeddable
-     * @param document
+     *            the embeddable
+     * @param jsonObj
+     *            the json obj
      */
     private static void onViaEmbeddable(EntityType entityType, Attribute column, EntityMetadata m, Object entity,
             EmbeddableType embeddable, JsonObject jsonObj)
@@ -351,11 +407,15 @@ public class CouchDBObjectMapper
     }
 
     /**
+     * Gets the object from json.
      * 
      * @param jsonObj
+     *            the json obj
      * @param clazz
+     *            the clazz
      * @param columns
-     * @return
+     *            the columns
+     * @return the object from json
      */
     static Object getObjectFromJson(JsonObject jsonObj, Class clazz, Set<Attribute> columns)
     {
@@ -369,10 +429,13 @@ public class CouchDBObjectMapper
     }
 
     /**
+     * Gets the json primitive.
      * 
      * @param value
+     *            the value
      * @param clazz
-     * @return
+     *            the clazz
+     * @return the json primitive
      */
     private static JsonElement getJsonPrimitive(Object value, Class clazz)
     {
@@ -402,6 +465,19 @@ public class CouchDBObjectMapper
         return null;
     }
 
+    /**
+     * Gets the _ id.
+     * 
+     * @param field
+     *            the field
+     * @param embeddedObject
+     *            the embedded object
+     * @param embeddableType
+     *            the embeddable type
+     * @param _id
+     *            the _id
+     * @return the _ id
+     */
     static String get_Id(Field field, Object embeddedObject, EmbeddableType embeddableType, String _id)
     {
         Field[] fields = field.getType().getDeclaredFields();

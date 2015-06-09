@@ -30,7 +30,8 @@ import org.junit.Test;
 import com.impetus.client.couchdb.entities.AddressCouchOTO;
 import com.impetus.client.couchdb.entities.PersonCouchOTO;
 
-public class CouchOTOTest {
+public class CouchOTOTest
+{
     private EntityManagerFactory emf;
 
     private EntityManager em;
@@ -39,7 +40,8 @@ public class CouchOTOTest {
      * @throws java.lang.Exception
      */
     @Before
-    public void setUp() throws Exception {
+    public void setUp() throws Exception
+    {
         emf = Persistence.createEntityManagerFactory("couchdb_pu");
         em = getNewEM();
     }
@@ -48,13 +50,15 @@ public class CouchOTOTest {
      * @throws java.lang.Exception
      */
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() throws Exception
+    {
         em.close();
         emf.close();
     }
 
     @Test
-    public void testCRUD() {
+    public void testCRUD()
+    {
         AddressCouchOTO address = new AddressCouchOTO();
         address.setAddressId("a");
         address.setStreet("sector 11");
@@ -98,7 +102,8 @@ public class CouchOTOTest {
     }
 
     @Test
-    public void testQuery() {
+    public void testQuery()
+    {
         AddressCouchOTO address = new AddressCouchOTO();
         address.setAddressId("a");
         address.setStreet("sector 11");
@@ -127,28 +132,34 @@ public class CouchOTOTest {
         List<PersonCouchOTO> results = q.getResultList();
         Assert.assertEquals(2, results.size());
 
-        for (PersonCouchOTO foundPerson : results) {
-            if (foundPerson.getPersonId().equals("1")) {
+        for (PersonCouchOTO foundPerson : results)
+        {
+            if (foundPerson.getPersonId().equals("1"))
+            {
 
                 Assert.assertEquals("sector 11", foundPerson.getAddress().getStreet());
                 Assert.assertEquals("a", foundPerson.getAddress().getAddressId());
                 Assert.assertEquals("Kuldeep", foundPerson.getPersonName());
 
-            } else if (foundPerson.getPersonId().equals("2")) {
+            }
+            else if (foundPerson.getPersonId().equals("2"))
+            {
                 Assert.assertEquals("sector 12", foundPerson.getAddress().getStreet());
                 Assert.assertEquals("b", foundPerson.getAddress().getAddressId());
                 Assert.assertEquals("KK", foundPerson.getPersonName());
 
             }
         }
-        
+
         em.remove(person);
         em.remove(person1);
 
     }
 
-    private EntityManager getNewEM() {
-        if (em != null && em.isOpen()) {
+    private EntityManager getNewEM()
+    {
+        if (em != null && em.isOpen())
+        {
             em.close();
         }
         return em = emf.createEntityManager();

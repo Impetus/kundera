@@ -42,13 +42,15 @@ public class StudentCouchDBCharTest extends CouchDBBase
     public void setUp() throws Exception
     {
 
-        emf = Persistence.createEntityManagerFactory(pu);super.setUpBase(((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());     
+        emf = Persistence.createEntityManagerFactory(pu);
+        super.setUpBase(((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance());
     }
 
     @After
     public void tearDown() throws Exception
     {
-        emf.close();     super.dropDatabase();
+        emf.close();
+        super.dropDatabase();
 
     }
 

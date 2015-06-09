@@ -24,17 +24,14 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 
 /**
- * @author vivek.mishra
- * Debit transaction extends {@link Transaction}
- *
+ * @author vivek.mishra Debit transaction extends {@link Transaction}
+ * 
  */
 @Entity
-@DiscriminatorValue(value="debit")
-
+@DiscriminatorValue(value = "debit")
 @AttributeOverrides(value = { @AttributeOverride(name = "txId", column = @Column(name = "DEBIT_ID")),
         @AttributeOverride(name = "bankIdentifier", column = @Column(name = "DEBIT_BANK_IDENT")),
         @AttributeOverride(name = "transactionDt", column = @Column(name = "TX_DT")) })
-
 public class DebitTransaction extends Transaction
 {
 
@@ -47,9 +44,9 @@ public class DebitTransaction extends Transaction
 
     public DebitTransaction()
     {
-        
+
     }
-    
+
     public Integer getAmount()
     {
         return amount;

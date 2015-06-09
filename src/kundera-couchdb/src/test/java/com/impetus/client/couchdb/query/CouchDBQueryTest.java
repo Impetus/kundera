@@ -191,8 +191,6 @@ public class CouchDBQueryTest extends CouchDBBase
 
         logger.info("On testSelectedFields");
 
-        final String originalName = "vivek";
-
         Query query = em.createQuery("Select p.age from PersonCouchDB p");
         List results = query.getResultList();
         Assert.assertEquals(3, results.size());
@@ -210,6 +208,48 @@ public class CouchDBQueryTest extends CouchDBBase
         age = (int) ((List) results.get(0)).get(0);
         Assert.assertTrue(age == 29 || age == 32 || age == 34);
         Assert.assertEquals("vivek", (String) ((List) results.get(0)).get(1));
+    }
+
+    @Test
+    public void testAggregations()
+    {
+        /*
+         * Test for selecting specific fields IMPORTANT NOTE: Selecting specific
+         * fields with 'WHERE' clause is yet not supported. It works only
+         * without 'WHERE' clause.
+         */
+
+        logger.info("On testAggregations");
+
+        Query query = em.createQuery("Select count(p) from PersonCouchDB p");
+        List results = query.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(3, (int) results.get(0));
+
+        query = em.createQuery("Select count(p.age) from PersonCouchDB p");
+        results = query.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(3, (int) results.get(0));
+
+        query = em.createQuery("Select sum(p.age) from PersonCouchDB p");
+        results = query.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(95.0, (double) results.get(0));
+
+        query = em.createQuery("Select min(p.age) from PersonCouchDB p");
+        results = query.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(29.0, (double) results.get(0));
+
+        query = em.createQuery("Select max(p.age) from PersonCouchDB p");
+        results = query.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(34.0, (double) results.get(0));
+
+        query = em.createQuery("Select avg(p.age) from PersonCouchDB p");
+        results = query.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(31.666666666666668, (double) results.get(0));
     }
 
     private void init()

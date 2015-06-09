@@ -42,13 +42,15 @@ public class StudentCouchDBShortPrimitiveTest extends CouchDBBase
     public void setUp() throws Exception
     {
 
-        emf = Persistence.createEntityManagerFactory(pu);super.setUpBase(((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());     
+        emf = Persistence.createEntityManagerFactory(pu);
+        super.setUpBase(((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance());
     }
 
     @After
     public void tearDown() throws Exception
     {
-        emf.close();     super.dropDatabase();
+        emf.close();
+        super.dropDatabase();
 
     }
 
@@ -202,8 +204,8 @@ public class StudentCouchDBShortPrimitiveTest extends CouchDBBase
         Query q;
         List<StudentCouchDBShortPrimitive> students;
         em = emf.createEntityManager();
-        query = "Select s From StudentOracleNoSQLShortPrimitive s where s.id between " + getMinValue(Short.class) + " and "
-                + getMaxValue(Short.class);
+        query = "Select s From StudentOracleNoSQLShortPrimitive s where s.id between " + getMinValue(Short.class)
+                + " and " + getMaxValue(Short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);
@@ -334,7 +336,8 @@ public class StudentCouchDBShortPrimitiveTest extends CouchDBBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCouchDBShortPrimitive newStudent = em.find(StudentCouchDBShortPrimitive.class, getRandomValue(Short.class));
+        StudentCouchDBShortPrimitive newStudent = em.find(StudentCouchDBShortPrimitive.class,
+                getRandomValue(Short.class));
         Assert.assertNull(newStudent);
         em.close();
     }
@@ -353,7 +356,8 @@ public class StudentCouchDBShortPrimitiveTest extends CouchDBBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCouchDBShortPrimitive newStudent = em.find(StudentCouchDBShortPrimitive.class, getRandomValue(Short.class));
+        StudentCouchDBShortPrimitive newStudent = em.find(StudentCouchDBShortPrimitive.class,
+                getRandomValue(Short.class));
         Assert.assertNotNull(newStudent);
         Assert.assertEquals(getRandomValue(short.class), newStudent.getAge());
         Assert.assertEquals("Vivek", newStudent.getName());
@@ -395,8 +399,8 @@ public class StudentCouchDBShortPrimitiveTest extends CouchDBBase
         List<StudentCouchDBShortPrimitive> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentOracleNoSQLShortPrimitive s where s.name = Amresh and s.age > " + getMinValue(short.class)
-                + " and s.age < " + getMaxValue(short.class);
+        query = "Select s From StudentOracleNoSQLShortPrimitive s where s.name = Amresh and s.age > "
+                + getMinValue(short.class) + " and s.age < " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);

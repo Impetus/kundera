@@ -33,18 +33,34 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
  */
 public class CouchDBPropertyReader extends AbstractPropertyReader implements PropertyReader
 {
-    /** log instance */
+
+    /** log instance. */
     private static Logger log = LoggerFactory.getLogger(CouchDBPropertyReader.class);
 
-    /** MongoDB schema metadata instance */
+    /** MongoDB schema metadata instance. */
     public static CouchDBSchemaMetadata csmd;
 
+    /**
+     * Instantiates a new couch db property reader.
+     * 
+     * @param externalProperties
+     *            the external properties
+     * @param puMetadata
+     *            the pu metadata
+     */
     public CouchDBPropertyReader(Map externalProperties, final PersistenceUnitMetadata puMetadata)
     {
         super(externalProperties, puMetadata);
         csmd = new CouchDBSchemaMetadata();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.configure.AbstractPropertyReader#onXml(com.impetus
+     * .kundera.configure.ClientProperties)
+     */
     @Override
     protected void onXml(ClientProperties cp)
     {
@@ -55,19 +71,32 @@ public class CouchDBPropertyReader extends AbstractPropertyReader implements Pro
     }
 
     /**
+     * The Class CouchDBSchemaMetadata.
      * 
      * @author Kuldeep Mishra
-     * 
      */
     public class CouchDBSchemaMetadata
     {
+
+        /** The client properties. */
         private ClientProperties clientProperties;
 
+        /**
+         * Gets the client properties.
+         * 
+         * @return the client properties
+         */
         public ClientProperties getClientProperties()
         {
             return clientProperties;
         }
 
+        /**
+         * Sets the client properties.
+         * 
+         * @param clientProperties
+         *            the new client properties
+         */
         public void setClientProperties(ClientProperties clientProperties)
         {
             this.clientProperties = clientProperties;

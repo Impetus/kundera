@@ -43,13 +43,15 @@ public class StudentCouchDBBooleanWrapperTest extends CouchDBBase
     public void setUp() throws Exception
     {
 
-        emf = Persistence.createEntityManagerFactory(pu);super.setUpBase(((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());     
+        emf = Persistence.createEntityManagerFactory(pu);
+        super.setUpBase(((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance());
     }
 
     @After
     public void tearDown() throws Exception
     {
-        emf.close();     super.dropDatabase();
+        emf.close();
+        super.dropDatabase();
 
     }
 
@@ -100,7 +102,8 @@ public class StudentCouchDBBooleanWrapperTest extends CouchDBBase
     {
         EntityManager em = emf.createEntityManager();
 
-        StudentCouchDBBooleanWrapper studentMax = em.find(StudentCouchDBBooleanWrapper.class, getMaxValue(Boolean.class));
+        StudentCouchDBBooleanWrapper studentMax = em.find(StudentCouchDBBooleanWrapper.class,
+                getMaxValue(Boolean.class));
         Assert.assertNotNull(studentMax);
         Assert.assertEquals(getMaxValue(short.class), studentMax.getAge());
         Assert.assertEquals(getMaxValue(String.class), studentMax.getName());
@@ -110,7 +113,8 @@ public class StudentCouchDBBooleanWrapperTest extends CouchDBBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCouchDBBooleanWrapper studentMin = em.find(StudentCouchDBBooleanWrapper.class, getMinValue(Boolean.class));
+        StudentCouchDBBooleanWrapper studentMin = em.find(StudentCouchDBBooleanWrapper.class,
+                getMinValue(Boolean.class));
         Assert.assertNotNull(studentMin);
         Assert.assertEquals(getMinValue(short.class), studentMin.getAge());
         Assert.assertEquals(getMinValue(String.class), studentMin.getName());
@@ -133,7 +137,8 @@ public class StudentCouchDBBooleanWrapperTest extends CouchDBBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCouchDBBooleanWrapper newStudent = em.find(StudentCouchDBBooleanWrapper.class, getMaxValue(Boolean.class));
+        StudentCouchDBBooleanWrapper newStudent = em.find(StudentCouchDBBooleanWrapper.class,
+                getMaxValue(Boolean.class));
         Assert.assertNotNull(newStudent);
         Assert.assertEquals(getMaxValue(short.class), newStudent.getAge());
         Assert.assertEquals("Kuldeep", newStudent.getName());
@@ -291,7 +296,8 @@ public class StudentCouchDBBooleanWrapperTest extends CouchDBBase
     {
         EntityManager em = emf.createEntityManager();
 
-        StudentCouchDBBooleanWrapper studentMax = em.find(StudentCouchDBBooleanWrapper.class, getMinValue(Boolean.class));
+        StudentCouchDBBooleanWrapper studentMax = em.find(StudentCouchDBBooleanWrapper.class,
+                getMinValue(Boolean.class));
         Assert.assertNotNull(studentMax);
         Assert.assertEquals(getMinValue(short.class), studentMax.getAge());
         Assert.assertEquals("Kuldeep", studentMax.getName());
@@ -321,7 +327,8 @@ public class StudentCouchDBBooleanWrapperTest extends CouchDBBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCouchDBBooleanWrapper newStudent = em.find(StudentCouchDBBooleanWrapper.class, getRandomValue(Boolean.class));
+        StudentCouchDBBooleanWrapper newStudent = em.find(StudentCouchDBBooleanWrapper.class,
+                getRandomValue(Boolean.class));
         Assert.assertNull(newStudent);
         em.close();
     }
@@ -340,7 +347,8 @@ public class StudentCouchDBBooleanWrapperTest extends CouchDBBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCouchDBBooleanWrapper newStudent = em.find(StudentCouchDBBooleanWrapper.class, getMaxValue(Boolean.class));
+        StudentCouchDBBooleanWrapper newStudent = em.find(StudentCouchDBBooleanWrapper.class,
+                getMaxValue(Boolean.class));
         Assert.assertNotNull(newStudent);
         Assert.assertEquals(getMaxValue(short.class), newStudent.getAge());
         Assert.assertEquals("Vivek", newStudent.getName());

@@ -42,13 +42,15 @@ public class StudentCouchDBDoubleWrapperTest extends CouchDBBase
     public void setUp() throws Exception
     {
 
-        emf = Persistence.createEntityManagerFactory(pu);super.setUpBase(((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());     
+        emf = Persistence.createEntityManagerFactory(pu);
+        super.setUpBase(((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance());
     }
 
     @After
     public void tearDown() throws Exception
     {
-        emf.close();     super.dropDatabase();
+        emf.close();
+        super.dropDatabase();
 
     }
 
@@ -335,7 +337,8 @@ public class StudentCouchDBDoubleWrapperTest extends CouchDBBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCouchDBDoubleWrapper newStudent = em.find(StudentCouchDBDoubleWrapper.class, getRandomValue(Double.class));
+        StudentCouchDBDoubleWrapper newStudent = em.find(StudentCouchDBDoubleWrapper.class,
+                getRandomValue(Double.class));
         Assert.assertNull(newStudent);
         em.close();
     }
@@ -354,7 +357,8 @@ public class StudentCouchDBDoubleWrapperTest extends CouchDBBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCouchDBDoubleWrapper newStudent = em.find(StudentCouchDBDoubleWrapper.class, getRandomValue(Double.class));
+        StudentCouchDBDoubleWrapper newStudent = em.find(StudentCouchDBDoubleWrapper.class,
+                getRandomValue(Double.class));
         Assert.assertNotNull(newStudent);
         Assert.assertEquals(getRandomValue(short.class), newStudent.getAge());
         Assert.assertEquals("Vivek", newStudent.getName());

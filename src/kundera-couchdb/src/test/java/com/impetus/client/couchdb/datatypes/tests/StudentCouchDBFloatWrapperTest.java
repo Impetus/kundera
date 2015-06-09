@@ -42,13 +42,15 @@ public class StudentCouchDBFloatWrapperTest extends CouchDBBase
     public void setUp() throws Exception
     {
 
-        emf = Persistence.createEntityManagerFactory(pu);super.setUpBase(((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());     
+        emf = Persistence.createEntityManagerFactory(pu);
+        super.setUpBase(((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance());
     }
 
     @After
     public void tearDown() throws Exception
     {
-        emf.close();     super.dropDatabase();
+        emf.close();
+        super.dropDatabase();
 
     }
 
@@ -396,8 +398,8 @@ public class StudentCouchDBFloatWrapperTest extends CouchDBBase
         List<StudentCouchDBFloatWrapper> students;
         int count;
         em = emf.createEntityManager();
-        query = "Select s From StudentOracleNoSQLFloatWrapper s where s.name = Amresh and s.age > " + getMinValue(short.class)
-                + " and s.age < " + getMaxValue(short.class);
+        query = "Select s From StudentOracleNoSQLFloatWrapper s where s.name = Amresh and s.age > "
+                + getMinValue(short.class) + " and s.age < " + getMaxValue(short.class);
         q = em.createQuery(query);
         students = q.getResultList();
         Assert.assertNotNull(students);

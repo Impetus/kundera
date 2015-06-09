@@ -58,6 +58,8 @@ public final class HBaseUtils
     public static final String COLON = ":";
 
     public static final String SIZE = "size";
+    
+    public static final String DOT = ".";
 
     /**
      * Gets the bytes.

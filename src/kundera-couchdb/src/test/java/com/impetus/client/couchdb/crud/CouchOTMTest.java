@@ -32,12 +32,12 @@ import org.junit.Test;
 import com.impetus.client.couchdb.entities.AddressCouchOTM;
 import com.impetus.client.couchdb.entities.PersonCouchOTM;
 
-
 /**
  * @author impadmin
  * 
  */
-public class CouchOTMTest {
+public class CouchOTMTest
+{
     private EntityManagerFactory emf;
 
     private EntityManager em;
@@ -46,7 +46,8 @@ public class CouchOTMTest {
      * @throws java.lang.Exception
      */
     @Before
-    public void setUp() throws Exception {
+    public void setUp() throws Exception
+    {
         emf = Persistence.createEntityManagerFactory("couchdb_pu");
         em = getNewEM();
     }
@@ -55,13 +56,15 @@ public class CouchOTMTest {
      * @throws java.lang.Exception
      */
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() throws Exception
+    {
         em.close();
         emf.close();
     }
 
     @Test
-    public void testCRUD() {
+    public void testCRUD()
+    {
         AddressCouchOTM address1 = new AddressCouchOTM();
         address1.setAddressId("a");
         address1.setStreet("sector 11");
@@ -90,11 +93,15 @@ public class CouchOTMTest {
         Assert.assertEquals("Kuldeep", foundPerson.getPersonName());
 
         int counter = 0;
-        for (AddressCouchOTM address : foundPerson.getAddresses()) {
-            if (address.getAddressId().equals("a")) {
+        for (AddressCouchOTM address : foundPerson.getAddresses())
+        {
+            if (address.getAddressId().equals("a"))
+            {
                 counter++;
                 Assert.assertEquals("sector 11", address.getStreet());
-            } else {
+            }
+            else
+            {
                 Assert.assertEquals("b", address.getAddressId());
                 Assert.assertEquals("sector 12", address.getStreet());
                 counter++;
@@ -116,11 +123,15 @@ public class CouchOTMTest {
         Assert.assertEquals("KK", foundPerson.getPersonName());
 
         counter = 0;
-        for (AddressCouchOTM address : foundPerson.getAddresses()) {
-            if (address.getAddressId().equals("a")) {
+        for (AddressCouchOTM address : foundPerson.getAddresses())
+        {
+            if (address.getAddressId().equals("a"))
+            {
                 counter++;
                 Assert.assertEquals("sector 11", address.getStreet());
-            } else {
+            }
+            else
+            {
                 Assert.assertEquals("b", address.getAddressId());
                 Assert.assertEquals("sector 12", address.getStreet());
                 counter++;
@@ -136,7 +147,8 @@ public class CouchOTMTest {
     }
 
     @Test
-    public void testQuery() {
+    public void testQuery()
+    {
         AddressCouchOTM address1 = new AddressCouchOTM();
         address1.setAddressId("a");
         address1.setStreet("sector 11");
@@ -185,38 +197,52 @@ public class CouchOTMTest {
         List<PersonCouchOTM> results = q.getResultList();
         Assert.assertEquals(2, results.size());
 
-        for (PersonCouchOTM foundPerson : results) {
-            if (foundPerson.getPersonId().equals("1")) {
+        for (PersonCouchOTM foundPerson : results)
+        {
+            if (foundPerson.getPersonId().equals("1"))
+            {
 
                 Assert.assertEquals("Kuldeep", foundPerson.getPersonName());
                 Assert.assertEquals(2, foundPerson.getAddresses().size());
 
-                for (AddressCouchOTM address : foundPerson.getAddresses()) {
-                    if (address.getAddressId().equals("a")) {
+                for (AddressCouchOTM address : foundPerson.getAddresses())
+                {
+                    if (address.getAddressId().equals("a"))
+                    {
                         Assert.assertEquals("sector 11", address.getStreet());
-                    } else {
+                    }
+                    else
+                    {
                         Assert.assertEquals("b", address.getAddressId());
                         Assert.assertEquals("sector 12", address.getStreet());
 
                     }
                 }
 
-            } else if (foundPerson.getPersonId().equals("2")) {
-                
+            }
+            else if (foundPerson.getPersonId().equals("2"))
+            {
+
                 Assert.assertEquals("KK", foundPerson.getPersonName());
                 Assert.assertEquals(3, foundPerson.getAddresses().size());
 
-                for (AddressCouchOTM address : foundPerson.getAddresses()) {
-                    if (address.getAddressId().equals("a1")) {
-                        
+                for (AddressCouchOTM address : foundPerson.getAddresses())
+                {
+                    if (address.getAddressId().equals("a1"))
+                    {
+
                         Assert.assertEquals("Sector a1", address.getStreet());
-                        
-                    } else if (address.getAddressId().equals("a2")) {
+
+                    }
+                    else if (address.getAddressId().equals("a2"))
+                    {
 
                         Assert.assertEquals("Sector a2", address.getStreet());
 
-                    } else {
-                        
+                    }
+                    else
+                    {
+
                         Assert.assertEquals("a3", address.getAddressId());
                         Assert.assertEquals("Sector a3", address.getStreet());
 
@@ -230,8 +256,10 @@ public class CouchOTMTest {
 
     }
 
-    private EntityManager getNewEM() {
-        if (em != null && em.isOpen()) {
+    private EntityManager getNewEM()
+    {
+        if (em != null && em.isOpen())
+        {
             em.close();
         }
         return em = emf.createEntityManager();

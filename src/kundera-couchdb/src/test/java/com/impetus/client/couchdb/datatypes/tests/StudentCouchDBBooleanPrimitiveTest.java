@@ -43,13 +43,15 @@ public class StudentCouchDBBooleanPrimitiveTest extends CouchDBBase
     public void setUp() throws Exception
     {
 
-        emf = Persistence.createEntityManagerFactory(pu);super.setUpBase(((EntityManagerFactoryImpl)emf).getKunderaMetadataInstance());     
+        emf = Persistence.createEntityManagerFactory(pu);
+        super.setUpBase(((EntityManagerFactoryImpl) emf).getKunderaMetadataInstance());
     }
 
     @After
     public void tearDown() throws Exception
     {
-        emf.close();     super.dropDatabase();
+        emf.close();
+        super.dropDatabase();
 
     }
 
@@ -100,7 +102,8 @@ public class StudentCouchDBBooleanPrimitiveTest extends CouchDBBase
     {
         EntityManager em = emf.createEntityManager();
 
-        StudentCouchDBBooleanPrimitive studentMax = em.find(StudentCouchDBBooleanPrimitive.class, getMaxValue(boolean.class));
+        StudentCouchDBBooleanPrimitive studentMax = em.find(StudentCouchDBBooleanPrimitive.class,
+                getMaxValue(boolean.class));
         Assert.assertNotNull(studentMax);
         Assert.assertEquals(getMaxValue(short.class), studentMax.getAge());
         Assert.assertEquals(getMaxValue(String.class), studentMax.getName());
@@ -110,7 +113,8 @@ public class StudentCouchDBBooleanPrimitiveTest extends CouchDBBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCouchDBBooleanPrimitive studentMin = em.find(StudentCouchDBBooleanPrimitive.class, getMinValue(boolean.class));
+        StudentCouchDBBooleanPrimitive studentMin = em.find(StudentCouchDBBooleanPrimitive.class,
+                getMinValue(boolean.class));
         Assert.assertNotNull(studentMin);
         Assert.assertEquals(getMinValue(short.class), studentMin.getAge());
         Assert.assertEquals(getMinValue(String.class), studentMin.getName());
@@ -121,7 +125,8 @@ public class StudentCouchDBBooleanPrimitiveTest extends CouchDBBase
     public void testMerge(boolean useSameEm)
     {
         EntityManager em = emf.createEntityManager();
-        StudentCouchDBBooleanPrimitive student = em.find(StudentCouchDBBooleanPrimitive.class, getMaxValue(boolean.class));
+        StudentCouchDBBooleanPrimitive student = em.find(StudentCouchDBBooleanPrimitive.class,
+                getMaxValue(boolean.class));
         Assert.assertNotNull(student);
         Assert.assertEquals(getMaxValue(short.class), student.getAge());
         Assert.assertEquals(getMaxValue(String.class), student.getName());
@@ -133,7 +138,8 @@ public class StudentCouchDBBooleanPrimitiveTest extends CouchDBBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCouchDBBooleanPrimitive newStudent = em.find(StudentCouchDBBooleanPrimitive.class, getMaxValue(boolean.class));
+        StudentCouchDBBooleanPrimitive newStudent = em.find(StudentCouchDBBooleanPrimitive.class,
+                getMaxValue(boolean.class));
         Assert.assertNotNull(newStudent);
         Assert.assertEquals(getMaxValue(short.class), newStudent.getAge());
         Assert.assertEquals("Kuldeep", newStudent.getName());
@@ -291,7 +297,8 @@ public class StudentCouchDBBooleanPrimitiveTest extends CouchDBBase
     {
         EntityManager em = emf.createEntityManager();
 
-        StudentCouchDBBooleanPrimitive studentMax = em.find(StudentCouchDBBooleanPrimitive.class, getMinValue(boolean.class));
+        StudentCouchDBBooleanPrimitive studentMax = em.find(StudentCouchDBBooleanPrimitive.class,
+                getMinValue(boolean.class));
         Assert.assertNotNull(studentMax);
         Assert.assertEquals(getMinValue(short.class), studentMax.getAge());
         Assert.assertEquals("Kuldeep", studentMax.getName());
@@ -321,7 +328,8 @@ public class StudentCouchDBBooleanPrimitiveTest extends CouchDBBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCouchDBBooleanPrimitive newStudent = em.find(StudentCouchDBBooleanPrimitive.class, getRandomValue(boolean.class));
+        StudentCouchDBBooleanPrimitive newStudent = em.find(StudentCouchDBBooleanPrimitive.class,
+                getRandomValue(boolean.class));
         Assert.assertNull(newStudent);
         em.close();
     }
@@ -340,7 +348,8 @@ public class StudentCouchDBBooleanPrimitiveTest extends CouchDBBase
             em.close();
             em = emf.createEntityManager();
         }
-        StudentCouchDBBooleanPrimitive newStudent = em.find(StudentCouchDBBooleanPrimitive.class, getMaxValue(boolean.class));
+        StudentCouchDBBooleanPrimitive newStudent = em.find(StudentCouchDBBooleanPrimitive.class,
+                getMaxValue(boolean.class));
         Assert.assertNotNull(newStudent);
         Assert.assertEquals(getMaxValue(short.class), newStudent.getAge());
         Assert.assertEquals("Vivek", newStudent.getName());

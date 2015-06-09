@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -14,12 +15,13 @@
 	<url>http://maven.apache.org</url>
 
 	<properties>
-		<hadoop.version>2.6.0</hadoop.version>
 		<hbase.version>1.0.0</hbase.version>
 		<thrift.version>0.9.0</thrift.version>
 	</properties>
 
 	<!-- Dependencies -->
+	<!-- Hadoop dependency has been removed from here because it was creating 
+		version conflict with hbase dep. (hbase also has hadoop dependency) -->
 	<dependencies>
 
 		<dependency>
@@ -73,11 +75,6 @@
 					<artifactId>slf4j-api</artifactId>
 				</exclusion>
 			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.hadoop</groupId>
-			<artifactId>hadoop-common</artifactId>
-			<version>${hadoop.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.hbase</groupId>

@@ -21,13 +21,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
-import javax.persistence.metamodel.EntityType;
 
 import org.apache.hadoop.hbase.filter.BinaryComparator;
 import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp;
@@ -42,14 +40,10 @@ import org.eclipse.persistence.jpa.jpql.parser.ComparisonExpression;
 import org.eclipse.persistence.jpa.jpql.parser.Expression;
 import org.eclipse.persistence.jpa.jpql.parser.InExpression;
 import org.eclipse.persistence.jpa.jpql.parser.InputParameter;
-import org.eclipse.persistence.jpa.jpql.parser.KeywordExpression;
 import org.eclipse.persistence.jpa.jpql.parser.LikeExpression;
 import org.eclipse.persistence.jpa.jpql.parser.LogicalExpression;
-import org.eclipse.persistence.jpa.jpql.parser.NumericLiteral;
 import org.eclipse.persistence.jpa.jpql.parser.SelectClause;
 import org.eclipse.persistence.jpa.jpql.parser.SelectStatement;
-import org.eclipse.persistence.jpa.jpql.parser.StateFieldPathExpression;
-import org.eclipse.persistence.jpa.jpql.parser.StringLiteral;
 import org.eclipse.persistence.jpa.jpql.parser.WhereClause;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +63,6 @@ import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
-import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
@@ -306,13 +299,12 @@ public class HBaseQuery extends QueryImpl
             {
                 SelectStatement selectStatement = kunderaQuery.getSelectStatement();
                 SelectClause selectClause = (SelectClause) selectStatement.getSelectClause();
-                return KunderaQueryUtils.readSelectClause(selectClause.getSelectExpression(), m, useLuceneOrES, kunderaMetadata);
+                return KunderaQueryUtils.readSelectClause(selectClause.getSelectExpression(), m, useLuceneOrES,
+                        kunderaMetadata);
             }
             return new ArrayList();
         }
 
-       
-        
         /**
          * Translate.
          * 
@@ -441,23 +433,26 @@ public class HBaseQuery extends QueryImpl
                 Boolean isIdColumn)
         {
 
-            Map<String, Object>map = KunderaQueryUtils.onComparisonExpression(expression,m, kunderaMetadata, getKunderaQuery());
+            Map<String, Object> map = KunderaQueryUtils.onComparisonExpression(expression, m, kunderaMetadata,
+                    getKunderaQuery());
             Class fieldClazz = (Class) map.get(Constants.FIELD_CLAZZ);
             String colFamily = (String) map.get(Constants.COL_FAMILY);
             String columnName = (String) map.get(Constants.DB_COL_NAME);
-           
+
             isIdColumn = idColumn.equalsIgnoreCase(columnName);
-            
-            Object value = KunderaQueryUtils.getValue(((ComparisonExpression) expression).getRightExpression(), fieldClazz, kunderaQuery);
+
+            Object value = KunderaQueryUtils.getValue(((ComparisonExpression) expression).getRightExpression(),
+                    fieldClazz, kunderaQuery);
             if (!isEmbeddable(map))
             {
                 byte[] valueInBytes = getValueInBytes(value, fieldClazz, isIdColumn, m);
-                return createNewFilter(((ComparisonExpression) expression).getIdentifier(), Bytes.toBytes(colFamily), Bytes.toBytes(columnName), valueInBytes,
-                        isIdColumn);
+                return createNewFilter(((ComparisonExpression) expression).getIdentifier(), Bytes.toBytes(colFamily),
+                        Bytes.toBytes(columnName), valueInBytes, isIdColumn);
             }
             else
             {
-                return createFilterForEmbeddables(((ComparisonExpression) expression).getIdentifier(), isIdColumn, m, fieldClazz, value);
+                return createFilterForEmbeddables(((ComparisonExpression) expression).getIdentifier(), isIdColumn, m,
+                        fieldClazz, value, columnName);
             }
         }
 
@@ -474,10 +469,11 @@ public class HBaseQuery extends QueryImpl
          *            the field clazz
          * @param value
          *            the value
+         * @param prefix
          * @return the filter
          */
         private Filter createFilterForEmbeddables(String condition, Boolean isIdColumn, EntityMetadata m,
-                Class fieldClazz, Object value)
+                Class fieldClazz, Object value, String prefix)
         {
             if (isIdColumn)
             {
@@ -491,7 +487,7 @@ public class HBaseQuery extends QueryImpl
                 EmbeddableType embeddable = metaModel.embeddable(fieldClazz);
                 Set<Attribute> attributes = embeddable.getAttributes();
                 FilterList filterList = new FilterList();
-                onEmbeddableField(value, attributes, condition, m, metaModel, filterList);
+                onEmbeddableField(value, attributes, condition, m, metaModel, filterList, prefix);
                 return filterList;
             }
         }
@@ -511,9 +507,10 @@ public class HBaseQuery extends QueryImpl
          *            the meta model
          * @param filterList
          *            the filter list
+         * @param prefix
          */
         private void onEmbeddableField(Object embeddable, Set<Attribute> attributes, String condition,
-                EntityMetadata m, MetamodelImpl metaModel, FilterList filterList)
+                EntityMetadata m, MetamodelImpl metaModel, FilterList filterList, String prefix)
         {
             for (Attribute attrib : attributes)
             {
@@ -523,7 +520,7 @@ public class HBaseQuery extends QueryImpl
                     Object fieldValue = PropertyAccessorHelper.getObject(embeddable, (Field) attrib.getJavaMember());
                     String colFamily = ((AbstractAttribute) attrib).getTableName() != null ? ((AbstractAttribute) attrib)
                             .getTableName() : m.getTableName();
-                    String columnName = ((AbstractAttribute) attrib).getJPAColumnName();
+                    String columnName = prefix + HBaseUtils.DOT + ((AbstractAttribute) attrib).getJPAColumnName();
                     byte[] valueInBytes = getValueInBytes(fieldValue, clazz, false, m);
                     filterList.addFilter(createNewFilter(condition, Bytes.toBytes(colFamily),
                             Bytes.toBytes(columnName), valueInBytes, false));
@@ -533,7 +530,8 @@ public class HBaseQuery extends QueryImpl
                     Set<Attribute> attribEmbeddables = metaModel.embeddable(
                             ((AbstractAttribute) attrib).getBindableJavaType()).getAttributes();
                     Object fieldValue = PropertyAccessorHelper.getObject(embeddable, (Field) attrib.getJavaMember());
-                    onEmbeddableField(fieldValue, attribEmbeddables, condition, m, metaModel, filterList);
+                    String newPrefix = prefix + HBaseUtils.DOT + ((AbstractAttribute) attrib).getJPAColumnName();
+                    onEmbeddableField(fieldValue, attribEmbeddables, condition, m, metaModel, filterList, newPrefix);
                 }
                 else
                 {
@@ -597,12 +595,14 @@ public class HBaseQuery extends QueryImpl
          */
         private Filter onInExpression(Expression expression, EntityMetadata m, String idColumn, Boolean isIdColumn)
         {
-            Map<String, Object>map = KunderaQueryUtils.onInExpression(expression,m, kunderaMetadata, getKunderaQuery());
+            Map<String, Object> map = KunderaQueryUtils.onInExpression(expression, m, kunderaMetadata,
+                    getKunderaQuery());
             Class fieldClazz = (Class) map.get(Constants.FIELD_CLAZZ);
             String colFamily = (String) map.get(Constants.COL_FAMILY);
             String columnName = (String) map.get(Constants.DB_COL_NAME);
             isIdColumn = idColumn.equalsIgnoreCase(columnName);
-            return onInClause((InExpression) expression, m, isIdColumn, Bytes.toBytes(colFamily), Bytes.toBytes(columnName), fieldClazz);
+            return onInClause((InExpression) expression, m, isIdColumn, Bytes.toBytes(colFamily),
+                    Bytes.toBytes(columnName), fieldClazz);
         }
 
         /**
@@ -656,7 +656,8 @@ public class HBaseQuery extends QueryImpl
             FilterList filterList = new FilterList(FilterList.Operator.MUST_PASS_ONE);
             while (itr.hasNext())
             {
-                Object value = isParameter ? itr.next() : KunderaQueryUtils.getValue((Expression) itr.next(), fieldClazz, kunderaQuery);
+                Object value = isParameter ? itr.next() : KunderaQueryUtils.getValue((Expression) itr.next(),
+                        fieldClazz, kunderaQuery);
                 byte[] valueInBytes = getValueInBytes(value, fieldClazz, isIdColumn, m);
                 Filter filter = !isIdColumn ? createNewFilter(HBaseUtils.EQUALS, colFamily, colName, valueInBytes,
                         isIdColumn) : new RowFilter(CompareOp.EQUAL, new BinaryComparator(valueInBytes));
@@ -664,8 +665,6 @@ public class HBaseQuery extends QueryImpl
             }
             return filterList.getFilters().size() == 0 ? null : filterList;
         }
-
-
 
         /**
          * Gets the value in bytes.
@@ -784,7 +783,6 @@ public class HBaseQuery extends QueryImpl
             }
         }
 
-       
         /**
          * Gets the filter.
          * 

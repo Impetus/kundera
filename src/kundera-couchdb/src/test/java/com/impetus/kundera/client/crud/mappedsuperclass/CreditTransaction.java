@@ -24,15 +24,14 @@ import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
 /**
- * @author vivek.mishra
- * Credit transaction extends {@link Transaction}
- *
+ * @author vivek.mishra Credit transaction extends {@link Transaction}
+ * 
  */
 
 @Entity
 @Table(name = "TRNX_CREDIT")
 @DiscriminatorValue(value = "credit")
-@AttributeOverride(name="bankIdentifier",column= @Column(name="CREDIT_BANK_IDENT"))
+@AttributeOverride(name = "bankIdentifier", column = @Column(name = "CREDIT_BANK_IDENT"))
 public class CreditTransaction extends Transaction
 {
 
@@ -45,9 +44,9 @@ public class CreditTransaction extends Transaction
 
     public CreditTransaction()
     {
-        
+
     }
-    
+
     public Integer getAmount()
     {
         return amount;
