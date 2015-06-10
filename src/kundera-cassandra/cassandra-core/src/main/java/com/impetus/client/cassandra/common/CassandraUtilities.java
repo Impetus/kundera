@@ -189,29 +189,9 @@ public class CassandraUtilities
      * 
      * 
      * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
      *     
      * } if user opted for
      * {@PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
      * 
      * 
      * 
@@ -251,7 +231,7 @@ public class CassandraUtilities
         }
     }
 
-    /**
+     /**
      * 
      * @param host
      * @param port
