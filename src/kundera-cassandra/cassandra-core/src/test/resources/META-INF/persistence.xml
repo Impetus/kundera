@@ -348,6 +348,22 @@
 		</properties>
 	</persistence-unit>
 
+	<persistence-unit name="cassandra_pool">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.pool.size.max.active" value="200" />
+			<property name="kundera.pool.size.max.idle" value="200" />
+			<property name="kundera.pool.size.min.idle" value="20" />
+			<property name="kundera.nodes" value="127.0.0.1" />
+			<property name="kundera.port" value="9160" />
+			<property name="kundera.keyspace" value="KunderaExamples" />
+			<property name="kundera.dialect" value="cassandra" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
+		</properties>
+	</persistence-unit>
+
 	<persistence-unit name="cassandra">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<class>com.impetus.client.schemamanager.entites.CassandraEntityPersonnelUniMToM</class>

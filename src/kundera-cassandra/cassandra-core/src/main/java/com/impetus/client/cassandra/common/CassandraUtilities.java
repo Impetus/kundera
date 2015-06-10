@@ -189,9 +189,29 @@ public class CassandraUtilities
      * 
      * 
      * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
      *     
      * } if user opted for
      * {@PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
      * 
      * 
      * 
@@ -231,7 +251,7 @@ public class CassandraUtilities
         }
     }
 
-     /**
+    /**
      * 
      * @param host
      * @param port
@@ -300,18 +320,34 @@ public class CassandraUtilities
         {
             prop.setInitialSize(maxActivePerNode);
             prop.setMaxActive(maxActivePerNode);
+            logger.info("kundera.pool.size.max.active is set to: {}", maxActivePerNode);
+        }
+        else
+        {
+            logger.info("kundera.pool.size.max.active is set to default value: 100");
         }
         if (maxIdlePerNode > 0)
         {
             prop.setMaxIdle(maxIdlePerNode);
+            logger.info("kundera.pool.size.max.idle is set to: {}", maxIdlePerNode);
+        }
+        else
+        {
+            logger.info("kundera.pool.size.max.idle is set to default value: 10");
         }
         if (minIdlePerNode > 0)
         {
             prop.setMinIdle(minIdlePerNode);
+            logger.info("kundera.pool.size.min.idle is set to: {}", minIdlePerNode);
+        }
+        else
+        {
+            logger.info("kundera.pool.size.min.idle is set to default value: 100");
         }
         if (maxTotal > 0)
         {
             prop.setMaxActive(maxTotal);
+            logger.info("kundera.pool.size.max.total is set to: {}", maxTotal);
         }
         if (cassandraHost.getUser() != null)
         {
