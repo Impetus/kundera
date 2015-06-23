@@ -47,6 +47,13 @@ import com.impetus.kundera.metadata.model.TableGeneratorDiscriptor;
  */
 public class CassandraIdGenerator implements AutoGenerator, TableGenerator
 {
+
+    /** The Constant SYSTEM. */
+    private static final String SYSTEM = "system";
+
+    /** The Constant UUID. */
+    private static final String UUID = "uuid";
+
     /** log for this class. */
     private static Logger log = LoggerFactory.getLogger(CassandraIdGenerator.class);
 
@@ -60,8 +67,8 @@ public class CassandraIdGenerator implements AutoGenerator, TableGenerator
     @Override
     public Object generate(Client<?> client, String dataType)
     {
-        CqlResult cqlResult = ((CassandraClientBase) client).execute("Select now() from system.schema_columns",
-                ((CassandraClientBase) client).getRawClient("system"));
+        CqlResult cqlResult = ((CassandraClientBase) client).execute("SELECT NOW() FROM system.schema_columns LIMIT 1",
+                ((CassandraClientBase) client).getRawClient(SYSTEM));
 
         CqlRow cqlRow = cqlResult.getRowsIterator().next();
         TimeUUIDType t = TimeUUIDType.instance;
@@ -69,11 +76,11 @@ public class CassandraIdGenerator implements AutoGenerator, TableGenerator
 
         switch (dataType.toLowerCase())
         {
-        case "uuid":
+        case UUID:
             return timeUUID;
 
         default:
-            return UUID.randomUUID();
+            return java.util.UUID.randomUUID();
 
         }
     }
