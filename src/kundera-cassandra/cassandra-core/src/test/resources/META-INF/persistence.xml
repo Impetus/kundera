@@ -358,6 +358,7 @@
 			<property name="kundera.nodes" value="127.0.0.1" />
 			<property name="kundera.port" value="9160" />
 			<property name="kundera.keyspace" value="KunderaExamples" />
+			<property name="kundera.ddl.auto.prepare" value="create" />
 			<property name="kundera.dialect" value="cassandra" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
