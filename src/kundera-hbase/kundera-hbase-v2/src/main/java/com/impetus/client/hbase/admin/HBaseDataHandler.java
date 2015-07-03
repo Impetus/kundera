@@ -363,11 +363,11 @@ public class HBaseDataHandler implements DataHandler
                         createCellsAndAddToRow(obj, metaModel, attribEmbeddables, hbaseRow, m, newCount++, newPrefix);
                     }
                 }
-                else
+                else if(embeddedField != null)
                 {
                     String newPrefix = prefix != "" ? prefix + absAttrib.getJPAColumnName() + HBaseUtils.DOT
                             : absAttrib.getJPAColumnName() + HBaseUtils.DOT;
-                    createCellsAndAddToRow(embeddedField, metaModel, attribEmbeddables, hbaseRow, m, -1, newPrefix);
+                    createCellsAndAddToRow(embeddedField, metaModel, attribEmbeddables, hbaseRow, m, count, newPrefix);
                 }
             }
             else if (!attribute.isCollection() && !attribute.isAssociation())
@@ -630,7 +630,7 @@ public class HBaseDataHandler implements DataHandler
         {
             String newPrefix = prefix != "" ? prefix + ((AbstractAttribute) attribute).getJPAColumnName()
                     + HBaseUtils.DOT : ((AbstractAttribute) attribute).getJPAColumnName() + HBaseUtils.DOT;
-            writeValuesToEntity(embeddedField, hbaseData, m, metaModel, attribEmbeddables, null, null, -1, newPrefix);
+            writeValuesToEntity(embeddedField, hbaseData, m, metaModel, attribEmbeddables, null, null, count, newPrefix);
             PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), embeddedField);
         }
         else
