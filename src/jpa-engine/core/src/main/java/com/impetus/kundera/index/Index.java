@@ -76,7 +76,7 @@ public @interface Index
      */
     public enum IndexType
     {
-        normal, composite
+        normal, composite, unique
     }
 
 }

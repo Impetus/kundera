@@ -38,6 +38,21 @@
 		</properties>
 	</persistence-unit>
 
+	<persistence-unit name="mongo_pu">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.client.mongodb.index.Book</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="27017" />
+			<property name="kundera.keyspace" value="KunderaIndexTest" />
+			<property name="kundera.dialect" value="mongodb" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.mongodb.MongoDBClientFactory" />
+			<property name="kundera.ddl.auto.prepare" value="update" />
+		</properties>
+	</persistence-unit>
+
 	<persistence-unit name="validAuthenticationMongoPu">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>

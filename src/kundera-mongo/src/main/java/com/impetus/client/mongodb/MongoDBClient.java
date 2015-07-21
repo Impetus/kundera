@@ -78,7 +78,7 @@ import com.mongodb.util.JSONParseException;
 /**
  * Client class for MongoDB database.
  * 
- * @author Devender Yadav
+ * @author devender.yadav
  */
 public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, Batcher, ClientPropertiesSetter
 
@@ -846,7 +846,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         try
         {
             DBCollection coll = mongoDb.getCollection(m.getTableName() + MongoDBUtils.FILES);
-            createUniqueIndex(coll, ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName());
+            createUniqueIndexGFS(coll, ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName());
             gfsInputFile.save();
             log.info("Input GridFS file: " + gfsInputFile.getFilename() + " is saved successfully in "
                     + m.getTableName() + MongoDBUtils.CHUNKS + " and metadata in " + m.getTableName()
@@ -1045,8 +1045,9 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
     /**
      * On flush batch.
-     *
-     * @param bulkWriteOperationMap the bulk write operation map
+     * 
+     * @param bulkWriteOperationMap
+     *            the bulk write operation map
      */
     private void onFlushBatch(Map<String, BulkWriteOperation> bulkWriteOperationMap)
     {
@@ -1085,8 +1086,17 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         {
             DBCollection dbCollection = mongoDb.getCollection(tableName);
             KunderaCoreUtils.printQuery("Persist collection:" + tableName, showQuery);
-            dbCollection.insert(collections.get(tableName).toArray(new DBObject[0]), getWriteConcern(), encoder);
+            try
+            {
+                dbCollection.insert(collections.get(tableName).toArray(new DBObject[0]), getWriteConcern(), encoder);
+            }
+            catch (MongoException ex)
+            {
+                throw new KunderaException("document is not inserted in " + dbCollection.getFullName()
+                        + " collection. Caused By:", ex);
+            }
         }
+
     }
 
     /**
@@ -1301,13 +1311,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             batchSize = puMetadata.getBatchSize();
         }
     }
-
-    // @Override
-    // public Object generate()
-    // {
-    // // return auto generated id used by mongodb.
-    // return new ObjectId();
-    // }
 
     /*
      * (non-Javadoc)
@@ -1555,7 +1558,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         return result.getN();
     }
 
-    private void createUniqueIndex(DBCollection coll, String id)
+    private void createUniqueIndexGFS(DBCollection coll, String id)
     {
         try
         {
@@ -1567,4 +1570,5 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
                     + id + " field");
         }
     }
+
 }
