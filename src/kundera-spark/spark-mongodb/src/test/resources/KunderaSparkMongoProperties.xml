@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<clientProperties>
+	<datastores>
+		<dataStore>
+			<name>mongodb</name>
+			<connection>
+				<properties>
+					<property name="spark.master" value="local"></property>
+					<property name="spark.app.name" value="sparkMongo"></property>
+				</properties>
+				<servers>
+					<server>
+						<host>localhost
+						</host>
+						<port>27017</port>
+					</server>
+				</servers>
+			</connection>
+		</dataStore>
+	</datastores>
+</clientProperties>
