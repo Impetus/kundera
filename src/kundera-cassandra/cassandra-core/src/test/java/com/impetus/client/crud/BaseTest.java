@@ -106,6 +106,38 @@ public abstract class BaseTest
         Assert.assertFalse(results.isEmpty());
         Assert.assertEquals(3, results.size());
     }
+    
+    /**
+     * Assert find by name.
+     * 
+     * @param <E>
+     *            the element type
+     * @param em
+     *            the em
+     * @param clazz
+     *            the clazz
+     * @param e
+     *            the e
+     * @param name
+     *            the name
+     * @param fieldName
+     *            the field name
+     */
+    protected <E extends Object> void assertFindByNameWithREservedKeyWords(EntityManager em, Class clazz, E e, String name, String fieldName)
+    {
+
+        CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+        CriteriaQuery<E> query = criteriaBuilder.createQuery(clazz);
+        Root<E> from = query.from(clazz);
+        query.select(from.alias("p"));
+        query.where(criteriaBuilder.equal(from.get(fieldName), name));
+        // // find by name.
+        TypedQuery<E> q = em.createQuery(query);
+        List<E> results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertFalse(results.isEmpty());
+        Assert.assertEquals(1, results.size());
+    }
 
     /**
      * Assert find by name.
