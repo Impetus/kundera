@@ -83,7 +83,6 @@
 	<persistence-unit name="addMongo">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>
-			<!-- <property name="kundera.nodes" value="192.168.145.168" /> -->
 			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="27017" />
 			<property name="kundera.keyspace" value="KunderaTests" />
@@ -175,7 +174,6 @@
 	<persistence-unit name="picongo">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>
-			<!-- <property name="kundera.nodes" value="192.168.145.168" /> -->
 			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="27017" />
 			<property name="kundera.keyspace" value="Pickr" />
@@ -189,7 +187,6 @@
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>
 			<property name="kundera.nodes" value="localhost" />
-			<!-- <property name="kundera.nodes" value="192.168.145.168" /> -->
 			<property name="kundera.port" value="6379" />
 			<property name="kundera.keyspace" value="RedisK" />
 			<property name="kundera.dialect" value="redis" />
@@ -309,7 +306,6 @@
 		<class>com.impetus.kundera.tests.entities.PersonDetailClassMap</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
-			<!-- <property name="kundera.nodes" value="192.168.145.168" /> -->
 			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="27017" />
 			<property name="kundera.keyspace" value="KunderaTests" />
@@ -324,7 +320,6 @@
 		<class>com.impetus.kundera.tests.entities.AddressMongoNoAnnotation</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
-			<!-- <property name="kundera.nodes" value="192.168.145.168" /> -->
 			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="27017" />
 			<property name="kundera.keyspace" value="KunderaTests" />
