@@ -45,7 +45,7 @@ public class SparkCassClientTest
 {
 
     /** The Constant PU. */
-    private static final String PU = "spark_pu";
+    private static final String PU = "spark_cass_pu";
 
     /** The emf. */
     private static EntityManagerFactory emf;

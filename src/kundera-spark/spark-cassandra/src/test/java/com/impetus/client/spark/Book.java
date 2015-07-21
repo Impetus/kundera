@@ -22,9 +22,6 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import com.impetus.kundera.index.Index;
-import com.impetus.kundera.index.IndexCollection;
-
 /**
  * The Class Book.
  * 
@@ -34,6 +31,9 @@ import com.impetus.kundera.index.IndexCollection;
 @Table(name = "spark_book")
 public class Book implements Serializable
 {
+
+    /** The Constant serialVersionUID. */
+    private static final long serialVersionUID = 1L;
 
     /** The id. */
     @Id
