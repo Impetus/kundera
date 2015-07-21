@@ -17,13 +17,12 @@ package com.impetus.spark.client;
 
 import java.util.Map;
 
-
 /**
- * The Interface FilePathBuilder.
+ * The Class FilePathBuilder.
  * 
  * @author devender.yadav
  */
-public interface FilePathBuilder
+public abstract class FilePathBuilder
 {
 
     /**
@@ -33,7 +32,7 @@ public interface FilePathBuilder
      *            the properties
      * @return the input file path
      */
-     String getInputFilePath(Map<String, Object> properties);
+    abstract String getInputFilePath(Map<String, Object> properties);
 
     /**
      * Gets the output file path.
@@ -42,6 +41,5 @@ public interface FilePathBuilder
      *            the properties
      * @return the output file path
      */
-    String getOutputFilePath(Map<String, Object> properties);
-
+    abstract String getOutputFilePath(Map<String, Object> properties);
 }
