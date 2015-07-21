@@ -206,7 +206,8 @@ public class MongoDBQuery extends QueryImpl
 
             if (isNative)
             {
-                throw new UnsupportedOperationException("Native query support is not enabled in mongoDB");
+            	return ((MongoDBClient) client).executeQuery(query == null ? getJPAQuery() : query, m);
+              
             }
 
             BasicDBObject orderByClause = getOrderByClause(m);
