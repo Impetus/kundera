@@ -161,6 +161,21 @@ public class CriteriaQueryTest extends BaseTest
         Assert.assertNotNull(p);
         Assert.assertEquals("KK MISHRA", p.getPersonName());
 
+        updateQuery = "update PersonCassandra p set p.personName='Screenshot from 2013-10-30 17:43:51.png' where p.personId=1";
+        q = entityManager.createQuery(updateQuery);
+        q.executeUpdate();
+
+        entityManager.clear();
+        assertFindByNameWithREservedKeyWords(entityManager, PersonCassandra.class, PersonCassandra.class, "Screenshot from 2013-10-30 17:43:51.png", "personName");
+        
+        entityManager.clear();
+        updateQuery = "update PersonCassandra p set p.personName='john.dever@impetus.co.in' where p.personId=1";
+        q = entityManager.createQuery(updateQuery);
+        q.executeUpdate();
+
+        entityManager.clear();
+        assertFindByNameWithREservedKeyWords(entityManager, PersonCassandra.class, PersonCassandra.class, "john.dever@impetus.co.in", "personName");
+        
         
         // Delete without WHERE clause.
 

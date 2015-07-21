@@ -88,7 +88,7 @@ public class KunderaCriteriaBuilderTest
     @Test
     public void testCountWithWhereClause()
     {
-        String expected = "Select Count(p) from Person p where p.personName = vivek AND p.age = 32";
+        String expected = "Select Count(p) from Person p where p.personName = \"vivek\" AND p.age = 32";
         CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
 
         CriteriaQuery<Long> personQuery = criteriaBuilder.createQuery(Long.class);
@@ -103,7 +103,7 @@ public class KunderaCriteriaBuilderTest
     @Test
     public void testWithWhereClause()
     {
-        String expected = "Select p from Person p where p.personName = vivek";
+        String expected = "Select p from Person p where p.personName = \"vivek\"";
         CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
         CriteriaQuery<Person> personQuery = criteriaBuilder.createQuery(Person.class);
         Root<Person> from = personQuery.from(Person.class);
@@ -116,7 +116,7 @@ public class KunderaCriteriaBuilderTest
     @Test
     public void testWithANDClause()
     {
-        String expected = "Select p from Person p where p.personName = vivek AND p.age = 32";
+        String expected = "Select p from Person p where p.personName = \"vivek\" AND p.age = 32";
         CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
         CriteriaQuery<Person> personQuery = criteriaBuilder.createQuery(Person.class);
         Root<Person> from = personQuery.from(Person.class);
@@ -130,7 +130,7 @@ public class KunderaCriteriaBuilderTest
     @Test
     public void testWithANDGTClause()
     {
-        String expected = "Select p from Person p where p.personName = vivek AND p.age > 32";
+        String expected = "Select p from Person p where p.personName = \"vivek\" AND p.age > 32";
         CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
         CriteriaQuery<Person> personQuery = criteriaBuilder.createQuery(Person.class);
         Root<Person> from = personQuery.from(Person.class);
@@ -144,7 +144,7 @@ public class KunderaCriteriaBuilderTest
     @Test
     public void testWithANDGTEClause()
     {
-        String expected = "Select p from Person p where p.personName = vivek AND p.age >= 32";
+        String expected = "Select p from Person p where p.personName = \"vivek\" AND p.age >= 32";
         CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
         CriteriaQuery<Person> personQuery = criteriaBuilder.createQuery(Person.class);
         Root<Person> from = personQuery.from(Person.class);
@@ -158,7 +158,7 @@ public class KunderaCriteriaBuilderTest
     @Test
     public void testWithANDLTClause()
     {
-        String expected = "Select p from Person p where p.personName = vivek OR p.age < 32";
+        String expected = "Select p from Person p where p.personName = \"vivek\" OR p.age < 32";
         CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
         CriteriaQuery<Person> personQuery = criteriaBuilder.createQuery(Person.class);
         Root<Person> from = personQuery.from(Person.class);
@@ -172,7 +172,7 @@ public class KunderaCriteriaBuilderTest
     @Test
     public void testWithORLTEClause()
     {
-        String expected = "Select p from Person p where p.personName = vivek OR p.age <= 32";
+        String expected = "Select p from Person p where p.personName = \"vivek\" OR p.age <= 32";
         CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
         CriteriaQuery<Person> personQuery = criteriaBuilder.createQuery(Person.class);
         Root<Person> from = personQuery.from(Person.class);
@@ -186,7 +186,7 @@ public class KunderaCriteriaBuilderTest
     @Test
     public void testWithORClause()
     {
-        String expected = "Select p from Person p where p.personName = vivek OR p.age = 32";
+        String expected = "Select p from Person p where p.personName = \"vivek\" OR p.age = 32";
         CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
         CriteriaQuery<Person> personQuery = criteriaBuilder.createQuery(Person.class);
         Root<Person> from = personQuery.from(Person.class);
@@ -213,7 +213,7 @@ public class KunderaCriteriaBuilderTest
     @Test
     public void testWithANDBTWClause()
     {
-        String expected = "Select p from Person p where p.personName = 'vivek' AND p.age BETWEEN 10 AND 20";
+        String expected = "Select p from Person p where p.personName = \"'vivek'\" AND p.age BETWEEN 10 AND 20";
         CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
         CriteriaQuery<Person> personQuery = criteriaBuilder.createQuery(Person.class);
         Root<Person> from = personQuery.from(Person.class);
@@ -227,7 +227,7 @@ public class KunderaCriteriaBuilderTest
     @Test
     public void testWithMultiANDClause()
     {
-        String expected = "Select p from Person p where p.personName = vivek AND p.age = 32 AND p.salary = 3200.01";
+        String expected = "Select p from Person p where p.personName = \"vivek\" AND p.age = 32 AND p.salary = 3200.01";
         CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
         CriteriaQuery<Person> personQuery = criteriaBuilder.createQuery(Person.class);
         Root<Person> from = personQuery.from(Person.class);
@@ -241,7 +241,7 @@ public class KunderaCriteriaBuilderTest
     @Test
     public void testWithANDGTLTClause()
     {
-        String expected = "Select p from Person p where p.personName = vivek AND p.age > 32 AND p.salary <= 3200.01";
+        String expected = "Select p from Person p where p.personName = \"vivek\" AND p.age > 32 AND p.salary <= 3200.01";
         CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
         CriteriaQuery<Person> personQuery = criteriaBuilder.createQuery(Person.class);
         Root<Person> from = personQuery.from(Person.class);
@@ -286,7 +286,7 @@ public class KunderaCriteriaBuilderTest
     @Test
     public void testOrderByWithWhereClause()
     {
-        String expected = "Select p from Person p where p.personName = vivek AND p.age > 32 AND p.salary <= 3200.01 ORDER BY p.personName DESC";
+        String expected = "Select p from Person p where p.personName = \"vivek\" AND p.age > 32 AND p.salary <= 3200.01 ORDER BY p.personName DESC";
 
         CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
         CriteriaQuery<Person> personQuery = criteriaBuilder.createQuery(Person.class);
