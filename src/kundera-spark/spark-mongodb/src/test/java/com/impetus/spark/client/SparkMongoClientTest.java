@@ -86,7 +86,7 @@ public class SparkMongoClientTest extends SparkBaseTest
     {
         testPersist();
         testQuery();
-        testSaveIntermediateResult();
+        // testSaveIntermediateResult();
     }
 
     /**

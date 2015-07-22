@@ -38,30 +38,15 @@ public class HDFSClient extends FSClient
     @Override
     public String getInputFilePath(Map<String, Object> properties)
     {
-        String errorMsg = null;
         String path = (String) properties.get(SparkPropertiesConstants.HDFS_INPUT_FILE_PATH);
-        String host = (String) properties.get(SparkPropertiesConstants.HDFS_CONNECTION_HOST);
-        String port = (String) properties.get(SparkPropertiesConstants.HDFS_CONNECTION_PORT);
-        if (path.isEmpty())
+        if (path == null || path.isEmpty())
         {
-            errorMsg = "Please set the path of inputfile while creating EntityManager using the property" + "\""
-                    + SparkPropertiesConstants.HDFS_INPUT_FILE_PATH + "\".";
+            throw new KunderaException(
+                    "Please set the path of inputfile while creating EntityManager using the property" + "\""
+                            + SparkPropertiesConstants.HDFS_INPUT_FILE_PATH + "\".");
         }
-        else if (host.isEmpty())
-        {
-            errorMsg = "Please set the hadoop connection host while creating EntityManager using the property" + "\""
-                    + SparkPropertiesConstants.HDFS_CONNECTION_HOST + "\".";
-        }
-        else if (port.isEmpty())
-        {
-            errorMsg = "Please set the hadoop connection port while creating EntityManager using the property" + "\""
-                    + SparkPropertiesConstants.HDFS_CONNECTION_PORT + "\".";
-        }
-        if (path.isEmpty() || host.isEmpty() || port.isEmpty())
-        {
-            throw new KunderaException(errorMsg);
-        }
-        return "hdfs://" + host + ":" + port + path;
+
+        return path;
     }
 
     /*
@@ -72,10 +57,8 @@ public class HDFSClient extends FSClient
     @Override
     public String getOutputFilePath(Map<String, Object> properties)
     {
-        String path = "hdfs://" + properties.get(SparkPropertiesConstants.HDFS_CONNECTION_HOST) + ":"
-                + properties.get(SparkPropertiesConstants.HDFS_CONNECTION_PORT)
-                + properties.get(SparkPropertiesConstants.HDFS_OUTPUT_FILE_PATH);
-        if (path.isEmpty())
+        String path = (String) properties.get(SparkPropertiesConstants.HDFS_OUTPUT_FILE_PATH);
+        if (path == null || path.isEmpty())
         {
             throw new KunderaException(
                     "Please set the path of outputfile while creating EntityManager using the property" + "\""

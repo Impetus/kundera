@@ -81,6 +81,22 @@ public class SparkCassClientTest
         persistBooks();
     }
 
+    /**
+     * Spark cass test.
+     */
+    @Test
+    public void sparkCassTest()
+    {
+        persistBooks();
+        testPersist();
+        testQuery();
+        testSaveIntermediateResult();
+        intermediatePersistSyntaxTest();
+    }
+
+    /**
+     * Persist books.
+     */
     private void persistBooks()
     {
         Book book1 = new Book("1", "A Tale of Two Cities", "Charles Dickens", "History", 441);
@@ -94,8 +110,7 @@ public class SparkCassClientTest
     /**
      * Test persist.
      */
-    @Test
-    public void testPersist()
+    private void testPersist()
     {
         Book book = em.find(Book.class, "1");
         validateBook1(book);
@@ -108,8 +123,7 @@ public class SparkCassClientTest
     /**
      * Query test.
      */
-    @Test
-    public void queryTest()
+    private void testQuery()
     {
         List<Book> results = em.createNativeQuery("select * from spark_book").getResultList();
         Assert.assertNotNull(results);
@@ -136,10 +150,71 @@ public class SparkCassClientTest
     }
 
     /**
+     * Intermediate persist syntax test.
+     */
+    private void intermediatePersistSyntaxTest()
+    {
+        String sqlString = "INSERT INTO insert into cassandra.sparktest.table FROM (select * from spark_book)";
+        Query query = em.createNativeQuery(sqlString, Book.class);
+        exceptionTest(query);
+
+        sqlString = "INSERT INTO into cassandra.sparktest.table FROM (select * from spark_book)";
+        query = em.createNativeQuery(sqlString, Book.class);
+        exceptionTest(query);
+
+        sqlString = "INSERT asdf INTO cassandra.sparktest.table FROM (select * from spark_book)";
+        query = em.createNativeQuery(sqlString, Book.class);
+        exceptionTest(query);
+
+        sqlString = "INSERT INTO dsfs cassandra.sparktest.table FROM (select * from spark_book)";
+        query = em.createNativeQuery(sqlString, Book.class);
+        exceptionTest(query);
+
+        sqlString = " INTO cassandra.sparktest.table FROM (select * from spark_book)";
+        query = em.createNativeQuery(sqlString, Book.class);
+        exceptionTest(query);
+
+        sqlString = "INSERT INTO cassandra.table FROM (select * from spark_book)";
+        query = em.createNativeQuery(sqlString, Book.class);
+        exceptionTest(query);
+
+        sqlString = "INSERT INTO .sparktest.table FROM (select * from spark_book)";
+        query = em.createNativeQuery(sqlString, Book.class);
+        exceptionTest(query);
+
+        sqlString = "INSERT INTO cassandra.sparktest.table.output FROM (select * from spark_book)";
+        query = em.createNativeQuery(sqlString, Book.class);
+        exceptionTest(query);
+
+        sqlString = "INSERT INTO cassandra.sparktest.table (select * from spark_book)";
+        query = em.createNativeQuery(sqlString, Book.class);
+        exceptionTest(query);
+
+        sqlString = "INSERT INTO cassandra.sparktest.table FROMM (select * from spark_book)";
+        query = em.createNativeQuery(sqlString, Book.class);
+        exceptionTest(query);
+
+        sqlString = "INSERT INTO cassandra.sparktest.table FROM sadsd (select * from spark_book)";
+        query = em.createNativeQuery(sqlString, Book.class);
+        exceptionTest(query);
+
+        sqlString = "INSERT INTO cassandra.sparktest.table FROM ()";
+        query = em.createNativeQuery(sqlString, Book.class);
+        exceptionTest(query);
+
+        sqlString = "cassandra.sparktest.table FROM (select * from spark_book)";
+        query = em.createNativeQuery(sqlString, Book.class);
+        exceptionTest(query);
+
+        sqlString = "INSERT INTO cassandra.sparktest.table (select * from spark_book)";
+        query = em.createNativeQuery(sqlString, Book.class);
+        exceptionTest(query);
+    }
+
+    /**
      * Save intermediate result.
      */
-    @Test
-    public void saveIntermediateResult()
+    private void testSaveIntermediateResult()
     {
         CassandraCli
                 .executeCqlQuery(
@@ -188,6 +263,27 @@ public class SparkCassClientTest
         CassandraCli.executeCqlQuery("DROP KEYSPACE \"sparktest\"", "sparktest");
         emf.close();
         emf = null;
+    }
+
+    /**
+     * Exception test.
+     *
+     * @param query the query
+     * @return true, if successful
+     */
+    private boolean exceptionTest(Query query)
+    {
+        try
+        {
+            query.executeUpdate();
+        }
+        catch (Exception e)
+        {
+            return true;
+        }
+
+        Assert.fail();
+        return false;
     }
 
     /**
@@ -275,6 +371,9 @@ public class SparkCassClientTest
         }
     }
 
+    /**
+     * Creates the column family.
+     */
     private static void createColumnFamily()
     {
         try
@@ -290,6 +389,9 @@ public class SparkCassClientTest
         }
     }
 
+    /**
+     * Creates the keyspace.
+     */
     private static void createKeyspace()
     {
         try

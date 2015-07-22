@@ -13,9 +13,6 @@
 			<property name="kundera.keyspace" value="sparktest" />
 			<property name="kundera.dialect" value="spark" />
 			<property name="kundera.client" value="hdfs" />
-			<property name="kundera.hdfs.connection.host" value="localhost" />
-			<property name="kundera.hdfs.connection.port" value="9000" />
-			<property name="kundera.hdfs.inputfile.path" value="/sample.json"/>
 			<property name="kundera.client.lookup.class" value="com.impetus.spark.client.SparkClientFactory" />
 			<property name="kundera.client.property" value="KunderaSparkTest.xml" />
 		</properties>

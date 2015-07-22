@@ -31,6 +31,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.impetus.client.spark.entities.Person;
+import com.impetus.client.spark.utils.SparkTestingUtils;
 
 /**
  * The Class SparkHDFSClientTest.
@@ -73,35 +74,30 @@ public class SparkHDFSClientTest extends SparkBaseTest
         em = emf.createEntityManager();
     }
 
+    /**
+     * Spark hdfs test.
+     */
     @Test
     public void sparkHdfsTest()
     {
         testPersist();
         testQuery();
-        // testSaveIntermediateResult();
+        testSaveIntermediateResult();
     }
 
-    @Test
     public void testPersist()
     {
-        em.setProperty("kundera.hdfs.outputfile.path", "/sparkInputTestqwer/input1");
+        em.setProperty("kundera.hdfs.outputfile.path", "hdfs://192.168.41.51:9000/sparkInputTest/input");
+        em.setProperty("kundera.hdfs.inputfile.path", "hdfs://192.168.41.51:9000/sparkInputTest/input");
         em.setProperty("format", "json");
-        em.setProperty("persist", true);
 
         Person person1 = getPerson("1", "dev", 22, 30000.5);
-        Person person2 = getPerson("2", "pg", 23, 40000.6);
-        Person person3 = getPerson("3", "kpm", 24, 50000.7);
+
         em.persist(person1);
-        em.persist(person2);
-        em.persist(person3);
 
         em.clear();
         Person p = em.find(Person.class, "1");
         validatePerson1(p);
-        p = em.find(Person.class, "2");
-        validatePerson2(p);
-        p = em.find(Person.class, "3");
-        validatePerson3(p);
     }
 
     /**
@@ -111,31 +107,8 @@ public class SparkHDFSClientTest extends SparkBaseTest
     {
         List<Person> results = em.createNativeQuery("select * from spark_person").getResultList();
         Assert.assertNotNull(results);
-        Assert.assertEquals(3, results.size());
-        assertResults(results, true, true, true);
-
-        results = em.createNativeQuery("select * from spark_person where salary > 35000").getResultList();
-        Assert.assertNotNull(results);
-        Assert.assertEquals(2, results.size());
-        assertResults(results, false, true, true);
-
-        results = em.createNativeQuery("select * from spark_person where salary > 35000 and age = 23").getResultList();
-        Assert.assertNotNull(results);
         Assert.assertEquals(1, results.size());
-        assertResults(results, false, true, false);
-
-        results = em.createNativeQuery("select * from spark_person where personName like 'kp%'").getResultList();
-        Assert.assertNotNull(results);
-        Assert.assertEquals(1, results.size());
-        assertResults(results, false, false, true);
-
-        List aggregateResults = em.createNativeQuery("select sum(salary) from spark_person").getResultList();
-        Assert.assertNotNull(aggregateResults);
-
-        aggregateResults = em.createNativeQuery("select count(*) from spark_person where salary > 30000")
-                .getResultList();
-        Assert.assertNotNull(aggregateResults.size());
-
+        validatePerson1(results.get(0));
     }
 
     /**
@@ -143,13 +116,13 @@ public class SparkHDFSClientTest extends SparkBaseTest
      */
     public void testSaveIntermediateResult()
     {
-        String sqlString = "INSERT INTO fs.[/home/impadmin/testspark_csv] AS CSV FROM (select * from spark_person)";
+        String sqlString = "INSERT INTO fs.[src/test/resources/testspark_csv] AS CSV FROM (select * from spark_person)";
         Query q = em.createNativeQuery(sqlString, Person.class);
         q.executeUpdate();
 
-        sqlString = "INSERT INTO fs.[/home/impadmin/testspark_json] AS JSON FROM (select * from spark_person)";
+        sqlString = "INSERT INTO fs.[src/test/resources/testspark_json] AS JSON FROM (select * from spark_person)";
         q = em.createNativeQuery(sqlString, Person.class);
-
+        q.executeUpdate();
     }
 
     /**
@@ -173,6 +146,8 @@ public class SparkHDFSClientTest extends SparkBaseTest
     @AfterClass
     public static void tearDownAfterClass() throws Exception
     {
+        SparkTestingUtils.recursivelyCleanDir("src/test/resources/testspark_json");
+        SparkTestingUtils.recursivelyCleanDir("src/test/resources/testspark_csv");
         emf.close();
         emf = null;
     }

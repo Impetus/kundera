@@ -211,7 +211,7 @@ public class SparkQuery extends QueryImpl implements Query
     @Override
     protected List recursivelyPopulateEntities(EntityMetadata m, Client client)
     {
-        return null;
+        throw new KunderaException("Query on entities having relations is currently not supported in kundera-spark.");
     }
 
     /*

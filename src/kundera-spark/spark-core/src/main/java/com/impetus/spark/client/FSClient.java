@@ -52,7 +52,7 @@ public class FSClient extends FilePathBuilder implements SparkDataClient
     public void registerTable(EntityMetadata m, SparkClient sparkClient)
     {
         String dataSourcePath = getInputFilePath(sparkClient.properties);
-        String ext = FilenameUtils.getExtension(dataSourcePath).toLowerCase();
+        String ext = ((String) sparkClient.properties.get("format")).toLowerCase();
         FileType fileType = FileFormatConstants.extension.get(ext);
         switch (fileType)
         {
@@ -111,7 +111,7 @@ public class FSClient extends FilePathBuilder implements SparkDataClient
     public String getInputFilePath(Map<String, Object> properties)
     {
         String path = (String) properties.get(SparkPropertiesConstants.FS_INPUT_FILE_PATH);
-        if (path != null && path.isEmpty())
+        if (path == null || path.isEmpty())
         {
             throw new KunderaException(
                     "Please set the path of inputfile while creating EntityManager using the property" + "\""
@@ -198,7 +198,7 @@ public class FSClient extends FilePathBuilder implements SparkDataClient
     public String getOutputFilePath(Map<String, Object> properties)
     {
         String path = (String) properties.get(SparkPropertiesConstants.FS_OUTPUT_FILE_PATH);
-        if (path.isEmpty())
+        if (path == null || path.isEmpty())
         {
             throw new KunderaException(
                     "Please set the path of outputfile while creating EntityManager using the property" + "\""
