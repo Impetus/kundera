@@ -269,6 +269,7 @@
 				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
 
 			<property name="kundera.client.property" value="kunderaTestDataType.xml" />
+<!-- 			<property name="kundera.auto.generator.class" value="com.impetus.client.generatedId.CustomIdGenerator" /> -->
 		</properties>
 	</persistence-unit>
 
