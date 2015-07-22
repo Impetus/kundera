@@ -92,4 +92,6 @@ public interface PersistenceProperties
     public static final String KUNDERA_TRANSACTION_RESOURCE = "kundera.transaction.resource.class";
 
     public static final String KUNDERA_INDEXER_CLASS = "kundera.indexer.class";
+    
+    public static final String KUNDERA_AUTO_GENERATOR_CLASS = "kundera.auto.generator.class";
 }

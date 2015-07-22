@@ -132,17 +132,31 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
 
         String indexerClass = puProperties != null ? (String) puProperties
                 .get(PersistenceProperties.KUNDERA_INDEXER_CLASS) : null;
+                
+        String autoGenClass = puProperties != null ? (String) puProperties
+                        .get(PersistenceProperties.KUNDERA_AUTO_GENERATOR_CLASS) : null;
+
 
         if (indexerClass == null)
         {
             indexerClass = kunderaMetadata.getApplicationMetadata().getPersistenceUnitMetadata(persistenceUnit)
                     .getProperties().getProperty(PersistenceProperties.KUNDERA_INDEXER_CLASS);
         }
+        if (autoGenClass == null)
+        {
+            autoGenClass = kunderaMetadata.getApplicationMetadata().getPersistenceUnitMetadata(persistenceUnit)
+                    .getProperties().getProperty(PersistenceProperties.KUNDERA_AUTO_GENERATOR_CLASS);
+        }
 
         if (luceneDirectoryPath == null)
         {
             luceneDirectoryPath = kunderaMetadata.getApplicationMetadata().getPersistenceUnitMetadata(persistenceUnit)
                     .getProperty(PersistenceProperties.KUNDERA_INDEX_HOME_DIR);
+        }
+        
+        if (autoGenClass != null) 
+        {
+            clientMetadata.setAutoGenImplementor(autoGenClass);    
         }
 
         // in case set empty via external property, means want to avoid lucene

@@ -47,6 +47,15 @@ public abstract class ClientBase
 
     /** The index manager. */
     protected IndexManager indexManager;
+    
+ 
+    /**
+     * @return the autoGenerator
+     */
+    public String getAutoGenerator()
+    {
+       return this.getClientMetadata() != null ? this.getClientMetadata().getAutoGenImplementor() : null;
+    }
 
     /** persistence unit */
     protected String persistenceUnit;
@@ -115,7 +124,8 @@ public abstract class ClientBase
     }
     protected void unIndexNode(EntityMetadata metadata, Object entity, Object pKey)
     {
-        if(indexManager!=null){
+        if(indexManager!=null)
+        {
             indexManager.remove(metadata, entity, pKey);
         }
     }

@@ -31,6 +31,25 @@ public class ClientMetadata
     /** The index implementor. */
     private String indexImplementor;
 
+    /** The autogen implementor. */
+    private String autoGenImplementor;
+
+    /**
+     * @return the autoGenImplementor
+     */
+    public String getAutoGenImplementor()
+    {
+        return autoGenImplementor;
+    }
+
+    /**
+     * @param autoGenImplementor the autoGenImplementor to set
+     */
+    public void setAutoGenImplementor(String autoGenImplementor)
+    {
+        this.autoGenImplementor = autoGenImplementor;
+    }
+
     /** The Lucene index dir. */
     private String LuceneIndexDir;
 

@@ -108,7 +108,7 @@ public class GenericClientFactoryTest
         Map<String, Object> propertyMap = new HashMap<String, Object>();
         propertyMap.put(PersistenceProperties.KUNDERA_INDEXER_CLASS, "com.impetus.kundera.query.CoreIndexer");
         propertyMap.put(PersistenceProperties.KUNDERA_INDEX_HOME_DIR, "");
-        
+        propertyMap.put(PersistenceProperties.KUNDERA_AUTO_GENERATOR_CLASS, "");
         CoreTestClientFactory clientFactory = new CoreTestClientFactory();
         clientFactory.load(PU, propertyMap);
         

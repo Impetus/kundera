@@ -22,17 +22,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.KunderaException;
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.generator.AutoGenerator;
+import com.impetus.kundera.generator.Generator;
 import com.impetus.kundera.generator.SequenceGenerator;
 import com.impetus.kundera.generator.TableGenerator;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.IdDiscriptor;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.utils.KunderaCoreUtils;
 
 /**
  * Generate id for entity when {@GeneratedValue} annotation
@@ -100,13 +104,16 @@ public class IdGenerator
      * @param m
      * @param client
      * @param e
+     * @param kunderaMetadata
      */
     private Object onAutoGenerator(EntityMetadata m, Client<?> client, Object e)
     {
-        if (client.getIdGenerator() instanceof AutoGenerator)
+        Object autogenerator = getAutoGenClazz(client);
+        
+        if (autogenerator instanceof AutoGenerator)
         {
-            Object generatedId = ((AutoGenerator) client.getIdGenerator()).generate(client, m.getIdAttribute()
-                    .getJavaType().getSimpleName());
+            
+            Object generatedId = ((AutoGenerator)autogenerator).generate(client, m.getIdAttribute().getJavaType().getSimpleName());
             try
             {
                 generatedId = PropertyAccessorHelper.fromSourceToTargetClass(m.getIdAttribute().getJavaType(),
@@ -124,6 +131,34 @@ public class IdGenerator
                 + " Strategy not supported by this client :" + client.getClass().getName());
     }
 
+    private Generator getAutoGenClazz(Client<?> client)
+    {
+        Generator autoGenerator = null;
+        String autoGen = ((ClientBase)client).getAutoGenerator();
+        if (null != autoGen)
+        {
+            Class autogenClazz;
+            try
+            {
+                autogenClazz = Class.forName(autoGen);
+                autoGenerator = (Generator) (KunderaCoreUtils.createNewInstance(autogenClazz));
+            }
+            catch (ClassNotFoundException cnfe)
+            {
+                log.error("The autogen custom class is invalid");
+                throw new KunderaException("The autogen custom class should implement AutoGenerator class", cnfe);
+            }
+
+        }
+        else
+        {
+
+            autoGenerator = ((Generator) client.getIdGenerator());
+
+        }
+        return autoGenerator;
+    }
+
     /**
      * Generate Id when given sequence generation strategy.
      * 
@@ -134,9 +169,10 @@ public class IdGenerator
      */
     private Object onSequenceGenerator(EntityMetadata m, Client<?> client, IdDiscriptor keyValue, Object e)
     {
-        if (client.getIdGenerator() instanceof SequenceGenerator)
+        Object seqgenerator = getAutoGenClazz(client);
+        if (seqgenerator instanceof SequenceGenerator)
         {
-            Object generatedId = ((SequenceGenerator) client.getIdGenerator()).generate(
+            Object generatedId = ((SequenceGenerator) seqgenerator).generate(
                     keyValue.getSequenceDiscriptor(), client, m.getIdAttribute().getJavaType().getSimpleName());
             try
             {
@@ -166,9 +202,10 @@ public class IdGenerator
      */
     private Object onTableGenerator(EntityMetadata m, Client<?> client, IdDiscriptor keyValue, Object e)
     {
-        if (client.getIdGenerator() instanceof TableGenerator)
+        Object tablegenerator = getAutoGenClazz(client);   
+        if (tablegenerator instanceof TableGenerator)
         {
-            Object generatedId = ((TableGenerator) client.getIdGenerator()).generate(keyValue.getTableDiscriptor(),
+            Object generatedId = ((TableGenerator) tablegenerator).generate(keyValue.getTableDiscriptor(),
                     (ClientBase) client, m.getIdAttribute().getJavaType().getSimpleName());
             try
             {
