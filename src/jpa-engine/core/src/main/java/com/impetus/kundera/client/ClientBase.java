@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.impetus.kundera.db.RelationHolder;
-import com.impetus.kundera.generator.AutoGenerator;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
@@ -49,15 +48,13 @@ public abstract class ClientBase
     /** The index manager. */
     protected IndexManager indexManager;
     
-    /** The index manager. */
-    protected AutoGenerator autoGenerator;
-
+ 
     /**
      * @return the autoGenerator
      */
     public String getAutoGenerator()
     {
-        return this.getClientMetadata().getAutoGenImplementor();
+       return this.getClientMetadata() != null ? this.getClientMetadata().getAutoGenImplementor() : null;
     }
 
     /** persistence unit */
