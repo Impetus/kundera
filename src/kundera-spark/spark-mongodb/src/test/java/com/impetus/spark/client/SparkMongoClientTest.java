@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.spark.client;
 
+import java.net.UnknownHostException;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -32,13 +33,16 @@ import org.junit.Test;
 
 import com.impetus.client.spark.entities.Person;
 import com.impetus.client.spark.tests.SparkBaseTest;
+import com.mongodb.DB;
+import com.mongodb.MongoClient;
+import com.mongodb.ServerAddress;
 
 /**
  * The Class MongoClientTest.
  * 
  * @author devender.yadav
  */
-public class MongoClientTest extends SparkBaseTest
+public class SparkMongoClientTest extends SparkBaseTest
 {
 
     /** The Constant MONGO_PU. */
@@ -82,7 +86,7 @@ public class MongoClientTest extends SparkBaseTest
     {
         testPersist();
         testQuery();
-        // testSaveIntermediateResult();
+        testSaveIntermediateResult();
     }
 
     /**
@@ -178,8 +182,18 @@ public class MongoClientTest extends SparkBaseTest
     @AfterClass
     public static void tearDownAfterClass() throws Exception
     {
+        // SparkTestingUtils.recursivelyCleanDir("src/test/resources/testspark_csv");
+        // SparkTestingUtils.recursivelyCleanDir("src/test/resources/testspark_json");
+        dropDB();
         emf.close();
         emf = null;
+    }
+
+    private static void dropDB() throws UnknownHostException
+    {
+        MongoClient mongoClient = new MongoClient(new ServerAddress("localhost", 27017));
+        DB db = mongoClient.getDB("sparktest");
+        db.dropDatabase();
     }
 
 }

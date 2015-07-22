@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<clientProperties>
+	<datastores>
+		<dataStore>
+			<name>cassandra</name>
+			<connection>
+				<properties>
+					<property name="spark.executor.memory" value="1g"></property>
+					<property name="spark.cassandra.connection.host" value="localhost"></property>
+					<property name="spark.cassandra.connection.native.port"
+						value="9042"></property>
+					<property name="spark.cassandra.connection.rpc.port"
+						value="9160"></property>
+					<property name="spark.master" value="local"></property>
+					<property name="spark.app.name" value="testspark"></property>
+					<property name="spark.driver.allowMultipleContexts" value="true"></property>
+				</properties>
+			</connection>
+		</dataStore>
+	</datastores>
+</clientProperties>

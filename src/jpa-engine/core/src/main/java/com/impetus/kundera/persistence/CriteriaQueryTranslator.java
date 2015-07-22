@@ -42,7 +42,7 @@ import com.impetus.kundera.query.KunderaQuery.SortOrder;
  * 
  * @author vivek.mishra
  */
-public final class CriteriaQueryTranslator
+final class CriteriaQueryTranslator
 {
 
     static Map<ConditionalOperator, String> conditions = new HashMap<AbstractPredicate.ConditionalOperator, String>();
@@ -65,7 +65,7 @@ public final class CriteriaQueryTranslator
      * 
      * @return JPQL string.
      */
-    public static <S> String translate(CriteriaQuery criteriaQuery)
+    static <S> String translate(CriteriaQuery criteriaQuery)
     {
         QueryBuilder builder = new CriteriaQueryTranslator.QueryBuilder();
 
@@ -175,7 +175,7 @@ public final class CriteriaQueryTranslator
         {
             this.builder.append(aggregation);
             return this;
-            
+
         }
 
         public String getQuery()
@@ -362,12 +362,9 @@ public final class CriteriaQueryTranslator
             this.builder.append(Constants.SPACE);
             this.builder.append(conditions.get(condition));
             this.builder.append(Constants.SPACE);
-            appendValue(value,isStringLiteral(((AbstractAttribute) path.getAttribute()).getBindableJavaType(), value));
+            appendValue(value, isStringLiteral(((AbstractAttribute) path.getAttribute()).getBindableJavaType(), value));
             this.builder.append(Constants.SPACE);
         }
-
-                
-       
 
         /**
          * @param alias
@@ -383,20 +380,22 @@ public final class CriteriaQueryTranslator
             this.builder.append(Constants.SPACE);
             this.builder.append(conditions.get(btw.getCondition()));
             this.builder.append(Constants.SPACE);
-            appendValue(btw.getLower(),isStringLiteral(((AbstractAttribute) path.getAttribute()).getBindableJavaType(),btw.getLower()));
+            appendValue(btw.getLower(),
+                    isStringLiteral(((AbstractAttribute) path.getAttribute()).getBindableJavaType(), btw.getLower()));
             this.builder.append(Constants.SPACE);
             this.builder.append("AND");
             this.builder.append(Constants.SPACE);
-            appendValue(btw.getUpper(),isStringLiteral(((AbstractAttribute) path.getAttribute()).getBindableJavaType(),btw.getUpper()));
+            appendValue(btw.getUpper(),
+                    isStringLiteral(((AbstractAttribute) path.getAttribute()).getBindableJavaType(), btw.getUpper()));
         }
-        
+
         /**
          * @param value
          * @param isString
          */
         private void appendValue(Object value, boolean isString)
         {
-            if(isString)
+            if (isString)
             {
                 this.builder.append("\"").append(value).append("\"");
             }
@@ -404,7 +403,7 @@ public final class CriteriaQueryTranslator
             {
                 this.builder.append(value);
             }
-            
+
         }
 
         /**
@@ -416,29 +415,26 @@ public final class CriteriaQueryTranslator
         {
             return !isNumericValue(fieldClazz) && !isNumericValue(value.getClass());
         }
-        
+
         /**
          * @param clazz
          * @return
          */
         private boolean isNumericValue(Class clazz)
         {
-            
-            if(!clazz.isPrimitive())
+
+            if (!clazz.isPrimitive())
             {
                 return Number.class.isAssignableFrom(clazz.getSuperclass());
             }
-            else 
+            else
             {
-                return int.class.isAssignableFrom(clazz) || float.class.isAssignableFrom(clazz)  
-                        || double.class.isAssignableFrom(clazz) 
-                        || long.class.isAssignableFrom(clazz) 
-                        || byte.class.isAssignableFrom(clazz) 
-                        || short.class.isAssignableFrom(clazz) ;
+                return int.class.isAssignableFrom(clazz) || float.class.isAssignableFrom(clazz)
+                        || double.class.isAssignableFrom(clazz) || long.class.isAssignableFrom(clazz)
+                        || byte.class.isAssignableFrom(clazz) || short.class.isAssignableFrom(clazz);
             }
-            
-        }
 
+        }
 
     }
 

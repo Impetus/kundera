@@ -45,6 +45,7 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
+import com.mongodb.MongoException;
 
 /**
  * The Class MongoDBSchemaManager manages auto schema operation
@@ -169,7 +170,7 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
                             + MongoDBUtils.CHUNKS, showQuery);
                 }
                 coll = db.createCollection(tableInfo.getTableName() + MongoDBUtils.FILES, options);
-                createUniqueIndex(coll, tableInfo.getIdColumnName());
+                createUniqueIndexGFS(coll, tableInfo.getIdColumnName());
                 KunderaCoreUtils.printQuery("Create collection: " + tableInfo.getTableName() + MongoDBUtils.FILES,
                         showQuery);
                 db.createCollection(tableInfo.getTableName() + MongoDBUtils.CHUNKS, options);
@@ -226,7 +227,7 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
                 if (!db.collectionExists(tableInfo.getTableName() + MongoDBUtils.FILES))
                 {
                     coll = db.createCollection(tableInfo.getTableName() + MongoDBUtils.FILES, options);
-                    createUniqueIndex(coll, tableInfo.getIdColumnName());
+                    createUniqueIndexGFS(coll, tableInfo.getIdColumnName());
                     KunderaCoreUtils.printQuery("Create collection: " + tableInfo.getTableName() + MongoDBUtils.FILES,
                             showQuery);
                 }
@@ -412,6 +413,10 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
         {
             options.put(MongoDBConstants.MAX, indexInfo.getMaxValue());
         }
+        if ((indexInfo.getIndexType().toLowerCase()).equals("unique"))
+        {
+            options.put("unique", true);
+        }
         collection.createIndex(keys, options);
         KunderaCoreUtils.printQuery("Create indexes on:" + keys, showQuery);
     }
@@ -470,9 +475,17 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
             throw new KunderaException("Multiple Lob fields in a single Entity are not supported in Kundera");
     }
 
-    private void createUniqueIndex(DBCollection coll, String id)
+    private void createUniqueIndexGFS(DBCollection coll, String id)
     {
-        coll.createIndex(new BasicDBObject("metadata." + id, 1), new BasicDBObject("unique", true));
+        try
+        {
+            coll.createIndex(new BasicDBObject("metadata." + id, 1), new BasicDBObject("unique", true));
+        }
+        catch (MongoException ex)
+        {
+            throw new KunderaException("Error in creating unique indexes in " + coll.getFullName() + " collection on "
+                    + id + " field");
+        }
     }
 
     @Override

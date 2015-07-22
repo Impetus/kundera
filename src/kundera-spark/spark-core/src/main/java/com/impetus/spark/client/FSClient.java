@@ -38,7 +38,7 @@ import com.impetus.spark.constants.SparkPropertiesConstants;
  * 
  * @author: Devender Yadav
  */
-public class FSClient implements SparkDataClient, FilePathBuilder
+public class FSClient extends FilePathBuilder implements SparkDataClient
 {
 
     /*

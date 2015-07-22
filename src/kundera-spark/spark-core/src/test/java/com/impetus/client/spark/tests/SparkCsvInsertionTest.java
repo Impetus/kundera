@@ -26,6 +26,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.impetus.client.spark.entities.Person;
+import com.impetus.client.spark.utils.SparkTestingUtils;
 
 /**
  * The Class SparkCsvCrudTest.
@@ -102,6 +103,7 @@ public class SparkCsvInsertionTest extends SparkBaseTest
     @AfterClass
     public static void tearDownAfterClass() throws Exception
     {
+        SparkTestingUtils.recursivelyCleanDir(OUTPUT_FILE_DIR);
         emf.close();
         emf = null;
     }

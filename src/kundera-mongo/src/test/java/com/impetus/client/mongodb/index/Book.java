@@ -13,14 +13,14 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.client.spark;
-
-import java.io.Serializable;
+package com.impetus.client.mongodb.index;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.Table;
+
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
 
 /**
  * The Class Book.
@@ -28,12 +28,9 @@ import javax.persistence.Table;
  * @author devender.yadav
  */
 @Entity
-@Table(name = "spark_book")
-public class Book implements Serializable
+@IndexCollection(columns = { @Index(name = "category", type = "unique") })
+public class Book
 {
-
-    /** The Constant serialVersionUID. */
-    private static final long serialVersionUID = 1L;
 
     /** The id. */
     @Id
@@ -42,10 +39,6 @@ public class Book implements Serializable
     /** The title. */
     @Column
     private String title;
-
-    /** The author. */
-    @Column
-    private String author;
 
     /** The category. */
     @Column
@@ -70,18 +63,15 @@ public class Book implements Serializable
      *            the id
      * @param title
      *            the title
-     * @param author
-     *            the author
      * @param category
      *            the category
      * @param numPages
      *            the num pages
      */
-    public Book(String id, String title, String author, String category, int numPages)
+    public Book(String id, String title, String category, int numPages)
     {
         this.id = id;
         this.title = title;
-        this.author = author;
         this.category = category;
         this.numPages = numPages;
     }
@@ -126,27 +116,6 @@ public class Book implements Serializable
     public void setTitle(String title)
     {
         this.title = title;
-    }
-
-    /**
-     * Gets the author.
-     * 
-     * @return the author
-     */
-    public String getAuthor()
-    {
-        return author;
-    }
-
-    /**
-     * Sets the author.
-     * 
-     * @param author
-     *            the new author
-     */
-    public void setAuthor(String author)
-    {
-        this.author = author;
     }
 
     /**
