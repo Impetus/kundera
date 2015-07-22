@@ -74,6 +74,7 @@ public class KunderaPersistenceProviderUtilTest
         if (propertyMap.isEmpty())
         {
             propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "");
+            propertyMap.put(PersistenceProperties.KUNDERA_NODES, "localhost");
         }
         Map mapOfExternalProperties = new HashMap<String, Map>();
         mapOfExternalProperties.put("addCassandra", propertyMap);
