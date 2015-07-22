@@ -123,7 +123,7 @@ public abstract class BaseTest
      * @param fieldName
      *            the field name
      */
-    protected <E extends Object> void assertFindByNameWithREservedKeyWords(EntityManager em, Class clazz, E e, String name, String fieldName)
+    protected <E extends Object> void assertFindByNameWithReservedKeywords(EntityManager em, Class clazz, E e, String name, String fieldName)
     {
 
         CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
