@@ -166,7 +166,7 @@ public class CriteriaQueryTest extends BaseTest
         q.executeUpdate();
 
         entityManager.clear();
-        assertFindByNameWithREservedKeyWords(entityManager, PersonCassandra.class, PersonCassandra.class, "Screenshot from 2013-10-30 17:43:51.png", "personName");
+        assertFindByNameWithReservedKeywords(entityManager, PersonCassandra.class, PersonCassandra.class, "Screenshot from 2013-10-30 17:43:51.png", "personName");
         
         entityManager.clear();
         updateQuery = "update PersonCassandra p set p.personName='john.dever@impetus.co.in' where p.personId=1";
@@ -174,7 +174,7 @@ public class CriteriaQueryTest extends BaseTest
         q.executeUpdate();
 
         entityManager.clear();
-        assertFindByNameWithREservedKeyWords(entityManager, PersonCassandra.class, PersonCassandra.class, "john.dever@impetus.co.in", "personName");
+        assertFindByNameWithReservedKeywords(entityManager, PersonCassandra.class, PersonCassandra.class, "john.dever@impetus.co.in", "personName");
         
         
         // Delete without WHERE clause.

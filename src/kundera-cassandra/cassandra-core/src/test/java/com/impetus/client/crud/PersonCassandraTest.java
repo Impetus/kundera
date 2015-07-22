@@ -441,10 +441,9 @@ public class PersonCassandraTest extends BaseTest
 
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 
-        CriteriaQuery<Long> personQuery = criteriaBuilder.createQuery(Long.class);
+        CriteriaQuery<Object> personQuery = criteriaBuilder.createQuery(Object.class);
         Root<PersonCassandra> from = personQuery.from(PersonCassandra.class);
         personQuery.select(criteriaBuilder.count((Expression<?>) from.alias("p")));
-        
 
         Query q = entityManager.createQuery(personQuery);
         List noOfRows = q.getResultList();
@@ -471,7 +470,6 @@ public class PersonCassandraTest extends BaseTest
         }
         tc.setCqlVersion(CassandraConstants.CQL_VERSION_2_0);
     }
-
     /**
      * Test count result.
      */
