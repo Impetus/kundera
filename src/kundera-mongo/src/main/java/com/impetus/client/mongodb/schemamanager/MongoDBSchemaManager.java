@@ -413,7 +413,8 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
         {
             options.put(MongoDBConstants.MAX, indexInfo.getMaxValue());
         }
-        if ((indexInfo.getIndexType().toLowerCase()).equals("unique"))
+        
+        if (indexInfo.getIndexType()!= null && (indexInfo.getIndexType().toLowerCase()).equals("unique"))
         {
             options.put("unique", true);
         }
