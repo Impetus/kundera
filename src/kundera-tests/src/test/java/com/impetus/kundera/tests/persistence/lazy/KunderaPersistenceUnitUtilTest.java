@@ -55,15 +55,15 @@ public class KunderaPersistenceUnitUtilTest
         Map<String, String> propertyMap = new HashMap<String, String>();
         if (propertyMap.isEmpty())
         {
-           // propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "");
-            //propertyMap.put(PersistenceProperties.KUNDERA_NODES, "localhost");
+            propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "");
+            
         }
         Map mapOfExternalProperties = new HashMap<String, Map>();
         mapOfExternalProperties.put("addCassandra", propertyMap);
         mapOfExternalProperties.put("piccandra", propertyMap);
         mapOfExternalProperties.put("secIdxAddCassandra", propertyMap);
         emf = Persistence.createEntityManagerFactory(
-                "rdbms,redis,addMongo,addCassandra,piccandra,secIdxAddCassandra,picongo", mapOfExternalProperties);
+                "addCassandra,rdbms,redis,addMongo,piccandra,secIdxAddCassandra,picongo", mapOfExternalProperties);
         em = emf.createEntityManager();
         util = emf.getPersistenceUnitUtil();
     }
