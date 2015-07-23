@@ -33,6 +33,7 @@ import org.junit.Test;
 
 import com.impetus.client.spark.entities.Person;
 import com.impetus.client.spark.tests.SparkBaseTest;
+import com.impetus.client.spark.utils.SparkTestingUtils;
 import com.mongodb.DB;
 import com.mongodb.MongoClient;
 import com.mongodb.ServerAddress;
@@ -86,7 +87,7 @@ public class SparkMongoClientTest extends SparkBaseTest
     {
         testPersist();
         testQuery();
-        // testSaveIntermediateResult();
+        testSaveIntermediateResult();
     }
 
     /**
@@ -182,8 +183,8 @@ public class SparkMongoClientTest extends SparkBaseTest
     @AfterClass
     public static void tearDownAfterClass() throws Exception
     {
-        // SparkTestingUtils.recursivelyCleanDir("src/test/resources/testspark_csv");
-        // SparkTestingUtils.recursivelyCleanDir("src/test/resources/testspark_json");
+        SparkTestingUtils.recursivelyCleanDir("src/test/resources/testspark_csv");
+        SparkTestingUtils.recursivelyCleanDir("src/test/resources/testspark_json");
         dropDB();
         emf.close();
         emf = null;

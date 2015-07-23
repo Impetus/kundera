@@ -48,8 +48,9 @@ public class SparkCsvQueryTest extends SparkBaseTest
 
     /**
      * Sets the up before class.
-     *
-     * @throws Exception the exception
+     * 
+     * @throws Exception
+     *             the exception
      */
     @BeforeClass
     public static void SetUpBeforeClass() throws Exception
@@ -68,6 +69,7 @@ public class SparkCsvQueryTest extends SparkBaseTest
     {
         em = emf.createEntityManager();
         em.setProperty("kundera.fs.inputfile.path", "src/test/resources/test.csv");
+        em.setProperty("format", "csv");
     }
 
     /**

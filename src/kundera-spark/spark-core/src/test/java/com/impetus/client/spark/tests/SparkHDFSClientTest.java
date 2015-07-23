@@ -72,6 +72,9 @@ public class SparkHDFSClientTest extends SparkBaseTest
     public void setUp() throws Exception
     {
         em = emf.createEntityManager();
+        em.setProperty("kundera.hdfs.outputfile.path", "hdfs://localhost:9000/sparkInputTest/input");
+        em.setProperty("kundera.hdfs.inputfile.path", "hdfs://localhost:9000/sparkInputTest/input");
+        em.setProperty("format", "json");
     }
 
     /**
@@ -87,14 +90,9 @@ public class SparkHDFSClientTest extends SparkBaseTest
 
     public void testPersist()
     {
-        em.setProperty("kundera.hdfs.outputfile.path", "hdfs://192.168.41.51:9000/sparkInputTest/input");
-        em.setProperty("kundera.hdfs.inputfile.path", "hdfs://192.168.41.51:9000/sparkInputTest/input");
-        em.setProperty("format", "json");
-
         Person person1 = getPerson("1", "dev", 22, 30000.5);
 
         em.persist(person1);
-
         em.clear();
         Person p = em.find(Person.class, "1");
         validatePerson1(p);

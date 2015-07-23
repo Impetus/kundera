@@ -37,7 +37,7 @@ import com.impetus.client.spark.cassandra.utils.CassandraCli;
 import com.impetus.client.spark.utils.SparkTestingUtils;
 
 /**
- * The Class SparkClientTest.
+ * The Class SparkCassClientTest.
  * 
  * @author: devender.yadav
  */
@@ -78,7 +78,6 @@ public class SparkCassClientTest
     public void setUp() throws Exception
     {
         em = emf.createEntityManager();
-        persistBooks();
     }
 
     /**
@@ -267,8 +266,9 @@ public class SparkCassClientTest
 
     /**
      * Exception test.
-     *
-     * @param query the query
+     * 
+     * @param query
+     *            the query
      * @return true, if successful
      */
     private boolean exceptionTest(Query query)

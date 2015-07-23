@@ -176,8 +176,7 @@ public class SparkClient extends ClientBase implements Client<SparkQuery>, Clien
      */
     public void close()
     {
-        // TODO Auto-generated method stub
-
+        registeredTables.clear();
     }
 
     /*
@@ -316,16 +315,19 @@ public class SparkClient extends ClientBase implements Client<SparkQuery>, Clien
     {
         DataFrame dataFrame = getDataFrame(query, m, kunderaQuery);
 
-//        dataFrame.show();
+        // dataFrame.show();
         return dataHandler.loadDataAndPopulateResults(dataFrame, m, kunderaQuery);
     }
 
     /**
      * Gets the data frame.
-     *
-     * @param query the query
-     * @param m the m
-     * @param kunderaQuery the kundera query
+     * 
+     * @param query
+     *            the query
+     * @param m
+     *            the m
+     * @param kunderaQuery
+     *            the kundera query
      * @return the data frame
      */
     public DataFrame getDataFrame(String query, EntityMetadata m, KunderaQuery kunderaQuery)
@@ -335,14 +337,11 @@ public class SparkClient extends ClientBase implements Client<SparkQuery>, Clien
         String clientName = puMetadata.getProperty(DATA_CLIENT).toLowerCase();
 
         SparkDataClient dataClient = SparkDataClientFactory.getDataClient(clientName);
-
         if (registeredTables.get(m.getTableName()) == null || !registeredTables.get(m.getTableName()))
         {
             dataClient.registerTable(m, this);
-            registeredTables.put(m.getTableName(), true); // when to make it
-            // false?
+            registeredTables.put(m.getTableName(), true);
         }
-
         // at this level temp table or table should be ready
         DataFrame dataFrame = sqlContext.sql(query);
 

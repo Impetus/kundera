@@ -10,6 +10,7 @@
 					<property name="spark.master" value="local"></property>
 					<property name="spark.app.name" value="sparkhdfs"></property>
 					<property name="spark.executor.memory" value="1g"></property>
+					<property name="spark.driver.allowMultipleContexts" value="true"></property>
 				</properties>
 			</connection>
 		</dataStore>
@@ -21,6 +22,7 @@
 					<property name="spark.master" value="local"></property>
 					<property name="spark.app.name" value="sparkfs"></property>
 					<property name="spark.executor.memory" value="1g"></property>
+					<property name="spark.driver.allowMultipleContexts" value="true"></property>
 				</properties>
 			</connection>
 		</dataStore>
