@@ -50,12 +50,12 @@ public class KunderaPersistenceUnitUtilTest
     public void setUp() throws Exception
     {
         setup.startServer();
-        //setup.createSchema();
+        setup.createSchema();
 
         Map<String, String> propertyMap = new HashMap<String, String>();
         if (propertyMap.isEmpty())
         {
-            propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "");
+            propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "update");
             
         }
         Map mapOfExternalProperties = new HashMap<String, Map>();
