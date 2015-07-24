@@ -67,8 +67,7 @@ public final class CassandraCli
     private static Logger log = LoggerFactory.getLogger(CassandraCli.class);
 
     private static List<String> puWithSchemaGeneration = new ArrayList<String>();
-    
-    
+
     /**
      * Cassandra set up.
      * 
@@ -85,28 +84,27 @@ public final class CassandraCli
      * @throws SchemaDisagreementException
      *             the schema disagreement exception
      */
-    public static void cassandraSetUp() throws IOException, TException, InvalidRequestException, UnavailableException,
-            TimedOutException, SchemaDisagreementException
+    public static void cassandraSetUp(String ip, int port) throws IOException, TException, InvalidRequestException,
+            UnavailableException, TimedOutException, SchemaDisagreementException
     {
-        if (!checkIfServerRunning())
+        if (!checkIfServerRunning(ip, port))
         {
             cassandra = new EmbeddedCassandraService();
             cassandra.start();
         }
-        initClient();
+        initClient(ip, port);
     }
 
     public static void archivePu(final String peristenceunit)
     {
         puWithSchemaGeneration.add(peristenceunit);
     }
-    
+
     public static boolean isArchived(final String persistenceUnit)
     {
         return puWithSchemaGeneration.contains(persistenceUnit);
     }
-    
-    
+
     /**
      * Create keyspace.
      * 
@@ -206,11 +204,6 @@ public final class CassandraCli
             {
                 client.system_drop_keyspace(keyspaceName);
             }
-            // deleteCassandraFolders("/var/lib/cassandra/data/");
-            // deleteCassandraFolders("/var/lib/cassandra/data/system/");
-            // deleteCassandraFolders("/var/lib/cassandra/commitlog/");
-            // deleteCassandraFolders("/var/lib/cassandra/saved_caches/");
-            // deleteCassandraFolders("/var/log/cassandra/");
         }
         catch (InvalidRequestException e)
         {
@@ -271,7 +264,7 @@ public final class CassandraCli
         }
         catch (InvalidRequestException irex)
         {
-         
+
             StringBuilder builder = new StringBuilder("Cannot add already existing column family ");
 
             if (irex.getWhy() != null && irex.getWhy().contains(builder.toString()))
@@ -294,13 +287,16 @@ public final class CassandraCli
     /**
      * Check if server running.
      * 
+     * @param port
+     * @param ip
+     * 
      * @return true, if successful
      */
-    private static boolean checkIfServerRunning()
+    private static boolean checkIfServerRunning(String ip, int port)
     {
         try
         {
-            Socket socket = new Socket("127.0.0.1", 9160);
+            Socket socket = new Socket(ip, port);
             return socket.getInetAddress() != null;
         }
         catch (UnknownHostException e)
@@ -317,12 +313,15 @@ public final class CassandraCli
     /**
      * Inits the client.
      * 
+     * @param port
+     * @param ip
+     * 
      * @throws TTransportException
      *             the t transport exception
      */
-    public static void initClient() throws TTransportException
+    public static void initClient(String ip, int port) throws TTransportException
     {
-        TSocket socket = new TSocket("127.0.0.1", 9160);
+        TSocket socket = new TSocket(ip, port);
         TTransport transport = new TFramedTransport(socket);
         TProtocol protocol = new TBinaryProtocol(transport, true, true);
         client = new Cassandra.Client(protocol);
