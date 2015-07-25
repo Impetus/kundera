@@ -70,15 +70,7 @@ public class SparkClientFactory extends GenericClientFactory
     }
 
     /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.loader.ClientLifeCycleManager#destroy()
-     */
-    public void destroy()
-    {
-        // TODO Auto-generated method stub
-        // sparkconf
-    }
+   
 
     /*
      * (non-Javadoc)
@@ -174,9 +166,7 @@ public class SparkClientFactory extends GenericClientFactory
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
-        // TODO Auto-generated method stub
-        // returns null on createEntityManager
-        // return null;
+        
         return new SparkClient(kunderaMetadata, reader, externalProperties, persistenceUnit, sparkContext, sqlContext);
     }
 
@@ -188,7 +178,7 @@ public class SparkClientFactory extends GenericClientFactory
     @Override
     public boolean isThreadSafe()
     {
-        // TODO Auto-generated method stub
+        
         return false;
     }
 
@@ -205,5 +195,33 @@ public class SparkClientFactory extends GenericClientFactory
         // TODO Auto-generated method stub
 
     }
+    
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.loader.ClientLifeCycleManager#destroy()
+     */
+    @Override
+    public void destroy()
+    {
+        indexManager.close();
+        if (schemaManager != null)
+        {
+            schemaManager.dropSchema();
+        }
+        if (sparkContext != null)
+        {
+            logger.info("Closing connection to spark.");
+            sparkContext.stop();
+            logger.info("Closed connection to spark.");
+        }
+        else
+        {
+            logger.warn("Can't close connection to Spark, it was already disconnected");
+        }
+        externalProperties = null;
+        schemaManager = null;
+    }
+
 
 }
