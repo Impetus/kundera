@@ -471,6 +471,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         byte[] valueInBytes = HBaseUtils.getBytes(colValue);
         SingleColumnValueFilter filter = new SingleColumnValueFilter(Bytes.toBytes(columnFamilyName),
                 Bytes.toBytes(colName), CompareOp.EQUAL, valueInBytes);
+        filter.setFilterIfMissing(true);
         try
         {
             return ((HBaseDataHandler) handler).readData(tableName, m, null, null, null, null, getFilterList(filter));

@@ -73,6 +73,7 @@
 		<class>com.impetus.kundera.client.crud.associations.MobileHandset</class>
 		<class>com.impetus.kundera.client.crud.associations.MobileManufacturer</class>
 		<class>com.impetus.kundera.client.crud.associations.MobileOperatingSystem</class>
+		<class>com.impetus.client.hbase.crud.association.UserOTM</class>
 		<class>com.impetus.client.hbase.crud.association.PersonUniOTO</class>
 		<class>com.impetus.client.hbase.crud.association.PersonBiOTO</class>
 		<class>com.impetus.client.hbase.crud.association.AddressUniOTO</class>
