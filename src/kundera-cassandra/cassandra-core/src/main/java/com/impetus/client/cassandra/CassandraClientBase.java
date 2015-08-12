@@ -942,8 +942,6 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     /**
      * Execute scalar query.
      * 
-     * @param dataHandler
-     *            the data handler
      * @param cqlQuery
      *            the cql query
      * @return the list
@@ -1002,8 +1000,6 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     /**
      * Compose column value.
      * 
-     * @param entity
-     *            the entity
      * @param cqlMetadata
      *            the cql metadata
      * @param thriftColumnValue
@@ -1318,6 +1314,36 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             builders.put(tableName, queryBuilder.toString());
         }
         return new ArrayList(builders.values());
+    }
+
+    /**
+     * Gets the persist queries.
+     * 
+     * @param entityMetadata
+     *            the entity metadata
+     * @param entity
+     *            the entity
+     * @param conn
+     *            the conn
+     * @param rlHolders
+     *            the rl holders
+     * @param ttlColumns
+     *            the ttl columns
+     * @return the persist queries
+     */
+    protected List<String> getPersistQueries(EntityMetadata entityMetadata, Object entity,
+            org.apache.cassandra.thrift.Cassandra.Client conn, List<RelationHolder> rlHolders, Object ttlColumns)
+    {
+        List<String> queries;
+        if (entityMetadata.isCounterColumnType())
+        {
+            queries = createUpdateQueryForCounter(entityMetadata, entity, conn, rlHolders);
+        }
+        else
+        {
+            queries = createInsertQuery(entityMetadata, entity, conn, rlHolders, ttlColumns);
+        }
+        return queries;
     }
 
     /**
@@ -1708,6 +1734,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         Map<Class<?>, Map<ByteBuffer, Map<String, List<Mutation>>>> batchMutationMap = new HashMap<Class<?>, Map<ByteBuffer, Map<String, List<Mutation>>>>();
 
         int recordsExecuted = 0;
+        boolean setCounter = true;
         String batchQuery = CQLTranslator.BATCH_QUERY;
         batchQuery = StringUtils.replace(batchQuery, CQLTranslator.STATEMENT, "");
         StringBuilder batchQueryBuilder = new StringBuilder(batchQuery);
@@ -1723,6 +1750,12 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                     Object id = node.getEntityId();
                     EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
                             node.getDataClass());
+                    if (metadata.isCounterColumnType() && setCounter)
+                    {
+                        batchQueryBuilder = new StringBuilder(StringUtils.replace(batchQueryBuilder.toString(),
+                                CQLTranslator.BEGIN_BATCH, CQLTranslator.BEGIN_COUNTER_BATCH));
+                        setCounter = false;
+                    }
                     persistenceUnit = metadata.getPersistenceUnit();
                     isUpdate = node.isUpdate();
 
@@ -1739,15 +1772,16 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                         {
                             String query;
                             query = onDeleteQuery(metadata, metadata.getTableName(), metaModel, id);
-                            batchQueryBuilder.append(" ");
+                            batchQueryBuilder.append(Constants.SPACE);
                             batchQueryBuilder.append(query);
                         }
                         else
                         {
-                            List<String> insertQueries = createInsertQuery(metadata, entity, conn, relationHolders,
+                            List<String> insertQueries = getPersistQueries(metadata, entity, conn, relationHolders,
                                     getTtlValues().get(metadata.getTableName()));
                             for (String query : insertQueries)
                             {
+                                batchQueryBuilder.append(Constants.SPACE);
                                 batchQueryBuilder.append(query);
                             }
                         }
@@ -2201,15 +2235,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 throws UnsupportedEncodingException, InvalidRequestException, TException, UnavailableException,
                 TimedOutException, SchemaDisagreementException
         {
-            List<String> queries;
-            if (entityMetadata.isCounterColumnType())
-            {
-                queries = createUpdateQueryForCounter(entityMetadata, entity, conn, rlHolders);
-            }
-            else
-            {
-                queries = createInsertQuery(entityMetadata, entity, conn, rlHolders, ttlColumns);
-            }
+            List<String> queries = getPersistQueries(entityMetadata, entity, conn, rlHolders, ttlColumns);
 
             for (String query : queries)
             {
