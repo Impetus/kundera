@@ -204,6 +204,12 @@ public final class CQLTranslator
     /** The Constant FROZEN. */
     public static final String FROZEN = "frozen";
 
+    /** The Constant BEGIN_COUNTER_BATCH. */
+    public static final String BEGIN_COUNTER_BATCH = "BEGIN COUNTER BATCH";
+
+    /** The Constant BEGIN_BATCH. */
+    public static final String BEGIN_BATCH = "BEGIN BATCH";
+
     /**
      * Instantiates a new CQL translator.
      */
