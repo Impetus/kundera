@@ -37,7 +37,6 @@ import org.apache.cassandra.utils.ByteBufferUtil;
 import com.datastax.driver.core.DataType.Name;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.UDTValue;
-//import com.datastax.driver.core.UserType;
 import com.impetus.client.cassandra.schemamanager.CassandraDataTranslator;
 import com.impetus.client.cassandra.schemamanager.CassandraDataTranslator.CassandraType;
 import com.impetus.client.cassandra.schemamanager.CassandraValidationClassMapper;
@@ -383,7 +382,7 @@ public final class DSClientUtilities
         case UDT:
             retVal = row.getUDTValue(columnName);
             PropertyAccessorHelper.set(entity, member,
-                    setUDTValue(entity, member.getType(), (UDTValue) retVal, metamodel));
+                    retVal != null ? setUDTValue(entity, member.getType(), (UDTValue) retVal, metamodel) : null);
             break;
         }
 

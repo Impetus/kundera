@@ -392,6 +392,30 @@ public class UdtAsEmbeddablesCRUDTest
         assertEntity((PersonUDT) p3, f3);
 
     }
+    
+    /**
+     * Test null embeddable.
+     */
+    @Test
+    public void testNullEmbeddable()
+    {
+        PersonUDT personUDT = new PersonUDT();
+        personUDT.setPersonId("10");
+        personUDT.setEmail("user@impetus.com");
+        List<String> nicknames = new ArrayList<String>();
+        nicknames.add("Charlie");
+        nicknames.add("kar");
+        personUDT.setNicknames(nicknames);
+        personUDT.setPassword("impetus");
+        personUDT.setPersonalDetails(null);
+        
+        entityManager.persist(personUDT);
+        entityManager.clear();
+
+        PersonUDT f1 = entityManager.find(PersonUDT.class, "10");
+        
+        Assert.assertNotNull(f1);
+    }
 
     /**
      * Assert entity.
