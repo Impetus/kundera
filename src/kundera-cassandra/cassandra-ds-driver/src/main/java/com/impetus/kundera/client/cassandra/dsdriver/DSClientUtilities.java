@@ -235,8 +235,8 @@ public final class DSClientUtilities
             {
                 if (listAttributeTypeClass.isAssignableFrom(byte[].class))
                 {
-                    PropertyAccessorHelper.set(entity, member, CassandraDataTranslator.marshalCollection(
-                            BytesType.class, (Collection) retVal, listAttributeTypeClass, ArrayList.class));
+                    setFieldValue(entity, member, CassandraDataTranslator.marshalCollection(BytesType.class,
+                            (Collection) retVal, listAttributeTypeClass, ArrayList.class));
                 }
                 else
                 {
@@ -245,13 +245,13 @@ public final class DSClientUtilities
                     {
                         resultList.add(collectionItems.next());
                     }
-                    PropertyAccessorHelper.set(entity, member, resultList);
+                    setFieldValue(entity, member, resultList);
                 }
 
             }
             else if (retVal != null && !((Collection) retVal).isEmpty())
             {
-                PropertyAccessorHelper.set(entity, member, resultList);
+                setFieldValue(entity, member, resultList);
             }
             break;
 
@@ -289,8 +289,8 @@ public final class DSClientUtilities
             {
                 if (setAttributeTypeClass.isAssignableFrom(byte[].class))
                 {
-                    PropertyAccessorHelper.set(entity, member, CassandraDataTranslator.marshalCollection(
-                            BytesType.class, (Collection) retVal, setAttributeTypeClass, HashSet.class));
+                    setFieldValue(entity, member, CassandraDataTranslator.marshalCollection(BytesType.class,
+                            (Collection) retVal, setAttributeTypeClass, HashSet.class));
                 }
                 else
                 {
@@ -299,12 +299,12 @@ public final class DSClientUtilities
                     {
                         resultSet.add(collectionItems.next());
                     }
-                    PropertyAccessorHelper.set(entity, member, resultSet);
+                    setFieldValue(entity, member, resultSet);
                 }
             }
             else if (retVal != null && !((Collection) retVal).isEmpty())
             {
-                PropertyAccessorHelper.set(entity, member, resultSet);
+                setFieldValue(entity, member, resultSet);
             }
             break;
         /*
@@ -360,7 +360,7 @@ public final class DSClientUtilities
             {
                 if (isByteBuffer)
                 {
-                    PropertyAccessorHelper.set(entity, member,
+                    setFieldValue(entity, member,
                             CassandraDataTranslator.marshalMap(mapGenericClasses, keyClass, valueClass, (Map) retVal));
                 }
                 else
@@ -371,17 +371,17 @@ public final class DSClientUtilities
                         Object keyValue = keys.next();
                         resultMap.put(keyValue, ((Map) retVal).get(keyValue));
                     }
-                    PropertyAccessorHelper.set(entity, member, resultMap);
+                    setFieldValue(entity, member, resultMap);
                 }
             }
             else if (retVal != null && !((Map) retVal).isEmpty())
             {
-                PropertyAccessorHelper.set(entity, member, resultMap);
+                setFieldValue(entity, member, resultMap);
             }
             break;
         case UDT:
             retVal = row.getUDTValue(columnName);
-            PropertyAccessorHelper.set(entity, member,
+            setFieldValue(entity, member,
                     retVal != null ? setUDTValue(entity, member.getType(), (UDTValue) retVal, metamodel) : null);
             break;
         }
@@ -414,7 +414,7 @@ public final class DSClientUtilities
             {
                 UDTValue subUDT = udt.getUDTValue(((AbstractAttribute) subAttribute).getJPAColumnName());
 
-                PropertyAccessorHelper.set(embeddedObject, embeddableColumn,
+                setFieldValue(embeddedObject, embeddableColumn,
                         setUDTValue(embeddedObject, embeddableColumn.getType(), subUDT, metaModel));
             }
             else
@@ -455,7 +455,7 @@ public final class DSClientUtilities
             retVal = row.getBytes(columnName);
             if (retVal != null)
             {
-                PropertyAccessorHelper.set(entity, member, ((ByteBuffer) retVal).array());
+                setFieldValue(entity, member, ((ByteBuffer) retVal).array());
             }
             break;
 
@@ -563,8 +563,8 @@ public final class DSClientUtilities
             {
                 if (listAttributeTypeClass.isAssignableFrom(byte[].class))
                 {
-                    PropertyAccessorHelper.set(entity, member, CassandraDataTranslator.marshalCollection(
-                            BytesType.class, (Collection) retVal, listAttributeTypeClass, ArrayList.class));
+                    setFieldValue(entity, member, CassandraDataTranslator.marshalCollection(BytesType.class,
+                            (Collection) retVal, listAttributeTypeClass, ArrayList.class));
                 }
                 else
                 {
@@ -573,13 +573,13 @@ public final class DSClientUtilities
                     {
                         resultList.add(collectionItems.next());
                     }
-                    PropertyAccessorHelper.set(entity, member, resultList);
+                    setFieldValue(entity, member, resultList);
                 }
 
             }
             else if (retVal != null && !((Collection) retVal).isEmpty())
             {
-                PropertyAccessorHelper.set(entity, member, resultList);
+                setFieldValue(entity, member, resultList);
             }
             break;
 
@@ -617,8 +617,8 @@ public final class DSClientUtilities
             {
                 if (setAttributeTypeClass.isAssignableFrom(byte[].class))
                 {
-                    PropertyAccessorHelper.set(entity, member, CassandraDataTranslator.marshalCollection(
-                            BytesType.class, (Collection) retVal, setAttributeTypeClass, HashSet.class));
+                    setFieldValue(entity, member, CassandraDataTranslator.marshalCollection(BytesType.class,
+                            (Collection) retVal, setAttributeTypeClass, HashSet.class));
                 }
                 else
                 {
@@ -627,12 +627,12 @@ public final class DSClientUtilities
                     {
                         resultSet.add(collectionItems.next());
                     }
-                    PropertyAccessorHelper.set(entity, member, resultSet);
+                    setFieldValue(entity, member, resultSet);
                 }
             }
             else if (retVal != null && !((Collection) retVal).isEmpty())
             {
-                PropertyAccessorHelper.set(entity, member, resultSet);
+                setFieldValue(entity, member, resultSet);
             }
             break;
         /*
@@ -688,7 +688,7 @@ public final class DSClientUtilities
             {
                 if (isByteBuffer)
                 {
-                    PropertyAccessorHelper.set(entity, member,
+                    setFieldValue(entity, member,
                             CassandraDataTranslator.marshalMap(mapGenericClasses, keyClass, valueClass, (Map) retVal));
                 }
                 else
@@ -699,12 +699,12 @@ public final class DSClientUtilities
                         Object keyValue = keys.next();
                         resultMap.put(keyValue, ((Map) retVal).get(keyValue));
                     }
-                    PropertyAccessorHelper.set(entity, member, resultMap);
+                    setFieldValue(entity, member, resultMap);
                 }
             }
             else if (retVal != null && !((Map) retVal).isEmpty())
             {
-                PropertyAccessorHelper.set(entity, member, resultMap);
+                setFieldValue(entity, member, resultMap);
             }
             break;
         }
