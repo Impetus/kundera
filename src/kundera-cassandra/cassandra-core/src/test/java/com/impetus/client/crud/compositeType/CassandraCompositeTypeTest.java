@@ -43,6 +43,7 @@ import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.crud.compositeType.CassandraPrimeUser.NickName;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
+import com.impetus.kundera.query.QueryHandlerException;
 
 /**
  * Junit test case for Compound/Composite key.
@@ -317,6 +318,20 @@ public class CassandraCompositeTypeTest
         Assert.assertEquals(1, results.size());
         Assert.assertNull(results.get(0).getKey().getFullName());
         Assert.assertNull(results.get(0).getKey().getFullName());
+
+        final String withSemiColonAtEnd = "Select u from CassandraPrimeUser u where u.key.userId = :userId;";
+        // Query with semi colon at end.
+        try
+        {
+            q = em.createQuery(withSemiColonAtEnd);
+            q.setParameter("userId", "mevivs");
+        }
+        catch (QueryHandlerException qhe)
+        {
+            Assert.assertEquals(
+                    "unexpected char: ';' in query [ Select u from CassandraPrimeUser u where u.key.userId = :userId; ]",
+                    qhe.getMessage().trim());
+        }
 
         em.remove(user);
 
