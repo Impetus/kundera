@@ -668,7 +668,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 log.error("Host or port should not be null, Port should be numeric.");
                 throw new IllegalArgumentException("Host or port should not be null, Port should be numeric.");
             }
-            TSocket socket = new TSocket(host, Integer.parseInt("9160"));
+            TSocket socket = new TSocket(host, Integer.parseInt(port));
             TTransport transport = new TFramedTransport(socket);
             TProtocol protocol = new TBinaryProtocol(transport, true, true);
             cassandra_client = new Cassandra.Client(protocol);
