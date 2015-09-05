@@ -24,6 +24,7 @@ import javax.persistence.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.kundera.Constants;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -59,6 +60,11 @@ public class QueryResolver
         if (jpaQuery == null)
         {
             throw new QueryHandlerException("Query String should not be null ");
+        }
+
+        if (jpaQuery.trim().endsWith(Constants.SEMI_COLON))
+        {
+            throw new QueryHandlerException("unexpected char: ';' in query [ " + jpaQuery + " ]");
         }
 
         KunderaQuery kunderaQuery = null;

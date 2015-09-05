@@ -177,6 +177,9 @@ public interface Constants
     /** The Constant COLON. */
     public static final String COLON = ":";
 
+    /** The Constant SEMI_COLON. */
+    public static final String SEMI_COLON = ";";
+
     /** The Constant STR_GT. */
     public static final String STR_GT = ">";
 
