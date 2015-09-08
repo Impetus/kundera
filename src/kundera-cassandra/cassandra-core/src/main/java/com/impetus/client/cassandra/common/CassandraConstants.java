@@ -43,6 +43,9 @@ public interface CassandraConstants
     public static final String DEFAULT_REPLICATION_FACTOR = "1";
 
     public static final String DURABLE_WRITES = "durable.writes";
+    
+    /** The Constant THRIFT BINARY Port. */
+    public static final String THRIFT_PORT = "rpc.port";
 
     // properties to set during creation of column family.
 

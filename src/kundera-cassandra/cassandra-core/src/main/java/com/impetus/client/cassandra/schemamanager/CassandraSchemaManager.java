@@ -349,7 +349,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         String createKeyspace = CQLTranslator.CREATE_KEYSPACE;
         String placement_strategy = csmd.getPlacement_strategy(databaseName);
         String replication_conf = CQLTranslator.SIMPLE_REPLICATION;
-        createKeyspace = createKeyspace.replace("$KEYSPACE", Constants.ESCAPE_QUOTE + databaseName + Constants.ESCAPE_QUOTE);
+        createKeyspace = createKeyspace.replace("$KEYSPACE", Constants.ESCAPE_QUOTE + databaseName
+                + Constants.ESCAPE_QUOTE);
 
         Schema schema = CassandraPropertyReader.csmd.getSchema(databaseName);
 
@@ -661,6 +662,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     protected boolean initiateClient()
     {
         Throwable message = null;
+       
         for (String host : hosts)
         {
             if (host == null || !StringUtils.isNumeric(port) || port.isEmpty())
@@ -668,7 +670,9 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 log.error("Host or port should not be null, Port should be numeric.");
                 throw new IllegalArgumentException("Host or port should not be null, Port should be numeric.");
             }
-            TSocket socket = new TSocket(host, Integer.parseInt(port));
+            int thriftPort = externalProperties.get(CassandraConstants.THRIFT_PORT) != null ? Integer
+                    .parseInt((String) externalProperties.get(CassandraConstants.THRIFT_PORT)) : Integer.parseInt(port);
+            TSocket socket = new TSocket(host, thriftPort);
             TTransport transport = new TFramedTransport(socket);
             TProtocol protocol = new TBinaryProtocol(transport, true, true);
             cassandra_client = new Cassandra.Client(protocol);
@@ -931,8 +935,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         for (EmbeddedColumnInfo embColInfo : embeddedColumns)
         {
             String cqlType = CQLTranslator.FROZEN + Constants.STR_LT + Constants.ESCAPE_QUOTE
-                    + embColInfo.getEmbeddable().getJavaType().getSimpleName() + Constants.ESCAPE_QUOTE + Constants.STR_GT
-                    + translator.COMMA_STR;
+                    + embColInfo.getEmbeddable().getJavaType().getSimpleName() + Constants.ESCAPE_QUOTE
+                    + Constants.STR_GT + translator.COMMA_STR;
             translator.appendColumnName(queryBuilder, embColInfo.getEmbeddedColumnName(), cqlType);
         }
     }
@@ -981,7 +985,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                     {
                         // handle embeddable
                         String cqlType = CQLTranslator.FROZEN + Constants.STR_LT + Constants.ESCAPE_QUOTE
-                                + columnAttribute.getJavaType().getSimpleName() + Constants.ESCAPE_QUOTE + Constants.STR_GT;
+                                + columnAttribute.getJavaType().getSimpleName() + Constants.ESCAPE_QUOTE
+                                + Constants.STR_GT;
                         translator.appendColumnName(typeQueryBuilder, columnAttribute.getName(), cqlType);
                         typeQueryBuilder.append(Constants.SPACE_COMMA);
                         childEmb.add(columnAttribute.getJavaType().getSimpleName());

@@ -98,6 +98,10 @@ public class DSClientFactory extends CassandraClientFactory
         {
             initializePropertyReader();
             externalProperties.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
+            externalProperties.put(
+                    CassandraConstants.THRIFT_PORT,
+                    externalProperties.get(CassandraConstants.THRIFT_PORT) != null ? externalProperties
+                            .get(CassandraConstants.THRIFT_PORT) : "9160");
             schemaManager = new CassandraSchemaManager(this.getClass().getName(), externalProperties, kunderaMetadata);
         }
         return schemaManager;
@@ -628,7 +632,8 @@ public class DSClientFactory extends CassandraClientFactory
         catch (ClassNotFoundException e)
         {
             logger.error(e.getMessage());
-            throw new KunderaException("Please make sure class "+customRetryPolicy+" set in property file exists in classpath " + e.getMessage());
+            throw new KunderaException("Please make sure class " + customRetryPolicy
+                    + " set in property file exists in classpath " + e.getMessage());
         }
         catch (IllegalAccessException e)
         {

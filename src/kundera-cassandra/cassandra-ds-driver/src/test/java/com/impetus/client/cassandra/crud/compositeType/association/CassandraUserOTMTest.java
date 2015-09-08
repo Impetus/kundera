@@ -15,8 +15,10 @@
  ******************************************************************************/
 package com.impetus.client.cassandra.crud.compositeType.association;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
@@ -29,6 +31,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
 
 /**
@@ -53,7 +56,12 @@ public class CassandraUserOTMTest
     {
         CassandraCli.cassandraSetUp();
         CassandraCli.createKeySpace(_KEYSPACE);
-        emf = Persistence.createEntityManagerFactory("ds_pu");
+        Map<String, Object> puPropertiesObj = new HashMap<String, Object>();
+   
+       puPropertiesObj.put(CassandraConstants.THRIFT_PORT, "9160");
+       
+       
+        emf = Persistence.createEntityManagerFactory("ds_pu",puPropertiesObj);
     }
 
     /**
