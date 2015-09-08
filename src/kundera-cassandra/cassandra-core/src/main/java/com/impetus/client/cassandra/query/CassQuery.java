@@ -245,7 +245,7 @@ public class CassQuery extends QueryImpl
 
         if (isNative)
         {
-            ls = (List<EnhanceEntity>) ((CassandraClientBase) client).executeQuery(m.getEntityClazz(), null, isNative,
+            ls = (List<EnhanceEntity>) ((CassandraClientBase) client).executeQuery(m.getEntityClazz(), m.getRelationNames(), isNative,
                     query != null ? query : getJPAQuery());
         }
         else if (!isNative && ((CassandraClientBase) client).isCql3Enabled(m))

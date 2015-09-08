@@ -4,6 +4,7 @@
 package com.impetus.client.cassandra.thrift;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
@@ -16,6 +17,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
 
@@ -38,6 +40,7 @@ public class PersonnelListenerDTOTest
         CassandraCli.cassandraSetUp();
         CassandraCli.createKeySpace("KunderaExamples");
         Map propertyMap = new HashMap();
+     //   propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
         propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create");
         emf = Persistence.createEntityManagerFactory("secIdxCassandraTest", propertyMap);
         em = emf.createEntityManager();
@@ -71,9 +74,19 @@ public class PersonnelListenerDTOTest
         em.clear();
 
         PersonnelListenerDTO foundPersonnel = em.find(PersonnelListenerDTO.class, "1");
+       
         Assert.assertNotNull(foundPersonnel);
         Assert.assertEquals("kuldeep", foundPersonnel.getFirstName());
         Assert.assertNotNull(foundPersonnel.getAddress());
         Assert.assertEquals("aaaa", foundPersonnel.getAddress().getStreet());
+        
+        
+        List<PersonnelListenerDTO> results = em.createNativeQuery("select * from person", PersonnelListenerDTO.class).getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals("kuldeep", results.get(0).getFirstName());
+        Assert.assertNotNull(results.get(0).getAddress());
+        Assert.assertEquals("aaaa", results.get(0).getAddress().getStreet());
     }
+    
+   
 }
