@@ -46,6 +46,7 @@ public class SparkDataClientFactory
         clientNameToClass.put("mongodb", "com.impetus.spark.client.MongoSparkClient");
         clientNameToClass.put("hdfs", "com.impetus.spark.client.HDFSClient");
         clientNameToClass.put("fs", "com.impetus.spark.client.FSClient");
+        clientNameToClass.put("hive", "com.impetus.spark.client.HiveSparkClient");
     }
 
     /**
@@ -64,8 +65,8 @@ public class SparkDataClientFactory
         }
         try
         {
-            SparkDataClient dataClient = (SparkDataClient) KunderaCoreUtils.createNewInstance(Class.forName(clientNameToClass
-                    .get(clientName)));
+            SparkDataClient dataClient = (SparkDataClient) KunderaCoreUtils.createNewInstance(Class
+                    .forName(clientNameToClass.get(clientName)));
             clientPool.put(clientName, dataClient);
             return dataClient;
         }

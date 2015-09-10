@@ -22,7 +22,7 @@ import java.util.Properties;
 
 import org.apache.spark.SparkConf;
 import org.apache.spark.SparkContext;
-import org.apache.spark.sql.SQLContext;
+import org.apache.spark.sql.hive.HiveContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +55,7 @@ public class SparkClientFactory extends GenericClientFactory
     private SparkContext sparkContext;
 
     /** The sql context. */
-    private SQLContext sqlContext;
+    private HiveContext sqlContext;
 
     /*
      * (non-Javadoc)
@@ -89,7 +89,7 @@ public class SparkClientFactory extends GenericClientFactory
         sparkconf = new SparkConf(true);
         configureClientProperties(pum);
         sparkContext = new SparkContext(sparkconf);
-        sqlContext = new SQLContext(sparkContext);
+        sqlContext = new HiveContext(sparkContext);
     }
 
     /**

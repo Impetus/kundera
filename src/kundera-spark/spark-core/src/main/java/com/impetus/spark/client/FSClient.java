@@ -19,11 +19,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.DataFrame;
-import org.apache.spark.sql.SQLContext;
 import org.apache.spark.sql.SaveMode;
+import org.apache.spark.sql.hive.HiveContext;
 
 import scala.collection.immutable.Seq;
 import scala.reflect.ClassTag;
@@ -77,7 +76,7 @@ public class FSClient extends FilePathBuilder implements SparkDataClient
      * @param sqlContext
      *            the sql context
      */
-    private void registerTableForJson(String tableName, String dataSourcePath, SQLContext sqlContext)
+    private void registerTableForJson(String tableName, String dataSourcePath, HiveContext sqlContext)
     {
         sqlContext.jsonFile(dataSourcePath).registerTempTable(tableName);
     }
@@ -92,7 +91,7 @@ public class FSClient extends FilePathBuilder implements SparkDataClient
      * @param sqlContext
      *            the sql context
      */
-    private void registerTableForCsv(String tableName, String dataSourcePath, SQLContext sqlContext)
+    private void registerTableForCsv(String tableName, String dataSourcePath, HiveContext sqlContext)
     {
         HashMap<String, String> options = new HashMap<String, String>();
         options.put("header", "true");

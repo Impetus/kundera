@@ -45,18 +45,19 @@ public final class SparkPropertiesConstants
 
     /** The Constant SOURCE_CASSANDRA. */
     public static final String SOURCE_CASSANDRA = "org.apache.spark.sql.cassandra";
-    
+
     /** The Constant CLIENT_CASSANDRA. */
     public static final String CLIENT_CASSANDRA = "cassandra";
-    
+
     /** The Constant CLIENT_FS. */
     public static final String CLIENT_FS = "fs";
-    
+
     /** The Constant CLIENT_HDFS. */
     public static final String CLIENT_HDFS = "hdfs";
-    
+
     /** The Constant CLIENT_MONGODB. */
     public static final String CLIENT_MONGODB = "mongodb";
-    
 
+    /** The Constant CLIENT_HIVE. */
+    public static final String CLIENT_HIVE = "hive";
 }

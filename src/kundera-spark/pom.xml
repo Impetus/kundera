@@ -72,6 +72,23 @@
 			<version>1.4.0</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.apache.spark</groupId>
+			<artifactId>spark-hive_2.10</artifactId>
+			<version>1.4.0</version>
+			<scope>provided</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.servlet</groupId>
+					<artifactId>servlet-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>javax.servlet</groupId>
+					<artifactId>jsp-api</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
 	</dependencies>
 
 	<profiles>
@@ -85,6 +102,7 @@
 				<module>spark-core</module>
 				<module>spark-cassandra</module>
 				<module>spark-mongodb</module>
+				<module>spark-hive</module>
 				<!-- <module>spark-fs</module> -->
 			</modules>
 		</profile>
@@ -119,6 +137,17 @@
 			<modules> 
 				<module>spark-core</module> 
 				 <module>spark-mongodb</module> 
+			</modules> 
+		</profile> 
+		
+		<profile> 
+		   	<id>hive</id>
+		 	<activation> 
+				 <activeByDefault>false</activeByDefault> 
+			</activation> 
+			<modules> 
+				<module>spark-core</module> 
+				<module>spark-hive</module> 
 			</modules> 
 		</profile> 
 

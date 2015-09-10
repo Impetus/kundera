@@ -23,7 +23,7 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.apache.spark.SparkContext;
 import org.apache.spark.sql.DataFrame;
-import org.apache.spark.sql.SQLContext;
+import org.apache.spark.sql.hive.HiveContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +58,7 @@ public class SparkClient extends ClientBase implements Client<SparkQuery>, Clien
     final SparkContext sparkContext;
 
     /** The sql context. */
-    final SQLContext sqlContext;
+    final HiveContext sqlContext;
 
     /** The properties. */
     Map<String, Object> properties = new HashMap<String, Object>();
@@ -92,7 +92,7 @@ public class SparkClient extends ClientBase implements Client<SparkQuery>, Clien
      *            the sql context
      */
     protected SparkClient(KunderaMetadata kunderaMetadata, EntityReader reader, Map<String, Object> properties,
-            String persistenceUnit, SparkContext sparkContext, SQLContext sqlContext)
+            String persistenceUnit, SparkContext sparkContext, HiveContext sqlContext)
     {
         super(kunderaMetadata, properties, persistenceUnit);
         this.reader = reader;
@@ -337,6 +337,7 @@ public class SparkClient extends ClientBase implements Client<SparkQuery>, Clien
         String clientName = puMetadata.getProperty(DATA_CLIENT).toLowerCase();
 
         SparkDataClient dataClient = SparkDataClientFactory.getDataClient(clientName);
+        sqlContext.sql("use " + m.getSchema());
         if (registeredTables.get(m.getTableName()) == null || !registeredTables.get(m.getTableName()))
         {
             dataClient.registerTable(m, this);

@@ -40,9 +40,9 @@ import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.Query;
 import com.impetus.kundera.query.QueryHandlerException;
 import com.impetus.kundera.query.QueryImpl;
+import com.impetus.spark.client.SparkClient;
 import com.impetus.spark.client.SparkDataClient;
 import com.impetus.spark.client.SparkDataClientFactory;
-import com.impetus.spark.client.SparkClient;
 import com.impetus.spark.constants.SparkPropertiesConstants;
 
 /**
@@ -173,6 +173,10 @@ public class SparkQuery extends QueryImpl implements Query
 
             case SparkPropertiesConstants.CLIENT_HDFS:
                 persistDetails.put(SparkPropertiesConstants.HDFS_OUTPUT_FILE_PATH, matcher.group(4));
+                break;
+            case SparkPropertiesConstants.CLIENT_HIVE:
+                persistDetails.put("keyspace", matcher.group(2));
+                persistDetails.put("table", matcher.group(3));
                 break;
 
             default:
@@ -323,8 +327,15 @@ public class SparkQuery extends QueryImpl implements Query
      */
     boolean isAggregatedQuery()
     {
-        Expression exp = ((SelectClause) kunderaQuery.getSelectStatement().getSelectClause()).getSelectExpression();
-        return AggregateFunction.class.isAssignableFrom(exp.getClass());
+        if (kunderaQuery.getSelectStatement() != null)
+        {
+            Expression exp = ((SelectClause) kunderaQuery.getSelectStatement().getSelectClause()).getSelectExpression();
+            return AggregateFunction.class.isAssignableFrom(exp.getClass());
+        }
+        else
+        {
+            return false;
+        }
     }
 
 }
