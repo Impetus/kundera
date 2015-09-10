@@ -1,0 +1,3 @@
+create database sparktest;
+create table person(personId varchar(4), personName varchar(255), salary double) row format delimited fields terminated by ',';
+create table intermediatePerson(personId varchar(4), personName varchar(255), salary double) row format delimited fields terminated by ',';
