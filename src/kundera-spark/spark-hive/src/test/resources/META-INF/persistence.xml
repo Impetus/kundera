@@ -1,0 +1,22 @@
+
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence
+	https://raw.github.com/impetus-opensource/Kundera/Kundera-2.0.4/kundera-core/src/test/resources/META-INF/persistence_2_0.xsd"
+	version="2.0">
+
+	<persistence-unit name="spark_hive_PU">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.client.spark.PersonHive</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="7077" />
+			<property name="kundera.keyspace" value="sparktest" />
+			<property name="kundera.dialect" value="spark" />
+			<property name="kundera.client" value="hive" />
+			<property name="kundera.client.lookup.class" value="com.impetus.spark.client.SparkClientFactory" />
+			<property name="kundera.client.property" value="KunderaSparkHiveProperties.xml" />
+		</properties>
+	</persistence-unit>
+</persistence>

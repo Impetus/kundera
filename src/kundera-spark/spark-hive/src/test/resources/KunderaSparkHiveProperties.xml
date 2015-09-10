@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<clientProperties>
+	<datastores>
+		<dataStore>
+			<name>hive</name>
+			<connection>
+				<properties>
+					<property name="spark.master" value="local"></property>
+					<property name="spark.app.name" value="sparkhive"></property>
+					<property name="spark.driver.allowMultipleContexts" value="true"></property>
+				</properties>
+			</connection>
+		</dataStore>
+	</datastores>
+</clientProperties>
