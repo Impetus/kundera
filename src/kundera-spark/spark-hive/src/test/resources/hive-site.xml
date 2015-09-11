@@ -29,7 +29,7 @@
 
 	<property>
 		<name>javax.jdo.option.ConnectionPassword</name>
-		<value>root</value>
+		<value>impetus</value>
 	</property>
 
 	<property>
