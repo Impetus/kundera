@@ -15,36 +15,25 @@
  ******************************************************************************/
 package com.impetus.spark.client;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
-import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.DataFrame;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import scala.collection.immutable.Seq;
-import scala.reflect.ClassTag;
 
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 
 /**
- * The Class HiveSparkClient.
+ * The Class TeradataSparkClient.
  * 
  * @author amitkumar
  */
-public class HiveSparkClient implements SparkDataClient
+public class TeradataSparkClient implements SparkDataClient
 {
-    /** The logger. */
-    private static Logger logger = LoggerFactory.getLogger(HiveSparkClient.class);
-
-    /** The Constant KEYSPACE. */
-    private static final String KEYSPACE = "keyspace";
-
-    /** The Constant TABLE. */
-    private static final String TABLE = "table";
-
     /*
      * (non-Javadoc)
      * 
@@ -55,7 +44,13 @@ public class HiveSparkClient implements SparkDataClient
     @Override
     public void registerTable(EntityMetadata m, SparkClient sparkClient)
     {
-        sparkClient.sqlContext.sql("use " + m.getSchema());
+        String conn = getConnectionString(m);
+
+        Map<String, String> options = new HashMap<String, String>();
+        options.put("url", conn);
+        options.put("dbtable", m.getTableName());
+
+        sparkClient.sqlContext.load("jdbc", options).registerTempTable(m.getTableName());
     }
 
     /*
@@ -68,28 +63,7 @@ public class HiveSparkClient implements SparkDataClient
     @Override
     public boolean persist(List listEntity, EntityMetadata m, SparkClient sparkClient)
     {
-        try
-        {
-            Seq s = scala.collection.JavaConversions.asScalaBuffer(listEntity).toList();
-            ClassTag tag = scala.reflect.ClassTag$.MODULE$.apply(m.getEntityClazz());
-            JavaRDD personRDD = sparkClient.sparkContext.parallelize(s, 1, tag).toJavaRDD();
-
-            DataFrame df = sparkClient.sqlContext.createDataFrame(personRDD, m.getEntityClazz());
-            sparkClient.sqlContext.sql("use " + m.getSchema());
-            if (logger.isDebugEnabled())
-            {
-                logger.info("Below are the registered table with hive context: ");
-                sparkClient.sqlContext.sql("show tables").show();
-            }
-            df.write().insertInto(m.getTableName());
-
-            return true;
-        }
-        catch (Exception e)
-        {
-            throw new KunderaException("Cannot persist object(s)", e);
-        }
-
+        throw new KunderaException("Entity persistence in teradata is currently not supported. ");
     }
 
     /*
@@ -102,7 +76,42 @@ public class HiveSparkClient implements SparkDataClient
     @Override
     public void saveDataFrame(DataFrame dataFrame, Class<?> entityClazz, Map<String, Object> properties)
     {
-        dataFrame.sqlContext().sql("use " + (String) properties.get(KEYSPACE));
-        dataFrame.write().insertInto((String) properties.get(TABLE));
+        throw new KunderaException("Dataframe persistence in teradata is currently not supported. ");
+    }
+
+    /**
+     * Gets the connection string.
+     * 
+     * @param m
+     *            the m
+     * @return the connection string
+     */
+    public String getConnectionString(EntityMetadata m)
+    {
+        Properties properties = new Properties();
+
+        String fileName = "teradata.properties";
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileName);
+
+        if (inputStream != null)
+        {
+            try
+            {
+                properties.load(inputStream);
+            }
+            catch (IOException e)
+            {
+                throw new RuntimeException("Property file: " + fileName + "not found in the classpath", e);
+            }
+        }
+        else
+        {
+            throw new RuntimeException("Property file: " + fileName + "not found in the classpath");
+        }
+
+        String connectionString = "jdbc:teradata://" + properties.getProperty("teradata.host") + "/database="
+                + m.getSchema() + ",tmode=ANSI,charset=UTF8,user=" + properties.getProperty("teradata.user")
+                + ",password=" + properties.getProperty("teradata.password") + "";
+        return connectionString;
     }
 }

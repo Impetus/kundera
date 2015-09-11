@@ -42,6 +42,7 @@ public class SparkDataClientFactory
     private static Map<String, String> clientNameToClass = new HashMap<String, String>();
     static
     {
+        clientNameToClass.put("teradata", "com.impetus.spark.client.TeradataSparkClient");
         clientNameToClass.put("cassandra", "com.impetus.spark.client.CassSparkClient");
         clientNameToClass.put("mongodb", "com.impetus.spark.client.MongoSparkClient");
         clientNameToClass.put("hdfs", "com.impetus.spark.client.HDFSClient");

@@ -103,6 +103,7 @@
 				<module>spark-cassandra</module>
 				<module>spark-mongodb</module>
 				<module>spark-hive</module>
+				<module>spark-teradata</module>
 				<!-- <module>spark-fs</module> -->
 			</modules>
 		</profile>
@@ -149,7 +150,18 @@
 				<module>spark-core</module> 
 				<module>spark-hive</module> 
 			</modules> 
-		</profile> 
+		</profile>
+
+		<profile> 
+		   	<id>teradata</id>
+		 	<activation> 
+				 <activeByDefault>false</activeByDefault> 
+			</activation> 
+			<modules> 
+				<module>spark-core</module> 
+				<module>spark-teradata</module> 
+			</modules> 
+		</profile>
 
 		<!-- <profile> -->
 		<!-- <id>fs</id> -->

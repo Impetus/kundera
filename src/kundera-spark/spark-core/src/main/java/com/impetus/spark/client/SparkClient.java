@@ -337,7 +337,6 @@ public class SparkClient extends ClientBase implements Client<SparkQuery>, Clien
         String clientName = puMetadata.getProperty(DATA_CLIENT).toLowerCase();
 
         SparkDataClient dataClient = SparkDataClientFactory.getDataClient(clientName);
-        sqlContext.sql("use " + m.getSchema());
         if (registeredTables.get(m.getTableName()) == null || !registeredTables.get(m.getTableName()))
         {
             dataClient.registerTable(m, this);
