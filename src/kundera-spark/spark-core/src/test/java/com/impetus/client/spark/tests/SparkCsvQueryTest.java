@@ -30,6 +30,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.impetus.client.spark.entities.Person;
+import com.impetus.client.spark.utils.SparkTestingUtils;
 
 /**
  * The Class SparkCsvQueryTest.
@@ -128,7 +129,7 @@ public class SparkCsvQueryTest extends SparkBaseTest
     public static void tearDownAfterClass() throws Exception
     {
         emf.close();
-        waitThread();
+        SparkTestingUtils.recursivelyCleanDir("metastore_db");
         emf = null;
         
     }
