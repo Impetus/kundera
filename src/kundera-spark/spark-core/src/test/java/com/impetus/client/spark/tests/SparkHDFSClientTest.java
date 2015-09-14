@@ -146,8 +146,8 @@ public class SparkHDFSClientTest extends SparkBaseTest
     {
         SparkTestingUtils.recursivelyCleanDir("src/test/resources/testspark_json");
         SparkTestingUtils.recursivelyCleanDir("src/test/resources/testspark_csv");
-        SparkTestingUtils.recursivelyCleanDir(System.getProperty("user.dir")+"/metastore_db");
         emf.close();
+        SparkTestingUtils.recursivelyCleanDir(System.getProperty("user.dir")+"/metastore_db");
         emf = null;
     }
 
