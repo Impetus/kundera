@@ -128,7 +128,10 @@ public class SparkCsvQueryTest extends SparkBaseTest
     public static void tearDownAfterClass() throws Exception
     {
         emf.close();
+        waitThread();
         emf = null;
+        
     }
-
+    
+   
 }

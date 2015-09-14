@@ -108,6 +108,18 @@ public abstract class SparkBaseTest
             }
         }
     }
+    
+    /**
+     * Wait thread.
+     * 
+     * @throws InterruptedException
+     *             the interrupted exception
+     */
+    protected static void waitThread() throws InterruptedException
+    {
+        Thread.sleep(1000);
+    }
+
 
     
     
