@@ -129,7 +129,7 @@ public class SparkCsvQueryTest extends SparkBaseTest
     public static void tearDownAfterClass() throws Exception
     {
         emf.close();
-        SparkTestingUtils.recursivelyCleanDir("metastore_db");
+        SparkTestingUtils.recursivelyCleanDir(System.getProperty("user.dir")+"/metastore_db");
         emf = null;
         
     }

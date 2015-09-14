@@ -105,7 +105,7 @@ public class SparkCsvInsertionTest extends SparkBaseTest
     {
         SparkTestingUtils.recursivelyCleanDir(OUTPUT_FILE_DIR);
         emf.close();
-        SparkTestingUtils.recursivelyCleanDir("metastore_db");
+        SparkTestingUtils.recursivelyCleanDir(System.getProperty("user.dir")+"/metastore_db");
         emf = null;
     }
 }
