@@ -94,4 +94,9 @@ Gson (https://code.google.com/p/google-gson/)
 Jackson libraries for object to xml & json conversions
 fasterxml API(https://github.com/FasterXML/)
 
+Apache Spark core APIs, spark-sql and spark-Hive library
+Apache spark (https://github.com/apache/spark)
+
+Junit for wrriting unit tests
+Junit (http://junit.org/)
 
