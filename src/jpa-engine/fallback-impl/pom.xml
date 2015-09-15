@@ -38,13 +38,6 @@
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
-
-		<dependency>
-			<groupId>net.sf.ehcache</groupId>
-			<artifactId>ehcache-core</artifactId>
-			<version>2.5.2</version>
-		</dependency>
-
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-core</artifactId>

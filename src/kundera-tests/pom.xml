@@ -71,6 +71,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
+				<version>2.3.2</version>
 				<configuration>
 					<configLocation>impetus_java5_checks.xml</configLocation>
 					<suppressionsLocation>checkstyle-suppressions.xml</suppressionsLocation>
@@ -95,6 +96,7 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-changes-plugin</artifactId>
+				<version>2.3.2</version>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -103,12 +105,15 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.9</version>
 			</plugin>
 			<plugin>
 				<artifactId>maven-jxr-plugin</artifactId>
+				<version>2.3.2</version>
 			</plugin>
 			<plugin>
 				<artifactId>maven-surefire-report-plugin</artifactId>
+				<version>2.5</version>
 				<configuration>
 					<forkMode>always</forkMode>
 				</configuration>
@@ -116,14 +121,17 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>jdepend-maven-plugin</artifactId>
+				<version>1.3</version>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>javancss-maven-plugin</artifactId>
+				<version>1.3</version>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>dashboard-maven-plugin</artifactId>
+				<version>1.3</version>
 			</plugin>
 		</plugins>
 	</reporting>
@@ -221,18 +229,7 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- Required for running tests for embedded cassandra mode <dependency> 
-			<groupId>org.cliffc</groupId> <artifactId>high-scale-lib</artifactId> <version>UNKNOWN</version> 
-			</dependency> <dependency> <groupId>com.reardencommerce</groupId> <artifactId>clhm-production</artifactId> 
-			<version>UNKNOWN</version> </dependency> <dependency> <groupId>javassist</groupId> 
-			<artifactId>javassist</artifactId> <version>3.9.0.GA</version> </dependency> 
-			Cassandra Dependencies <dependency> <groupId>org.apache.cassandra</groupId> 
-			<artifactId>cassandra-all</artifactId> <version>1.2.4</version> </dependency> 
-			<dependency> <groupId>org.apache.cassandra</groupId> <artifactId>cassandra-thrift</artifactId> 
-			<version>1.2.4</version> </dependency> <dependency> <groupId>org.apache.cassandra</groupId> 
-			<artifactId>cassandra-clientutil</artifactId> <version>1.2.4</version> <scope>test</scope> 
-			</dependency> <dependency> <groupId>org.xerial</groupId> <artifactId>snappy</artifactId> 
-			<version>1.0.1-rc4</version> </dependency> -->
+		
 
 		<!-- contiperf dependency -->
 
@@ -276,7 +273,7 @@
 			<exclusions>
 				<exclusion>
 					<artifactId>httpclient</artifactId>
-					<groupId>org.apache.httpcomponents/</groupId>
+					<groupId>org.apache.httpcomponents</groupId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -364,7 +361,7 @@
 			<exclusions>
 				<exclusion>
 					<artifactId>httpclient</artifactId>
-					<groupId>org.apache.httpcomponents/</groupId>
+					<groupId>org.apache.httpcomponents</groupId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -498,6 +495,7 @@
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
 				<configuration>
 					<source>1.7</source>
 					<target>1.7</target>
@@ -524,6 +522,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.3.2</version>
 				<configuration>
 					<archive>
 						<manifest>
@@ -537,6 +536,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
+				<version>2.3.2</version>
 				<dependencies>
 					<dependency>
 						<groupId>com.impetus.ilabs.build</groupId>
@@ -560,6 +560,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-clean-plugin</artifactId>
+				<version>2.5</version>
 				<configuration>
 					<filesets>
 						<fileset>
