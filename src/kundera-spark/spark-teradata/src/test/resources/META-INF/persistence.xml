@@ -7,9 +7,10 @@
 	<persistence-unit name="teradata_spark_pu">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<class>com.impetus.client.spark.Person</class>
+		<!-- <class>com.impetus.client.spark.PersonTeradata</class> -->
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
-			<property name="kundera.nodes" value="172.16.144.128" />
+			<property name="kundera.nodes" value="192.168.145.80" />
 			<property name="kundera.port" value="7077" />
 			<property name="kundera.keyspace" value="etloffload" />
 			<property name="kundera.dialect" value="spark" />
