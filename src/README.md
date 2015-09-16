@@ -56,7 +56,12 @@ Currently Supported Datasources
 
 Recent Releases
 ================================
-####Please Note: trunk is current development branch. kundera-3.0 is released tag.
+####Please Note: trunk is current development branch. kundera-3.1 is released tag.
+
+#### 16-September-2015 - Kundera 3.1 released
+This release includes [bug fixes] (https://github.com/impetus-opensource/Kundera/wiki/Bug-Fixes), additional  improvements and the following new features : 
+   * Querying via Apache Spark support enabled for Teradata and Hive 
+   * Querying via Apache Spark using Kundera currently works for Cassandra, MongoDB, HDFS, Hive ,Teradata and CSV. This support is enabled using Spark 1.4.0 version.
 
 #### 25-July-2015 - Kundera 3.0 released
 This release includes [bug fixes] (https://github.com/impetus-opensource/Kundera/wiki/Bug-Fixes), additional  improvements and the following new features : 
