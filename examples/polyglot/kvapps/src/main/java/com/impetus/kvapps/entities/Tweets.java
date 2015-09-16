@@ -29,95 +29,107 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import com.impetus.kundera.annotations.Index;
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
 
 /**
  * @author impetus
  * 
- * Tweets entity
+ *         Tweets entity
  */
 
 @Entity
 @Table(name = "tweets")
-@Index(columns = { "body", "tweeted_at" }, index = true)
-public class Tweets {
+@IndexCollection(columns = { @Index(name = "body"), @Index(name = "tweeted_at") })
+public class Tweets
+{
 
-	@Id
-	@Column(name = "tweet_id")
-	private String tweetId;
+    @Id
+    @Column(name = "tweet_id")
+    private String tweetId;
 
-	@Column(name = "body")
-	private String body;
+    @Column(name = "body")
+    private String body;
 
-	@Column(name = "tweeted_at")
-	@Temporal(TemporalType.DATE)
-	private Date tweetDate;
+    @Column(name = "tweeted_at")
+    @Temporal(TemporalType.DATE)
+    private Date tweetDate;
 
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	@JoinColumn(name = "tweet_id")
-	private Set<Video> videos;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "tweet_id")
+    private Set<Video> videos;
 
-	public Tweets() {
-		// Default constructor.
-	}
+    public Tweets()
+    {
+        // Default constructor.
+    }
 
-	/**
-	 * @return the tweetId
-	 */
-	public String getTweetId() {
-		return tweetId;
-	}
+    /**
+     * @return the tweetId
+     */
+    public String getTweetId()
+    {
+        return tweetId;
+    }
 
-	/**
-	 * @param tweetId
-	 *            the tweetId to set
-	 */
-	public void setTweetId(String tweetId) {
-		this.tweetId = tweetId;
-	}
+    /**
+     * @param tweetId
+     *            the tweetId to set
+     */
+    public void setTweetId(String tweetId)
+    {
+        this.tweetId = tweetId;
+    }
 
-	/**
-	 * @return the body
-	 */
-	public String getBody() {
-		return body;
-	}
+    /**
+     * @return the body
+     */
+    public String getBody()
+    {
+        return body;
+    }
 
-	/**
-	 * @param body
-	 *            the body to set
-	 */
-	public void setBody(String body) {
-		this.body = body;
-	}
+    /**
+     * @param body
+     *            the body to set
+     */
+    public void setBody(String body)
+    {
+        this.body = body;
+    }
 
-	/**
-	 * @return the tweetDate
-	 */
-	public Date getTweetDate() {
-		return tweetDate;
-	}
+    /**
+     * @return the tweetDate
+     */
+    public Date getTweetDate()
+    {
+        return tweetDate;
+    }
 
-	/**
-	 * @param tweetDate
-	 *            the tweetDate to set
-	 */
-	public void setTweetDate(Date tweetDate) {
-		this.tweetDate = tweetDate;
-	}
+    /**
+     * @param tweetDate
+     *            the tweetDate to set
+     */
+    public void setTweetDate(Date tweetDate)
+    {
+        this.tweetDate = tweetDate;
+    }
 
-	public Set<Video> getVideos() {
-		return videos;
-	}
+    public Set<Video> getVideos()
+    {
+        return videos;
+    }
 
-	public void setVideos(Set<Video> videos) {
-		this.videos = videos;
-	}
+    public void setVideos(Set<Video> videos)
+    {
+        this.videos = videos;
+    }
 
-	@Override
-	public String toString() {
-		return "Tweets [tweetId=" + tweetId + ", body=" + body + ", tweetDate="
-				+ tweetDate + ", videos=" + videos + "]";
-	}
+    @Override
+    public String toString()
+    {
+        return "Tweets [tweetId=" + tweetId + ", body=" + body + ", tweetDate=" + tweetDate + ", videos=" + videos
+                + "]";
+    }
 
 }

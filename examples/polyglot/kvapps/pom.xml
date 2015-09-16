@@ -12,7 +12,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<kundera.version>2.15</kundera.version>
+		<kundera.version>3.1</kundera.version>
 	</properties>
 	
 	<repositories>
