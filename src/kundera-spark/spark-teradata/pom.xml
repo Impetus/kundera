@@ -29,21 +29,21 @@
 			<scope>test</scope>
 		</dependency>
 
-<!-- 		<dependency> -->
-<!-- 			<groupId>com.teradata.jdbc</groupId> -->
-<!-- 			<artifactId>jdbc</artifactId> -->
-<!-- 			<version>15.00.00.28</version> -->
-<!-- 			<scope>system</scope> -->
-<!-- 			<systemPath>${user.home}/software/teradataJDBCJar/terajdbc4.jar</systemPath> -->
-<!-- 		</dependency> -->
+		<dependency>
+			<groupId>com.teradata.jdbc</groupId>
+			<artifactId>jdbc</artifactId>
+			<version>15.00.00.28</version>
+			<scope>system</scope>
+			<systemPath>${user.home}/software/teradataJDBCJar/terajdbc4.jar</systemPath>
+		</dependency>
 
-<!-- 		<dependency> -->
-<!-- 			<groupId>com.teradata.tdgss</groupId> -->
-<!-- 			<artifactId>tdgss</artifactId> -->
-<!-- 			<version>14.10.00.01</version> -->
-<!-- 			<scope>system</scope> -->
-<!-- 			<systemPath>${user.home}/software/teradataJDBCJar/tdgssconfig.jar</systemPath> -->
-<!-- 		</dependency> -->
+		<dependency>
+			<groupId>com.teradata.tdgss</groupId>
+			<artifactId>tdgss</artifactId>
+			<version>14.10.00.01</version>
+			<scope>system</scope>
+			<systemPath>${user.home}/software/teradataJDBCJar/tdgssconfig.jar</systemPath>
+		</dependency>
 
 	</dependencies>
 
