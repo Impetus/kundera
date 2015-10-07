@@ -52,6 +52,7 @@ public class RedisEntityWithoutFieldsTest extends EntityWithoutFieldsTest{
 	@After
 	public void tearDown()
 	{
+                em.createQuery("Delete from Person p").executeUpdate();
 		tearDownInternal();
 	}
 }
