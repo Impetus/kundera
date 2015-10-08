@@ -64,6 +64,7 @@ public class RedisTransactionTest
     @Test
     public void onRollback() throws Exception
     {
+        purge();
         em.getTransaction().begin();
 
         Object p1 = prepareData("1", 10);
@@ -104,6 +105,7 @@ public class RedisTransactionTest
     @Test
     public void onCommit() throws Exception
     {
+        purge();
         // em.setFlushMode(FlushModeType.COMMIT);
 
         em.getTransaction().begin();
@@ -160,6 +162,7 @@ public class RedisTransactionTest
     @Test
     public void rollbackOnError() throws Exception
     {
+        purge();
         PersonRedis p = null;
         try
         {
@@ -227,6 +230,7 @@ public class RedisTransactionTest
     @Test
     public void rollBackWithMultiTransactions()
     {
+        purge();
         EntityManager em1 = emf.createEntityManager();
         // em1.setFlushMode(FlushModeType.COMMIT);
 
@@ -286,6 +290,14 @@ public class RedisTransactionTest
         o.setAge(age);
         return o;
     }
+    
+    private void purge()
+    {
+        // Delete by query.
+        String deleteQuery = "Delete from PersonRedis p";
+        Query query = em.createQuery(deleteQuery);
+        int updateCount = query.executeUpdate();
+    }
 
     /**
      * @throws java.lang.Exception
@@ -293,12 +305,8 @@ public class RedisTransactionTest
     @After
     public void tearDown() throws Exception
     {
-        EntityManager em = emf.createEntityManager();
-
-        // Delete by query.
-        String deleteQuery = "Delete from PersonRedis p";
-        Query query = em.createQuery(deleteQuery);
-        int updateCount = query.executeUpdate();
+        
+        purge();
 
         em.close();
         emf.close();

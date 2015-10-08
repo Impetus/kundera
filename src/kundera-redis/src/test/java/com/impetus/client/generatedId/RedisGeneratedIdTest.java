@@ -76,7 +76,7 @@ public class RedisGeneratedIdTest
     public void testPersist()
     {
         EntityManager em = emf.createEntityManager();
-
+        em.clear();
         RedisGeneratedIdDefault idDefault = new RedisGeneratedIdDefault();
         idDefault.setName("kuldeep");
         try
@@ -92,6 +92,7 @@ public class RedisGeneratedIdTest
         }
         RedisGeneratedIdStrategyAuto strategyAuto = new RedisGeneratedIdStrategyAuto();
         strategyAuto.setName("kuldeep");
+        em.clear();
         try
         {
             em.persist(strategyAuto);
@@ -103,7 +104,7 @@ public class RedisGeneratedIdTest
                     + GenerationType.AUTO + " Strategy not supported by this client :" + RedisClient.class.getName(),
                     e.getMessage());
         }
-
+        em.clear();
         RedisGeneratedIdStrategyIdentity strategyIdentity = new RedisGeneratedIdStrategyIdentity();
         strategyIdentity.setName("kuldeep");
         try
@@ -118,7 +119,7 @@ public class RedisGeneratedIdTest
                             + GenerationType.IDENTITY + " Strategy not supported by this client :"
                             + RedisClient.class.getName(), e.getMessage());
         }
-
+        em.clear();
         RedisGeneratedIdStrategySequence strategySequence = new RedisGeneratedIdStrategySequence();
         strategySequence.setName("Kuldeep");
         try
@@ -140,7 +141,7 @@ public class RedisGeneratedIdTest
             
             Assert.fail();
         }
-
+        em.clear();
         RedisGeneratedIdStrategyTable strategyTable = new RedisGeneratedIdStrategyTable();
         strategyTable.setName("KK");
         try
@@ -155,7 +156,7 @@ public class RedisGeneratedIdTest
                     + GenerationType.TABLE + " Strategy not supported by this client :" + RedisClient.class.getName(),
                     e.getMessage());
         }
-
+        em.clear();
         RedisGeneratedIdWithOutSequenceGenerator withOutSequenceGenerator = new RedisGeneratedIdWithOutSequenceGenerator();
         withOutSequenceGenerator.setName("Kuldeep Kumar");
         try
@@ -176,7 +177,7 @@ public class RedisGeneratedIdTest
         {
             Assert.fail();
         }
-
+        em.clear();
         RedisGeneratedIdWithOutTableGenerator withOutTableGenerator = new RedisGeneratedIdWithOutTableGenerator();
         withOutTableGenerator.setName("Kuldeep Mishra");
         try
@@ -190,6 +191,7 @@ public class RedisGeneratedIdTest
                     + GenerationType.TABLE + " Strategy not supported by this client :" + RedisClient.class.getName(),
                     e.getMessage());
         }
+        em.clear();
         RedisGeneratedIdWithSequenceGenerator withSequenceGenerator = new RedisGeneratedIdWithSequenceGenerator();
         withSequenceGenerator.setName("Kuldeep Kumar Mishra");
         try
@@ -210,6 +212,7 @@ public class RedisGeneratedIdTest
         {
             Assert.fail();
         }
+        em.clear();
         RedisGeneratedIdWithTableGenerator withTableGenerator = new RedisGeneratedIdWithTableGenerator();
         withTableGenerator.setName("Kumar Mishra");
         try
