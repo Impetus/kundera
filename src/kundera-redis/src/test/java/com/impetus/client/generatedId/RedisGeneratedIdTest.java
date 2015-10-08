@@ -32,6 +32,8 @@ public class RedisGeneratedIdTest
 {
 
     private EntityManagerFactory emf;
+    
+    private EntityManager em;
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception
@@ -47,13 +49,25 @@ public class RedisGeneratedIdTest
     public void setUp() throws Exception
     {
         emf = Persistence.createEntityManagerFactory("redis_pu");
+        em = emf.createEntityManager();
     }
 
     @After
     public void tearDown() throws Exception
-    {
-        EntityManager em = emf.createEntityManager();
+    { 
 
+        purge();
+
+        em.close();
+
+        emf.close();
+    }
+
+    /**
+     * 
+     */
+    private void purge()
+    {
         // Delete by query.
         String deleteQuery = "Delete from RedisGeneratedIdStrategySequence r";
         Query query = em.createQuery(deleteQuery);
@@ -66,17 +80,12 @@ public class RedisGeneratedIdTest
         deleteQuery = "Delete from RedisGeneratedIdWithSequenceGenerator r";
         query = em.createQuery(deleteQuery);
         query.executeUpdate();
-
-        em.close();
-
-        emf.close();
     }
 
     @Test
     public void testPersist()
     {
-        EntityManager em = emf.createEntityManager();
-        em.clear();
+        purge();
         RedisGeneratedIdDefault idDefault = new RedisGeneratedIdDefault();
         idDefault.setName("kuldeep");
         try
