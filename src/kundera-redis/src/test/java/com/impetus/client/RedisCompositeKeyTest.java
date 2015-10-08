@@ -78,6 +78,7 @@ public class RedisCompositeKeyTest
      // Delete by query.
         String deleteQuery = "Delete from RedisPrimeUser p";
         em.createQuery(deleteQuery).executeUpdate();
+        em.close();
         emf.close();
     }
 

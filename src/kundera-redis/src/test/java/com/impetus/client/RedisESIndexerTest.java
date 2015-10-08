@@ -284,7 +284,7 @@ public class RedisESIndexerTest
         query = em.createQuery(findWithOutWhereClause);
         results = query.getResultList();
         Assert.assertNotNull(results);
-        Assert.assertTrue(results.isEmpty());
+        Assert.assertTrue(results.size() == 0);
     }
 
     /**
@@ -551,6 +551,9 @@ public class RedisESIndexerTest
         // Delete by query.
         String deleteQuery = "Delete from PersonRedis p";
         Query query = em.createQuery(deleteQuery);
+        query.executeUpdate();
+        em.clear();
+        query = em.createQuery(deleteQuery);
         query.executeUpdate();
         em.flush();
         em.clear();
