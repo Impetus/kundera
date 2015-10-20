@@ -6,6 +6,7 @@ import java.util.UUID;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.Query;
 
 import junit.framework.Assert;
 
@@ -26,6 +27,9 @@ public class RedisCompositeKeyTest
 
     /** The emf. */
     private EntityManagerFactory emf;
+    
+    /** The em. */
+    private EntityManager em;
 
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(RedisCompositeKeyTest.class);
@@ -35,13 +39,14 @@ public class RedisCompositeKeyTest
     {
         
         emf = Persistence.createEntityManagerFactory(REDIS_PU);
+        em = emf.createEntityManager();
     }
 
     @Test
     public void testCRUD()
     {
         logger.info("On testCRUD");
-        EntityManager em = emf.createEntityManager();
+       
         final String userId = "1";
         final int tweetId = 12;
         final UUID timeLineId = UUID.randomUUID();
@@ -70,6 +75,10 @@ public class RedisCompositeKeyTest
     @After
     public void tearDown() throws Exception
     {
+     // Delete by query.
+        String deleteQuery = "Delete from RedisPrimeUser p";
+        em.createQuery(deleteQuery).executeUpdate();
+        em.close();
         emf.close();
     }
 

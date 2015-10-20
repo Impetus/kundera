@@ -84,12 +84,14 @@ public class FlushManager
         cascades.add(CascadeType.PERSIST);
 
         cascadePermission.put(EventType.INSERT, cascades);
-
-        cascades.remove(CascadeType.PERSIST);
+        
+        cascades = new ArrayList<CascadeType>();
+        cascades.add(CascadeType.ALL);
         cascades.add(CascadeType.MERGE);
         cascadePermission.put(EventType.UPDATE, cascades);
-
-        cascades.remove(CascadeType.MERGE);
+        
+        cascades = new ArrayList<CascadeType>();
+        cascades.add(CascadeType.ALL);
         cascades.add(CascadeType.REMOVE);
         cascadePermission.put(EventType.DELETE, cascades);
 

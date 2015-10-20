@@ -48,7 +48,9 @@ public class RedisQueryTest
 
     /** The emf. */
     private EntityManagerFactory emf;
-
+    
+    /** The em. */
+    private EntityManager em;
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(RedisQueryTest.class);
 
@@ -59,6 +61,7 @@ public class RedisQueryTest
     public void setUp() throws Exception
     {
         emf = Persistence.createEntityManagerFactory(REDIS_PU);
+        em = emf.createEntityManager();
     }
 
     @Test
@@ -66,8 +69,8 @@ public class RedisQueryTest
     {
         logger.info("On testPopulateEntities");
 
-        EntityManager em = emf.createEntityManager();
-        purge(em);
+        
+        purge();
 
         final String originalName = "vivek";
 
@@ -252,7 +255,7 @@ public class RedisQueryTest
         Assert.assertTrue(results.isEmpty());
     }
 
-    private void purge(EntityManager em)
+    private void purge()
     {
         // Delete by query.
         String deleteQuery = "Delete from PersonRedis p";
@@ -266,10 +269,7 @@ public class RedisQueryTest
     @After
     public void tearDown() throws Exception
     {
-        EntityManager em = emf.createEntityManager();
-
-        purge(em);
-
+        purge();
         em.close();
         emf.close();
         emf = null;

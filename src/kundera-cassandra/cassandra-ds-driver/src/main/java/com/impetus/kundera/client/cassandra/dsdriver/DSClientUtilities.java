@@ -125,7 +125,11 @@ public final class DSClientUtilities
          * }
          */
         Object retVal = null;
-
+        
+        if(row.isNull(columnName)){
+        	return entity;
+        }
+        
         switch (dataType)
         {
         case BLOB:
@@ -447,6 +451,9 @@ public final class DSClientUtilities
     private static void setBasicValue(Object entity, Field member, String columnName, UDTValue row,
             CassandraType dataType, MetamodelImpl metamodel)
     {
+    	if(row.isNull(columnName)){
+        	return;
+        }
         Object retVal = null;
         switch (dataType)
         {
