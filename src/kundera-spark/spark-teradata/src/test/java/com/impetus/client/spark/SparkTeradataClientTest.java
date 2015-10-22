@@ -77,7 +77,7 @@ public class SparkTeradataClientTest extends SparkBaseTest
     @Test
     public void testTeradataWithSpark()
     {
-        testQuery();
+       // testQuery();
     }
 
     /**
