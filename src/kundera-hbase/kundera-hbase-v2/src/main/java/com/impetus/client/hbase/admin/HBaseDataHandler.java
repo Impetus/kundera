@@ -363,7 +363,7 @@ public class HBaseDataHandler implements DataHandler
                         createCellsAndAddToRow(obj, metaModel, attribEmbeddables, hbaseRow, m, newCount++, newPrefix);
                     }
                 }
-                else if(embeddedField != null)
+                else if (embeddedField != null)
                 {
                     String newPrefix = prefix != "" ? prefix + absAttrib.getJPAColumnName() + HBaseUtils.DOT
                             : absAttrib.getJPAColumnName() + HBaseUtils.DOT;
@@ -639,8 +639,13 @@ public class HBaseDataHandler implements DataHandler
             String newPrefix = prefix != "" ? prefix + ((AbstractAttribute) attribute).getJPAColumnName()
                     + HBaseUtils.DELIM : ((AbstractAttribute) attribute).getJPAColumnName() + HBaseUtils.DELIM;
             List embeddedCollection = new ArrayList();
-            int size = Bytes.toInt(hbaseData.getColumnValue(HBaseUtils.getColumnDataKey(m.getTableName(), newPrefix
-                    + HBaseUtils.SIZE)));
+            byte[] columnValue = hbaseData.getColumnValue(HBaseUtils.getColumnDataKey(m.getTableName(), newPrefix
+                    + HBaseUtils.SIZE));
+            int size = 0;
+            if (columnValue != null)
+            {
+                size = Bytes.toInt(columnValue);
+            }
             while (size != newCount)
             {
                 embeddedField = KunderaCoreUtils.createNewInstance(javaType);
@@ -860,7 +865,8 @@ public class HBaseDataHandler implements DataHandler
                 {
                     Class embedClazz = (Class) map.get(Constants.FIELD_CLAZZ);
                     String prefix = (String) map.get(Constants.DB_COL_NAME) + HBaseUtils.DOT;
-                    obj = populateEmbeddableObject(data, KunderaCoreUtils.createNewInstance(embedClazz), m, embedClazz, prefix);
+                    obj = populateEmbeddableObject(data, KunderaCoreUtils.createNewInstance(embedClazz), m, embedClazz,
+                            prefix);
                 }
                 else if (isIdCol(m, (String) map.get(Constants.DB_COL_NAME)))
                 {
@@ -905,10 +911,11 @@ public class HBaseDataHandler implements DataHandler
      *            the m
      * @param clazz
      *            the clazz
-     * @param prefix 
+     * @param prefix
      * @return the object
      */
-    private Object populateEmbeddableObject(HBaseDataWrapper data, Object obj, EntityMetadata m, Class clazz, String prefix)
+    private Object populateEmbeddableObject(HBaseDataWrapper data, Object obj, EntityMetadata m, Class clazz,
+            String prefix)
     {
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
