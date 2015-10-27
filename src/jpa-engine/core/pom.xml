@@ -1,9 +1,10 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
- 	        <groupId>com.impetus.kundera.core</groupId>
-                <artifactId>core-parent</artifactId>
+		<groupId>com.impetus.kundera.core</groupId>
+		<artifactId>core-parent</artifactId>
 		<version>3.2-SNAPSHOT</version>
 	</parent>
 
@@ -33,11 +34,8 @@
 			<artifactId>commons-lang</artifactId>
 			<version>2.4</version>
 		</dependency>
-		<!-- <dependency>
-			<groupId>javax.persistence</groupId>
-			<artifactId>persistence-api</artifactId>
-			<version>2.0</version>
-		</dependency> -->
+		<!-- <dependency> <groupId>javax.persistence</groupId> <artifactId>persistence-api</artifactId> 
+			<version>2.0</version> </dependency> -->
 		<dependency>
 			<groupId>javax</groupId>
 			<artifactId>javaee-api</artifactId>
@@ -48,12 +46,12 @@
 			<artifactId>org.eclipse.persistence.jpa.jpql</artifactId>
 			<version>2.5.2</version>
 		</dependency>
-		
-<!--         <dependency> -->
-<!-- 			<groupId>javax.validation</groupId> -->
-<!-- 			<artifactId>validation-api</artifactId> -->
-<!-- 			<version>1.1.0.Final</version> -->
-<!-- 		</dependency> -->
+
+		<!-- <dependency> -->
+		<!-- <groupId>javax.validation</groupId> -->
+		<!-- <artifactId>validation-api</artifactId> -->
+		<!-- <version>1.1.0.Final</version> -->
+		<!-- </dependency> -->
 		<dependency>
 			<groupId>cglib</groupId>
 			<artifactId>cglib</artifactId>
@@ -114,19 +112,14 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		
+
 
 	</dependencies>
 	<build>
-<!-- 		<resources>
-			<resource>
-				<directory>${project.basedir}/target/test-classes/com/impetus/kundera/index/</directory>
-				<excludes>
-					<exclude>LuceneIndexer.class</exclude>
-				</excludes>
-			</resource>
-		</resources>
- -->		<plugins>
+		<!-- <resources> <resource> <directory>${project.basedir}/target/test-classes/com/impetus/kundera/index/</directory> 
+			<excludes> <exclude>LuceneIndexer.class</exclude> </excludes> </resource> 
+			</resources> -->
+		<plugins>
 			<plugin>
 				<!-- NOTE: We don't need a groupId specification because the group is 
 					org.apache.maven.plugins ...which is assumed by default. -->
@@ -161,17 +154,32 @@
 							<goal>test-jar</goal>
 						</goals>
 						<configuration>
-						<!-- <classifier>tests</classifier> -->
-<!-- 							<filesets>
-								<fileset>
-									<directory>${project.basedir}/target/test-classes/com/impetus/kundera/index/</directory>
- -->									<excludes>
-										<exclude>**/index/LuceneIndexer.class</exclude>
-										<exclude>**/persistence/EntityReaderTest.class</exclude>
-									</excludes>
-<!-- 								</fileset>
-							</filesets>
- -->						</configuration>
+							<!-- <classifier>tests</classifier> -->
+							<!-- <filesets> <fileset> <directory>${project.basedir}/target/test-classes/com/impetus/kundera/index/</directory> -->
+							<excludes>
+								<exclude>**/index/LuceneIndexer.class</exclude>
+								<exclude>**/persistence/EntityReaderTest.class</exclude>
+							</excludes>
+							<!-- </fileset> </filesets> -->
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- disable DocLint when compiling with java8 -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.9</version>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<additionalparam>-Xdoclint:none</additionalparam>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
