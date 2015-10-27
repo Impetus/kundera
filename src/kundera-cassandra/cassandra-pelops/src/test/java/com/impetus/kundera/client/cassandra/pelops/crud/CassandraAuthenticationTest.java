@@ -28,7 +28,7 @@ import javax.persistence.Persistence;
 
 import junit.framework.Assert;
 
-import org.apache.cassandra.auth.IAuthenticator;
+import org.apache.cassandra.auth.PasswordAuthenticator;
 import org.apache.cassandra.thrift.AuthenticationException;
 import org.apache.cassandra.thrift.AuthenticationRequest;
 import org.apache.cassandra.thrift.AuthorizationException;
@@ -216,9 +216,10 @@ public class CassandraAuthenticationTest /*extends BaseTest*/
 
         try
         {
+            PasswordAuthenticator idAuth = new PasswordAuthenticator();
             Map<String, String> credentials = new HashMap<String, String>();
-            credentials.put(IAuthenticator.USERNAME_KEY, userName);
-            credentials.put(IAuthenticator.PASSWORD_KEY, password);
+            credentials.put(idAuth.USERNAME_KEY, userName);
+            credentials.put(idAuth.PASSWORD_KEY, password);
             CassandraCli.client.login(new AuthenticationRequest(credentials));
 
             CassandraCli.createKeySpace("KunderaAuthentication");

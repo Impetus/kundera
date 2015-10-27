@@ -6,7 +6,6 @@ import java.util.List;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
-import org.apache.cassandra.cli.CliParser.columnFamily_return;
 import org.apache.cassandra.db.marshal.CounterColumnType;
 import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.ColumnDef;

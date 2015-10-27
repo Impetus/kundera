@@ -45,7 +45,6 @@ import java.util.Set;
 
 import org.apache.cassandra.exceptions.AuthenticationException;
 import org.apache.cassandra.exceptions.ConfigurationException;
-import org.apache.cassandra.exceptions.InvalidRequestException;
 import org.apache.cassandra.io.util.FileUtils;
 import org.apache.cassandra.utils.FBUtilities;
 import org.apache.cassandra.utils.Hex;
@@ -178,56 +177,6 @@ public class SimpleAuthenticator implements IAuthenticator
     /*
      * (non-Javadoc)
      * 
-     * @see org.apache.cassandra.auth.IAuthenticator#alter(java.lang.String,
-     * java.util.Map)
-     */
-    @Override
-    public void alter(String arg0, Map<Option, Object> arg1) throws InvalidRequestException
-    {
-        // TODO Auto-generated method stub
-
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.apache.cassandra.auth.IAuthenticator#alterableOptions()
-     */
-    @Override
-    public Set<Option> alterableOptions()
-    {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.apache.cassandra.auth.IAuthenticator#create(java.lang.String,
-     * java.util.Map)
-     */
-    @Override
-    public void create(String arg0, Map<Option, Object> arg1) throws InvalidRequestException
-    {
-        // TODO Auto-generated method stub
-
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.apache.cassandra.auth.IAuthenticator#drop(java.lang.String)
-     */
-    @Override
-    public void drop(String arg0) throws InvalidRequestException
-    {
-        // TODO Auto-generated method stub
-
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see org.apache.cassandra.auth.IAuthenticator#protectedResources()
      */
     @Override
@@ -261,14 +210,14 @@ public class SimpleAuthenticator implements IAuthenticator
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.apache.cassandra.auth.IAuthenticator#supportedOptions()
-     */
     @Override
-    public Set<Option> supportedOptions()
-    {
+    public AuthenticatedUser legacyAuthenticate(Map<String, String> arg0) throws AuthenticationException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public SaslNegotiator newSaslNegotiator() {
         // TODO Auto-generated method stub
         return null;
     }

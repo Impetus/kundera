@@ -44,53 +44,61 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.apache.cassandra.exceptions.ConfigurationException;
-import org.apache.cassandra.exceptions.InvalidRequestException;
-import org.apache.cassandra.exceptions.UnauthorizedException;
+import org.apache.cassandra.exceptions.RequestExecutionException;
+import org.apache.cassandra.exceptions.RequestValidationException;
 import org.apache.cassandra.io.util.FileUtils;
 
-public class SimpleAuthority implements IAuthorizer
-{
+// TODO: Auto-generated Javadoc
+/**
+ * The Class SimpleAuthority.
+ */
+public class SimpleAuthority implements IAuthorizer {
+
+    /** The Constant ACCESS_FILENAME_PROPERTY. */
     public final static String ACCESS_FILENAME_PROPERTY = "access.properties";
 
     // magical property for WRITE permissions to the keyspaces list
+    /** The Constant KEYSPACES_WRITE_PROPERTY. */
     public final static String KEYSPACES_WRITE_PROPERTY = "<modify-keyspaces>";
 
-    public EnumSet<Permission> authorize(AuthenticatedUser user, List<Object> resource)
-    {
+    /**
+     * Authorize.
+     * 
+     * @param user
+     *            the user
+     * @param resource
+     *            the resource
+     * @return the enum set
+     */
+    public EnumSet<Permission> authorize(AuthenticatedUser user, List<Object> resource) {
         if (resource.size() < 2 || !Resources.ROOT.equals(resource.get(0))
-                || !Resources.KEYSPACES.equals(resource.get(1)))
+            || !Resources.KEYSPACES.equals(resource.get(1)))
             return (EnumSet<Permission>) Permission.NONE;
 
         String keyspace, columnFamily = null;
         EnumSet<Permission> authorized = (EnumSet<Permission>) Permission.NONE;
 
         // /cassandra/keyspaces
-        if (resource.size() == 2)
-        {
+        if (resource.size() == 2) {
             keyspace = KEYSPACES_WRITE_PROPERTY;
             authorized = EnumSet.of(Permission.READ);
         }
         // /cassandra/keyspaces/<keyspace name>
-        else if (resource.size() == 3)
-        {
+        else if (resource.size() == 3) {
             keyspace = (String) resource.get(2);
         }
         // /cassandra/keyspaces/<keyspace name>/<cf name>
-        else if (resource.size() == 4)
-        {
+        else if (resource.size() == 4) {
             keyspace = (String) resource.get(2);
             columnFamily = (String) resource.get(3);
-        }
-        else
-        {
+        } else {
             // We don't currently descend any lower in the hierarchy.
             throw new UnsupportedOperationException();
         }
 
         String accessFilename = System.getProperty(ACCESS_FILENAME_PROPERTY);
         InputStream in = null;
-        try
-        {
+        try {
             in = Thread.currentThread().getContextClassLoader().getResourceAsStream("access.properties");
             // in = new BufferedInputStream(new
             // FileInputStream(accessFilename));
@@ -98,8 +106,7 @@ public class SimpleAuthority implements IAuthorizer
             accessProperties.load(in);
 
             // Special case access to the keyspace list
-            if (keyspace == KEYSPACES_WRITE_PROPERTY)
-            {
+            if (keyspace == KEYSPACES_WRITE_PROPERTY) {
                 String kspAdmins = accessProperties.getProperty(KEYSPACES_WRITE_PROPERTY);
                 for (String admin : kspAdmins.split(","))
                     if (admin.equals(user.getName()))
@@ -109,35 +116,26 @@ public class SimpleAuthority implements IAuthorizer
             boolean canRead = false, canWrite = false;
             String readers = null, writers = null;
 
-            if (columnFamily == null)
-            {
+            if (columnFamily == null) {
                 readers = accessProperties.getProperty(keyspace + ".<ro>");
                 writers = accessProperties.getProperty(keyspace + ".<rw>");
-            }
-            else
-            {
+            } else {
                 readers = accessProperties.getProperty(keyspace + "." + columnFamily + ".<ro>");
                 writers = accessProperties.getProperty(keyspace + "." + columnFamily + ".<rw>");
             }
 
-            if (readers != null)
-            {
-                for (String reader : readers.split(","))
-                {
-                    if (reader.equals(user.getName()))
-                    {
+            if (readers != null) {
+                for (String reader : readers.split(",")) {
+                    if (reader.equals(user.getName())) {
                         canRead = true;
                         break;
                     }
                 }
             }
 
-            if (writers != null)
-            {
-                for (String writer : writers.split(","))
-                {
-                    if (writer.equals(user.getName()))
-                    {
+            if (writers != null) {
+                for (String writer : writers.split(",")) {
+                    if (writer.equals(user.getName())) {
                         canWrite = true;
                         break;
                     }
@@ -149,72 +147,37 @@ public class SimpleAuthority implements IAuthorizer
             else if (canRead)
                 authorized = EnumSet.of(Permission.READ);
 
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             throw new RuntimeException(String.format("Authorization table file '%s' could not be opened: %s",
-                    accessFilename, e.getMessage()));
-        }
-        finally
-        {
+                accessFilename, e.getMessage()));
+        } finally {
             FileUtils.closeQuietly(in);
         }
 
         return authorized;
     }
 
-    public void validateConfiguration() throws ConfigurationException
-    {
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.cassandra.auth.IAuthorizer#validateConfiguration()
+     */
+    public void validateConfiguration() throws ConfigurationException {
         String afilename = System.getProperty(ACCESS_FILENAME_PROPERTY);
-        if (afilename == null)
-        {
+        if (afilename == null) {
             throw new ConfigurationException(String.format("When using %s, '%s' property must be defined.", this
-                    .getClass().getCanonicalName(), ACCESS_FILENAME_PROPERTY));
+                .getClass().getCanonicalName(), ACCESS_FILENAME_PROPERTY));
         }
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see
-     * org.apache.cassandra.auth.IAuthorizer#authorize(org.apache.cassandra.
-     * auth.AuthenticatedUser, org.apache.cassandra.auth.IResource)
+     * @see org.apache.cassandra.auth.IAuthorizer#authorize(org.apache.cassandra. auth.AuthenticatedUser,
+     * org.apache.cassandra.auth.IResource)
      */
     @Override
-    public Set<Permission> authorize(AuthenticatedUser arg0, IResource arg1)
-    {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.apache.cassandra.auth.IAuthorizer#grant(org.apache.cassandra.auth
-     * .AuthenticatedUser, java.util.Set, org.apache.cassandra.auth.IResource,
-     * java.lang.String)
-     */
-    @Override
-    public void grant(AuthenticatedUser arg0, Set<Permission> arg1, IResource arg2, String arg3)
-            throws UnauthorizedException, InvalidRequestException
-    {
-        // TODO Auto-generated method stub
-
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.apache.cassandra.auth.IAuthorizer#list(org.apache.cassandra.auth.
-     * AuthenticatedUser, java.util.Set, org.apache.cassandra.auth.IResource,
-     * java.lang.String)
-     */
-    @Override
-    public Set<PermissionDetails> list(AuthenticatedUser arg0, Set<Permission> arg1, IResource arg2, String arg3)
-            throws UnauthorizedException, InvalidRequestException
-    {
+    public Set<Permission> authorize(AuthenticatedUser arg0, IResource arg1) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -225,52 +188,9 @@ public class SimpleAuthority implements IAuthorizer
      * @see org.apache.cassandra.auth.IAuthorizer#protectedResources()
      */
     @Override
-    public Set<? extends IResource> protectedResources()
-    {
+    public Set<? extends IResource> protectedResources() {
         // TODO Auto-generated method stub
         return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.apache.cassandra.auth.IAuthorizer#revoke(org.apache.cassandra.auth
-     * .AuthenticatedUser, java.util.Set, org.apache.cassandra.auth.IResource,
-     * java.lang.String)
-     */
-    @Override
-    public void revoke(AuthenticatedUser arg0, Set<Permission> arg1, IResource arg2, String arg3)
-            throws UnauthorizedException, InvalidRequestException
-    {
-        // TODO Auto-generated method stub
-
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.apache.cassandra.auth.IAuthorizer#revokeAll(java.lang.String)
-     */
-    @Override
-    public void revokeAll(String arg0)
-    {
-        // TODO Auto-generated method stub
-
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.apache.cassandra.auth.IAuthorizer#revokeAll(org.apache.cassandra.
-     * auth.IResource)
-     */
-    @Override
-    public void revokeAll(IResource arg0)
-    {
-        // TODO Auto-generated method stub
-
     }
 
     /*
@@ -279,8 +199,68 @@ public class SimpleAuthority implements IAuthorizer
      * @see org.apache.cassandra.auth.IAuthorizer#setup()
      */
     @Override
-    public void setup()
-    {
+    public void setup() {
+        // TODO Auto-generated method stub
+
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.cassandra.auth.IAuthorizer#grant(org.apache.cassandra.auth.AuthenticatedUser, java.util.Set,
+     * org.apache.cassandra.auth.IResource, org.apache.cassandra.auth.RoleResource)
+     */
+    @Override
+    public void grant(AuthenticatedUser arg0, Set<Permission> arg1, IResource arg2, RoleResource arg3)
+        throws RequestValidationException, RequestExecutionException {
+        // TODO Auto-generated method stub
+
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.cassandra.auth.IAuthorizer#list(org.apache.cassandra.auth.AuthenticatedUser, java.util.Set,
+     * org.apache.cassandra.auth.IResource, org.apache.cassandra.auth.RoleResource)
+     */
+    @Override
+    public Set<PermissionDetails> list(AuthenticatedUser arg0, Set<Permission> arg1, IResource arg2, RoleResource arg3)
+        throws RequestValidationException, RequestExecutionException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.cassandra.auth.IAuthorizer#revoke(org.apache.cassandra.auth.AuthenticatedUser, java.util.Set,
+     * org.apache.cassandra.auth.IResource, org.apache.cassandra.auth.RoleResource)
+     */
+    @Override
+    public void revoke(AuthenticatedUser arg0, Set<Permission> arg1, IResource arg2, RoleResource arg3)
+        throws RequestValidationException, RequestExecutionException {
+        // TODO Auto-generated method stub
+
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.cassandra.auth.IAuthorizer#revokeAllFrom(org.apache.cassandra.auth.RoleResource)
+     */
+    @Override
+    public void revokeAllFrom(RoleResource arg0) {
+        // TODO Auto-generated method stub
+
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.cassandra.auth.IAuthorizer#revokeAllOn(org.apache.cassandra.auth.IResource)
+     */
+    @Override
+    public void revokeAllOn(IResource arg0) {
         // TODO Auto-generated method stub
 
     }

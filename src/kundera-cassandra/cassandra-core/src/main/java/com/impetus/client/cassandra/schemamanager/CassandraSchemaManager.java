@@ -533,9 +533,12 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     private void updateExistingColumnFamily(TableInfo tableInfo, KsDef ksDef, InvalidRequestException irex)
             throws Exception
     {
-        StringBuilder builder = new StringBuilder("Cannot add already existing column family ");
+        StringBuilder builder = new StringBuilder("^Cannot add already existing (?:column family|table) .*$");
+        
+        boolean fl = irex.getWhy().matches(builder.toString());
 
-        if (irex.getWhy() != null && irex.getWhy().contains(builder.toString()))
+//        if (irex.getWhy() != null && irex.getWhy().contains(builder.toString()))
+            if (irex.getWhy() != null && fl)
         {
             SchemaOperationType operationType = SchemaOperationType.getInstance(operation);
             switch (operationType)
@@ -569,7 +572,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
         else
         {
-            log.error("Error occurred while creating table{}, Caused by: {}.", tableInfo.getTableName(), irex);
+            log.error("Error occurred while creating table {}, Caused by: {}.", tableInfo.getTableName(), irex);
             throw new SchemaGenerationException("Error occurred while creating table " + tableInfo.getTableName(),
                     irex, "Cassandra", databaseName);
         }
