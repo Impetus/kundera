@@ -67,8 +67,7 @@ public final class CassandraCli
     private static Logger log = LoggerFactory.getLogger(CassandraCli.class);
 
     private static List<String> puWithSchemaGeneration = new ArrayList<String>();
-    
-    
+
     /**
      * Cassandra set up.
      * 
@@ -100,13 +99,12 @@ public final class CassandraCli
     {
         puWithSchemaGeneration.add(peristenceunit);
     }
-    
+
     public static boolean isArchived(final String persistenceUnit)
     {
         return puWithSchemaGeneration.contains(persistenceUnit);
     }
-    
-    
+
     /**
      * Create keyspace.
      * 
@@ -271,10 +269,10 @@ public final class CassandraCli
         }
         catch (InvalidRequestException irex)
         {
-         
-            StringBuilder builder = new StringBuilder("Cannot add already existing column family ");
 
-            if (irex.getWhy() != null && irex.getWhy().contains(builder.toString()))
+            StringBuilder builder = new StringBuilder("^Cannot add already existing (?:column family|table) .*$");
+
+            if (irex.getWhy() != null && irex.getWhy().matches(builder.toString()))
             {
                 return true;
             }

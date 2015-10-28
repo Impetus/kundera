@@ -534,11 +534,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             throws Exception
     {
         StringBuilder builder = new StringBuilder("^Cannot add already existing (?:column family|table) .*$");
-        
-        boolean fl = irex.getWhy().matches(builder.toString());
 
-//        if (irex.getWhy() != null && irex.getWhy().contains(builder.toString()))
-            if (irex.getWhy() != null && fl)
+        if (irex.getWhy() != null && irex.getWhy().matches(builder.toString()))
         {
             SchemaOperationType operationType = SchemaOperationType.getInstance(operation);
             switch (operationType)
@@ -665,7 +662,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     protected boolean initiateClient()
     {
         Throwable message = null;
-       
+
         for (String host : hosts)
         {
             if (host == null || !StringUtils.isNumeric(port) || port.isEmpty())
