@@ -42,6 +42,12 @@ import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
 public class CassandraScalarQueriesTest
 {
 
+    /** The entity manager factory. */
+    private static EntityManagerFactory entityManagerFactory;
+
+    /** The entity manager. */
+    private static EntityManager entityManager;
+
     /**
      * Sets the up.
      * 
@@ -65,6 +71,12 @@ public class CassandraScalarQueriesTest
         em.persist(p1);
         em.persist(p2);
         em.persist(p3);
+
+        emf.close();
+        em.close();
+
+        entityManagerFactory = Persistence.createEntityManagerFactory("CassandraScalarQueriesTest");
+        entityManager = entityManagerFactory.createEntityManager();
     }
 
     /**
@@ -73,8 +85,6 @@ public class CassandraScalarQueriesTest
     @Test
     public void testSelectQueries()
     {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("CassandraScalarQueriesTest");
-        EntityManager entityManager = emf.createEntityManager();
         String qry = "Select key, \"PERSON_NAME\" from \"PERSONCASSANDRA\" where key = '1'";
 
         Query q = entityManager.createNativeQuery(qry);
@@ -102,13 +112,6 @@ public class CassandraScalarQueriesTest
         Assert.assertNotNull(persons);
         Assert.assertFalse(persons.isEmpty());
         Assert.assertEquals(3, persons.size());
-        Assert.assertEquals("1", ((Map) persons.get(0)).get("key"));
-        Assert.assertEquals("karthik", ((Map) persons.get(0)).get("PERSON_NAME"));
-        Assert.assertEquals("MAY", ((Map) persons.get(0)).get("MONTH_ENUM"));
-        Assert.assertEquals(10, ((Map) persons.get(0)).get("AGE"));
-
-        entityManager.close();
-        emf.close();
     }
 
     /**
@@ -117,8 +120,6 @@ public class CassandraScalarQueriesTest
     @Test
     public void testCreateAndUpdateQueries()
     {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("CassandraScalarQueriesTest");
-        EntityManager entityManager = emf.createEntityManager();
         String useNativeSql = "USE " + "\"KunderaExamples\"";
         Query q = entityManager.createNativeQuery(useNativeSql);
         q.executeUpdate();
@@ -184,15 +185,11 @@ public class CassandraScalarQueriesTest
         Assert.assertEquals("update", ((Map) results.get(0)).get("full_name"));
         Assert.assertEquals(new Integer(1975), ((Map) results.get(0)).get("birth_date"));
 
-        entityManager.close();
-        emf.close();
     }
 
     @Test
     public void testMetadataQueries()
     {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("CassandraScalarQueriesTest");
-        EntityManager entityManager = emf.createEntityManager();
         String useNativeSql = "SELECT keyspace_name,columnfamily_name,column_name,type,validator FROM system.schema_columns"
                 + " WHERE keyspace_name = 'KunderaExamples' AND columnfamily_name = 'PERSONCASSANDRA'";
         Query q = entityManager.createNativeQuery(useNativeSql);
@@ -225,8 +222,6 @@ public class CassandraScalarQueriesTest
         Assert.assertEquals(1, results.size());
         Assert.assertEquals(6l, ((Map) results.get(0)).get("count"));
 
-        entityManager.close();
-        emf.close();
     }
 
     /**
