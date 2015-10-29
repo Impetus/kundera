@@ -41,6 +41,7 @@ import org.apache.cassandra.db.marshal.AbstractType;
 import org.apache.cassandra.db.marshal.TypeParser;
 import org.apache.cassandra.exceptions.ConfigurationException;
 import org.apache.cassandra.exceptions.SyntaxException;
+import org.apache.cassandra.serializers.CollectionSerializer;
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.Column;
@@ -79,7 +80,6 @@ import com.impetus.client.cassandra.schemamanager.CassandraDataTranslator;
 import com.impetus.client.cassandra.schemamanager.CassandraValidationClassMapper;
 import com.impetus.client.cassandra.thrift.CQLTranslator;
 import com.impetus.client.cassandra.thrift.CQLTranslator.TranslationType;
-import com.impetus.client.cassandra.thrift.ThriftDataHandler;
 import com.impetus.client.cassandra.thrift.ThriftDataResultHelper;
 import com.impetus.client.cassandra.thrift.ThriftRow;
 import com.impetus.kundera.Constants;
@@ -1020,6 +1020,9 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         {
             log.error(ex.getMessage());
             throw new KunderaException("Error while deserializing column value " + ex);
+        }
+        if(type.isCollection()){
+            return ((CollectionSerializer) type.getSerializer()).deserializeForNativeProtocol(ByteBuffer.wrap(thriftColumnValue), 2);
         }
         return type.compose(ByteBuffer.wrap(thriftColumnValue));
     }
