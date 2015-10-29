@@ -63,17 +63,11 @@
 		</dependency>
 
 		<dependency>
-			<groupId>oracle.kv</groupId>
-			<artifactId>kvclient</artifactId>
-			<version>3.0.5</version>
+			<groupId>com.oracle.kv</groupId>
+			<artifactId>oracle-nosql-client</artifactId>
+			<version>3.2.5</version>
 		</dependency>
-		<dependency>
-			<groupId>oracle.kv</groupId>
-			<artifactId>kvstore</artifactId>
-			<version>3.0.5</version>
-		</dependency>
-		<!--<dependency> <groupId>com.sleepycat</groupId> <artifactId>je</artifactId> 
-			<version>3.3.75</version> <scope>test</scope> </dependency> -->
+
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -131,26 +125,6 @@
 				<skip>true</skip> </configuration> </execution> </executions> </plugin> -->
 		</plugins>
 	</build>
-	<profiles>
-		<profile>
-			<id>doclint-java8-disable</id>
-			<activation>
-				<jdk>[1.8,)</jdk>
-			</activation>
-
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-javadoc-plugin</artifactId>
-						<configuration>
-							<additionalparam>-Xdoclint:none</additionalparam>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
 
 </project>
 

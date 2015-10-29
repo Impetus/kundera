@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.client.oraclenosql.config.OracleNoSQLPropertyReader;
 import com.impetus.client.oraclenosql.index.OracleNoSQLInvertedIndexer;
+import com.impetus.client.oraclenosql.schemamanager.OracleNoSQLSchemaManager;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
@@ -53,7 +54,14 @@ public class OracleNoSQLClientFactory extends GenericClientFactory
     @Override
     public SchemaManager getSchemaManager(Map<String, Object> puProperties)
     {
-        return null;
+        if (schemaManager == null)
+        {
+            initializePropertyReader();
+            setExternalProperties(puProperties);
+            schemaManager = new OracleNoSQLSchemaManager(OracleNoSQLClientFactory.class.getName(), puProperties,
+                    kunderaMetadata);
+        }
+        return schemaManager;
     }
 
     @Override

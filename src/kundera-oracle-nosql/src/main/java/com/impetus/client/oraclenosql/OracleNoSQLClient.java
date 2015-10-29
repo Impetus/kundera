@@ -38,7 +38,6 @@ import oracle.kv.DurabilityException;
 import oracle.kv.FaultException;
 import oracle.kv.KVStore;
 import oracle.kv.Key;
-import oracle.kv.OperationExecutionException;
 import oracle.kv.impl.api.table.TableImpl;
 import oracle.kv.table.FieldDef;
 import oracle.kv.table.FieldValue;
@@ -50,6 +49,7 @@ import oracle.kv.table.ReturnRow.Choice;
 import oracle.kv.table.Row;
 import oracle.kv.table.Table;
 import oracle.kv.table.TableAPI;
+import oracle.kv.table.TableOpExecutionException;
 import oracle.kv.table.TableOperation;
 
 import org.apache.commons.lang.StringUtils;
@@ -81,7 +81,6 @@ import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
-import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.QueryHandlerException;
@@ -193,7 +192,6 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
      *            columns to select
      * @return the object
      */
-    @SuppressWarnings("unchecked")
     private Object find(Class entityClass, Object key, List<String> columnsToSelect)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClass);
@@ -465,7 +463,7 @@ public class OracleNoSQLClient extends ClientBase implements Client<OracleNoSQLQ
                 log.error("Error while executing operations in OracleNOSQL, Caused by:" + e + ".");
                 throw new PersistenceException("Error while Persisting data using batch", e);
             }
-            catch (OperationExecutionException e)
+            catch (TableOpExecutionException e)
             {
                 log.error("Error while executing operations in OracleNOSQL, Caused by:" + e + ".");
                 throw new PersistenceException("Error while Persisting data using batch", e);
