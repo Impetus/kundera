@@ -34,6 +34,7 @@ import com.impetus.client.crud.PersonCassandra.Day;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class CassandraNativeFunctionsTest.
  * 
@@ -250,6 +251,95 @@ public class CassandraNativeFunctionsTest
         Assert.assertEquals("karthik", ((Map) persons.get(0)).get("PERSON_NAME"));
         Assert.assertEquals("MAY", ((Map) persons.get(0)).get("MONTH_ENUM"));
         Assert.assertEquals(500, ((Map) persons.get(0)).get("AGE"));
+    }
+
+    /**
+     * Test in clause on primary key.
+     */
+    @Test
+    public void testINClauseOnPrimaryKey()
+    {
+        String useNativeSql = "USE " + "\"KunderaExamples\"";
+        Query q = entityManager.createNativeQuery(useNativeSql);
+        q.executeUpdate();
+
+        String qry = "Select * from \"PERSONCASSANDRA\" where key IN ('1', '3', '5', '7')";
+        q = entityManager.createNativeQuery(qry);
+        List persons = q.getResultList();
+        Assert.assertNotNull(persons);
+        Assert.assertFalse(persons.isEmpty());
+        Assert.assertEquals(3, persons.size());
+    }
+
+    /**
+     * Test in clause on composite partition and clustering keys.
+     */
+    @Test
+    public void testINClauseOnCompositePartitionAndClusteringKeys()
+    {
+        // prepare data for querying
+        prepareDataWithCompositePartitionAndClusteringKeys();
+
+        // query and assert
+        String qry = "select * from kundera where k_part_one IN ('kar','dev', 'amit') and k_part_two IN (1, 5, 7, 9, 13, 50)";
+        Query q = entityManager.createNativeQuery(qry);
+        List persons = q.getResultList();
+        Assert.assertNotNull(persons);
+        Assert.assertFalse(persons.isEmpty());
+        Assert.assertEquals(2, persons.size());
+
+        qry = "select * from kundera where k_part_one IN ('kar','dev', 'amit') and k_part_two IN (1, 5, 7, 9, 13, 50) "
+                + "and k_clust_one IN ('cluster11', 'cluster13', 'cluster14')";
+        q = entityManager.createNativeQuery(qry);
+        persons = q.getResultList();
+        Assert.assertNotNull(persons);
+        Assert.assertFalse(persons.isEmpty());
+        Assert.assertEquals(1, persons.size());
+
+        qry = "select * from kundera where k_part_one IN ('kar','dev', 'amit')";
+        q = entityManager.createNativeQuery(qry);
+        try
+        {
+            persons = q.getResultList();
+            Assert.fail();
+        }
+        catch (Exception e)
+        {
+            Assert.assertEquals(
+                    "javax.persistence.PersistenceException: com.impetus.kundera.KunderaException: "
+                            + "InvalidRequestException(why:Partition key parts: k_part_two must be restricted as other parts are)",
+                    e.getMessage());
+        }
+    }
+
+    /**
+     * Prepare data with composite partition and clustering keys.
+     */
+    private void prepareDataWithCompositePartitionAndClusteringKeys()
+    {
+        String useNativeSql = "USE " + "\"KunderaExamples\"";
+        Query q = entityManager.createNativeQuery(useNativeSql);
+        q.executeUpdate();
+        String qry = "create table kundera (k_part_one text, k_part_two int, "
+                + "k_clust_one text, k_clust_two int, k_clust_three text, data text, "
+                + "PRIMARY KEY((k_part_one,k_part_two), k_clust_one, k_clust_two, k_clust_three))";
+        q = entityManager.createNativeQuery(qry);
+        q.executeUpdate();
+
+        qry = "insert into kundera (k_part_one, k_part_two, k_clust_one, k_clust_two, k_clust_three, data)"
+                + "VALUES ('kar', 13, 'cluster11', 21, 'cluster31', 'some random data')";
+        q = entityManager.createNativeQuery(qry);
+        q.executeUpdate();
+
+        qry = "insert into kundera (k_part_one, k_part_two, k_clust_one, k_clust_two, k_clust_three, data)"
+                + "VALUES ('dev', 7, 'cluster12', 22, 'cluster32', 'some more random data')";
+        q = entityManager.createNativeQuery(qry);
+        q.executeUpdate();
+
+        qry = "insert into kundera (k_part_one, k_part_two, k_clust_one, k_clust_two, k_clust_three, data)"
+                + "VALUES ('pg', 9, 'cluster13', 23, 'cluster33', 'random data')";
+        q = entityManager.createNativeQuery(qry);
+        q.executeUpdate();
     }
 
     /**
