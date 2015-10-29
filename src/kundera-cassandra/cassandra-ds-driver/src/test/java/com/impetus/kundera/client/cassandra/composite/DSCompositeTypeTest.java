@@ -109,14 +109,14 @@ public class DSCompositeTypeTest
         Assert.assertEquals(results.get(0).getKey().getUserId(), results.get(1).getKey().getUserId());
         Assert.assertNotSame(results.get(0).getKey().getTimeLineId(), results.get(1).getKey().getTimeLineId());
         Assert.assertEquals(results.get(0).getTweetBody(), results.get(1).getTweetBody());
-        
-        final String deleteQuery="Delete from PrimeUser p";
+
+        final String deleteQuery = "Delete from PrimeUser p";
         em.createQuery(deleteQuery).executeUpdate();
         query = em.createQuery(noClause);
         results = query.getResultList();
-        
+
         Assert.assertTrue(results.isEmpty());
-        
+
         em.close();
         // emf.close();
     }
@@ -500,18 +500,21 @@ public class DSCompositeTypeTest
 
         em.clear();
 
-        // Single quote within single quote not supported by eclipselink, need to look into this 
-//        String inClause = "Select u from PrimeUser u where u.key.userId IN ('mevivs','cgangwal\''s','kmishra') ORDER BY u.key.tweetId ASC";
-//        Query q = em.createQuery(inClause);
-//
-//        List<PrimeUser> results = q.getResultList();
-//        Assert.assertNotNull(results);
-//        Assert.assertEquals(3, results.size());
-//        Assert.assertEquals("my first tweet", results.get(0).getTweetBody());
-//        Assert.assertEquals("my second tweet", results.get(1).getTweetBody());
-//        Assert.assertEquals("my third tweet", results.get(2).getTweetBody());
-//        
-//
+        // Single quote within single quote not supported by eclipselink, need
+        // to look into this
+        // String inClause =
+        // "Select u from PrimeUser u where u.key.userId IN ('mevivs','cgangwal\''s','kmishra') ORDER BY u.key.tweetId ASC";
+        // Query q = em.createQuery(inClause);
+        //
+        // List<PrimeUser> results = q.getResultList();
+        // Assert.assertNotNull(results);
+        // Assert.assertEquals(3, results.size());
+        // Assert.assertEquals("my first tweet", results.get(0).getTweetBody());
+        // Assert.assertEquals("my second tweet",
+        // results.get(1).getTweetBody());
+        // Assert.assertEquals("my third tweet", results.get(2).getTweetBody());
+        //
+        //
         String inClause = "Select u from PrimeUser u where u.key.userId IN (\"mevivs\",\"cgangwal's\",\"kmishra\") ORDER BY u.key.tweetId ASC";
         Query q = em.createQuery(inClause);
 
@@ -536,13 +539,12 @@ public class DSCompositeTypeTest
             inClause = "Select u from PrimeUser u where u.key.tweetId IN (1,2,3) ORDER BY u.key.tweetId DESC";
             q = em.createQuery(inClause);
             results = q.getResultList();
-
             Assert.fail();
         }
         catch (Exception e)
         {
             Assert.assertEquals(
-                    "com.datastax.driver.core.exceptions.InvalidQueryException: Clustering column \"tweetId\" cannot be restricted by an IN relation",
+                    "com.datastax.driver.core.exceptions.InvalidQueryException: ORDER BY is only supported when the partition key is restricted by an EQ or an IN.",
                     e.getMessage());
         }
 
@@ -555,7 +557,7 @@ public class DSCompositeTypeTest
         EntityManager em = emf.createEntityManager();
 
         UUID timeLineId = UUID.randomUUID();
-        
+
         for (int i = 0; i < 500; i++)
         {
             UserTimeLine key = new UserTimeLine("mevivs", i, timeLineId);
