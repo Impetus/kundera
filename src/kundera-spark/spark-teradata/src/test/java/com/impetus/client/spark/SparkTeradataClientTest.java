@@ -53,7 +53,7 @@ public class SparkTeradataClientTest extends SparkBaseTest
      * @throws Exception
      *             the exception
      */
-    @BeforeClass
+  //  @BeforeClass
     public static void SetUpBeforeClass() throws Exception
     {
         emf = Persistence.createEntityManagerFactory(PU);
@@ -65,7 +65,7 @@ public class SparkTeradataClientTest extends SparkBaseTest
      * @throws Exception
      *             the exception
      */
-    @Before
+   // @Before
     public void setUp() throws Exception
     {
         em = emf.createEntityManager();
@@ -74,10 +74,10 @@ public class SparkTeradataClientTest extends SparkBaseTest
     /**
      * Test teradata with spark.
      */
-    @Test
+   // @Test
     public void testTeradataWithSpark()
     {
-       // testQuery();
+        testQuery();
     }
 
     /**
@@ -128,7 +128,7 @@ public class SparkTeradataClientTest extends SparkBaseTest
      * @throws Exception
      *             the exception
      */
-    @After
+   // @After
     public void tearDown() throws Exception
     {
         em.close();
@@ -140,7 +140,7 @@ public class SparkTeradataClientTest extends SparkBaseTest
      * @throws Exception
      *             the exception
      */
-    @AfterClass
+    //@AfterClass
     public static void tearDownAfterClass() throws Exception
     {
         emf.close();

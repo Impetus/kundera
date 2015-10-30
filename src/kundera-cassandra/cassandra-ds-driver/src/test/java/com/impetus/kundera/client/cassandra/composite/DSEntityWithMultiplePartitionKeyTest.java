@@ -434,10 +434,10 @@ public class DSEntityWithMultiplePartitionKeyTest
             Assert.assertEquals("Persisting", entity.getAction());
             Assert.assertEquals("Entity to test composite key with multiple partition key.",
                     entity.getEntityDiscription());
-            Assert.assertEquals("clusterkey2", entity.getId().getClusterkey1());
-            Assert.assertEquals(111, entity.getId().getClusterkey2());
-            Assert.assertEquals("partitionKey2", entity.getId().getPartitionKey().getPartitionKey1());
-            Assert.assertEquals(2, entity.getId().getPartitionKey().getPartitionKey2());
+            Assert.assertEquals("clusterkey1", entity.getId().getClusterkey1());
+            Assert.assertEquals(11, entity.getId().getClusterkey2());
+            Assert.assertEquals("partitionKey1", entity.getId().getPartitionKey().getPartitionKey1());
+            Assert.assertEquals(1, entity.getId().getPartitionKey().getPartitionKey2());
             count++;
         }
         Assert.assertEquals(1, count);
