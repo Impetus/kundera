@@ -27,17 +27,17 @@ import com.impetus.kundera.index.IndexCollection;
  * @author devender.yadav
  */
 @Embeddable
-@IndexCollection(columns = { @Index(indexName = "user_email", name = "email"),
-        @Index(indexName = "user_address", name = "address") })
+@IndexCollection(columns = { @Index(indexName = "email", name = "email"),
+        @Index(indexName = "address", name = "address") })
 public class UserDetails
 {
 
     /** The email. */
-    @Column(name = "EMAIL")
+    @Column(name = "email")
     private String email;
 
     /** The address. */
-    @Column(name = "ADDRESS")
+    @Column(name = "address")
     private String address;
 
     /**

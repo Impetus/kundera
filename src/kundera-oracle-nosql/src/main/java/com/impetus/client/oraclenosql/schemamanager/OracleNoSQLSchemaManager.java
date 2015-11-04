@@ -217,6 +217,10 @@ public class OracleNoSQLSchemaManager extends AbstractSchemaManager implements S
                 {
                     statement = buildCreateDDLQuery(tableInfo);
                     result = tableAPI.executeSync(statement);
+                    if (!result.isSuccessful())
+                    {
+                        throw new SchemaGenerationException("Unable to CREATE TABLE " + tableInfo.getTableName());
+                    }
                 }
                 else
                 {

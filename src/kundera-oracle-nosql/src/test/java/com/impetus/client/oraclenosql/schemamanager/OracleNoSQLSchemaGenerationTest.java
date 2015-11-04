@@ -154,11 +154,11 @@ public class OracleNoSQLSchemaGenerationTest
         Table table = tableAPI.getTable("ONS_USER");
         Assert.assertNull(table);
 
-        tableAPI.executeSync("CREATE TABLE ONS_USER(USER_ID string, NAME string, AGE string, PRIMARY KEY(USER_ID))");
+        tableAPI.executeSync("CREATE TABLE ONS_USER(userId string, name string, age string, PRIMARY KEY(userId))");
         table = tableAPI.getTable("ONS_USER");
         Assert.assertNotNull(table);
         List<String> list = table.getFields();
-        
+
         propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "update");
         emf = Persistence.createEntityManagerFactory(_PU, propertyMap);
         table = tableAPI.getTable("ONS_USER");

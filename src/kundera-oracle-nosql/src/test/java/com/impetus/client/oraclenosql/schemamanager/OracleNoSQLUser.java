@@ -31,21 +31,23 @@ import com.impetus.kundera.index.IndexCollection;
  */
 @Entity
 @Table(name = "ONS_USER")
-@IndexCollection(columns = { @Index(indexName = "user_name", name = "name"),
-        @Index(indexName = "user_age", name = "age") })
+@IndexCollection(columns = { @Index(indexName = "name", name = "name"),
+        @Index(indexName = "age", name = "age"),
+        @Index(indexName = "email", name = "details.email", type = "composite"),
+        @Index(indexName = "address", name = "details.address", type = "composite") })
 public class OracleNoSQLUser
 {
     /** The user id. */
     @Id
-    @Column(name = "USER_ID")
+    @Column(name = "userId")
     private int userId;
 
     /** The name. */
-    @Column(name = "NAME")
+    @Column(name = "name")
     private String name;
 
     /** The age. */
-    @Column(name = "AGE")
+    @Column(name = "age")
     private int age;
 
     @Embedded
