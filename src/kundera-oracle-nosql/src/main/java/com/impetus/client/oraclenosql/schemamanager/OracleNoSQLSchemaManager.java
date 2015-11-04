@@ -19,6 +19,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.Embeddable;
+
 import oracle.kv.FaultException;
 import oracle.kv.KVStore;
 import oracle.kv.KVStoreConfig;
@@ -369,16 +371,21 @@ public class OracleNoSQLSchemaManager extends AbstractSchemaManager implements S
     private String buildCreateDDLQuery(TableInfo tableInfo)
     {
         String statement;
+        boolean flag = false;
+        StringBuilder compoundKeys = null;
         StringBuilder builder = new StringBuilder();
         builder.append("CREATE TABLE ");
         builder.append(tableInfo.getTableName());
         builder.append(Constants.OPEN_ROUND_BRACKET);
 
-        builder.append(tableInfo.getIdColumnName());
-        builder.append(Constants.SPACE);
-        String idType = tableInfo.getTableIdType().getSimpleName().toLowerCase();
-        builder.append(OracleNoSQLValidationClassMapper.getValidType(idType));
-        builder.append(Constants.COMMA);
+        if (!tableInfo.getTableIdType().isAnnotationPresent(Embeddable.class))
+        {
+            builder.append(tableInfo.getIdColumnName());
+            builder.append(Constants.SPACE);
+            String idType = tableInfo.getTableIdType().getSimpleName().toLowerCase();
+            builder.append(OracleNoSQLValidationClassMapper.getValidType(idType));
+            builder.append(Constants.COMMA);
+        }
 
         for (ColumnInfo columnInfo : tableInfo.getColumnMetadatas())
         {
@@ -390,6 +397,11 @@ public class OracleNoSQLSchemaManager extends AbstractSchemaManager implements S
         }
         for (EmbeddedColumnInfo embeddedColumnInfo : tableInfo.getEmbeddedColumnMetadatas())
         {
+            if (tableInfo.getIdColumnName().equals(embeddedColumnInfo.getEmbeddedColumnName()))
+            {
+                compoundKeys = new StringBuilder();
+                flag = true;
+            }
             for (ColumnInfo columnInfo : embeddedColumnInfo.getColumns())
             {
                 builder.append(columnInfo.getColumnName());
@@ -397,12 +409,28 @@ public class OracleNoSQLSchemaManager extends AbstractSchemaManager implements S
                 String coulmnType = columnInfo.getType().getSimpleName().toLowerCase();
                 builder.append(OracleNoSQLValidationClassMapper.getValidType(coulmnType));
                 builder.append(Constants.COMMA);
+                if (flag)
+                {
+                    compoundKeys.append(columnInfo.getColumnName());
+                    compoundKeys.append(Constants.COMMA);
+                }
             }
+            flag = false;
         }
 
         builder.append("PRIMARY KEY");
         builder.append(Constants.OPEN_ROUND_BRACKET);
-        builder.append(tableInfo.getIdColumnName());
+
+        if (!tableInfo.getTableIdType().isAnnotationPresent(Embeddable.class))
+        {
+            builder.append(tableInfo.getIdColumnName());
+        }
+        else
+        {
+            compoundKeys.deleteCharAt(compoundKeys.length() - 1);
+            builder.append(compoundKeys.toString());
+        }
+
         builder.append(Constants.CLOSE_ROUND_BRACKET);
         builder.append(Constants.CLOSE_ROUND_BRACKET);
 
