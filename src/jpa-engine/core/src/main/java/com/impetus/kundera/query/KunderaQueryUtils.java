@@ -386,7 +386,7 @@ public final class KunderaQueryUtils
                 isEmbeddable = metaModel.isEmbeddable(attrib.getBindableJavaType());
                 dbColName+=("."+attrib.getJPAColumnName());
             }
-            colName = fieldName;
+            colName = dbColName;
         }
 
         if (!sfpExp.getPath(count - 1).equals(discriminatorColumn))

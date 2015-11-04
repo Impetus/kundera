@@ -33,7 +33,7 @@ public class UserDetails
 {
 
     /** The email. */
-    @Column(name = "email")
+    @Column(name = "EMAIL")
     private String email;
 
     /** The address. */
