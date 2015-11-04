@@ -8,7 +8,7 @@
 					<property name="spark.executor.memory" value="1g"></property>
 					<property name="spark.cassandra.connection.host" value="192.168.145.21"></property>
 					<property name="spark.cassandra.connection.native.port"
-						value="9042"></property>
+						value="9043"></property>
 					<property name="spark.cassandra.connection.rpc.port"
 						value="9161"></property>
 					<property name="spark.master" value="local"></property>
