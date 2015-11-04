@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.client.oraclenosql.schemamanager;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,14 +24,18 @@ import oracle.kv.KVStore;
 import oracle.kv.KVStoreConfig;
 import oracle.kv.KVStoreFactory;
 import oracle.kv.table.StatementResult;
+import oracle.kv.table.Table;
 import oracle.kv.table.TableAPI;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.configure.schema.ColumnInfo;
+import com.impetus.kundera.configure.schema.EmbeddedColumnInfo;
+import com.impetus.kundera.configure.schema.IndexInfo;
 import com.impetus.kundera.configure.schema.SchemaGenerationException;
 import com.impetus.kundera.configure.schema.TableInfo;
 import com.impetus.kundera.configure.schema.api.AbstractSchemaManager;
@@ -95,7 +100,6 @@ public class OracleNoSQLSchemaManager extends AbstractSchemaManager implements S
     public void exportSchema(String persistenceUnit, List<TableInfo> puToSchemaCol)
     {
         super.exportSchema(persistenceUnit, puToSchemaCol);
-
     }
 
     /*
@@ -106,7 +110,31 @@ public class OracleNoSQLSchemaManager extends AbstractSchemaManager implements S
     @Override
     public void dropSchema()
     {
-
+        // dropping all the tables in the Oracle NoSQL store
+        if (operation != null && operation.equalsIgnoreCase("create-drop"))
+        {
+            for (TableInfo tableInfo : tableInfos)
+            {
+                try
+                {
+                    StatementResult result = tableAPI.executeSync("DROP TABLE IF EXISTS " + tableInfo.getTableName());
+                    if (!result.isSuccessful())
+                    {
+                        throw new SchemaGenerationException("Unable to DROP TABLE " + tableInfo.getTableName());
+                    }
+                }
+                catch (IllegalArgumentException e)
+                {
+                    logger.error("Invalid DROP TABLE Statement. Caused By: ", e);
+                    throw new SchemaGenerationException(e, "Invalid DROP TABLE Statement. Caused By: ");
+                }
+                catch (FaultException e)
+                {
+                    logger.error("DROP TABLE Statement couldn't be executed. Caused By: ", e);
+                    throw new SchemaGenerationException(e, "Invalid DROP TABLE Statement is executed. Caused By: ");
+                }
+            }
+        }
     }
 
     /*
@@ -129,6 +157,7 @@ public class OracleNoSQLSchemaManager extends AbstractSchemaManager implements S
             try
             {
                 kvStore = KVStoreFactory.getStore(new KVStoreConfig(databaseName, host + ":" + port));
+                tableAPI = kvStore.getTableAPI();
             }
             catch (FaultException e)
             {
@@ -149,7 +178,22 @@ public class OracleNoSQLSchemaManager extends AbstractSchemaManager implements S
     @Override
     protected void validate(List<TableInfo> tableInfos)
     {
-        tableAPI = kvStore.getTableAPI();
+        for (TableInfo tableInfo : tableInfos)
+        {
+            try
+            {
+                if (tableAPI.getTable(tableInfo.getTableName()) == null)
+                {
+                    throw new SchemaGenerationException("No table found for " + tableInfo.getTableName());
+                }
+            }
+            catch (FaultException e)
+            {
+                logger.error("Error while getting table " + tableInfo.getTableName() + ". Caused By: ", e);
+                throw new SchemaGenerationException(e, "Error while getting table " + tableInfo.getTableName()
+                        + ". Caused By: ");
+            }
+        }
     }
 
     /*
@@ -162,7 +206,65 @@ public class OracleNoSQLSchemaManager extends AbstractSchemaManager implements S
     @Override
     protected void update(List<TableInfo> tableInfos)
     {
+        StatementResult result = null;
+        String statement = null;
+        for (TableInfo tableInfo : tableInfos)
+        {
+            try
+            {
+                Table table = tableAPI.getTable(tableInfo.getTableName());
+                if (table == null)
+                {
+                    statement = buildCreateDDLQuery(tableInfo);
+                    result = tableAPI.executeSync(statement);
+                }
+                else
+                {
+                    List<ColumnInfo> columnInfos = tableInfo.getColumnMetadatas();
+                    Map<String, String> newColumns = new HashMap<String, String>();
+                    for (ColumnInfo column : columnInfos)
+                    {
+                        if (table.getField(column.getColumnName()) == null)
+                        {
+                            newColumns.put(column.getColumnName(), column.getType().getSimpleName());
+                        }
+                    }
 
+                    List<EmbeddedColumnInfo> embeddedColumnInfos = tableInfo.getEmbeddedColumnMetadatas();
+                    for (EmbeddedColumnInfo embeddedColumnInfo : embeddedColumnInfos)
+                    {
+                        for (ColumnInfo column : embeddedColumnInfo.getColumns())
+                        {
+                            if (table.getField(column.getColumnName()) == null)
+                            {
+                                newColumns.put(column.getColumnName(), column.getType().getSimpleName());
+                            }
+                        }
+                    }
+                    if (!newColumns.isEmpty())
+                    {
+                        statement = buildAlterDDLQuery(tableInfo, newColumns);
+                        result = tableAPI.executeSync(statement);
+
+                        if (!result.isSuccessful())
+                        {
+                            throw new SchemaGenerationException("Unable to ALTER TABLE " + tableInfo.getTableName());
+                        }
+                    }
+                }
+                createIndexOnTable(tableInfo);
+            }
+            catch (IllegalArgumentException e)
+            {
+                logger.error("Invalid Statement. Caused By: ", e);
+                throw new SchemaGenerationException(e, "Invalid Statement. Caused By: ");
+            }
+            catch (FaultException e)
+            {
+                logger.error("Statement couldn't be executed. Caused By: ", e);
+                throw new SchemaGenerationException(e, "Statement couldn't be executed. Caused By: ");
+            }
+        }
     }
 
     /*
@@ -175,8 +277,6 @@ public class OracleNoSQLSchemaManager extends AbstractSchemaManager implements S
     @Override
     protected void create(List<TableInfo> tableInfos)
     {
-        tableAPI = kvStore.getTableAPI();
-
         StatementResult result = null;
         String statement = null;
 
@@ -184,53 +284,159 @@ public class OracleNoSQLSchemaManager extends AbstractSchemaManager implements S
         {
             try
             {
-                tableAPI.executeSync("DROP TABLE IF EXISTS " + tableInfo.getTableName());
-                
-                StringBuilder builder = new StringBuilder();
-                builder.append("CREATE TABLE ");
-                builder.append(tableInfo.getTableName());
-                builder.append("(");
-
-                builder.append(tableInfo.getIdColumnName());
-                builder.append(" ");
-                builder.append(tableInfo.getTableIdType().getSimpleName());
-                builder.append(",");
-
-                for (ColumnInfo columnInfo : tableInfo.getColumnMetadatas())
-                {
-                    builder.append(columnInfo.getColumnName());
-                    builder.append(" ");
-                    builder.append(columnInfo.getType().getSimpleName());
-                    builder.append(",");
-                }
-
-                builder.append("PRIMARY KEY");
-                builder.append("(");
-                builder.append(tableInfo.getIdColumnName());
-                builder.append(")");
-                builder.append(")");
-
-                statement = builder.toString();
-
-                result = tableAPI.executeSync(statement);
-                
+                result = tableAPI.executeSync("DROP TABLE IF EXISTS " + tableInfo.getTableName());
                 if (!result.isSuccessful())
                 {
-                    throw new SchemaGenerationException("unable to create tables");
+                    throw new SchemaGenerationException("Unable to DROP TABLE " + tableInfo.getTableName());
                 }
-
+                statement = buildCreateDDLQuery(tableInfo);
+                result = tableAPI.executeSync(statement);
+                if (!result.isSuccessful())
+                {
+                    throw new SchemaGenerationException("Unable to CREATE TABLE " + tableInfo.getTableName());
+                }
+                createIndexOnTable(tableInfo);
             }
             catch (IllegalArgumentException e)
             {
-                logger.error("invalid Statement. Caused By: ", e);
-                throw new SchemaGenerationException(e);
+                logger.error("Invalid Statement. Caused By: ", e);
+                throw new SchemaGenerationException(e, "Invalid Statement. Caused By: ");
             }
             catch (FaultException e)
             {
                 logger.error("Statement couldn't be executed. Caused By: ", e);
-                throw new SchemaGenerationException(e);
+                throw new SchemaGenerationException(e, "Statement couldn't be executed. Caused By: ");
             }
         }
+    }
+
+    /**
+     * Creates the index on table.
+     * 
+     * @param tableInfo
+     *            the table info
+     */
+    private void createIndexOnTable(TableInfo tableInfo)
+    {
+        // create index for ID column
+        createIndex(tableInfo.getTableName(), tableInfo.getIdColumnName(), tableInfo.getIdColumnName());
+        List<IndexInfo> indexColumns = tableInfo.getColumnsToBeIndexed();
+        for (IndexInfo indexInfo : indexColumns)
+        {
+            createIndex(tableInfo.getTableName(), indexInfo.getIndexName(), indexInfo.getColumnName());
+        }
+    }
+
+    /**
+     * Creates the index.
+     * 
+     * @param tableName
+     *            the table name
+     * @param indexName
+     *            the index name
+     * @param fieldName
+     *            the field name
+     */
+    private void createIndex(String tableName, String indexName, String fieldName)
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.append("CREATE INDEX IF NOT EXISTS ");
+        builder.append(indexName);
+        builder.append(" ON ");
+        builder.append(tableName);
+        builder.append(Constants.OPEN_ROUND_BRACKET);
+        builder.append(fieldName);
+        builder.append(Constants.CLOSE_ROUND_BRACKET);
+        StatementResult result = tableAPI.executeSync(builder.toString());
+        if (!result.isSuccessful())
+        {
+            throw new SchemaGenerationException("Unable to CREATE Index with Index Name [" + indexName + "] on field ["
+                    + fieldName + "] for table [" + tableName + "]");
+        }
+    }
+
+    /**
+     * Builds the create ddl query.
+     * 
+     * @param tableInfo
+     *            the table info
+     * @return the string
+     */
+    private String buildCreateDDLQuery(TableInfo tableInfo)
+    {
+        String statement;
+        StringBuilder builder = new StringBuilder();
+        builder.append("CREATE TABLE ");
+        builder.append(tableInfo.getTableName());
+        builder.append(Constants.OPEN_ROUND_BRACKET);
+
+        builder.append(tableInfo.getIdColumnName());
+        builder.append(Constants.SPACE);
+        String idType = tableInfo.getTableIdType().getSimpleName().toLowerCase();
+        builder.append(OracleNoSQLValidationClassMapper.getValidType(idType));
+        builder.append(Constants.COMMA);
+
+        for (ColumnInfo columnInfo : tableInfo.getColumnMetadatas())
+        {
+            builder.append(columnInfo.getColumnName());
+            builder.append(Constants.SPACE);
+            String coulmnType = columnInfo.getType().getSimpleName().toLowerCase();
+            builder.append(OracleNoSQLValidationClassMapper.getValidType(coulmnType));
+            builder.append(Constants.COMMA);
+        }
+        for (EmbeddedColumnInfo embeddedColumnInfo : tableInfo.getEmbeddedColumnMetadatas())
+        {
+            for (ColumnInfo columnInfo : embeddedColumnInfo.getColumns())
+            {
+                builder.append(columnInfo.getColumnName());
+                builder.append(Constants.SPACE);
+                String coulmnType = columnInfo.getType().getSimpleName().toLowerCase();
+                builder.append(OracleNoSQLValidationClassMapper.getValidType(coulmnType));
+                builder.append(Constants.COMMA);
+            }
+        }
+
+        builder.append("PRIMARY KEY");
+        builder.append(Constants.OPEN_ROUND_BRACKET);
+        builder.append(tableInfo.getIdColumnName());
+        builder.append(Constants.CLOSE_ROUND_BRACKET);
+        builder.append(Constants.CLOSE_ROUND_BRACKET);
+
+        statement = builder.toString();
+        return statement;
+    }
+
+    /**
+     * Builds the alter ddl query.
+     * 
+     * @param tableInfo
+     *            the table info
+     * @param newColumns
+     *            the new columns
+     * @return the string
+     */
+    private String buildAlterDDLQuery(TableInfo tableInfo, Map<String, String> newColumns)
+    {
+        String statement;
+        StringBuilder builder = new StringBuilder();
+        builder.append("ALTER TABLE ");
+        builder.append(tableInfo.getTableName());
+        builder.append(Constants.OPEN_ROUND_BRACKET);
+
+        for (Map.Entry<String, String> entry : newColumns.entrySet())
+        {
+            builder.append("ADD ");
+            builder.append(entry.getKey());
+            builder.append(Constants.SPACE);
+            String coulmnType = entry.getValue().toLowerCase();
+            builder.append(OracleNoSQLValidationClassMapper.getValidType(coulmnType));
+            builder.append(Constants.COMMA);
+        }
+
+        builder.deleteCharAt(builder.length() - 1);
+        builder.append(Constants.CLOSE_ROUND_BRACKET);
+        statement = builder.toString();
+        return statement;
     }
 
     /*
@@ -243,7 +449,7 @@ public class OracleNoSQLSchemaManager extends AbstractSchemaManager implements S
     @Override
     protected void create_drop(List<TableInfo> tableInfos)
     {
-
+        create(tableInfos);
     }
 
 }
