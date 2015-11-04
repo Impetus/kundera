@@ -309,6 +309,3 @@ plan add-index -name location -table PERSON_EMBEDDED -field location -wait
 plan add-index -name age -table PERSON_EMBEDDED -field AGE -wait
 plan add-index -name personName -table PERSON_EMBEDDED -field PERSON_NAME -wait
 plan add-index -name compositeIdx -table PERSON_EMBEDDED -field PERSON_ID -field AGE -wait
-plan add-index -name officeId -table PERSON_EMBEDDED -field officeId -wait
-plan add-index -name companyName -table PERSON_EMBEDDED -field companyName -wait
-plan add-index -name location -table PERSON_EMBEDDED -field location -wait

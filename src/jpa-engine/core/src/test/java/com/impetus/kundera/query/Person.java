@@ -47,7 +47,7 @@ public class Person
     @Column(name = "SALARY")
     private Double salary;
 
-    @Column(name = "ENUM")
+    @Column(name = "DAY")
     @Enumerated(EnumType.STRING)
     private Day day;   
 

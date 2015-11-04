@@ -33,7 +33,7 @@ public class FacebookProfile extends SocialProfile
     private String facebookId;
 
     /** The facebook user. */
-    @Column(name = "twitter_user", length = 128)
+    @Column(name = "facebook_user", length = 128)
     private String facebookUser;
 
     /**

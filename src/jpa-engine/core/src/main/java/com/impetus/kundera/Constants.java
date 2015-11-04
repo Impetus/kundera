@@ -164,6 +164,12 @@ public interface Constants
 
     /** The Constant CLOSE_SQUARE_BRACKET. */
     public static final String CLOSE_SQUARE_BRACKET = "]";
+    
+    /** The Constant OPEN_ROUND_BRACKET. */
+    public static final String OPEN_ROUND_BRACKET = "(";
+
+    /** The Constant CLOSE_ROUND_BRACKET. */
+    public static final String CLOSE_ROUND_BRACKET = ")";
 
     /** The Constant OPEN_CURLY_BRACKET. */
     public static final String OPEN_CURLY_BRACKET = "{";

@@ -24,13 +24,13 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
- * The Class RedisEmbeddedUser.
+ * The Class OracleNoSqlEmbeddedUser.
  * 
  * @author vivek.mishra
  */
 
 @Entity
-@Table(name = "User")
+@Table(name = "Embedded_User")
 public class OracleNoSqlEmbeddedUser
 {
 

@@ -48,7 +48,7 @@ public class PersonOracleNoSql
     @Column(name = "AGE")
     private Integer age;
 
-    @Column(name = "ENUM")
+    @Column(name = "DAY_ENUM")
     @Enumerated(EnumType.STRING)
     private Day day;
 

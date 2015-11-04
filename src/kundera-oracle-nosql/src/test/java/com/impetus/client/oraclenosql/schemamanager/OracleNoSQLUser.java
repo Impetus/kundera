@@ -16,9 +16,13 @@
 package com.impetus.client.oraclenosql.schemamanager;
 
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
 
 /**
  * The Class OracleNoSQLUser.
@@ -27,9 +31,10 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "ONS_USER")
+@IndexCollection(columns = { @Index(indexName = "user_name1", name = "name"),
+        @Index(indexName = "user_id1", name = "userId") })
 public class OracleNoSQLUser
 {
-
     /** The user id. */
     @Id
     @Column(name = "USER_ID")
@@ -42,6 +47,9 @@ public class OracleNoSQLUser
     /** The age. */
     @Column(name = "AGE")
     private Integer age;
+
+    @Embedded
+    private OracleNoSQLOffice office;
 
     /**
      * Gets the user id.

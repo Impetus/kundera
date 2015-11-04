@@ -21,8 +21,9 @@ import javax.persistence.Entity;
 
 /**
  * Facebook profile entity
+ * 
  * @author vivek.mishra
- *
+ * 
  */
 @Entity
 @DiscriminatorValue("fb")
@@ -38,7 +39,7 @@ public class FacebookProfile extends SocialProfile
     @Column(name = "facebook_id", updatable = false)
     private String facebookId;
 
-    @Column(name = "twitter_user", length = 128)
+    @Column(name = "facebook_user", length = 128)
     private String facebookUser;
 
     public String getFacebookId()
