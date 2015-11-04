@@ -31,14 +31,14 @@ import com.impetus.kundera.index.IndexCollection;
  */
 @Entity
 @Table(name = "ONS_USER")
-@IndexCollection(columns = { @Index(indexName = "user_name1", name = "name"),
-        @Index(indexName = "user_id1", name = "userId") })
+@IndexCollection(columns = { @Index(indexName = "user_name", name = "name"),
+        @Index(indexName = "user_age", name = "age") })
 public class OracleNoSQLUser
 {
     /** The user id. */
     @Id
     @Column(name = "USER_ID")
-    private Integer userId;
+    private int userId;
 
     /** The name. */
     @Column(name = "NAME")
@@ -46,17 +46,17 @@ public class OracleNoSQLUser
 
     /** The age. */
     @Column(name = "AGE")
-    private Integer age;
+    private int age;
 
     @Embedded
-    private OracleNoSQLOffice office;
+    private UserDetails details;
 
     /**
      * Gets the user id.
      * 
      * @return the user id
      */
-    public Integer getUserId()
+    public int getUserId()
     {
         return userId;
     }
@@ -67,7 +67,7 @@ public class OracleNoSQLUser
      * @param userId
      *            the new user id
      */
-    public void setUserId(Integer userId)
+    public void setUserId(int userId)
     {
         this.userId = userId;
     }
@@ -98,20 +98,29 @@ public class OracleNoSQLUser
      * 
      * @return the age
      */
-    public Integer getAge()
+    public int getAge()
     {
         return age;
     }
 
-    /**
-     * Sets the age.
-     * 
-     * @param age
-     *            the new age
-     */
-    public void setAge(Integer age)
+    public void setAge(int age)
     {
         this.age = age;
+    }
+
+    /**
+     * Gets the details.
+     * 
+     * @return the details
+     */
+    public UserDetails getDetails()
+    {
+        return details;
+    }
+
+    public void setDetails(UserDetails details)
+    {
+        this.details = details;
     }
 
 }
