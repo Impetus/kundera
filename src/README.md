@@ -56,7 +56,12 @@ Currently Supported Datasources
 
 Recent Releases
 ================================
-####Please Note: trunk is current development branch. kundera-3.1 is released tag.
+####Please Note: trunk is current development branch. kundera-3.2 is released tag.
+
+#### 16-November-2015 - Kundera 3.2 released
+This release includes [bug fixes] (https://github.com/impetus-opensource/Kundera/wiki/Bug-Fixes), additional  improvements and the following new features : 
+   * Support for Cassandra-2.2 enabled 
+   * Support for Oracle NoSQL 3.2.5 enabled along with schema generation.
 
 #### 16-September-2015 - Kundera 3.1 released
 This release includes [bug fixes] (https://github.com/impetus-opensource/Kundera/wiki/Bug-Fixes), additional  improvements and the following new features : 
