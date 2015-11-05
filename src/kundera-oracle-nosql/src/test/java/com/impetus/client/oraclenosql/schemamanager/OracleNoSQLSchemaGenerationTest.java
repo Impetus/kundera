@@ -74,6 +74,7 @@ public class OracleNoSQLSchemaGenerationTest
     {
         kvStore = KVStoreFactory.getStore(new KVStoreConfig(STORE_NAME, "localhost:5000"));
         tableAPI = kvStore.getTableAPI();
+        tableAPI.executeSync("DROP TABLE IF EXISTS ONS_USER");
     }
 
     /**
