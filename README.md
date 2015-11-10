@@ -1,6 +1,3 @@
-Coming soon...<b>Kundera Meetup ! </b>            
-Please cast your vote at https://www.surveymonkey.com/s/QJQBNGV
-
 Overview
 =========
 Kundera is a "Polyglot Object Mapper" with a JPA interface. The idea behind Kundera is to make working with NoSQL Databases drop-dead simple and fun. Kundera is being developed with following objectives:
