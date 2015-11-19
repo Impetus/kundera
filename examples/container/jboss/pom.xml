@@ -5,12 +5,12 @@
 	<parent>
 	<groupId>com.impetus.kundera.examples</groupId>
 	<artifactId>container</artifactId>
-	<version>2.16-SNAPSHOT</version>
+	<version>3.3-SNAPSHOT</version>
 	</parent>
 
 	<groupId>com.impetus.kundera.examples</groupId>
 	<artifactId>jboss</artifactId>
-	<version>2.16-SNAPSHOT</version>
+	<version>3.3-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>jboss-app</name>
