@@ -83,7 +83,8 @@ Important Links
    * [Rest Based Access] (https://github.com/impetus-opensource/Kundera/wiki/REST-Based-Access)
 * Tutorials :
    * [Kundera with Openshift] (https://github.com/impetus-opensource/Kundera/wiki/Deploying-Polyglot-(RDBMS---NoSQL)-Applications-on-Openshift)
-   * [Kundera with Play Framework] (https://github.com/impetus-opensource/Kundera/wiki/Using-Kundera-with-Play!-Framework)
+   * [Kundera with Play Framework 2.1.1] (https://github.com/impetus-opensource/Kundera/wiki/Using-Kundera-with-Play!-Framework)
+   * [Kundera with Play Framework 2.3.x, WebJars, Bootstrap & Bootswatch-United](https://github.com/knoldus/playing-kundera-cassandra)
    * [Kundera with GWT] (https://github.com/impetus-opensource/Kundera/wiki/Using-Kundera-with-GWT)
    * [Kundera with JBoss] (https://github.com/impetus-opensource/Kundera/wiki/Using-Kundera-with-Jboss)
    * [Kundera with Spring] (https://github.com/impetus-opensource/Kundera/wiki/Building-Applications-with-Kundera-and-Spring)
