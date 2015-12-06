@@ -2,16 +2,12 @@ package com.impetus.client.hbase.utils;
 
 import java.math.BigDecimal;
 
-import javax.persistence.metamodel.Metamodel;
-
-import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp;
+import com.impetus.client.hbase.query.SingleColumnFilterFactory;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
-import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessorFactory;
-import com.impetus.kundera.utils.KunderaCoreUtils;
 
 public final class HBaseUtils
 {
@@ -71,12 +67,6 @@ public final class HBaseUtils
     /**
      * Returns bytes value for given value.
      * 
-     * @param fieldName
-     *            field name.
-     * @param m
-     *            entity metadata
-     * @param value
-     *            value.
      * @return bytes value.
      */
     public static byte[] getBytes(Object o)
@@ -149,27 +139,31 @@ public final class HBaseUtils
      *            the id present
      * @return the operator
      */
-    public static CompareOp getOperator(String condition, boolean idPresent, boolean useFilter)
+    public static SingleColumnFilterFactory getOperator(String condition, boolean idPresent, boolean useFilter)
     {
         if (condition.equals("="))
         {
-            return CompareOp.EQUAL;
+            return SingleColumnFilterFactory.EQUAL;
         }
         else if (condition.equals(">"))
         {
-            return CompareOp.GREATER;
+            return SingleColumnFilterFactory.GREATER;
         }
         else if (condition.equals("<"))
         {
-            return CompareOp.LESS;
+            return SingleColumnFilterFactory.LESS;
         }
         else if (condition.equals(">="))
         {
-            return CompareOp.GREATER_OR_EQUAL;
+            return SingleColumnFilterFactory.GREATER_OR_EQUAL;
         }
         else if (condition.equals("<="))
         {
-            return CompareOp.LESS_OR_EQUAL;
+            return SingleColumnFilterFactory.LESS_OR_EQUAL;
+        }
+        else if (condition.equals("LIKE"))
+        {
+            return SingleColumnFilterFactory.LIKE;
         }
         else if (useFilter)
         {
