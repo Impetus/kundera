@@ -71,14 +71,6 @@ public class HBaseQuery extends QueryImpl
     /** the log used by this class. */
     private static Logger log = LoggerFactory.getLogger(HBaseQuery.class);
 
-    /**
-     * Constructor using fields.
-     * 
-     * @param query
-     *            jpa query.
-     * @param persistenceDelegator
-     *            persistence delegator interface.
-     */
     public HBaseQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator,
             final KunderaMetadata kunderaMetadata)
     {
@@ -447,11 +439,11 @@ public class HBaseQuery extends QueryImpl
             }
             else
             {
-                CompareOp operator = HBaseUtils.getOperator(condition, isIdColumn, useFilter);
-
+                SingleColumnFilterFactory factory = HBaseUtils.getOperator(condition, isIdColumn, useFilter);
+                CompareOp operator = factory.operator;
                 if (!isIdColumn)
                 {
-                    Filter f = createQualifierValueFilter(name, value, m, operator);
+                    Filter f = createQualifierValueFilter(name, value, m, factory);
                     addToFilter(f);
                 }
                 else
@@ -470,6 +462,11 @@ public class HBaseQuery extends QueryImpl
                     {
                         startRow = endRow = getBytes(m.getIdAttribute().getName(), m, value);
                     }
+                    else
+                    {
+                        throw new UnsupportedOperationException(" Condition " + condition
+                                + " is not suported for query on row key!");
+                    }
                 }
             }
         }
@@ -478,10 +475,11 @@ public class HBaseQuery extends QueryImpl
          * @param name
          * @param value
          * @param m
-         * @param operator
+         * @param factory
          * @return
          */
-        private Filter createQualifierValueFilter(String name, Object value, EntityMetadata m, CompareOp operator)
+        private Filter createQualifierValueFilter(String name, Object value,
+                EntityMetadata m, SingleColumnFilterFactory factory)
         {
             List<String> columns = null;
             byte[] valueInBytes = getBytes(name, m, value);
@@ -494,9 +492,7 @@ public class HBaseQuery extends QueryImpl
             {
                 name = columns.get(0);
             }
-            Filter f = new SingleColumnValueFilter(Bytes.toBytes(m.getTableName()), Bytes.toBytes(name), operator,
-                    valueInBytes);
-            return f;
+            return factory.create(m.getTableName(), name, valueInBytes);
         }
 
         /**

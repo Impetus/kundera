@@ -656,15 +656,13 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
     @Override
     public List<Object> findByRelation(String colName, Object colValue, Class entityClazz)
     {
-        CompareOp operator = HBaseUtils.getOperator("=", false, false);
-
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClazz);
 
         String columnFamilyName = m.getTableName();
 
         byte[] valueInBytes = HBaseUtils.getBytes(colValue);
-        SingleColumnValueFilter f = null;
-        f = new SingleColumnValueFilter(Bytes.toBytes(columnFamilyName), Bytes.toBytes(colName), operator, valueInBytes);
+        SingleColumnValueFilter f = new SingleColumnValueFilter(Bytes.toBytes(columnFamilyName),
+                Bytes.toBytes(colName), CompareOp.EQUAL, valueInBytes);
 
         List output = new ArrayList();
         try
@@ -742,12 +740,11 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
     public Object[] findIdsByColumn(String schemaName, String tableName, String pKeyName, String columnName,
             Object columnValue, Class entityClazz)
     {
-        CompareOp operator = HBaseUtils.getOperator("=", false, false);
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClazz);
 
         byte[] valueInBytes = HBaseUtils.getBytes(columnValue);
-        Filter f = new SingleColumnValueFilter(Bytes.toBytes(tableName), Bytes.toBytes(columnName), operator,
-                valueInBytes);
+        Filter f = new SingleColumnValueFilter(Bytes.toBytes(tableName), Bytes.toBytes(columnName),
+                CompareOp.EQUAL, valueInBytes);
         KeyOnlyFilter keyFilter = new KeyOnlyFilter();
         FilterList filterList = new FilterList(f, keyFilter);
         try
