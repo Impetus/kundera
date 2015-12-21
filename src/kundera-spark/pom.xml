@@ -24,10 +24,6 @@
 		</repository>
 	</repositories>
 
-	<properties>
-		<project.version>3.0-SNAPSHOT</project.version>
-	</properties>
-
 	<!-- Dependencies -->
 	<dependencies>
 		<dependency>
