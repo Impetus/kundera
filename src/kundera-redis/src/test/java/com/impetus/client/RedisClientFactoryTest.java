@@ -105,7 +105,7 @@ public class RedisClientFactoryTest
             Jedis connection=(Jedis) field.get(redisClient);
             Assert.assertEquals(6379, connection.getClient().getPort());
             Assert.assertEquals("localhost", connection.getClient().getHost());
-            Assert.assertEquals(20000, connection.getClient().getTimeout());
+            Assert.assertEquals(20000, connection.getClient().getConnectionTimeout());
             
             Assert.assertNotNull(connectionObj);
 
