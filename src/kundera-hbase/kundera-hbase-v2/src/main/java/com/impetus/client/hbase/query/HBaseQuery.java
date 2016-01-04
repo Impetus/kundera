@@ -44,7 +44,9 @@ import org.eclipse.persistence.jpa.jpql.parser.LikeExpression;
 import org.eclipse.persistence.jpa.jpql.parser.LogicalExpression;
 import org.eclipse.persistence.jpa.jpql.parser.SelectClause;
 import org.eclipse.persistence.jpa.jpql.parser.SelectStatement;
+import org.eclipse.persistence.jpa.jpql.parser.StateFieldPathExpression;
 import org.eclipse.persistence.jpa.jpql.parser.WhereClause;
+import org.eclipse.persistence.jpa.jpql.parser.RegexpExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -410,8 +412,11 @@ public class HBaseQuery extends QueryImpl
             }
             else if (LikeExpression.class.isAssignableFrom(expression.getClass()))
             {
-                throw new KunderaException("LIKE query is currently not supported in HBase. "
-                        + "Please use Lucene or ElasticSearch to create secondary indexes and use LIKE query");
+                return onLikeExpression(expression, m, idColumn, isIdColumn);
+            }
+            else if (RegexpExpression.class.isAssignableFrom(expression.getClass()))
+            {
+                return onRegExpression(expression, m, idColumn, isIdColumn);
             }
             return null;
         }
@@ -453,6 +458,59 @@ public class HBaseQuery extends QueryImpl
             {
                 return createFilterForEmbeddables(((ComparisonExpression) expression).getIdentifier(), isIdColumn, m,
                         fieldClazz, value, columnName);
+            }
+        }
+
+        private Filter onLikeExpression(Expression expression, EntityMetadata m, String idColumn, Boolean isIdColumn)
+        {
+
+            Map<String, Object> map = KunderaQueryUtils.setFieldClazzAndColumnFamily(
+                    (StateFieldPathExpression) ((LikeExpression) expression).getStringExpression(), m, kunderaMetadata);
+            Class fieldClazz = (Class) map.get(Constants.FIELD_CLAZZ);
+            String colFamily = (String) map.get(Constants.COL_FAMILY);
+            String columnName = (String) map.get(Constants.DB_COL_NAME);
+
+            isIdColumn = idColumn.equalsIgnoreCase(columnName);
+
+            Object value = KunderaQueryUtils.getValue(((LikeExpression) expression).getPatternValue(), fieldClazz,
+                    kunderaQuery);
+            if (!isEmbeddable(map))
+            {
+                byte[] valueInBytes = getValueInBytes(value, fieldClazz, isIdColumn, m);
+                return createNewFilter(((LikeExpression) expression).getIdentifier(), Bytes.toBytes(colFamily),
+                        Bytes.toBytes(columnName), valueInBytes, isIdColumn);
+            }
+            else
+            {
+                return createFilterForEmbeddables(((LikeExpression) expression).getIdentifier(), isIdColumn, m,
+                        fieldClazz, value, columnName);
+            }
+        }
+
+        private Filter onRegExpression(Expression expression, EntityMetadata m, String idColumn, Boolean isIdColumn)
+        {
+
+            Map<String, Object> map = KunderaQueryUtils.setFieldClazzAndColumnFamily(
+                    (StateFieldPathExpression) ((RegexpExpression) expression).getStringExpression(), m,
+                    kunderaMetadata);
+            Class fieldClazz = (Class) map.get(Constants.FIELD_CLAZZ);
+            String colFamily = (String) map.get(Constants.COL_FAMILY);
+            String columnName = (String) map.get(Constants.DB_COL_NAME);
+
+            isIdColumn = idColumn.equalsIgnoreCase(columnName);
+
+            Object value = KunderaQueryUtils.getValue(((RegexpExpression) expression).getPatternValue(), fieldClazz,
+                    kunderaQuery);
+            if (!isEmbeddable(map))
+            {
+                byte[] valueInBytes = getValueInBytes(value, fieldClazz, isIdColumn, m);
+                return createNewFilter(((RegexpExpression) expression).getActualRegexpIdentifier().toUpperCase(),
+                        Bytes.toBytes(colFamily), Bytes.toBytes(columnName), valueInBytes, isIdColumn);
+            }
+            else
+            {
+                return createFilterForEmbeddables(((RegexpExpression) expression).getActualRegexpIdentifier()
+                        .toUpperCase(), isIdColumn, m, fieldClazz, value, columnName);
             }
         }
 
@@ -748,10 +806,11 @@ public class HBaseQuery extends QueryImpl
         private Filter createNewFilter(String condition, byte[] colFamily, byte[] colName, byte[] value,
                 Boolean isIdColumn)
         {
-            CompareOp operator = HBaseUtils.getOperator(condition, isIdColumn, true);
+            SingleColumnFilterFactory factory = HBaseUtils.getOperator(condition, isIdColumn, true);
+            CompareOp operator = factory.getOperator();
             if (!isIdColumn)
             {
-                return new SingleColumnValueFilter(colFamily, colName, operator, value);
+                return factory.create(colFamily, colName, value);
             }
             else
             {

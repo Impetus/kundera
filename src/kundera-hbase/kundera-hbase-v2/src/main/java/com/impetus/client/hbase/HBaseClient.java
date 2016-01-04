@@ -515,7 +515,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
     public Object[] findIdsByColumn(String schemaName, String tableName, String pKeyName, String columnName,
             Object columnValue, Class entityClazz)
     {
-        CompareOp operator = HBaseUtils.getOperator("=", false, false);
+        CompareOp operator = HBaseUtils.getOperator("=", false, false).getOperator();
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClazz);
 
         byte[] valueInBytes = HBaseUtils.getBytes(columnValue);

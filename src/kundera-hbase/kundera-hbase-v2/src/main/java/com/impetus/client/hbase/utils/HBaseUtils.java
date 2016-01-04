@@ -22,6 +22,7 @@ import java.util.Map;
 import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp;
 import org.apache.hadoop.hbase.util.Bytes;
 
+import com.impetus.client.hbase.query.SingleColumnFilterFactory;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -213,31 +214,39 @@ public final class HBaseUtils
      *            the use filter
      * @return the operator
      */
-    public static CompareOp getOperator(String condition, boolean idPresent, boolean useFilter)
+    public static SingleColumnFilterFactory getOperator(String condition, boolean idPresent, boolean useFilter)
     {
         if (condition.equals("="))
         {
-            return CompareOp.EQUAL;
+            return SingleColumnFilterFactory.EQUAL;
         }
         else if (condition.equals(">"))
         {
-            return CompareOp.GREATER;
+            return SingleColumnFilterFactory.GREATER;
         }
         else if (condition.equals("<"))
         {
-            return CompareOp.LESS;
+            return SingleColumnFilterFactory.LESS;
         }
         else if (condition.equals(">="))
         {
-            return CompareOp.GREATER_OR_EQUAL;
+            return SingleColumnFilterFactory.GREATER_OR_EQUAL;
         }
         else if (condition.equals("<="))
         {
-            return CompareOp.LESS_OR_EQUAL;
+            return SingleColumnFilterFactory.LESS_OR_EQUAL;
         }
         else if (condition.equals("<>"))
         {
-            return CompareOp.NOT_EQUAL;
+            return SingleColumnFilterFactory.NOT_EQUAL;
+        }
+        else if (condition.equals("LIKE"))
+        {
+            return SingleColumnFilterFactory.LIKE;
+        }
+        else if (condition.equals("REGEXP"))
+        {
+            return SingleColumnFilterFactory.REGEXP;
         }
         else if (useFilter)
         {
