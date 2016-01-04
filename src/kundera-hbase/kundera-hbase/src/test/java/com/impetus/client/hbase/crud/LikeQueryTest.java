@@ -11,12 +11,14 @@ import javax.persistence.Persistence;
 import javax.persistence.Query;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.hbase.schemaManager.HBaseEntitySimple;
 
+/**
+ * The Class LikeQueryTest.
+ */
 public class LikeQueryTest
 {
 
@@ -27,7 +29,10 @@ public class LikeQueryTest
     private static EntityManager em;
 
     /**
-     * @throws java.lang.Exception
+     * Sets the up.
+     * 
+     * @throws Exception
+     *             the exception
      */
     @Before
     public void setUp() throws Exception
@@ -37,7 +42,10 @@ public class LikeQueryTest
     }
 
     /**
-     * @throws java.lang.Exception
+     * Tear down.
+     * 
+     * @throws Exception
+     *             the exception
      */
     @After
     public void tearDown() throws Exception
@@ -45,6 +53,9 @@ public class LikeQueryTest
         emf.close();
     }
 
+    /**
+     * Like query test.
+     */
     @Test
     public void likeQueryTest()
     {
@@ -56,15 +67,20 @@ public class LikeQueryTest
         q.setParameter("name", "pragal");
         List<HBaseEntitySimple> persons = q.getResultList();
         assertNotNull(persons);
-        Assert.assertEquals(1, persons.size());
+        assertEquals(1, persons.size());
+        assertEquals("pragalbh garg", persons.get(0).getPersonName());
 
         qry = "Select p from HBaseEntitySimple p where p.personName like :name";
         q = em.createQuery(qry);
         q.setParameter("name", "thik");
         persons = q.getResultList();
         assertEquals(1, persons.size());
+        assertEquals("karthik prasad", persons.get(0).getPersonName());
     }
 
+    /**
+     * Inits the.
+     */
     private void init()
     {
         HBaseEntitySimple p1 = new HBaseEntitySimple();
@@ -73,7 +89,7 @@ public class LikeQueryTest
         p1.setPersonName("pragalbh garg");
 
         HBaseEntitySimple p2 = new HBaseEntitySimple();
-        p2.setAge((short)20);
+        p2.setAge((short) 20);
         p2.setPersonId("2");
         p2.setPersonName("karthik prasad");
 
