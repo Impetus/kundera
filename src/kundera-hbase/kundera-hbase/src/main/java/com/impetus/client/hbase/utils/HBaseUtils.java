@@ -1,3 +1,18 @@
+/*******************************************************************************
+ *  * Copyright 2015 Impetus Infotech.
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *      http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ ******************************************************************************/
 package com.impetus.client.hbase.utils;
 
 import java.math.BigDecimal;
@@ -9,12 +24,20 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 
+/**
+ * The Class HBaseUtils.
+ */
 public final class HBaseUtils
 {
+
     /**
+     * Gets the bytes.
+     * 
      * @param value
+     *            the value
      * @param clazz
-     * @return
+     *            the clazz
+     * @return the bytes
      */
     public static byte[] getBytes(Object value, Class<?> clazz)
     {
@@ -67,6 +90,8 @@ public final class HBaseUtils
     /**
      * Returns bytes value for given value.
      * 
+     * @param o
+     *            the o
      * @return bytes value.
      */
     public static byte[] getBytes(Object o)
@@ -79,6 +104,17 @@ public final class HBaseUtils
         return null;
     }
 
+    /**
+     * From bytes.
+     * 
+     * @param m
+     *            the m
+     * @param metaModel
+     *            the meta model
+     * @param b
+     *            the b
+     * @return the object
+     */
     public static Object fromBytes(EntityMetadata m, MetamodelImpl metaModel, byte[] b)
     {
         Class idFieldClass = m.getIdAttribute().getJavaType();
@@ -89,6 +125,15 @@ public final class HBaseUtils
         return fromBytes(b, idFieldClass);
     }
 
+    /**
+     * From bytes.
+     * 
+     * @param b
+     *            the b
+     * @param clazz
+     *            the clazz
+     * @return the object
+     */
     public static Object fromBytes(byte[] b, Class<?> clazz)
     {
 
@@ -137,6 +182,8 @@ public final class HBaseUtils
      *            the condition
      * @param idPresent
      *            the id present
+     * @param useFilter
+     *            the use filter
      * @return the operator
      */
     public static SingleColumnFilterFactory getOperator(String condition, boolean idPresent, boolean useFilter)

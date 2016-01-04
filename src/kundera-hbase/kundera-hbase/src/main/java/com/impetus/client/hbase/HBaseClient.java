@@ -743,8 +743,8 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClazz);
 
         byte[] valueInBytes = HBaseUtils.getBytes(columnValue);
-        Filter f = new SingleColumnValueFilter(Bytes.toBytes(tableName), Bytes.toBytes(columnName),
-                CompareOp.EQUAL, valueInBytes);
+        Filter f = new SingleColumnValueFilter(Bytes.toBytes(tableName), Bytes.toBytes(columnName), CompareOp.EQUAL,
+                valueInBytes);
         KeyOnlyFilter keyFilter = new KeyOnlyFilter();
         FilterList filterList = new FilterList(f, keyFilter);
         try

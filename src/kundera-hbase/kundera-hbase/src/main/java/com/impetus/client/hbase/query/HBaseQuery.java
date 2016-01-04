@@ -440,7 +440,7 @@ public class HBaseQuery extends QueryImpl
             else
             {
                 SingleColumnFilterFactory factory = HBaseUtils.getOperator(condition, isIdColumn, useFilter);
-                CompareOp operator = factory.operator;
+                CompareOp operator = factory.getOperator();
                 if (!isIdColumn)
                 {
                     Filter f = createQualifierValueFilter(name, value, m, factory);

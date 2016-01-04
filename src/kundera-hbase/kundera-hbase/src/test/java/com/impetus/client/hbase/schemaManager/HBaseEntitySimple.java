@@ -25,7 +25,7 @@ import javax.persistence.Table;
  * The Class HbaseEntitySimple.
  */
 @Entity
-@Table(name = "HbaseEntitySimple", schema = "KunderaHbaseTests@HBaseSchemaOperationTest")
+@Table(name = "HbaseEntitySimple"/*, schema = "KunderaHbaseTests@HBaseSchemaOperationTest"*/)
 public class HBaseEntitySimple
 {
 
