@@ -52,6 +52,10 @@ public class SingleColumnFilterFactory
     /** The Constant LIKE. */
     public static final SingleColumnFilterFactory LIKE = new SingleColumnFilterFactory(CompareOp.EQUAL,
             LikeComparatorFactory.INSTANCE);
+    
+    /** The Constant REGEXP. */
+    public static final SingleColumnFilterFactory REGEXP = new SingleColumnFilterFactory(CompareOp.EQUAL,
+            RegexComparatorFactory.INSTANCE);
 
     /** The operator. */
     private final CompareOp operator;

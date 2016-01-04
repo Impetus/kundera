@@ -41,6 +41,7 @@ import org.eclipse.persistence.jpa.jpql.parser.LogicalExpression;
 import org.eclipse.persistence.jpa.jpql.parser.NumericLiteral;
 import org.eclipse.persistence.jpa.jpql.parser.OrderByClause;
 import org.eclipse.persistence.jpa.jpql.parser.OrderByItem;
+import org.eclipse.persistence.jpa.jpql.parser.RegexpExpression;
 import org.eclipse.persistence.jpa.jpql.parser.SelectStatement;
 import org.eclipse.persistence.jpa.jpql.parser.StateFieldPathExpression;
 import org.eclipse.persistence.jpa.jpql.parser.StringLiteral;
@@ -437,6 +438,10 @@ public final class KunderaQueryUtils
         {
             onLikeExpression(expression, m, kunderaMetadata, kunderaQuery);
         }
+        else if (RegexpExpression.class.isAssignableFrom(expression.getClass()))
+        {
+            onRegExpression(expression, m, kunderaMetadata, kunderaQuery);
+        }
         else if (BetweenExpression.class.isAssignableFrom(expression.getClass()))
         {
             onBetweenExpression(expression, m, kunderaMetadata, kunderaQuery);
@@ -506,6 +511,26 @@ public final class KunderaQueryUtils
                 .getPatternValue().toActualText(), (String) map.get(Constants.FIELD_NAME));
         return map;
 
+    }
+    
+    /**
+     * On reg expression.
+     *
+     * @param expression the expression
+     * @param m the m
+     * @param kunderaMetadata the kundera metadata
+     * @param kunderaQuery the kundera query
+     * @return the map
+     */
+    public static Map<String, Object> onRegExpression(Expression expression, EntityMetadata m,
+            KunderaMetadata kunderaMetadata, KunderaQuery kunderaQuery)
+    {
+        RegexpExpression regExp = (RegexpExpression) expression;
+        StateFieldPathExpression sfpExp = (StateFieldPathExpression) regExp.getStringExpression();
+        Map<String, Object> map = KunderaQueryUtils.setFieldClazzAndColumnFamily(sfpExp, m, kunderaMetadata);
+        kunderaQuery.addFilterClause((String) map.get(Constants.COL_NAME), regExp.getActualRegexpIdentifier().toUpperCase(), regExp
+                .getPatternValue().toActualText(), (String) map.get(Constants.FIELD_NAME));
+        return map;
     }
 
     /**

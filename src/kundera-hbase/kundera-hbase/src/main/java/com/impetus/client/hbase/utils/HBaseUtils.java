@@ -212,6 +212,10 @@ public final class HBaseUtils
         {
             return SingleColumnFilterFactory.LIKE;
         }
+        else if (condition.equals("REGEXP"))
+        {
+            return SingleColumnFilterFactory.REGEXP;
+        }
         else if (useFilter)
         {
             if (!idPresent)
