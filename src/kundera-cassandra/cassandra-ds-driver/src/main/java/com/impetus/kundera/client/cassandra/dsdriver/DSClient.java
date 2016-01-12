@@ -413,7 +413,7 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
             // factory.releaseConnection(session);
         }
 
-        List rowKeys = getColumnsById(schemaName, tableName,  rowKeyName, columnName, columnValue,
+        List rowKeys = getColumnsById(schemaName, tableName, columnName, rowKeyName, columnValue,
                 columnValue.getClass());
         for (Object rowKey : rowKeys)
         {
