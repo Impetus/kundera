@@ -206,14 +206,21 @@ public class MongoDBQuery extends QueryImpl
 
             if (isNative)
             {
-            	return ((MongoDBClient) client).executeQuery(query == null ? getJPAQuery() : query, m);
-              
-            }
+                return ((MongoDBClient) client).executeQuery(query == null ? getJPAQuery() : query, m);
 
-            BasicDBObject orderByClause = getOrderByClause(m);
-            ls = ((MongoDBClient) client).loadData(m, createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()),
-                    m.getRelationNames(), orderByClause, isSingleResult ? 1 : maxResult, firstResult,
-                    getKeys(m, getKunderaQuery().getResult()), getKunderaQuery().getResult());
+            }
+            if (MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
+            {
+                BasicDBObject orderByClause = getOrderByClause(m);
+                ls = ((MongoDBClient) client).loadData(m,
+                        createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()), m.getRelationNames(),
+                        orderByClause, isSingleResult ? 1 : maxResult, firstResult,
+                        getKeys(m, getKunderaQuery().getResult()), getKunderaQuery().getResult());
+            }
+            else
+            {
+                return populateUsingLucene(m, client, null, getKunderaQuery().getResult());
+            }
         }
         catch (Exception e)
         {
@@ -378,7 +385,7 @@ public class MongoDBQuery extends QueryImpl
                 {
                     EntityType entity = metaModel.entity(m.getEntityClazz());
                     String fieldName = m.getFieldName(property);
-                    
+
                     f = (Field) entity.getAttribute(fieldName).getJavaMember();
 
                     if (value.getClass().isAssignableFrom(String.class) && f != null
@@ -388,7 +395,7 @@ public class MongoDBQuery extends QueryImpl
                                 value.toString());
                     }
                     value = MongoDBUtils.populateValue(value, value.getClass());
-                    
+
                     property = "metadata." + property;
                 }
                 else
