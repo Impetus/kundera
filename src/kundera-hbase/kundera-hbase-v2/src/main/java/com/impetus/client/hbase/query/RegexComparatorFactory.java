@@ -15,29 +15,30 @@
  ******************************************************************************/
 package com.impetus.client.hbase.query;
 
-import static com.impetus.client.hbase.query.LikeComparatorFactory.likeToRegex;
-import static org.junit.Assert.assertEquals;
+import org.apache.hadoop.hbase.filter.ByteArrayComparable;
+import org.apache.hadoop.hbase.filter.RegexStringComparator;
 
-import org.junit.Test;
+import com.google.common.base.Function;
 
 /**
- * The Class LikeComparatorFactoryTest.
+ * A factory for creating RegexComparator objects.
+ * 
+ * @author karthikp.manchala
  */
-public class LikeComparatorFactoryTest
+public class RegexComparatorFactory implements Function<byte[], ByteArrayComparable>
 {
 
-    /**
-     * Like to regex conversion.
+    /** The Constant INSTANCE. */
+    public static final RegexComparatorFactory INSTANCE = new RegexComparatorFactory();
+
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.google.common.base.Function#apply(java.lang.Object)
      */
-    @Test
-    public void likeToRegexConversion()
+    public ByteArrayComparable apply(byte[] bytes)
     {
-        assertEquals("as is", likeToRegex("as is"));
-        assertEquals("last percent .*", likeToRegex("last percent %"));
-        assertEquals("middle.*percent", likeToRegex("middle%percent"));
-        assertEquals(".*first percent", likeToRegex("%first percent"));
-        assertEquals("%", likeToRegex("%%"));
-        assertEquals("%.*", likeToRegex("%%%"));
-        assertEquals("\\" + "{" + "\\" + "[", likeToRegex("{["));
+        return new RegexStringComparator(new String(bytes));
     }
 }

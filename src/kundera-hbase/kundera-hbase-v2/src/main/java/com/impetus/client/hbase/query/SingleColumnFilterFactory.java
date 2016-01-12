@@ -33,6 +33,10 @@ public class SingleColumnFilterFactory
     public static final SingleColumnFilterFactory EQUAL = new SingleColumnFilterFactory(CompareOp.EQUAL,
             BinaryComparatorFactory.INSTANCE);
 
+    /** The Constant NOT_EQUAL. */
+    public static final SingleColumnFilterFactory NOT_EQUAL = new SingleColumnFilterFactory(CompareOp.NOT_EQUAL,
+            BinaryComparatorFactory.INSTANCE);
+
     /** The Constant GREATER. */
     public static final SingleColumnFilterFactory GREATER = new SingleColumnFilterFactory(CompareOp.GREATER,
             BinaryComparatorFactory.INSTANCE);
@@ -52,7 +56,7 @@ public class SingleColumnFilterFactory
     /** The Constant LIKE. */
     public static final SingleColumnFilterFactory LIKE = new SingleColumnFilterFactory(CompareOp.EQUAL,
             LikeComparatorFactory.INSTANCE);
-    
+
     /** The Constant REGEXP. */
     public static final SingleColumnFilterFactory REGEXP = new SingleColumnFilterFactory(CompareOp.EQUAL,
             RegexComparatorFactory.INSTANCE);
@@ -98,8 +102,8 @@ public class SingleColumnFilterFactory
      *            the value
      * @return the filter
      */
-    public Filter create(String family, String column, byte[] value)
+    public Filter create(byte[] family, byte[] column, byte[] value)
     {
-        return new SingleColumnValueFilter(toBytes(family), toBytes(column), operator, comparatorFactory.apply(value));
+        return new SingleColumnValueFilter(family, column, operator, comparatorFactory.apply(value));
     }
 }

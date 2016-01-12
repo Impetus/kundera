@@ -14,7 +14,7 @@
  *  * limitations under the License.
  ******************************************************************************/
 
-package com.impetus.client.hbase.schemaManager;
+package com.impetus.client.query;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -25,7 +25,7 @@ import javax.persistence.Table;
  * The Class HbaseEntitySimple.
  */
 @Entity
-@Table(name = "HbaseEntitySimple"/*, schema = "KunderaHbaseTests@HBaseSchemaOperationTest"*/)
+@Table(name = "HBaseEntitySimple", schema = "HBaseNew@queryTest")
 public class HBaseEntitySimple
 {
 
