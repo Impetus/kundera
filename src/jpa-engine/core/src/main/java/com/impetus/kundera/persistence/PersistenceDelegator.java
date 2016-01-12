@@ -860,7 +860,7 @@ public final class PersistenceDelegator
                         for (Object pk : jtData.getJoinTableRecords().keySet())
                         {
                             client.deleteByColumn(m.getSchema(), jtData.getJoinTableName(),
-                                    ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName(), pk);
+                                    jtData.getJoinColumnName(), pk);
                         }
                         jtData.setProcessed(true);
                     }
