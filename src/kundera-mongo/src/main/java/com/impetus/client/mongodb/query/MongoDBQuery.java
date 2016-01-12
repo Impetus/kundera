@@ -161,7 +161,7 @@ public class MongoDBQuery extends QueryImpl
             }
             else
             {
-                return populateUsingLucene(m, client, result, null);
+                return populateUsingLucene(m, client, null, getKunderaQuery().getResult());
             }
 
         }

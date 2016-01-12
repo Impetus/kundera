@@ -177,5 +177,23 @@
 				value="com.impetus.client.mongodb.MongoDBClientFactory" />
 		</properties>
 	</persistence-unit>
+	<persistence-unit name="esIndexerTest">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+<!-- 		<class>com.impetus.client.esindexer.PersonESIndexerCassandra</class> -->
+<!-- 		<class>com.impetus.client.esindexer.PersonESIndexerCassandraUUID</class> -->
+		<class>com.impetus.kundera.query.Person</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="27017" />
+			<property name="kundera.keyspace" value="KunderaExamples" />
+			<property name="kundera.dialect" value="cassandra" />
+			<property name="kundera.ddl.auto.prepare" value="create" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.mongodb.MongoDBClientFactory" />
+			<property name="kundera.indexer.class" value="com.impetus.client.es.index.ESIndexer" />
+
+		</properties>
+	</persistence-unit>
 
 </persistence>
