@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.persistence.DiscriminatorColumn;
@@ -402,6 +403,17 @@ public class SchemaConfiguration extends AbstractSchemaConfiguration implements 
                 .getMetamodel(entityMetadata.getPersistenceUnit());
         EntityType entityType = metaModel.entity(entityMetadata.getEntityClazz());
         Map<String, PropertyIndex> columns = entityMetadata.getIndexProperties();
+        
+        //populate columnsToBeIndexed with composite indexes
+        for(Entry<String, PropertyIndex> c : columns.entrySet()){
+            PropertyIndex indexedColumn = c.getValue();
+            if(indexedColumn.getIndexType().equals("composite")){
+                
+                IndexInfo indexInfo = new IndexInfo(c.getKey(), indexedColumn.getMax(), indexedColumn.getMin(),
+                        indexedColumn.getIndexType(), indexedColumn.getName());
+                tableInfo.addToIndexedColumnList(indexInfo);
+            }
+        }
 
         Set attributes = entityType.getAttributes();
 
