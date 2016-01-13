@@ -45,7 +45,7 @@ public class StudentOracleNoSQLDoubleWrapperTest extends OracleNoSQLBase
     public void setUp() throws Exception
     {
 
-        emf = Persistence.createEntityManagerFactory("twikvstore");
+        emf = Persistence.createEntityManagerFactory("oracleNosqlDataTypeTest");
     }
 
     @After

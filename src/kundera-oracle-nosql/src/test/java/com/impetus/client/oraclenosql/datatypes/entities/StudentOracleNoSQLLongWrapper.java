@@ -27,7 +27,7 @@ import javax.persistence.Table;
  *
  */
 @Entity
-@Table(name = "StudentOracleNoSQLLongWrapper", schema = "OracleNoSqlTests@twikvstore")
+@Table(name = "StudentOracleNoSQLLongWrapper", schema = "OracleNoSqlTests@oracleNosqlDataTypeTest")
 public class StudentOracleNoSQLLongWrapper implements Serializable
 {
 

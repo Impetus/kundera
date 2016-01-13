@@ -94,9 +94,8 @@ public class OracleNoSQLSchemaManager extends AbstractSchemaManager implements S
     /*
      * (non-Javadoc)
      * 
-     * @see
-     * com.impetus.kundera.configure.schema.api.AbstractSchemaManager#exportSchema
-     * (java.lang.String, java.util.List)
+     * @see com.impetus.kundera.configure.schema.api.AbstractSchemaManager#
+     * exportSchema (java.lang.String, java.util.List)
      */
     @Override
     public void exportSchema(String persistenceUnit, List<TableInfo> puToSchemaCol)
@@ -142,9 +141,8 @@ public class OracleNoSQLSchemaManager extends AbstractSchemaManager implements S
     /*
      * (non-Javadoc)
      * 
-     * @see
-     * com.impetus.kundera.configure.schema.api.AbstractSchemaManager#initiateClient
-     * ()
+     * @see com.impetus.kundera.configure.schema.api.AbstractSchemaManager#
+     * initiateClient ()
      */
     @Override
     protected boolean initiateClient()
@@ -186,14 +184,15 @@ public class OracleNoSQLSchemaManager extends AbstractSchemaManager implements S
             {
                 if (tableAPI.getTable(tableInfo.getTableName()) == null)
                 {
+                    logger.error("No table found for " + tableInfo.getTableName());
                     throw new SchemaGenerationException("No table found for " + tableInfo.getTableName());
                 }
             }
             catch (FaultException e)
             {
                 logger.error("Error while getting table " + tableInfo.getTableName() + ". Caused By: ", e);
-                throw new SchemaGenerationException(e, "Error while getting table " + tableInfo.getTableName()
-                        + ". Caused By: ");
+                throw new SchemaGenerationException(e,
+                        "Error while getting table " + tableInfo.getTableName() + ". Caused By: ");
             }
         }
     }
@@ -324,12 +323,19 @@ public class OracleNoSQLSchemaManager extends AbstractSchemaManager implements S
      */
     private void createIndexOnTable(TableInfo tableInfo)
     {
-        // create index for ID column
-        createIndex(tableInfo.getTableName(), tableInfo.getIdColumnName(), tableInfo.getIdColumnName());
+
         List<IndexInfo> indexColumns = tableInfo.getColumnsToBeIndexed();
         for (IndexInfo indexInfo : indexColumns)
         {
-            createIndex(tableInfo.getTableName(), indexInfo.getIndexName(), indexInfo.getColumnName());
+            if (indexInfo.getIndexType() != null && indexInfo.getIndexType().toLowerCase().equals(Constants.COMPOSITE))
+            {
+                String[] columnNames = indexInfo.getColumnName().split(Constants.COMMA);
+                createIndex(tableInfo.getTableName(), indexInfo.getIndexName(), columnNames);
+            }
+            else
+            {
+                createIndex(tableInfo.getTableName(), indexInfo.getIndexName(), indexInfo.getColumnName());
+            }
         }
     }
 
@@ -343,7 +349,7 @@ public class OracleNoSQLSchemaManager extends AbstractSchemaManager implements S
      * @param fieldName
      *            the field name
      */
-    private void createIndex(String tableName, String indexName, String fieldName)
+    private void createIndex(String tableName, String indexName, String... fieldNames)
     {
         StringBuilder builder = new StringBuilder();
         builder.append("CREATE INDEX IF NOT EXISTS ");
@@ -351,13 +357,18 @@ public class OracleNoSQLSchemaManager extends AbstractSchemaManager implements S
         builder.append(" ON ");
         builder.append(tableName);
         builder.append(Constants.OPEN_ROUND_BRACKET);
-        builder.append(fieldName);
+        for (String fieldName : fieldNames)
+        {
+            builder.append(fieldName);
+            builder.append(Constants.COMMA);
+        }
+        builder.deleteCharAt(builder.length() - 1);
         builder.append(Constants.CLOSE_ROUND_BRACKET);
         StatementResult result = tableAPI.executeSync(builder.toString());
         if (!result.isSuccessful())
         {
-            throw new SchemaGenerationException("Unable to CREATE Index with Index Name [" + indexName + "] on field ["
-                    + fieldName + "] for table [" + tableName + "]");
+            throw new SchemaGenerationException(
+                    "Unable to CREATE Index with Index Name [" + indexName + "] for table [" + tableName + "]");
         }
     }
 
@@ -383,7 +394,7 @@ public class OracleNoSQLSchemaManager extends AbstractSchemaManager implements S
             builder.append(tableInfo.getIdColumnName());
             builder.append(Constants.SPACE);
             String idType = tableInfo.getTableIdType().getSimpleName().toLowerCase();
-            builder.append(OracleNoSQLValidationClassMapper.getValidType(idType));
+            builder.append(OracleNoSQLValidationClassMapper.getValidIdType(idType));
             builder.append(Constants.COMMA);
         }
 
@@ -474,9 +485,8 @@ public class OracleNoSQLSchemaManager extends AbstractSchemaManager implements S
     /*
      * (non-Javadoc)
      * 
-     * @see
-     * com.impetus.kundera.configure.schema.api.AbstractSchemaManager#create_drop
-     * (java.util.List)
+     * @see com.impetus.kundera.configure.schema.api.AbstractSchemaManager#
+     * create_drop (java.util.List)
      */
     @Override
     protected void create_drop(List<TableInfo> tableInfos)

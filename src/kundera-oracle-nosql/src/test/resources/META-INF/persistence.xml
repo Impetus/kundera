@@ -14,11 +14,41 @@
 			<property name="kundera.show.query" value="true" />
 			<property name="kundera.dialect" value="kvstore" />
 			<property name="kundera.client" value="kvstore" />
+			<property name="kundera.ddl.auto.prepare" value="update" />
 			<!-- <property name="kundera.cache.provider.class" value="com.impetus.kundera.cache.ehcache.EhCacheProvider" 
 				/> <property name="kundera.cache.config.resource" value="/ehcache-test.xml" 
 				/> -->			<!-- <property name="index.home.dir" value="./lucene"/> -->
 			<!-- <property name="kundera.indexer.class" value="com.impetus.client.oraclenosql.index.OracleNoSQLInvertedIndexer" 
 				/> -->
+		</properties>
+	</persistence-unit>
+
+	<persistence-unit name="oracleNosqlDataTypeTest">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.client.oraclenosql.datatypes.entities.StudentOracleNoSQLChar</class>
+		<class>com.impetus.client.oraclenosql.datatypes.entities.StudentOracleNoSQLCharacter</class>
+		<class>com.impetus.client.oraclenosql.datatypes.entities.StudentOracleNoSQLDate</class>
+		<class>com.impetus.client.oraclenosql.datatypes.entities.StudentOracleNoSQLDoublePrimitive</class>
+		<class>com.impetus.client.oraclenosql.datatypes.entities.StudentOracleNoSQLDoubleWrapper</class>
+		<class>com.impetus.client.oraclenosql.datatypes.entities.StudentOracleNoSQLFloatPrimitive</class>
+		<class>com.impetus.client.oraclenosql.datatypes.entities.StudentOracleNoSQLFloatWrapper</class>
+		<class>com.impetus.client.oraclenosql.datatypes.entities.StudentOracleNoSQLInt</class>
+		<class>com.impetus.client.oraclenosql.datatypes.entities.StudentOracleNoSQLInteger</class>
+		<class>com.impetus.client.oraclenosql.datatypes.entities.StudentOracleNoSQLLongPrimitive</class>
+		<class>com.impetus.client.oraclenosql.datatypes.entities.StudentOracleNoSQLLongWrapper</class>
+		<class>com.impetus.client.oraclenosql.datatypes.entities.StudentOracleNoSQLSqlDate</class>
+		<class>com.impetus.client.oraclenosql.datatypes.entities.StudentOracleNoSQLString</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="5000" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.oraclenosql.OracleNoSQLClientFactory" />
+			<property name="kundera.keyspace" value="OracleNoSqlTests" />
+			<property name="kundera.show.query" value="true" />
+			<property name="kundera.dialect" value="kvstore" />
+			<property name="kundera.client" value="kvstore" />
+			<property name="kundera.ddl.auto.prepare" value="update" />
 		</properties>
 	</persistence-unit>
 
@@ -40,6 +70,8 @@
 
 	<persistence-unit name="oracleNosqlBatchTest">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.client.oraclenosql.batch.PersonBatchOracleNosqlEntity</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="5000" />
@@ -55,11 +87,15 @@
 			<property name="kundera.indexer.class"
 				value="com.impetus.client.oraclenosql.index.OracleNoSQLInvertedIndexer" />
 			<property name="kundera.batch.size" value="5" />
+			<property name="kundera.ddl.auto.prepare" value="update" />
 		</properties>
 	</persistence-unit>
 
 	<persistence-unit name="oracleNosqlBatchTestSizeTwenty">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.client.oraclenosql.batch.AddressBatchOracleNosql</class>
+		<class>com.impetus.client.oraclenosql.batch.PersonBatchOracleNosql</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="5000" />
@@ -76,6 +112,7 @@
 			<property name="kundera.indexer.class"
 				value="com.impetus.client.oraclenosql.index.OracleNoSQLInvertedIndexer" />
 			<property name="kundera.batch.size" value="20" />
+			<property name="kundera.ddl.auto.prepare" value="update" />
 		</properties>
 	</persistence-unit>
 
@@ -92,6 +129,7 @@
 			<property name="kundera.show.query" value="true" />
 			<property name="kundera.dialect" value="kvstore" />
 			<property name="kundera.client" value="kvstore" />
+			<property name="kundera.ddl.auto.prepare" value="update" />
 		</properties>
 	</persistence-unit>
 
@@ -107,6 +145,7 @@
 			<property name="kundera.keyspace" value="OracleNoSqlTests" />
 			<property name="kundera.dialect" value="kvstore" />
 			<property name="kundera.client" value="kvstore" />
+			<property name="kundera.ddl.auto.prepare" value="update" />
 		</properties>
 	</persistence-unit>
 
@@ -123,6 +162,7 @@
 			<property name="kundera.dialect" value="kvstore" />
 			<property name="kundera.client" value="kvstore" />
 			<property name="kundera.indexer.class" value="com.impetus.client.es.index.ESIndexer" />
+			<property name="kundera.ddl.auto.prepare" value="update" />
 		</properties>
 	</persistence-unit>
 

@@ -30,7 +30,7 @@ import com.impetus.kundera.index.IndexCollection;
  * @author vivek.mishra
  */
 @Entity
-@Table(name = "PERSON_KV_STORE")
+@Table(name = "PERSON_ORACLE_NOSQL")
 @IndexCollection(columns = { @Index(name = "personName"), @Index(name = "age") })
 public class PersonOracleNoSql
 {

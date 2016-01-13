@@ -28,7 +28,7 @@ import javax.persistence.Table;
  *
  */
 @Entity
-@Table(name = "StudentOracleNoSQLSqlDate", schema = "OracleNoSqlTests@twikvstore")
+@Table(name = "StudentOracleNoSQLSqlDate", schema = "OracleNoSqlTests@oracleNosqlDataTypeTest")
 public class StudentOracleNoSQLSqlDate implements Serializable
 {
 

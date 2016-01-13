@@ -43,7 +43,7 @@ public class StudentOracleNoSQLLongWrapperTest extends OracleNoSQLBase
     @Before
     public void setUp() throws Exception
     {
-        emf = Persistence.createEntityManagerFactory("twikvstore");
+        emf = Persistence.createEntityManagerFactory("oracleNosqlDataTypeTest");
     }
 
     @After

@@ -166,7 +166,6 @@ public class OracleNoSQSchemaOperationTest
     @After
     public void tearDown() throws Exception
     {
-        removeUser();
         em.close();
     }
 

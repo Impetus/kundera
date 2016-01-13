@@ -44,7 +44,7 @@ public class StudentOracleNoSQLIntTest extends OracleNoSQLBase
     public void setUp() throws Exception
     {
 
-        emf = Persistence.createEntityManagerFactory("twikvstore");
+        emf = Persistence.createEntityManagerFactory("oracleNosqlDataTypeTest");
     }
 
     @After
