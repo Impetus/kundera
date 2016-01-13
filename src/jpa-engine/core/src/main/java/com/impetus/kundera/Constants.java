@@ -147,6 +147,9 @@ public interface Constants
     /** The Constant COL_NAME. */
     public static final String COL_NAME = "colName";
 
+    /** The Constant COMPOSITE. */
+    public final static String COMPOSITE = "composite";
+
     /** The Constant IS_EMBEDDABLE. */
     public static final String IS_EMBEDDABLE = "isEmbeddable";
 
@@ -164,7 +167,7 @@ public interface Constants
 
     /** The Constant CLOSE_SQUARE_BRACKET. */
     public static final String CLOSE_SQUARE_BRACKET = "]";
-    
+
     /** The Constant OPEN_ROUND_BRACKET. */
     public static final String OPEN_ROUND_BRACKET = "(";
 
