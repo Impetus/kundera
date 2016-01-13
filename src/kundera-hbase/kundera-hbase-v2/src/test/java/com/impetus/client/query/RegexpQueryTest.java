@@ -66,6 +66,7 @@ public class RegexpQueryTest
     @After
     public void tearDown() throws Exception
     {
+        removePersons();
         emf.close();
     }
 
@@ -78,22 +79,22 @@ public class RegexpQueryTest
         init();
         em.clear();
 
-        String qry = "Select p from HBaseEntitySimple p where p.personName regexp :name";
+        String qry = "Select p from HBasePerson p where p.personName regexp :name";
         Query q = em.createQuery(qry);
         q.setParameter("name", "^pra.*");
-        List<HBaseEntitySimple> persons = q.getResultList();
+        List<HBasePerson> persons = q.getResultList();
         assertNotNull(persons);
         Assert.assertEquals(1, persons.size());
         Assert.assertEquals("pragalbh garg", persons.get(0).getPersonName());
 
-        qry = "Select p from HBaseEntitySimple p where p.personName regexp :name";
+        qry = "Select p from HBasePerson p where p.personName regexp :name";
         q = em.createQuery(qry);
         q.setParameter("name", "^[pk]");
         persons = q.getResultList();
         assertNotNull(persons);
         Assert.assertEquals(2, persons.size());
 
-        qry = "Select p from HBaseEntitySimple p where p.personName regexp :name";
+        qry = "Select p from HBasePerson p where p.personName regexp :name";
         q = em.createQuery(qry);
         q.setParameter("name", "pra...$");
         persons = q.getResultList();
@@ -106,18 +107,29 @@ public class RegexpQueryTest
      */
     private void init()
     {
-        HBaseEntitySimple p1 = new HBaseEntitySimple();
+        HBasePerson p1 = new HBasePerson();
         p1.setAge((short) 23);
         p1.setPersonId("1");
         p1.setPersonName("pragalbh garg");
 
-        HBaseEntitySimple p2 = new HBaseEntitySimple();
+        HBasePerson p2 = new HBasePerson();
         p2.setAge((short) 20);
         p2.setPersonId("2");
         p2.setPersonName("karthik prasad");
 
         em.persist(p1);
         em.persist(p2);
+    }
+
+    /**
+     * Remove Persons.
+     */
+    private void removePersons()
+    {
+        HBasePerson p1 = em.find(HBasePerson.class, "1");
+        em.remove(p1);
+        HBasePerson p2 = em.find(HBasePerson.class, "2");
+        em.remove(p2);
     }
 
 }

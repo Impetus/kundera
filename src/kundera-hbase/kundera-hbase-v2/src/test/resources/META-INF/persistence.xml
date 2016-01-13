@@ -53,7 +53,7 @@
 	<persistence-unit name="queryTest">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<class>com.impetus.client.query.Book</class>
-		<class>com.impetus.client.query.HBaseEntitySimple</class>
+		<class>com.impetus.client.query.HBasePerson</class>
 		<class>com.impetus.client.hbase.validator.BookEntity</class>
 		<class>com.impetus.client.query.Student</class>
 		<class>com.impetus.client.hbase.crud.compositetype.HBasePrimeUser</class>
