@@ -264,6 +264,7 @@
 			<property name="kundera.keyspace" value="OracleNoSqlTests" />
 			<property name="kundera.dialect" value="kvstore" />
 			<property name="kundera.client" value="kvstore" />
+			<property name="kundera.ddl.auto.prepare" value="create" />
 			<property name="kundera.indexer.class"
 				value="com.impetus.client.oraclenosql.index.OracleNoSQLInvertedIndexer" />
 		</properties>
@@ -280,6 +281,7 @@
 			<property name="kundera.keyspace" value="OracleNoSqlTests" />
 			<property name="kundera.dialect" value="kvstore" />
 			<property name="kundera.client" value="kvstore" />
+			<property name="kundera.ddl.auto.prepare" value="create" />
 			<property name="kundera.indexer.class"
 				value="com.impetus.client.oraclenosql.index.OracleNoSQLInvertedIndexer" />
 		</properties>
