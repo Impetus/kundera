@@ -62,8 +62,18 @@ public abstract class AbstractPropertyReader
      */
     public void read(String pu)
     {
-        String propertyFileName = externalProperties != null ? (String) externalProperties
-                .get(PersistenceProperties.KUNDERA_CLIENT_PROPERTY) : null;
+
+        String propertyFileName = null;
+        if (puMetadata.getProperties() != null
+                && puMetadata.getProperties().containsKey(PersistenceProperties.KUNDERA_CLIENT_PROPERTY))
+        {
+            propertyFileName = (String) puMetadata.getProperties().get(PersistenceProperties.KUNDERA_CLIENT_PROPERTY);
+        }
+        if (externalProperties != null && externalProperties.containsKey(PersistenceProperties.KUNDERA_CLIENT_PROPERTY))
+        {
+            propertyFileName = (String) externalProperties.get(PersistenceProperties.KUNDERA_CLIENT_PROPERTY);
+        }
+        
         if (propertyFileName == null)
         {
             propertyFileName = puMetadata != null ? puMetadata
@@ -98,16 +108,16 @@ public abstract class AbstractPropertyReader
                 log.warn("File {} not found, Caused by ", propertyFileName);
                 return null;
             }
-        
+
         }
 
-        if(inStream != null)
+        if (inStream != null)
         {
             xStream = getXStreamObject();
             Object o = xStream.fromXML(inStream);
             return (ClientProperties) o;
         }
-        
+
         return null;
     }
 
