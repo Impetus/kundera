@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<clientProperties>
+	<datastores>
+		<dataStore>
+			<name>oraclenosql</name>
+			<connection>
+				<properties>
+<!-- 				  <property name="oracle.kv.security" -->
+<!-- 						value="/home/impadmin/Softwares/kv-3.2.5/kvroot/security/client.security" /> -->
+				</properties>
+				<servers>
+					<server>
+						<host>localhost</host>
+						<port>5000</port>
+					</server>
+					<server>
+						<host>192.168.145.21</host>
+						<port>5000</port>
+					</server>
+				</servers>
+			</connection>
+		</dataStore>
+	</datastores>
+</clientProperties>

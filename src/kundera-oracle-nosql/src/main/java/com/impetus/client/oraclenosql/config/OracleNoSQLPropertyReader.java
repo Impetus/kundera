@@ -15,7 +15,10 @@
  */
 package com.impetus.client.oraclenosql.config;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import com.impetus.kundera.configure.AbstractPropertyReader;
 import com.impetus.kundera.configure.ClientProperties;
 import com.impetus.kundera.configure.ClientProperties.DataStore;
+import com.impetus.kundera.configure.ClientProperties.DataStore.Connection.Server;
 import com.impetus.kundera.configure.PropertyReader;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
@@ -111,6 +115,37 @@ public class OracleNoSQLPropertyReader extends AbstractPropertyReader implements
                 }
             }
             return null;
+        }
+        
+        public Properties getConnectionProperties()
+        {
+            DataStore ds = getDataStore();
+            Properties properties = new Properties();
+            if (ds != null)
+            {
+                if (ds.getConnection() != null)
+                {
+                    properties = ds.getConnection().getProperties();
+                    return properties != null ? properties : new Properties();
+                }
+                if (log.isWarnEnabled())
+                {
+                    log.warn("No connection properties found, returning none.");
+                }
+            }
+            return properties;
+        }
+
+        public List<Server> getConnectionServers()
+        {
+            DataStore ds = getDataStore();
+            List<Server> servers = new ArrayList<Server>();
+            if (ds != null && ds.getConnection() != null)
+            {
+                servers = ds.getConnection().getServers();
+                return servers;
+            }
+            return servers;
         }
     }
 

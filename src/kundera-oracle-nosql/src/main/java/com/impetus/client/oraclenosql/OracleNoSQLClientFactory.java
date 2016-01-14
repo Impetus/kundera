@@ -17,7 +17,10 @@ package com.impetus.client.oraclenosql;
 
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
+import oracle.kv.AuthenticationFailureException;
+import oracle.kv.KVSecurityConstants;
 import oracle.kv.KVStore;
 import oracle.kv.KVStoreConfig;
 import oracle.kv.KVStoreFactory;
@@ -28,6 +31,8 @@ import org.slf4j.LoggerFactory;
 import com.impetus.client.oraclenosql.config.OracleNoSQLPropertyReader;
 import com.impetus.client.oraclenosql.index.OracleNoSQLInvertedIndexer;
 import com.impetus.client.oraclenosql.schemamanager.OracleNoSQLSchemaManager;
+import com.impetus.client.oraclenosql.server.OracleNoSQLHostConfiguration;
+import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
@@ -36,6 +41,8 @@ import com.impetus.kundera.index.Indexer;
 import com.impetus.kundera.loader.ClientFactory;
 import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.service.Host;
+import com.impetus.kundera.service.HostConfiguration;
 
 /**
  * {@link ClientFactory} implementation for Oracle NOSQL database
@@ -47,6 +54,8 @@ public class OracleNoSQLClientFactory extends GenericClientFactory
 
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(OracleNoSQLClientFactory.class);
+
+    private HostConfiguration configuration;
 
     /** The kvstore db. */
     private KVStore kvStore;
@@ -69,6 +78,8 @@ public class OracleNoSQLClientFactory extends GenericClientFactory
     {
         initializePropertyReader();
         setExternalProperties(puProperties);
+        configuration = new OracleNoSQLHostConfiguration(externalProperties, OracleNoSQLPropertyReader.osmd,
+                getPersistenceUnit(), kunderaMetadata);
         reader = new OracleNoSQLEntityReader(kunderaMetadata);
     }
 
@@ -164,12 +175,14 @@ public class OracleNoSQLClientFactory extends GenericClientFactory
         String defaultPort = null;
         String storeName = null;
         String poolSize = null;
+
         if (externalProperties != null)
         {
             hostName = (String) externalProperties.get(PersistenceProperties.KUNDERA_NODES);
             defaultPort = (String) externalProperties.get(PersistenceProperties.KUNDERA_PORT);
             storeName = (String) externalProperties.get(PersistenceProperties.KUNDERA_KEYSPACE);
             poolSize = (String) externalProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
+
         }
 
         if (hostName == null)
@@ -189,7 +202,80 @@ public class OracleNoSQLClientFactory extends GenericClientFactory
         {
             poolSize = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
         }
-        return KVStoreFactory.getStore(new KVStoreConfig(storeName, hostName + ":" + defaultPort));
+        String[] hosts = new String[configuration.getHosts().size()];
+        int count = 0;
+        for (Host host : configuration.getHosts())
+        {
+            hosts[count] = host.getHost() + ":" + host.getPort();
+            count++;
+        }
+        KVStoreConfig kconfig = new KVStoreConfig(storeName, hosts);
+        setAuthProperties(kconfig, externalProperties);
+        return KVStoreFactory.getStore(kconfig);
+    }
+
+    /**
+     * This parameter sets auth related parameters for KVCleint
+     * 
+     * @param kconfig
+     * @param externalProperties
+     */
+    private void setAuthProperties(KVStoreConfig kconfig, Map<String, Object> externalProperties)
+    {
+        try
+        {
+            if (externalProperties != null)
+            {
+
+                Properties secProps = new Properties();
+                Set<String> props = externalProperties.keySet();
+                for (String key : props)
+                {
+                    if (isKVSecurityParam(key))
+                    {
+                        secProps.setProperty(key, (String) externalProperties.get(key));
+                    }
+                }
+
+                if (!secProps.isEmpty())
+                {
+                    kconfig.setSecurityProperties(secProps);
+                }
+               
+
+            }
+        }
+        catch (AuthenticationFailureException afe)
+        {
+            /*
+             * Could potentially retry the login, possibly with different
+             * credentials, but in this simple example, we just fail the
+             * attempt.
+             */
+            throw new KunderaException("Could not authorize the client connection " + afe.getMessage());
+
+        }
+
+    }
+
+    /**
+     * @param key
+     * @return
+     */
+    private boolean isKVSecurityParam(String key)
+    {
+
+        return KVSecurityConstants.TRANSPORT_PROPERTY.equals(key)
+                || KVSecurityConstants.SSL_TRUSTSTORE_TYPE_PROPERTY.equals(key)
+                || KVSecurityConstants.SSL_TRUSTSTORE_FILE_PROPERTY.equals(key)
+                || KVSecurityConstants.SSL_PROTOCOLS_PROPERTY.equals(key)
+                || KVSecurityConstants.SSL_HOSTNAME_VERIFIER_PROPERTY.equals(key)
+                || KVSecurityConstants.SSL_CIPHER_SUITES_PROPERTY.equals(key)
+                || KVSecurityConstants.SECURITY_FILE_PROPERTY.equals(key)
+                || KVSecurityConstants.AUTH_WALLET_PROPERTY.equals(key)
+                || KVSecurityConstants.AUTH_USERNAME_PROPERTY.equals(key)
+                || KVSecurityConstants.AUTH_PWDFILE_PROPERTY.equals(key);
+
     }
 
     @Override
