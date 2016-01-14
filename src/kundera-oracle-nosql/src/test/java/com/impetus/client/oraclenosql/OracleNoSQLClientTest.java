@@ -25,9 +25,10 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
 import junit.framework.Assert;
-
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +37,11 @@ import com.impetus.client.oraclenosql.entities.PersonOTOOracleNoSQL;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData.OPERATION;
+
+import oracle.kv.KVStore;
+import oracle.kv.KVStoreConfig;
+import oracle.kv.KVStoreFactory;
+import oracle.kv.table.TableAPI;
 
 /**
  * Test case for {@link OracleNoSQLClient_Leagacy}
@@ -55,21 +61,24 @@ public class OracleNoSQLClientTest
     private static Logger logger = LoggerFactory.getLogger(OracleNoSQLClient.class);
 
     /**
+     * Sets the up before class.
+     * 
+     * @throws Exception
+     *             the exception
+     */
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception
+    {
+        createJoinTableInDatabase();
+    }
+
+    /**
      * @throws java.lang.Exception
      */
     @Before
     public void setUp() throws Exception
     {
         emf = Persistence.createEntityManagerFactory(PU);
-    }
-
-    /**
-     * @throws java.lang.Exception
-     */
-    @After
-    public void tearDown() throws Exception
-    {
-        emf.close();
     }
 
     @Test
@@ -128,4 +137,51 @@ public class OracleNoSQLClientTest
 
         Assert.assertTrue(columns.isEmpty());
     }
+
+    /**
+     * @throws java.lang.Exception
+     */
+    @After
+    public void tearDown() throws Exception
+    {
+        if (emf != null)
+        {
+            emf.close();
+        }
+    }
+
+    /**
+     * Tear down after class.
+     * 
+     * @throws Exception
+     *             the exception
+     */
+    @AfterClass
+    public static void tearDownAfterClass() throws Exception
+    {
+        dropJoinTableInDatabase();
+    }
+
+    private static void createJoinTableInDatabase()
+    {
+        KVStore kvStore = KVStoreFactory.getStore(new KVStoreConfig("OracleNoSqlTests", "localhost:5000"));
+        TableAPI tableAPI = kvStore.getTableAPI();
+        tableAPI.executeSync(
+                "CREATE TABLE PERSON_ADDRESS (key STRING, PERSON_ID STRING,ADDRESS_ID STRING,PRIMARY KEY (key))");
+        tableAPI.executeSync("CREATE INDEX IF NOT EXISTS PERSON_ID ON PERSON_ADDRESS(PERSON_ID)");
+        tableAPI.executeSync("CREATE INDEX IF NOT EXISTS ADDRESS_ID ON PERSON_ADDRESS(ADDRESS_ID)");
+        kvStore.close();
+
+    }
+
+    private static void dropJoinTableInDatabase()
+    {
+        KVStore kvStore = KVStoreFactory.getStore(new KVStoreConfig("OracleNoSqlTests", "localhost:5000"));
+        TableAPI tableAPI = kvStore.getTableAPI();
+        tableAPI.executeSync(" DROP TABLE IF EXISTS PERSON_ADDRESS");
+        tableAPI.executeSync("DROP INDEX IF EXISTS PERSON_ID ON PERSON_ADDRESS");
+        tableAPI.executeSync("DROP INDEX IF EXISTS ADDRESS_ID ON PERSON_ADDRESS");
+        kvStore.close();
+    }
+
 }
