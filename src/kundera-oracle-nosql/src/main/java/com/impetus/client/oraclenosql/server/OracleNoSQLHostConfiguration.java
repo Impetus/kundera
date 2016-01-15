@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import oracle.kv.KVSecurityConstants;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,15 +50,15 @@ public class OracleNoSQLHostConfiguration extends HostConfiguration
     {
         super(externalProperties, csmd != null ? csmd.getConnectionServers() : new ArrayList<Server>(),
                 persistenceUnit, kunderaMetadata);
-        
+
         connectionProperties.putAll(csmd.getConnectionProperties());
-        
+
     }
 
     protected void buildHosts(List<Server> servers, List<Host> hostsList)
     {
         List<OracleNoSQLHost> oracleNoSQLHosts = new CopyOnWriteArrayList<OracleNoSQLHost>();
-        
+
         for (Server server : servers)
         {
             String host = server.getHost().trim();
@@ -69,7 +70,7 @@ public class OracleNoSQLHostConfiguration extends HostConfiguration
             oracleNoSQLHosts.add(oracleNoSQLHost);
             hostsList.add(oracleNoSQLHost);
         }
-        
+
     }
 
     protected void buildHosts(String hosts, String portAsString, List<Host> hostsList)
@@ -94,49 +95,25 @@ public class OracleNoSQLHostConfiguration extends HostConfiguration
     protected void setConfig(Host host, Properties props, Map externalProperties)
     {
         OracleNoSQLHost oracleNoSQLHost = (OracleNoSQLHost) host;
-        String maxActivePerNode = null;
-        String maxIdlePerNode = null;
-        String minIdlePerNode = null;
-        String maxTotal = null;
         String userName = null;
         String password = null;
-    
+        Properties secProps = new Properties();
+
         if (externalProperties != null)
         {
             connectionProperties.putAll(externalProperties);
 
-            maxActivePerNode = (String) connectionProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
-            maxIdlePerNode = (String) connectionProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_IDLE);
-            minIdlePerNode = (String) connectionProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MIN_IDLE);
-            maxTotal = (String) connectionProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_TOTAL);
+            
             userName = (String) connectionProperties.get(PersistenceProperties.KUNDERA_USERNAME);
             password = (String) connectionProperties.get(PersistenceProperties.KUNDERA_PASSWORD);
-           
+
+            setSecutiyProps(secProps);
+
         }
 
         if (props != null)
         {
-            if (maxActivePerNode == null)
-            {
-                maxActivePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE) != null ? props
-                        .getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE).trim() : null;
-            }
-            if (maxIdlePerNode == null)
-            {
-                maxIdlePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_IDLE) != null ? props
-                        .getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_IDLE).trim() : null;
-            }
-            if (minIdlePerNode == null)
-            {
-                minIdlePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MIN_IDLE) != null ? props
-                        .getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MIN_IDLE).trim() : null;
-            }
-            if (maxTotal == null)
-            {
-                maxTotal = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_TOTAL) != null ? props
-                        .getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_TOTAL).trim() : null;
-            }
-
+            
             if (userName == null)
             {
                 userName = props.getProperty(PersistenceProperties.KUNDERA_USERNAME);
@@ -145,15 +122,74 @@ public class OracleNoSQLHostConfiguration extends HostConfiguration
         }
         try
         {
- 
+
             oracleNoSQLHost.setUserName(userName);
             oracleNoSQLHost.setPassword(password);
+            oracleNoSQLHost.setSecurityProps(secProps);
 
-          
         }
         catch (NumberFormatException e)
         {
             logger.warn("Some Connection pool related property couldn't be parsed. Default pool policy would be used");
+        }
+    }
+
+    /**
+     * @param secProps
+     */
+    private void setSecutiyProps(Properties secProps)
+    {
+        if (connectionProperties.contains(KVSecurityConstants.TRANSPORT_PROPERTY))
+        {
+            secProps.put(KVSecurityConstants.TRANSPORT_PROPERTY,
+                    connectionProperties.get(KVSecurityConstants.TRANSPORT_PROPERTY));
+        }
+
+        if (connectionProperties.contains(KVSecurityConstants.SSL_TRUSTSTORE_TYPE_PROPERTY))
+        {
+            secProps.put(KVSecurityConstants.SSL_TRUSTSTORE_TYPE_PROPERTY,
+                    connectionProperties.get(KVSecurityConstants.SSL_TRUSTSTORE_TYPE_PROPERTY));
+        }
+        if (connectionProperties.contains(KVSecurityConstants.SSL_TRUSTSTORE_FILE_PROPERTY))
+        {
+            secProps.put(KVSecurityConstants.SSL_TRUSTSTORE_FILE_PROPERTY,
+                    connectionProperties.get(KVSecurityConstants.SSL_TRUSTSTORE_FILE_PROPERTY));
+        }
+        if (connectionProperties.contains(KVSecurityConstants.SSL_PROTOCOLS_PROPERTY))
+        {
+            secProps.put(KVSecurityConstants.SSL_PROTOCOLS_PROPERTY,
+                    connectionProperties.get(KVSecurityConstants.SSL_PROTOCOLS_PROPERTY));
+        }
+        if (connectionProperties.contains(KVSecurityConstants.SSL_HOSTNAME_VERIFIER_PROPERTY))
+        {
+            secProps.put(KVSecurityConstants.SSL_HOSTNAME_VERIFIER_PROPERTY,
+                    connectionProperties.get(KVSecurityConstants.SSL_HOSTNAME_VERIFIER_PROPERTY));
+        }
+        if (connectionProperties.contains(KVSecurityConstants.SSL_CIPHER_SUITES_PROPERTY))
+        {
+            secProps.put(KVSecurityConstants.SSL_CIPHER_SUITES_PROPERTY,
+                    connectionProperties.get(KVSecurityConstants.SSL_CIPHER_SUITES_PROPERTY));
+        }
+        if (connectionProperties.contains(KVSecurityConstants.SECURITY_FILE_PROPERTY))
+        {
+            secProps.put(KVSecurityConstants.SECURITY_FILE_PROPERTY,
+                    connectionProperties.get(KVSecurityConstants.SECURITY_FILE_PROPERTY));
+        }
+
+        if (connectionProperties.contains(KVSecurityConstants.AUTH_WALLET_PROPERTY))
+        {
+            secProps.put(KVSecurityConstants.AUTH_WALLET_PROPERTY,
+                    connectionProperties.get(KVSecurityConstants.AUTH_WALLET_PROPERTY));
+        }
+        if (connectionProperties.contains(KVSecurityConstants.AUTH_USERNAME_PROPERTY))
+        {
+            secProps.put(KVSecurityConstants.AUTH_USERNAME_PROPERTY,
+                    connectionProperties.get(KVSecurityConstants.AUTH_USERNAME_PROPERTY));
+        }
+        if (connectionProperties.contains(KVSecurityConstants.AUTH_PWDFILE_PROPERTY))
+        {
+            secProps.put(KVSecurityConstants.AUTH_PWDFILE_PROPERTY,
+                    connectionProperties.get(KVSecurityConstants.AUTH_PWDFILE_PROPERTY));
         }
     }
 
@@ -165,10 +201,6 @@ public class OracleNoSQLHostConfiguration extends HostConfiguration
     {
         return hostsList;
     }
-
-
-
-  
 
     /**
      * 

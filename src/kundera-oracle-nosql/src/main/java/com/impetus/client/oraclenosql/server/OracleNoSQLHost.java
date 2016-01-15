@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.impetus.client.oraclenosql.server;
 
+import java.util.Properties;
+
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import com.impetus.kundera.service.Host;
@@ -37,6 +39,8 @@ public class OracleNoSQLHost implements Host
     private String userName;
 
     private String password;
+    
+    private Properties secProps = new Properties();
 
     
     public OracleNoSQLHost(String host)
@@ -119,37 +123,48 @@ public class OracleNoSQLHost implements Host
     @Override
     public int getMaxTotal()
     {
-        // TODO Auto-generated method stub
+        
         return 0;
     }
 
     @Override
     public int getMaxActive()
     {
-        // TODO Auto-generated method stub
+        
         return 0;
     }
 
     @Override
     public int getMaxIdle()
     {
-        // TODO Auto-generated method stub
+       
         return 0;
     }
 
     @Override
     public int getMinIdle()
     {
-        // TODO Auto-generated method stub
+       
         return 0;
     }
 
     @Override
     public boolean isRetryHost()
     {
-        // TODO Auto-generated method stub
+      
         return false;
     }
 
+    public void setSecurityProps(Properties secProps)
+    {
+        this.secProps = secProps;
+        
+    }
+
+    public Properties getSecurityProps()
+    {
+        return this.secProps;
+        
+    }
   
 }

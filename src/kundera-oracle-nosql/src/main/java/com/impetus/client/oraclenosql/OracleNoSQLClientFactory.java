@@ -20,10 +20,10 @@ import java.util.Properties;
 import java.util.Set;
 
 import oracle.kv.AuthenticationFailureException;
-import oracle.kv.KVSecurityConstants;
 import oracle.kv.KVStore;
 import oracle.kv.KVStoreConfig;
 import oracle.kv.KVStoreFactory;
+import oracle.kv.PasswordCredentials;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +32,7 @@ import com.impetus.client.oraclenosql.config.OracleNoSQLPropertyReader;
 import com.impetus.client.oraclenosql.index.OracleNoSQLInvertedIndexer;
 import com.impetus.client.oraclenosql.schemamanager.OracleNoSQLSchemaManager;
 import com.impetus.client.oraclenosql.server.OracleNoSQLHostConfiguration;
+import com.impetus.client.oraclenosql.server.OracleNoSQLHost;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
@@ -175,6 +176,9 @@ public class OracleNoSQLClientFactory extends GenericClientFactory
         String defaultPort = null;
         String storeName = null;
         String poolSize = null;
+        String userName = null;
+        String password = null;
+        Properties securityProps = new Properties();
 
         if (externalProperties != null)
         {
@@ -182,7 +186,8 @@ public class OracleNoSQLClientFactory extends GenericClientFactory
             defaultPort = (String) externalProperties.get(PersistenceProperties.KUNDERA_PORT);
             storeName = (String) externalProperties.get(PersistenceProperties.KUNDERA_KEYSPACE);
             poolSize = (String) externalProperties.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
-
+            userName = (String) externalProperties.get(PersistenceProperties.KUNDERA_USERNAME);
+            password = (String) externalProperties.get(PersistenceProperties.KUNDERA_PASSWORD);
         }
 
         if (hostName == null)
@@ -204,45 +209,23 @@ public class OracleNoSQLClientFactory extends GenericClientFactory
         }
         String[] hosts = new String[configuration.getHosts().size()];
         int count = 0;
+
         for (Host host : configuration.getHosts())
         {
             hosts[count] = host.getHost() + ":" + host.getPort();
-            count++;
+            securityProps = ((OracleNoSQLHost) host).getSecurityProps();
         }
         KVStoreConfig kconfig = new KVStoreConfig(storeName, hosts);
-        setAuthProperties(kconfig, externalProperties);
-        return KVStoreFactory.getStore(kconfig);
-    }
-
-    /**
-     * This parameter sets auth related parameters for KVCleint
-     * 
-     * @param kconfig
-     * @param externalProperties
-     */
-    private void setAuthProperties(KVStoreConfig kconfig, Map<String, Object> externalProperties)
-    {
         try
         {
-            if (externalProperties != null)
+            if (!securityProps.isEmpty())
             {
-
-                Properties secProps = new Properties();
-                Set<String> props = externalProperties.keySet();
-                for (String key : props)
-                {
-                    if (isKVSecurityParam(key))
-                    {
-                        secProps.setProperty(key, (String) externalProperties.get(key));
-                    }
-                }
-
-                if (!secProps.isEmpty())
-                {
-                    kconfig.setSecurityProperties(secProps);
-                }
-               
-
+                kconfig.setSecurityProperties(securityProps);
+            }
+            if (userName != null && password != null)
+            {
+                return KVStoreFactory
+                        .getStore(kconfig, new PasswordCredentials(userName, password.toCharArray()), null);
             }
         }
         catch (AuthenticationFailureException afe)
@@ -256,27 +239,51 @@ public class OracleNoSQLClientFactory extends GenericClientFactory
 
         }
 
+        return KVStoreFactory.getStore(kconfig);
     }
 
-    /**
-     * @param key
-     * @return
-     */
-    private boolean isKVSecurityParam(String key)
-    {
-
-        return KVSecurityConstants.TRANSPORT_PROPERTY.equals(key)
-                || KVSecurityConstants.SSL_TRUSTSTORE_TYPE_PROPERTY.equals(key)
-                || KVSecurityConstants.SSL_TRUSTSTORE_FILE_PROPERTY.equals(key)
-                || KVSecurityConstants.SSL_PROTOCOLS_PROPERTY.equals(key)
-                || KVSecurityConstants.SSL_HOSTNAME_VERIFIER_PROPERTY.equals(key)
-                || KVSecurityConstants.SSL_CIPHER_SUITES_PROPERTY.equals(key)
-                || KVSecurityConstants.SECURITY_FILE_PROPERTY.equals(key)
-                || KVSecurityConstants.AUTH_WALLET_PROPERTY.equals(key)
-                || KVSecurityConstants.AUTH_USERNAME_PROPERTY.equals(key)
-                || KVSecurityConstants.AUTH_PWDFILE_PROPERTY.equals(key);
-
-    }
+//    /**
+//     * This parameter sets auth related parameters for KVCleint
+//     * 
+//     * @param kconfig
+//     * @param externalProperties
+//     */
+//    private void setAuthProperties(KVStoreConfig kconfig, Map<String, Object> externalProperties)
+//    {
+//        try
+//        {
+//            if (externalProperties != null)
+//            {
+//
+//                Properties secProps = new Properties();
+//                Set<String> props = externalProperties.keySet();
+//                for (String key : props)
+//                {
+//                    if (NoSqlDBUtils.isKVSecurityParam(key))
+//                    {
+//                        secProps.setProperty(key, (String) externalProperties.get(key));
+//                    }
+//                }
+//
+//                if (!secProps.isEmpty())
+//                {
+//                    kconfig.setSecurityProperties(secProps);
+//                }
+//
+//            }
+//        }
+//        catch (AuthenticationFailureException afe)
+//        {
+//            /*
+//             * Could potentially retry the login, possibly with different
+//             * credentials, but in this simple example, we just fail the
+//             * attempt.
+//             */
+//            throw new KunderaException("Could not authorize the client connection " + afe.getMessage());
+//
+//        }
+//
+//    }
 
     @Override
     protected void initializeLoadBalancer(String loadBalancingPolicyName)
