@@ -64,7 +64,7 @@ public class OracleNoSQLSchemaManager extends AbstractSchemaManager implements S
 
     /** The table api. */
     private TableAPI tableAPI;
-    
+
     private Properties securityProps = new Properties();
 
     /**
@@ -152,6 +152,8 @@ public class OracleNoSQLSchemaManager extends AbstractSchemaManager implements S
     @Override
     protected boolean initiateClient()
     {
+        String[] hostsList = new String[hosts.length];
+        int count = 0;
         for (String host : hosts)
         {
             if (host == null || !StringUtils.isNumeric(port) || port.isEmpty())
@@ -159,34 +161,37 @@ public class OracleNoSQLSchemaManager extends AbstractSchemaManager implements S
                 logger.error("Host or port should not be null / port should be numeric");
                 throw new IllegalArgumentException("Host or port should not be null / port should be numeric");
             }
-            KVStoreConfig kconfig  = new KVStoreConfig(databaseName, host + ":" + port);
-            if (!securityProps.isEmpty())
-            {
-                
-                kconfig.setSecurityProperties(securityProps);
-                
-            }
-            
-            
-            try
-            {
-                if (userName != null && password != null)
-                {
-                    kvStore = KVStoreFactory
-                            .getStore(kconfig, new PasswordCredentials(userName, password.toCharArray()), null);
-                }
-                else{
-                    kvStore = KVStoreFactory.getStore(new KVStoreConfig(databaseName, host + ":" + port));
-                }
-                
-                tableAPI = kvStore.getTableAPI();
-            }
-            catch (FaultException e)
-            {
-                logger.error("Unable to get KVStore. Caused by ", e);
-                throw new KunderaException("Unable to get KVStore. Caused by ", e);
-            }
+            hostsList[count] = host + ":" + port;
+            count++;
         }
+        KVStoreConfig kconfig = new KVStoreConfig(databaseName, hostsList);
+        if (!securityProps.isEmpty())
+        {
+
+            kconfig.setSecurityProperties(securityProps);
+
+        }
+
+        try
+        {
+            if (userName != null && password != null)
+            {
+                kvStore = KVStoreFactory.getStore(kconfig, new PasswordCredentials(userName, password.toCharArray()),
+                        null);
+            }
+            else
+            {
+                kvStore = KVStoreFactory.getStore(kconfig);
+            }
+
+            tableAPI = kvStore.getTableAPI();
+        }
+        catch (FaultException e)
+        {
+            logger.error("Unable to get KVStore. Caused by ", e);
+            throw new KunderaException("Unable to get KVStore. Caused by ", e);
+        }
+
         return true;
     }
 
@@ -515,10 +520,10 @@ public class OracleNoSQLSchemaManager extends AbstractSchemaManager implements S
     {
         create(tableInfos);
     }
-    
+
     /**
      * @param secProps
-     * @param connectionProperties 
+     * @param connectionProperties
      */
     private void setSecurityProps()
     {
@@ -574,8 +579,7 @@ public class OracleNoSQLSchemaManager extends AbstractSchemaManager implements S
             securityProps.put(KVSecurityConstants.AUTH_PWDFILE_PROPERTY,
                     externalProperties.get(KVSecurityConstants.AUTH_PWDFILE_PROPERTY));
         }
-        
-        
+
     }
 
 }
