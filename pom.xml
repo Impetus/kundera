@@ -10,7 +10,7 @@
 
 	<groupId>com.impetus</groupId>
 	<artifactId>kundera-parent</artifactId>
-	<version>3.3-SNAPSHOT</version>
+	<version>3.3</version>
 	<packaging>pom</packaging>
 
 	<name>kundera</name>
@@ -28,7 +28,7 @@
 		<connection>scm:git:git@github.com:impetus-opensource/Kundera.git</connection>
 		<developerConnection>scm:git:git@github.com:impetus-opensource/Kundera.git</developerConnection>
 		<url>git@github.com:impetus-opensource/Kundera.git</url>
-	  <tag>HEAD</tag>
+	  <tag>kundera-3.3</tag>
   </scm>
 
 	<developers>
