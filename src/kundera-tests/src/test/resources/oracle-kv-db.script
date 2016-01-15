@@ -172,8 +172,8 @@ plan add-index -name STREET -table HabitatUniMToM -field STREET -wait
 table create -name PERSONNEL_ADDRESS
 add-field -type string -name ADDRESS_ID
 add-field -type string -name PERSON_ID
-add-field -type string -name PERSON_ID_ADDRESS_ID
-primary-key -field PERSON_ID_ADDRESS_ID
+add-field -type string -name key
+primary-key -field key
 exit
 plan add-table -name PERSONNEL_ADDRESS -wait
 
