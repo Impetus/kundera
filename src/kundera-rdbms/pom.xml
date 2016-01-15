@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>kundera</artifactId>
 		<groupId>com.impetus</groupId>
-		<version>3.3</version>
+		<version>3.4-SNAPSHOT</version>
 	</parent>
 	<groupId>com.impetus.kundera.client</groupId>
 	<artifactId>kundera-rdbms</artifactId>
