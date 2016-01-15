@@ -11,7 +11,6 @@
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.oraclenosql.OracleNoSQLClientFactory" />
 			<property name="kundera.keyspace" value="OracleNoSqlTests" />
-			<property name="kundera.show.query" value="true" />
 			<property name="kundera.dialect" value="kvstore" />
 			<property name="kundera.client" value="kvstore" />
 			<property name="kundera.ddl.auto.prepare" value="update" />
@@ -45,7 +44,6 @@
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.oraclenosql.OracleNoSQLClientFactory" />
 			<property name="kundera.keyspace" value="OracleNoSqlTests" />
-			<property name="kundera.show.query" value="true" />
 			<property name="kundera.dialect" value="kvstore" />
 			<property name="kundera.client" value="kvstore" />
 			<property name="kundera.ddl.auto.prepare" value="update" />
@@ -62,7 +60,6 @@
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.oraclenosql.OracleNoSQLClientFactory" />
 			<property name="kundera.keyspace" value="OracleNoSqlTests" />
-			<property name="kundera.show.query" value="true" />
 			<property name="kundera.dialect" value="kvstore" />
 			<property name="kundera.client" value="kvstore" />
 		</properties>
@@ -107,7 +104,6 @@
 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
-			<property name="kundera.show.query" value="true" />
 			<!-- <property name="index.home.dir" value="./lucene"/> -->
 			<property name="kundera.indexer.class"
 				value="com.impetus.client.oraclenosql.index.OracleNoSQLInvertedIndexer" />
@@ -126,9 +122,9 @@
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.oraclenosql.OracleNoSQLClientFactory" />
 			<property name="kundera.keyspace" value="OracleNoSqlTests" />
-			<property name="kundera.show.query" value="true" />
 			<property name="kundera.dialect" value="kvstore" />
 			<property name="kundera.client" value="kvstore" />
+			<property name="kundera.show.query" value="true" />
 			<property name="kundera.ddl.auto.prepare" value="update" />
 		</properties>
 	</persistence-unit>
