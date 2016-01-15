@@ -178,7 +178,7 @@ public class OracleNoSQLClientFactory extends GenericClientFactory
         String poolSize = null;
         String userName = null;
         String password = null;
-        Properties securityProps = new Properties();
+        
 
         if (externalProperties != null)
         {
@@ -213,15 +213,18 @@ public class OracleNoSQLClientFactory extends GenericClientFactory
         for (Host host : configuration.getHosts())
         {
             hosts[count] = host.getHost() + ":" + host.getPort();
-            securityProps = ((OracleNoSQLHost) host).getSecurityProps();
         }
         KVStoreConfig kconfig = new KVStoreConfig(storeName, hosts);
         try
         {
-            if (!securityProps.isEmpty())
+
+            if (!((OracleNoSQLHostConfiguration)configuration).getSecurityProps().isEmpty())
             {
-                kconfig.setSecurityProperties(securityProps);
+                
+                kconfig.setSecurityProperties(((OracleNoSQLHostConfiguration)configuration).getSecurityProps());
+                
             }
+            
             if (userName != null && password != null)
             {
                 return KVStoreFactory
@@ -242,48 +245,6 @@ public class OracleNoSQLClientFactory extends GenericClientFactory
         return KVStoreFactory.getStore(kconfig);
     }
 
-//    /**
-//     * This parameter sets auth related parameters for KVCleint
-//     * 
-//     * @param kconfig
-//     * @param externalProperties
-//     */
-//    private void setAuthProperties(KVStoreConfig kconfig, Map<String, Object> externalProperties)
-//    {
-//        try
-//        {
-//            if (externalProperties != null)
-//            {
-//
-//                Properties secProps = new Properties();
-//                Set<String> props = externalProperties.keySet();
-//                for (String key : props)
-//                {
-//                    if (NoSqlDBUtils.isKVSecurityParam(key))
-//                    {
-//                        secProps.setProperty(key, (String) externalProperties.get(key));
-//                    }
-//                }
-//
-//                if (!secProps.isEmpty())
-//                {
-//                    kconfig.setSecurityProperties(secProps);
-//                }
-//
-//            }
-//        }
-//        catch (AuthenticationFailureException afe)
-//        {
-//            /*
-//             * Could potentially retry the login, possibly with different
-//             * credentials, but in this simple example, we just fail the
-//             * attempt.
-//             */
-//            throw new KunderaException("Could not authorize the client connection " + afe.getMessage());
-//
-//        }
-//
-//    }
 
     @Override
     protected void initializeLoadBalancer(String loadBalancingPolicyName)
