@@ -213,7 +213,9 @@ public class OracleNoSQLClientFactory extends GenericClientFactory
         for (Host host : configuration.getHosts())
         {
             hosts[count] = host.getHost() + ":" + host.getPort();
+            count++;
         }
+        
         KVStoreConfig kconfig = new KVStoreConfig(storeName, hosts);
         try
         {
