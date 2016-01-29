@@ -44,6 +44,10 @@ public class OracleNoSQLHostConfiguration extends HostConfiguration
 {
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(OracleNoSQLHostConfiguration.class);
+    
+    private Properties securityProps =  new Properties();
+
+   
 
     public OracleNoSQLHostConfiguration(Map externalProperties, OracleNoSQLSchemaMetadata csmd, String persistenceUnit,
             final KunderaMetadata kunderaMetadata)
@@ -52,6 +56,8 @@ public class OracleNoSQLHostConfiguration extends HostConfiguration
                 persistenceUnit, kunderaMetadata);
 
         connectionProperties.putAll(csmd.getConnectionProperties());
+        
+        setSecurityProps(); 
 
     }
 
@@ -97,23 +103,18 @@ public class OracleNoSQLHostConfiguration extends HostConfiguration
         OracleNoSQLHost oracleNoSQLHost = (OracleNoSQLHost) host;
         String userName = null;
         String password = null;
-        Properties secProps = new Properties();
-
+               
         if (externalProperties != null)
         {
             connectionProperties.putAll(externalProperties);
-
-            
             userName = (String) connectionProperties.get(PersistenceProperties.KUNDERA_USERNAME);
             password = (String) connectionProperties.get(PersistenceProperties.KUNDERA_PASSWORD);
-
-            setSecutiyProps(secProps);
-
+             
         }
 
         if (props != null)
         {
-            
+ 
             if (userName == null)
             {
                 userName = props.getProperty(PersistenceProperties.KUNDERA_USERNAME);
@@ -125,7 +126,7 @@ public class OracleNoSQLHostConfiguration extends HostConfiguration
 
             oracleNoSQLHost.setUserName(userName);
             oracleNoSQLHost.setPassword(password);
-            oracleNoSQLHost.setSecurityProps(secProps);
+            
 
         }
         catch (NumberFormatException e)
@@ -136,61 +137,64 @@ public class OracleNoSQLHostConfiguration extends HostConfiguration
 
     /**
      * @param secProps
+     * @param connectionProperties 
      */
-    private void setSecutiyProps(Properties secProps)
+    private void setSecurityProps()
     {
-        if (connectionProperties.contains(KVSecurityConstants.TRANSPORT_PROPERTY))
+        if (connectionProperties.containsKey(KVSecurityConstants.TRANSPORT_PROPERTY))
         {
-            secProps.put(KVSecurityConstants.TRANSPORT_PROPERTY,
+            securityProps.put(KVSecurityConstants.TRANSPORT_PROPERTY,
                     connectionProperties.get(KVSecurityConstants.TRANSPORT_PROPERTY));
         }
 
-        if (connectionProperties.contains(KVSecurityConstants.SSL_TRUSTSTORE_TYPE_PROPERTY))
+        if (connectionProperties.containsKey(KVSecurityConstants.SSL_TRUSTSTORE_TYPE_PROPERTY))
         {
-            secProps.put(KVSecurityConstants.SSL_TRUSTSTORE_TYPE_PROPERTY,
+            securityProps.put(KVSecurityConstants.SSL_TRUSTSTORE_TYPE_PROPERTY,
                     connectionProperties.get(KVSecurityConstants.SSL_TRUSTSTORE_TYPE_PROPERTY));
         }
-        if (connectionProperties.contains(KVSecurityConstants.SSL_TRUSTSTORE_FILE_PROPERTY))
+        if (connectionProperties.containsKey(KVSecurityConstants.SSL_TRUSTSTORE_FILE_PROPERTY))
         {
-            secProps.put(KVSecurityConstants.SSL_TRUSTSTORE_FILE_PROPERTY,
+            securityProps.put(KVSecurityConstants.SSL_TRUSTSTORE_FILE_PROPERTY,
                     connectionProperties.get(KVSecurityConstants.SSL_TRUSTSTORE_FILE_PROPERTY));
         }
-        if (connectionProperties.contains(KVSecurityConstants.SSL_PROTOCOLS_PROPERTY))
+        if (connectionProperties.containsKey(KVSecurityConstants.SSL_PROTOCOLS_PROPERTY))
         {
-            secProps.put(KVSecurityConstants.SSL_PROTOCOLS_PROPERTY,
+            securityProps.put(KVSecurityConstants.SSL_PROTOCOLS_PROPERTY,
                     connectionProperties.get(KVSecurityConstants.SSL_PROTOCOLS_PROPERTY));
         }
-        if (connectionProperties.contains(KVSecurityConstants.SSL_HOSTNAME_VERIFIER_PROPERTY))
+        if (connectionProperties.containsKey(KVSecurityConstants.SSL_HOSTNAME_VERIFIER_PROPERTY))
         {
-            secProps.put(KVSecurityConstants.SSL_HOSTNAME_VERIFIER_PROPERTY,
+            securityProps.put(KVSecurityConstants.SSL_HOSTNAME_VERIFIER_PROPERTY,
                     connectionProperties.get(KVSecurityConstants.SSL_HOSTNAME_VERIFIER_PROPERTY));
         }
-        if (connectionProperties.contains(KVSecurityConstants.SSL_CIPHER_SUITES_PROPERTY))
+        if (connectionProperties.containsKey(KVSecurityConstants.SSL_CIPHER_SUITES_PROPERTY))
         {
-            secProps.put(KVSecurityConstants.SSL_CIPHER_SUITES_PROPERTY,
+            securityProps.put(KVSecurityConstants.SSL_CIPHER_SUITES_PROPERTY,
                     connectionProperties.get(KVSecurityConstants.SSL_CIPHER_SUITES_PROPERTY));
         }
-        if (connectionProperties.contains(KVSecurityConstants.SECURITY_FILE_PROPERTY))
+        if (connectionProperties.containsKey(KVSecurityConstants.SECURITY_FILE_PROPERTY))
         {
-            secProps.put(KVSecurityConstants.SECURITY_FILE_PROPERTY,
+            securityProps.put(KVSecurityConstants.SECURITY_FILE_PROPERTY,
                     connectionProperties.get(KVSecurityConstants.SECURITY_FILE_PROPERTY));
         }
 
-        if (connectionProperties.contains(KVSecurityConstants.AUTH_WALLET_PROPERTY))
+        if (connectionProperties.containsKey(KVSecurityConstants.AUTH_WALLET_PROPERTY))
         {
-            secProps.put(KVSecurityConstants.AUTH_WALLET_PROPERTY,
+            securityProps.put(KVSecurityConstants.AUTH_WALLET_PROPERTY,
                     connectionProperties.get(KVSecurityConstants.AUTH_WALLET_PROPERTY));
         }
-        if (connectionProperties.contains(KVSecurityConstants.AUTH_USERNAME_PROPERTY))
+        if (connectionProperties.containsKey(KVSecurityConstants.AUTH_USERNAME_PROPERTY))
         {
-            secProps.put(KVSecurityConstants.AUTH_USERNAME_PROPERTY,
+            securityProps.put(KVSecurityConstants.AUTH_USERNAME_PROPERTY,
                     connectionProperties.get(KVSecurityConstants.AUTH_USERNAME_PROPERTY));
         }
-        if (connectionProperties.contains(KVSecurityConstants.AUTH_PWDFILE_PROPERTY))
+        if (connectionProperties.containsKey(KVSecurityConstants.AUTH_PWDFILE_PROPERTY))
         {
-            secProps.put(KVSecurityConstants.AUTH_PWDFILE_PROPERTY,
+            securityProps.put(KVSecurityConstants.AUTH_PWDFILE_PROPERTY,
                     connectionProperties.get(KVSecurityConstants.AUTH_PWDFILE_PROPERTY));
         }
+        
+        
     }
 
     /**
@@ -200,6 +204,14 @@ public class OracleNoSQLHostConfiguration extends HostConfiguration
     public List<Host> getOracleNoSQLHosts()
     {
         return hostsList;
+    }
+    
+    /**
+     * @return the secProps
+     */
+    public Properties getSecurityProps()
+    {
+        return securityProps;
     }
 
     /**

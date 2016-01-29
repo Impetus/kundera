@@ -134,7 +134,7 @@
 		<class>com.impetus.client.oraclenosql.entities.UserInformation</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
-			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.nodes" value="localhost,Impetus-N178Cent" />
 			<property name="kundera.port" value="5000" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.oraclenosql.OracleNoSQLClientFactory" />

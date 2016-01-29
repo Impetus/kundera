@@ -40,7 +40,7 @@ public class OracleNoSQLHost implements Host
 
     private String password;
     
-    private Properties secProps = new Properties();
+   
 
     
     public OracleNoSQLHost(String host)
@@ -155,16 +155,6 @@ public class OracleNoSQLHost implements Host
         return false;
     }
 
-    public void setSecurityProps(Properties secProps)
-    {
-        this.secProps = secProps;
-        
-    }
-
-    public Properties getSecurityProps()
-    {
-        return this.secProps;
-        
-    }
+ 
   
 }

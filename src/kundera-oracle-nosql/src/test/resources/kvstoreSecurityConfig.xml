@@ -5,8 +5,8 @@
 			<name>oraclenosql</name>
 			<connection>
 				<properties>
-<!-- 				  <property name="oracle.kv.security" -->
-<!-- 						value="/home/impadmin/Softwares/kv-3.2.5/kvroot/security/client.security" /> -->
+				  <property name="oracle.kv.security"
+						value="/home/impadmin/oracle/client.txt" />
 				</properties>
 				<servers>
 					<server>

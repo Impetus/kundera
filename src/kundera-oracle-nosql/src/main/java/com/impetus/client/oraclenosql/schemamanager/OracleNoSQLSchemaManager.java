@@ -18,13 +18,16 @@ package com.impetus.client.oraclenosql.schemamanager;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.persistence.Embeddable;
 
 import oracle.kv.FaultException;
+import oracle.kv.KVSecurityConstants;
 import oracle.kv.KVStore;
 import oracle.kv.KVStoreConfig;
 import oracle.kv.KVStoreFactory;
+import oracle.kv.PasswordCredentials;
 import oracle.kv.table.StatementResult;
 import oracle.kv.table.Table;
 import oracle.kv.table.TableAPI;
@@ -61,6 +64,8 @@ public class OracleNoSQLSchemaManager extends AbstractSchemaManager implements S
 
     /** The table api. */
     private TableAPI tableAPI;
+
+    private Properties securityProps = new Properties();
 
     /**
      * Instantiates a new oracle no sql schema manager.
@@ -147,6 +152,8 @@ public class OracleNoSQLSchemaManager extends AbstractSchemaManager implements S
     @Override
     protected boolean initiateClient()
     {
+        String[] hostsList = new String[hosts.length];
+        int count = 0;
         for (String host : hosts)
         {
             if (host == null || !StringUtils.isNumeric(port) || port.isEmpty())
@@ -154,17 +161,37 @@ public class OracleNoSQLSchemaManager extends AbstractSchemaManager implements S
                 logger.error("Host or port should not be null / port should be numeric");
                 throw new IllegalArgumentException("Host or port should not be null / port should be numeric");
             }
-            try
-            {
-                kvStore = KVStoreFactory.getStore(new KVStoreConfig(databaseName, host + ":" + port));
-                tableAPI = kvStore.getTableAPI();
-            }
-            catch (FaultException e)
-            {
-                logger.error("Unable to get KVStore. Caused by ", e);
-                throw new KunderaException("Unable to get KVStore. Caused by ", e);
-            }
+            hostsList[count] = host + ":" + port;
+            count++;
         }
+        KVStoreConfig kconfig = new KVStoreConfig(databaseName, hostsList);
+        if (!securityProps.isEmpty())
+        {
+
+            kconfig.setSecurityProperties(securityProps);
+
+        }
+
+        try
+        {
+            if (userName != null && password != null)
+            {
+                kvStore = KVStoreFactory.getStore(kconfig, new PasswordCredentials(userName, password.toCharArray()),
+                        null);
+            }
+            else
+            {
+                kvStore = KVStoreFactory.getStore(kconfig);
+            }
+
+            tableAPI = kvStore.getTableAPI();
+        }
+        catch (FaultException e)
+        {
+            logger.error("Unable to get KVStore. Caused by ", e);
+            throw new KunderaException("Unable to get KVStore. Caused by ", e);
+        }
+
         return true;
     }
 
@@ -191,8 +218,8 @@ public class OracleNoSQLSchemaManager extends AbstractSchemaManager implements S
             catch (FaultException e)
             {
                 logger.error("Error while getting table " + tableInfo.getTableName() + ". Caused By: ", e);
-                throw new SchemaGenerationException(e,
-                        "Error while getting table " + tableInfo.getTableName() + ". Caused By: ");
+                throw new SchemaGenerationException(e, "Error while getting table " + tableInfo.getTableName()
+                        + ". Caused By: ");
             }
         }
     }
@@ -367,8 +394,8 @@ public class OracleNoSQLSchemaManager extends AbstractSchemaManager implements S
         StatementResult result = tableAPI.executeSync(builder.toString());
         if (!result.isSuccessful())
         {
-            throw new SchemaGenerationException(
-                    "Unable to CREATE Index with Index Name [" + indexName + "] for table [" + tableName + "]");
+            throw new SchemaGenerationException("Unable to CREATE Index with Index Name [" + indexName
+                    + "] for table [" + tableName + "]");
         }
     }
 
@@ -492,6 +519,67 @@ public class OracleNoSQLSchemaManager extends AbstractSchemaManager implements S
     protected void create_drop(List<TableInfo> tableInfos)
     {
         create(tableInfos);
+    }
+
+    /**
+     * @param secProps
+     * @param connectionProperties
+     */
+    private void setSecurityProps()
+    {
+        if (externalProperties.containsKey(KVSecurityConstants.TRANSPORT_PROPERTY))
+        {
+            securityProps.put(KVSecurityConstants.TRANSPORT_PROPERTY,
+                    externalProperties.get(KVSecurityConstants.TRANSPORT_PROPERTY));
+        }
+
+        if (externalProperties.containsKey(KVSecurityConstants.SSL_TRUSTSTORE_TYPE_PROPERTY))
+        {
+            securityProps.put(KVSecurityConstants.SSL_TRUSTSTORE_TYPE_PROPERTY,
+                    externalProperties.get(KVSecurityConstants.SSL_TRUSTSTORE_TYPE_PROPERTY));
+        }
+        if (externalProperties.containsKey(KVSecurityConstants.SSL_TRUSTSTORE_FILE_PROPERTY))
+        {
+            securityProps.put(KVSecurityConstants.SSL_TRUSTSTORE_FILE_PROPERTY,
+                    externalProperties.get(KVSecurityConstants.SSL_TRUSTSTORE_FILE_PROPERTY));
+        }
+        if (externalProperties.containsKey(KVSecurityConstants.SSL_PROTOCOLS_PROPERTY))
+        {
+            securityProps.put(KVSecurityConstants.SSL_PROTOCOLS_PROPERTY,
+                    externalProperties.get(KVSecurityConstants.SSL_PROTOCOLS_PROPERTY));
+        }
+        if (externalProperties.containsKey(KVSecurityConstants.SSL_HOSTNAME_VERIFIER_PROPERTY))
+        {
+            securityProps.put(KVSecurityConstants.SSL_HOSTNAME_VERIFIER_PROPERTY,
+                    externalProperties.get(KVSecurityConstants.SSL_HOSTNAME_VERIFIER_PROPERTY));
+        }
+        if (externalProperties.containsKey(KVSecurityConstants.SSL_CIPHER_SUITES_PROPERTY))
+        {
+            securityProps.put(KVSecurityConstants.SSL_CIPHER_SUITES_PROPERTY,
+                    externalProperties.get(KVSecurityConstants.SSL_CIPHER_SUITES_PROPERTY));
+        }
+        if (externalProperties.containsKey(KVSecurityConstants.SECURITY_FILE_PROPERTY))
+        {
+            securityProps.put(KVSecurityConstants.SECURITY_FILE_PROPERTY,
+                    externalProperties.get(KVSecurityConstants.SECURITY_FILE_PROPERTY));
+        }
+
+        if (externalProperties.containsKey(KVSecurityConstants.AUTH_WALLET_PROPERTY))
+        {
+            securityProps.put(KVSecurityConstants.AUTH_WALLET_PROPERTY,
+                    externalProperties.get(KVSecurityConstants.AUTH_WALLET_PROPERTY));
+        }
+        if (externalProperties.containsKey(KVSecurityConstants.AUTH_USERNAME_PROPERTY))
+        {
+            securityProps.put(KVSecurityConstants.AUTH_USERNAME_PROPERTY,
+                    externalProperties.get(KVSecurityConstants.AUTH_USERNAME_PROPERTY));
+        }
+        if (externalProperties.containsKey(KVSecurityConstants.AUTH_PWDFILE_PROPERTY))
+        {
+            securityProps.put(KVSecurityConstants.AUTH_PWDFILE_PROPERTY,
+                    externalProperties.get(KVSecurityConstants.AUTH_PWDFILE_PROPERTY));
+        }
+
     }
 
 }

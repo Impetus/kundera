@@ -52,11 +52,18 @@ Currently Supported Datasources
 *  Elastic-search
 *  Couchdb
 *  Relational databases
+*  Spark enabled support for Hive, Teradata, HDFS,CSV
 
 
 Recent Releases
 ================================
-####Please Note: trunk is current development branch. kundera-3.2 is released tag.
+####Please Note: trunk is current development branch. kundera-3.3 is released tag.
+
+#### 16-January-2016 - Kundera 3.3 released
+This release includes [bug fixes] (https://github.com/impetus-opensource/Kundera/wiki/Bug-Fixes), additional  improvements and the following new features : 
+   * Support for schema generation for relational entities and composite columns added with kundera-oracle-no-sql 
+   * Support for like operator and regex enabled for kundera-hbase
+   * Redis 3.0 can now be used with kundera-redis
 
 #### 16-November-2015 - Kundera 3.2 released
 This release includes [bug fixes] (https://github.com/impetus-opensource/Kundera/wiki/Bug-Fixes), additional  improvements and the following new features : 
