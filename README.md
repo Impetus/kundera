@@ -87,6 +87,8 @@ Important Links
    * [Kundera with GWT] (https://github.com/impetus-opensource/Kundera/wiki/Using-Kundera-with-GWT)
    * [Kundera with JBoss] (https://github.com/impetus-opensource/Kundera/wiki/Using-Kundera-with-Jboss)
    * [Kundera with Spring] (https://github.com/impetus-opensource/Kundera/wiki/Building-Applications-with-Kundera-and-Spring)
+   * [Kundera with Spark] (https://github.com/impetus-opensource/Kundera/wiki/Kundera-with-Spark)
+* [Kundera Tagged Questions on stackoverflow.com] (http://stackoverflow.com/questions/tagged/kundera)
 * [Releases] (https://github.com/impetus-opensource/Kundera/blob/trunk/src/README.md)
 
 
