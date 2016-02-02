@@ -1143,7 +1143,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
                 DBCollection dbCollection = mongoDb.getCollection(documentName);
                 KunderaCoreUtils.printQuery("Persist collection:" + documentName, showQuery);
 
-                dbCollection.save(documents.get(documentName));
+                dbCollection.save(documents.get(documentName),getWriteConcern());
             }
         }
         else
