@@ -14,16 +14,12 @@
 	<url>http://maven.apache.org</url>
 
 	<properties>
-		<hadoop.version>2.2.0</hadoop.version>
-		<hbase.version>0.96.1.1-hadoop2</hbase.version>
+		<hadoop.version>2.5</hadoop.version>
+		<hbase.version>1.1.2</hbase.version>
 		<thrift.version>0.9.0</thrift.version>
 	</properties>
 
-	<!-- Dependencies -->
 	<dependencies>
-
-
-
 		<dependency>
 			<groupId>org.apache.hbase</groupId>
 			<artifactId>hbase-client</artifactId>
