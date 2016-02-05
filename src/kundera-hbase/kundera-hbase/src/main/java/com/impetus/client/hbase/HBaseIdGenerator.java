@@ -17,7 +17,7 @@ package com.impetus.client.hbase;
 
 import java.io.IOException;
 
-import org.apache.hadoop.hbase.client.HTableInterface;
+import org.apache.hadoop.hbase.client.Table;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,14 +46,19 @@ public class HBaseIdGenerator implements TableGenerator
      * com.impetus.kundera.client.ClientBase, java.lang.Object)
      */
     @Override
-    public Object generate(TableGeneratorDiscriptor discriptor, ClientBase client, String dataType)
+    public Object generate(final TableGeneratorDiscriptor discriptor,
+            ClientBase client, String dataType)
     {
         try
         {
-            HTableInterface hTable = ((HBaseDataHandler) ((HBaseClient) client).handler).gethTable(discriptor
-                    .getSchema());
-            Long latestCount = hTable.incrementColumnValue(discriptor.getPkColumnValue().getBytes(), discriptor
-                    .getTable().getBytes(), discriptor.getValueColumnName().getBytes(), 1);
+            Long latestCount = ((HBaseClient) client).getRequestExecutor().execute(
+                    new TableRequest<Long>(discriptor.getSchema()) {
+                        protected Long execute(Table table) throws IOException {
+                            return table.incrementColumnValue(discriptor.getPkColumnValue().getBytes(),
+                                    discriptor.getTable().getBytes(),
+                                    discriptor.getValueColumnName().getBytes(), 1);
+                        }
+                    });
             if (latestCount == 1)
             {
                 return (long) discriptor.getInitialValue();

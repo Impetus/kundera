@@ -34,13 +34,15 @@ import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 
+import com.impetus.client.hbase.AdminRequest;
+import com.impetus.client.hbase.RequestExecutor;
+import com.impetus.client.hbase.TableRequest;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
-import org.apache.hadoop.hbase.MasterNotRunningException;
-import org.apache.hadoop.hbase.client.HBaseAdmin;
-import org.apache.hadoop.hbase.client.HTableInterface;
-import org.apache.hadoop.hbase.client.HTablePool;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Admin;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.FilterList;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -81,20 +83,15 @@ public class HBaseDataHandler implements DataHandler
     /** the log used by this class. */
     private static Logger log = LoggerFactory.getLogger(HBaseDataHandler.class);
 
-    /** The admin. */
-    private HBaseAdmin admin;
-
     /** The conf. */
     private Configuration conf;
-
-    /** The h table pool. */
-    private HTablePool hTablePool;
 
     /** The hbase reader. */
     private Reader hbaseReader = new HBaseReader();
 
+    private RequestExecutor executor;
     /** The hbase writer. */
-    private Writer hbaseWriter = new HBaseWriter();
+    private Writer hbaseWriter;
 
     private FilterList filter = null;
 
@@ -107,17 +104,16 @@ public class HBaseDataHandler implements DataHandler
      * 
      * @param conf
      *            the conf
-     * @param hTablePool
-     *            the h table pool
      */
-    public HBaseDataHandler(final KunderaMetadata kunderaMetadata, Configuration conf, HTablePool hTablePool)
+    public HBaseDataHandler(final KunderaMetadata kunderaMetadata, Configuration conf,
+            RequestExecutor executor)
     {
         try
         {
             this.kunderaMetadata = kunderaMetadata;
             this.conf = conf;
-            this.hTablePool = hTablePool;
-            this.admin = new HBaseAdmin(conf);
+            this.executor = executor;
+            hbaseWriter = new HBaseWriter(executor);
         }
         catch (Exception e)
         {
@@ -134,78 +130,22 @@ public class HBaseDataHandler implements DataHandler
      * java.lang.String, java.lang.String[])
      */
     @Override
-    public void createTableIfDoesNotExist(final String tableName, final String... colFamily)
-            throws MasterNotRunningException, IOException
+    public void createTableIfDoesNotExist(final TableName tableName, final String... colFamily)
+            throws IOException
     {
-        if (!admin.tableExists(Bytes.toBytes(tableName)))
-        {
-            HTableDescriptor htDescriptor = new HTableDescriptor(tableName);
-            for (String columnFamily : colFamily)
-            {
-                HColumnDescriptor familyMetadata = new HColumnDescriptor(columnFamily);
-                htDescriptor.addFamily(familyMetadata);
-            }
-            admin.createTable(htDescriptor);
-        }
-    }
-
-    /**
-     * Adds the column family to table.
-     * 
-     * @param tableName
-     *            the table name
-     * @param columnFamilyName
-     *            the column family name
-     * @throws IOException
-     *             Signals that an I/O exception has occurred.
-     */
-    private void addColumnFamilyToTable(String tableName, String columnFamilyName) throws IOException
-    {
-        HColumnDescriptor cfDesciptor = new HColumnDescriptor(columnFamilyName);
-
-        try
-        {
-            if (admin.tableExists(tableName))
-            {
-
-                // Before any modification to table schema, it's necessary to
-                // disable it
-                if (!admin.isTableEnabled(tableName))
-                {
-                    admin.enableTable(tableName);
+        executor.execute(new AdminRequest() {
+            protected void execute(Admin admin) throws IOException {
+                if (admin.tableExists(tableName)) {
+                    return;
                 }
-                HTableDescriptor descriptor = admin.getTableDescriptor(tableName.getBytes());
-                boolean found = false;
-                for (HColumnDescriptor hColumnDescriptor : descriptor.getColumnFamilies())
-                {
-                    if (hColumnDescriptor.getNameAsString().equalsIgnoreCase(columnFamilyName))
-                        found = true;
+                HTableDescriptor htDescriptor = new HTableDescriptor(tableName);
+                for (String columnFamily : colFamily) {
+                    HColumnDescriptor familyMetadata = new HColumnDescriptor(columnFamily);
+                    htDescriptor.addFamily(familyMetadata);
                 }
-                if (!found)
-                {
-
-                    if (admin.isTableEnabled(tableName))
-                    {
-                        admin.disableTable(tableName);
-                    }
-
-                    admin.addColumn(tableName, cfDesciptor);
-
-                    // Enable table once done
-                    admin.enableTable(tableName);
-                }
+                admin.createTable(htDescriptor);
             }
-            else
-            {
-                log.warn("Table {} doesn't exist, so no question of adding column family {} to it!", tableName,
-                        columnFamilyName);
-            }
-        }
-        catch (IOException e)
-        {
-            log.error("Error while adding column family {}, to table{} . ", columnFamilyName, tableName);
-            throw e;
-        }
+        });
     }
 
     /*
@@ -217,18 +157,10 @@ public class HBaseDataHandler implements DataHandler
      * java.lang.String, java.util.List)
      */
     @Override
-    public List readData(final String tableName, Class clazz, EntityMetadata m, final Object rowKey,
+    public List readData(final Table table, Class clazz, EntityMetadata m, final Object rowKey,
             List<String> relationNames, FilterList f, String... columns) throws IOException
     {
-
         List output = null;
-
-        Object entity = null;
-
-        HTableInterface hTable = null;
-
-        hTable = gethTable(tableName);
-
         if (getFilter(m.getTableName()) != null)
         {
             if (f == null)
@@ -248,13 +180,13 @@ public class HBaseDataHandler implements DataHandler
                 .getSecondaryTablesName();
         secondaryTables.add(m.getTableName());
         Collections.shuffle(secondaryTables);
-        List<HBaseData> results = new ArrayList<HBaseData>();
+        List<HBaseData> results = new ArrayList<>();
         for (String colTableName : secondaryTables)
         {
-            results.addAll(hbaseReader.LoadData(hTable, colTableName, rowKey, f, columns));
+            results.addAll(hbaseReader.LoadData(table, colTableName, rowKey, f, columns));
         }
 
-        output = onRead(tableName, clazz, m, output, hTable, entity, relationNames, results);
+        output = onRead(clazz, m, output, relationNames, results);
         return output;
     }
 
@@ -267,18 +199,10 @@ public class HBaseDataHandler implements DataHandler
      * java.lang.String, java.util.List)
      */
     @Override
-    public List readAll(final String tableName, Class clazz, EntityMetadata m, final List<Object> rowKey,
+    public List readAll(final Table hTable, Class clazz, EntityMetadata m, final List<Object> rowKey,
             List<String> relationNames, String... columns) throws IOException
     {
-
         List output = null;
-
-        Object entity = null;
-
-        HTableInterface hTable = null;
-
-        hTable = gethTable(tableName);
-
         // Load raw data from HBase
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
@@ -300,7 +224,7 @@ public class HBaseDataHandler implements DataHandler
             }
         }
 
-        output = onRead(tableName, clazz, m, output, hTable, entity, relationNames, results);
+        output = onRead(clazz, m, output, relationNames, results);
         return output;
     }
 
@@ -314,12 +238,10 @@ public class HBaseDataHandler implements DataHandler
      * byte[], byte[])
      */
     @Override
-    public List readDataByRange(String tableName, Class clazz, EntityMetadata m, byte[] startRow, byte[] endRow,
+    public List readDataByRange(Table table, Class clazz, EntityMetadata m, byte[] startRow, byte[] endRow,
             String[] columns, FilterList f) throws IOException
     {
         List output = new ArrayList();
-        HTableInterface hTable = null;
-        Object entity = null;
         List<String> relationNames = m.getRelationNames();
         Filter filter = getFilter(m.getTableName());
         if (filter != null)
@@ -331,10 +253,8 @@ public class HBaseDataHandler implements DataHandler
             f.addFilter(filter);
         }
         // Load raw data from HBase
-        hTable = gethTable(tableName);
-        List<HBaseData> results = hbaseReader.loadAll(hTable, f, startRow, endRow, m.getTableName(), null, columns);
-        output = onRead(tableName, clazz, m, output, hTable, entity, relationNames, results);
-
+        List<HBaseData> results = hbaseReader.loadAll(table, f, startRow, endRow, m.getTableName(), null, columns);
+        output = onRead(clazz, m, output, relationNames, results);
         return output;
     }
 
@@ -347,11 +267,9 @@ public class HBaseDataHandler implements DataHandler
      * java.lang.String, java.util.List)
      */
     @Override
-    public void writeData(String tableName, EntityMetadata m, Object entity, Object rowId,
+    public void writeData(Table table, EntityMetadata m, Object entity, Object rowId,
             List<RelationHolder> relations, boolean showQuery) throws IOException
     {
-        HTableInterface hTable = gethTable(tableName);
-
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
 
@@ -366,16 +284,16 @@ public class HBaseDataHandler implements DataHandler
 
         HBaseDataWrapper columnWrapper = new HBaseDataWrapper(rowId, new java.util.HashMap<String, Attribute>(),
                 entity, null);
-        List<HBaseDataWrapper> persistentData = new ArrayList<HBaseDataHandler.HBaseDataWrapper>(attributes.size());
+        List<HBaseDataWrapper> persistentData = new ArrayList<>(attributes.size());
 
-        Map<String, HBaseDataWrapper> columnWrappers = preparePersistentData(tableName, m.getTableName(), entity,
+        Map<String, HBaseDataWrapper> columnWrappers = preparePersistentData(m.getTableName(), entity,
                 rowId, metaModel, attributes, columnWrapper, persistentData, showQuery);
 
-        writeColumnData(hTable, entity, columnWrappers);
+        writeColumnData(table, entity, columnWrappers);
 
         for (HBaseDataWrapper wrapper : persistentData)
         {
-            hbaseWriter.writeColumns(hTable, wrapper.getColumnFamily(), wrapper.getRowKey(), wrapper.getColumns(),
+            hbaseWriter.writeColumns(table, wrapper.getColumnFamily(), wrapper.getRowKey(), wrapper.getColumns(),
                     wrapper.getValues(), wrapper.getEntity());
         }
 
@@ -385,7 +303,7 @@ public class HBaseDataHandler implements DataHandler
 
         if (relations != null && !relations.isEmpty())
         {
-            hbaseWriter.writeRelations(hTable, rowId, containsEmbeddedObjectsOnly, relations, m.getTableName());
+            hbaseWriter.writeRelations(table, rowId, containsEmbeddedObjectsOnly, relations, m.getTableName());
         }
 
         // add discriminator column
@@ -398,19 +316,17 @@ public class HBaseDataHandler implements DataHandler
         {
             List<RelationHolder> discriminator = new ArrayList<RelationHolder>(1);
             discriminator.add(new RelationHolder(discrColumn, discrValue));
-            hbaseWriter.writeRelations(hTable, rowId, containsEmbeddedObjectsOnly, discriminator, m.getTableName());
+            hbaseWriter.writeRelations(table, rowId, containsEmbeddedObjectsOnly, discriminator, m.getTableName());
         }
-
-        puthTable(hTable);
     }
 
-    private void writeColumnData(HTableInterface hTable, Object entity, Map<String, HBaseDataWrapper> columnWrappers)
+    private void writeColumnData(Table table, Object entity, Map<String, HBaseDataWrapper> columnWrappers)
             throws IOException
     {
 
         for (HBaseDataWrapper wrapper : columnWrappers.values())
         {
-            hbaseWriter.writeColumns(hTable, wrapper.getRowKey(), wrapper.getColumns(), entity,
+            hbaseWriter.writeColumns(table, wrapper.getRowKey(), wrapper.getColumns(), entity,
                     wrapper.getColumnFamily());
         }
 
@@ -424,14 +340,10 @@ public class HBaseDataHandler implements DataHandler
      * .String, java.lang.String, java.util.Map)
      */
     @Override
-    public void writeJoinTableData(String tableName, Object rowId, Map<String, Object> columns, String columnFamilyName)
+    public void writeJoinTableData(Table hTable, Object rowId, Map<String, Object> columns, String columnFamilyName)
             throws IOException
     {
-        HTableInterface hTable = gethTable(tableName);
-
         hbaseWriter.writeColumns(hTable, rowId, columns, columnFamilyName);
-
-        puthTable(hTable);
     }
 
     /*
@@ -442,19 +354,18 @@ public class HBaseDataHandler implements DataHandler
      * (java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
-    public <E> List<E> getForeignKeysFromJoinTable(String schemaName, String joinTableName, Object rowKey,
-            String inverseJoinColumnName)
+    public <E> List<E> getForeignKeysFromJoinTable(String schemaName,
+            final String joinTableName, final Object rowKey, String inverseJoinColumnName)
     {
         List<E> foreignKeys = new ArrayList<E>();
-
-        HTableInterface hTable = null;
-
         // Load raw data from Join Table in HBase
         try
         {
-            hTable = gethTable(schemaName);
-
-            List<HBaseData> results = hbaseReader.LoadData(hTable, joinTableName, rowKey, getFilter(joinTableName));
+            List<HBaseData> results = executor.execute(new TableRequest<List<HBaseData>>(schemaName) {
+                protected List<HBaseData> execute(Table table) throws IOException {
+                    return hbaseReader.LoadData(table, joinTableName, rowKey, getFilter(joinTableName));
+                }
+            });
 
             // assuming rowKey is not null.
             if (results != null && !results.isEmpty())
@@ -482,49 +393,8 @@ public class HBaseDataHandler implements DataHandler
         }
         catch (IOException e)
         {
-            return foreignKeys;
-        }
-        finally
-        {
-            try
-            {
-                if (hTable != null)
-                {
-                    puthTable(hTable);
-                }
-            }
-            catch (IOException e)
-            {
-
-                // Do nothing.
-            }
         }
         return foreignKeys;
-    }
-
-    /**
-     * Selects an HTable from the pool and returns.
-     * 
-     * @param tableName
-     *            Name of HBase table
-     * @return the h table
-     * @throws IOException
-     *             Signals that an I/O exception has occurred.
-     */
-    public HTableInterface gethTable(final String tableName) throws IOException
-    {
-        return hTablePool.getTable(tableName);
-    }
-
-    /**
-     * Puts HTable back into the HBase table pool.
-     * 
-     * @param hTable
-     *            HBase Table instance
-     */
-    private void puthTable(HTableInterface hTable) throws IOException
-    {
-        hTablePool.putTable(hTable);
     }
 
     /*
@@ -782,9 +652,6 @@ public class HBaseDataHandler implements DataHandler
     /**
      * Sets the h base data into object.
      * 
-     * @param colData
-     *            the col data
-     * @param columnFamilyField
      *            the column family field
      * @param columnNameToFieldMap
      *            the column name to field map
@@ -820,9 +687,9 @@ public class HBaseDataHandler implements DataHandler
      * com.impetus.client.hbase.admin.DataHandler#deleteRow(java.lang.String,
      * java.lang.String)
      */
-    public void deleteRow(Object rowKey, String tableName, String columnFamilyName) throws IOException
+    public void deleteRow(Object rowKey, Table table, String columnFamilyName) throws IOException
     {
-        hbaseWriter.delete(gethTable(tableName), rowKey, columnFamilyName);
+        hbaseWriter.delete(table, rowKey, columnFamilyName);
     }
 
     @Override
@@ -866,21 +733,16 @@ public class HBaseDataHandler implements DataHandler
 
     /**
      * 
-     * @param tableName
      * @param clazz
      * @param m
-     * @param startRow
-     * @param endRow
      * @param output
-     * @param hTable
-     * @param entity
      * @param relationNames
      * @param results
      * @return
      * @throws IOException
      */
-    private List onRead(String tableName, Class clazz, EntityMetadata m, List output, HTableInterface hTable,
-            Object entity, List<String> relationNames, List<HBaseData> results) throws IOException
+    private List onRead(Class clazz, EntityMetadata m, List output,
+            List<String> relationNames, List<HBaseData> results) throws IOException
     {
         try
         {
@@ -892,7 +754,7 @@ public class HBaseDataHandler implements DataHandler
 
                 for (HBaseData data : results)
                 {
-                    entity = KunderaCoreUtils.createNewInstance(clazz);
+                    Object entity = KunderaCoreUtils.createNewInstance(clazz);
                     /* Set Row Key */
 
                     MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
@@ -931,14 +793,6 @@ public class HBaseDataHandler implements DataHandler
             log.error("Error while creating an instance of {}, Caused by: .", clazz, e);
             throw new PersistenceException(e);
         }
-        finally
-        {
-            if (hTable != null)
-            {
-                puthTable(hTable);
-            }
-        }
-
         return output;
     }
 
@@ -1047,8 +901,8 @@ public class HBaseDataHandler implements DataHandler
 
     }
 
-    public List scanData(Filter f, final String tableName, Class clazz, EntityMetadata m, String columnFamily,
-            String qualifier) throws IOException, InstantiationException, IllegalAccessException
+    public List scanData(Filter f, final Table table, Class clazz, EntityMetadata m, String columnFamily,
+            String qualifier) throws IOException
     {
         List returnedResults = new ArrayList();
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
@@ -1070,28 +924,30 @@ public class HBaseDataHandler implements DataHandler
                 break;
             }
         }
-        List<HBaseData> results = hbaseReader.loadAll(gethTable(tableName), f, null, null, m.getTableName(),
+        List<HBaseData> results = hbaseReader.loadAll(table, f, null, null, m.getTableName(),
                 isCollection ? qualifier : null, null);
         if (results != null)
         {
             for (HBaseData row : results)
             {
-                Object entity = clazz.newInstance();// Entity Object
-                /* Set Row Key */
-                PropertyAccessorHelper.setId(entity, m, HBaseUtils.fromBytes(m, metaModel, row.getRowKey()));
-
-                returnedResults.add(populateEntityFromHbaseData(entity, row, m, row.getRowKey(), m.getRelationNames()));
+                try {
+                    Object entity = clazz.newInstance();
+                    /* Set Row Key */
+                    PropertyAccessorHelper.setId(entity, m, HBaseUtils.fromBytes(m, metaModel, row.getRowKey()));
+                    returnedResults.add(populateEntityFromHbaseData(entity, row, m, row.getRowKey(), m.getRelationNames()));
+                } catch (IllegalAccessException|InstantiationException e) {
+                    log.error("Error during find By Relation, Caused by: .", e);
+                    throw new KunderaException(e);
+                }
             }
         }
         return returnedResults;
     }
 
     @Override
-    public Object[] scanRowyKeys(FilterList filterList, String tableName, String columnFamilyName, String columnName,
+    public Object[] scanRowyKeys(FilterList filterList, Table hTable, String columnFamilyName, String columnName,
             final Class rowKeyClazz) throws IOException
     {
-        HTableInterface hTable = null;
-        hTable = gethTable(tableName);
         return hbaseReader.scanRowKeys(hTable, filterList, columnFamilyName, columnName, rowKeyClazz);
     }
 
@@ -1117,7 +973,7 @@ public class HBaseDataHandler implements DataHandler
 
     /**
      * 
-     * @param tableName
+     * @param columnFamily
      * @param entity
      * @param rowId
      * @param metaModel
@@ -1127,12 +983,12 @@ public class HBaseDataHandler implements DataHandler
      * @return
      * @throws IOException
      */
-    public Map<String, HBaseDataWrapper> preparePersistentData(String tableName, String columnFamily, Object entity,
+    public Map<String, HBaseDataWrapper> preparePersistentData(String columnFamily, Object entity,
             Object rowId, MetamodelImpl metaModel, Set<Attribute> attributes, HBaseDataWrapper columnWrapper,
             List<HBaseDataWrapper> persistentData, boolean showQuery) throws IOException
     {
 
-        Map<String, HBaseDataWrapper> persistentDataWrappers = new HashMap<String, HBaseDataWrapper>();
+        Map<String, HBaseDataWrapper> persistentDataWrappers = new HashMap<>();
         persistentDataWrappers.put(columnFamily, columnWrapper);
         StringBuilder printQuery = null;
         if (showQuery)
@@ -1353,7 +1209,7 @@ public class HBaseDataHandler implements DataHandler
      * @param data
      * @throws IOException
      */
-    public void batch_insert(Map<HTableInterface, List<HBaseDataWrapper>> data) throws IOException
+    public void batch_insert(Map<TableName, List<HBaseDataWrapper>> data) throws IOException
     {
         hbaseWriter.persistRows(data);
     }
@@ -1365,15 +1221,13 @@ public class HBaseDataHandler implements DataHandler
 
     public Object next(EntityMetadata m)
     {
-        Object entity = null;
         HBaseData result = ((HBaseReader) hbaseReader).next();
         List<HBaseData> results = new ArrayList<HBaseData>();
         List output = new ArrayList();
         results.add(result);
         try
         {
-            output = onRead(m.getSchema(), m.getEntityClazz(), m, output, gethTable(m.getSchema()), entity,
-                    m.getRelationNames(), results);
+            output = onRead(m.getEntityClazz(), m, output, m.getRelationNames(), results);
         }
         catch (IOException e)
         {
@@ -1403,7 +1257,8 @@ public class HBaseDataHandler implements DataHandler
 
     public HBaseDataHandler getHandle()
     {
-        HBaseDataHandler handler = new HBaseDataHandler(this.kunderaMetadata, this.conf, this.hTablePool);
+        HBaseDataHandler handler = new HBaseDataHandler(this.kunderaMetadata,
+                this.conf, executor);
         handler.filter = this.filter;
         handler.filters = this.filters;
         return handler;

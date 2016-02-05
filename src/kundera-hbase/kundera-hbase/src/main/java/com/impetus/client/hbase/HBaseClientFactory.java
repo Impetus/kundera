@@ -46,16 +46,7 @@ public class HBaseClientFactory extends GenericClientFactory
     /** The conf. */
     private Configuration conf;
 
-    /** The h table pool. */
-    private HTablePool hTablePool;
-
-    /** The Constant DEFAULT_POOL_SIZE. */
-    private static final int DEFAULT_POOL_SIZE = 100;
-
     private static final String DEFAULT_ZOOKEEPER_PORT = "2181";
-
-    /** The pool size. */
-    private int poolSize;
 
     @Override
     public void initialize(Map<String, Object> externalProperty)
@@ -67,12 +58,10 @@ public class HBaseClientFactory extends GenericClientFactory
 
         String node = null;
         String port = null;
-        String poolSize = null;
         if (externalProperty != null)
         {
             node = (String) externalProperty.get(PersistenceProperties.KUNDERA_NODES);
             port = (String) externalProperty.get(PersistenceProperties.KUNDERA_PORT);
-            poolSize = (String) externalProperty.get(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
         }
         if (node == null)
         {
@@ -81,19 +70,6 @@ public class HBaseClientFactory extends GenericClientFactory
         if (port == null)
         {
             port = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_PORT);
-        }
-        if (poolSize == null)
-        {
-            poolSize = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
-        }
-
-        if (StringUtils.isEmpty(poolSize))
-        {
-            this.poolSize = DEFAULT_POOL_SIZE;
-        }
-        else
-        {
-            this.poolSize = Integer.parseInt(poolSize);
         }
 
         onValidation(node, port);
@@ -125,14 +101,13 @@ public class HBaseClientFactory extends GenericClientFactory
     @Override
     protected Object createPoolOrConnection()
     {
-        hTablePool = new HTablePool(conf, poolSize);
-        return hTablePool;
+        return null;
     }
 
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
-        return new HBaseClient(indexManager, conf, hTablePool, reader, persistenceUnit, externalProperties, clientMetadata, kunderaMetadata);
+        return new HBaseClient(indexManager, conf, reader, persistenceUnit, externalProperties, clientMetadata, kunderaMetadata);
     }
 
     @Override

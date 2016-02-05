@@ -18,7 +18,7 @@ package com.impetus.client.hbase;
 import java.io.IOException;
 import java.util.List;
 
-import org.apache.hadoop.hbase.client.HTableInterface;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.filter.Filter;
 
 // TODO: Auto-generated Javadoc
@@ -43,7 +43,7 @@ public interface Reader
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    List<HBaseData> LoadData(HTableInterface hTable, String columnFamily, Object rowKey, Filter filter,
+    List<HBaseData> LoadData(Table hTable, String columnFamily, Object rowKey, Filter filter,
             String... columns) throws IOException;
 
     /**
@@ -59,7 +59,7 @@ public interface Reader
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    List<HBaseData> LoadData(HTableInterface hTable, Object rowKey, Filter filter, String... columns)
+    List<HBaseData> LoadData(Table hTable, Object rowKey, Filter filter, String... columns)
             throws IOException;
 
     /**
@@ -78,7 +78,7 @@ public interface Reader
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    List<HBaseData> loadAll(HTableInterface hTable, Filter filter, byte[] startRow, byte[] endRow, String columnFamily,
+    List<HBaseData> loadAll(Table hTable, Filter filter, byte[] startRow, byte[] endRow, String columnFamily,
             String qualifier, String[] columns) throws IOException;
 
     /**
@@ -96,6 +96,6 @@ public interface Reader
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    Object[] scanRowKeys(final HTableInterface hTable, final Filter filter, final String columnFamilyName,
+    Object[] scanRowKeys(final Table hTable, final Filter filter, final String columnFamilyName,
             final String columnName, final Class rowKeyClazz) throws IOException;
 }

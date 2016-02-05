@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.filter.FilterList;
 
 import com.impetus.kundera.db.RelationHolder;
@@ -43,13 +45,12 @@ public interface DataHandler
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    void createTableIfDoesNotExist(String tableName, String... colFamily) throws IOException;
+    void createTableIfDoesNotExist(TableName tableName, String... colFamily) throws IOException;
 
     /**
      * Populates data for give column family, column name, and HBase table name.
      * 
-     * @param tableName
-     *            the table name
+     * @param table
      * @param clazz
      *            the clazz
      * @param m
@@ -63,19 +64,18 @@ public interface DataHandler
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    List readData(String tableName, Class clazz, EntityMetadata m, Object rowKey, List<String> relatationNames,
+    List readData(Table table, Class clazz, EntityMetadata m, Object rowKey, List<String> relationNames,
             FilterList f, String... columns) throws IOException;
 
     /**
      * Populates data for give column family, column name, and HBase table name.
      * 
-     * @param tableName
-     *            the table name
+     * @param table
      * @param clazz
      *            the clazz
      * @param m
      *            the m
-     * @param rowKey
+     * @param rowKeys
      *            the row key
      * @param relationNames
      *            the relation names
@@ -83,28 +83,25 @@ public interface DataHandler
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    List readAll(String tableName, Class clazz, EntityMetadata m, List<Object> rowKeys, List<String> relatationNames,
+    List readAll(Table table, Class clazz, EntityMetadata m, List<Object> rowKeys, List<String> relationNames,
             String... columns) throws IOException;
 
     /**
-     * @param tableName
      * @param clazz
      * @param m
-     * @param relationNames
      * @param startRow
      * @param endRow
      * @param columns
      * @param f
      * @return
      */
-    List readDataByRange(String tableName, Class clazz, EntityMetadata m, byte[] startRow, byte[] endRow,
+    List readDataByRange(Table table, Class clazz, EntityMetadata m, byte[] startRow, byte[] endRow,
             String[] columns, FilterList f) throws IOException;
 
     /**
      * Write data.
      * 
-     * @param tableName
-     *            the table name
+     * @param table
      * @param m
      *            the m
      * @param entity
@@ -116,14 +113,13 @@ public interface DataHandler
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    void writeData(String tableName, EntityMetadata m, Object entity, Object rowId, List<RelationHolder> relations,
+    void writeData(Table table, EntityMetadata m, Object entity, Object rowId, List<RelationHolder> relations,
             boolean showQuery) throws IOException;
 
     /**
      * Writes data into Join Table.
      * 
-     * @param tableName
-     *            the table name
+     * @param table
      * @param rowId
      *            the row id
      * @param columns
@@ -131,7 +127,7 @@ public interface DataHandler
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    void writeJoinTableData(String tableName, Object rowId, Map<String, Object> columns, String columnFamilyName)
+    void writeJoinTableData(Table table, Object rowId, Map<String, Object> columns, String columnFamilyName)
             throws IOException;
 
     /**
@@ -174,13 +170,13 @@ public interface DataHandler
      * 
      * @param rowKey
      *            the row key
-     * @param tableName
+     * @param table
      *            the table name
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    void deleteRow(Object rowKey, String tableName, String columnFamilyName) throws IOException;
+    void deleteRow(Object rowKey, Table table, String columnFamilyName) throws IOException;
 
-    Object[] scanRowyKeys(FilterList filterList, String tableName, String columnFamilyName, String columnName,
+    Object[] scanRowyKeys(FilterList filterList, Table table, String columnFamilyName, String columnName,
             Class rowKeyClazz) throws IOException;
 }

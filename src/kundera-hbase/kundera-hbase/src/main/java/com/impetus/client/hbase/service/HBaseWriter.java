@@ -26,9 +26,12 @@ import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.SingularAttribute;
 
+import com.impetus.client.hbase.BatchPutRequest;
+import com.impetus.client.hbase.RequestExecutor;
+import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.HTableInterface;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -56,6 +59,13 @@ public class HBaseWriter implements Writer
     /** the log used by this class. */
     private static Logger log = LoggerFactory.getLogger(HBaseWriter.class);
 
+    private final RequestExecutor executor;
+
+    public HBaseWriter(RequestExecutor executor) {
+        this.executor = executor;
+    }
+
+
     /*
      * (non-Javadoc)
      * 
@@ -65,13 +75,11 @@ public class HBaseWriter implements Writer
      * java.lang.Object)
      */
     @Override
-    public void writeColumns(HTableInterface htable, String columnFamily, Object rowKey,
+    public void writeColumns(Table table, String columnFamily, Object rowKey,
             Map<String, Attribute> columns,
-
             Map<String, Object> values, Object columnFamilyObj) throws IOException
     {
-        Put p = preparePut(columnFamily, rowKey, columns, values);
-        htable.put(p);
+        table.put(preparePut(columnFamily, rowKey, columns, values));
     }
 
     /*
@@ -83,14 +91,14 @@ public class HBaseWriter implements Writer
      * javax.persistence.metamodel.Attribute, java.lang.Object)
      */
     @Override
-    public void writeColumn(HTableInterface htable, String columnFamily, Object rowKey, Attribute column,
+    public void writeColumn(Table table, String columnFamily, Object rowKey, Attribute column,
             Object columnObj) throws IOException
     {
         Put p = new Put(HBaseUtils.getBytes(rowKey));
-        p.add(Bytes.toBytes(columnFamily), Bytes.toBytes(((AbstractAttribute) column).getJPAColumnName()),
+        p.addColumn(Bytes.toBytes(columnFamily),
+                Bytes.toBytes(((AbstractAttribute) column).getJPAColumnName()),
                 Bytes.toBytes(columnObj.toString()));
-
-        htable.put(p);
+        table.put(p);
     }
 
     /*
@@ -101,27 +109,23 @@ public class HBaseWriter implements Writer
      * client.HTable, java.lang.Object, java.util.Set, java.lang.Object)
      */
     @Override
-    public void writeColumns(HTableInterface htable, Object rowKey, Map<String, Attribute> columns, Object entity,
+    public void writeColumns(Table table, Object rowKey, Map<String, Attribute> columns, Object entity,
             String columnFamilyName) throws IOException
     {
         Put p = new Put(HBaseUtils.getBytes(rowKey));
-
-        boolean present = false;
         for (String columnName : columns.keySet())
         {
             Attribute column = columns.get(columnName);
             if (!column.isCollection() && !((SingularAttribute) column).isId())
             {
-                String qualifier = columnName;
                 try
                 {
-                    byte[] qualValInBytes = Bytes.toBytes(qualifier);
+                    byte[] qualValInBytes = Bytes.toBytes(columnName);
                     Object value = PropertyAccessorHelper.getObject(entity, (Field) column.getJavaMember());
                     if (value != null)
                     {
-                        p.add(columnFamilyName.getBytes(), qualValInBytes, System.currentTimeMillis(),
+                        p.addColumn(columnFamilyName.getBytes(), qualValInBytes, System.currentTimeMillis(),
                                 HBaseUtils.getBytes(value));
-                        present = true;
                     }
                 }
                 catch (PropertyAccessException e1)
@@ -130,10 +134,10 @@ public class HBaseWriter implements Writer
                 }
             }
         }
-        if (present)
-        {
-            htable.put(p);
+        if (p.isEmpty()) {
+            return;
         }
+        table.put(p);
     }
 
     /*
@@ -144,23 +148,18 @@ public class HBaseWriter implements Writer
      * client.HTable, java.lang.Object, java.util.Map)
      */
     @Override
-    public void writeColumns(HTableInterface htable, Object rowKey, Map<String, Object> columns, String columnFamilyName)
+    public void writeColumns(Table table, Object rowKey, Map<String, Object> columns, String columnFamilyName)
             throws IOException
     {
-
         Put p = new Put(HBaseUtils.getBytes(rowKey));
-
-        boolean isPresent = false;
         for (String columnName : columns.keySet())
         {
-            p.add(columnFamilyName.getBytes(), Bytes.toBytes(columnName), HBaseUtils.getBytes(columns.get(columnName)));
-            isPresent = true;
+            p.addColumn(columnFamilyName.getBytes(), Bytes.toBytes(columnName), HBaseUtils.getBytes(columns.get(columnName)));
         }
-
-        if (isPresent)
-        {
-            htable.put(p);
+        if (p.isEmpty()) {
+            return;
         }
+        table.put(p);
     }
 
     /*
@@ -171,35 +170,30 @@ public class HBaseWriter implements Writer
      * .client.HTable, java.lang.Object, boolean, java.util.List)
      */
     @Override
-    public void writeRelations(HTableInterface htable, Object rowKey, boolean containsEmbeddedObjectsOnly,
+    public void writeRelations(Table table, Object rowKey, boolean containsEmbeddedObjectsOnly,
             List<RelationHolder> relations, String columnFamilyName) throws IOException
     {
         Put p = new Put(HBaseUtils.getBytes(rowKey));
-
-        boolean isPresent = false;
         for (RelationHolder r : relations)
         {
             if (r != null)
             {
                 if (containsEmbeddedObjectsOnly)
                 {
-                    p.add(Bytes.toBytes(r.getRelationName()), Bytes.toBytes(r.getRelationName()),
+                    p.addColumn(Bytes.toBytes(r.getRelationName()), Bytes.toBytes(r.getRelationName()),
                             PropertyAccessorHelper.getBytes(r.getRelationValue()));
-                    isPresent = true;
                 }
                 else
                 {
-                    p.add(columnFamilyName.getBytes(), Bytes.toBytes(r.getRelationName()), System.currentTimeMillis(),
+                    p.addColumn(columnFamilyName.getBytes(), Bytes.toBytes(r.getRelationName()), System.currentTimeMillis(),
                             PropertyAccessorHelper.getBytes(r.getRelationValue()));
-                    isPresent = true;
                 }
             }
         }
-
-        if (isPresent)
-        {
-            htable.put(p);
+        if (p.isEmpty()) {
+            return;
         }
+        table.put(p);
     }
 
     // TODO: Scope of performance improvement in this code
@@ -211,17 +205,14 @@ public class HBaseWriter implements Writer
      * .client.HTable, java.lang.String, java.util.Map)
      */
     @Override
-    public void writeForeignKeys(HTableInterface hTable, String rowKey, Map<String, Set<String>> foreignKeyMap)
+    public void writeForeignKeys(Table table, String rowKey, Map<String, Set<String>> foreignKeyMap)
             throws IOException
     {
         Put p = new Put(Bytes.toBytes(rowKey));
 
         // Checking if foreign key column family exists
         Get g = new Get(Bytes.toBytes(rowKey));
-        Result r = hTable.get(g);
-
-        boolean isPresent = false;
-
+        Result r = table.get(g);
         for (Map.Entry<String, Set<String>> entry : foreignKeyMap.entrySet())
         {
             String property = entry.getKey(); // Foreign key name
@@ -236,28 +227,26 @@ public class HBaseWriter implements Writer
 
             if (existingForeignKey == null || existingForeignKey.isEmpty())
             {
-                p.add(Bytes.toBytes(Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME), Bytes.toBytes(property),
+                p.addColumn(Bytes.toBytes(Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME), Bytes.toBytes(property),
                         Bytes.toBytes(keys));
-                isPresent = true;
             }
             else
             {
-                p.add(Bytes.toBytes(Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME), Bytes.toBytes(property),
+                p.addColumn(Bytes.toBytes(Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME), Bytes.toBytes(property),
                         Bytes.toBytes(existingForeignKey + Constants.FOREIGN_KEY_SEPARATOR + keys));
-                isPresent = true;
             }
         }
-        if (isPresent)
-        {
-            hTable.put(p);
+        if (p.isEmpty()) {
+            return;
         }
+        table.put(p);
     }
 
     /**
      * Support for delete over HBase.
      * 
-     * @param hTable
-     *            the h table
+     * @param table
+     *            the table
      * @param rowKey
      *            the row key
      * @param columnFamily
@@ -270,15 +259,15 @@ public class HBaseWriter implements Writer
      * com.impetus.client.hbase.Writer#delete(org.apache.hadoop.hbase.client
      * .HTable, java.lang.String, java.lang.String)
      */
-    public void delete(HTableInterface hTable, Object rowKey, String columnFamily)
+    public void delete(Table table, Object rowKey, String columnFamily)
     {
         try
         {
             byte[] rowBytes = HBaseUtils.getBytes(rowKey);
             Delete delete = new Delete(rowBytes);
             byte[] family = HBaseUtils.getBytes(columnFamily);
-            delete.deleteFamily(family);
-            hTable.delete(delete);
+            delete.addFamily(family);
+            table.delete(delete);
         }
         catch (IOException e)
         {
@@ -293,17 +282,17 @@ public class HBaseWriter implements Writer
      * @see com.impetus.client.hbase.Writer#persistRows(java.util.Map)
      */
     @Override
-    public void persistRows(Map<HTableInterface, List<HBaseDataWrapper>> rows) throws IOException
+    public void persistRows(Map<TableName, List<HBaseDataWrapper>> rows) throws IOException
     {
-        List<Put> dataSet = new ArrayList<Put>(rows.size());
-        for (HTableInterface hTable : rows.keySet())
+        final List<Put> dataSet = new ArrayList<>(rows.size());
+        for (TableName tableName : rows.keySet())
         {
-            List<HBaseDataWrapper> row = rows.get(hTable);
+            List<HBaseDataWrapper> row = rows.get(tableName);
             for (HBaseDataWrapper data : row)
             {
                 dataSet.add(preparePut(data.getColumnFamily(), data.getRowKey(), data.getColumns(), data.getValues()));
             }
-            hTable.put(dataSet);
+            executor.execute(new BatchPutRequest(tableName, dataSet));
             dataSet.clear();
         }
     }
@@ -318,8 +307,6 @@ public class HBaseWriter implements Writer
      * @param columns
      *            the columns
      * @param values TODO
-     * @param columnFamilyObj
-     *            the column family obj
      * @return the put
      * @throws IOException
      *             Signals that an I/O exception has occurred.
@@ -333,14 +320,13 @@ public class HBaseWriter implements Writer
             Attribute column = columns.get(columnName);
             if (!column.isCollection() && !((SingularAttribute) column).isId())
             {
-                String qualifier = columnName;
                 try
                 {
                     Object o = values.get(columnName);
                     byte[] value = HBaseUtils.getBytes(o);
                     if (value != null && columnFamily != null)
                     {
-                        p.add(Bytes.toBytes(columnFamily), Bytes.toBytes(qualifier), value);
+                        p.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(columnName), value);
                     }
                 }
                 catch (PropertyAccessException e1)

@@ -22,7 +22,8 @@ import java.util.Set;
 
 import javax.persistence.metamodel.Attribute;
 
-import org.apache.hadoop.hbase.client.HTableInterface;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Table;
 
 import com.impetus.client.hbase.admin.HBaseDataHandler.HBaseDataWrapper;
 import com.impetus.kundera.db.RelationHolder;
@@ -38,8 +39,8 @@ public interface Writer
     /**
      * Write column.
      * 
-     * @param htable
-     *            the htable
+     * @param table
+     *            the table
      * @param columnFamily
      *            the column family
      * @param rowKey
@@ -51,7 +52,7 @@ public interface Writer
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    void writeColumn(HTableInterface htable, String columnFamily, Object rowKey, Attribute column, Object columnObj)
+    void writeColumn(Table table, String columnFamily, Object rowKey, Attribute column, Object columnObj)
             throws IOException;
 
     /**
@@ -72,15 +73,15 @@ public interface Writer
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    void writeColumns(HTableInterface htable, String columnFamily, Object rowKey, Map<String, Attribute> columns,
+    void writeColumns(Table htable, String columnFamily, Object rowKey, Map<String, Attribute> columns,
             Map<String, Object> values, Object columnFamilyObj) throws IOException;
 
     /**
      * Writes Columns <code>columns</code> into a given table. Each columns is
      * written in their own column family(name same as column name)
      * 
-     * @param htable
-     *            the htable
+     * @param table
+     *            the table
      * @param rowKey
      *            the row key
      * @param columns
@@ -90,14 +91,14 @@ public interface Writer
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    void writeColumns(HTableInterface htable, Object rowKey, Map<String, Attribute> columns, Object entity,
+    void writeColumns(Table table, Object rowKey, Map<String, Attribute> columns, Object entity,
             String columnFamilyName) throws IOException;
 
     /**
      * Write relations.
      * 
-     * @param htable
-     *            the htable
+     * @param table
+     *            the table
      * @param rowKey
      *            the row key
      * @param containsEmbeddedObjectsOnly
@@ -107,7 +108,7 @@ public interface Writer
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    void writeRelations(HTableInterface htable, Object rowKey, boolean containsEmbeddedObjectsOnly,
+    void writeRelations(Table table, Object rowKey, boolean containsEmbeddedObjectsOnly,
             List<RelationHolder> relations, String columnFamilyName) throws IOException;
 
     /**
@@ -115,8 +116,8 @@ public interface Writer
      * column family named FKey-TO. Each column corresponds to foreign key field
      * name and values are actual foreign keys (separated by ~ if applicable)
      * 
-     * @param hTable
-     *            the h table
+     * @param table
+     *            the table
      * @param rowKey
      *            the row key
      * @param foreignKeyMap
@@ -125,15 +126,15 @@ public interface Writer
      *             Signals that an I/O exception has occurred.
      * @deprecated
      */
-    public void writeForeignKeys(HTableInterface hTable, String rowKey, Map<String, Set<String>> foreignKeyMap)
+    public void writeForeignKeys(Table table, String rowKey, Map<String, Set<String>> foreignKeyMap)
             throws IOException;
 
     /**
      * Writes columns data to HBase table, supplied as a map in Key/ value pair;
      * key and value representing column name and value respectively.
      * 
-     * @param htable
-     *            the htable
+     * @param table
+     *            the table
      * @param rowKey
      *            the row key
      * @param columns
@@ -141,20 +142,20 @@ public interface Writer
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    void writeColumns(HTableInterface htable, Object rowKey, Map<String, Object> columns, String columnFamilyName)
+    void writeColumns(Table table, Object rowKey, Map<String, Object> columns, String columnFamilyName)
             throws IOException;
 
     /**
      * Delete.
      * 
-     * @param hTable
-     *            the h table
+     * @param table
+     *            the table
      * @param rowKey
      *            the row key
      * @param columnFamily
      *            the column family
      */
-    void delete(HTableInterface hTable, Object rowKey, String columnFamily);
+    void delete(Table table, Object rowKey, String columnFamily);
 
     /**
      * method to perform batch insert/update.
@@ -164,5 +165,5 @@ public interface Writer
      * @throws IOException
      *             throws io exception.
      */
-    void persistRows(Map<HTableInterface, List<HBaseDataWrapper>> rows) throws IOException;
+    void persistRows(Map<TableName, List<HBaseDataWrapper>> rows) throws IOException;
 }
