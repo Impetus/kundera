@@ -1,6 +1,5 @@
-Overview
+Overview [![Join the chat at https://gitter.im/impetus-opensource/Kundera](https://badges.gitter.im/impetus-opensource/Kundera.svg)](https://gitter.im/impetus-opensource/Kundera?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 =========
-[![Join the chat at https://gitter.im/impetus-opensource/Kundera](https://badges.gitter.im/impetus-opensource/Kundera.svg)](https://gitter.im/impetus-opensource/Kundera?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 Kundera is a "Polyglot Object Mapper" with a JPA interface. The idea behind Kundera is to make working with NoSQL Databases drop-dead simple and fun. Kundera is being developed with following objectives:
 * To make working with NoSQL as simple as working with SQL
 * To serve as JPA Compliant mapping solution for NoSQL Datastores.
