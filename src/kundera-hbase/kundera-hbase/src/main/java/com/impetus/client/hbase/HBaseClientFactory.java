@@ -15,12 +15,13 @@
  ******************************************************************************/
 package com.impetus.client.hbase;
 
+import java.io.IOException;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
+import com.impetus.kundera.KunderaException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.client.HTablePool;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +46,8 @@ public class HBaseClientFactory extends GenericClientFactory
 
     /** The conf. */
     private Configuration conf;
+
+    private RequestExecutor requestExecutor;
 
     private static final String DEFAULT_ZOOKEEPER_PORT = "2181";
 
@@ -99,15 +102,20 @@ public class HBaseClientFactory extends GenericClientFactory
     }
 
     @Override
-    protected Object createPoolOrConnection()
-    {
-        return null;
+    protected Object createPoolOrConnection() {
+        try {
+            return requestExecutor = new SingleConnectionRequestExecutor(
+                    ConnectionFactory.createConnection(conf));
+        } catch (IOException e) {
+            throw new KunderaException(e);
+        }
     }
 
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
-        return new HBaseClient(indexManager, conf, reader, persistenceUnit, externalProperties, clientMetadata, kunderaMetadata);
+        return new HBaseClient(indexManager, conf, requestExecutor, reader, persistenceUnit,
+                externalProperties, clientMetadata, kunderaMetadata);
     }
 
     @Override

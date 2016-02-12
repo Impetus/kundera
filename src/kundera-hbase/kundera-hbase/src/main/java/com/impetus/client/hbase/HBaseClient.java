@@ -32,10 +32,8 @@ import javax.persistence.metamodel.EntityType;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.TableName;
-import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Table;
-import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.FilterList;
@@ -118,19 +116,15 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
      * @param kunderaMetadata
      *            the kundera metadata
      */
-    public HBaseClient(IndexManager indexManager, Configuration conf, EntityReader reader,
-
+    public HBaseClient(IndexManager indexManager, Configuration conf,
+            RequestExecutor requestExecutor, EntityReader reader,
     String persistenceUnit, Map<String, Object> externalProperties, ClientMetadata clientMetadata,
 
     final KunderaMetadata kunderaMetadata)
     {
         super(kunderaMetadata, externalProperties, persistenceUnit);
         this.indexManager = indexManager;
-        try {
-            this.executor = new SingleConnectionRequestExecutor(ConnectionFactory.createConnection(conf));
-        } catch (IOException e) {
-            throw new KunderaException(e);
-        }
+        this.executor = requestExecutor;
         this.handler = new HBaseDataHandler(kunderaMetadata, conf, executor);
         this.reader = reader;
         this.clientMetadata = clientMetadata;
