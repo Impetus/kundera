@@ -15,4 +15,9 @@ public class SingleConnectionRequestExecutor implements RequestExecutor {
     public <T> T execute(HBaseRequest<T> request) throws IOException {
         return request.execute(connection);
     }
+
+    @Override
+    public void close() throws IOException {
+        connection.close();
+    }
 }
