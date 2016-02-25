@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.Parameter;
+import javax.persistence.Query;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
@@ -121,7 +122,7 @@ public class RDBMSQuery extends QueryImpl
                 }
                 else
                 {
-                    return ((HibernateClient) client).findByQuery(getJPAQuery(), getParamaters());
+                    return ((HibernateClient) client).findByQuery(getJPAQuery(), getParamaters(), firstResult, maxResult);
 
                 }
             }
@@ -163,7 +164,7 @@ public class RDBMSQuery extends QueryImpl
         EntityMetadata m = getEntityMetadata();
 
         Client client = persistenceDelegeator.getClient(m);
-        return ((HibernateClient) client).onExecuteUpdate(getJPAQuery(), getParamaters());
+        return ((HibernateClient) client).onExecuteUpdate(getJPAQuery(), getParamaters(), firstResult, maxResult);
     }
 
     /**
@@ -280,7 +281,29 @@ public class RDBMSQuery extends QueryImpl
     @Override
     protected List findUsingLucene(EntityMetadata m, Client client)
     {
-        return ((HibernateClient) client).findByQuery(getJPAQuery(), getParamaters());
+        return ((HibernateClient) client).findByQuery(getJPAQuery(), getParamaters(), firstResult, maxResult);
+    }
+    
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.query.QueryImpl#setFirstResult(int)
+     */
+    @Override
+    public Query setFirstResult(int firstResult)
+    {
+        return super.setFirstResult(firstResult);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.query.QueryImpl#setMaxResults(int)
+     */
+    @Override
+    public Query setMaxResults(int maxResult)
+    {
+        return super.setMaxResults(maxResult);
     }
 
 }

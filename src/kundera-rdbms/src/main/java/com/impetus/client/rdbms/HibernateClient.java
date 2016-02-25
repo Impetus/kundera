@@ -587,13 +587,17 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      *            the native fquery
      * @param parameterMap
      *            the parameter map
+     * @param maxResult 
+     * @param firstResult 
      * @return the list
      */
-    public List findByQuery(String query, Map<Parameter, Object> parameterMap)
+    public List findByQuery(String query, Map<Parameter, Object> parameterMap, int firstResult, int maxResult)
     {
         s = getStatelessSession();
 
         Query q = s.createQuery(query);
+        q.setFirstResult(firstResult);
+        q.setMaxResults(maxResult);
 
         setParameters(parameterMap, q);
 
@@ -634,13 +638,19 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      *            the native fquery
      * @param parameterMap
      *            the parameter map
+     * @param maxResult 
+     * @param firstResult 
      * @return the list
      */
-    public int onExecuteUpdate(String query, Map<Parameter, Object> parameterMap)
+    public int onExecuteUpdate(String query, Map<Parameter, Object> parameterMap, int firstResult, int maxResult)
     {
         s = getStatelessSession();
 
         Query q = s.createQuery(query);
+        
+        q.setFirstResult(firstResult);
+        q.setMaxResults(maxResult);
+        
         setParameters(parameterMap, q);
 
         Transaction tx = onBegin();
