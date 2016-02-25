@@ -123,13 +123,34 @@ public class PersonRdbmsTest extends BaseTest
         assertFindByNameAndAgeGTAndLT(em, "PersonRDBMS", PersonRDBMS.class, "vivek", "10", "20", "personName");
         assertFindByNameAndAgeBetween(em, "PersonRDBMS", PersonRDBMS.class, "vivek", "10", "15", "personName");
         assertFindByRange(em, "PersonRDBMS", PersonRDBMS.class, "1", "2", "personId");
+        
+        //test Pagination
+        testPagination();
 
         // Test IN clause.
         testINClause();
 
         // Test Native queries.
         testNativeQuery();
+        
+    }
 
+    private void testPagination()
+    {
+        Query findQuery = em.createQuery("Select p from PersonRDBMS p");
+        findQuery.setFirstResult(1);
+        findQuery.setMaxResults(2);
+        List<PersonRDBMS> allPersons = findQuery.getResultList();
+        Assert.assertEquals(2, allPersons.size());
+        Assert.assertEquals("2", allPersons.get(0).getPersonId());
+        Assert.assertEquals("3", allPersons.get(1).getPersonId());
+        
+        //extremes
+        findQuery.setFirstResult(5);
+        findQuery.setMaxResults(10);
+        allPersons = findQuery.getResultList();
+        Assert.assertNotNull(allPersons);
+        Assert.assertTrue(allPersons.isEmpty());
     }
 
     private void testINClause()
