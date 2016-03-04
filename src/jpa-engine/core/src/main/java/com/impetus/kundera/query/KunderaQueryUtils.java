@@ -42,12 +42,14 @@ import org.eclipse.persistence.jpa.jpql.parser.NumericLiteral;
 import org.eclipse.persistence.jpa.jpql.parser.OrderByClause;
 import org.eclipse.persistence.jpa.jpql.parser.OrderByItem;
 import org.eclipse.persistence.jpa.jpql.parser.RegexpExpression;
+import org.eclipse.persistence.jpa.jpql.parser.SelectClause;
 import org.eclipse.persistence.jpa.jpql.parser.SelectStatement;
 import org.eclipse.persistence.jpa.jpql.parser.StateFieldPathExpression;
 import org.eclipse.persistence.jpa.jpql.parser.StringLiteral;
 import org.eclipse.persistence.jpa.jpql.parser.SubExpression;
 import org.eclipse.persistence.jpa.jpql.parser.UpdateStatement;
 import org.eclipse.persistence.jpa.jpql.parser.WhereClause;
+import org.eclipse.persistence.jpa.jpql.utility.iterable.ListIterable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,6 +100,34 @@ public final class KunderaQueryUtils
             }
         }
         return whereClause;
+    }
+
+    public static List<String> getSelectColumns(JPQLExpression jpqlExpression)
+    {
+        List<String> columns = null;
+        if (isSelectStatement(jpqlExpression))
+        {
+            columns = new ArrayList<String>();
+            SelectClause k = ((SelectClause) ((SelectStatement) jpqlExpression.getQueryStatement()).getSelectClause());
+            if (k.getSelectExpression() instanceof CollectionExpression)
+            {
+                CollectionExpression l = ((CollectionExpression) k.getSelectExpression());
+                ListIterable<Expression> list = l.children();
+                for (Expression exp : list)
+                {
+                    if (exp.toActualText().indexOf(".") > 0)
+                    {
+                        columns.add(exp.toActualText().split("[.]")[1]);
+                    }
+                }
+            }
+        }
+        else
+        {
+            logger.error("Not a select Query");
+            throw new KunderaException("Not a select Query");
+        }
+        return columns;
     }
 
     /**
@@ -385,7 +415,7 @@ public final class KunderaQueryUtils
                 fieldName = fieldName + "." + attName;
                 attrib = (AbstractAttribute) embeddableType.getAttribute(attName);
                 isEmbeddable = metaModel.isEmbeddable(attrib.getBindableJavaType());
-                dbColName+=("."+attrib.getJPAColumnName());
+                dbColName += ("." + attrib.getJPAColumnName());
             }
             colName = fieldName;
         }
@@ -512,14 +542,18 @@ public final class KunderaQueryUtils
         return map;
 
     }
-    
+
     /**
      * On reg expression.
-     *
-     * @param expression the expression
-     * @param m the m
-     * @param kunderaMetadata the kundera metadata
-     * @param kunderaQuery the kundera query
+     * 
+     * @param expression
+     *            the expression
+     * @param m
+     *            the m
+     * @param kunderaMetadata
+     *            the kundera metadata
+     * @param kunderaQuery
+     *            the kundera query
      * @return the map
      */
     public static Map<String, Object> onRegExpression(Expression expression, EntityMetadata m,
@@ -528,8 +562,8 @@ public final class KunderaQueryUtils
         RegexpExpression regExp = (RegexpExpression) expression;
         StateFieldPathExpression sfpExp = (StateFieldPathExpression) regExp.getStringExpression();
         Map<String, Object> map = KunderaQueryUtils.setFieldClazzAndColumnFamily(sfpExp, m, kunderaMetadata);
-        kunderaQuery.addFilterClause((String) map.get(Constants.COL_NAME), regExp.getActualRegexpIdentifier().toUpperCase(), regExp
-                .getPatternValue().toActualText(), (String) map.get(Constants.FIELD_NAME));
+        kunderaQuery.addFilterClause((String) map.get(Constants.COL_NAME), regExp.getActualRegexpIdentifier()
+                .toUpperCase(), regExp.getPatternValue().toActualText(), (String) map.get(Constants.FIELD_NAME));
         return map;
     }
 

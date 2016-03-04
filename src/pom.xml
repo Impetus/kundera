@@ -154,6 +154,7 @@
         <module>kundera-elastic-search</module>
         <module>kundera-cassandra</module>
         <module>kundera-spark</module>
+	<module>kundera-kudu</module>
         <module>kundera-hbase</module>
         <module>kundera-mongo</module>
         <module>kundera-rdbms</module>
@@ -237,6 +238,17 @@
       <modules>
         <module>jpa-engine</module>
         <module>kundera-spark</module>
+      </modules>
+    </profile>
+
+     <profile>
+      <id>kudu</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <modules>
+        <module>jpa-engine</module>
+        <module>kundera-kudu</module>
       </modules>
     </profile>
     
