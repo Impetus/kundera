@@ -12,6 +12,7 @@
 			<property name="kundera.port" value="7051" />
 			<property name="kundera.keyspace" value="kudutest" />
 			<property name="kundera.client" value="kudu" />
+			<property name="kundera.ddl.auto.prepare" value="update" />
 			<property name="kundera.client.lookup.class" value="com.impetus.kudu.client.KuduDBClientFactory" />
 		</properties>
 	</persistence-unit>
