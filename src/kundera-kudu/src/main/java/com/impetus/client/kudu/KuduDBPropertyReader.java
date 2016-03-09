@@ -28,7 +28,8 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
  * 
  * @author karthikp.manchala
  */
-public class KuduDBPropertyReader extends AbstractPropertyReader implements PropertyReader {
+public class KuduDBPropertyReader extends AbstractPropertyReader implements PropertyReader
+{
 
     /** The ksmd. */
     public static KuduDBSchemaMetadata ksmd;
@@ -41,7 +42,8 @@ public class KuduDBPropertyReader extends AbstractPropertyReader implements Prop
      * @param puMetadata
      *            the pu metadata
      */
-    public KuduDBPropertyReader(Map externalProperties, final PersistenceUnitMetadata puMetadata) {
+    public KuduDBPropertyReader(Map externalProperties, final PersistenceUnitMetadata puMetadata)
+    {
         super(externalProperties, puMetadata);
         ksmd = new KuduDBSchemaMetadata();
     }
@@ -49,10 +51,14 @@ public class KuduDBPropertyReader extends AbstractPropertyReader implements Prop
     /*
      * (non-Javadoc)
      * 
-     * @see com.impetus.kundera.configure.AbstractPropertyReader#onXml(com.impetus.kundera.configure.ClientProperties)
+     * @see
+     * com.impetus.kundera.configure.AbstractPropertyReader#onXml(com.impetus.
+     * kundera.configure.ClientProperties)
      */
-    public void onXml(ClientProperties cp) {
-        if (cp != null) {
+    public void onXml(ClientProperties cp)
+    {
+        if (cp != null)
+        {
             ksmd.setClientProperties(cp);
         }
     }
@@ -60,7 +66,8 @@ public class KuduDBPropertyReader extends AbstractPropertyReader implements Prop
     /**
      * The Class KuduDBSchemaMetadata.
      */
-    public class KuduDBSchemaMetadata {
+    public class KuduDBSchemaMetadata
+    {
 
         /** The client properties. */
         private ClientProperties clientProperties;
@@ -68,7 +75,8 @@ public class KuduDBPropertyReader extends AbstractPropertyReader implements Prop
         /**
          * Instantiates a new kudu db schema metadata.
          */
-        public KuduDBSchemaMetadata() {
+        public KuduDBSchemaMetadata()
+        {
 
         }
 
@@ -77,7 +85,8 @@ public class KuduDBPropertyReader extends AbstractPropertyReader implements Prop
          * 
          * @return the client properties
          */
-        public ClientProperties getClientProperties() {
+        public ClientProperties getClientProperties()
+        {
             return clientProperties;
         }
 
@@ -87,7 +96,8 @@ public class KuduDBPropertyReader extends AbstractPropertyReader implements Prop
          * @param clientProperties
          *            the new client properties
          */
-        private void setClientProperties(ClientProperties clientProperties) {
+        private void setClientProperties(ClientProperties clientProperties)
+        {
             this.clientProperties = clientProperties;
         }
 
@@ -98,10 +108,14 @@ public class KuduDBPropertyReader extends AbstractPropertyReader implements Prop
          *            the datastore
          * @return the data store
          */
-        public DataStore getDataStore(String datastore) {
-            if (getClientProperties() != null && getClientProperties().getDatastores() != null) {
-                for (DataStore dataStore : getClientProperties().getDatastores()) {
-                    if (dataStore.getName() != null && dataStore.getName().trim().equalsIgnoreCase(datastore)) {
+        public DataStore getDataStore(String datastore)
+        {
+            if (getClientProperties() != null && getClientProperties().getDatastores() != null)
+            {
+                for (DataStore dataStore : getClientProperties().getDatastores())
+                {
+                    if (dataStore.getName() != null && dataStore.getName().trim().equalsIgnoreCase(datastore))
+                    {
                         return dataStore;
                     }
                 }

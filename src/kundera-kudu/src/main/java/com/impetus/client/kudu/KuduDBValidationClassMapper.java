@@ -25,12 +25,14 @@ import org.kududb.Type;
  * 
  * @author karthikp.manchala
  */
-public class KuduDBValidationClassMapper {
+public class KuduDBValidationClassMapper
+{
 
     /** The Constant validationClassMapper. */
     private final static HashMap<Class<?>, Type> validationClassMapper = new HashMap<Class<?>, Type>();
 
-    static {
+    static
+    {
         validationClassMapper.put(java.lang.String.class, Type.STRING);
         validationClassMapper.put(Character.class, Type.STRING);
         validationClassMapper.put(char.class, Type.STRING);
@@ -65,7 +67,6 @@ public class KuduDBValidationClassMapper {
         validationClassMapper.put(byte[].class, Type.BINARY);
 
         validationClassMapper.put(Calendar.class, Type.TIMESTAMP);
-
     }
 
     /**
@@ -75,7 +76,8 @@ public class KuduDBValidationClassMapper {
      *            the clazz
      * @return the valid type for class
      */
-    public static Type getValidTypeForClass(Class clazz) {
+    public static Type getValidTypeForClass(Class clazz)
+    {
         return validationClassMapper.get(clazz);
     }
 }

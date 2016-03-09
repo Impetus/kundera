@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  * Copyright 2015 Impetus Infotech.
+ *  * Copyright 2016 Impetus Infotech.
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -15,14 +15,9 @@
  ******************************************************************************/
 package com.impetus.client.kudu.entities;
 
-import java.io.Serializable;
-
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-
-import com.impetus.kundera.index.Index;
-import com.impetus.kundera.index.IndexCollection;
 
 /**
  * The Class Person.
@@ -30,13 +25,9 @@ import com.impetus.kundera.index.IndexCollection;
  * @author: karthikp.manchala
  */
 @Entity
-@Table(name = "Person")
-@IndexCollection(columns = { @Index(name = "personName"), @Index(name = "age"), @Index(name = "salary") })
-public class Person implements Serializable
+@Table(name = "PERSON_KUDU", schema = "kudutest@kudu")
+public class Person
 {
-
-    /** The Constant serialVersionUID. */
-    private static final long serialVersionUID = 1L;
 
     /** The person id. */
     @Id
@@ -50,6 +41,34 @@ public class Person implements Serializable
 
     /** The salary. */
     private Double salary;
+
+    /**
+     * Instantiates a new person.
+     */
+    public Person()
+    {
+    }
+
+    /**
+     * Instantiates a new person.
+     *
+     * @param personId
+     *            the person id
+     * @param personName
+     *            the person name
+     * @param age
+     *            the age
+     * @param salary
+     *            the salary
+     */
+    public Person(String personId, String personName, long age, Double salary)
+    {
+        super();
+        this.personId = personId;
+        this.personName = personName;
+        this.age = age;
+        this.salary = salary;
+    }
 
     /**
      * Gets the person id.

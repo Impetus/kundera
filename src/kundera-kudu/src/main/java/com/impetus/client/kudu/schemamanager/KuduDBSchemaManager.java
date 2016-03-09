@@ -30,6 +30,7 @@ import org.kududb.client.KuduTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.client.kudu.KuduDBDataHandler;
 import com.impetus.client.kudu.KuduDBValidationClassMapper;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.configure.schema.ColumnInfo;
@@ -44,7 +45,8 @@ import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
  * 
  * @author karthikp.manchala
  */
-public class KuduDBSchemaManager extends AbstractSchemaManager implements SchemaManager {
+public class KuduDBSchemaManager extends AbstractSchemaManager implements SchemaManager
+{
 
     /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(KuduDBSchemaManager.class);
@@ -63,17 +65,19 @@ public class KuduDBSchemaManager extends AbstractSchemaManager implements Schema
      *            the kundera metadata
      */
     public KuduDBSchemaManager(String clientFactory, Map<String, Object> externalProperties,
-        KunderaMetadata kunderaMetadata) {
+            KunderaMetadata kunderaMetadata)
+    {
         super(clientFactory, externalProperties, kunderaMetadata);
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.impetus.kundera.configure.schema.api.AbstractSchemaManager#exportSchema(java.lang.String,
-     * java.util.List)
+     * @see com.impetus.kundera.configure.schema.api.AbstractSchemaManager#
+     * exportSchema(java.lang.String, java.util.List)
      */
-    public void exportSchema(final String persistenceUnit, List<TableInfo> schemas) {
+    public void exportSchema(final String persistenceUnit, List<TableInfo> schemas)
+    {
         super.exportSchema(persistenceUnit, schemas);
     }
 
@@ -83,11 +87,16 @@ public class KuduDBSchemaManager extends AbstractSchemaManager implements Schema
      * @see com.impetus.kundera.configure.schema.api.SchemaManager#dropSchema()
      */
     @Override
-    public void dropSchema() {
-        for (TableInfo tableinfo : tableInfos) {
-            try {
-                client.deleteTable(tableinfo.getTableName());
-            } catch (Exception ex) {
+    public void dropSchema()
+    {
+        for (TableInfo tableInfo : tableInfos)
+        {
+            try
+            {
+                client.deleteTable(tableInfo.getTableName());
+            }
+            catch (Exception ex)
+            {
                 logger.error("Error during deleting tables in kudu, Caused by: ", ex);
                 throw new SchemaGenerationException(ex, "Kudu");
             }
@@ -97,10 +106,13 @@ public class KuduDBSchemaManager extends AbstractSchemaManager implements Schema
     /*
      * (non-Javadoc)
      * 
-     * @see com.impetus.kundera.configure.schema.api.SchemaManager#validateEntity(java.lang.Class)
+     * @see
+     * com.impetus.kundera.configure.schema.api.SchemaManager#validateEntity(
+     * java.lang.Class)
      */
     @Override
-    public boolean validateEntity(Class clazz) {
+    public boolean validateEntity(Class clazz)
+    {
         // TODO Auto-generated method stub
         return false;
     }
@@ -108,18 +120,25 @@ public class KuduDBSchemaManager extends AbstractSchemaManager implements Schema
     /*
      * (non-Javadoc)
      * 
-     * @see com.impetus.kundera.configure.schema.api.AbstractSchemaManager#initiateClient()
+     * @see com.impetus.kundera.configure.schema.api.AbstractSchemaManager#
+     * initiateClient()
      */
     @Override
-    protected boolean initiateClient() {
-        for (String host : hosts) {
-            if (host == null || !StringUtils.isNumeric(port) || port.isEmpty()) {
+    protected boolean initiateClient()
+    {
+        for (String host : hosts)
+        {
+            if (host == null || !StringUtils.isNumeric(port) || port.isEmpty())
+            {
                 logger.error("Host or port should not be null / port should be numeric");
                 throw new IllegalArgumentException("Host or port should not be null / port should be numeric");
             }
-            try {
+            try
+            {
                 client = new KuduClient.KuduClientBuilder(host + ":" + port).build();
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 logger.error("Database host cannot be resolved, Caused by: " + e.getMessage());
                 throw new SchemaGenerationException("Database host cannot be resolved, Caused by: " + e.getMessage());
             }
@@ -130,16 +149,24 @@ public class KuduDBSchemaManager extends AbstractSchemaManager implements Schema
     /*
      * (non-Javadoc)
      * 
-     * @see com.impetus.kundera.configure.schema.api.AbstractSchemaManager#validate(java.util.List)
+     * @see
+     * com.impetus.kundera.configure.schema.api.AbstractSchemaManager#validate(
+     * java.util.List)
      */
     @Override
-    protected void validate(List<TableInfo> tableInfos) {
-        for (TableInfo tableInfo : tableInfos) {
-            try {
-                if (!client.tableExists(tableInfo.getTableName())) {
+    protected void validate(List<TableInfo> tableInfos)
+    {
+        for (TableInfo tableInfo : tableInfos)
+        {
+            try
+            {
+                if (!client.tableExists(tableInfo.getTableName()))
+                {
                     throw new SchemaGenerationException("Table: " + tableInfo.getTableName() + " does not exist ");
                 }
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 logger.error("Error while validating tables, Caused by: " + e.getMessage());
                 throw new KunderaException("Error while validating tables, Caused by: " + e.getMessage());
             }
@@ -149,39 +176,53 @@ public class KuduDBSchemaManager extends AbstractSchemaManager implements Schema
     /*
      * (non-Javadoc)
      * 
-     * @see com.impetus.kundera.configure.schema.api.AbstractSchemaManager#update(java.util.List)
+     * @see
+     * com.impetus.kundera.configure.schema.api.AbstractSchemaManager#update(
+     * java.util.List)
      */
     @Override
-    protected void update(List<TableInfo> tableInfos) {
-        for (TableInfo tableInfo : tableInfos) {
-            try {
-                if (!client.tableExists(tableInfo.getTableName())) {
+    protected void update(List<TableInfo> tableInfos)
+    {
+        for (TableInfo tableInfo : tableInfos)
+        {
+            try
+            {
+                if (!client.tableExists(tableInfo.getTableName()))
+                {
                     createKuduTable(tableInfo);
-                } else {
+                }
+                else
+                {
                     List<String> entityColumns = new ArrayList<String>();
                     KuduTable table = client.openTable(tableInfo.getTableName());
                     AlterTableOptions alterTableOptions = new AlterTableOptions();
                     AtomicBoolean updated = new AtomicBoolean(false);
                     Schema schema = table.getSchema();
                     // add modify columns
-                    for (ColumnInfo columnInfo : tableInfo.getColumnMetadatas()) {
+                    for (ColumnInfo columnInfo : tableInfo.getColumnMetadatas())
+                    {
                         entityColumns.add(columnInfo.getColumnName());
                         alterColumn(alterTableOptions, schema, columnInfo, updated);
                     }
                     // delete columns
-                    for (ColumnSchema columnSchema : schema.getColumns()) {
+                    for (ColumnSchema columnSchema : schema.getColumns())
+                    {
                         // if not in tableInfo and not a key then delete
-                        if (!entityColumns.contains(columnSchema.getName()) && !columnSchema.isKey()) {
+                        if (!entityColumns.contains(columnSchema.getName()) && !columnSchema.isKey())
+                        {
                             alterTableOptions.dropColumn(columnSchema.getName());
                             updated.set(true);
                         }
                     }
 
-                    if (updated.get()) {
+                    if (updated.get())
+                    {
                         client.alterTable(tableInfo.getTableName(), alterTableOptions);
                     }
                 }
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 logger.error("Error while updating tables, Caused by: " + e.getMessage());
                 throw new KunderaException("Error while updating tables, Caused by: " + e.getMessage());
             }
@@ -201,51 +242,57 @@ public class KuduDBSchemaManager extends AbstractSchemaManager implements Schema
      *            the updated
      */
     private void alterColumn(AlterTableOptions alterTableOptions, Schema schema, ColumnInfo columnInfo,
-        AtomicBoolean updated) {
-        if (!hasColumn(schema, columnInfo.getColumnName())) {
+            AtomicBoolean updated)
+    {
+        if (!KuduDBDataHandler.hasColumn(schema, columnInfo.getColumnName()))
+        {
             // add if column is not in schema
             alterTableOptions.addNullableColumn(columnInfo.getColumnName(),
-                KuduDBValidationClassMapper.getValidTypeForClass(columnInfo.getType()));
+                    KuduDBValidationClassMapper.getValidTypeForClass(columnInfo.getType()));
             updated.set(true);
-        } else {
-            // check for type, drop and add if not consistent TODO: throw exception or override?
+        }
+        else
+        {
+            // check for type, drop and add if not consistent TODO: throw
+            // exception or override?
             if (!schema.getColumn(columnInfo.getColumnName()).getType()
-                .equals(KuduDBValidationClassMapper.getValidTypeForClass(columnInfo.getType()))) {
+                    .equals(KuduDBValidationClassMapper.getValidTypeForClass(columnInfo.getType())))
+            {
                 alterTableOptions.dropColumn(columnInfo.getColumnName());
                 alterTableOptions.addNullableColumn(columnInfo.getColumnName(),
-                    KuduDBValidationClassMapper.getValidTypeForClass(columnInfo.getType()));
+                        KuduDBValidationClassMapper.getValidTypeForClass(columnInfo.getType()));
                 updated.set(true);
             }
-        }
-    }
-
-    /**
-     * Checks for column.
-     * 
-     * @param schema
-     *            the schema
-     * @param columnName
-     *            the column name
-     * @return true, if successful
-     */
-    private boolean hasColumn(Schema schema, String columnName) {
-        try {
-            schema.getColumn(columnName);
-            return true;
-        } catch (IllegalArgumentException e) {
-            return false;
         }
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.impetus.kundera.configure.schema.api.AbstractSchemaManager#create(java.util.List)
+     * @see
+     * com.impetus.kundera.configure.schema.api.AbstractSchemaManager#create(
+     * java.util.List)
      */
     @Override
-    protected void create(List<TableInfo> tableInfos) {
+    protected void create(List<TableInfo> tableInfos)
+    {
 
-        for (TableInfo tableInfo : tableInfos) {
+        for (TableInfo tableInfo : tableInfos)
+        {
+            try
+            {
+                if (client.tableExists(tableInfo.getTableName()))
+                {
+                    client.deleteTable(tableInfo.getTableName());
+                }
+            }
+            catch (Exception e)
+            {
+                logger.error(
+                        "Cannot check table existence for table " + tableInfo.getTableName() + ". Caused By: " + e);
+                throw new KunderaException(
+                        "Cannot check table existence for table " + tableInfo.getTableName() + ". Caused By: " + e);
+            }
             createKuduTable(tableInfo);
         }
     }
@@ -256,36 +303,42 @@ public class KuduDBSchemaManager extends AbstractSchemaManager implements Schema
      * @param tableInfo
      *            the table info
      */
-    private void createKuduTable(TableInfo tableInfo) {
+    private void createKuduTable(TableInfo tableInfo)
+    {
         List<ColumnSchema> columns = new ArrayList<ColumnSchema>();
         // add key
-        columns.add(new ColumnSchema.ColumnSchemaBuilder(tableInfo.getIdColumnName(), KuduDBValidationClassMapper
-            .getValidTypeForClass(tableInfo.getTableIdType())).key(true).build());
+        columns.add(new ColumnSchema.ColumnSchemaBuilder(tableInfo.getIdColumnName(),
+                KuduDBValidationClassMapper.getValidTypeForClass(tableInfo.getTableIdType())).key(true).build());
         // add other columns
-        for (ColumnInfo columnInfo : tableInfo.getColumnMetadatas()) {
-            ColumnSchemaBuilder columnSchemaBuilder =
-                new ColumnSchema.ColumnSchemaBuilder(columnInfo.getColumnName(),
+        for (ColumnInfo columnInfo : tableInfo.getColumnMetadatas())
+        {
+            ColumnSchemaBuilder columnSchemaBuilder = new ColumnSchema.ColumnSchemaBuilder(columnInfo.getColumnName(),
                     KuduDBValidationClassMapper.getValidTypeForClass(columnInfo.getType()));
             columns.add(columnSchemaBuilder.build());
         }
         Schema schema = new Schema(columns);
-        try {
+        try
+        {
             client.createTable(tableInfo.getTableName(), schema);
             logger.debug("Table: " + tableInfo.getTableName() + " created successfully");
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             logger.error("Table: " + tableInfo.getTableName() + " cannot be created, Caused by: " + e.getMessage(), e);
-            throw new SchemaGenerationException("Table: " + tableInfo.getTableName() + " cannot be created, Caused by"
-                + e.getMessage(), e, "Kudu");
+            throw new SchemaGenerationException(
+                    "Table: " + tableInfo.getTableName() + " cannot be created, Caused by" + e.getMessage(), e, "Kudu");
         }
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.impetus.kundera.configure.schema.api.AbstractSchemaManager#create_drop(java.util.List)
+     * @see com.impetus.kundera.configure.schema.api.AbstractSchemaManager#
+     * create_drop(java.util.List)
      */
     @Override
-    protected void create_drop(List<TableInfo> tableInfos) {
+    protected void create_drop(List<TableInfo> tableInfos)
+    {
         create(tableInfos);
     }
 
