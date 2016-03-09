@@ -22,8 +22,6 @@
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<class>com.impetus.client.kudu.crud.datatypes.entities.StudentKuduBytePrimitive</class>
 		<class>com.impetus.client.kudu.crud.datatypes.entities.StudentKuduByteWrapper</class>
-		<class>com.impetus.client.kudu.crud.datatypes.entities.StudentKuduChar</class>
-		<class>com.impetus.client.kudu.crud.datatypes.entities.StudentKuduCharacter</class>
 		<class>com.impetus.client.kudu.crud.datatypes.entities.StudentKuduInt</class>
 		<class>com.impetus.client.kudu.crud.datatypes.entities.StudentKuduInteger</class>
 		<class>com.impetus.client.kudu.crud.datatypes.entities.StudentKuduLongPrimitive</class>
