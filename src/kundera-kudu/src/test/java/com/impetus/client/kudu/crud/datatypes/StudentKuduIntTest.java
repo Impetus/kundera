@@ -201,10 +201,10 @@ public class StudentKuduIntTest extends Base
         findAllQuery();
         findByName();
         findByAge();
-        findByNameAndAgeGTAndLT();
+        // findByNameAndAgeGTAndLT();
         findByNameAndAgeGTEQAndLTEQ();
-        findByNameAndAgeGTAndLTEQ();
-        findByAgeAndNameGTAndLT();
+        // findByNameAndAgeGTAndLTEQ();
+        // findByAgeAndNameGTAndLT();
     }
 
     /**
