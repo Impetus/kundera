@@ -6,6 +6,12 @@ Kundera is a "Polyglot Object Mapper" with a JPA interface. The idea behind Kund
 *	To help developers, forget the complexity of NoSQL stores and focus on Domain Model.
 *	To make switching across data-stores as easy as changing a configuration.
 
+Latest 
+======
+* Kundera now supports **Apache Spark**. Perform SQL queries over big data using Kundera with Apache Spark as the query engine. Check [Kundera with Spark](https://github.com/impetus-opensource/Kundera/wiki/Kundera-with-Spark) for more details. 
+* We are active on **stackoverflow.com**. Ask questions & check existing [Kundera Tagged Questions](http://stackoverflow.com/questions/tagged/kundera) on stackoverflow. 
+
+
 Supported Datastores 
 =====================
 Kundera currently supports following data stores :
