@@ -6,13 +6,22 @@
 
 	<persistence-unit name="testPU">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
-		<properties>
-			<property name="kundera.nodes" value="quickstart.cloudera" />
-			<property name="kundera.port" value="7051" />
-			<property name="kundera.keyspace" value="kudutest" />
-			<property name="kundera.client" value="kudu" />
-			<property name="kundera.client.lookup.class" value="com.impetus.client.kudu.KuduDBClientFactory" />
-		</properties>
+		<class>com.impetus.core.entities.Employee</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+<!-- 		<properties> -->
+<!-- 			<property name="kundera.nodes" value="quickstart.cloudera" /> -->
+<!-- 			<property name="kundera.port" value="7051" /> -->
+<!-- 			<property name="kundera.keyspace" value="kudutest" /> -->
+<!-- 			<property name="kundera.client" value="kudu" /> -->
+<!-- 			<property name="kundera.client.lookup.class" value="com.impetus.client.kudu.KuduDBClientFactory" /> -->
+<!-- 		</properties> -->
+<!-- <properties> -->
+<!-- 			<property name="kundera.nodes" value="192.168.145.151" /> -->
+<!-- 			<property name="kundera.port" value="9160" /> -->
+<!-- 			<property name="kundera.keyspace" value="DAOtest" /> -->
+<!-- 			<property name="kundera.client" value="cassandra" /> -->
+<!-- 			<property name="kundera.client.lookup.class" value="com.impetus.client.cassandra.thrift.ThriftClientFactory" /> -->
+<!-- 		</properties> -->
 	</persistence-unit>
 
 </persistence>

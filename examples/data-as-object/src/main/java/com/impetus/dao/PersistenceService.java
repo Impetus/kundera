@@ -12,10 +12,16 @@ public class PersistenceService
 
     private static final String CLIENT_PROPERTIES = "client.properties";
 
-    public static EntityManager getEM() throws Exception
+    public static EntityManager getEM()
     {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory(PU,
-                PropertyReader.getProps(CLIENT_PROPERTIES));
+        EntityManagerFactory emf = null;
+		try {
+			emf = Persistence.createEntityManagerFactory(PU,
+			        PropertyReader.getProps(CLIENT_PROPERTIES));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
         EntityManager em = emf.createEntityManager();
 
