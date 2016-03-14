@@ -12,7 +12,7 @@
 		<dependency>
 			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-cassandra</artifactId>
-			<version>3.3</version>
+			<version>3.4-SNAPSHOT</version>
 		</dependency>
 		
 		<dependency>

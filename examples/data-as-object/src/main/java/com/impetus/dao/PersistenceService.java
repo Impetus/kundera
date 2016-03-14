@@ -10,20 +10,28 @@ public class PersistenceService
 {
     private static final String PU = "testPU";
 
-    private static final String CLIENT_PROPERTIES = "client.properties";
+    private static EntityManagerFactory emf;
 
-    public static EntityManager getEM()
+    private static EntityManager em;
+
+    public static synchronized EntityManager getEM(final String propertiesPath)
     {
-        EntityManagerFactory emf = null;
-		try {
-			emf = Persistence.createEntityManagerFactory(PU,
-			        PropertyReader.getProps(CLIENT_PROPERTIES));
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+        if (emf == null)
+        {
+            try
+            {
+                emf = Persistence.createEntityManagerFactory(PropertyReader.getProps(propertiesPath).getProperty("pu"),
+                        PropertyReader.getProps(propertiesPath));
 
-        EntityManager em = emf.createEntityManager();
+            }
+            catch (Exception e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+
+        em = emf.createEntityManager();
 
         return em;
     }
