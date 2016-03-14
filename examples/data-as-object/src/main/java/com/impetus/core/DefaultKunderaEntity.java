@@ -6,9 +6,13 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Table;
+
+import org.apache.commons.lang.StringUtils;
 
 import com.impetus.dao.PersistenceService;
 import com.impetus.kundera.Constants;
+import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -22,17 +26,19 @@ public class DefaultKunderaEntity<T, K> implements KunderaEntity<T, K>
 
     public final T find(K key)
     {
-
         return (T) em.find(this.getClass(), key);
     }
 
     private static void onBind(Class clazz)
     {
 
-        EntityMetadata metadata = new EntityMetadata(clazz/* this.getClass() */);
+        EntityMetadata metadata = new EntityMetadata(clazz);
         metadata.setPersistenceUnit(getPersistenceUnit());
-        metadata.setTableName("Employee");
-        metadata.setSchema("DAOtest");
+
+        setSchemaAndPU(clazz, metadata);
+        // metadata.setTableName("Employee");
+        // metadata.setSchema("DAOtest");
+
         new TableProcessor(em.getEntityManagerFactory().getProperties(),
                 ((EntityManagerFactoryImpl) em.getEntityManagerFactory()).getKunderaMetadataInstance()).process(clazz,
                         metadata);
@@ -41,26 +47,39 @@ public class DefaultKunderaEntity<T, K> implements KunderaEntity<T, K>
                 .getKunderaMetadataInstance();
 
         ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
-        ((MetamodelImpl) em.getMetamodel()).addEntityMetadata(clazz, metadata);
-        appMetadata.getMetamodelMap().put(getPersistenceUnit(), em.getMetamodel());
-        Map<String, List<String>> clazzToPuMap = new HashMap<String, List<String>>();
 
+        ((MetamodelImpl) em.getMetamodel()).addEntityMetadata(clazz, metadata);
+
+        appMetadata.getMetamodelMap().put(getPersistenceUnit(), em.getMetamodel());
+        
+        Map<String, List<String>> clazzToPuMap = new HashMap<String, List<String>>();
         List<String> persistenceUnits = new ArrayList<String>();
         persistenceUnits.add(getPersistenceUnit());
         clazzToPuMap.put(clazz.getName(), persistenceUnits);
         appMetadata.setClazzToPuMap(clazzToPuMap);
-        /*
-         * new
-         * MetamodelConfiguration(em.getEntityManagerFactory().getProperties(),
-         * ((EntityManagerFactoryImpl)em.getEntityManagerFactory()).
-         * getKunderaMetadataInstance(), getPersistenceUnit()).configure();
-         * 
-         * // KunderaMetadataManager.getMetamodel(((EntityManagerFactoryImpl)em.
-         * getEntityManagerFactory()).getKunderaMetadataInstance(),
-         * getPersistenceUnit()).addEntityMetadata(this.getClass(), metadata);
-         * ((MetamodelImpl)em.getMetamodel()).addEntityMetadata(this.getClass(),
-         * metadata);
-         */
+
+    }
+
+    private static void setSchemaAndPU(Class<?> clazz, EntityMetadata metadata)
+    {
+        Table table = clazz.getAnnotation(Table.class);
+        if (table != null)
+        {
+            metadata.setTableName(!StringUtils.isBlank(table.name()) ? table.name() : clazz.getSimpleName());
+            String schemaStr = table.schema();
+
+            MetadataUtils.setSchemaAndPersistenceUnit(metadata, schemaStr,
+                    em.getEntityManagerFactory().getProperties());
+        }
+        else{
+            metadata.setTableName(clazz.getSimpleName());
+            metadata.setSchema((String) em.getEntityManagerFactory().getProperties().get("kundera.keyspace"));
+        }
+        
+        if (metadata.getPersistenceUnit() == null)
+        {
+            metadata.setPersistenceUnit(getPersistenceUnit());
+        }
     }
 
     private static String getPersistenceUnit()
@@ -97,4 +116,5 @@ public class DefaultKunderaEntity<T, K> implements KunderaEntity<T, K>
         em.getEntityManagerFactory().close();
         em.close();
     }
+
 }

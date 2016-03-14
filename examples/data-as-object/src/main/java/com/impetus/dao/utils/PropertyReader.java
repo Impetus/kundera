@@ -6,20 +6,27 @@ import java.util.Properties;
 
 public class PropertyReader
 {
-    public static Properties getProps(String fileName) throws Exception {
-        Properties properties = new Properties();    
+    public static Properties getProps(String fileName) throws Exception
+    {
+        Properties properties = new Properties();
         InputStream inputStream = PropertyReader.class.getClassLoader().getResourceAsStream(fileName);
 
-        if (inputStream != null) {
-            try {
+        if (inputStream != null)
+        {
+            try
+            {
                 properties.load(inputStream);
-            } catch (IOException e) {
+            }
+            catch (IOException e)
+            {
                 e.printStackTrace();
             }
-        } else {
+        }
+        else
+        {
             throw new Exception("Property file: [" + fileName + "] not found in the classpath");
         }
         return properties;
-      }
+    }
 
 }

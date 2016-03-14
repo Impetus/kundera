@@ -11,6 +11,4 @@ public interface KunderaEntity<T, K>
 
     void delete();
 
-    // void bind() throws BindingException;
-
 }
