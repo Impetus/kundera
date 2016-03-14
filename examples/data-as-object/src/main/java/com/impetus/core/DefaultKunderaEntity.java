@@ -1,5 +1,6 @@
 package com.impetus.core;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -7,6 +8,8 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Table;
+import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EntityType;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -19,6 +22,7 @@ import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.processor.TableProcessor;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 
 public class DefaultKunderaEntity<T, K> implements KunderaEntity<T, K>
 {
@@ -51,7 +55,7 @@ public class DefaultKunderaEntity<T, K> implements KunderaEntity<T, K>
         ((MetamodelImpl) em.getMetamodel()).addEntityMetadata(clazz, metadata);
 
         appMetadata.getMetamodelMap().put(getPersistenceUnit(), em.getMetamodel());
-        
+
         Map<String, List<String>> clazzToPuMap = new HashMap<String, List<String>>();
         List<String> persistenceUnits = new ArrayList<String>();
         persistenceUnits.add(getPersistenceUnit());
@@ -71,11 +75,12 @@ public class DefaultKunderaEntity<T, K> implements KunderaEntity<T, K>
             MetadataUtils.setSchemaAndPersistenceUnit(metadata, schemaStr,
                     em.getEntityManagerFactory().getProperties());
         }
-        else{
+        else
+        {
             metadata.setTableName(clazz.getSimpleName());
             metadata.setSchema((String) em.getEntityManagerFactory().getProperties().get("kundera.keyspace"));
         }
-        
+
         if (metadata.getPersistenceUnit() == null)
         {
             metadata.setPersistenceUnit(getPersistenceUnit());
@@ -106,7 +111,7 @@ public class DefaultKunderaEntity<T, K> implements KunderaEntity<T, K>
     {
         if (em == null)
         {
-            em = PersistenceService.getEM(propertiesPath);
+            em = PersistenceService.getEM(propertiesPath, clazz.getSimpleName());
         }
         onBind(clazz);
     }
@@ -115,6 +120,24 @@ public class DefaultKunderaEntity<T, K> implements KunderaEntity<T, K>
     {
         em.getEntityManagerFactory().close();
         em.close();
+    }
+
+    public final List leftJoin(Class clazz, String joinColumn, String... columnTobeFetched)
+    {
+        List<T> finalResult = new ArrayList();
+        List<T> leftTable = em.createQuery("Select * from " + this.getClass().getSimpleName()).getResultList();
+        EntityType leftEntity = ((MetamodelImpl) em.getMetamodel()).entity(this.getClass());
+        Attribute attribute = leftEntity.getAttribute(joinColumn);
+        Field field = (Field) attribute.getJavaMember();
+        for (T obj : leftTable)
+        {
+            Object right = em.find(clazz, PropertyAccessorHelper.getObject(this, field));
+            if (right != null)
+            {
+                finalResult.add(obj);
+            }
+        }
+        return finalResult;
     }
 
 }

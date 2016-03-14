@@ -1,5 +1,7 @@
 package com.impetus.core;
 
+import java.util.List;
+
 public interface KunderaEntity<T, K>
 {
 
@@ -10,5 +12,7 @@ public interface KunderaEntity<T, K>
     void update();
 
     void delete();
+
+    List<T> leftJoin(Class clazz, String joinColumn, String... columnTobeFetched);
 
 }
