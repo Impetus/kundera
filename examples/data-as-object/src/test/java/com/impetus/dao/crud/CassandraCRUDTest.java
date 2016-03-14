@@ -1,12 +1,15 @@
 package com.impetus.dao.crud;
 
+import java.util.List;
+
+import junit.framework.Assert;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.impetus.dao.entities.Department;
 import com.impetus.dao.entities.Employee;
-
-import junit.framework.Assert;
 
 public class CassandraCRUDTest
 {
@@ -53,6 +56,29 @@ public class CassandraCRUDTest
         Employee e1 = new Employee().find(101l);
         Assert.assertNull(e1);
     }
+    
+    @Test
+    public void testJoin()
+    {
+    	for (long i = 1; i <= 50; i++) {
+			Employee empl = new Employee();
+			empl.setEmplyoeeId(i);
+			empl.setName("kart_" + i);
+			empl.setSalary(i + 1000d);
+			empl.save();
+		}
+    	for (long i = 1; i <= 50; i++) {
+			Department dept = new Department();
+			dept.setDeptId(i+100);
+			dept.setEmployeeId((long) (Math.random()%50));
+			dept.setDepartmentName("Department_"+i);
+			dept.save();
+		}
+    	Employee e = new Employee();
+    	List result = e.leftJoin(Department.class, "employeeId");
+    	System.out.println(result);
+    }
+
     
     @AfterClass
     public static void tearDownAfterClass() throws Exception
