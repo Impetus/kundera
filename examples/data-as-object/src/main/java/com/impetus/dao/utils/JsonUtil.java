@@ -42,12 +42,16 @@ public class JsonUtil
             if(jsonStream != null) {
                   return mapper.readValue(jsonStream, clazz);
             }
+            else
+            {
+                LOGGER.error("InputStream is null.");
+                throw new KunderaException("InputStream is null.");
+            }
         } catch (IOException e) {
-            LOGGER.error("Error while converting in json{} presentation{}.", jsonStream,e);
-            throw new KunderaException("Error while mapping JSON to Object. Caused By: ", e);
+            LOGGER.error("Error while mapping input stream to object. Caused By: ",e);
+            throw new KunderaException("Error while mapping input stream to object. Caused By: ",e);
         }
  
-        return null;
     }
 
 }

@@ -33,5 +33,13 @@
     "kundera.keyspace": "DAOTest",
     "kundera.ddl.auto.prepare": "create",
     "kundera.client.lookup.class": "com.impetus.client.kudu.KuduDBClientFactory"
+  },
+  "com.impetus.dao.entities.DepartmentKudu": {
+    "kundera.nodes": "quickstart.cloudera",
+    "kundera.port": "7051",
+    "kundera.client": "kudu",
+    "kundera.keyspace": "DAOTest",
+    "kundera.ddl.auto.prepare": "create",
+    "kundera.client.lookup.class": "com.impetus.client.kudu.KuduDBClientFactory"
   }
 }

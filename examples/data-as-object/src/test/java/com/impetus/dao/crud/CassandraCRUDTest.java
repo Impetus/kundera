@@ -1,15 +1,12 @@
 package com.impetus.dao.crud;
 
-import java.util.List;
-
-import junit.framework.Assert;
-
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.impetus.dao.entities.Department;
 import com.impetus.dao.entities.Employee;
+
+import junit.framework.Assert;
 
 public class CassandraCRUDTest
 {
@@ -19,9 +16,15 @@ public class CassandraCRUDTest
     {
         Employee.bind("client-properties.json", Employee.class);
     }
+    
+    @Test 
+    public void testCRUD(){
+        testInsert();
+        testUpdate();
+        testDelete();
+    }
 
-    @Test
-    public void testInsert()
+    private void testInsert()
     {
         Employee emp = new Employee();
         emp.setEmplyoeeId(101l);
@@ -34,8 +37,7 @@ public class CassandraCRUDTest
         Assert.assertEquals(50000d, e.getSalary());
     }
 
-    @Test
-    public void testUpdate()
+    private void testUpdate()
     {
         Employee e = new Employee().find(101l);
         e.setName("dev");
@@ -47,8 +49,7 @@ public class CassandraCRUDTest
         Assert.assertEquals(50000d, e1.getSalary());
     }
 
-    @Test
-    public void testDelete()
+    private void testDelete()
     {
         Employee e = new Employee().find(101l);
         e.delete();
@@ -57,29 +58,6 @@ public class CassandraCRUDTest
         Assert.assertNull(e1);
     }
     
-    @Test
-    public void testJoin()
-    {
-        Department.bind("client-properties.json", Department.class);
-    	for (long i = 1; i <= 50; i++) {
-			Employee empl = new Employee();
-			empl.setEmplyoeeId(i);
-			empl.setName("kart_" + i);
-			empl.setSalary(i + 1000d);
-			empl.save();
-		}
-    	for (long i = 1; i <= 50; i++) {
-			Department dept = new Department();
-			dept.setDeptId(i+100);
-			dept.setEmployeeId((long) (Math.random()*50));
-			dept.setDepartmentName("Department_"+i);
-			dept.save();
-		}
-    	Employee e = new Employee();
-    	List result = e.leftJoin(Department.class, "employeeId");
-    	System.out.println(result.size());
-    }
-
     
     @AfterClass
     public static void tearDownAfterClass() throws Exception

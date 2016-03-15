@@ -4,7 +4,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.impetus.dao.entities.Employee;
+import com.impetus.dao.entities.Customer;
 
 import junit.framework.Assert;
 
@@ -13,50 +13,57 @@ public class KuduCRUDTest
     @BeforeClass
     public static void SetUpBeforeClass()
     {
-        Employee.bind("kudu-client.properties", Employee.class);
+        Customer.bind("client-properties.json", Customer.class);
     }
 
     @Test
-    public void testInsert()
+    public void testCRUD()
     {
-        Employee emp = new Employee();
-        emp.setEmplyoeeId(101l);
-        emp.setName("karthik");
-        emp.setSalary(50000d);
-        emp.save();
-        Employee e = new Employee().find(101l);
-        Assert.assertEquals(Long.valueOf(101), e.getEmplyoeeId());
-        Assert.assertEquals("karthik", e.getName());
-        Assert.assertEquals(50000d, e.getSalary());
+        testInsert();
+        testUpdate();
+        testDelete();
     }
 
-    @Test
-    public void testUpdate()
+    private void testInsert()
     {
-        Employee e = new Employee().find(101l);
-        e.setName("dev");
-        e.update();
+        Customer customer = new Customer();
+        customer.setCustomerId(101);
+        customer.setName("dev");
+        customer.setLocation("Noida");
+        customer.save();
 
-        Employee e1 = new Employee().find(101l);
-        Assert.assertEquals(Long.valueOf(101), e1.getEmplyoeeId());
-        Assert.assertEquals("dev", e1.getName());
-        Assert.assertEquals(50000d, e1.getSalary());
+        Customer c = new Customer().find(101);
+
+        Assert.assertEquals(101, c.getCustomerId());
+        Assert.assertEquals("dev", c.getName());
+        Assert.assertEquals("Noida", c.getLocation());
     }
 
-    @Test
-    public void testDelete()
+    private void testUpdate()
     {
-        Employee e = new Employee().find(101l);
-        e.delete();
+        Customer c = new Customer().find(101);
+        c.setName("karthik");
+        c.update();
 
-        Employee e1 = new Employee().find(101l);
-        Assert.assertNull(e1);
+        Customer c1 = new Customer().find(101);
+        Assert.assertEquals(101, c1.getCustomerId());
+        Assert.assertEquals("karthik", c1.getName());
+        Assert.assertEquals("Noida", c1.getLocation());
+    }
+
+    private void testDelete()
+    {
+        Customer c = new Customer().find(101);
+        c.delete();
+
+        Customer c1 = new Customer().find(101);
+        Assert.assertNull(c1);
     }
 
     @AfterClass
     public static void tearDownAfterClass() throws Exception
     {
-        Employee.unbind();
+        Customer.unbind();
     }
 
 }

@@ -10,7 +10,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
-import org.json.simple.parser.JSONParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,15 +22,12 @@ public class PersistenceService
 
     private static Logger LOGGER = LoggerFactory.getLogger(PersistenceService.class);
 
-    private static Map<?, Map<String, String>> clientProperties = new HashMap();
-    
-    private static Map<String,Map<String,String>> entityConfigurations = new HashMap<>();
+    private static Map<?, Map<String, String>> clientProperties = new HashMap<>();
 
-    private static EntityManagerFactory emf;
+    private static Map<String, Map<String, String>> entityConfigurations = new HashMap<>();
 
-    private static EntityManager em;
-
-    public static synchronized EntityManager getEM(final String propertiesPath,final String clazzName)
+    public static synchronized EntityManager getEM(EntityManagerFactory emf, final String propertiesPath,
+            final String clazzName)
     {
         loadClientProperties(propertiesPath);
 
@@ -44,47 +40,43 @@ public class PersistenceService
             }
             catch (Exception e)
             {
-                e.printStackTrace();
+                LOGGER.error("Unable to create Entity Manager Factory. Caused By: ", e);
+                throw new KunderaException("Unable to create Entity Manager Factory. Caused By: ", e);
             }
         }
 
-        em = emf.createEntityManager();
-
-        return em;
+        return emf.createEntityManager();
     }
 
     private static void loadClientProperties(String propertiesPath)
     {
 
-        JSONParser parser = new JSONParser();
-
-        try
-        {
             InputStream inputStream = PropertyReader.class.getClassLoader().getResourceAsStream(propertiesPath);
             clientProperties = JsonUtil.readJson(inputStream, Map.class);
-            
-            if(clientProperties != null) {
-            Iterator iter = clientProperties.keySet().iterator();
-            
-            while(iter.hasNext()) {
-                Object key = iter.next();
-                if(key.getClass().isAssignableFrom(List.class)) {
-                    Iterator i = ((List) key).iterator();
-                    while(i.hasNext()) {
-                        String entity = (String) i.next();
-                        entityConfigurations.put(entity, clientProperties.get(key));
+
+            if (clientProperties != null)
+            {
+                Iterator iter = clientProperties.keySet().iterator();
+
+                while (iter.hasNext())
+                {
+                    Object key = iter.next();
+                    if (key.getClass().isAssignableFrom(List.class))
+                    {
+                        Iterator i = ((List) key).iterator();
+                        while (i.hasNext())
+                        {
+                            String entity = (String) i.next();
+                            entityConfigurations.put(entity, clientProperties.get(key));
+                        }
                     }
-                    
-                }else {
-                    entityConfigurations.put((String) key, clientProperties.get(key));
+                    else
+                    {
+                        entityConfigurations.put((String) key, clientProperties.get(key));
+                    }
                 }
             }
-            
-            }
-        }catch(KunderaException kex) {
-            
-        }
-        
+
     }
 
 }

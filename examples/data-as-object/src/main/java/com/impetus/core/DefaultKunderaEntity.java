@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.Table;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
@@ -28,6 +29,8 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 
 public class DefaultKunderaEntity<T, K> implements KunderaEntity<T, K>
 {
+    private static EntityManagerFactory emf;
+
     private static EntityManager em;
 
     public final T find(K key)
@@ -49,7 +52,7 @@ public class DefaultKunderaEntity<T, K> implements KunderaEntity<T, K>
 
         KunderaMetadata kunderaMetadata = ((EntityManagerFactoryImpl) em.getEntityManagerFactory())
                 .getKunderaMetadataInstance();
-        
+
         new IndexProcessor(kunderaMetadata).process(clazz, metadata);
 
         ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
@@ -115,15 +118,18 @@ public class DefaultKunderaEntity<T, K> implements KunderaEntity<T, K>
     {
         if (em == null)
         {
-            em = PersistenceService.getEM(propertiesPath, clazz.getName());
+            em = PersistenceService.getEM(emf, propertiesPath, clazz.getName());
         }
         onBind(clazz);
     }
 
     public static synchronized void unbind()
     {
-        em.getEntityManagerFactory().close();
-        em.close();
+        if (em.isOpen())
+        {
+            em.getEntityManagerFactory().close();
+            em.close();
+        }
     }
 
     public final List leftJoin(Class clazz, String joinColumn, String... columnTobeFetched)
@@ -133,11 +139,12 @@ public class DefaultKunderaEntity<T, K> implements KunderaEntity<T, K>
         EntityType leftEntity = ((MetamodelImpl) em.getMetamodel()).entity(this.getClass());
         Attribute attribute = leftEntity.getAttribute(joinColumn);
         Field field = (Field) attribute.getJavaMember();
+
         for (T obj : leftTable)
         {
             List rightTable = em
-                    .createQuery("Select p from " + clazz.getSimpleName() + " p where p." + joinColumn
-                            + " = :columnValue")
+                    .createQuery(
+                            "Select p from " + clazz.getSimpleName() + " p where p." + joinColumn + " = :columnValue")
                     .setParameter("columnValue", PropertyAccessorHelper.getObject(obj, field)).getResultList();
             if (!rightTable.isEmpty())
             {
