@@ -2,16 +2,14 @@ package com.impetus.dao.entities;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.Table;
 
 import com.impetus.core.DefaultKunderaEntity;
 
 @Entity
-//@Table(name="EMPLOYEE_123",schema="DAOtest@testPU")
 public class Employee extends DefaultKunderaEntity<Employee, Long>
 {
     @Id
-    private Long emplyoeeId;
+    private Long employeeId;
 
     private Double salary;
 
@@ -19,12 +17,12 @@ public class Employee extends DefaultKunderaEntity<Employee, Long>
 
     public Long getEmplyoeeId()
     {
-        return emplyoeeId;
+        return employeeId;
     }
 
     public void setEmplyoeeId(Long emplyoeeId)
     {
-        this.emplyoeeId = emplyoeeId;
+        this.employeeId = emplyoeeId;
     }
 
     public Double getSalary()

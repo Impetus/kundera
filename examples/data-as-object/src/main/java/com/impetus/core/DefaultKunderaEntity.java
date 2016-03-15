@@ -15,10 +15,12 @@ import org.apache.commons.lang.StringUtils;
 
 import com.impetus.dao.PersistenceService;
 import com.impetus.kundera.Constants;
+import com.impetus.kundera.configure.SchemaConfiguration;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.processor.IndexProcessor;
 import com.impetus.kundera.metadata.processor.TableProcessor;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
@@ -40,8 +42,6 @@ public class DefaultKunderaEntity<T, K> implements KunderaEntity<T, K>
         metadata.setPersistenceUnit(getPersistenceUnit());
 
         setSchemaAndPU(clazz, metadata);
-        // metadata.setTableName("Employee");
-        // metadata.setSchema("DAOtest");
 
         new TableProcessor(em.getEntityManagerFactory().getProperties(),
                 ((EntityManagerFactoryImpl) em.getEntityManagerFactory()).getKunderaMetadataInstance()).process(clazz,
@@ -49,11 +49,13 @@ public class DefaultKunderaEntity<T, K> implements KunderaEntity<T, K>
 
         KunderaMetadata kunderaMetadata = ((EntityManagerFactoryImpl) em.getEntityManagerFactory())
                 .getKunderaMetadataInstance();
+        
+        new IndexProcessor(kunderaMetadata).process(clazz, metadata);
 
         ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
 
         ((MetamodelImpl) em.getMetamodel()).addEntityMetadata(clazz, metadata);
-
+        ((MetamodelImpl) em.getMetamodel()).addEntityNameToClassMapping(clazz.getSimpleName(), clazz);
         appMetadata.getMetamodelMap().put(getPersistenceUnit(), em.getMetamodel());
 
         Map<String, List<String>> clazzToPuMap = new HashMap<String, List<String>>();
@@ -61,6 +63,8 @@ public class DefaultKunderaEntity<T, K> implements KunderaEntity<T, K>
         persistenceUnits.add(getPersistenceUnit());
         clazzToPuMap.put(clazz.getName(), persistenceUnits);
         appMetadata.setClazzToPuMap(clazzToPuMap);
+        new SchemaConfiguration(em.getEntityManagerFactory().getProperties(), kunderaMetadata, getPersistenceUnit())
+                .configure();
 
     }
 
@@ -111,7 +115,7 @@ public class DefaultKunderaEntity<T, K> implements KunderaEntity<T, K>
     {
         if (em == null)
         {
-            em = PersistenceService.getEM(propertiesPath, clazz.getSimpleName());
+            em = PersistenceService.getEM(propertiesPath, clazz.getName());
         }
         onBind(clazz);
     }
@@ -125,19 +129,27 @@ public class DefaultKunderaEntity<T, K> implements KunderaEntity<T, K>
     public final List leftJoin(Class clazz, String joinColumn, String... columnTobeFetched)
     {
         List<T> finalResult = new ArrayList();
-        List<T> leftTable = em.createQuery("Select * from " + this.getClass().getSimpleName()).getResultList();
+        List<T> leftTable = em.createQuery("Select p from " + this.getClass().getSimpleName() + " p").getResultList();
         EntityType leftEntity = ((MetamodelImpl) em.getMetamodel()).entity(this.getClass());
         Attribute attribute = leftEntity.getAttribute(joinColumn);
         Field field = (Field) attribute.getJavaMember();
         for (T obj : leftTable)
         {
-            Object right = em.find(clazz, PropertyAccessorHelper.getObject(this, field));
-            if (right != null)
+            List rightTable = em
+                    .createQuery("Select p from " + clazz.getSimpleName() + " p where p." + joinColumn
+                            + " = :columnValue")
+                    .setParameter("columnValue", PropertyAccessorHelper.getObject(obj, field)).getResultList();
+            if (!rightTable.isEmpty())
             {
                 finalResult.add(obj);
             }
         }
         return finalResult;
+    }
+
+    public List<T> query(String query)
+    {
+        return em.createQuery(query).getResultList();
     }
 
 }

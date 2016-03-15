@@ -39,7 +39,7 @@ public class PersistenceService
         {
             try
             {
-                emf = Persistence.createEntityManagerFactory(clazzName, entityConfigurations.get(clazzName));
+                emf = Persistence.createEntityManagerFactory("testPU", entityConfigurations.get(clazzName));
 
             }
             catch (Exception e)

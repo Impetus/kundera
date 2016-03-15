@@ -13,6 +13,8 @@ public interface KunderaEntity<T, K>
 
     void delete();
 
+    List<T> query(String query);
+
     List<T> leftJoin(Class clazz, String joinColumn, String... columnTobeFetched);
 
 }

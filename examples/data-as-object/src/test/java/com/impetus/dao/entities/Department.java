@@ -4,8 +4,11 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 
 import com.impetus.core.DefaultKunderaEntity;
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
 
 @Entity
+@IndexCollection(columns = { @Index(name = "employeeId")})
 public class Department extends DefaultKunderaEntity<Department, Long> {
 	@Id
 	private Long deptId;
