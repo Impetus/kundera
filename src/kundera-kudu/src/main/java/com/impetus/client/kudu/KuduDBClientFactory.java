@@ -16,11 +16,13 @@
 package com.impetus.client.kudu;
 
 import java.util.Map;
+import java.util.Properties;
 
 import org.kududb.client.KuduClient;
 
 import com.impetus.client.kudu.query.KuduDBEntityReader;
 import com.impetus.client.kudu.schemamanager.KuduDBSchemaManager;
+import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.loader.GenericClientFactory;
@@ -81,8 +83,19 @@ public class KuduDBClientFactory extends GenericClientFactory
         initializePropertyReader();
         PersistenceUnitMetadata pum = kunderaMetadata.getApplicationMetadata()
                 .getPersistenceUnitMetadata(getPersistenceUnit());
-        String kuduMasterHost = (String) pum.getProperty("kundera.nodes");
-        String kuduMasterPort = (String) pum.getProperty("kundera.port");
+        
+        Properties pumProps = pum.getProperties();
+        
+        pumProps.putAll(puProperties);
+        
+        String kuduMasterHost = (String) pumProps.getProperty("kundera.nodes");
+        
+        String kuduMasterPort = (String) pumProps.getProperty("kundera.port");
+        
+        if(kuduMasterHost==null || kuduMasterPort ==null){
+            throw new KunderaException("Hostname/IP or Port is null.");
+        }
+        
         kuduClient = new KuduClient.KuduClientBuilder(kuduMasterHost + ":" + kuduMasterPort).build();
     }
 
