@@ -23,6 +23,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.impetus.core.QueryType;
 import com.impetus.dao.entities.Book;
 
 import junit.framework.Assert;
@@ -51,9 +52,21 @@ public class CassandraQueryTest extends BookBaseTest
     public void testSelectQueries() throws Exception
     {
         testSelectAll();
-         testSelectOnId();
+        testSelectOnId();
         testSelectWithWhereClause();
         testSelectFields();
+    }
+    
+    @Test
+    public void testNativeQueries()
+    {
+        List results = new Book().query("select \"TITLE\" from \"Book\"", QueryType.NATIVE);
+        Assert.assertNotNull(results);
+        Assert.assertEquals(4, results.size());
+        results = new Book().query("select \"AUTHOR\" from \"Book\" where token(\"ID\") = token(1)", QueryType.NATIVE);
+        Assert.assertNotNull(results);
+        Assert.assertEquals(1, results.size());
+        Assert.assertEquals("author1", ((Book) results.get(0)).getAuthor());
     }
 
     private void testSelectAll()

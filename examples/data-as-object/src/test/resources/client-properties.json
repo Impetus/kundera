@@ -1,14 +1,5 @@
 {
-  "com.impetus.dao.entities.Employee": {
-    "kundera.nodes": "localhost",
-    "kundera.port": "9160",
-    "kundera.client": "cassandra",
-    "kundera.keyspace": "DAOTest",
-    "kundera.ddl.auto.prepare": "update",
-    "cql.version": "3.0.0",
-    "kundera.client.lookup.class": "com.impetus.client.cassandra.thrift.ThriftClientFactory"
-  },
-  "com.impetus.dao.entities.Department": {
+  "com.impetus.dao.entities.Employee,com.impetus.dao.entities.Department": {
     "kundera.nodes": "localhost",
     "kundera.port": "9160",
     "kundera.client": "cassandra",

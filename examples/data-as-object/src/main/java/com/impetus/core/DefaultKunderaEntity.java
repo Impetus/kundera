@@ -14,8 +14,8 @@ import javax.persistence.metamodel.EntityType;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.impetus.dao.PersistenceService;
 import com.impetus.kundera.Constants;
+import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.configure.SchemaConfiguration;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
@@ -157,6 +157,24 @@ public class DefaultKunderaEntity<T, K> implements KunderaEntity<T, K>
     public List<T> query(String query)
     {
         return em.createQuery(query).getResultList();
+    }
+    
+    public List<T> query(String query, QueryType type)
+    {
+        switch(type){
+        case JPQL:
+           return  query(query);
+            
+        case NATIVE:
+            return  nativeQuery(query);
+            
+            default:
+                throw new KunderaException("invalid query type");
+        }
+    }
+    private List<T> nativeQuery(String query)
+    {
+        return em.createNativeQuery(query).getResultList();
     }
 
 }
