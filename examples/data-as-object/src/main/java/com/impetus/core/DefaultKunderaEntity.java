@@ -1,3 +1,18 @@
+/*******************************************************************************
+ *  * Copyright 2016 Impetus Infotech.
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *      http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ ******************************************************************************/
 package com.impetus.core;
 
 import java.lang.reflect.Field;
@@ -27,17 +42,39 @@ import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
+/**
+ * The Class DefaultKunderaEntity.
+ *
+ * @param <T>
+ *            the generic type
+ * @param <K>
+ *            the key type
+ */
 public class DefaultKunderaEntity<T, K> implements KunderaEntity<T, K>
 {
+
+    /** The emf. */
     private static EntityManagerFactory emf;
 
+    /** The em. */
     private static EntityManager em;
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.core.KunderaEntity#find(java.lang.Object)
+     */
     public final T find(K key)
     {
         return (T) em.find(this.getClass(), key);
     }
 
+    /**
+     * On bind.
+     *
+     * @param clazz
+     *            the clazz
+     */
     private static void onBind(Class clazz)
     {
 
@@ -71,6 +108,14 @@ public class DefaultKunderaEntity<T, K> implements KunderaEntity<T, K>
 
     }
 
+    /**
+     * Sets the schema and pu.
+     *
+     * @param clazz
+     *            the clazz
+     * @param metadata
+     *            the metadata
+     */
     private static void setSchemaAndPU(Class<?> clazz, EntityMetadata metadata)
     {
         Table table = clazz.getAnnotation(Table.class);
@@ -94,26 +139,56 @@ public class DefaultKunderaEntity<T, K> implements KunderaEntity<T, K>
         }
     }
 
+    /**
+     * Gets the persistence unit.
+     *
+     * @return the persistence unit
+     */
     private static String getPersistenceUnit()
     {
         return (String) em.getEntityManagerFactory().getProperties().get(Constants.PERSISTENCE_UNIT_NAME);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.core.KunderaEntity#save()
+     */
     public final void save()
     {
         em.persist(this);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.core.KunderaEntity#update()
+     */
     public final void update()
     {
         em.merge(this);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.core.KunderaEntity#delete()
+     */
     public final void delete()
     {
         em.remove(this);
     }
 
+    /**
+     * Bind.
+     *
+     * @param propertiesPath
+     *            the properties path
+     * @param clazz
+     *            the clazz
+     * @throws BindingException
+     *             the binding exception
+     */
     public static synchronized void bind(String propertiesPath, Class clazz) throws BindingException
     {
         if (em == null)
@@ -123,6 +198,9 @@ public class DefaultKunderaEntity<T, K> implements KunderaEntity<T, K>
         onBind(clazz);
     }
 
+    /**
+     * Unbind.
+     */
     public static synchronized void unbind()
     {
         if (emf != null && emf.isOpen())
@@ -138,6 +216,12 @@ public class DefaultKunderaEntity<T, K> implements KunderaEntity<T, K>
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.core.KunderaEntity#leftJoin(java.lang.Class,
+     * java.lang.String, java.lang.String[])
+     */
     public final List leftJoin(Class clazz, String joinColumn, String... columnTobeFetched)
     {
         List<T> finalResult = new ArrayList();
@@ -160,11 +244,22 @@ public class DefaultKunderaEntity<T, K> implements KunderaEntity<T, K>
         return finalResult;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.core.KunderaEntity#query(java.lang.String)
+     */
     public List<T> query(String query)
     {
         return em.createQuery(query).getResultList();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.core.KunderaEntity#query(java.lang.String,
+     * com.impetus.core.QueryType)
+     */
     public List<T> query(String query, QueryType type)
     {
         switch (type)
@@ -180,6 +275,13 @@ public class DefaultKunderaEntity<T, K> implements KunderaEntity<T, K>
         }
     }
 
+    /**
+     * Native query.
+     *
+     * @param query
+     *            the query
+     * @return the list
+     */
     private List<T> nativeQuery(String query)
     {
         return em.createNativeQuery(query).getResultList();

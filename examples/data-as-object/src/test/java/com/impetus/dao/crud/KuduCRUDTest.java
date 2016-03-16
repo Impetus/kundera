@@ -1,3 +1,18 @@
+/*******************************************************************************
+ *  * Copyright 2016 Impetus Infotech.
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *      http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ ******************************************************************************/
 package com.impetus.dao.crud;
 
 import org.junit.AfterClass;
@@ -8,14 +23,24 @@ import com.impetus.dao.entities.Customer;
 
 import junit.framework.Assert;
 
+/**
+ * The Class KuduCRUDTest.
+ */
 public class KuduCRUDTest
 {
+
+    /**
+     * Sets the up before class.
+     */
     @BeforeClass
     public static void SetUpBeforeClass()
     {
         Customer.bind("client-properties.json", Customer.class);
     }
 
+    /**
+     * Test crud.
+     */
     @Test
     public void testCRUD()
     {
@@ -24,6 +49,9 @@ public class KuduCRUDTest
         testDelete();
     }
 
+    /**
+     * Test insert.
+     */
     private void testInsert()
     {
         Customer customer = new Customer();
@@ -39,6 +67,9 @@ public class KuduCRUDTest
         Assert.assertEquals("Noida", c.getLocation());
     }
 
+    /**
+     * Test update.
+     */
     private void testUpdate()
     {
         Customer c = new Customer().find(101);
@@ -51,6 +82,9 @@ public class KuduCRUDTest
         Assert.assertEquals("Noida", c1.getLocation());
     }
 
+    /**
+     * Test delete.
+     */
     private void testDelete()
     {
         Customer c = new Customer().find(101);
@@ -60,6 +94,12 @@ public class KuduCRUDTest
         Assert.assertNull(c1);
     }
 
+    /**
+     * Tear down after class.
+     *
+     * @throws Exception
+     *             the exception
+     */
     @AfterClass
     public static void tearDownAfterClass() throws Exception
     {

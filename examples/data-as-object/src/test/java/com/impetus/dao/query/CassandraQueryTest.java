@@ -1,5 +1,5 @@
 /*******************************************************************************
- * * Copyright 2015 Impetus Infotech.
+ *  * Copyright 2016 Impetus Infotech.
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -36,18 +36,36 @@ import junit.framework.Assert;
 public class CassandraQueryTest extends BookBaseTest
 {
 
+    /**
+     * Sets the up before class.
+     *
+     * @throws Exception
+     *             the exception
+     */
     @BeforeClass
     public static void setUpBeforeClass() throws Exception
     {
         Book.bind("client-properties.json", Book.class);
     }
 
+    /**
+     * Sets the up.
+     *
+     * @throws Exception
+     *             the exception
+     */
     @Before
     public void setUp() throws Exception
     {
         persistBooks();
     }
 
+    /**
+     * Test select queries.
+     *
+     * @throws Exception
+     *             the exception
+     */
     @Test
     public void testSelectQueries() throws Exception
     {
@@ -56,20 +74,26 @@ public class CassandraQueryTest extends BookBaseTest
         testSelectWithWhereClause();
         testSelectFields();
     }
-    
+
+    /**
+     * Test native queries.
+     */
     @Test
     public void testNativeQueries()
     {
         List results = new Book().query("select \"TITLE\" from \"Book\"", QueryType.NATIVE);
         Assert.assertNotNull(results);
         Assert.assertEquals(4, results.size());
-        
+
         results = new Book().query("select \"AUTHOR\" from \"Book\" where token(\"ID\") = token(1)", QueryType.NATIVE);
         Assert.assertNotNull(results);
         Assert.assertEquals(1, results.size());
         Assert.assertEquals("author1", ((Book) results.get(0)).getAuthor());
     }
 
+    /**
+     * Test select all.
+     */
     private void testSelectAll()
     {
         List<Book> results = new Book().query("select b from Book b");
@@ -79,6 +103,9 @@ public class CassandraQueryTest extends BookBaseTest
         assertResults(results, T, T, T, T);
     }
 
+    /**
+     * Test select on id.
+     */
     private void testSelectOnId()
     {
         List<Book> results = new Book().query("select b from Book b where b.bookId=1");
@@ -93,6 +120,9 @@ public class CassandraQueryTest extends BookBaseTest
 
     }
 
+    /**
+     * Test select with where clause.
+     */
     private void testSelectWithWhereClause()
     {
         List<Book> results = new Book().query("select b from Book b where b.title = 'book1'");
@@ -110,7 +140,9 @@ public class CassandraQueryTest extends BookBaseTest
 
     }
 
-
+    /**
+     * Test select fields.
+     */
     private void testSelectFields()
     {
         List results = new Book().query("select b.title from Book b");
@@ -120,25 +152,40 @@ public class CassandraQueryTest extends BookBaseTest
         results = new Book().query("select b.author from Book b where b.bookId=1");
         Assert.assertNotNull(results);
         Assert.assertEquals(1, results.size());
-        Assert.assertEquals("author1", ((Book)results.get(0)).getAuthor());
+        Assert.assertEquals("author1", ((Book) results.get(0)).getAuthor());
 
         results = new Book().query("select b.title from Book b where b.bookId in (3,4,5,6)");
         Assert.assertNotNull(results);
         Assert.assertEquals(2, results.size());
     }
 
+    /**
+     * Tear down.
+     *
+     * @throws Exception
+     *             the exception
+     */
     @After
     public void tearDown() throws Exception
     {
         deleteBooks();
     }
 
+    /**
+     * Tear down after class.
+     *
+     * @throws Exception
+     *             the exception
+     */
     @AfterClass
     public static void tearDownAfterClass() throws Exception
     {
         Book.unbind();
     }
 
+    /**
+     * Persist books.
+     */
     private void persistBooks()
     {
         Book book1 = prepareData(1, "book1", "author1", 2000, 100);
@@ -151,6 +198,9 @@ public class CassandraQueryTest extends BookBaseTest
         book4.save();
     }
 
+    /**
+     * Delete books.
+     */
     private void deleteBooks()
     {
         Book b1 = new Book().find(1);
@@ -165,6 +215,21 @@ public class CassandraQueryTest extends BookBaseTest
         b4.delete();
     }
 
+    /**
+     * Prepare data.
+     *
+     * @param bookId
+     *            the book id
+     * @param title
+     *            the title
+     * @param author
+     *            the author
+     * @param year
+     *            the year
+     * @param pages
+     *            the pages
+     * @return the book
+     */
     private Book prepareData(int bookId, String title, String author, int year, int pages)
     {
         Book book = new Book();
