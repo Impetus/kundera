@@ -63,6 +63,7 @@ public class CassandraQueryTest extends BookBaseTest
         List results = new Book().query("select \"TITLE\" from \"Book\"", QueryType.NATIVE);
         Assert.assertNotNull(results);
         Assert.assertEquals(4, results.size());
+        
         results = new Book().query("select \"AUTHOR\" from \"Book\" where token(\"ID\") = token(1)", QueryType.NATIVE);
         Assert.assertNotNull(results);
         Assert.assertEquals(1, results.size());

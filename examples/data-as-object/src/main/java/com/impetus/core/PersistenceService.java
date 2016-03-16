@@ -1,9 +1,9 @@
 package com.impetus.core;
 
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
@@ -25,7 +25,8 @@ public class PersistenceService
 
     private static Map<?, Map<String, String>> clientProperties = new HashMap<>();
 
-    private static Map<String, Map<String, String>> entityConfigurations = new HashMap<>();
+    private static Map<String, Map<String, String>> entityConfigurations = Collections
+            .synchronizedMap(new HashMap<String, Map<String, String>>());
 
     public static synchronized EntityManager getEM(EntityManagerFactory emf, final String propertiesPath,
             final String clazzName)
@@ -52,38 +53,40 @@ public class PersistenceService
     private static void loadClientProperties(String propertiesPath, String clazzName)
     {
 
-            InputStream inputStream = PropertyReader.class.getClassLoader().getResourceAsStream(propertiesPath);
-            clientProperties = JsonUtil.readJson(inputStream, Map.class);
+        InputStream inputStream = PropertyReader.class.getClassLoader().getResourceAsStream(propertiesPath);
+        clientProperties = JsonUtil.readJson(inputStream, Map.class);
 
-            if (clientProperties != null)
+        if (clientProperties != null)
+        {
+            if (clientProperties.get("all") != null)
             {
-            	if (clientProperties.get("all") != null)
-                {
-                    entityConfigurations.put(clazzName, clientProperties.get("all"));
-                }
-            	else{
-            		
-            		Iterator iter = clientProperties.keySet().iterator();
-            		
-            		while (iter.hasNext())
-            		{
-            			Object key = iter.next();
-            			 if (((String) key).indexOf(',') > 0)
-                         {
-                             StringTokenizer tokenizer = new StringTokenizer((String) key, ",");
-                             while (tokenizer.hasMoreElements())
-                             {
-                                 String token = tokenizer.nextToken();
-                                 entityConfigurations.put(token, clientProperties.get(key));
-                             }
-                         }
-                         else
-                         {
-                             entityConfigurations.put((String) key, clientProperties.get(key));
-                         }            		}
-            	}
+                entityConfigurations.put(clazzName, clientProperties.get("all"));
             }
+            else
+            {
+
+                Iterator iter = clientProperties.keySet().iterator();
+
+                while (iter.hasNext())
+                {
+                    Object key = iter.next();
+                    if (((String) key).indexOf(',') > 0)
+                    {
+                        StringTokenizer tokenizer = new StringTokenizer((String) key, ",");
+                        while (tokenizer.hasMoreElements())
+                        {
+                            String token = tokenizer.nextToken();
+                            entityConfigurations.put(token, clientProperties.get(key));
+                        }
+                    }
+                    else
+                    {
+                        entityConfigurations.put((String) key, clientProperties.get(key));
+                    }
+                }
+            }
+        }
 
     }
-    
+
 }

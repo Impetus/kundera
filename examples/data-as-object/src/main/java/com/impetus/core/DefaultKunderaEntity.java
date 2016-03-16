@@ -125,10 +125,16 @@ public class DefaultKunderaEntity<T, K> implements KunderaEntity<T, K>
 
     public static synchronized void unbind()
     {
-        if (em.isOpen())
+        if (emf != null && emf.isOpen())
         {
-            em.getEntityManagerFactory().close();
+            emf.close();
+            emf = null;
+
+        }
+        if (em != null && em.isOpen())
+        {
             em.close();
+            em = null;
         }
     }
 
@@ -158,20 +164,22 @@ public class DefaultKunderaEntity<T, K> implements KunderaEntity<T, K>
     {
         return em.createQuery(query).getResultList();
     }
-    
+
     public List<T> query(String query, QueryType type)
     {
-        switch(type){
+        switch (type)
+        {
         case JPQL:
-           return  query(query);
-            
+            return query(query);
+
         case NATIVE:
-            return  nativeQuery(query);
-            
-            default:
-                throw new KunderaException("invalid query type");
+            return nativeQuery(query);
+
+        default:
+            throw new KunderaException("invalid query type");
         }
     }
+
     private List<T> nativeQuery(String query)
     {
         return em.createNativeQuery(query).getResultList();
