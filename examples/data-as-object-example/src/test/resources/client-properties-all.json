@@ -1,0 +1,11 @@
+{
+  "all": {
+    "kundera.nodes": "localhost",
+    "kundera.port": "9160",
+    "kundera.client": "cassandra",
+    "kundera.keyspace": "DAOTest",
+    "kundera.ddl.auto.prepare": "update",
+    "cql.version": "3.0.0",
+    "kundera.client.lookup.class": "com.impetus.client.cassandra.thrift.ThriftClientFactory"
+  }
+}

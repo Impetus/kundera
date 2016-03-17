@@ -1,0 +1,36 @@
+{
+  "com.impetus.kundera.dataasobject.entities.Employee,com.impetus.kundera.dataasobject.entities.Department": {
+    "kundera.nodes": "localhost",
+    "kundera.port": "9160",
+    "kundera.client": "cassandra",
+    "kundera.keyspace": "DAOTest",
+    "kundera.ddl.auto.prepare": "update",
+    "cql.version": "3.0.0",
+    "kundera.client.lookup.class": "com.impetus.client.cassandra.thrift.ThriftClientFactory"
+  },
+  "com.impetus.kundera.dataasobject.entities.Book": {
+    "kundera.nodes": "localhost",
+    "kundera.port": "9160",
+    "kundera.client": "cassandra",
+    "kundera.keyspace": "DAOTest",
+    "kundera.ddl.auto.prepare": "update",
+    "cql.version": "3.0.0",
+    "kundera.client.lookup.class": "com.impetus.client.cassandra.thrift.ThriftClientFactory"
+  },
+  "com.impetus.kundera.dataasobject.entities.Customer": {
+    "kundera.nodes": "quickstart.cloudera",
+    "kundera.port": "7051",
+    "kundera.client": "kudu",
+    "kundera.keyspace": "DAOTest",
+    "kundera.ddl.auto.prepare": "create",
+    "kundera.client.lookup.class": "com.impetus.client.kudu.KuduDBClientFactory"
+  },
+  "com.impetus.kundera.dataasobject.entities.DepartmentKudu": {
+    "kundera.nodes": "quickstart.cloudera",
+    "kundera.port": "7051",
+    "kundera.client": "kudu",
+    "kundera.keyspace": "DAOTest",
+    "kundera.ddl.auto.prepare": "create",
+    "kundera.client.lookup.class": "com.impetus.client.kudu.KuduDBClientFactory"
+  }
+}
