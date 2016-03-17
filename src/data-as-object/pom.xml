@@ -7,8 +7,8 @@
 		<version>3.4-SNAPSHOT</version>
 	</parent>
 	<groupId>com.impetus.kundera.client</groupId>
-	<artifactId>kundera-wieldy</artifactId>
-	<name>kundera-wieldy</name>
+	<artifactId>data-as-object</artifactId>
+	<name>data-as-object</name>
 	<url>http://maven.apache.org</url>
 
 	<dependencies>
