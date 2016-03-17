@@ -155,6 +155,7 @@
         <module>kundera-cassandra</module>
         <module>kundera-spark</module>
 	<module>kundera-kudu</module>
+	<module>kundera-wieldy</module>
         <module>kundera-hbase</module>
         <module>kundera-mongo</module>
         <module>kundera-rdbms</module>
@@ -249,6 +250,17 @@
       <modules>
         <module>jpa-engine</module>
         <module>kundera-kudu</module>
+      </modules>
+    </profile>
+
+     <profile>
+      <id>wieldy</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <modules>
+        <module>jpa-engine</module>
+        <module>kundera-wieldy</module>
       </modules>
     </profile>
     
