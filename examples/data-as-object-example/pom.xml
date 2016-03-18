@@ -11,7 +11,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>com.impetus.kundera.client</groupId>
-			<artifactId>kundera-wieldy</artifactId>
+			<artifactId>data-as-object</artifactId>
 			<version>3.4-SNAPSHOT</version>
 		</dependency>
 		<dependency>
