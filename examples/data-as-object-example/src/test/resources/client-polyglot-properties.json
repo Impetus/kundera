@@ -1,0 +1,11 @@
+ {
+ "com.impetus.kundera.dataasobject.entities.User": {
+	 "kundera.pu":"twirdbms"
+  },
+   "com.impetus.kundera.dataasobject.entities.Tweets": {
+	 "kundera.pu":"twingo"
+  },
+   "com.impetus.kundera.dataasobject.entities.Video": {
+	 "kundera.pu":"twissandra"
+  }
+  }

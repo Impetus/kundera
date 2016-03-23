@@ -19,7 +19,16 @@
 			<artifactId>kundera-cassandra</artifactId>
 			<version>3.4-SNAPSHOT</version>
 		</dependency>
-
+		<dependency>
+			<groupId>com.impetus.kundera.client</groupId>
+			<artifactId>kundera-mongo</artifactId>
+			<version>3.4-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.impetus.kundera.client</groupId>
+			<artifactId>kundera-rdbms</artifactId>
+			<version>3.4-SNAPSHOT</version>
+		</dependency>
 		<dependency>
 			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-kudu</artifactId>

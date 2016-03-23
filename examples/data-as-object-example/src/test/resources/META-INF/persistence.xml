@@ -1,0 +1,59 @@
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
+	version="2.0">
+
+	<!-- Persistence Units for user-tweets application -->
+
+	<persistence-unit name="twirdbms">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.kundera.dataasobject.entities.User</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.client.lookup.class" value="com.impetus.client.rdbms.RDBMSClientFactory" />
+			<property name="hibernate.hbm2ddl.auto" value="update" />
+			<property name="hibernate.show_sql" value="false" />
+			<property name="hibernate.format_sql" value="false" />
+			<property name="dialect"
+				value="org.openmeetings.app.hibernate.utils.MySQL5MyISAMDialect" />
+			<property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5Dialect" />
+			<property name="hibernate.connection.driver_class" value="com.mysql.jdbc.Driver" />
+			<property name="hibernate.connection.url" value="jdbc:mysql://localhost:3306/kvapps" />
+			<property name="hibernate.connection.username" value="root" />
+			<property name="hibernate.connection.password" value="root" />
+		</properties>
+	</persistence-unit>
+
+	<!-- Persistence unit for mongo -->
+	<persistence-unit name="twingo">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.kundera.dataasobject.entities.Tweets</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="27017" />
+			<property name="kundera.keyspace" value="kvapps" />
+			<property name="kundera.dialect" value="mongodb" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.mongodb.MongoDBClientFactory" />
+			<property name="kundera.ddl.auto.prepare" value="update" />
+		</properties>
+	</persistence-unit>
+
+	<!-- Persistence unit for cassandra -->
+	<persistence-unit name="twissandra">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.kundera.dataasobject.entities.Video</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="9160" />
+			<property name="kundera.keyspace" value="kvapps" />
+			<property name="kundera.dialect" value="cassandra" />
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
+			<property name="kundera.ddl.auto.prepare" value="update" />
+			<property name="cql.version" value="3.0.0"></property>
+		</properties>
+	</persistence-unit>
+</persistence>
