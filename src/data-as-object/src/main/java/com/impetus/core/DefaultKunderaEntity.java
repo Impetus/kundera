@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.core;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,8 +23,6 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Table;
-import javax.persistence.metamodel.Attribute;
-import javax.persistence.metamodel.EntityType;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -40,7 +37,6 @@ import com.impetus.kundera.metadata.processor.IndexProcessor;
 import com.impetus.kundera.metadata.processor.TableProcessor;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
-import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
  * The Class DefaultKunderaEntity.
@@ -78,33 +74,38 @@ public class DefaultKunderaEntity<T, K> implements KunderaEntity<T, K>
     private static void onBind(Class clazz)
     {
 
-        EntityMetadata metadata = new EntityMetadata(clazz);
-        metadata.setPersistenceUnit(getPersistenceUnit());
+        if (((MetamodelImpl) em.getMetamodel()).getEntityMetadataMap().isEmpty())
+        {
 
-        setSchemaAndPU(clazz, metadata);
+            EntityMetadata metadata = new EntityMetadata(clazz);
+            metadata.setPersistenceUnit(getPersistenceUnit());
 
-        new TableProcessor(em.getEntityManagerFactory().getProperties(),
-                ((EntityManagerFactoryImpl) em.getEntityManagerFactory()).getKunderaMetadataInstance()).process(clazz,
-                        metadata);
+            setSchemaAndPU(clazz, metadata);
 
-        KunderaMetadata kunderaMetadata = ((EntityManagerFactoryImpl) em.getEntityManagerFactory())
-                .getKunderaMetadataInstance();
+            new TableProcessor(em.getEntityManagerFactory().getProperties(),
+                    ((EntityManagerFactoryImpl) em.getEntityManagerFactory()).getKunderaMetadataInstance())
+                            .process(clazz, metadata);
 
-        new IndexProcessor(kunderaMetadata).process(clazz, metadata);
+            KunderaMetadata kunderaMetadata = ((EntityManagerFactoryImpl) em.getEntityManagerFactory())
+                    .getKunderaMetadataInstance();
 
-        ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
+            new IndexProcessor(kunderaMetadata).process(clazz, metadata);
 
-        ((MetamodelImpl) em.getMetamodel()).addEntityMetadata(clazz, metadata);
-        ((MetamodelImpl) em.getMetamodel()).addEntityNameToClassMapping(clazz.getSimpleName(), clazz);
-        appMetadata.getMetamodelMap().put(getPersistenceUnit(), em.getMetamodel());
+            ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
 
-        Map<String, List<String>> clazzToPuMap = new HashMap<String, List<String>>();
-        List<String> persistenceUnits = new ArrayList<String>();
-        persistenceUnits.add(getPersistenceUnit());
-        clazzToPuMap.put(clazz.getName(), persistenceUnits);
-        appMetadata.setClazzToPuMap(clazzToPuMap);
-        new SchemaConfiguration(em.getEntityManagerFactory().getProperties(), kunderaMetadata, getPersistenceUnit())
-                .configure();
+            ((MetamodelImpl) em.getMetamodel()).addEntityMetadata(clazz, metadata);
+            ((MetamodelImpl) em.getMetamodel()).addEntityNameToClassMapping(clazz.getSimpleName(), clazz);
+            appMetadata.getMetamodelMap().put(getPersistenceUnit(), em.getMetamodel());
+
+            Map<String, List<String>> clazzToPuMap = new HashMap<String, List<String>>();
+            List<String> persistenceUnits = new ArrayList<String>();
+            persistenceUnits.add(getPersistenceUnit());
+            clazzToPuMap.put(clazz.getName(), persistenceUnits);
+            appMetadata.setClazzToPuMap(clazzToPuMap);
+            new SchemaConfiguration(em.getEntityManagerFactory().getProperties(), kunderaMetadata, getPersistenceUnit())
+                    .configure();
+
+        }
 
     }
 
@@ -222,27 +223,32 @@ public class DefaultKunderaEntity<T, K> implements KunderaEntity<T, K>
      * @see com.impetus.core.KunderaEntity#leftJoin(java.lang.Class,
      * java.lang.String, java.lang.String[])
      */
-    public final List leftJoin(Class clazz, String joinColumn, String... columnTobeFetched)
-    {
-        List<T> finalResult = new ArrayList();
-        List<T> leftTable = em.createQuery("Select p from " + this.getClass().getSimpleName() + " p").getResultList();
-        EntityType leftEntity = ((MetamodelImpl) em.getMetamodel()).entity(this.getClass());
-        Attribute attribute = leftEntity.getAttribute(joinColumn);
-        Field field = (Field) attribute.getJavaMember();
-
-        for (T obj : leftTable)
-        {
-            List rightTable = em
-                    .createQuery(
-                            "Select p from " + clazz.getSimpleName() + " p where p." + joinColumn + " = :columnValue")
-                    .setParameter("columnValue", PropertyAccessorHelper.getObject(obj, field)).getResultList();
-            if (!rightTable.isEmpty())
-            {
-                finalResult.add(obj);
-            }
-        }
-        return finalResult;
-    }
+    // public final List leftJoin(Class clazz, String joinColumn, String...
+    // columnTobeFetched)
+    // {
+    // List<T> finalResult = new ArrayList();
+    // List<T> leftTable = em.createQuery("Select p from " +
+    // this.getClass().getSimpleName() + " p").getResultList();
+    // EntityType leftEntity = ((MetamodelImpl)
+    // em.getMetamodel()).entity(this.getClass());
+    // Attribute attribute = leftEntity.getAttribute(joinColumn);
+    // Field field = (Field) attribute.getJavaMember();
+    //
+    // for (T obj : leftTable)
+    // {
+    // List rightTable = em
+    // .createQuery(
+    // "Select p from " + clazz.getSimpleName() + " p where p." + joinColumn + "
+    // = :columnValue")
+    // .setParameter("columnValue", PropertyAccessorHelper.getObject(obj,
+    // field)).getResultList();
+    // if (!rightTable.isEmpty())
+    // {
+    // finalResult.add(obj);
+    // }
+    // }
+    // return finalResult;
+    // }
 
     /*
      * (non-Javadoc)

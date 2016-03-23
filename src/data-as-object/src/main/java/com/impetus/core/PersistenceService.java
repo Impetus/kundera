@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.StringTokenizer;
 
 import javax.persistence.EntityManager;
@@ -67,9 +68,34 @@ public class PersistenceService
 
         if (emf == null)
         {
+
+            StringBuilder puNames = new StringBuilder();
+
+            for (Entry<String, Map<String, String>> entry : entityConfigurations.entrySet())
+            {
+                if (entry.getValue().get("kundera.pu") != null)
+                {
+                    puNames.append(entry.getValue().get("kundera.pu"));
+                    puNames.append(",");
+                }
+            }
+            if (puNames.length() > 0)
+            {
+                puNames.deleteCharAt(puNames.length() - 1);
+            }
+
             try
             {
-                emf = Persistence.createEntityManagerFactory("testPU", entityConfigurations.get(clazzName));
+
+                if (puNames.toString().isEmpty())
+                {
+                    emf = Persistence.createEntityManagerFactory("testPU", entityConfigurations.get(clazzName));
+                }
+
+                else
+                {
+                    emf = Persistence.createEntityManagerFactory(puNames.toString());
+                }
 
             }
             catch (Exception e)
