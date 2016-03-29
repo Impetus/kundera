@@ -1,5 +1,5 @@
 /*******************************************************************************
- * * Copyright 2013 Impetus Infotech.
+ *  * Copyright 2016 Impetus Infotech.
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -31,38 +31,47 @@ import javax.persistence.TemporalType;
 import com.impetus.core.DefaultKunderaEntity;
 
 /**
+ * The Class Tweets.
+ *
  * @author impetus
  * 
  *         Tweets entity
  */
 
 @Entity
-//@Table(name = "tweets")
-//@IndexCollection(columns = { @Index(name = "body"), @Index(name = "tweeted_at") })
 public class Tweets extends DefaultKunderaEntity<Tweets, String>
 {
 
+    /** The tweet id. */
     @Id
     @Column(name = "tweet_id")
     private String tweetId;
 
+    /** The body. */
     @Column(name = "body")
     private String body;
 
+    /** The tweet date. */
     @Column(name = "tweeted_at")
     @Temporal(TemporalType.DATE)
     private Date tweetDate;
 
+    /** The videos. */
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "tweet_id")
     private Set<Video> videos;
 
+    /**
+     * Instantiates a new tweets.
+     */
     public Tweets()
     {
         // Default constructor.
     }
 
     /**
+     * Gets the tweet id.
+     *
      * @return the tweetId
      */
     public String getTweetId()
@@ -71,8 +80,9 @@ public class Tweets extends DefaultKunderaEntity<Tweets, String>
     }
 
     /**
-     * @param tweetId
-     *            the tweetId to set
+     * Sets the tweet id.
+     *
+     * @param tweetId            the tweetId to set
      */
     public void setTweetId(String tweetId)
     {
@@ -80,6 +90,8 @@ public class Tweets extends DefaultKunderaEntity<Tweets, String>
     }
 
     /**
+     * Gets the body.
+     *
      * @return the body
      */
     public String getBody()
@@ -88,8 +100,9 @@ public class Tweets extends DefaultKunderaEntity<Tweets, String>
     }
 
     /**
-     * @param body
-     *            the body to set
+     * Sets the body.
+     *
+     * @param body            the body to set
      */
     public void setBody(String body)
     {
@@ -97,6 +110,8 @@ public class Tweets extends DefaultKunderaEntity<Tweets, String>
     }
 
     /**
+     * Gets the tweet date.
+     *
      * @return the tweetDate
      */
     public Date getTweetDate()
@@ -105,24 +120,38 @@ public class Tweets extends DefaultKunderaEntity<Tweets, String>
     }
 
     /**
-     * @param tweetDate
-     *            the tweetDate to set
+     * Sets the tweet date.
+     *
+     * @param tweetDate            the tweetDate to set
      */
     public void setTweetDate(Date tweetDate)
     {
         this.tweetDate = tweetDate;
     }
 
+    /**
+     * Gets the videos.
+     *
+     * @return the videos
+     */
     public Set<Video> getVideos()
     {
         return videos;
     }
 
+    /**
+     * Sets the videos.
+     *
+     * @param videos the new videos
+     */
     public void setVideos(Set<Video> videos)
     {
         this.videos = videos;
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
     @Override
     public String toString()
     {

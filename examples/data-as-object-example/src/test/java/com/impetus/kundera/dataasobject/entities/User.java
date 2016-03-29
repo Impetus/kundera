@@ -1,5 +1,5 @@
 /*******************************************************************************
- * * Copyright 2013 Impetus Infotech.
+ *  * Copyright 2016 Impetus Infotech.
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -19,162 +19,195 @@ import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
-import javax.persistence.Table;
 
 import com.impetus.core.DefaultKunderaEntity;
-import com.impetus.kundera.index.Index;
-import com.impetus.kundera.index.IndexCollection;
 
 /**
+ * The Class User.
+ *
  * @author impetus User entity.
  */
 @Entity
-// @Table(name = "User")
-// @IndexCollection(columns = { @Index(name = "emailId") })
-public class User extends DefaultKunderaEntity<User, String> {
+public class User extends DefaultKunderaEntity<User, String>
+{
 
-	@Id
-	@Column(name = "user_id")
-	private String userId;
+    /** The user id. */
+    @Id
+    @Column(name = "user_id")
+    private String userId;
 
-	@Column(name = "first_name")
-	private String firstName;
+    /** The first name. */
+    @Column(name = "first_name")
+    private String firstName;
 
-	@Column(name = "last_name")
-	private String lastName;
+    /** The last name. */
+    @Column(name = "last_name")
+    private String lastName;
 
-	@Column(name = "emailId")
-	private String emailId;
+    /** The email id. */
+    @Column(name = "emailId")
+    private String emailId;
 
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_id")
-	private Set<Tweets> tweets;
+    /** The tweets. */
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private Set<Tweets> tweets;
 
-	// @Embedded
-	// private PersonalDetail personalDetail;
+    /**
+     * Instantiates a new user.
+     */
+    public User()
+    {
+    }
 
-	public User() {
-		// Default constructor.
-	}
+    /**
+     * Gets the user id.
+     *
+     * @return the userId
+     */
+    public String getUserId()
+    {
+        return userId;
+    }
 
-	/**
-	 * @return the userId
-	 */
-	public String getUserId() {
-		return userId;
-	}
+    /**
+     * Sets the user id.
+     *
+     * @param userId            the userId to set
+     */
+    public void setUserId(String userId)
+    {
+        this.userId = userId;
+    }
 
-	/**
-	 * @param userId
-	 *            the userId to set
-	 */
-	public void setUserId(String userId) {
-		this.userId = userId;
-	}
+    /**
+     * Gets the first name.
+     *
+     * @return the firstName
+     */
+    public String getFirstName()
+    {
+        return firstName;
+    }
 
-	/**
-	 * @return the firstName
-	 */
-	public String getFirstName() {
-		return firstName;
-	}
+    /**
+     * Sets the first name.
+     *
+     * @param firstName            the firstName to set
+     */
+    public void setFirstName(String firstName)
+    {
+        this.firstName = firstName;
+    }
 
-	/**
-	 * @param firstName
-	 *            the firstName to set
-	 */
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
+    /**
+     * Gets the last name.
+     *
+     * @return the lastName
+     */
+    public String getLastName()
+    {
+        return lastName;
+    }
 
-	/**
-	 * @return the lastName
-	 */
-	public String getLastName() {
-		return lastName;
-	}
+    /**
+     * Sets the last name.
+     *
+     * @param lastName            the lastName to set
+     */
+    public void setLastName(String lastName)
+    {
+        this.lastName = lastName;
+    }
 
-	/**
-	 * @param lastName
-	 *            the lastName to set
-	 */
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
-	}
+    /**
+     * Gets the email id.
+     *
+     * @return the emailId
+     */
+    public String getEmailId()
+    {
+        return emailId;
+    }
 
-	/**
-	 * @return the emailId
-	 */
-	public String getEmailId() {
-		return emailId;
-	}
+    /**
+     * Sets the email id.
+     *
+     * @param emailId            the emailId to set
+     */
+    public void setEmailId(String emailId)
+    {
+        this.emailId = emailId;
+    }
 
-	/**
-	 * @param emailId
-	 *            the emailId to set
-	 */
-	public void setEmailId(String emailId) {
-		this.emailId = emailId;
-	}
+    /**
+     * Gets the tweets.
+     *
+     * @return the tweets
+     */
+    public Set<Tweets> getTweets()
+    {
+        return tweets;
+    }
 
-	/**
-	 * @return the tweets
-	 */
-	public Set<Tweets> getTweets() {
-		return tweets;
-	}
+    /**
+     * Sets the tweets.
+     *
+     * @param tweets            the tweets to set
+     */
+    public void setTweets(Set<Tweets> tweets)
+    {
+        this.tweets = tweets;
+    }
 
-	/**
-	 * @param tweets
-	 *            the tweets to set
-	 */
-	public void setTweets(Set<Tweets> tweets) {
-		this.tweets = tweets;
-	}
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString()
+    {
+        return "User [userId=" + userId + ", firstName=" + firstName + ", lastName=" + lastName + ", emailId=" + emailId
+                + ", tweets=" + tweets + "]";
+    }
 
-	// public PersonalDetail getPersonalDetail() {
-	// return personalDetail;
-	// }
-	//
-	// public void setPersonalDetail(PersonalDetail personalDetail) {
-	// this.personalDetail = personalDetail;
-	// }
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode()
+    {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((userId == null) ? 0 : userId.hashCode());
+        return result;
+    }
 
-	@Override
-	public String toString() {
-		return "User [userId=" + userId + ", firstName=" + firstName + ", lastName=" + lastName + ", emailId=" + emailId
-				+ ", tweets=" + tweets + "]";
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((userId == null) ? 0 : userId.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		User other = (User) obj;
-		if (userId == null) {
-			if (other.userId != null)
-				return false;
-		} else if (!userId.equals(other.userId))
-			return false;
-		return true;
-	}
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        User other = (User) obj;
+        if (userId == null)
+        {
+            if (other.userId != null)
+                return false;
+        }
+        else if (!userId.equals(other.userId))
+            return false;
+        return true;
+    }
 
 }

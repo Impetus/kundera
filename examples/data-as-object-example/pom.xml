@@ -8,32 +8,41 @@
 	<name>data-as-object-example</name>
 	<url>http://maven.apache.org</url>
 
+	<properties>
+		<kundera-version>3.4-SNAPSHOT</kundera-version>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>data-as-object</artifactId>
-			<version>3.4-SNAPSHOT</version>
+			<version>${kundera-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-cassandra</artifactId>
-			<version>3.4-SNAPSHOT</version>
+			<version>${kundera-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-mongo</artifactId>
-			<version>3.4-SNAPSHOT</version>
+			<version>${kundera-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-rdbms</artifactId>
-			<version>3.4-SNAPSHOT</version>
+			<version>${kundera-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-kudu</artifactId>
-			<version>3.4-SNAPSHOT</version>
+			<version>${kundera-version}</version>
 		</dependency>
+		<!-- <dependency> -->
+		<!-- <groupId>com.impetus.kundera.client</groupId> -->
+		<!-- <artifactId>kundera-elastic-search</artifactId> -->
+		<!-- <version>${kundera-version}</version> -->
+		<!-- </dependency> -->
 	</dependencies>
 
 	<build>

@@ -11,7 +11,7 @@
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<property name="kundera.client.lookup.class" value="com.impetus.client.rdbms.RDBMSClientFactory" />
-			<property name="hibernate.hbm2ddl.auto" value="update" />
+			<property name="hibernate.hbm2ddl.auto" value="create" />
 			<property name="hibernate.show_sql" value="false" />
 			<property name="hibernate.format_sql" value="false" />
 			<property name="dialect"
@@ -36,7 +36,7 @@
 			<property name="kundera.dialect" value="mongodb" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.mongodb.MongoDBClientFactory" />
-			<property name="kundera.ddl.auto.prepare" value="update" />
+			<property name="kundera.ddl.auto.prepare" value="create" />
 		</properties>
 	</persistence-unit>
 
@@ -52,7 +52,7 @@
 			<property name="kundera.dialect" value="cassandra" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.cassandra.thrift.ThriftClientFactory" />
-			<property name="kundera.ddl.auto.prepare" value="update" />
+			<property name="kundera.ddl.auto.prepare" value="create" />
 			<property name="cql.version" value="3.0.0"></property>
 		</properties>
 	</persistence-unit>
