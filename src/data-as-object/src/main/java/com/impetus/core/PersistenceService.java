@@ -43,13 +43,6 @@ public class PersistenceService
     /** The logger. */
     private static Logger LOGGER = LoggerFactory.getLogger(PersistenceService.class);
 
-    /** The client properties. */
-    private static Map<?, Map<String, String>> clientProperties = new HashMap<>();
-
-    /** The entity configurations. */
-    private static Map<String, Map<String, String>> entityConfigurations = Collections
-            .synchronizedMap(new HashMap<String, Map<String, String>>());
-
     /**
      * Gets the em.
      *
@@ -64,7 +57,14 @@ public class PersistenceService
     public static synchronized EntityManager getEM(EntityManagerFactory emf, final String propertiesPath,
             final String clazzName)
     {
-        loadClientProperties(propertiesPath, clazzName);
+        /** The client properties. */
+        Map<?, Map<String, String>> clientProperties = new HashMap<>();
+
+        /** The entity configurations. */
+        Map<String, Map<String, String>> entityConfigurations = Collections
+                .synchronizedMap(new HashMap<String, Map<String, String>>());
+
+        loadClientProperties(propertiesPath, clazzName, clientProperties, entityConfigurations);
 
         if (emf == null)
         {
@@ -115,8 +115,11 @@ public class PersistenceService
      *            the properties path
      * @param clazzName
      *            the clazz name
+     * @param entityConfigurations
+     * @param clientProperties
      */
-    private static void loadClientProperties(String propertiesPath, String clazzName)
+    private static void loadClientProperties(String propertiesPath, String clazzName,
+            Map<?, Map<String, String>> clientProperties, Map<String, Map<String, String>> entityConfigurations)
     {
 
         InputStream inputStream = PropertyReader.class.getClassLoader().getResourceAsStream(propertiesPath);
