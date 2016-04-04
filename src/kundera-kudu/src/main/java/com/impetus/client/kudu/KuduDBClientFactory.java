@@ -83,19 +83,20 @@ public class KuduDBClientFactory extends GenericClientFactory
         initializePropertyReader();
         PersistenceUnitMetadata pum = kunderaMetadata.getApplicationMetadata()
                 .getPersistenceUnitMetadata(getPersistenceUnit());
-        
+
         Properties pumProps = pum.getProperties();
-        
+
         pumProps.putAll(puProperties);
-        
+
         String kuduMasterHost = (String) pumProps.getProperty("kundera.nodes");
-        
+
         String kuduMasterPort = (String) pumProps.getProperty("kundera.port");
-        
-        if(kuduMasterHost==null || kuduMasterPort ==null){
+
+        if (kuduMasterHost == null || kuduMasterPort == null)
+        {
             throw new KunderaException("Hostname/IP or Port is null.");
         }
-        
+
         kuduClient = new KuduClient.KuduClientBuilder(kuduMasterHost + ":" + kuduMasterPort).build();
     }
 

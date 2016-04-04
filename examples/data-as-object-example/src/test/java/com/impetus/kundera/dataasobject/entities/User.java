@@ -78,7 +78,8 @@ public class User extends DefaultKunderaEntity<User, String>
     /**
      * Sets the user id.
      *
-     * @param userId            the userId to set
+     * @param userId
+     *            the userId to set
      */
     public void setUserId(String userId)
     {
@@ -98,7 +99,8 @@ public class User extends DefaultKunderaEntity<User, String>
     /**
      * Sets the first name.
      *
-     * @param firstName            the firstName to set
+     * @param firstName
+     *            the firstName to set
      */
     public void setFirstName(String firstName)
     {
@@ -118,7 +120,8 @@ public class User extends DefaultKunderaEntity<User, String>
     /**
      * Sets the last name.
      *
-     * @param lastName            the lastName to set
+     * @param lastName
+     *            the lastName to set
      */
     public void setLastName(String lastName)
     {
@@ -138,7 +141,8 @@ public class User extends DefaultKunderaEntity<User, String>
     /**
      * Sets the email id.
      *
-     * @param emailId            the emailId to set
+     * @param emailId
+     *            the emailId to set
      */
     public void setEmailId(String emailId)
     {
@@ -158,14 +162,17 @@ public class User extends DefaultKunderaEntity<User, String>
     /**
      * Sets the tweets.
      *
-     * @param tweets            the tweets to set
+     * @param tweets
+     *            the tweets to set
      */
     public void setTweets(Set<Tweets> tweets)
     {
         this.tweets = tweets;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#toString()
      */
     @Override
@@ -175,7 +182,9 @@ public class User extends DefaultKunderaEntity<User, String>
                 + ", tweets=" + tweets + "]";
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#hashCode()
      */
     @Override
@@ -187,7 +196,9 @@ public class User extends DefaultKunderaEntity<User, String>
         return result;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override

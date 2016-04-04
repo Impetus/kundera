@@ -83,6 +83,7 @@ public interface KunderaEntity<T, K>
      *            the column tobe fetched
      * @return the list
      */
-//    List<T> leftJoin(Class clazz, String joinColumn, String... columnTobeFetched);
+    // List<T> leftJoin(Class clazz, String joinColumn, String...
+    // columnTobeFetched);
 
 }

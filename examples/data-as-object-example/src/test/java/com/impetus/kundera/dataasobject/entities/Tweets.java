@@ -82,7 +82,8 @@ public class Tweets extends DefaultKunderaEntity<Tweets, String>
     /**
      * Sets the tweet id.
      *
-     * @param tweetId            the tweetId to set
+     * @param tweetId
+     *            the tweetId to set
      */
     public void setTweetId(String tweetId)
     {
@@ -102,7 +103,8 @@ public class Tweets extends DefaultKunderaEntity<Tweets, String>
     /**
      * Sets the body.
      *
-     * @param body            the body to set
+     * @param body
+     *            the body to set
      */
     public void setBody(String body)
     {
@@ -122,7 +124,8 @@ public class Tweets extends DefaultKunderaEntity<Tweets, String>
     /**
      * Sets the tweet date.
      *
-     * @param tweetDate            the tweetDate to set
+     * @param tweetDate
+     *            the tweetDate to set
      */
     public void setTweetDate(Date tweetDate)
     {
@@ -142,14 +145,17 @@ public class Tweets extends DefaultKunderaEntity<Tweets, String>
     /**
      * Sets the videos.
      *
-     * @param videos the new videos
+     * @param videos
+     *            the new videos
      */
     public void setVideos(Set<Video> videos)
     {
         this.videos = videos;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#toString()
      */
     @Override
