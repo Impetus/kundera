@@ -14,7 +14,7 @@
 						<port>5000</port>
 					</server>
 					<server>
-						<host>192.168.145.21</host>
+						<host>192.168.145.154</host>
 						<port>5000</port>
 					</server>
 				</servers>

@@ -63,7 +63,7 @@ public class SparkCassClientTest
     public static void SetUpBeforeClass() throws Exception
     {
         emf = Persistence.createEntityManagerFactory(PU);
-        CassandraCli.cassandraSetUp("192.168.145.21", 9161);
+        CassandraCli.cassandraSetUp("192.168.145.154", 9161);
         createKeyspace();
         createColumnFamily();
     }
