@@ -23,9 +23,6 @@ import com.impetus.client.hbase.junits.HBaseCli;
 public class EmbeddedEntityTest
 {
 
-    /**
-     * 
-     */
     private static final Date CAPTURE_TIME = new Date();
 
     private static final Date CAPTURE_TIME1 = new Date("Feb 14 10:01:25 MST 2010");
@@ -47,7 +44,7 @@ public class EmbeddedEntityTest
     {
         cli = new HBaseCli();
         cli.startCluster();
-        
+
         emf = Persistence.createEntityManagerFactory("hbaseTest");
     }
 
@@ -61,9 +58,9 @@ public class EmbeddedEntityTest
     public void testSelectEmbeddedColumn()
     {
         persist();
-        String query2 = "select x.id," + "x.rowKey," + "x.established, " + "x.closeWait," + "x.finWait,"
-                + "x.finWait2," + "x.idle," + "x.listen," + "x.synRecv," + "x.timeWait," + "x.total "
-                + "from NetstatData x " + "where x.id.server= :serverid";
+        String query2 = "select x.id," + "x.rowKey," + "x.established, " + "x.closeWait," + "x.finWait," + "x.finWait2,"
+                + "x.idle," + "x.listen," + "x.synRecv," + "x.timeWait," + "x.total " + "from NetstatData x "
+                + "where x.id.server= :serverid";
 
         Query query = em.createQuery(query2);
         query.setParameter("serverid", "apdwa570");
@@ -81,8 +78,8 @@ public class EmbeddedEntityTest
     public void testSelectOnlySpecificColumnOfEmbeddable()
     {
         persist();
-        String query2 = "select x.id.server, x.id.captureTime," + "x.rowKey," + "x.established, " + "x.closeWait," + "x.finWait,"
-                + "x.finWait2," + "x.idle," + "x.listen," + "x.synRecv," + "x.timeWait," + "x.total "
+        String query2 = "select x.id.server, x.id.captureTime," + "x.rowKey," + "x.established, " + "x.closeWait,"
+                + "x.finWait," + "x.finWait2," + "x.idle," + "x.listen," + "x.synRecv," + "x.timeWait," + "x.total "
                 + "from NetstatData x " + "where x.id.server= :serverid";
 
         Query query = em.createQuery(query2);
@@ -113,11 +110,9 @@ public class EmbeddedEntityTest
 
         List<NetstatData> result = query.getResultList();
         Assert.assertNotNull(result);
-        Assert.assertEquals(3, result.size());
+        Assert.assertEquals(2, result.size());
         Assert.assertNotNull(result.get(0));
         Assert.assertNotNull(result.get(0).getId());
-        Assert.assertEquals(CAPTURE_TIME, result.get(0).getId().getCaptureTime());
-        Assert.assertEquals("apdwa570", result.get(0).getId().getServer());
         Assert.assertNull(result.get(0).getId().getPortMapId());
     }
 
@@ -174,7 +169,7 @@ public class EmbeddedEntityTest
     public static void tearDownAfterClass()
     {
         emf.close();
-        if (cli != null )
+        if (cli != null)
         {
             cli.dropTable("KunderaExamples");
         }

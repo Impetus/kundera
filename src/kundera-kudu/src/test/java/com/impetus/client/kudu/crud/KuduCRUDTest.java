@@ -69,10 +69,20 @@ public class KuduCRUDTest
     }
 
     /**
-     * Test insert.
+     * Test CRUD.
      */
     @Test
-    public void testInsert()
+    public void testCRUD()
+    {
+        testInsert();
+        testMerge();
+        testDelete();
+    }
+
+    /**
+     * Test insert.
+     */
+    private void testInsert()
     {
         Person person = new Person("101", "dev", 22, 30000.5);
         em.persist(person);
@@ -88,8 +98,7 @@ public class KuduCRUDTest
     /**
      * Test merge.
      */
-    @Test
-    public void testMerge()
+    private void testMerge()
     {
         Person p = em.find(Person.class, "101");
         p.setPersonName("karthik");
@@ -103,8 +112,7 @@ public class KuduCRUDTest
     /**
      * Test delete.
      */
-    @Test
-    public void testDelete()
+    private void testDelete()
     {
         Person p = em.find(Person.class, "101");
         em.remove(p);
