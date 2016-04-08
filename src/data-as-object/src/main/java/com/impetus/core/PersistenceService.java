@@ -115,8 +115,10 @@ public class PersistenceService
      *            the properties path
      * @param clazzName
      *            the clazz name
-     * @param entityConfigurations
      * @param clientProperties
+     *            the client properties
+     * @param entityConfigurations
+     *            the entity configurations
      */
     private static void loadClientProperties(String propertiesPath, String clazzName,
             Map<?, Map<String, String>> clientProperties, Map<String, Map<String, String>> entityConfigurations)
