@@ -10,7 +10,7 @@
 
 	<groupId>com.impetus</groupId>
 	<artifactId>kundera-parent</artifactId>
-	<version>3.5-SNAPSHOT</version>
+	<version>3.4-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>kundera</name>
