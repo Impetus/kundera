@@ -3,7 +3,7 @@
 	<parent>
 		<artifactId>kundera</artifactId>
 		<groupId>com.impetus</groupId>
-		<version>3.4</version>
+		<version>3.5-SNAPSHOT</version>
 	</parent>
 	<groupId>com.impetus.kundera.client</groupId>
 	<artifactId>data-as-object</artifactId>
