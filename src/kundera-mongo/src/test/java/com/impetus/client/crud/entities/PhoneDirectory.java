@@ -46,11 +46,6 @@ public class PhoneDirectory
     {
         this.contactName = new LinkedList<String>();
         this.contactMap = new HashMap<String, String>();
-        this.contactNumber = new HashSet<String>();
-        this.contactName.add("xamry");
-        this.contactMap.put("xamry", "9891991919");
-        this.contactNumber.add("9891991919");
-        this.phoneDirectoryName = "MyPhoneDirectory";
     }
 
     public PhoneDirectory(String phoneDirectoryName, List<String> contactName, Map<String, String> contactMap,

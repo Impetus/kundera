@@ -75,12 +75,12 @@ public class DocumentObjectMapper
             String tableName) throws PropertyAccessException
     {
         Map<String, DBObject> embeddedObjects = new HashMap<String, DBObject>();
-        BasicDBObject dBObj = new BasicDBObject();
+        // BasicDBObject dBObj = new BasicDBObject();
 
         for (Attribute column : columns)
         {
-           String collectionName = ((AbstractAttribute) column).getTableName() != null ? ((AbstractAttribute) column)
-                    .getTableName() : tableName;
+            String collectionName = ((AbstractAttribute) column).getTableName() != null
+                    ? ((AbstractAttribute) column).getTableName() : tableName;
 
             DBObject dbObject = embeddedObjects.get(collectionName);
             if (dbObject == null)
@@ -92,7 +92,9 @@ public class DocumentObjectMapper
             if (((MetamodelImpl) metaModel).isEmbeddable(((AbstractAttribute) column).getBindableJavaType()))
             {
                 DefaultMongoDBDataHandler handler = new DefaultMongoDBDataHandler();
-                handler.onEmbeddable(column, obj, metaModel, dBObj, collectionName);
+                // handler.onEmbeddable(column, obj, metaModel, dBObj,
+                // collectionName);
+                handler.onEmbeddable(column, obj, metaModel, dbObject, collectionName);
             }
             else
             {
@@ -121,7 +123,8 @@ public class DocumentObjectMapper
         int count = 0;
         for (Object o : coll)
         {
-            dBObjects[count] = (BasicDBObject) getDocumentFromObject(metaModel, o, columns, tableName).values().toArray()[0];
+            dBObjects[count] = (BasicDBObject) getDocumentFromObject(metaModel, o, columns, tableName).values()
+                    .toArray()[0];
             count++;
         }
         return dBObjects;
@@ -139,8 +142,8 @@ public class DocumentObjectMapper
      * @param columns
      *            the columns
      * @return the object from document
-     * @throws IllegalAccessException 
-     * @throws InstantiationException 
+     * @throws IllegalAccessException
+     * @throws InstantiationException
      */
     static Object getObjectFromDocument(Metamodel metamodel, BasicDBObject documentObj, Set<Attribute> columns,
             Object obj) throws InstantiationException, IllegalAccessException
@@ -205,8 +208,8 @@ public class DocumentObjectMapper
                     break;
                 case SET:
                     List collectionValues = Arrays.asList(((BasicDBList) value).toArray());
-                    PropertyAccessorHelper.set(entityObject, (Field) column.getJavaMember(), new HashSet(
-                            collectionValues));
+                    PropertyAccessorHelper.set(entityObject, (Field) column.getJavaMember(),
+                            new HashSet(collectionValues));
                     break;
                 case LIST:
                     PropertyAccessorHelper.set(entityObject, (Field) column.getJavaMember(),
@@ -360,8 +363,8 @@ public class DocumentObjectMapper
         }
         else
         {
-            throw new PersistenceException("Invalid collection class " + embeddedCollectionClass
-                    + "; only Set and List allowed");
+            throw new PersistenceException(
+                    "Invalid collection class " + embeddedCollectionClass + "; only Set and List allowed");
         }
 
         for (Object dbObj : documentList)

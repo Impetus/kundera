@@ -15,8 +15,11 @@
  ******************************************************************************/
 package com.impetus.client.crud;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
@@ -68,8 +71,18 @@ public class PersonnelEmbeddedTest
     @Test
     public void test()
     {
-        PhoneDirectory phone = new PhoneDirectory();
-
+        
+        List<String> contactName = new ArrayList<String>();
+        contactName.add("xamry");
+        
+        Map<String, String> contactMap =  new HashMap<>();
+        contactMap.put("xamry", "9891991919");
+        
+        Set<String> contactNumber = new HashSet<>();
+        contactNumber.add("9891991919");
+        
+        PhoneDirectory phone = new PhoneDirectory("MyPhoneDirectory",contactName,contactMap,contactNumber);
+        
         PersonalDetailEmbedded detail = new PersonalDetailEmbedded();
         detail.setPhoneNo(12456);
         detail.setEmailId("xyz@gmail.com");
