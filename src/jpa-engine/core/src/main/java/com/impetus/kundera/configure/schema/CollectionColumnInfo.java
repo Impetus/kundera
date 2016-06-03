@@ -88,5 +88,17 @@ public class CollectionColumnInfo
     {
         this.genericClasses = genericClasses;
     }   
+    
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj){
+    	
+    	//if object's class and column name matches then return true;
+        return obj != null && obj instanceof CollectionColumnInfo && ((CollectionColumnInfo) obj).collectionColumnName != null ? this.collectionColumnName != null
+                && this.collectionColumnName.equals(((CollectionColumnInfo) obj).collectionColumnName)
+                : false;
+    }
 
 }
