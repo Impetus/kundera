@@ -67,7 +67,7 @@ public class CassandraIdGenerator implements AutoGenerator, TableGenerator
     @Override
     public Object generate(Client<?> client, String dataType)
     {
-        CqlResult cqlResult = ((CassandraClientBase) client).execute("SELECT NOW() FROM system.schema_columns LIMIT 1",
+        CqlResult cqlResult = ((CassandraClientBase) client).execute("SELECT NOW() FROM system_schema.columns LIMIT 1",
                 ((CassandraClientBase) client).getRawClient(SYSTEM));
 
         CqlRow cqlRow = cqlResult.getRowsIterator().next();

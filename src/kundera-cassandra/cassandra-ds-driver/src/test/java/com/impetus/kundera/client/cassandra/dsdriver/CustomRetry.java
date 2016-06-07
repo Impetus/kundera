@@ -18,10 +18,11 @@
  */
 package com.impetus.kundera.client.cassandra.dsdriver;
 
+import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ConsistencyLevel;
 import com.datastax.driver.core.Statement;
 import com.datastax.driver.core.WriteType;
-import com.datastax.driver.core.policies.FallthroughRetryPolicy;
+import com.datastax.driver.core.exceptions.DriverException;
 import com.datastax.driver.core.policies.RetryPolicy;
 
 /**
@@ -93,5 +94,24 @@ public class CustomRetry implements RetryPolicy
     {
         return null;
     }
+
+	@Override
+	public void close() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void init(Cluster arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public RetryDecision onRequestError(Statement arg0, ConsistencyLevel arg1,
+			DriverException arg2, int arg3) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }

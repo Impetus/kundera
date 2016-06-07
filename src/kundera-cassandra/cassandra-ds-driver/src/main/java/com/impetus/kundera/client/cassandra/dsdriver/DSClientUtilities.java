@@ -187,7 +187,7 @@ public final class DSClientUtilities
             break;
 
         case TIMESTAMP:
-            retVal = row.getDate(columnName);
+            retVal = row.getTimestamp(columnName);
             if (retVal != null && member != null)
                 retVal = CassandraDataTranslator.decompose(member.getType(),
                         ByteBufferUtil.bytes(((Date) retVal).getTime()).array(), true);
@@ -318,6 +318,11 @@ public final class DSClientUtilities
          */
         case MAP:
             List<Class<?>> mapGenericClasses = PropertyAccessorHelper.getGenericClasses(member);
+            
+            if(mapGenericClasses.isEmpty()){
+            	//TODO: get map types from column metadata where member is null (Scalar queries)
+            	break;
+            }
 
             Class keyClass = CassandraValidationClassMapper.getValidationClassInstance(mapGenericClasses.get(0), true);
             Class valueClass = CassandraValidationClassMapper

@@ -40,7 +40,7 @@ public class DSIdGenerator implements AutoGenerator
     public Object generate(Client<?> client, String dataType)
     {
 
-        final String generatedId = "Select now() from system.schema_columns";
+        final String generatedId = "Select now() from system_schema.columns";
         ResultSet rSet = ((DSClient) client).execute(generatedId, null);
 
         UUID uuid = rSet.iterator().next().getUUID(0);

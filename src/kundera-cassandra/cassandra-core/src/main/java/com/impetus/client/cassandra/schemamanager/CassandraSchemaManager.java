@@ -2245,7 +2245,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
 
             onSetSubComparator(cfDef, cfProperties, builder);
 
-            onSetReplicateOnWrite(cfDef, cfProperties, builder);
+//            onSetReplicateOnWrite(cfDef, cfProperties, builder);
 
             onSetCompactionThreshold(cfDef, cfProperties, builder);
 
@@ -2267,6 +2267,13 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             if (builder != null && StringUtils.contains(builder.toString(), CQLTranslator.AND_CLAUSE))
             {
                 builder.delete(builder.lastIndexOf(CQLTranslator.AND_CLAUSE), builder.length());
+                // builder.deleteCharAt(builder.length() - 2);
+            }
+            
+         // Strip last WITH clause.
+            if (builder != null && StringUtils.contains(builder.toString(), CQLTranslator.WITH_CLAUSE))
+            {
+                builder.delete(builder.lastIndexOf(CQLTranslator.WITH_CLAUSE), builder.length());
                 // builder.deleteCharAt(builder.length() - 2);
             }
         }

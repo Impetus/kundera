@@ -23,6 +23,7 @@ import java.nio.charset.CharacterCodingException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -1077,7 +1078,8 @@ public final class CassandraDataTranslator
             try
             {
                 outputCollection = new HashSet();
-                SetSerializer setSerializer = SetSerializer.getInstance(valueClassInstance);
+                Comparator<ByteBuffer> test = null;
+				SetSerializer setSerializer = SetSerializer.getInstance(valueClassInstance, test );
                 outputCollection.addAll((Collection) setSerializer.deserializeForNativeProtocol((ByteBuffer) value, 2));
                 return marshalCollection(valueValidationClass, outputCollection, genericClass, outputCollection.getClass());
             }
@@ -1172,7 +1174,7 @@ public final class CassandraDataTranslator
                         .getValidationSerializerClassInstance(mapGenericClasses.get(1), true);
 
                 Map rawMap = new HashMap();
-                MapSerializer mapSerializer = MapSerializer.getInstance(keyClassInstance, valueClassInstance);
+                MapSerializer mapSerializer = MapSerializer.getInstance(keyClassInstance, valueClassInstance, null);
 
                 rawMap.putAll(mapSerializer.deserializeForNativeProtocol((ByteBuffer) value, 2));
 

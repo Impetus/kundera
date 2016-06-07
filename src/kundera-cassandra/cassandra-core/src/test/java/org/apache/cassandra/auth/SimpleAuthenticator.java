@@ -38,6 +38,7 @@ package org.apache.cassandra.auth;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
 import java.security.MessageDigest;
 import java.util.Map;
 import java.util.Properties;
@@ -216,9 +217,14 @@ public class SimpleAuthenticator implements IAuthenticator
         return null;
     }
 
-    @Override
     public SaslNegotiator newSaslNegotiator() {
         // TODO Auto-generated method stub
         return null;
     }
+
+	@Override
+	public SaslNegotiator newSaslNegotiator(InetAddress arg0) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

@@ -124,9 +124,7 @@ public class DSClientExternalPropertyTest
         Assert.assertEquals(configuration.getPoolingOptions().getCoreConnectionsPerHost(distance), 5);
         Assert.assertEquals(configuration.getPoolingOptions().getMaxConnectionsPerHost(distance), 12);
         Assert.assertEquals(configuration.getPoolingOptions()
-                .getMaxSimultaneousRequestsPerConnectionThreshold(distance), 128);
-        Assert.assertEquals(configuration.getPoolingOptions()
-                .getMinSimultaneousRequestsPerConnectionThreshold(distance), 65);
+                .getMaxRequestsPerConnection(distance), 128);
 
         Assert.assertEquals(configuration.getPolicies().getLoadBalancingPolicy().getClass().getName(), RRP);
         Assert.assertEquals(configuration.getPolicies().getReconnectionPolicy().getClass().getName(), ERP);
@@ -212,9 +210,7 @@ public class DSClientExternalPropertyTest
         Assert.assertEquals(configuration.getPoolingOptions().getCoreConnectionsPerHost(distance), 5);
         Assert.assertEquals(configuration.getPoolingOptions().getMaxConnectionsPerHost(distance), 12);
         Assert.assertEquals(configuration.getPoolingOptions()
-                .getMaxSimultaneousRequestsPerConnectionThreshold(distance), 128);
-        Assert.assertEquals(configuration.getPoolingOptions()
-                .getMinSimultaneousRequestsPerConnectionThreshold(distance), 65);
+                .getMaxRequestsPerConnection(distance), 128);
         Assert.assertEquals(configuration.getPolicies().getLoadBalancingPolicy().getClass().getName(), TAP);
         Assert.assertEquals(configuration.getPolicies().getReconnectionPolicy().getClass().getName(), CRP);
         Assert.assertEquals(configuration.getPolicies().getRetryPolicy().getClass().getName(), LRTP);
@@ -270,9 +266,7 @@ public class DSClientExternalPropertyTest
         Assert.assertEquals(configuration.getPoolingOptions().getCoreConnectionsPerHost(distance), 5);
         Assert.assertEquals(configuration.getPoolingOptions().getMaxConnectionsPerHost(distance), 12);
         Assert.assertEquals(configuration.getPoolingOptions()
-                .getMaxSimultaneousRequestsPerConnectionThreshold(distance), 128);
-        Assert.assertEquals(configuration.getPoolingOptions()
-                .getMinSimultaneousRequestsPerConnectionThreshold(distance), 65);
+                .getMaxRequestsPerConnection(distance), 128);
         Assert.assertEquals(configuration.getPolicies().getLoadBalancingPolicy().getClass().getName(),
                 LatencyAwarePolicy.class.getName());
         Assert.assertEquals(configuration.getPolicies().getReconnectionPolicy().getClass().getName(), CRP);
@@ -328,9 +322,7 @@ public class DSClientExternalPropertyTest
         Assert.assertEquals(configuration.getPoolingOptions().getCoreConnectionsPerHost(distance), 5);
         Assert.assertEquals(configuration.getPoolingOptions().getMaxConnectionsPerHost(distance), 12);
         Assert.assertEquals(configuration.getPoolingOptions()
-                .getMaxSimultaneousRequestsPerConnectionThreshold(distance), 128);
-        Assert.assertEquals(configuration.getPoolingOptions()
-                .getMinSimultaneousRequestsPerConnectionThreshold(distance), 65);
+                .getMaxRequestsPerConnection(distance), 128);
 
         Assert.assertEquals(configuration.getPolicies().getLoadBalancingPolicy().getClass().getName(), RRP);
         Assert.assertEquals(configuration.getPolicies().getReconnectionPolicy().getClass().getName(), ERP);
@@ -384,9 +376,7 @@ public class DSClientExternalPropertyTest
         Assert.assertEquals(configuration.getPoolingOptions().getCoreConnectionsPerHost(distance), 5);
         Assert.assertEquals(configuration.getPoolingOptions().getMaxConnectionsPerHost(distance), 12);
         Assert.assertEquals(configuration.getPoolingOptions()
-                .getMaxSimultaneousRequestsPerConnectionThreshold(distance), 128);
-        Assert.assertEquals(configuration.getPoolingOptions()
-                .getMinSimultaneousRequestsPerConnectionThreshold(distance), 65);
+                .getMaxRequestsPerConnection(distance), 128);
 
         Assert.assertEquals(configuration.getPolicies().getLoadBalancingPolicy().getClass().getName(), DRRP);
         Assert.assertEquals(configuration.getPolicies().getReconnectionPolicy().getClass().getName(), CRP);

@@ -96,8 +96,8 @@ public class CassandraIdQueryTest extends BaseTest
         findByIdGTE();
         findByIdGTEAndLT();
         findByIdGTAndLTE();
-        findByIdAndAgeGTAndLT();
-        findByIdGTAndAgeGTAndLT();
+//        findByIdAndAgeGTAndLT();
+//        findByIdGTAndAgeGTAndLT();
         findByIdAndAge();
         findByIdAndAgeGT();
         findByIdGTEAndAge();

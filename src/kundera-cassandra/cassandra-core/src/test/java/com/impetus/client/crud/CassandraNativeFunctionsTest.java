@@ -30,11 +30,11 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.crud.PersonCassandra.Day;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class CassandraNativeFunctionsTest.
  * 
@@ -62,6 +62,7 @@ public class CassandraNativeFunctionsTest
         CassandraCli.dropKeySpace("KunderaExamples");
         HashMap propertyMap = new HashMap();
         propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create");
+        propertyMap.put(CassandraConstants.CQL_VERSION,	CassandraConstants.CQL_VERSION_3_0);
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("genericCassandraTest", propertyMap);
         EntityManager em = emf.createEntityManager();
 
@@ -140,7 +141,7 @@ public class CassandraNativeFunctionsTest
         q = entityManager.createNativeQuery(udf);
         q.executeUpdate();
         // Assert values
-        String qry = "Select fLog(\"AGE\") from \"PERSONCASSANDRA\" where \"AGE\" = 10";
+        String qry = "Select fLog(\"AGE\") from \"PERSONCASSANDRA\" where \"personId\" = '1'";
         q = entityManager.createNativeQuery(qry);
         List persons = q.getResultList();
         Assert.assertNotNull(persons);
@@ -196,7 +197,7 @@ public class CassandraNativeFunctionsTest
         Query q = entityManager.createNativeQuery(useNativeSql);
         q.executeUpdate();
         // create user defined function
-        String insertJSON = "Insert into \"PERSONCASSANDRA\" JSON '{\"\\\"PERSON_NAME\\\"\": \"kundera\", \"\\\"AGE\\\"\": 123, \"key\":\"abc\" }'";
+        String insertJSON = "Insert into \"PERSONCASSANDRA\" JSON '{\"\\\"PERSON_NAME\\\"\": \"kundera\", \"\\\"AGE\\\"\": 123, \"\\\"personId\\\"\":\"abc\" }'";
         q = entityManager.createNativeQuery(insertJSON);
         q.executeUpdate();
         // Assert values
@@ -206,7 +207,7 @@ public class CassandraNativeFunctionsTest
         Assert.assertNotNull(persons);
         Assert.assertFalse(persons.isEmpty());
         Assert.assertEquals(6, persons.size());
-        q = entityManager.createNativeQuery("Delete from \"PERSONCASSANDRA\" where key = 'abc'");
+        q = entityManager.createNativeQuery("Delete from \"PERSONCASSANDRA\" where \"personId\" = 'abc'");
         q.executeUpdate();
     }
 
@@ -219,7 +220,7 @@ public class CassandraNativeFunctionsTest
         String useNativeSql = "USE " + "\"KunderaExamples\"";
         Query q = entityManager.createNativeQuery(useNativeSql);
         q.executeUpdate();
-        String qry = "Select key, toJson(\"PERSON_NAME\") as person_name from \"PERSONCASSANDRA\"";
+        String qry = "Select \"personId\", toJson(\"PERSON_NAME\") as person_name from \"PERSONCASSANDRA\"";
         q = entityManager.createNativeQuery(qry);
         List persons = q.getResultList();
         Assert.assertNotNull(persons);
@@ -236,18 +237,18 @@ public class CassandraNativeFunctionsTest
         String useNativeSql = "USE " + "\"KunderaExamples\"";
         Query q = entityManager.createNativeQuery(useNativeSql);
         q.executeUpdate();
-        String qry = "UPDATE \"PERSONCASSANDRA\" SET \"AGE\" = fromJson('500') WHERE key = fromJson('\"3\"')";
+        String qry = "UPDATE \"PERSONCASSANDRA\" SET \"AGE\" = fromJson('500') WHERE \"personId\" = fromJson('\"3\"')";
         q = entityManager.createNativeQuery(qry);
         q.executeUpdate();
 
         // Assertions
-        qry = "Select * from \"PERSONCASSANDRA\" where key = '3'";
+        qry = "Select * from \"PERSONCASSANDRA\" where \"personId\" = '3'";
         q = entityManager.createNativeQuery(qry);
         List persons = q.getResultList();
         Assert.assertNotNull(persons);
         Assert.assertFalse(persons.isEmpty());
         Assert.assertEquals(1, persons.size());
-        Assert.assertEquals("3", ((Map) persons.get(0)).get("key"));
+        Assert.assertEquals("3", ((Map) persons.get(0)).get("personId"));
         Assert.assertEquals("karthik", ((Map) persons.get(0)).get("PERSON_NAME"));
         Assert.assertEquals("MAY", ((Map) persons.get(0)).get("MONTH_ENUM"));
         Assert.assertEquals(500, ((Map) persons.get(0)).get("AGE"));
@@ -263,7 +264,7 @@ public class CassandraNativeFunctionsTest
         Query q = entityManager.createNativeQuery(useNativeSql);
         q.executeUpdate();
 
-        String qry = "Select * from \"PERSONCASSANDRA\" where key IN ('1', '3', '5', '7')";
+        String qry = "Select * from \"PERSONCASSANDRA\" where \"personId\" IN ('1', '3', '5', '7')";
         q = entityManager.createNativeQuery(qry);
         List persons = q.getResultList();
         Assert.assertNotNull(persons);

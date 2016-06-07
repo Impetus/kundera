@@ -405,8 +405,8 @@ public class CassandraSchemaOperationTest
             Assert.assertEquals(2, ksDef.getCf_defs().size());
             Assert.assertTrue(2 == ksDef.getCf_defs().get(0).getColumn_metadata().size()
                     || 0 == ksDef.getCf_defs().get(0).getColumn_metadata().size());
-            Assert.assertTrue(2 == ksDef.getCf_defs().get(1).getColumn_metadata().size()
-                    || 0 == ksDef.getCf_defs().get(1).getColumn_metadata().size());
+            Assert.assertTrue(1 == ksDef.getCf_defs().get(1).getColumn_metadata().size()
+                    || 1 == ksDef.getCf_defs().get(1).getColumn_metadata().size());
 
             getEntityManagerFactory("validate");
             Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCassandraExamples"));

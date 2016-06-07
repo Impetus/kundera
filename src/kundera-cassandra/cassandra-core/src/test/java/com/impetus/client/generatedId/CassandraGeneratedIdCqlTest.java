@@ -2,6 +2,7 @@ package com.impetus.client.generatedId;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 
 import com.impetus.client.cassandra.common.CassandraConstants;
 
@@ -15,6 +16,11 @@ public class CassandraGeneratedIdCqlTest extends CassandraGeneratedIdTest
         super.setUp();
     }
 
+    @Test
+    public void testPersist(){
+    	super.testPersist();
+    }
+    
     @After
     public void tearDown() throws Exception
     {

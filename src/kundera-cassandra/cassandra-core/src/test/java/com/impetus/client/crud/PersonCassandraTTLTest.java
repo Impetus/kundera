@@ -452,6 +452,10 @@ public class PersonCassandraTTLTest extends BaseTest
         }
 
         Object p4 = prepareData("4", 10);
+        ttlValues = new HashMap<String, Integer>();
+        ttlValues.put("PERSONCASSANDRA", new Integer(10));
+        em.setProperty("ttl.per.session", true);
+        em.setProperty("ttl.values", ttlValues);
         em.persist(p4);
         em.clear();
 

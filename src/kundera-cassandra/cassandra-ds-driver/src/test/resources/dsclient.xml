@@ -24,11 +24,9 @@
 
 
 					<property name="hostDistance" value="LOCAL"></property>
-					<property name="minSimultaneousRequests" value="65"></property>
-					<!-- maxSimultaneousRequests must be between 0 and 128 -->
-					<property name="maxSimultaneousRequests" value="128"></property>
+					<property name="maxConnectionsPerHost" value="12"></property>
+					<property name="maxRequestsPerConnection" value="128"></property>
 					<property name="coreConnections" value="5"></property>
-					<property name="maxConnections" value="12"></property>
 					<property name="baseDelayMs" value="11000"></property>
 					<property name="maxDelayMs" value="13000"></property>
 

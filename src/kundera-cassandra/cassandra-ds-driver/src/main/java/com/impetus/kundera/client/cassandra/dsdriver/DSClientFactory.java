@@ -490,8 +490,14 @@ public class DSClientFactory extends CassandraClientFactory
 
             String usedHostsPerRemoteDc = (String) conProperties.get("usedHostsPerRemoteDc");
             String localdc = (String) conProperties.get("localdc");
-            loadBalancingPolicy = new DCAwareRoundRobinPolicy(localdc == null ? "DC1" : localdc,
-                    usedHostsPerRemoteDc != null ? Integer.parseInt(usedHostsPerRemoteDc) : 0);
+            String allowRemoteDCsForLocalConsistencyLevel = (String) conProperties.get("allowRemoteDCsForLocalConsistencyLevel");
+            DCAwareRoundRobinPolicy.Builder policyBuilder = DCAwareRoundRobinPolicy.builder();
+            policyBuilder.withLocalDc(localdc == null ? "DC1" : localdc);
+            policyBuilder.withUsedHostsPerRemoteDc(usedHostsPerRemoteDc != null ? Integer.parseInt(usedHostsPerRemoteDc) : 0);
+            if(allowRemoteDCsForLocalConsistencyLevel != null && "true".equalsIgnoreCase(allowRemoteDCsForLocalConsistencyLevel)){
+            	policyBuilder.allowRemoteDCsForLocalConsistencyLevel();
+            }
+            loadBalancingPolicy = policyBuilder.build();
             break;
 
         // case RoundRobinPolicy:
@@ -733,10 +739,9 @@ public class DSClientFactory extends CassandraClientFactory
         PoolingOptions options = new PoolingOptions();
 
         String hostDistance = connectionProperties.getProperty("hostDistance");
-        String minSimultaneousRequests = connectionProperties.getProperty("minSimultaneousRequests");
-        String maxSimultaneousRequests = connectionProperties.getProperty("maxSimultaneousRequests");
+        String maxConnectionsPerHost = connectionProperties.getProperty("maxConnectionsPerHost");
+        String maxRequestsPerConnection = connectionProperties.getProperty("maxRequestsPerConnection");
         String coreConnections = connectionProperties.getProperty("coreConnections");
-        String maxConnections = connectionProperties.getProperty("maxConnections");
 
         if (!StringUtils.isBlank(hostDistance))
         {
@@ -746,19 +751,14 @@ public class DSClientFactory extends CassandraClientFactory
                 options.setCoreConnectionsPerHost(HostDistance.LOCAL, new Integer(coreConnections));
             }
 
-            if (!StringUtils.isBlank(maxConnections))
+            if (!StringUtils.isBlank(maxConnectionsPerHost))
             {
-                options.setMaxConnectionsPerHost(hostDist, new Integer(maxConnections));
+                options.setMaxConnectionsPerHost(hostDist, new Integer(maxConnectionsPerHost));
             }
 
-            if (!StringUtils.isBlank(minSimultaneousRequests))
+            if (!StringUtils.isBlank(maxRequestsPerConnection))
             {
-                options.setMinSimultaneousRequestsPerConnectionThreshold(hostDist, new Integer(minSimultaneousRequests));
-            }
-
-            if (!StringUtils.isBlank(maxSimultaneousRequests))
-            {
-                options.setMaxSimultaneousRequestsPerConnectionThreshold(hostDist, new Integer(maxSimultaneousRequests));
+                options.setMaxRequestsPerConnection(hostDist, new Integer(maxRequestsPerConnection));
             }
         }
         return options;

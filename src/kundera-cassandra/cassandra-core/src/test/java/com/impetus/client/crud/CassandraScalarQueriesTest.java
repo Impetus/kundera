@@ -190,20 +190,20 @@ public class CassandraScalarQueriesTest
     @Test
     public void testMetadataQueries()
     {
-        String useNativeSql = "SELECT keyspace_name,columnfamily_name,column_name,type,validator FROM system.schema_columns"
-                + " WHERE keyspace_name = 'KunderaExamples' AND columnfamily_name = 'PERSONCASSANDRA'";
+        String useNativeSql = "SELECT keyspace_name,table_name,column_name,kind,type FROM system_schema.columns"
+                + " WHERE keyspace_name = 'KunderaExamples' AND table_name = 'PERSONCASSANDRA'";
         Query q = entityManager.createNativeQuery(useNativeSql);
         List results = q.getResultList();
 
         Assert.assertNotNull(results);
-        Assert.assertEquals(6, results.size());
+        Assert.assertEquals(8, results.size());
         Assert.assertEquals("KunderaExamples", ((Map) results.get(0)).get("keyspace_name"));
-        Assert.assertEquals("PERSONCASSANDRA", ((Map) results.get(0)).get("columnfamily_name"));
+        Assert.assertEquals("PERSONCASSANDRA", ((Map) results.get(0)).get("table_name"));
         Assert.assertEquals("AGE", ((Map) results.get(0)).get("column_name"));
-        Assert.assertEquals("regular", ((Map) results.get(0)).get("type"));
-        Assert.assertEquals("org.apache.cassandra.db.marshal.Int32Type", ((Map) results.get(0)).get("validator"));
+        Assert.assertEquals("static", ((Map) results.get(0)).get("kind"));
+        Assert.assertEquals("int", ((Map) results.get(0)).get("type"));
 
-        useNativeSql = "SELECT * FROM system.schema_keyspaces WHERE keyspace_name = 'KunderaExamples'";
+        useNativeSql = "SELECT * FROM system_schema.keyspaces WHERE keyspace_name = 'KunderaExamples'";
         q = entityManager.createNativeQuery(useNativeSql);
         results = q.getResultList();
 
@@ -211,16 +211,14 @@ public class CassandraScalarQueriesTest
         Assert.assertEquals(1, results.size());
         Assert.assertEquals("KunderaExamples", ((Map) results.get(0)).get("keyspace_name"));
         Assert.assertEquals(true, ((Map) results.get(0)).get("durable_writes"));
-        Assert.assertEquals("org.apache.cassandra.locator.SimpleStrategy", ((Map) results.get(0)).get("strategy_class"));
-        Assert.assertEquals("{\"replication_factor\":\"1\"}", ((Map) results.get(0)).get("strategy_options"));
 
-        useNativeSql = "SELECT COUNT(*) FROM system.schema_columns WHERE keyspace_name = 'KunderaExamples'AND columnfamily_name = 'PERSONCASSANDRA'";
+        useNativeSql = "SELECT COUNT(*) FROM system_schema.columns WHERE keyspace_name = 'KunderaExamples'AND table_name = 'PERSONCASSANDRA'";
         q = entityManager.createNativeQuery(useNativeSql);
         results = q.getResultList();
 
         Assert.assertNotNull(results);
         Assert.assertEquals(1, results.size());
-        Assert.assertEquals(6l, ((Map) results.get(0)).get("count"));
+        Assert.assertEquals(8l, ((Map) results.get(0)).get("count"));
 
     }
 

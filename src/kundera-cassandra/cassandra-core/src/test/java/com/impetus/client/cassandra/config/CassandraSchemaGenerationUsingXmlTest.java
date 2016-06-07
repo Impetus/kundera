@@ -74,7 +74,7 @@ public class CassandraSchemaGenerationUsingXmlTest
         try
         {
               CqlResult cqlResult = CassandraCli.client.execute_cql3_query(ByteBuffer
-                                    .wrap("Select * from system.schema_keyspaces where keyspace_name = 'KunderaCassandraXmlTest'"
+                                    .wrap("Select * from system_schema.keyspaces where keyspace_name = 'KunderaCassandraXmlTest'"
                                             .getBytes()), Compression.NONE, ConsistencyLevel.ONE);
 
             List<CqlRow> cqlRows = cqlResult.getRows();
@@ -91,14 +91,11 @@ public class CassandraSchemaGenerationUsingXmlTest
                 Assert.assertEquals(keyspaceName, ByteBufferUtil.string(ByteBuffer.wrap(cqlRow.getColumns().get(0).getValue())));
                 Assert.assertEquals("durable_writes", ByteBufferUtil.string(ByteBuffer.wrap(cqlRow.getColumns().get(1).getName())));
                 Assert.assertEquals(false, Boolean.getBoolean(ByteBufferUtil.string(ByteBuffer.wrap(cqlRow.getColumns().get(1).getValue()))));
-                Assert.assertEquals("strategy_class", ByteBufferUtil.string(ByteBuffer.wrap(cqlRow.getColumns().get(2).getName())));
-                Assert.assertEquals(SimpleStrategy.class.getName(), ByteBufferUtil.string(ByteBuffer.wrap(cqlRow.getColumns().get(2).getValue())));
-                Assert.assertEquals("strategy_options", ByteBufferUtil.string(ByteBuffer.wrap(cqlRow.getColumns().get(3).getName())));
-                Assert.assertEquals(builder.toString(), ByteBufferUtil.string(ByteBuffer.wrap(cqlRow.getColumns().get(3).getValue())));
+                Assert.assertEquals("replication", ByteBufferUtil.string(ByteBuffer.wrap(cqlRow.getColumns().get(2).getName())));
             }
             
             cqlResult = CassandraCli.client.execute_cql3_query(ByteBuffer
-                                    .wrap("Select * from system.schema_columnFamilies where keyspace_name = 'KunderaCassandraXmlTest'"
+                                    .wrap("Select * from system_schema.tables where keyspace_name = 'KunderaCassandraXmlTest'"
                                             .getBytes()), Compression.NONE, ConsistencyLevel.ONE);
 
             List<CqlRow> columnFamilies = cqlResult.getRows();
