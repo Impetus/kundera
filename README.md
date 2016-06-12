@@ -12,6 +12,9 @@ Latest
 
 * Want to step out of JPA world and still take advantage of Kundera? Check [Kundera Data as Object](https://github.com/impetus-opensource/Kundera/wiki/Kundera-Data-As-Object).
 
+* Want to save your large files in MongoDB GridFS in the same JPA way. Check [GridFS support in Kundera](https://github.com/impetus-opensource/Kundera/wiki/GridFS-support-with-Kundera-MongoDB).
+
+
 * Perform SQL queries over big data using Kundera with **Apache Spark** as the query engine. Check [Kundera with Spark](https://github.com/impetus-opensource/Kundera/wiki/Kundera-with-Spark) for more details. 
 * We are active on **stackoverflow.com**. Ask questions & check existing [Kundera Tagged Questions](http://stackoverflow.com/questions/tagged/kundera) on stackoverflow. 
 
