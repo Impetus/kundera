@@ -42,20 +42,6 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- http://mvnrepository.com/artifact/com.carrotsearch/hppc -->
-		<dependency>
-			<groupId>com.carrotsearch</groupId>
-			<artifactId>hppc</artifactId>
-			<version>0.7.1</version>
-		</dependency>
-		<!-- http://mvnrepository.com/artifact/com.ning/compress-lzf -->
-		<dependency>
-			<groupId>com.ning</groupId>
-			<artifactId>compress-lzf</artifactId>
-			<version>1.0.3</version>
-		</dependency>
-
-
 	</dependencies>
 
 
