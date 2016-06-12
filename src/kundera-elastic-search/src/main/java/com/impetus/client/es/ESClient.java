@@ -28,13 +28,13 @@ import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 
+import org.apache.lucene.queryparser.xml.FilterBuilder;
 import org.eclipse.persistence.jpa.jpql.parser.Expression;
 import org.eclipse.persistence.jpa.jpql.parser.OrderByItem;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteRequest;
-import org.elasticsearch.action.deletebyquery.DeleteByQueryRequestBuilder;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
@@ -42,11 +42,11 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.index.query.FilterBuilder;
-import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.FilteredQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.TermFilterBuilder;
+import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
 import org.elasticsearch.search.SearchHits;
@@ -306,7 +306,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
      * @param maxResult
      * @return the list
      */
-    public List executeQuery(FilterBuilder filter, AggregationBuilder aggregation, final EntityMetadata entityMetadata,
+    public List executeQuery(QueryBuilder filter, AggregationBuilder aggregation, final EntityMetadata entityMetadata,
             KunderaQuery query, int maxResults)
     {
         String[] fieldsToSelect = query.getResult();
@@ -475,7 +475,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
             try
             {
                 txClient.prepareDelete(metadata.getSchema().toLowerCase(), metadata.getTableName(),
-                        keyAsString.toString()/* index, type, id */).setOperationThreaded(false).execute().get();
+                        keyAsString.toString()/* index, type, id */).execute().get();
             }
             catch (InterruptedException iex)
             {
@@ -573,7 +573,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
             Object pKeyColumnValue, Class columnJavaType)
     {
         // fetch list ADDRESS_ID for given PERSON_ID
-        FilterBuilder filterBuilder = new TermFilterBuilder(pKeyColumnName, pKeyColumnValue);
+        QueryBuilder filterBuilder = new TermQueryBuilder(pKeyColumnName, pKeyColumnValue);
 
         SearchResponse response = txClient.prepareSearch(schemaName.toLowerCase()).setTypes(tableName)
                 .setPostFilter(filterBuilder).addField(columnName).execute().actionGet();
@@ -602,7 +602,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
             Object columnValue, Class entityClazz)
     {
 
-        TermFilterBuilder filter = FilterBuilders.termFilter(columnName, columnValue);
+        TermQueryBuilder filter = QueryBuilders.termQuery(columnName, columnValue);
 
         SearchResponse response = txClient.prepareSearch(schemaName.toLowerCase()).setTypes(tableName)
                 .addField(pKeyName).setPostFilter(filter).execute().actionGet();
@@ -632,13 +632,15 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
     @Override
     public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
     {
-        Map<String, Object> querySource = new HashMap<String, Object>();
-        querySource.put(columnName, columnValue);
-
-        DeleteByQueryRequestBuilder deleteQueryBuilder = txClient.prepareDeleteByQuery(schemaName.toLowerCase())
-                .setSource(querySource).setTypes(tableName);
-
-        deleteQueryBuilder.execute().actionGet();
+        // TODO: implement using scroll/scan and bulk delete requests
+        // Map<String, Object> querySource = new HashMap<String, Object>();
+        // querySource.put(columnName, columnValue);
+        //
+        // DeleteByQueryRequestBuilder deleteQueryBuilder =
+        // txClient.prepareDeleteByQuery(schemaName.toLowerCase())
+        // .setSource(querySource).setTypes(tableName);
+        //
+        // deleteQueryBuilder.execute().actionGet();
     }
 
     /*

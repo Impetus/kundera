@@ -5,6 +5,7 @@
 			<properties>
 				<property name="host" value="localhost" />
 				<property name="port" value="9300" />
+				<property name="cluster.name" value="kart123" />
 			</properties>
 		</node>
 	</nodes>

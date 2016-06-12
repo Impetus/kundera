@@ -93,8 +93,8 @@ public abstract class DocumentIndexer implements com.impetus.kundera.index.lucen
      */
     public DocumentIndexer() {
         final String empty = "";
-        this.analyzer = new StandardAnalyzer(Version.LUCENE_CURRENT);
-        tokenizer = new LetterTokenizer(Version.LUCENE_34, new CharArrayReader(empty.toCharArray()));
+        this.analyzer = new StandardAnalyzer();
+        tokenizer = new LetterTokenizer();
     }
 
     /**

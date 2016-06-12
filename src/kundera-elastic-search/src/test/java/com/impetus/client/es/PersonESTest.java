@@ -32,7 +32,8 @@ import javax.persistence.Query;
 
 import junit.framework.Assert;
 
-import org.elasticsearch.common.settings.ImmutableSettings;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.settings.Settings.Builder;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
 import org.junit.After;
@@ -75,8 +76,8 @@ public class PersonESTest
     {
         if (!checkIfServerRunning())
         {
-            ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder();
-            builder.put("path.data", "target/data");
+            Builder builder = Settings.settingsBuilder();
+            builder.put("path.home", "target/data");
             node = new NodeBuilder().settings(builder).node();
         }
     }
@@ -246,7 +247,7 @@ public class PersonESTest
     public void testSpecificFieldRetrieval() throws InterruptedException
     {
         waitThread();
-        String queryWithOutAndClause = "Select p.personName,p.age from PersonES p where p.personName = 'karthik' OR p.personName = 'pragalbh'";
+        String queryWithOutAndClause = "Select p.personName,p.age from PersonES p where p.personName = 'karthik' OR p.personName = 'pragalbh' ORDER BY p.personName";
         Query nameQuery = em.createNamedQuery(queryWithOutAndClause);
 
         List persons = nameQuery.getResultList();
@@ -383,14 +384,15 @@ public class PersonESTest
     @Test
     public void testNotWithDelete()
     {
-        String queryString = "delete from PersonES p where p.personId <> 2 or p.personName <> 'amit'";
+        String queryString = "delete from PersonES p where p.personId <> 2";
         Query query = em.createQuery(queryString);
         int rowUpdataCount = query.executeUpdate();
+        waitThread();
+        Assert.assertEquals(3, rowUpdataCount);
 
-        Assert.assertEquals(4, rowUpdataCount);
-
-        List resultList = em.createQuery("Select p from PersonES p").getResultList();
-        assertResultList(resultList, person1, person2, person3, person4);
+        List<PersonES> resultList = em.createQuery("Select p from PersonES p").getResultList();
+        Assert.assertEquals(1, resultList.size());
+        Assert.assertEquals("2", resultList.get(0).getPersonId());
     }
 
     /**

@@ -68,15 +68,15 @@ public class PersonTest
 
         Query findQuery = em.createQuery("Select p from Person p", Person.class);
         List<Person> allPersons = findQuery.getResultList();
-        Assert.assertNotNull(allPersons);
+        Assert.assertTrue(allPersons.isEmpty());
 
         findQuery = em.createQuery("Select p from Person p where p.personName = vivek");
         allPersons = findQuery.getResultList();
-        Assert.assertNotNull(allPersons);
+        Assert.assertTrue(allPersons.isEmpty());
 
         findQuery = em.createQuery("Select p.age from Person p where p.personName = vivek");
         allPersons = findQuery.getResultList();
-        Assert.assertNotNull(allPersons);
+        Assert.assertTrue(allPersons.isEmpty());
 
         em.persist(p1);
         em.persist(p2);
@@ -87,8 +87,8 @@ public class PersonTest
         findQuery.setMaxResults(2);
         allPersons = findQuery.getResultList();
         Assert.assertEquals(2, allPersons.size());
-        Assert.assertEquals(new Integer(20), allPersons.get(0).getAge());
-        Assert.assertEquals(new Integer(10), allPersons.get(1).getAge());
+        Assert.assertEquals(new Integer(10), allPersons.get(0).getAge());
+        Assert.assertEquals(new Integer(20), allPersons.get(1).getAge());
 
         Person personWithKey = new Person();
         personWithKey.setPersonId("111");

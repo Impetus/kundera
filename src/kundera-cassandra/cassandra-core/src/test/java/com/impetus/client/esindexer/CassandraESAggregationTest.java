@@ -20,7 +20,8 @@ package com.impetus.client.esindexer;
 
 import javax.persistence.Persistence;
 
-import org.elasticsearch.common.settings.ImmutableSettings;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.settings.Settings.Builder;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
 import org.junit.After;
@@ -28,8 +29,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.client.query.AggregationsBaseTest;
 import com.impetus.kundera.query.Person;
@@ -56,8 +55,8 @@ public class CassandraESAggregationTest extends AggregationsBaseTest
     {
         if (!checkIfServerRunning())
         {
-            ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder();
-            builder.put("path.data", "target/data");
+            Builder builder = Settings.settingsBuilder();
+            builder.put("path.home", "target/data");
             node = new NodeBuilder().settings(builder).node();
         }
     }

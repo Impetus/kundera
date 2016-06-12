@@ -19,6 +19,7 @@ package com.impetus.kundera.metadata;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -110,14 +111,14 @@ public class MetadataUtilsTest
     @Test
     public void testSerializeKeys()
     {
-        Set<String> foreignKeys = new HashSet<String>();
+        Set<String> foreignKeys = new LinkedHashSet<String>();
         foreignKeys.add("key1");
         foreignKeys.add("key2");
         foreignKeys.add("key3");
 
         String serializedKey = MetadataUtils.serializeKeys(foreignKeys);
         Assert.assertNotNull(serializedKey);
-        Assert.assertEquals("key3~key2~key1", serializedKey);
+        Assert.assertEquals("key1~key2~key3", serializedKey);
     }
 
     @Test

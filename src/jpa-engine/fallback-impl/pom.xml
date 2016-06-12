@@ -14,7 +14,7 @@
 	<url>http://maven.apache.org</url>
 
 	<properties>
-		<lucene.version>4.10.2</lucene.version>
+		<lucene.version>5.5.0</lucene.version>
 	</properties>
 
 	<dependencies>

@@ -30,6 +30,7 @@ import javax.persistence.metamodel.EntityType;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexNotFoundException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
@@ -110,7 +111,7 @@ public class LuceneIndexer extends DocumentIndexer
             File file = new File(luceneDirPath);
             if (file.exists())
             {
-                Directory sourceDir = FSDirectory.open(getIndexDirectory());
+                FSDirectory sourceDir = FSDirectory.open(getIndexDirectory().toPath());
 
                 // TODO initialize context.
                 index = new RAMDirectory(sourceDir, IOContext.DEFAULT);
@@ -124,7 +125,7 @@ public class LuceneIndexer extends DocumentIndexer
              */
             // isInitialized
             /* writer */
-            IndexWriterConfig indexWriterConfig = new IndexWriterConfig(Version.LUCENE_34, analyzer);
+            IndexWriterConfig indexWriterConfig = new IndexWriterConfig(analyzer);
             LogDocMergePolicy logDocMergePolicy = new LogDocMergePolicy();
             logDocMergePolicy.setMergeFactor(1000);
             indexWriterConfig.setMergePolicy(logDocMergePolicy);
@@ -182,11 +183,11 @@ public class LuceneIndexer extends DocumentIndexer
             {
                 if (!isInitialized)
                 {
-                    Directory sourceDir = FSDirectory.open(getIndexDirectory());
+                    Directory sourceDir = FSDirectory.open(getIndexDirectory().toPath());
                     copy(sourceDir, index);
                     isInitialized = true;
                 }
-                reader = IndexReader.open(index);
+                reader = DirectoryReader.open(index);
             }
             catch (IndexNotFoundException infex)
             {
@@ -243,8 +244,7 @@ public class LuceneIndexer extends DocumentIndexer
 
         try
         {
-            QueryParser qp = new QueryParser(Version.LUCENE_34, DEFAULT_SEARCHABLE_FIELD, new StandardAnalyzer(
-                    Version.LUCENE_34));
+            QueryParser qp = new QueryParser(DEFAULT_SEARCHABLE_FIELD, new StandardAnalyzer());
 
             qp.setLowercaseExpandedTerms(false);
             qp.setAllowLeadingWildcard(true);
@@ -254,7 +254,7 @@ public class LuceneIndexer extends DocumentIndexer
             w.deleteDocuments(q);
             w.commit();
             w.close();
-            IndexWriterConfig indexWriterConfig = new IndexWriterConfig(Version.LUCENE_34, analyzer);
+            IndexWriterConfig indexWriterConfig = new IndexWriterConfig(analyzer);
             LogDocMergePolicy logDocMergePolicy = new LogDocMergePolicy();
             logDocMergePolicy.setMergeFactor(1000);
             indexWriterConfig.setMergePolicy(logDocMergePolicy);
@@ -411,7 +411,7 @@ public class LuceneIndexer extends DocumentIndexer
         QueryParser qp = null;
         IndexSearcher searcher = new IndexSearcher(reader);
 
-        qp = new QueryParser(Version.LUCENE_34, DEFAULT_SEARCHABLE_FIELD, new StandardAnalyzer(Version.LUCENE_34));
+        qp = new QueryParser(DEFAULT_SEARCHABLE_FIELD, new StandardAnalyzer());
 
         try
         {
@@ -541,7 +541,7 @@ public class LuceneIndexer extends DocumentIndexer
             {
                 // w.optimize();
                 w.commit();
-                copy(index, FSDirectory.open(getIndexDirectory()));
+                copy(index, FSDirectory.open(getIndexDirectory().toPath()));
                 readyForCommit = false;
                 reader = null;
                 isInitialized = false;
@@ -565,7 +565,7 @@ public class LuceneIndexer extends DocumentIndexer
             if (w != null && readyForCommit)
             {
                 w.commit();
-                copy(index, FSDirectory.open(getIndexDirectory()));
+                copy(index, FSDirectory.open(getIndexDirectory().toPath()));
             }
         }
 
@@ -980,7 +980,7 @@ public class LuceneIndexer extends DocumentIndexer
     {
         for (String file : src.listAll())
         {
-            src.copy(to, file, file, IOContext.DEFAULT);
+            src.copyFrom(src, file, to.toString(), IOContext.DEFAULT);
         }
     }
 

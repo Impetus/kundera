@@ -15,12 +15,13 @@
  ******************************************************************************/
 package com.impetus.client.es;
 
+import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.Properties;
 
 import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.settings.Settings.Builder;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 
 import com.impetus.kundera.PersistenceProperties;
@@ -114,22 +115,22 @@ public class ESClientFactory extends GenericClientFactory
 
         Properties properties = ((ESClientPropertyReader) propertyReader).getConnectionProperties();
 
-        ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder();
+        Builder builder = Settings.settingsBuilder();
+
+        builder.put("client.transport.sniff", true);
 
         if (properties != null)
         {
             builder.put(properties);
         }
 
-        builder.put("client.transport.sniff", true);
-
         Settings settings = builder.build();
 
-        org.elasticsearch.client.Client client = new TransportClient(settings);
+        TransportClient client = TransportClient.builder().settings(settings).build();
 
         for (String h : hosts)
         {
-            ((TransportClient) client).addTransportAddress(new InetSocketTransportAddress(h, new Integer(port)));
+            client.addTransportAddress(new InetSocketTransportAddress(new InetSocketAddress(h, new Integer(port))));
         }
 
         return client;

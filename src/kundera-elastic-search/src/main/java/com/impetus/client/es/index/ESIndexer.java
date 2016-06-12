@@ -2,6 +2,7 @@ package com.impetus.client.es.index;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.Properties;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.lucene.queryparser.xml.FilterBuilder;
 import org.eclipse.persistence.jpa.jpql.parser.Expression;
 import org.eclipse.persistence.jpa.jpql.parser.OrderByItem;
 import org.eclipse.persistence.jpa.jpql.parser.WhereClause;
@@ -24,8 +26,8 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
-import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilteredQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
@@ -69,10 +71,11 @@ public class ESIndexer implements Indexer
     private static final long UUID = 6077004083174677888L;
 
     /** The Constant PARENT_ID_FIELD. */
-    public static final String PARENT_ID_FIELD = UUID + ".parent.id";
+    //ES 2.0+ doesn't support '.' in field name (Causes MapperParsingException)
+    public static final String PARENT_ID_FIELD = UUID + "_parent_id";
 
     /** The Constant PARENT_ID_CLASS. */
-    public static final String PARENT_ID_CLASS = UUID + ".parent.class";
+    public static final String PARENT_ID_CLASS = UUID + "_parent_class";
 
     /** the log used by this class. */
     private static Log log = LogFactory.getLog(ESIndexer.class);
@@ -110,7 +113,7 @@ public class ESIndexer implements Indexer
         ObjectMapper mapper = new ObjectMapper();
         try
         {
-            values.put("entity.class", metadata.getEntityClazz().getCanonicalName().toLowerCase());
+            values.put("entity_class", metadata.getEntityClazz().getCanonicalName().toLowerCase());
             if (parentId != null)
             {
                 values.put(PARENT_ID_FIELD, parentId);
@@ -167,7 +170,7 @@ public class ESIndexer implements Indexer
         }
 
         ListenableActionFuture<SearchResponse> listenableActionFuture = client
-                .prepareSearch(m.getSchema().toLowerCase()).setQuery(QueryBuilders.queryString(luceneQuery))
+                .prepareSearch(m.getSchema().toLowerCase()).setQuery(QueryBuilders.queryStringQuery(luceneQuery))
                 .setSize(40000).execute();
         SearchResponse response = listenableActionFuture.actionGet();
 
@@ -200,7 +203,7 @@ public class ESIndexer implements Indexer
                 m.getPersistenceUnit());
         Expression whereExpression = KunderaQueryUtils.getWhereClause(kunderaQuery.getJpqlExpression());
 
-        FilterBuilder filter = whereExpression != null ? query.getEsFilterBuilder().populateFilterBuilder(
+        QueryBuilder filter = whereExpression != null ? query.getEsFilterBuilder().populateFilterBuilder(
                 ((WhereClause) whereExpression).getConditionalExpression(), m) : null;
 
         FilteredQueryBuilder queryBuilder = QueryBuilders.filteredQuery(null, filter);
@@ -267,7 +270,7 @@ public class ESIndexer implements Indexer
      * @return the search response
      */
     private SearchResponse getSearchResponse(KunderaQuery kunderaQuery, FilteredQueryBuilder queryBuilder,
-            FilterBuilder filter, ESQuery query, EntityMetadata m, int maxResults, KunderaMetadata kunderaMetadata)
+            QueryBuilder filter, ESQuery query, EntityMetadata m, int maxResults, KunderaMetadata kunderaMetadata)
     {
         SearchRequestBuilder builder = client.prepareSearch(m.getSchema().toLowerCase()).setTypes(
                 m.getEntityClazz().getSimpleName());
@@ -378,7 +381,7 @@ public class ESIndexer implements Indexer
             {
                 if (client == null)
                 {
-                    client = new TransportClient();
+                    client = TransportClient.builder().build();
                 }
                 for (Node node : nodes)
                 {
@@ -393,8 +396,9 @@ public class ESIndexer implements Indexer
                             throw new IllegalArgumentException(
                                     "Host or port should not be null / port should be numeric");
                         }
-                        ((TransportClient) client).addTransportAddress(new InetSocketTransportAddress(properties
-                                .getProperty("host"), Integer.parseInt(properties.getProperty("port"))));
+                        ((TransportClient) client).addTransportAddress(new InetSocketTransportAddress(
+                                new InetSocketAddress(properties.getProperty("host"), Integer.parseInt(properties
+                                        .getProperty("port")))));
                     }
                 }
             }

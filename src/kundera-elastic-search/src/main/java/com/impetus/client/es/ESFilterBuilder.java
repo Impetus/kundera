@@ -39,16 +39,14 @@ import org.eclipse.persistence.jpa.jpql.parser.OrExpression;
 import org.eclipse.persistence.jpa.jpql.parser.StateFieldPathExpression;
 import org.eclipse.persistence.jpa.jpql.parser.SubExpression;
 import org.eclipse.persistence.jpa.jpql.parser.SubtractionExpression;
-import org.elasticsearch.index.query.AndFilterBuilder;
-import org.elasticsearch.index.query.FilterBuilder;
-import org.elasticsearch.index.query.FilterBuilders;
-import org.elasticsearch.index.query.NotFilterBuilder;
-import org.elasticsearch.index.query.OrFilterBuilder;
+import org.elasticsearch.index.query.AndQueryBuilder;
+import org.elasticsearch.index.query.NotQueryBuilder;
+import org.elasticsearch.index.query.OrQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.RangeFilterBuilder;
-import org.elasticsearch.index.query.TermFilterBuilder;
-import org.elasticsearch.index.query.TermsFilterBuilder;
+import org.elasticsearch.index.query.RangeQueryBuilder;
+import org.elasticsearch.index.query.TermQueryBuilder;
+import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,10 +99,10 @@ public class ESFilterBuilder
      *            the entity
      * @return the filter builder
      */
-    public FilterBuilder populateFilterBuilder(Expression condtionalExp, EntityMetadata m)
+    public QueryBuilder populateFilterBuilder(Expression condtionalExp, EntityMetadata m)
     {
         log.info("Populating filter for expression: " + condtionalExp);
-        FilterBuilder filter = null;
+        QueryBuilder filter = null;
 
         if (condtionalExp instanceof SubExpression)
         {
@@ -149,7 +147,7 @@ public class ESFilterBuilder
      *            the metadata
      * @return the filter builder
      */
-    private FilterBuilder populateLikeQuery(LikeExpression likeExpression, EntityMetadata metadata)
+    private QueryBuilder populateLikeQuery(LikeExpression likeExpression, EntityMetadata metadata)
     {
         Expression patternValue = likeExpression.getPatternValue();
         String field = likeExpression.getStringExpression().toString();
@@ -159,7 +157,7 @@ public class ESFilterBuilder
         String jpaField = getField(field);
 
         log.debug("Pattern value for field " + field + " is: " + patternValue);
-        FilterBuilder filterBuilder = getQueryBuilder(kunderaQuery.new FilterClause(jpaField, Expression.LIKE,
+        QueryBuilder filterBuilder = getQueryBuilder(kunderaQuery.new FilterClause(jpaField, Expression.LIKE,
                 likePattern, field), metadata);
 
         return filterBuilder;
@@ -174,7 +172,7 @@ public class ESFilterBuilder
      *            the metadata
      * @return the filter builder
      */
-    private FilterBuilder populateInQuery(InExpression inExpression, EntityMetadata metadata)
+    private QueryBuilder populateInQuery(InExpression inExpression, EntityMetadata metadata)
     {
         String property = getField(inExpression.getExpression().toParsedText());
         Expression inItemsParameter = inExpression.getInItems();
@@ -252,7 +250,7 @@ public class ESFilterBuilder
      *            the entity
      * @return the filter builder
      */
-    private FilterBuilder populateBetweenFilter(BetweenExpression betweenExpression, EntityMetadata m)
+    private QueryBuilder populateBetweenFilter(BetweenExpression betweenExpression, EntityMetadata m)
     {
         String lowerBoundExpression = getBetweenBoundaryValues(betweenExpression.getLowerBoundExpression());
         String upperBoundExpression = getBetweenBoundaryValues(betweenExpression.getUpperBoundExpression());
@@ -261,7 +259,7 @@ public class ESFilterBuilder
         log.debug("Between clause for field " + field + "with lower bound " + lowerBoundExpression + "and upper bound "
                 + upperBoundExpression);
 
-        return new AndFilterBuilder(getFilter(kunderaQuery.new FilterClause(field, Expression.GREATER_THAN_OR_EQUAL,
+        return new AndQueryBuilder(getFilter(kunderaQuery.new FilterClause(field, Expression.GREATER_THAN_OR_EQUAL,
                 lowerBoundExpression, field), m), getFilter(kunderaQuery.new FilterClause(field,
                 Expression.LOWER_THAN_OR_EQUAL, upperBoundExpression,field), m));
     }
@@ -338,7 +336,7 @@ public class ESFilterBuilder
      *            the entity
      * @return the filter builder
      */
-    private FilterBuilder populateLogicalFilterBuilder(Expression logicalExp, EntityMetadata m)
+    private QueryBuilder populateLogicalFilterBuilder(Expression logicalExp, EntityMetadata m)
     {
         String identifier = ((LogicalExpression) logicalExp).getIdentifier();
 
@@ -357,13 +355,13 @@ public class ESFilterBuilder
      *            the entity
      * @return the and filter builder
      */
-    private AndFilterBuilder getAndFilterBuilder(Expression logicalExp, EntityMetadata m)
+    private AndQueryBuilder getAndFilterBuilder(Expression logicalExp, EntityMetadata m)
     {
         AndExpression andExp = (AndExpression) logicalExp;
         Expression leftExpression = andExp.getLeftExpression();
         Expression rightExpression = andExp.getRightExpression();
 
-        return new AndFilterBuilder(populateFilterBuilder(leftExpression, m), populateFilterBuilder(rightExpression, m));
+        return new AndQueryBuilder(populateFilterBuilder(leftExpression, m), populateFilterBuilder(rightExpression, m));
     }
 
     /**
@@ -377,13 +375,13 @@ public class ESFilterBuilder
      *            the entity
      * @return the or filter builder
      */
-    private OrFilterBuilder getOrFilterBuilder(Expression logicalExp, EntityMetadata m)
+    private OrQueryBuilder getOrFilterBuilder(Expression logicalExp, EntityMetadata m)
     {
         OrExpression orExp = (OrExpression) logicalExp;
         Expression leftExpression = orExp.getLeftExpression();
         Expression rightExpression = orExp.getRightExpression();
 
-        return new OrFilterBuilder(populateFilterBuilder(leftExpression, m), populateFilterBuilder(rightExpression, m));
+        return new OrQueryBuilder(populateFilterBuilder(leftExpression, m), populateFilterBuilder(rightExpression, m));
     }
 
     /**
@@ -416,7 +414,7 @@ public class ESFilterBuilder
      *            the entity type
      * @return the filter
      */
-    private FilterBuilder getFilter(FilterClause clause, final EntityMetadata metadata)
+    private QueryBuilder getFilter(FilterClause clause, final EntityMetadata metadata)
     {
         String condition = clause.getCondition();
         Object value = condition.equals(Expression.IN) ? clause.getValue() : clause.getValue().get(0);
@@ -424,35 +422,35 @@ public class ESFilterBuilder
                 metadata.getPersistenceUnit())).entity(metadata.getEntityClazz()).getAttribute(clause.getProperty()))
                 .getJPAColumnName();
 
-        FilterBuilder filterBuilder = null;
+        QueryBuilder filterBuilder = null;
 
         if (condition.equals(Expression.EQUAL))
         {
-            filterBuilder = new TermFilterBuilder(name, value);
+            filterBuilder = new TermQueryBuilder(name, value);
         }
         else if (condition.equals(Expression.GREATER_THAN))
         {
-            filterBuilder = new RangeFilterBuilder(name).gt(value);
+            filterBuilder = new RangeQueryBuilder(name).gt(value);
         }
         else if (condition.equals(Expression.LOWER_THAN))
         {
-            filterBuilder = new RangeFilterBuilder(name).lt(value);
+            filterBuilder = new RangeQueryBuilder(name).lt(value);
         }
         else if (condition.equals(Expression.GREATER_THAN_OR_EQUAL))
         {
-            filterBuilder = new RangeFilterBuilder(name).gte(value);
+            filterBuilder = new RangeQueryBuilder(name).gte(value);
         }
         else if (condition.equals(Expression.LOWER_THAN_OR_EQUAL))
         {
-            filterBuilder = new RangeFilterBuilder(name).lte(value);
+            filterBuilder = new RangeQueryBuilder(name).lte(value);
         }
         else if (condition.equals(Expression.DIFFERENT))
         {
-            filterBuilder = new NotFilterBuilder(new TermFilterBuilder(name, value));
+            filterBuilder = new NotQueryBuilder(new TermQueryBuilder(name, value));
         }
         else if (condition.equals(Expression.IN))
         {
-            filterBuilder = new TermsFilterBuilder(name, clause.getValue());
+            filterBuilder = new TermsQueryBuilder(name, clause.getValue());
         }
 
         return filterBuilder;
@@ -467,7 +465,7 @@ public class ESFilterBuilder
      *            the metadata
      * @return the query
      */
-    private FilterBuilder getQueryBuilder(FilterClause clause, final EntityMetadata metadata)
+    private QueryBuilder getQueryBuilder(FilterClause clause, final EntityMetadata metadata)
     {
         String condition = clause.getCondition();
         String value = clause.getValue().get(0).toString();
@@ -484,6 +482,6 @@ public class ESFilterBuilder
             queryBuilder = QueryBuilders.wildcardQuery(name, likePattern);
         }
 
-        return FilterBuilders.queryFilter(queryBuilder);
+        return QueryBuilders.queryFilter(queryBuilder);
     }
 }

@@ -23,6 +23,7 @@ import java.util.Set;
 import javax.persistence.Query;
 import javax.persistence.metamodel.EntityType;
 
+import org.apache.lucene.queryparser.xml.FilterBuilder;
 import org.eclipse.persistence.jpa.jpql.parser.AggregateFunction;
 import org.eclipse.persistence.jpa.jpql.parser.AndExpression;
 import org.eclipse.persistence.jpa.jpql.parser.CollectionExpression;
@@ -40,8 +41,8 @@ import org.eclipse.persistence.jpa.jpql.parser.SelectStatement;
 import org.eclipse.persistence.jpa.jpql.parser.StateFieldPathExpression;
 import org.eclipse.persistence.jpa.jpql.parser.WhereClause;
 import org.eclipse.persistence.jpa.jpql.utility.iterable.ListIterable;
-import org.elasticsearch.index.query.FilterBuilder;
-import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
@@ -114,7 +115,7 @@ public class ESQuery<E> extends QueryImpl
         EntityType entity = metaModel.entity(m.getEntityClazz());
         Expression whereExpression = KunderaQueryUtils.getWhereClause(kunderaQuery.getJpqlExpression());
 
-        FilterBuilder filter = whereExpression == null || whereExpression instanceof NullExpression ? null
+        QueryBuilder filter = whereExpression == null || whereExpression instanceof NullExpression ? null
                 : esFilterBuilder.populateFilterBuilder(((WhereClause) whereExpression).getConditionalExpression(), m);
 
         return ((ESClient) client).executeQuery(filter, buildAggregation(kunderaQuery, m, filter), m,
@@ -214,7 +215,7 @@ public class ESQuery<E> extends QueryImpl
      *            the filter
      * @return the filter aggregation builder
      */
-    public AggregationBuilder buildAggregation(KunderaQuery query, EntityMetadata entityMetadata, FilterBuilder filter)
+    public AggregationBuilder buildAggregation(KunderaQuery query, EntityMetadata entityMetadata, QueryBuilder filter)
     {
         SelectStatement selectStatement = query.getSelectStatement();
 
@@ -406,9 +407,9 @@ public class ESQuery<E> extends QueryImpl
      *            the filter
      * @return the filter aggregation builder
      */
-    private FilterAggregationBuilder buildWhereAggregations(EntityMetadata entityMetadata, FilterBuilder filter)
+    private FilterAggregationBuilder buildWhereAggregations(EntityMetadata entityMetadata, QueryBuilder filter)
     {
-        filter = filter != null ? filter : FilterBuilders.matchAllFilter();
+        filter = filter != null ? filter : QueryBuilders.matchAllQuery();
         FilterAggregationBuilder filteragg = AggregationBuilders.filter(ESConstants.AGGREGATION_NAME).filter(filter);
 
         return filteragg;

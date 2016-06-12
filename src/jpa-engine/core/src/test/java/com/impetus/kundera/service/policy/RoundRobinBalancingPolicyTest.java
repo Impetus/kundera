@@ -15,7 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.service.policy;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import junit.framework.Assert;
@@ -57,7 +57,7 @@ public class RoundRobinBalancingPolicyTest
     @Test
     public void testGetPool()
     {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new LinkedHashMap<String, Object>();
         Object o1 = new Object();
         Object o2 = new Object();
         Object o3 = new Object();
@@ -73,15 +73,15 @@ public class RoundRobinBalancingPolicyTest
             Assert.assertNotNull(o);
             if (i % 3 == 0)
             {
-                Assert.assertEquals(o2, o);
+                Assert.assertEquals(o1, o);
             }
             else if (i % 3 == 1)
             {
-                Assert.assertEquals(o3, o);
+                Assert.assertEquals(o2, o);
             }
             else if (i % 3 == 2)
             {
-                Assert.assertEquals(o1, o);
+                Assert.assertEquals(o3, o);
             }
         }
     }

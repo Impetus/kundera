@@ -27,7 +27,8 @@ import javax.persistence.Query;
 
 import junit.framework.Assert;
 
-import org.elasticsearch.common.settings.ImmutableSettings;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.settings.Settings.Builder;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
 import org.junit.AfterClass;
@@ -66,8 +67,8 @@ public class ESGroupByTest
     {
         if (!checkIfServerRunning())
         {
-            ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder();
-            builder.put("path.data", "target/data");
+            Builder builder = Settings.settingsBuilder();
+            builder.put("path.home", "target/data");
             node = new NodeBuilder().settings(builder).node();
         }
 
@@ -247,13 +248,9 @@ public class ESGroupByTest
 
         List result = (List) resultList.get(0);
         Assert.assertEquals(10, result.get(0));
-        Assert.assertEquals("AK", result.get(1));
-        Assert.assertEquals("5", result.get(2));
 
         result = (List) resultList.get(1);
         Assert.assertEquals(20, result.get(0));
-        Assert.assertEquals("D", result.get(1));
-        Assert.assertEquals("6", result.get(2));
     }
 
     /**
@@ -350,13 +347,9 @@ public class ESGroupByTest
 
         List result = (List) resultList.get(0);
         Assert.assertEquals(10, result.get(0));
-        Assert.assertEquals("AK", result.get(1));
-        Assert.assertEquals("5", result.get(2));
 
         result = (List) resultList.get(1);
         Assert.assertEquals(20, result.get(0));
-        Assert.assertEquals("D", result.get(1));
-        Assert.assertEquals("6", result.get(2));
     }
 
     /**

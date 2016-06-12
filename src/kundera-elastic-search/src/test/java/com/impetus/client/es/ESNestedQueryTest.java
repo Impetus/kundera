@@ -27,7 +27,8 @@ import javax.persistence.Query;
 
 import junit.framework.Assert;
 
-import org.elasticsearch.common.settings.ImmutableSettings;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.settings.Settings.Builder;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
 import org.junit.After;
@@ -68,8 +69,8 @@ public class ESNestedQueryTest
     {
         if (!checkIfServerRunning())
         {
-            ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder();
-            builder.put("path.data", "target/data");
+            Builder builder = Settings.settingsBuilder();
+            builder.put("path.home", "target/data");
             node = new NodeBuilder().settings(builder).node();
         }
     }
