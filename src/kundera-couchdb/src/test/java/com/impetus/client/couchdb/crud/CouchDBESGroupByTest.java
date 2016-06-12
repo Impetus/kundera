@@ -17,7 +17,8 @@ package com.impetus.client.couchdb.crud;
 
 import javax.persistence.Persistence;
 
-import org.elasticsearch.common.settings.ImmutableSettings;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.settings.Settings.Builder;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
 import org.junit.AfterClass;
@@ -47,8 +48,8 @@ public class CouchDBESGroupByTest extends GroupByBaseTest
     {
         if (!checkIfServerRunning())
         {
-            ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder();
-            builder.put("path.data", "target/data");
+            Builder builder = Settings.settingsBuilder();
+            builder.put("path.home", "target/data");
             node = new NodeBuilder().settings(builder).node();
         }
 

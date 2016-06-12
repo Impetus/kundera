@@ -24,9 +24,8 @@ import java.util.Map;
 
 import javax.persistence.Persistence;
 
-import junit.framework.Assert;
-
-import org.elasticsearch.common.settings.ImmutableSettings;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.settings.Settings.Builder;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
 import org.junit.After;
@@ -37,6 +36,8 @@ import org.junit.Test;
 
 import com.impetus.client.hbase.testingutil.HBaseTestingUtils;
 import com.impetus.kundera.utils.LuceneCleanupUtilities;
+
+import junit.framework.Assert;
 
 /**
  * The Class HBaseESQueryTest.
@@ -65,11 +66,10 @@ public class HBaseESQueryTest extends HBaseQueryBaseTest
         propertyMap.put("kundera.indexer.class", "com.impetus.client.es.index.ESIndexer");
         
 
-        //if (!checkIfServerRunning())
+        if (!checkIfServerRunning())
         {
-            ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder();
-
-            builder.put("path.data", "target/data");
+            Builder builder = Settings.settingsBuilder();
+            builder.put("path.home", "target/data");
             node = new NodeBuilder().settings(builder).node();
         }
     } 

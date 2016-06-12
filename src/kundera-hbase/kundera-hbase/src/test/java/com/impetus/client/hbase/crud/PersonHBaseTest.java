@@ -25,12 +25,11 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 
-import junit.framework.Assert;
-
 import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
-import org.elasticsearch.common.settings.ImmutableSettings;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.settings.Settings.Builder;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
 import org.junit.After;
@@ -43,6 +42,8 @@ import com.impetus.client.hbase.junits.HBaseCli;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 import com.impetus.kundera.utils.LuceneCleanupUtilities;
+
+import junit.framework.Assert;
 
 public class PersonHBaseTest extends BaseTest
 {
@@ -194,10 +195,10 @@ public class PersonHBaseTest extends BaseTest
     public void onInsertLuceneHbase() throws Exception
     {
         // enabled for es indexing.
-        ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder();
-        builder.put("path.data", "target/data");
+        Builder builder = Settings.settingsBuilder();
+        builder.put("path.home", "target/data");
         Node node = new NodeBuilder().settings(builder).node();
-        //
+        
         Map<String, Object> puProperties = new HashMap<String, Object>();
         puProperties.put("kundera.indexer.class", "com.impetus.client.es.index.ESIndexer");
         // puProperties.put("index.home.dir", "./lucene"); // uncomment for
