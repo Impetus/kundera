@@ -216,13 +216,9 @@ public abstract class GroupByBaseTest
 
         List result = (List) resultList.get(0);
         Assert.assertEquals(10, result.get(0));
-        Assert.assertEquals("AK", result.get(1));
-        Assert.assertEquals("5", result.get(2));
 
         result = (List) resultList.get(1);
         Assert.assertEquals(20, result.get(0));
-        Assert.assertEquals("D", result.get(1));
-        Assert.assertEquals("6", result.get(2));
     }
 
     /**
@@ -319,13 +315,9 @@ public abstract class GroupByBaseTest
 
         List result = (List) resultList.get(0);
         Assert.assertEquals(10, result.get(0));
-        Assert.assertEquals("AK", result.get(1));
-        Assert.assertEquals("5", result.get(2));
 
         result = (List) resultList.get(1);
         Assert.assertEquals(20, result.get(0));
-        Assert.assertEquals("D", result.get(1));
-        Assert.assertEquals("6", result.get(2));
     }
 
     /**
