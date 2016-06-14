@@ -515,23 +515,18 @@ public class DSCompositeTypeTest
         // Assert.assertEquals("my third tweet", results.get(2).getTweetBody());
         //
         //
-        String inClause = "Select u from PrimeUser u where u.key.userId IN (\"mevivs\",\"cgangwal's\",\"kmishra\") ORDER BY u.key.tweetId ASC";
+        String inClause = "Select u from PrimeUser u where u.key.userId IN (\"mevivs\",\"cgangwal's\",\"kmishra\")";
         Query q = em.createQuery(inClause);
 
         List<PrimeUser> results = q.getResultList();
         Assert.assertNotNull(results);
-        Assert.assertEquals("my first tweet", results.get(0).getTweetBody());
-        Assert.assertEquals("my second tweet", results.get(1).getTweetBody());
-        Assert.assertEquals("my third tweet", results.get(2).getTweetBody());
         Assert.assertEquals(3, results.size());
 
-        inClause = "Select u from PrimeUser u where u.key.userId IN (\"mevivs\",\"cgangwal's\") ORDER BY u.key.tweetId ASC";
+        inClause = "Select u from PrimeUser u where u.key.userId IN (\"mevivs\",\"cgangwal's\")";
         q = em.createQuery(inClause);
 
         results = q.getResultList();
         Assert.assertNotNull(results);
-        Assert.assertEquals("my first tweet", results.get(0).getTweetBody());
-        Assert.assertEquals("my second tweet", results.get(1).getTweetBody());
         Assert.assertEquals(2, results.size());
 
         try
