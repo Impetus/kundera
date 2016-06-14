@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.client.crud;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -63,7 +64,16 @@ public class EmbeddableUserTest
     {
         AppUser user = new AppUser();
         user.setId("id");
-        PhoneDirectory properties = new PhoneDirectory();
+        List<String> contactList = new ArrayList<>();
+        contactList.add("xamry");
+
+        Map<String, String> contactMap = new HashMap<>();
+        contactMap.put("xamry", "9891991919");
+
+        Set<String> contactSet = new HashSet<>();
+        contactSet.add("xamry");
+
+        PhoneDirectory properties = new PhoneDirectory("MyPhoneDirectory", contactList, contactMap, contactSet);
         user.setPropertyContainer(properties);
         em.persist(user);
 
