@@ -245,8 +245,8 @@ public class CassQuery extends QueryImpl
 
         if (isNative)
         {
-            ls = (List<EnhanceEntity>) ((CassandraClientBase) client).executeQuery(m.getEntityClazz(), m.getRelationNames(), isNative,
-                    query != null ? query : getJPAQuery());
+            ls = (List<EnhanceEntity>) ((CassandraClientBase) client).executeQuery(m.getEntityClazz(),
+                    m.getRelationNames(), isNative, query != null ? query : getJPAQuery());
         }
         else if (!isNative && ((CassandraClientBase) client).isCql3Enabled(m))
         {
@@ -844,6 +844,11 @@ public class CassQuery extends QueryImpl
                 }
                 else if (idColumn.equals(fieldName))
                 {
+                    // dont use token for equals query on id column (#856)
+                    if (condition.equals("="))
+                    {
+                        use = false;
+                    }
                     isPresent = buildWhereClause(builder, isPresent, translator, condition, value, useInClause,
                             ((AbstractAttribute) m.getIdAttribute()), CassandraUtilities.getIdColumnName(
                                     kunderaMetadata, m, externalProperties,
