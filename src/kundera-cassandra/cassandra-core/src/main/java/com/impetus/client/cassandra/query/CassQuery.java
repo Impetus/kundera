@@ -845,14 +845,15 @@ public class CassQuery extends QueryImpl
                 else if (idColumn.equals(fieldName))
                 {
                     // dont use token for equals query on id column (#856)
+                    boolean useToken = use;
                     if (condition.equals("="))
                     {
-                        use = false;
+                        useToken = false;
                     }
                     isPresent = buildWhereClause(builder, isPresent, translator, condition, value, useInClause,
                             ((AbstractAttribute) m.getIdAttribute()), CassandraUtilities.getIdColumnName(
                                     kunderaMetadata, m, externalProperties,
-                                    ((CassandraClientBase) persistenceDelegeator.getClient(m)).isCql3Enabled(m)), use);
+                                    ((CassandraClientBase) persistenceDelegeator.getClient(m)).isCql3Enabled(m)), useToken);
                 }
                 else
                 {

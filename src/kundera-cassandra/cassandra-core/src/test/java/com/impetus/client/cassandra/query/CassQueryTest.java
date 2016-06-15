@@ -95,7 +95,7 @@ public class CassQueryTest
 
         Assert.assertNotNull(cqlQuery);
 
-        Assert.assertEquals("SELECT * FROM \"PERSONCASSANDRA\" WHERE token(\"personId\") = token('kk') LIMIT 200", cqlQuery);
+        Assert.assertEquals("SELECT * FROM \"PERSONCASSANDRA\" WHERE \"personId\" = 'kk' LIMIT 200", cqlQuery);
 
         // In Query.
         queryString = "Select p from PersonCassandra p WHERE p.personId in ('kk', 'sk','pk')";
