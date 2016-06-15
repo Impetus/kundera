@@ -10,7 +10,7 @@
 					<property name="reconnection.policy" value="ConstantReconnectionPolicy"></property>
 					<property name="retry.policy" value="DowngradingConsistencyRetryPolicy"></property>
 					
-					<property name="localdc" value="dc1"></property>
+					<property name="localdc" value="datacenter1"></property>
 					<property name="usedHostsPerRemoteDc" value="2"></property>
 					<property name="constantDelayMs" value="110000"></property>
 					

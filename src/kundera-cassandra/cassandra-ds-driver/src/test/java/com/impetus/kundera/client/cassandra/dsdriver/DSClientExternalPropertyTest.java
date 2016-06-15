@@ -216,7 +216,7 @@ public class DSClientExternalPropertyTest
         Assert.assertEquals(configuration.getPolicies().getRetryPolicy().getClass().getName(), LRTP);
 
         Assert.assertEquals(connectionProperties.getProperty("constantDelayMs"), "110000");
-        Assert.assertEquals(connectionProperties.getProperty("localdc"), "dc1");
+        Assert.assertEquals(connectionProperties.getProperty("localdc"), "datacenter1");
         Assert.assertEquals(connectionProperties.getProperty("usedHostsPerRemoteDc"), "2");
         Assert.assertEquals(connectionProperties.getProperty("isTokenAware"), "true");
         Assert.assertEquals(connectionProperties.getProperty("isLoggingRetry"), "true");
@@ -273,7 +273,7 @@ public class DSClientExternalPropertyTest
         Assert.assertEquals(configuration.getPolicies().getRetryPolicy().getClass().getName(), LRTP);
 
         Assert.assertEquals(connectionProperties.getProperty("constantDelayMs"), "110000");
-        Assert.assertEquals(connectionProperties.getProperty("localdc"), "dc1");
+        Assert.assertEquals(connectionProperties.getProperty("localdc"), "datacenter1");
         Assert.assertEquals(connectionProperties.getProperty("usedHostsPerRemoteDc"), "2");
         Assert.assertEquals(connectionProperties.getProperty("isLatencyAware"), "true");
         Assert.assertEquals(connectionProperties.getProperty("isLoggingRetry"), "true");
