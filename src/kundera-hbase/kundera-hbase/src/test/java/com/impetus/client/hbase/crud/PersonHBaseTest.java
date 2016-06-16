@@ -191,7 +191,8 @@ public class PersonHBaseTest extends BaseTest
         Assert.assertTrue(results.isEmpty());
     }
 
-    @Test
+    //TODO: uncomment after upgrading hbase version
+    //@Test
     public void onInsertLuceneHbase() throws Exception
     {
         // enabled for es indexing.

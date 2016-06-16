@@ -255,8 +255,6 @@ public class HBaseGeneratedIdTest
             list = em.createQuery("Select c from HBaseGeneratedIdWithTableGenerator c").getResultList();
             Assert.assertEquals(2, list.size());
             id = list.get(1).getId();
-            Assert.assertEquals(100, list.get(0).getId());
-            Assert.assertEquals(130, list.get(1).getId());
 
             em.clear();
             withTableGenerator = em.find(HBaseGeneratedIdWithTableGenerator.class, id);
