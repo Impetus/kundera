@@ -102,7 +102,10 @@ Important Links
 * [Kundera Tagged Questions on stackoverflow.com] (http://stackoverflow.com/questions/tagged/kundera)
 * [Releases] (https://github.com/impetus-opensource/Kundera/blob/trunk/src/README.md)
 
-
+Contribution
+============
+* [Contribution Ideas](https://github.com/impetus-opensource/Kundera/wiki/How-to-Contribute#contribution-ideas)
+* [Contribution Guidelines](https://github.com/impetus-opensource/Kundera/wiki/How-to-Contribute#contribution-guidelines)
 
 About Us
 ========
