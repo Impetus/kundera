@@ -379,13 +379,13 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                     {
                         builder.append(CQLTranslator.QUOTE_STR);
                         builder.append(dc.getName());
+                        builder.append(CQLTranslator.QUOTE_STR);
                         builder.append(":");
                         builder.append(dc.getValue());
-                        builder.append(CQLTranslator.QUOTE_STR);
                         builder.append(CQLTranslator.COMMA_STR);
                     }
 
-                    builder.deleteCharAt(builder.length() - 1);
+                    builder.delete(builder.lastIndexOf(CQLTranslator.COMMA_STR), builder.length());
 
                     replication_conf = builder.toString();
                 }
