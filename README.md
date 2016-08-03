@@ -92,6 +92,7 @@ Important Links
    * [Schema Generation] (https://github.com/impetus-opensource/Kundera/wiki/Schema-Generation)
    * [Transaction Management] (https://github.com/impetus-opensource/Kundera/wiki/Transaction-Management)
    * [Rest Based Access] (https://github.com/impetus-opensource/Kundera/wiki/REST-Based-Access)
+   * [Aggregation over NoSQL] (https://github.com/impetus-opensource/Kundera/wiki/How-to-perform-aggregation-over-data-stored-in-NoSQL%3F)
 * Tutorials :
    * [Kundera with Openshift] (https://github.com/impetus-opensource/Kundera/wiki/Deploying-Polyglot-(RDBMS---NoSQL)-Applications-on-Openshift)
    * [Kundera with Play Framework] (https://github.com/impetus-opensource/Kundera/wiki/Using-Kundera-with-Play!-Framework)
