@@ -23,12 +23,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
-import javax.persistence.GenerationType;
 import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 
-import org.apache.lucene.queryparser.xml.FilterBuilder;
 import org.eclipse.persistence.jpa.jpql.parser.Expression;
 import org.eclipse.persistence.jpa.jpql.parser.OrderByItem;
 import org.elasticsearch.ElasticsearchException;
@@ -42,7 +40,6 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.FilteredQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -142,9 +139,8 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
     /*
      * (non-Javadoc)
      * 
-     * @see
-     * com.impetus.kundera.client.ClientBase#onPersist(com.impetus.kundera.metadata
-     * .model.EntityMetadata, java.lang.Object, java.lang.Object,
+     * @see com.impetus.kundera.client.ClientBase#onPersist(com.impetus.kundera.
+     * metadata .model.EntityMetadata, java.lang.Object, java.lang.Object,
      * java.util.List)
      */
     @Override
@@ -154,8 +150,8 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
         {
             Map<String, Object> values = new HashMap<String, Object>();
 
-            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
-                    entityMetadata.getPersistenceUnit());
+            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
+                    .getMetamodel(entityMetadata.getPersistenceUnit());
 
             EntityType entityType = metaModel.entity(entityMetadata.getEntityClazz());
 
@@ -254,8 +250,8 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClass);
         GetResponse get = null;
 
-        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
-                metadata.getPersistenceUnit());
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
+                .getMetamodel(metadata.getPersistenceUnit());
 
         EntityType entityType = metaModel.entity(metadata.getEntityClazz());
 
@@ -312,12 +308,12 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
         String[] fieldsToSelect = query.getResult();
         Class clazz = entityMetadata.getEntityClazz();
 
-        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
-                entityMetadata.getPersistenceUnit());
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
+                .getMetamodel(entityMetadata.getPersistenceUnit());
 
         FilteredQueryBuilder queryBuilder = QueryBuilders.filteredQuery(null, filter);
-        SearchRequestBuilder builder = txClient.prepareSearch(entityMetadata.getSchema().toLowerCase()).setTypes(
-                entityMetadata.getTableName());
+        SearchRequestBuilder builder = txClient.prepareSearch(entityMetadata.getSchema().toLowerCase())
+                .setTypes(entityMetadata.getTableName());
 
         addFieldsToBuilder(fieldsToSelect, clazz, metaModel, builder);
 
@@ -369,8 +365,8 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
      */
     private void addSortOrder(SearchRequestBuilder builder, KunderaQuery query, EntityMetadata entityMetadata)
     {
-        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
-                entityMetadata.getPersistenceUnit());
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
+                .getMetamodel(entityMetadata.getPersistenceUnit());
 
         List<OrderByItem> orderList = KunderaQueryUtils.getOrderByItems(query.getJpqlExpression());
 
@@ -409,9 +405,8 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
             for (int i = 1; i < fieldsToSelect.length; i++)
             {
                 logger.debug(i + " : " + fieldsToSelect[i]);
-                builder = builder
-                        .addField(((AbstractAttribute) metaModel.entity(clazz).getAttribute(fieldsToSelect[i]))
-                                .getJPAColumnName());
+                builder = builder.addField(((AbstractAttribute) metaModel.entity(clazz).getAttribute(fieldsToSelect[i]))
+                        .getJPAColumnName());
             }
         }
     }
@@ -465,8 +460,8 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
         {
             EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entity.getClass());
 
-            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
-                    metadata.getPersistenceUnit());
+            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
+                    .getMetamodel(metadata.getPersistenceUnit());
 
             EntityType entityType = metaModel.entity(metadata.getEntityClazz());
 
@@ -660,20 +655,19 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
 
         try
         {
-            SearchResponse response = txClient.prepareSearch(metadata.getSchema().toLowerCase())/*
-                                                                                                 * .
-                                                                                                 * addFields
-                                                                                                 * (
-                                                                                                 * "*"
-                                                                                                 * )
-                                                                                                 */
-            .setTypes(metadata.getTableName()).setQuery(QueryBuilders.termQuery(colName, colValue)).execute().get();
+            SearchResponse response = txClient
+                    .prepareSearch(metadata.getSchema()
+                            .toLowerCase())/*
+                                            * . addFields ( "*" )
+                                            */
+                    .setTypes(metadata.getTableName()).setQuery(QueryBuilders.termQuery(colName, colValue)).execute()
+                    .get();
 
             SearchHits hits = response.getHits();
             for (SearchHit hit : hits)
             {
-                MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
-                        metadata.getPersistenceUnit());
+                MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
+                        .getMetamodel(metadata.getPersistenceUnit());
 
                 EntityType entityType = metaModel.entity(entityClazz);
                 Map<String, Object> searchResults = hit.getSource();
@@ -777,8 +771,8 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
                     EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata,
                             node.getDataClass());
 
-                    MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
-                            metadata.getPersistenceUnit());
+                    MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
+                            .getMetamodel(metadata.getPersistenceUnit());
 
                     EntityType entityType = metaModel.entity(metadata.getEntityClazz());
 
@@ -922,9 +916,9 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
     /*
      * (non-Javadoc)
      * 
-     * @see
-     * com.impetus.kundera.client.ClientPropertiesSetter#populateClientProperties
-     * (com.impetus.kundera.client.Client, java.util.Map)
+     * @see com.impetus.kundera.client.ClientPropertiesSetter#
+     * populateClientProperties (com.impetus.kundera.client.Client,
+     * java.util.Map)
      */
     @Override
     public void populateClientProperties(Client client, Map<String, Object> properties)
@@ -940,7 +934,6 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
     @Override
     public Generator getIdGenerator()
     {
-        throw new UnsupportedOperationException(GenerationType.class.getSimpleName()
-                + " Strategies not supported by this client : ESClient");
+        return (Generator) KunderaCoreUtils.createNewInstance(EsIdGenerator.class);
     }
 }
