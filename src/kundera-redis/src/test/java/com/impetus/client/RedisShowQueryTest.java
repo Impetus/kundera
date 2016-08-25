@@ -122,7 +122,7 @@ public class RedisShowQueryTest
         {
 
             int i = 0;
-            String expectedQuery[] = new String[5];
+            String expectedQuery[] = new String[4];
             String actualQuery = null;
             BufferedReader br = null;
             file = new File("showQuery.log");
@@ -154,7 +154,7 @@ public class RedisShowQueryTest
             findQuery = em.createQuery("Select p from UserInformation p where p.id=1 AND p.age=32");
             findQuery.getResultList();
             System.setOut(printStream);
-            expectedQuery[4] = "Fetching primary key from UserInformation corresponding to UserInformation:id:1 and UserInformation:age:32";
+            expectedQuery[3] = "Fetching primary key from UserInformation corresponding to UserInformation:id:1 and UserInformation:age:32";
            
             br = new BufferedReader(new FileReader("showQuery.log"));
             actualQuery = br.readLine();
