@@ -146,10 +146,10 @@ public class RedisShowQueryTest
             System.setOut(printStream);
             expectedQuery[2] = "Fetching primary key from UserInformation corresponding to age between {age=32.0} and {age=35.0}";
 
-            findQuery = em.createQuery("Select p from UserInformation p where p.id=1 OR p.age=29");
-            findQuery.getResultList();
-            expectedQuery[3] = "Fetching primary key from UserInformation corresponding to UserInformation:id:1 or UserInformation:age:29";
-            System.setOut(printStream);
+//            findQuery = em.createQuery("Select p from UserInformation p where p.id=1 OR p.age=29");
+//            findQuery.getResultList();
+//            expectedQuery[3] = "Fetching primary key from UserInformation corresponding to UserInformation:id:1 or UserInformation:age:29";
+//            System.setOut(printStream);
             
             findQuery = em.createQuery("Select p from UserInformation p where p.id=1 AND p.age=32");
             findQuery.getResultList();
