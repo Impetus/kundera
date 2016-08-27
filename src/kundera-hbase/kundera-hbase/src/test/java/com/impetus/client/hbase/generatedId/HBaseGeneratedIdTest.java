@@ -251,7 +251,13 @@ public class HBaseGeneratedIdTest
             em.persist(withTableGenerator2);
             list = em.createQuery("Select c from HBaseGeneratedIdWithTableGenerator c").getResultList();
             Assert.assertEquals(2, list.size());
-            id = list.get(1).getId();
+            
+            if(list.get(0).getName().equals("Kumar Mishra2")){
+            	  id = list.get(0).getId();
+            }
+            else{
+                id = list.get(1).getId();
+            }
 
             em.clear();
             withTableGenerator = em.find(HBaseGeneratedIdWithTableGenerator.class, id);
