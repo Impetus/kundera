@@ -166,83 +166,36 @@ public class HBaseTransactionTest{
     /**
      * Rollback on error.
      * 
-     * @throws IOException
-     *             Signals that an I/O exception has occurred.
-     * @throws TException
-     *             the t exception
-     * @throws InvalidRequestException
-     *             the invalid request exception
-     * @throws UnavailableException
-     *             the unavailable exception
-     * @throws TimedOutException
-     *             the timed out exception
-     * @throws SchemaDisagreementException
-     *             the schema disagreement exception
+     * @throws Exception
+     *             the exception
      */
     @Test
     public void rollbackOnError() throws Exception
     {
-        HBaseUser p = null;
         try
         {
+            em.getTransaction().begin();
             Object p1 = prepareData("test1", 10);
             Object p2 = prepareData("test2", 20);
+            Object p3 = prepareData("test3", 15);
             em.persist(p1);
             em.persist(p2);
-
-            p = em.find(HBaseUser.class, "test1");
-            Assert.assertNotNull(p);
-
-            Object p3 = prepareData("test3", 15);
             em.persist(p3);
-
-            // Assert on rollback on error.
-            ((HBaseUser) p2).setAddress("rollback");
-            em.merge(p2);
             em.merge(null);
-
-            // As this is a runtime exception so rollback should happen and
-            // delete out commited data.
+            em.getTransaction().commit();
         }
         catch (Exception ex)
         {
-
-            p = em.find(HBaseUser.class, "test1");
-            Assert.assertNull(p);
-
-            p = em.find(HBaseUser.class, "test2");
-            Assert.assertNull(p);
-
-            p = em.find(HBaseUser.class, "3");
-            Assert.assertNull(p);
-        }
-        em.clear();
-        // persist with 1 em
-        EntityManager em1 = emf.createEntityManager();
-        // em1.setFlushMode(FlushModeType.COMMIT);
-        em1.getTransaction().begin();
-        Object p3 = prepareData("test4", 15);
-        em1.persist(p3);
-        em1.getTransaction().commit();
-
-        try
-        {
-            // remove with another em with auto flush.
-            EntityManager em2 = emf.createEntityManager();
-            HBaseUser person = em2.find(HBaseUser.class, "test4");
-            em2.remove(person);
-            em2.merge(null);
-        }
-        catch (Exception ex)
-        {
-            em1.clear();
-            p = em.find(HBaseUser.class, "test4");
-            Assert.assertNotNull(p);
-            Assert.assertEquals("test4", p.getName());
-            Assert.assertEquals("D-40", p.getAddress());
-
+            em.clear();
+            HBaseUser user = em.find(HBaseUser.class, "test1");
+            Assert.assertNull(user);
+            user = em.find(HBaseUser.class, "test2");
+            Assert.assertNull(user);
+            user = em.find(HBaseUser.class, "test3");
+            Assert.assertNull(user);
         }
     }
+
 
     /**
      * Roll back with multi transactions.
