@@ -119,7 +119,7 @@ public class ESQuery<E> extends QueryImpl
                 : esFilterBuilder.populateFilterBuilder(((WhereClause) whereExpression).getConditionalExpression(), m);
 
         return ((ESClient) client).executeQuery(filter, buildAggregation(kunderaQuery, m, filter), m,
-                getKunderaQuery(), this.maxResult);
+                getKunderaQuery(),this.firstResult, this.maxResult);
     }
 
     /*
