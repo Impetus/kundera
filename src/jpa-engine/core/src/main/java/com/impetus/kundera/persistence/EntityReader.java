@@ -39,10 +39,6 @@ public interface EntityReader
      * 
      * @param m
      *            entity meta data
-     * @param relationNames
-     *            relation names
-     * @param isParent
-     *            if entity is not holding any relation.
      * @param client
      *            client instance
      * @return list of wrapped enhance entities.
@@ -52,20 +48,9 @@ public interface EntityReader
     /**
      * Returns populated entity along with all relational value.
      * 
-     * @param e
-     *            enhance entity
-     * @param graphs
-     *            entity graph
-     * @param collectionHolder
-     *            collection holder.
-     * @param client
-     *            client
      * @param m
      *            entity meta data
      * @param relationStack 
-     * @param persistenceDelegeator
-     *            persistence delegator.
-     * @param lazily loaded. true if invoked over lazily fetched object.           
      * @return populate entity.
      * @throws Exception
      *             the exception
@@ -81,8 +66,6 @@ public interface EntityReader
      *            the primary key
      * @param m
      *            the m
-     * @param relationNames
-     *            the relation names
      * @param client
      *            the client
      * @return the enhance entity

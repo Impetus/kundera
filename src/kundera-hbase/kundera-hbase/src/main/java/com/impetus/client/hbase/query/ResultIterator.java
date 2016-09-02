@@ -21,6 +21,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import com.impetus.client.hbase.RequestExecutor;
+import com.impetus.client.hbase.TableRequest;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.filter.FilterList;
 import org.apache.hadoop.hbase.filter.KeyOnlyFilter;
 import org.slf4j.Logger;
@@ -50,6 +53,8 @@ class ResultIterator<E> implements IResultIterator<E>
 {
     private HBaseClient client;
 
+    private RequestExecutor executor;
+
     private EntityMetadata entityMetadata;
 
     private PersistenceDelegator persistenceDelegator;
@@ -69,13 +74,15 @@ class ResultIterator<E> implements IResultIterator<E>
     /** the log used by this class. */
     private static Logger log = LoggerFactory.getLogger(ResultIterator.class);
 
-    public ResultIterator(HBaseClient client, EntityMetadata m, PersistenceDelegator pd, int fetchSize,
+    public ResultIterator(HBaseClient client,
+            EntityMetadata m, PersistenceDelegator pd, int fetchSize,
             QueryTranslator translator, List<String> columns)
     {
         this.entityMetadata = m;
         this.client = client;
+        this.executor = client.getRequestExecutor();
         this.persistenceDelegator = pd;
-        this.handler = ((HBaseClient) client).getHandle();
+        this.handler = client.getHandle();
         this.handler.setFetchSize(fetchSize);
         this.fetchSize = fetchSize;
         this.translator = translator;
@@ -113,7 +120,7 @@ class ResultIterator<E> implements IResultIterator<E>
         }
         else
         {
-            return result = setRelationEntities(result, client, entityMetadata);
+            return setRelationEntities(result, client, entityMetadata);
         }
     }
 
@@ -140,7 +147,7 @@ class ResultIterator<E> implements IResultIterator<E>
             EnhanceEntity ee = (EnhanceEntity) enhanceEntity;
 
             result = (E) client.getReader().recursivelyFindEntities(ee.getEntity(), ee.getRelations(), m,
-                    persistenceDelegator, false, new HashMap<Object, Object>());
+                    persistenceDelegator, false, new HashMap<>());
         }
 
         return result;
@@ -156,65 +163,59 @@ class ResultIterator<E> implements IResultIterator<E>
      *            hbase client
      * @return list of entities.
      */
-    private void onQuery(EntityMetadata m, Client client)
+    private void onQuery(final EntityMetadata m, final Client client)
     {
 
         try
         {
             // Called only in case of standalone entity.
-            FilterList filter = null;
-            if (translator.getFilter() != null)
-            {
+            final FilterList filter;
+            if (translator.getFilter() != null) {
                 filter = new FilterList(translator.getFilter());
+            } else {
+                filter = null;
             }
-            String[] columnAsArr = getColumnsAsArray();
+            final String[] columnAsArr = getColumnsAsArray();
 
-            if (isFindKeyOnly(m, columnAsArr))
-            {
+            if (isFindKeyOnly(m, columnAsArr)) {
                 this.handler.setFilter(new KeyOnlyFilter());
             }
+            executor.execute(new TableRequest<Void>(m.getSchema()) {
+                protected Void execute(Table table) throws IOException {
+                    if (filter == null && columns != null) {
 
-            if (filter == null && columns != null)
-            {
-                handler.readDataByRange(m.getSchema(), m.getEntityClazz(), m, translator.getStartRow(),
-                        translator.getEndRow(), columnAsArr, null);
-            }
-            if (MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
-            {
-                if (filter == null)
-                {
-                    // means complete scan without where clause, scan all
-                    // records.
-                    // findAll.
-                    if (translator.isRangeScan())
-                    {
-                        handler.readDataByRange(m.getSchema(), m.getEntityClazz(), m, translator.getStartRow(),
+                        handler.readDataByRange(table, m.getEntityClazz(), m, translator.getStartRow(),
                                 translator.getEndRow(), columnAsArr, null);
                     }
-                    else
-                    {
-                        handler.readDataByRange(m.getSchema(), m.getEntityClazz(), m, null, null, columnAsArr, null);
-                    }
-                }
-                else
-                {
-                    // means WHERE clause is present.
-                    if (translator.isRangeScan())
-                    {
-                        handler.readDataByRange(m.getSchema(), m.getEntityClazz(), m, translator.getStartRow(),
-                                translator.getEndRow(), columnAsArr, filter);
-                    }
-                    else
-                    {
-                        // if range query. means query over id column. create
-                        // range
-                        // scan method.
+                    if (MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata())) {
+                        if (filter == null) {
+                            // means complete scan without where clause, scan all
+                            // records.
+                            // findAll.
+                            if (translator.isRangeScan()) {
+                                handler.readDataByRange(table, m.getEntityClazz(), m, translator.getStartRow(),
+                                        translator.getEndRow(), columnAsArr, null);
+                            } else {
+                                handler.readDataByRange(table, m.getEntityClazz(), m, null, null, columnAsArr, null);
+                            }
+                        } else {
+                            // means WHERE clause is present.
+                            if (translator.isRangeScan()) {
+                                handler.readDataByRange(table, m.getEntityClazz(), m, translator.getStartRow(),
+                                        translator.getEndRow(), columnAsArr, filter);
+                            } else {
+                                // if range query. means query over id column. create
+                                // range
+                                // scan method.
 
-                        handler.readData(m.getSchema(), entityMetadata.getEntityClazz(), entityMetadata, null,
-                                m.getRelationNames(), filter, columnAsArr);
+                                handler.readData(table, entityMetadata.getEntityClazz(), entityMetadata, null,
+                                        m.getRelationNames(), filter, columnAsArr);
+                            }
+                        }
                     }
+                    return null;
                 }
-            }
+            });
         }
         catch (IOException ioex)
         {

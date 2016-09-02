@@ -22,7 +22,7 @@ import java.util.List;
 
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.HTableInterface;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
@@ -57,7 +57,7 @@ public class HBaseReader implements Reader
      */
 
     @Override
-    public List<HBaseData> LoadData(HTableInterface hTable, String columnFamily, Object rowKey, Filter filter,
+    public List<HBaseData> LoadData(Table hTable, String columnFamily, Object rowKey, Filter filter,
             String... columns) throws IOException
     {
         List<HBaseData> results = new ArrayList<HBaseData>();
@@ -124,10 +124,10 @@ public class HBaseReader implements Reader
      * .HTable, java.lang.String)
      */
     @Override
-    public List<HBaseData> LoadData(HTableInterface hTable, Object rowKey, Filter filter, String... columns)
+    public List<HBaseData> LoadData(Table hTable, Object rowKey, Filter filter, String... columns)
             throws IOException
     {
-        return LoadData(hTable, Bytes.toString(hTable.getTableName()), rowKey, filter, columns);
+        return LoadData(hTable, Bytes.toString(hTable.getName().getName()), rowKey, filter, columns);
     }
 
     /*
@@ -138,7 +138,7 @@ public class HBaseReader implements Reader
      * .HTable, org.apache.hadoop.hbase.filter.Filter, byte[], byte[])
      */
     @Override
-    public List<HBaseData> loadAll(HTableInterface hTable, Filter filter, byte[] startRow, byte[] endRow,
+    public List<HBaseData> loadAll(Table hTable, Filter filter, byte[] startRow, byte[] endRow,
             String columnFamily, String qualifier, String[] columns) throws IOException
     {
         List<HBaseData> results = null;
@@ -214,8 +214,7 @@ public class HBaseReader implements Reader
      *            column family.
      * @param results
      *            results.
-     * @param scanner
-     *            result scanner.
+
      * @return collection of scanned results.
      * @throws IOException
      */
@@ -249,7 +248,7 @@ public class HBaseReader implements Reader
     }
 
     @Override
-    public Object[] scanRowKeys(final HTableInterface hTable, final Filter filter, final String columnFamilyName,
+    public Object[] scanRowKeys(final Table hTable, final Filter filter, final String columnFamilyName,
             final String columnName, final Class rowKeyClazz) throws IOException
     {
         List<Object> rowKeys = new ArrayList<Object>();
@@ -280,7 +279,7 @@ public class HBaseReader implements Reader
         return null;
     }
 
-    public List<HBaseData> loadAll(final HTableInterface hTable, final List<Object> rows, final String columnFamily,
+    public List<HBaseData> loadAll(final Table hTable, final List<Object> rows, final String columnFamily,
             final String[] columns) throws IOException
     {
         List<HBaseData> results = null;

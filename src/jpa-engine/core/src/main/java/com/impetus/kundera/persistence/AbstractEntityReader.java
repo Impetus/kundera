@@ -101,7 +101,6 @@ public class AbstractEntityReader
      * 
      * @param entity
      * @param relationsMap
-     * @param client
      * @param m
      * @param pd
      * @param relationStack
@@ -193,13 +192,9 @@ public class AbstractEntityReader
      * 
      * @param entity
      *            relation owning entity.
-     * @param entityId
-     *            entity id of relation owning entity.
      * @param relationsMap
      *            contains relation name and it's value.
      * @param relationStack
-     * @param m
-     *            entity metadata.
      */
     private void onRelation(Object entity, Map<String, Object> relationsMap, final Relation relation,
             final EntityMetadata metadata, final PersistenceDelegator pd, boolean lazilyloaded,
@@ -510,7 +505,6 @@ public class AbstractEntityReader
      * 
      * @param entity
      * @param relationsMap
-     * @param client
      * @param m
      * @param pd
      * @return
