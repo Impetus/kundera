@@ -13,19 +13,6 @@
 	<name>kundera-hbase-parent</name>
 	<url>http://maven.apache.org</url>
 
-	<repositories>
-		<repository>
-			<id>hbase-dependency</id>
-			<name>Hbase Dependencies</name>
-			<url>http://repo1.maven.org/maven2</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
-
-
-
 	<!-- Dependencies -->
 	<dependencies>
 

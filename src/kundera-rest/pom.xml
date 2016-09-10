@@ -11,17 +11,6 @@
 	<name>kundera-rest</name>
 	<url>http://maven.apache.org</url>
 
-	<repositories>
-		<!--These are needed for Jersey -->
-		<repository>
-			<id>maven2-repository.dev.java.net</id>
-			<name>Java.net Repository for Maven</name>
-			<url>http://download.java.net/maven/2/</url>
-			<layout>default</layout>
-		</repository>
-
-	</repositories>
-
 	<dependencies>
 		<!-- JAX-RS Libraries -->
 		<dependency>

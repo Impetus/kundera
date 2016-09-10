@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>com.impetus</groupId>
@@ -10,30 +11,15 @@
 	<packaging>jar</packaging>
 	<name>kundera-neo4j</name>
 	<url>http://maven.apache.org</url>
-	<repositories>
-		<repository>
-			<id>neo4j-release-repository</id>
-			<name>Neo4j Maven 2 release repository</name>
-			<url>http://m2.neo4j.org/releases</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>neo4j-snapshot-repository</id>
-			<name>Neo4j Maven 2 snapshot repository</name>
-			<url>http://m2.neo4j.org/snapshots</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-		</repository>
-	</repositories>
+
+	<!-- <repositories> <repository> <id>neo4j-release-repository</id> <name>Neo4j 
+		Maven 2 release repository</name> <url>http://m2.neo4j.org/releases</url> 
+		<releases> <enabled>true</enabled> </releases> <snapshots> <enabled>false</enabled> 
+		</snapshots> </repository> <repository> <id>neo4j-snapshot-repository</id> 
+		<name>Neo4j Maven 2 snapshot repository</name> <url>http://m2.neo4j.org/snapshots</url> 
+		<snapshots> <enabled>true</enabled> </snapshots> <releases> <enabled>false</enabled> 
+		</releases> </repository> </repositories> -->
+
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>

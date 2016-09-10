@@ -14,17 +14,6 @@
 	<name>kundera-cassandra-parent</name>
 	<url>http://maven.apache.org</url>
 
-	<repositories>
-		<repository>
-			<id>cassandra-dependency</id>
-			<name>Cassandra Dependencies</name>
-			<url>http://repo1.maven.org/maven2</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
-
 	<properties>
 		<cassandra.version>3.5</cassandra.version>
 	</properties>

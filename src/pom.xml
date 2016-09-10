@@ -103,7 +103,7 @@
     <sonar.language>java</sonar.language>
   </properties>
 
-
+  <!--
   <repositories>
      <repository>
       <id>clover</id>
@@ -140,7 +140,8 @@
         <enabled>true</enabled>
       </snapshots>
     </repository>
-  </repositories>
+  </repositories> -->
+
   <!-- Build profiles -->
   <profiles>
 

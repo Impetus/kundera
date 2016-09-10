@@ -50,7 +50,7 @@
 		<developer>
 			<id>devender-yadav</id>
 			<name>Devender Yadav</name>
-			<email>devdner.yadav@impetus.co.in</email>
+			<email>devender.yadav@impetus.co.in</email>
 		</developer>
 		<developer>
 			<id>karthikprasad13</id>
@@ -78,7 +78,7 @@
 		<sonar.language>java</sonar.language>
 	</properties>
 
-
+	<!--
 	<repositories>
 		<repository>
 			<id>clover</id>
@@ -115,7 +115,8 @@
 				<enabled>true</enabled>
 			</snapshots>
 		</repository>
-	</repositories>
+	</repositories> -->
+
 	<!-- Build profiles -->
 	<profiles>
 

@@ -12,17 +12,6 @@
 	<packaging>pom</packaging>
 	<name>kundera-spark-parent</name>
 	<url>http://maven.apache.org</url>
-	
-	<repositories>
-		<repository>
-			<id>spark-dependency</id>
-			<name>Spark Dependencies</name>
-			<url>http://repo1.maven.org/maven2</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
 
 	<!-- Dependencies -->
 	<dependencies>

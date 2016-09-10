@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>com.impetus</groupId>
@@ -16,56 +17,23 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
-	<scm>
-		<connection>scm:svn:http://kundera.googlecode.com/svn/trunk</connection>
-		<developerConnection>scm:svn:https://kundera.googlecode.com/svn/trunk</developerConnection>
-		<url>http://kundera.googlecode.com/svn/trunk</url>
-		<tag>HEAD</tag>
-	</scm>
 
-	<issueManagement>
-		<system>Google Code</system>
-		<url>http://code.google.com/p/kundera/issues/list</url>
-	</issueManagement>
-	<repositories>
-		<repository>
-			<id>kundera-missing</id>
-			<name>Kundera Public Missing Resources Repository</name>
-			<url>http://kundera.googlecode.com/svn/maven2/maven-missing-resources</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>riptano</id>
-			<name>riptano</name>
-			<url>http://mvn.riptano.com/content/repositories/public</url>
-		</repository>
-		<repository>
-			<id>spring-milestone</id>
-			<name>Spring Maven MILESTONE Repository</name>
-			<url>http://maven.springframework.org/milestone</url>
-		</repository>
-		<repository>
-			<id>morphia.googlecode.com</id>
-			<name>Morphia Repo at Google Code</name>
-			<url>http://morphia.googlecode.com/svn/mavenrepo</url>
-		</repository>
-		<repository>
-			<id>sonatype-nexus</id>
-			<name>Kundera Public Repository</name>
-			<url>https://oss.sonatype.org/content/repositories/releases</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
+	<!-- <scm> <connection>scm:svn:http://kundera.googlecode.com/svn/trunk</connection> 
+		<developerConnection>scm:svn:https://kundera.googlecode.com/svn/trunk</developerConnection> 
+		<url>http://kundera.googlecode.com/svn/trunk</url> <tag>HEAD</tag> </scm> 
+		<issueManagement> <system>Google Code</system> <url>http://code.google.com/p/kundera/issues/list</url> 
+		</issueManagement> <repositories> <repository> <id>kundera-missing</id> <name>Kundera 
+		Public Missing Resources Repository</name> <url>http://kundera.googlecode.com/svn/maven2/maven-missing-resources</url> 
+		<releases> <enabled>true</enabled> </releases> <snapshots> <enabled>true</enabled> 
+		</snapshots> </repository> <repository> <id>riptano</id> <name>riptano</name> 
+		<url>http://mvn.riptano.com/content/repositories/public</url> </repository> 
+		<repository> <id>spring-milestone</id> <name>Spring Maven MILESTONE Repository</name> 
+		<url>http://maven.springframework.org/milestone</url> </repository> <repository> 
+		<id>morphia.googlecode.com</id> <name>Morphia Repo at Google Code</name> 
+		<url>http://morphia.googlecode.com/svn/mavenrepo</url> </repository> <repository> 
+		<id>sonatype-nexus</id> <name>Kundera Public Repository</name> <url>https://oss.sonatype.org/content/repositories/releases</url> 
+		<releases> <enabled>true</enabled> </releases> <snapshots> <enabled>false</enabled> 
+		</snapshots> </repository> </repositories> -->
 
 	<reporting>
 		<plugins>
@@ -139,9 +107,6 @@
 
 	<dependencies>
 
-		<!-- <dependency> <groupId>mysql</groupId> <artifactId>mysql-connector-java</artifactId> 
-			<version>5.1.6</version> <scope>test</scope> </dependency> -->
-
 		<dependency>
 			<groupId>org.hsqldb</groupId>
 			<artifactId>hsqldb</artifactId>
@@ -180,59 +145,36 @@
 			<artifactId>slf4j-api</artifactId>
 			<version>1.7.2</version>
 		</dependency>
-		<!-- <dependency> -->
-		<!-- <groupId>org.slf4j</groupId> -->
-		<!-- <artifactId>slf4j-log4j12</artifactId> -->
-		<!-- <version>1.7.2</version> -->
-		<!-- </dependency> -->
+
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
 			<version>1.2</version>
 		</dependency>
-		<dependency>
-			<groupId>javax.persistence</groupId>
-			<artifactId>persistence-api</artifactId>
-			<version>2.0</version>
-		</dependency>
-		<!-- <dependency> <groupId>org.apache.lucene</groupId> <artifactId>lucene-core</artifactId> 
-			<version>3.5.0</version> </dependency> -->
-		<dependency>
-			<groupId>net.sf.ehcache</groupId>
-			<artifactId>ehcache</artifactId>
-			<version>2.2.0</version>
-		</dependency>
+
 		<dependency>
 			<groupId>cglib</groupId>
 			<artifactId>cglib</artifactId>
 			<version>2.2</version>
 		</dependency>
-		<!-- <dependency> <groupId>com.google.guava</groupId> <artifactId>guava</artifactId> 
-			<version>r08</version> </dependency> -->
+
 		<dependency>
 			<groupId>com.github.stephenc</groupId>
 			<artifactId>jamm</artifactId>
 			<version>0.2.2</version>
 		</dependency>
-		<dependency>
-			<groupId>org.xerial</groupId>
-			<artifactId>snappy</artifactId>
-			<version>1.0.1-rc4</version>
-		</dependency>
+		<!-- <dependency> <groupId>javax.persistence</groupId> <artifactId>persistence-api</artifactId> 
+			<version>2.0</version> </dependency> -->
 
+		<!-- <dependency> <groupId>net.sf.ehcache</groupId> <artifactId>ehcache</artifactId> 
+			<version>2.2.0</version> </dependency> -->
+
+		<!-- <dependency> <groupId>org.xerial</groupId> <artifactId>snappy</artifactId> 
+			<version>1.0.1-rc4</version> </dependency> -->
 
 		<!-- Non public dependencies- being picked from kundera svn repository -->
-
-		<dependency>
-			<groupId>org.safehaus.jug</groupId>
-			<artifactId>jug-asl</artifactId>
-			<version>2.0.0</version>
-			<scope>test</scope>
-		</dependency>
-
-
-
-		<!-- contiperf dependency -->
+		<!-- <dependency> <groupId>org.safehaus.jug</groupId> <artifactId>jug-asl</artifactId> 
+			<version>2.0.0</version> <scope>test</scope> </dependency> -->
 
 		<dependency>
 			<groupId>org.databene</groupId>
