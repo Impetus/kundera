@@ -164,7 +164,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
 
             IndexResponse response = txClient
                     .prepareIndex(entityMetadata.getSchema().toLowerCase(), entityMetadata.getTableName(), keyAsString)
-                    .setSource(values).execute().actionGet();
+                    .setSource(values).setRefresh(isRefreshIndexes()).execute().actionGet();
 
             assert response.getId() != null;
         }
@@ -288,18 +288,19 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
 
     /**
      * Execute query.
-     * 
+     *
      * @param filter
      *            the filter
      * @param aggregation
      *            the aggregation
-     * @param queryBuilder
-     *            the query builder
      * @param entityMetadata
      *            the entity metadata
      * @param query
      *            the query
-     * @param maxResult
+     * @param firstResult
+     *            the first result
+     * @param maxResults
+     *            the max results
      * @return the list
      */
     public List executeQuery(QueryBuilder filter, AggregationBuilder aggregation, final EntityMetadata entityMetadata,
@@ -471,7 +472,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
             try
             {
                 txClient.prepareDelete(metadata.getSchema().toLowerCase(), metadata.getTableName(),
-                        keyAsString.toString()/* index, type, id */).execute().get();
+                        keyAsString.toString()/* index, type, id */).setRefresh(isRefreshIndexes()).execute().get();
             }
             catch (InterruptedException iex)
             {
@@ -509,7 +510,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
 
         Set<Object> joinKeys = joinTableRecords.keySet();
 
-        BulkRequestBuilder bulkRequest = txClient.prepareBulk();
+        BulkRequestBuilder bulkRequest = txClient.prepareBulk().setRefresh(isRefreshIndexes());
 
         /**
          * 1_p => 1_a1,1_a2 1_a1=> 1_p,1_p1
@@ -758,7 +759,7 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
     @Override
     public int executeBatch()
     {
-        BulkRequestBuilder bulkRequest = txClient.prepareBulk();
+        BulkRequestBuilder bulkRequest = txClient.prepareBulk().setRefresh(isRefreshIndexes());
 
         try
         {
@@ -936,5 +937,31 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
     public Generator getIdGenerator()
     {
         return (Generator) KunderaCoreUtils.createNewInstance(EsIdGenerator.class);
+    }
+
+    /**
+     * Checks if is refresh indexes.
+     *
+     * @return true, if is refresh indexes
+     */
+    private boolean isRefreshIndexes()
+    {
+
+        if (clientProperties == null)
+        {
+            return false;
+        }
+
+        Object refreshIndexes = clientProperties.get(ESConstants.ES_REFRESH_INDEXES);
+
+        if (refreshIndexes != null && refreshIndexes instanceof Boolean)
+        {
+            return (boolean) refreshIndexes;
+        }
+        else
+        {
+            return Boolean.parseBoolean((String) refreshIndexes);
+        }
+
     }
 }

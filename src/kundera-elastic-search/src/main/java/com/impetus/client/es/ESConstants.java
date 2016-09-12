@@ -51,4 +51,7 @@ public interface ESConstants
 
     /** The Constant DEFAULT. */
     public static final String DEFAULT = "DEFAULT";
+
+    /** The Constant ES_REFRESH_INDEXES. */
+    public static final String ES_REFRESH_INDEXES = "es.refresh.indexes";
 }
