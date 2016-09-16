@@ -505,6 +505,18 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     {
         return !tableInfo.getEmbeddedColumnMetadatas().isEmpty();
     }
+    
+    /**
+     * Contains element collection columns.
+     * 
+     * @param tableInfo
+     *            the table info
+     * @return true, if successful
+     */
+    private boolean containsElementCollectionColumns(TableInfo tableInfo)
+    {
+        return !tableInfo.getElementCollectionMetadatas().isEmpty();
+    }
 
     /**
      * Contains composite key.
@@ -756,7 +768,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             }
             else
             {
-                if (!compositeColumns.isEmpty())
+                if (!compositeColumns.isEmpty() || !tableInfo.getElementCollectionMetadatas().isEmpty())
                 {
                     // embedded create udts
                     // check for multiple embedded and collections in embedded
@@ -2726,10 +2738,10 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
 
         // For normal columns
         boolean isCounterColumnType = isCounterColumnType(tableInfo, defaultValidationClass);
-
         return containsCompositeKey(tableInfo)
                 || containsCollectionColumns(tableInfo)
-                || ((cql_version != null && cql_version.equals(CassandraConstants.CQL_VERSION_3_0)) && containsEmbeddedColumns(tableInfo))
+                || ((cql_version != null && cql_version.equals(CassandraConstants.CQL_VERSION_3_0)) &&
+                		(containsEmbeddedColumns(tableInfo) || containsElementCollectionColumns(tableInfo)))
                 && !isCounterColumnType
                 || ((cql_version != null && cql_version.equals(CassandraConstants.CQL_VERSION_3_0)) && !tableInfo
                         .getType().equals(Type.SUPER_COLUMN_FAMILY.name()));

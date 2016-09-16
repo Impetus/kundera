@@ -15,7 +15,7 @@
 	<url>http://maven.apache.org</url>
 
 	<properties>
-		<cassandra.version>3.5</cassandra.version>
+		<cassandra.version>3.7</cassandra.version>
 	</properties>
 
 	<!-- Dependencies -->
