@@ -17,6 +17,9 @@ package com.impetus.kundera.client.cassandra.dsdriver;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Properties;
 
@@ -41,6 +44,7 @@ import com.datastax.driver.core.policies.LoadBalancingPolicy;
 import com.datastax.driver.core.policies.LoggingRetryPolicy;
 import com.datastax.driver.core.policies.RoundRobinPolicy;
 import com.datastax.driver.core.policies.TokenAwarePolicy;
+import com.datastax.driver.core.policies.WhiteListPolicy;
 import com.impetus.client.cassandra.common.CassandraClientFactory;
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.config.CassandraPropertyReader;
@@ -482,6 +486,7 @@ public class DSClientFactory extends CassandraClientFactory
         LoadBalancingPolicy loadBalancingPolicy = null;
         String isTokenAware = (String) conProperties.get("isTokenAware");
         String isLatencyAware = (String) conProperties.get("isLatencyAware");
+        String whiteList = (String) conProperties.get("whiteList");
         // Policy.v
         switch (policy)
         {
@@ -518,9 +523,54 @@ public class DSClientFactory extends CassandraClientFactory
         {
             loadBalancingPolicy = LatencyAwarePolicy.builder(loadBalancingPolicy).build();
         }
+        
+        if (loadBalancingPolicy != null && whiteList != null)
+        {
+        	Collection<InetSocketAddress> whiteListCollection = buildWhiteListCollection(whiteList);
+        	
+			loadBalancingPolicy = new WhiteListPolicy(loadBalancingPolicy,  whiteListCollection);
+        }
 
         return loadBalancingPolicy;
     }
+
+	private Collection<InetSocketAddress> buildWhiteListCollection(
+			String whiteList) {
+		String[] list = whiteList.split(Constants.COMMA);
+		Collection<InetSocketAddress> whiteListCollection = new ArrayList<InetSocketAddress>();
+		
+		PersistenceUnitMetadata persistenceUnitMetadata = kunderaMetadata.getApplicationMetadata()
+                .getPersistenceUnitMetadata(getPersistenceUnit());
+        Properties props = persistenceUnitMetadata.getProperties();
+        int defaultPort = 9042;
+
+        if (externalProperties != null && externalProperties.get(PersistenceProperties.KUNDERA_PORT) != null)
+        {
+        	try {
+				defaultPort = Integer.parseInt((String) externalProperties.get(PersistenceProperties.KUNDERA_PORT));
+			} catch (NumberFormatException e) {
+				logger.error("Port in persistence.xml should be integer");
+			}
+        }
+
+        else {
+        	try {
+				defaultPort = Integer.parseInt((String) props.get(PersistenceProperties.KUNDERA_PORT));
+			} catch (NumberFormatException e) {
+				logger.error("Port in persistence.xml should be integer");
+			}
+        }
+		
+		for(String node : list){
+			if(node.indexOf(Constants.COLON) > 0){
+				String[] parts = node.split(Constants.COLON);
+				whiteListCollection.add(new InetSocketAddress(parts[0], Integer.parseInt(parts[1])));
+			} else {
+				whiteListCollection.add(new InetSocketAddress(node, defaultPort));
+			}
+		}
+		return whiteListCollection;
+	}
 
     /**
      * Gets the policy.

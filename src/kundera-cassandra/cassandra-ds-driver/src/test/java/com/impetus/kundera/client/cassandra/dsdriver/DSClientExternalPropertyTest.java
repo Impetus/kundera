@@ -42,6 +42,7 @@ import com.datastax.driver.core.policies.LatencyAwarePolicy;
 import com.datastax.driver.core.policies.LoggingRetryPolicy;
 import com.datastax.driver.core.policies.RoundRobinPolicy;
 import com.datastax.driver.core.policies.TokenAwarePolicy;
+import com.datastax.driver.core.policies.WhiteListPolicy;
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.config.CassandraPropertyReader;
 import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
@@ -298,7 +299,7 @@ public class DSClientExternalPropertyTest
         emf = Persistence.createEntityManagerFactory(_PU, propertyMap);
 
         DSClientFactory ds = new DSClientFactory();
-        final String RRP = RoundRobinPolicy.class.getName();
+        final String RRP = WhiteListPolicy.class.getName();
         final String ERP = ExponentialReconnectionPolicy.class.getName();
         final String DCRP = FallthroughRetryPolicy.class.getName();
         Properties connectionProperties = initialize(ds);
