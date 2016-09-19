@@ -498,12 +498,16 @@ public class DSClientFactory extends CassandraClientFactory
 
             String usedHostsPerRemoteDc = (String) conProperties.get("usedHostsPerRemoteDc");
             String localdc = (String) conProperties.get("localdc");
-            String allowRemoteDCsForLocalConsistencyLevel = (String) conProperties.get("allowRemoteDCsForLocalConsistencyLevel");
+            String allowRemoteDCsForLocalConsistencyLevel = (String) conProperties
+                    .get("allowRemoteDCsForLocalConsistencyLevel");
             DCAwareRoundRobinPolicy.Builder policyBuilder = DCAwareRoundRobinPolicy.builder();
             policyBuilder.withLocalDc(localdc == null ? "DC1" : localdc);
-            policyBuilder.withUsedHostsPerRemoteDc(usedHostsPerRemoteDc != null ? Integer.parseInt(usedHostsPerRemoteDc) : 0);
-            if(allowRemoteDCsForLocalConsistencyLevel != null && "true".equalsIgnoreCase(allowRemoteDCsForLocalConsistencyLevel)){
-            	policyBuilder.allowRemoteDCsForLocalConsistencyLevel();
+            policyBuilder.withUsedHostsPerRemoteDc(usedHostsPerRemoteDc != null ? Integer
+                    .parseInt(usedHostsPerRemoteDc) : 0);
+            if (allowRemoteDCsForLocalConsistencyLevel != null
+                    && "true".equalsIgnoreCase(allowRemoteDCsForLocalConsistencyLevel))
+            {
+                policyBuilder.allowRemoteDCsForLocalConsistencyLevel();
             }
             loadBalancingPolicy = policyBuilder.build();
             break;
@@ -526,97 +530,132 @@ public class DSClientFactory extends CassandraClientFactory
         {
             loadBalancingPolicy = LatencyAwarePolicy.builder(loadBalancingPolicy).build();
         }
-        
+
         if (loadBalancingPolicy != null && whiteList != null)
         {
-        	Collection<InetSocketAddress> whiteListCollection = buildWhiteListCollection(whiteList);
-        	
-			loadBalancingPolicy = new WhiteListPolicy(loadBalancingPolicy,  whiteListCollection);
+            Collection<InetSocketAddress> whiteListCollection = buildWhiteListCollection(whiteList);
+
+            loadBalancingPolicy = new WhiteListPolicy(loadBalancingPolicy, whiteListCollection);
         }
-        
+
         if (loadBalancingPolicy != null && hostFilterPolicy != null)
         {
-        	Predicate<com.datastax.driver.core.Host> predicate = null ;
-        	Method getter = null;
-        	Class<?> hostFilterClazz = null;
-			try {
+            Predicate<com.datastax.driver.core.Host> predicate = getHostFilterPredicate(hostFilterPolicy);
 
-				hostFilterClazz = Class.forName(hostFilterPolicy);
-				getter = hostFilterClazz.getDeclaredMethod(GET_INSTANCE);
-
-				predicate = (Predicate<com.datastax.driver.core.Host>) getter
-						.invoke(KunderaCoreUtils.createNewInstance(hostFilterClazz)); 
-			} catch (ClassNotFoundException e) {
-				logger.error(e.getMessage());
-				throw new KunderaException("Please make sure class "
-						+ hostFilterPolicy
-						+ " set in property file exists in classpath "
-						+ e.getMessage());
-			} catch (IllegalAccessException e) {
-				logger.error(e.getMessage());
-				throw new KunderaException("Method " + getter.getName()
-						+ " must be declared public " + e.getMessage());
-			} catch (NoSuchMethodException e) {
-				logger.error(e.getMessage());
-				throw new KunderaException("Please make sure getter method of "
-						+ hostFilterClazz.getSimpleName()
-						+ " is named \"getInstance()\"");
-			} catch (InvocationTargetException e) {
-				logger.error(e.getMessage());
-				throw new KunderaException(
-						"Error while executing \"getInstance()\" method of Class "
-								+ hostFilterClazz.getSimpleName() + ": "
-								+ e.getMessage());
-			} catch (SecurityException e) {
-				logger.error(e.getMessage());
-				throw new KunderaException("Encountered security exception while accessing the method: "
-						+ "named \"getInstance()\"");
-			}
-        	
-			
-			loadBalancingPolicy = new HostFilterPolicy(loadBalancingPolicy,  predicate);
+            loadBalancingPolicy = new HostFilterPolicy(loadBalancingPolicy, predicate);
         }
 
         return loadBalancingPolicy;
     }
 
-	private Collection<InetSocketAddress> buildWhiteListCollection(
-			String whiteList) {
-		String[] list = whiteList.split(Constants.COMMA);
-		Collection<InetSocketAddress> whiteListCollection = new ArrayList<InetSocketAddress>();
-		
-		PersistenceUnitMetadata persistenceUnitMetadata = kunderaMetadata.getApplicationMetadata()
+    /**
+     * Gets the host filter predicate.
+     * 
+     * @param hostFilterPolicy
+     *            the host filter policy
+     * @return the host filter predicate
+     */
+    private Predicate<com.datastax.driver.core.Host> getHostFilterPredicate(String hostFilterPolicy)
+    {
+        Predicate<com.datastax.driver.core.Host> predicate = null;
+        Method getter = null;
+        Class<?> hostFilterClazz = null;
+        try
+        {
+
+            hostFilterClazz = Class.forName(hostFilterPolicy);
+            getter = hostFilterClazz.getDeclaredMethod(GET_INSTANCE);
+
+            predicate = (Predicate<com.datastax.driver.core.Host>) getter.invoke(KunderaCoreUtils
+                    .createNewInstance(hostFilterClazz));
+        }
+        catch (ClassNotFoundException e)
+        {
+            logger.error(e.getMessage());
+            throw new KunderaException("Please make sure class " + hostFilterPolicy
+                    + " set in property file exists in classpath " + e.getMessage());
+        }
+        catch (IllegalAccessException e)
+        {
+            logger.error(e.getMessage());
+            throw new KunderaException("Method " + getter.getName() + " must be declared public " + e.getMessage());
+        }
+        catch (NoSuchMethodException e)
+        {
+            logger.error(e.getMessage());
+            throw new KunderaException("Please make sure getter method of " + hostFilterClazz.getSimpleName()
+                    + " is named \"getInstance()\"");
+        }
+        catch (InvocationTargetException e)
+        {
+            logger.error(e.getMessage());
+            throw new KunderaException("Error while executing \"getInstance()\" method of Class "
+                    + hostFilterClazz.getSimpleName() + ": " + e.getMessage());
+        }
+        catch (SecurityException e)
+        {
+            logger.error(e.getMessage());
+            throw new KunderaException("Encountered security exception while accessing the method: "
+                    + "named \"getInstance()\"");
+        }
+        return predicate;
+    }
+
+    /**
+     * Builds the white list collection.
+     * 
+     * @param whiteList
+     *            the white list
+     * @return the collection
+     */
+    private Collection<InetSocketAddress> buildWhiteListCollection(String whiteList)
+    {
+        String[] list = whiteList.split(Constants.COMMA);
+        Collection<InetSocketAddress> whiteListCollection = new ArrayList<InetSocketAddress>();
+
+        PersistenceUnitMetadata persistenceUnitMetadata = kunderaMetadata.getApplicationMetadata()
                 .getPersistenceUnitMetadata(getPersistenceUnit());
         Properties props = persistenceUnitMetadata.getProperties();
         int defaultPort = 9042;
 
         if (externalProperties != null && externalProperties.get(PersistenceProperties.KUNDERA_PORT) != null)
         {
-        	try {
-				defaultPort = Integer.parseInt((String) externalProperties.get(PersistenceProperties.KUNDERA_PORT));
-			} catch (NumberFormatException e) {
-				logger.error("Port in persistence.xml should be integer");
-			}
+            try
+            {
+                defaultPort = Integer.parseInt((String) externalProperties.get(PersistenceProperties.KUNDERA_PORT));
+            }
+            catch (NumberFormatException e)
+            {
+                logger.error("Port in persistence.xml should be integer");
+            }
         }
 
-        else {
-        	try {
-				defaultPort = Integer.parseInt((String) props.get(PersistenceProperties.KUNDERA_PORT));
-			} catch (NumberFormatException e) {
-				logger.error("Port in persistence.xml should be integer");
-			}
+        else
+        {
+            try
+            {
+                defaultPort = Integer.parseInt((String) props.get(PersistenceProperties.KUNDERA_PORT));
+            }
+            catch (NumberFormatException e)
+            {
+                logger.error("Port in persistence.xml should be integer");
+            }
         }
-		
-		for(String node : list){
-			if(node.indexOf(Constants.COLON) > 0){
-				String[] parts = node.split(Constants.COLON);
-				whiteListCollection.add(new InetSocketAddress(parts[0], Integer.parseInt(parts[1])));
-			} else {
-				whiteListCollection.add(new InetSocketAddress(node, defaultPort));
-			}
-		}
-		return whiteListCollection;
-	}
+
+        for (String node : list)
+        {
+            if (node.indexOf(Constants.COLON) > 0)
+            {
+                String[] parts = node.split(Constants.COLON);
+                whiteListCollection.add(new InetSocketAddress(parts[0], Integer.parseInt(parts[1])));
+            }
+            else
+            {
+                whiteListCollection.add(new InetSocketAddress(node, defaultPort));
+            }
+        }
+        return whiteListCollection;
+    }
 
     /**
      * Gets the policy.
