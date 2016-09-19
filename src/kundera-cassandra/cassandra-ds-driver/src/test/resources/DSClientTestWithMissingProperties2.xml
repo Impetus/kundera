@@ -23,7 +23,7 @@
 					<property name="receiveBufferSize" value="12"></property>
 					<property name="sendBufferSize" value="11"></property>
 					
-					
+					<property name="hostFilterPolicy" value="com.impetus.kundera.client.cassandra.dsdriver.HostFilterPredicate"></property>
 					<property name="hostDistance" value="LOCAL"></property>
 					<property name="maxConnectionsPerHost" value="12"></property>
 					<property name="maxRequestsPerConnection" value="128"></property>
