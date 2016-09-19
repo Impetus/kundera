@@ -38,6 +38,7 @@ import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy;
 import com.datastax.driver.core.policies.DowngradingConsistencyRetryPolicy;
 import com.datastax.driver.core.policies.ExponentialReconnectionPolicy;
 import com.datastax.driver.core.policies.FallthroughRetryPolicy;
+import com.datastax.driver.core.policies.HostFilterPolicy;
 import com.datastax.driver.core.policies.LatencyAwarePolicy;
 import com.datastax.driver.core.policies.LoggingRetryPolicy;
 import com.datastax.driver.core.policies.RoundRobinPolicy;
@@ -353,7 +354,7 @@ public class DSClientExternalPropertyTest
         emf = Persistence.createEntityManagerFactory(_PU, propertyMap);
 
         DSClientFactory ds = new DSClientFactory();
-        final String DRRP = DCAwareRoundRobinPolicy.class.getName();
+        final String DRRP = HostFilterPolicy.class.getName();
         final String CRP = ConstantReconnectionPolicy.class.getName();
         final String DCRP = DowngradingConsistencyRetryPolicy.class.getName();
         Properties connectionProperties = initialize(ds);

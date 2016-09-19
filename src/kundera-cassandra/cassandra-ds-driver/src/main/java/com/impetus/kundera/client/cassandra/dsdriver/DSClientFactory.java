@@ -39,12 +39,14 @@ import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy;
 import com.datastax.driver.core.policies.DowngradingConsistencyRetryPolicy;
 import com.datastax.driver.core.policies.ExponentialReconnectionPolicy;
 import com.datastax.driver.core.policies.FallthroughRetryPolicy;
+import com.datastax.driver.core.policies.HostFilterPolicy;
 import com.datastax.driver.core.policies.LatencyAwarePolicy;
 import com.datastax.driver.core.policies.LoadBalancingPolicy;
 import com.datastax.driver.core.policies.LoggingRetryPolicy;
 import com.datastax.driver.core.policies.RoundRobinPolicy;
 import com.datastax.driver.core.policies.TokenAwarePolicy;
 import com.datastax.driver.core.policies.WhiteListPolicy;
+import com.google.common.base.Predicate;
 import com.impetus.client.cassandra.common.CassandraClientFactory;
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.config.CassandraPropertyReader;
@@ -487,6 +489,7 @@ public class DSClientFactory extends CassandraClientFactory
         String isTokenAware = (String) conProperties.get("isTokenAware");
         String isLatencyAware = (String) conProperties.get("isLatencyAware");
         String whiteList = (String) conProperties.get("whiteList");
+        String hostFilterPolicy = (String) conProperties.get("hostFilterPolicy");
         // Policy.v
         switch (policy)
         {
@@ -529,6 +532,49 @@ public class DSClientFactory extends CassandraClientFactory
         	Collection<InetSocketAddress> whiteListCollection = buildWhiteListCollection(whiteList);
         	
 			loadBalancingPolicy = new WhiteListPolicy(loadBalancingPolicy,  whiteListCollection);
+        }
+        
+        if (loadBalancingPolicy != null && hostFilterPolicy != null)
+        {
+        	Predicate<com.datastax.driver.core.Host> predicate = null ;
+        	Method getter = null;
+        	Class<?> hostFilterClazz = null;
+			try {
+
+				hostFilterClazz = Class.forName(hostFilterPolicy);
+				getter = hostFilterClazz.getDeclaredMethod(GET_INSTANCE);
+
+				predicate = (Predicate<com.datastax.driver.core.Host>) getter
+						.invoke(KunderaCoreUtils.createNewInstance(hostFilterClazz)); 
+			} catch (ClassNotFoundException e) {
+				logger.error(e.getMessage());
+				throw new KunderaException("Please make sure class "
+						+ hostFilterPolicy
+						+ " set in property file exists in classpath "
+						+ e.getMessage());
+			} catch (IllegalAccessException e) {
+				logger.error(e.getMessage());
+				throw new KunderaException("Method " + getter.getName()
+						+ " must be declared public " + e.getMessage());
+			} catch (NoSuchMethodException e) {
+				logger.error(e.getMessage());
+				throw new KunderaException("Please make sure getter method of "
+						+ hostFilterClazz.getSimpleName()
+						+ " is named \"getInstance()\"");
+			} catch (InvocationTargetException e) {
+				logger.error(e.getMessage());
+				throw new KunderaException(
+						"Error while executing \"getInstance()\" method of Class "
+								+ hostFilterClazz.getSimpleName() + ": "
+								+ e.getMessage());
+			} catch (SecurityException e) {
+				logger.error(e.getMessage());
+				throw new KunderaException("Encountered security exception while accessing the method: "
+						+ "named \"getInstance()\"");
+			}
+        	
+			
+			loadBalancingPolicy = new HostFilterPolicy(loadBalancingPolicy,  predicate);
         }
 
         return loadBalancingPolicy;
