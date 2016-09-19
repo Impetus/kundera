@@ -45,10 +45,10 @@ public class CRUDTestWithRefreshedIndexes
 {
 
     /** The emf. */
-    private EntityManagerFactory emf;
+    protected EntityManagerFactory emf;
 
     /** The em. */
-    private EntityManager em;
+    protected EntityManager em;
 
     /** The node. */
     private static Node node = null;
