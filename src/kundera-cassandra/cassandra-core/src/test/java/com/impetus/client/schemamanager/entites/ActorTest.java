@@ -69,7 +69,7 @@ public class ActorTest
         {
             if ("Actor".equals(cfDef.getName()))
             {
-                Assert.assertEquals("Super", cfDef.column_type);
+                Assert.assertEquals("Standard", cfDef.column_type);
             }
         }
     }

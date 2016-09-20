@@ -83,7 +83,7 @@ public class CassandraSchemaOperationTest
         Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntitySimple", "KunderaCoreExmples"));
         org.apache.cassandra.thrift.KsDef ksDef = new KsDef();
         ksDef = client.describe_keyspace("KunderaCoreExmples");
-        Assert.assertEquals(2, ksDef.getCf_defs().size());
+        Assert.assertEquals(1, ksDef.getCf_defs().size());
         for (org.apache.cassandra.thrift.CfDef cfDef : ksDef.getCf_defs())
         {
             if ("CassandraEntitySimple".equals(cfDef.getName()))
