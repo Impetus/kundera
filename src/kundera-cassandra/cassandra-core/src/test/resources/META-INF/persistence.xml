@@ -417,7 +417,7 @@
 	<persistence-unit name="CassandraSchemaOperationTest">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<class>com.impetus.client.schemamanager.entites.CassandraEntitySimple</class>
-		<class>com.impetus.client.schemamanager.entites.Actor</class>
+<!-- 		<class>com.impetus.client.schemamanager.entites.Actor</class> -->
 		<class>com.impetus.client.schemamanager.entites.TwitterUser</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
