@@ -596,7 +596,7 @@ public class DSClientFactory extends CassandraClientFactory
         {
             logger.error(e.getMessage());
             throw new KunderaException("Encountered security exception while accessing the method: "
-                    + "named \"getInstance()\"");
+                    + "\"getInstance()\"" + e.getMessage());
         }
         return predicate;
     }
