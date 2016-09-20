@@ -54,4 +54,7 @@ public interface ESConstants
 
     /** The Constant ES_REFRESH_INDEXES. */
     public static final String ES_REFRESH_INDEXES = "es.refresh.indexes";
+    
+    /** The Constant KUNDERA_ES_REFRESH_INDEXES. */
+    public static final String KUNDERA_ES_REFRESH_INDEXES = "kundera.es.refresh.indexes";
 }

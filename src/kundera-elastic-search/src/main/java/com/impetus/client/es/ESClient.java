@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
@@ -105,6 +106,9 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
     /** The client properties. */
     private Map clientProperties;
 
+    /** The set reresh indexes. */
+    private boolean setRereshIndexes;
+
     /** The Constant KEY_SEPERATOR. */
     private static final String KEY_SEPERATOR = "\001";
 
@@ -134,6 +138,9 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
         this.txClient = client;
         this.reader = new ESEntityReader(kunderaMetadata);
         setBatchSize(getPersistenceUnit(), externalProperties);
+        setRefreshIndexes(
+                kunderaMetadata.getApplicationMetadata().getPersistenceUnitMetadata(persistenceUnit).getProperties(),
+                externalProperties);
     }
 
     /*
@@ -940,6 +947,53 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
     }
 
     /**
+     * Sets the refresh indexes.
+     *
+     * @param puProps
+     *            the pu props
+     * @param externalProperties
+     *            the external properties
+     */
+    private void setRefreshIndexes(Properties puProps, Map<String, Object> externalProperties)
+    {
+        Object refreshIndexes = null;
+
+        /*
+         * Check from properties set while creating emf
+         * 
+         */
+        if (externalProperties.get(ESConstants.KUNDERA_ES_REFRESH_INDEXES) != null)
+        {
+
+            refreshIndexes = externalProperties.get(ESConstants.KUNDERA_ES_REFRESH_INDEXES);
+
+        }
+
+        /*
+         * Check from PU Properties
+         * 
+         */
+        if (refreshIndexes == null && puProps.get(ESConstants.KUNDERA_ES_REFRESH_INDEXES) != null)
+        {
+
+            refreshIndexes = puProps.get(ESConstants.KUNDERA_ES_REFRESH_INDEXES);
+
+        }
+
+        if (refreshIndexes != null)
+        {
+            if (refreshIndexes instanceof Boolean)
+            {
+                this.setRereshIndexes = (boolean) refreshIndexes;
+            }
+            else
+            {
+                this.setRereshIndexes = Boolean.parseBoolean((String) refreshIndexes);
+            }
+        }
+    }
+
+    /**
      * Checks if is refresh indexes.
      *
      * @return true, if is refresh indexes
@@ -947,21 +1001,24 @@ public class ESClient extends ClientBase implements Client<ESQuery>, Batcher, Cl
     private boolean isRefreshIndexes()
     {
 
-        if (clientProperties == null)
+        if (clientProperties != null)
         {
-            return false;
-        }
 
-        Object refreshIndexes = clientProperties.get(ESConstants.ES_REFRESH_INDEXES);
+            Object refreshIndexes = clientProperties.get(ESConstants.ES_REFRESH_INDEXES);
 
-        if (refreshIndexes != null && refreshIndexes instanceof Boolean)
-        {
-            return (boolean) refreshIndexes;
+            if (refreshIndexes != null && refreshIndexes instanceof Boolean)
+            {
+                return (boolean) refreshIndexes;
+            }
+            else
+            {
+                return Boolean.parseBoolean((String) refreshIndexes);
+            }
+
         }
         else
         {
-            return Boolean.parseBoolean((String) refreshIndexes);
+            return this.setRereshIndexes;
         }
-
     }
 }
