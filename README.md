@@ -34,7 +34,7 @@ You can find the list of data stores(specific versions) supported by Kundera [he
 
 Getting Started
 ===============
-The latest stable release of Kundera is <b>3.5</b>.
+The latest stable release of Kundera is <b>3.6</b>.
 It is a maven based project . You can either download it directly from github and build using following command :
 
 <b>mvn clean install -Dfile src/pom.xml </b>
@@ -54,17 +54,6 @@ It is a maven based project . You can either download it directly from github an
        <snapshots>
            <enabled>false</enabled>
        </snapshots>
-    </repository>
-    <repository>
-        <id>kundera-missing</id>
-        <name>Kundera Public Missing Resources Repository</name>
-        <url>http://kundera.googlecode.com/svn/maven2/maven-missing-resources</url>
-        <releases>
-           <enabled>true</enabled>
-      </releases>
-      <snapshots>
-          <enabled>true</enabled>
-      </snapshots>
     </repository>
    ```
   
