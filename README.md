@@ -99,11 +99,9 @@ Troubleshooting
 Sample Projects
 ===============
 
-
-
-* [Kundera Cassandra Example](https://github.com/impetus-opensource/Kundera/blob/trunk/examples/basic-examples/downloadables/kundera-cassandra-example.zip?raw=true)
-* [Kundera MongoDB Example](https://github.com/impetus-opensource/Kundera/blob/trunk/examples/basic-examples/downloadables/kundera-mongodb-example.zip?raw=true)
-* [Kundera HBase Example](https://github.com/impetus-opensource/Kundera/blob/trunk/examples/basic-examples/downloadables/kundera-hbase-example.zip?raw=true)
+* [kundera-cassandra-example.zip](https://github.com/impetus-opensource/Kundera/blob/trunk/examples/basic-examples/downloadables/kundera-cassandra-example.zip?raw=true)
+* [kundera-mongodb-example.zip](https://github.com/impetus-opensource/Kundera/blob/trunk/examples/basic-examples/downloadables/kundera-mongodb-example.zip?raw=true)
+* [kundera-hbase-example.zip](https://github.com/impetus-opensource/Kundera/blob/trunk/examples/basic-examples/downloadables/kundera-hbase-example.zip?raw=true)
 
 Contribution
 ============
