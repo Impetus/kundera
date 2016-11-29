@@ -121,8 +121,8 @@ public class RedisIndexer implements Indexer
     @Override
     public void unIndex(Class entityClazz, Object entity, EntityMetadata metadata, MetamodelImpl metamodel)
     {
-        // we need not implement this method for Redis because 
-        //redis automatically removes indexes while performing delete
+        // we need not implement this method for Redis because
+        // redis automatically removes indexes while performing delete
         logger.warn("Removing index is implicitly managed by RedisClient's unindex method");
     }
 
@@ -163,7 +163,7 @@ public class RedisIndexer implements Indexer
 
     @Override
     public Map<String, Object> search(KunderaMetadata kunderaMetadata, KunderaQuery kunderaQuery,
-            PersistenceDelegator persistenceDelegator, EntityMetadata m, int maxResults)
+            PersistenceDelegator persistenceDelegator, EntityMetadata m, int firstResult, int maxResults)
     {
         throw new KunderaException("Unsupported Method");
     }

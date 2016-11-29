@@ -29,8 +29,9 @@ import com.impetus.kundera.query.KunderaQuery;
  * Once this is enabled in persistence provider, Kundera will automatically
  * delegate index related requests to configure indexer interface implementation
  * but will keep functioning for any database specific requests. For example,
- * developer may rely upon custom index implementation for inverted indexes(e.g. @Id
- * attributes) but entity data population will be handled by Kundera.
+ * developer may rely upon custom index implementation for inverted
+ * indexes(e.g. @Id attributes) but entity data population will be handled by
+ * Kundera.
  * 
  * @author vivek.mishra
  * 
@@ -74,7 +75,7 @@ public interface Indexer
             EntityMetadata childMetadata, Object entityId, int start, int count);
 
     Map<String, Object> search(KunderaMetadata kunderaMetadata, KunderaQuery kunderaQuery,
-            PersistenceDelegator persistenceDelegator, EntityMetadata m, int maxResults);
+            PersistenceDelegator persistenceDelegator, EntityMetadata m, int firstResult, int maxResults);
 
     /**
      * Deletes index for given entity class.

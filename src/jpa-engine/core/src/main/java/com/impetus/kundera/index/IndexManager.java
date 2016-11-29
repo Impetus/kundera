@@ -346,7 +346,9 @@ public class IndexManager
 
     /**
      * Search.
-     * 
+     *
+     * @param clazz
+     *            the clazz
      * @param query
      *            the query
      * @param start
@@ -375,9 +377,9 @@ public class IndexManager
     }
 
     public final Map<String, Object> search(KunderaMetadata kunderaMetadata, KunderaQuery kunderaQuery,
-            PersistenceDelegator persistenceDelegator, EntityMetadata m, int maxResults)
+            PersistenceDelegator persistenceDelegator, EntityMetadata m,int firstResult, int maxResults)
     {
-        return indexer.search(kunderaMetadata, kunderaQuery, persistenceDelegator, m, maxResults);
+        return indexer.search(kunderaMetadata, kunderaQuery, persistenceDelegator, m, firstResult, maxResults);
     }
 
     /**

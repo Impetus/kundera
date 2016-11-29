@@ -118,8 +118,8 @@ public class OracleNoSQLInvertedIndexer implements Indexer
             KeyValueVersion keyValueVersion = iterator.next();
             String minorKey = keyValueVersion.getKey().getMinorPath().get(0);
 
-            PropertyAccessor accessor = PropertyAccessorFactory.getPropertyAccessor(childMetadata.getIdAttribute()
-                    .getBindableJavaType());
+            PropertyAccessor accessor = PropertyAccessorFactory
+                    .getPropertyAccessor(childMetadata.getIdAttribute().getBindableJavaType());
 
             byte[] idByteArr = keyValueVersion.getValue().getValue();
             Object keyObj = accessor.fromBytes(childMetadata.getIdAttribute().getBindableJavaType(), idByteArr);
@@ -155,8 +155,8 @@ public class OracleNoSQLInvertedIndexer implements Indexer
                 if (columnName.equals(((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName())
                         && condition.equals("="))
                 {
-                    Object idValue = PropertyAccessorHelper.fromSourceToTargetClass(entityMetadata.getIdAttribute()
-                            .getJavaType(), String.class, value);
+                    Object idValue = PropertyAccessorHelper.fromSourceToTargetClass(
+                            entityMetadata.getIdAttribute().getJavaType(), String.class, value);
                     foundKeys.add(idValue);
                 }
                 else
@@ -204,8 +204,8 @@ public class OracleNoSQLInvertedIndexer implements Indexer
                         KeyValueVersion keyValueVersion = iterator.next();
                         String minorKey = keyValueVersion.getKey().getMinorPath().get(0);
 
-                        PropertyAccessor accessor = PropertyAccessorFactory.getPropertyAccessor(entityMetadata
-                                .getIdAttribute().getBindableJavaType());
+                        PropertyAccessor accessor = PropertyAccessorFactory
+                                .getPropertyAccessor(entityMetadata.getIdAttribute().getBindableJavaType());
 
                         byte[] idByteArr = keyValueVersion.getValue().getValue();
                         Object keyObj = accessor.fromBytes(entityMetadata.getIdAttribute().getBindableJavaType(),
@@ -345,7 +345,7 @@ public class OracleNoSQLInvertedIndexer implements Indexer
 
     @Override
     public Map<String, Object> search(KunderaMetadata kunderaMetadata, KunderaQuery kunderaQuery,
-            PersistenceDelegator persistenceDelegator, EntityMetadata m, int maxResults)
+            PersistenceDelegator persistenceDelegator, EntityMetadata m, int firstResult, int maxResults)
     {
         throw new KunderaException("Unsupported Method");
     }

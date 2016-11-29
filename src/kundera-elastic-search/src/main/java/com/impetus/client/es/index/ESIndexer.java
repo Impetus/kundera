@@ -12,7 +12,6 @@ import java.util.Properties;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.lucene.queryparser.xml.FilterBuilder;
 import org.eclipse.persistence.jpa.jpql.parser.Expression;
 import org.eclipse.persistence.jpa.jpql.parser.OrderByItem;
 import org.eclipse.persistence.jpa.jpql.parser.WhereClause;
@@ -71,7 +70,7 @@ public class ESIndexer implements Indexer
     private static final long UUID = 6077004083174677888L;
 
     /** The Constant PARENT_ID_FIELD. */
-    //ES 2.0+ doesn't support '.' in field name (Causes MapperParsingException)
+    // ES 2.0+ doesn't support '.' in field name (Causes MapperParsingException)
     public static final String PARENT_ID_FIELD = UUID + "_parent_id";
 
     /** The Constant PARENT_ID_CLASS. */
@@ -196,19 +195,19 @@ public class ESIndexer implements Indexer
      */
     @Override
     public Map<String, Object> search(KunderaMetadata kunderaMetadata, KunderaQuery kunderaQuery,
-            PersistenceDelegator persistenceDelegator, EntityMetadata m, int maxResults)
+            PersistenceDelegator persistenceDelegator, EntityMetadata m, int firstResult, int maxResults)
     {
         ESQuery query = new ESQuery<>(kunderaQuery, persistenceDelegator, kunderaMetadata);
-        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
-                m.getPersistenceUnit());
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
+                .getMetamodel(m.getPersistenceUnit());
         Expression whereExpression = KunderaQueryUtils.getWhereClause(kunderaQuery.getJpqlExpression());
 
-        QueryBuilder filter = whereExpression != null ? query.getEsFilterBuilder().populateFilterBuilder(
-                ((WhereClause) whereExpression).getConditionalExpression(), m) : null;
+        QueryBuilder filter = whereExpression != null ? query.getEsFilterBuilder()
+                .populateFilterBuilder(((WhereClause) whereExpression).getConditionalExpression(), m) : null;
 
         FilteredQueryBuilder queryBuilder = QueryBuilders.filteredQuery(null, filter);
-        SearchResponse response = getSearchResponse(kunderaQuery, queryBuilder, filter, query, m, maxResults,
-                kunderaMetadata);
+        SearchResponse response = getSearchResponse(kunderaQuery, queryBuilder, filter, query, m, firstResult,
+                maxResults, kunderaMetadata);
 
         return buildResultMap(response, kunderaQuery, m, metaModel);
     }
@@ -270,15 +269,17 @@ public class ESIndexer implements Indexer
      * @return the search response
      */
     private SearchResponse getSearchResponse(KunderaQuery kunderaQuery, FilteredQueryBuilder queryBuilder,
-            QueryBuilder filter, ESQuery query, EntityMetadata m, int maxResults, KunderaMetadata kunderaMetadata)
+            QueryBuilder filter, ESQuery query, EntityMetadata m, int firstResult, int maxResults,
+            KunderaMetadata kunderaMetadata)
     {
-        SearchRequestBuilder builder = client.prepareSearch(m.getSchema().toLowerCase()).setTypes(
-                m.getEntityClazz().getSimpleName());
+        SearchRequestBuilder builder = client.prepareSearch(m.getSchema().toLowerCase())
+                .setTypes(m.getEntityClazz().getSimpleName());
         AggregationBuilder aggregation = query.buildAggregation(kunderaQuery, m, filter);
 
         if (aggregation == null)
         {
             builder.setQuery(queryBuilder);
+            builder.setFrom(firstResult);
             builder.setSize(maxResults);
             addSortOrder(builder, kunderaQuery, m, kunderaMetadata);
         }
@@ -287,9 +288,8 @@ public class ESIndexer implements Indexer
             log.debug("Aggregated query identified");
             builder.addAggregation(aggregation);
 
-            if (kunderaQuery.getResult().length == 1
-                    || (kunderaQuery.isSelectStatement() && KunderaQueryUtils.hasGroupBy(kunderaQuery
-                            .getJpqlExpression())))
+            if (kunderaQuery.getResult().length == 1 || (kunderaQuery.isSelectStatement()
+                    && KunderaQueryUtils.hasGroupBy(kunderaQuery.getJpqlExpression())))
             {
                 builder.setSize(0);
             }
@@ -324,8 +324,8 @@ public class ESIndexer implements Indexer
     {
         Object id = PropertyAccessorHelper.getId(entity, metadata);
         DeleteResponse response = client
-                .prepareDelete(metadata.getSchema().toLowerCase(), entityClazz.getSimpleName(), id.toString())
-                .execute().actionGet();
+                .prepareDelete(metadata.getSchema().toLowerCase(), entityClazz.getSimpleName(), id.toString()).execute()
+                .actionGet();
     }
 
     /*
@@ -396,9 +396,9 @@ public class ESIndexer implements Indexer
                             throw new IllegalArgumentException(
                                     "Host or port should not be null / port should be numeric");
                         }
-                        ((TransportClient) client).addTransportAddress(new InetSocketTransportAddress(
-                                new InetSocketAddress(properties.getProperty("host"), Integer.parseInt(properties
-                                        .getProperty("port")))));
+                        ((TransportClient) client).addTransportAddress(
+                                new InetSocketTransportAddress(new InetSocketAddress(properties.getProperty("host"),
+                                        Integer.parseInt(properties.getProperty("port")))));
                     }
                 }
             }
@@ -438,8 +438,8 @@ public class ESIndexer implements Indexer
     private void addSortOrder(SearchRequestBuilder builder, KunderaQuery query, EntityMetadata entityMetadata,
             KunderaMetadata kunderaMetadata)
     {
-        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
-                entityMetadata.getPersistenceUnit());
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
+                .getMetamodel(entityMetadata.getPersistenceUnit());
         List<OrderByItem> orderList = KunderaQueryUtils.getOrderByItems(query.getJpqlExpression());
 
         for (OrderByItem orderByItem : orderList)

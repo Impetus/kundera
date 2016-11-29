@@ -179,8 +179,9 @@ public class MongoDBQuery extends QueryImpl
         try
         {
             BasicDBObject orderByClause = getOrderByClause(m);
+            // find on id, so no need to add skip() [firstResult hardcoded 0]
             return ((MongoDBClient) client).loadData(m, createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()),
-                    null, orderByClause, isSingleResult ? 1 : maxResult, firstResult,
+                    null, orderByClause, isSingleResult ? 1 : maxResult, 0,
                     getKeys(m, getKunderaQuery().getResult()), getKunderaQuery().getResult());
         }
         catch (Exception e)

@@ -64,7 +64,7 @@ public class CoreIndexer implements Indexer
 
     @Override
     public Map<String, Object> search(KunderaMetadata kunderaMetadata, KunderaQuery kunderaQuery,
-            PersistenceDelegator persistenceDelegator, EntityMetadata m, int maxResults)
+            PersistenceDelegator persistenceDelegator, EntityMetadata m, int firstResult, int maxResults)
     {
         return null;
     }
