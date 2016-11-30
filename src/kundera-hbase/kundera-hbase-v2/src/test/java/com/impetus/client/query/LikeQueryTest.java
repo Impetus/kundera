@@ -91,6 +91,12 @@ public class LikeQueryTest
         persons = q.getResultList();
         assertEquals(1, persons.size());
         assertEquals("karthik prasad", persons.get(0).getPersonName());
+        
+        qry = "Select p from HBasePerson p where p.personId like :id";
+        q = em.createQuery(qry);
+        q.setParameter("id", "abc");
+        persons = q.getResultList();
+        assertEquals(2, persons.size());
     }
 
     /**
@@ -100,12 +106,12 @@ public class LikeQueryTest
     {
         HBasePerson p1 = new HBasePerson();
         p1.setAge((short) 23);
-        p1.setPersonId("1");
+        p1.setPersonId("12_abc_56");
         p1.setPersonName("pragalbh garg");
 
         HBasePerson p2 = new HBasePerson();
         p2.setAge((short) 20);
-        p2.setPersonId("2");
+        p2.setPersonId("45_abc_34");
         p2.setPersonName("karthik prasad");
 
         em.persist(p1);
@@ -117,9 +123,9 @@ public class LikeQueryTest
      */
     private void removePersons()
     {
-        HBasePerson p1 = em.find(HBasePerson.class, "1");
+        HBasePerson p1 = em.find(HBasePerson.class, "12_abc_56");
         em.remove(p1);
-        HBasePerson p2 = em.find(HBasePerson.class, "2");
+        HBasePerson p2 = em.find(HBasePerson.class, "45_abc_34");
         em.remove(p2);
     }
 
