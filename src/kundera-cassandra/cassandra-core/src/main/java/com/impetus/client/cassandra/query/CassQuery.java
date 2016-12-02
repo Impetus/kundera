@@ -90,7 +90,7 @@ public class CassQuery extends QueryImpl
     private EntityReader reader;
 
     /** The external properties. */
-    private Map<String, Object> externalProperties;
+    protected Map<String, Object> externalProperties;
 
     /**
      * Instantiates a new cass query.
@@ -689,7 +689,7 @@ public class CassQuery extends QueryImpl
      *            the relations
      * @return the list
      */
-    String onQueryOverCQL3(EntityMetadata m, Client client, MetamodelImpl metaModel, List<String> relations)
+    public String onQueryOverCQL3(EntityMetadata m, Client client, MetamodelImpl metaModel, List<String> relations)
     {
         // select column will always be of entity field only!
         // where clause ordering
@@ -1323,7 +1323,7 @@ public class CassQuery extends QueryImpl
      * @param m
      *            the m
      */
-    void setRelationalEntities(List enhanceEntities, Client client, EntityMetadata m)
+    public void setRelationalEntities(List enhanceEntities, Client client, EntityMetadata m)
     {
         super.setRelationEntities(enhanceEntities, client, m);
     }

@@ -27,6 +27,7 @@ import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
+import javax.persistence.metamodel.SingularAttribute;
 
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.IndexExpression;
@@ -56,29 +57,30 @@ import com.impetus.kundera.utils.ReflectUtils;
 
 /**
  * The Class ResultIterator.
- *
+ * 
  * @author vivek.mishra .
  * 
  *         Implementation of Cassandra result iteration.
  * 
  *         TODO::: Need to add support for relational entities and a junit for
  *         Composite key test
- * @param <E> the element type
+ * @param <E>
+ *            the element type
  */
-class ResultIterator<E> implements IResultIterator<E>
+public class ResultIterator<E> implements IResultIterator<E>
 {
-    
+
     /** The log. */
     private static Logger log = LoggerFactory.getLogger(ResultIterator.class);
 
     /** The query. */
-    private final CassQuery query;
+    protected final CassQuery query;
 
     /** The entity metadata. */
-    private final EntityMetadata entityMetadata;
+    protected final EntityMetadata entityMetadata;
 
     /** The client. */
-    private final Client client;
+    protected final Client client;
 
     /** The reader. */
     private final EntityReader reader;
@@ -87,7 +89,7 @@ class ResultIterator<E> implements IResultIterator<E>
     private int maxResult = 1;
 
     /** The results. */
-    private List<E> results;
+    protected List<E> results;
 
     /** The start. */
     private byte[] start;
@@ -99,34 +101,40 @@ class ResultIterator<E> implements IResultIterator<E>
     private static final String MAX_ = "max";
 
     /** The fetch size. */
-    private int fetchSize;
+    protected int fetchSize;
 
     /** The count. */
-    private int count;
+    protected int count;
 
     /** The scroll complete. */
-    private boolean scrollComplete;
+    protected boolean scrollComplete;
 
     /** The external properties. */
-    private Map<String, Object> externalProperties;
+    protected Map<String, Object> externalProperties;
 
     /** The current. */
-    private E current;
+    protected E current;
 
     /** The kundera metadata. */
-    private final KunderaMetadata kunderaMetadata;
+    protected final KunderaMetadata kunderaMetadata;
 
     /**
      * Constructor with parameters.
-     *
-     * @param query the query
-     * @param m the m
-     * @param client the client
-     * @param reader the reader
-     * @param fetchSize the fetch size
-     * @param kunderaMetadata the kundera metadata
+     * 
+     * @param query
+     *            the query
+     * @param m
+     *            the m
+     * @param client
+     *            the client
+     * @param reader
+     *            the reader
+     * @param fetchSize
+     *            the fetch size
+     * @param kunderaMetadata
+     *            the kundera metadata
      */
-    ResultIterator(final Query query, final EntityMetadata m, final Client client, final EntityReader reader,
+    protected ResultIterator(final Query query, final EntityMetadata m, final Client client, final EntityReader reader,
             final int fetchSize, final KunderaMetadata kunderaMetadata)
     {
         this.client = client;
@@ -138,7 +146,9 @@ class ResultIterator<E> implements IResultIterator<E>
         this.kunderaMetadata = kunderaMetadata;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.Iterator#hasNext()
      */
     @Override
@@ -157,7 +167,9 @@ class ResultIterator<E> implements IResultIterator<E>
         return false;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.Iterator#next()
      */
     @Override
@@ -180,7 +192,9 @@ class ResultIterator<E> implements IResultIterator<E>
         return current;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.Iterator#remove()
      */
     @Override
@@ -189,7 +203,9 @@ class ResultIterator<E> implements IResultIterator<E>
         throw new UnsupportedOperationException("remove method is not supported over pagination");
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.query.IResultIterator#next(int)
      */
     @Override
@@ -201,7 +217,7 @@ class ResultIterator<E> implements IResultIterator<E>
     /**
      * Check on fetch size. returns true, if count on fetched rows is less than
      * fetch size.
-     *
+     * 
      * @return true, if successful
      */
     private boolean checkOnFetchSize()
@@ -251,7 +267,7 @@ class ResultIterator<E> implements IResultIterator<E>
      * @throws Exception
      *             throws exception, in case of run time error.
      */
-    private List<E> populateEntities(EntityMetadata m, Client client) throws Exception
+    protected List<E> populateEntities(EntityMetadata m, Client client) throws Exception
     {
         if (log.isDebugEnabled())
         {
@@ -396,9 +412,11 @@ class ResultIterator<E> implements IResultIterator<E>
 
     /**
      * Parse and append cql3 token function for iter.next() call.
-     *
-     * @param translator            cql translator.
-     * @param query the query
+     * 
+     * @param translator
+     *            cql translator.
+     * @param query
+     *            the query
      * @return parsed/append cql3 query.
      */
     private String prepareNext(CQLTranslator translator, String query)
@@ -440,7 +458,7 @@ class ResultIterator<E> implements IResultIterator<E>
 
             EmbeddableType keyObj = null;
             // Bytes bytes = null;
-            String columnName;
+            String columnName = null;
             if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
             {
                 keyObj = metaModel.embeddable(entityMetadata.getIdAttribute().getBindableJavaType());
@@ -450,6 +468,12 @@ class ResultIterator<E> implements IResultIterator<E>
                 columnName = ((AbstractAttribute) partitionKey).getJPAColumnName();
                 id = partitionKeyValue;
                 idClazz = ((AbstractAttribute) partitionKey).getBindableJavaType();
+                // StringBuilder pkNameTokens = new StringBuilder("token(");
+                // StringBuilder pkValueTokens = new StringBuilder("token(");
+                // buildPartitionKeyTokens(metaModel,
+                // entityMetadata.getIdAttribute(), id, translator,
+                // pkNameTokens,
+                // pkValueTokens);
 
             }
             else
@@ -469,10 +493,64 @@ class ResultIterator<E> implements IResultIterator<E>
         return null;
     }
 
+    private void buildPartitionKeyTokens(MetamodelImpl metaModel, SingularAttribute idAttribute, Object id,
+            CQLTranslator translator, StringBuilder pkNameTokens, StringBuilder pkValueTokens)
+    {
+        EmbeddableType keyObj = metaModel.embeddable(entityMetadata.getIdAttribute().getBindableJavaType());
+        Field embeddedField = getPartitionKeyField();
+
+        if (embeddedField == null)
+        {
+            // use tokens on the fields (no clustering keys
+            Field[] fields = entityMetadata.getIdAttribute().getBindableJavaType().getDeclaredFields();
+
+            for (Field field : fields)
+            {
+                Object value = PropertyAccessorHelper.getObject(id, field);
+                String columnName = ((AbstractAttribute) keyObj.getAttribute(field.getName())).getJPAColumnName();
+                translator.appendColumnName(pkNameTokens, columnName);
+                translator.appendValue(pkValueTokens, field.getType(), value, false, false);
+            }
+        }
+        else
+        {
+            // use tokens for partition key fields (fields in embeddedField) and
+            // where clause for clustering fields
+            Attribute partitionKey = keyObj.getAttribute(embeddedField.getName());
+            EmbeddableType partitionKeyObj = metaModel.embeddable(partitionKey.getJavaType());
+            Object partitionKeyValue = PropertyAccessorHelper.getObject(id, (Field) partitionKey.getJavaMember());
+            Field[] fields = partitionKey.getJavaType().getDeclaredFields();
+            // handle for part keys
+            for (Field field : fields)
+            {
+                if (!ReflectUtils.isTransientOrStatic(field))
+                {
+                    Object value = PropertyAccessorHelper.getObject(partitionKeyValue, field);
+                    String columnName = ((AbstractAttribute) partitionKeyObj.getAttribute(field.getName()))
+                            .getJPAColumnName();
+                    translator.appendColumnName(pkNameTokens, columnName);
+                    translator.appendValue(pkValueTokens, field.getType(), value, false, false);
+                    pkNameTokens.append(CQLTranslator.COMMA_STR);
+                    pkValueTokens.append(CQLTranslator.COMMA_STR);
+                }
+            }
+            pkNameTokens.delete(pkNameTokens.lastIndexOf(CQLTranslator.COMMA_STR), pkNameTokens.length());
+            pkValueTokens.delete(pkValueTokens.lastIndexOf(CQLTranslator.COMMA_STR), pkValueTokens.length());
+            pkNameTokens.append(CQLTranslator.CLOSE_BRACKET);
+            pkValueTokens.append(CQLTranslator.CLOSE_BRACKET);
+
+            // TODO: handle for cluster keys
+            throw new UnsupportedOperationException(
+                    "Pagination is not suported via ThriftClient on primary key with clustering keys...");
+        }
+
+    }
+
     /**
      * Gets the condition on id column.
-     *
-     * @param idColumn the id column
+     * 
+     * @param idColumn
+     *            the id column
      * @return the condition on id column
      */
     private Map<Boolean, String> getConditionOnIdColumn(String idColumn)
@@ -510,7 +588,7 @@ class ResultIterator<E> implements IResultIterator<E>
 
     /**
      * Id value in byte arr.
-     *
+     * 
      * @return the byte[]
      */
     private byte[] idValueInByteArr()
@@ -543,7 +621,7 @@ class ResultIterator<E> implements IResultIterator<E>
 
     /**
      * Will return partition key part of composite id.
-     *
+     * 
      * @return the partition key field
      */
     private Field getPartitionKeyField()
@@ -590,8 +668,9 @@ class ResultIterator<E> implements IResultIterator<E>
 
     /**
      * Replace applied token.
-     *
-     * @param query the query
+     * 
+     * @param query
+     *            the query
      * @return the string
      */
     private String replaceAppliedToken(String query)
@@ -623,6 +702,5 @@ class ResultIterator<E> implements IResultIterator<E>
         }
         return query;
     }
-    
-}
 
+}

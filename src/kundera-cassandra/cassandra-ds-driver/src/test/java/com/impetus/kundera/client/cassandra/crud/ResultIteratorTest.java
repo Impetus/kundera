@@ -248,7 +248,7 @@ public class ResultIteratorTest extends BaseTest
             counter++;
         }
 
-        Assert.assertEquals(counter, fetchSize == null || available < fetchSize?available:fetchSize);
+        Assert.assertEquals(counter, fetchSize != null && fetchSize == 0 ? 0:available);
         try
         {
             iter.next();
