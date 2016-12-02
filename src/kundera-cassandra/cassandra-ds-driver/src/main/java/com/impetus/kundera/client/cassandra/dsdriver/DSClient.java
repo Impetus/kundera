@@ -52,7 +52,6 @@ import com.datastax.driver.core.Statement;
 import com.impetus.client.cassandra.CassandraClientBase;
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
-import com.impetus.client.cassandra.query.CassQuery;
 import com.impetus.client.cassandra.thrift.CQLTranslator;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
@@ -82,7 +81,7 @@ import com.impetus.kundera.utils.TimestampGenerator;
  * @author vivek.mishra
  * 
  */
-public class DSClient extends CassandraClientBase implements Client<CassQuery>, Batcher
+public class DSClient extends CassandraClientBase implements Client<DSCassQuery>, Batcher
 {
 
     /** log for this class. */
@@ -170,7 +169,7 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClass);
         StringBuilder builder = createSelectQuery(rowId, metadata, metadata.getTableName());
         ResultSet rSet = this.execute(builder.toString(), null);
-        List results = iterateAndReturn(rSet, entityClass, metadata);
+        List results = iterateAndReturn(rSet, metadata);
         return results.isEmpty() ? null : results.get(0);
     }
 
@@ -458,7 +457,7 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
 
         ResultSet rSet = (ResultSet) this.execute(selectQueryBuilder.toString(), null);
 
-        return iterateAndReturn(rSet, entityClazz, m);
+        return iterateAndReturn(rSet, m);
     }
 
     /*
@@ -478,9 +477,9 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
      * @see com.impetus.kundera.client.Client#getQueryImplementor()
      */
     @Override
-    public Class<CassQuery> getQueryImplementor()
+    public Class<DSCassQuery> getQueryImplementor()
     {
-        return CassQuery.class;
+        return DSCassQuery.class;
     }
 
     /*
@@ -529,7 +528,13 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
             return iterateAndReturn(rSet);
         }
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, clazz);
-        return iterateAndReturn(rSet, clazz, metadata);
+        return iterateAndReturn(rSet, metadata);
+    }
+    
+    public ResultSet executeStatement(Statement st){
+        
+        Session session = factory.getConnection();
+        return session.execute(st);
     }
 
     /**
@@ -769,7 +774,7 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
      *            the metadata
      * @return the list
      */
-    private List iterateAndReturn(ResultSet rSet, Class entityClazz, EntityMetadata metadata)
+    private List iterateAndReturn(ResultSet rSet, EntityMetadata metadata)
     {
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 metadata.getPersistenceUnit());
@@ -784,33 +789,39 @@ public class DSClient extends CassandraClientBase implements Client<CassQuery>, 
         {
             Object entity = null;
             Row row = rowIter.next();
-            ColumnDefinitions columnDefs = row.getColumnDefinitions();
-            Iterator<Definition> columnDefIter = columnDefs.iterator();
+            populateObjectFromRow(metadata, metaModel, entityType, results, relationalValues, entity, row);
+        }
+        return results;
+    }
 
-            entity = iteratorColumns(metadata, metaModel, entityType, relationalValues, entity, row, columnDefIter);
+    void populateObjectFromRow(EntityMetadata metadata, MetamodelImpl metaModel, EntityType entityType,
+            List results, Map<String, Object> relationalValues, Object entity, Row row)
+    {
+        ColumnDefinitions columnDefs = row.getColumnDefinitions();
+        Iterator<Definition> columnDefIter = columnDefs.iterator();
 
-            if (entity != null && entity.getClass().isAssignableFrom(metadata.getEntityClazz()))
+        entity = iteratorColumns(metadata, metaModel, entityType, relationalValues, entity, row, columnDefIter);
+
+        if (entity != null && entity.getClass().isAssignableFrom(metadata.getEntityClazz()))
+        {
+            Object rowKey = PropertyAccessorHelper.getId(entity, metadata);
+
+            // populate secondary tables data if there is any.
+            populateSecondaryTableData(rowKey, entity, metaModel, metadata);
+
+            if (!relationalValues.isEmpty())
             {
-                Object rowKey = PropertyAccessorHelper.getId(entity, metadata);
-
-                // populate secondary tables data if there is any.
-                populateSecondaryTableData(rowKey, entity, metaModel, metadata);
-
-                if (!relationalValues.isEmpty())
-                {
-                    results.add(new EnhanceEntity(entity, rowKey, relationalValues));
-                }
-                else
-                {
-                    results.add(entity);
-                }
+                results.add(new EnhanceEntity(entity, rowKey, relationalValues));
             }
-            else if (entity != null)
+            else
             {
                 results.add(entity);
             }
         }
-        return results;
+        else if (entity != null)
+        {
+            results.add(entity);
+        }
     }
 
     /**

@@ -396,6 +396,37 @@ public class EntityWithMultiplePartitionKeyTest
         {
             Assert.fail();
         }
+        
+     // Select by cluster key only.
+        try
+        {
+            foundEntitys = em.createQuery("select e from EntityWithMultiplePartitionKey e where e.id.clusterkey1=clusterkey1").getResultList();
+
+            Assert.assertNotNull(foundEntitys);
+            Assert.assertFalse(foundEntitys.isEmpty());
+            Assert.assertEquals(1, foundEntitys.size());
+
+            count = 0;
+            for (EntityWithMultiplePartitionKey foundEntity : foundEntitys)
+            {
+                Assert.assertNotNull(foundEntity);
+                Assert.assertNotNull(foundEntity.getId());
+                Assert.assertNotNull(foundEntity.getId().getPartitionKey());
+                Assert.assertEquals("Persisting", foundEntity.getAction());
+                Assert.assertEquals("Entity to test composite key with multiple partition key.",
+                        foundEntity.getEntityDiscription());
+                Assert.assertEquals("clusterkey1", foundEntity.getId().getClusterkey1());
+                Assert.assertEquals(11, foundEntity.getId().getClusterkey2());
+                Assert.assertEquals("partitionKey1", foundEntity.getId().getPartitionKey().getPartitionKey1());
+                Assert.assertEquals(1, foundEntity.getId().getPartitionKey().getPartitionKey2());
+                count++;
+            }
+            Assert.assertEquals(1, count);
+        }
+        catch (Exception e)
+        {
+            Assert.fail();
+        }
 
         // Select by first partition key query.
         try
