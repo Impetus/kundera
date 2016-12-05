@@ -18,7 +18,7 @@ package com.impetus.client.kudu;
 import java.util.Calendar;
 import java.util.HashMap;
 
-import org.kududb.Type;
+import org.apache.kudu.Type;
 
 /**
  * The Class KuduDBValidationClassMapper.
@@ -37,14 +37,14 @@ public class KuduDBValidationClassMapper
         validationClassMapper.put(Character.class, Type.STRING);
         validationClassMapper.put(char.class, Type.STRING);
 
-        validationClassMapper.put(java.sql.Time.class, Type.TIMESTAMP);
+        validationClassMapper.put(java.sql.Time.class, Type.UNIXTIME_MICROS);
         validationClassMapper.put(java.lang.Integer.class, Type.INT32);
         validationClassMapper.put(int.class, Type.INT32);
-        validationClassMapper.put(java.sql.Timestamp.class, Type.TIMESTAMP);
+        validationClassMapper.put(java.sql.Timestamp.class, Type.UNIXTIME_MICROS);
         validationClassMapper.put(Short.class, Type.INT16);
         validationClassMapper.put(short.class, Type.INT16);
-        validationClassMapper.put(java.sql.Date.class, Type.TIMESTAMP);
-        validationClassMapper.put(java.util.Date.class, Type.TIMESTAMP);
+        validationClassMapper.put(java.sql.Date.class, Type.UNIXTIME_MICROS);
+        validationClassMapper.put(java.util.Date.class, Type.UNIXTIME_MICROS);
         validationClassMapper.put(java.math.BigInteger.class, Type.INT64);
         validationClassMapper.put(java.math.BigDecimal.class, Type.INT64);
 
@@ -66,7 +66,7 @@ public class KuduDBValidationClassMapper
         validationClassMapper.put(Byte[].class, Type.BINARY);
         validationClassMapper.put(byte[].class, Type.BINARY);
 
-        validationClassMapper.put(Calendar.class, Type.TIMESTAMP);
+        validationClassMapper.put(Calendar.class, Type.UNIXTIME_MICROS);
     }
 
     /**

@@ -24,18 +24,18 @@ import java.util.Set;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 
-import org.kududb.ColumnSchema;
-import org.kududb.Type;
-import org.kududb.client.ColumnRangePredicate;
-import org.kududb.client.Delete;
-import org.kududb.client.KuduClient;
-import org.kududb.client.KuduScanner;
-import org.kududb.client.KuduSession;
-import org.kududb.client.KuduTable;
-import org.kududb.client.Operation;
-import org.kududb.client.PartialRow;
-import org.kududb.client.RowResult;
-import org.kududb.client.RowResultIterator;
+import org.apache.kudu.ColumnSchema;
+import org.apache.kudu.Type;
+import org.apache.kudu.client.Delete;
+import org.apache.kudu.client.KuduClient;
+import org.apache.kudu.client.KuduPredicate;
+import org.apache.kudu.client.KuduScanner;
+import org.apache.kudu.client.KuduSession;
+import org.apache.kudu.client.KuduTable;
+import org.apache.kudu.client.Operation;
+import org.apache.kudu.client.PartialRow;
+import org.apache.kudu.client.RowResult;
+import org.apache.kudu.client.RowResultIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -130,8 +130,8 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
 
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClass);
 
-        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
-                .getMetamodel(entityMetadata.getPersistenceUnit());
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                entityMetadata.getPersistenceUnit());
         EntityType entityType = metaModel.entity(entityMetadata.getEntityClazz());
 
         String idColumnName = ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName();
@@ -151,10 +151,10 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
             throw new KunderaException("Cannot open table : " + entityMetadata.getTableName(), e);
         }
         ColumnSchema column = new ColumnSchema.ColumnSchemaBuilder(idColumnName, idType).build();
-        ColumnRangePredicate predicate = new ColumnRangePredicate(column);
-        KuduDBDataHandler.setPredicateLowerBound(predicate, idType, key);
-        KuduDBDataHandler.setPredicateUpperBound(predicate, idType, key);
-        KuduScanner scanner = kuduClient.newScannerBuilder(table).addColumnRangePredicate(predicate).build();
+
+        KuduPredicate predicate = KuduDBDataHandler.getEqualCompersionPredicate(column, idType, key);
+        KuduScanner scanner = kuduClient.newScannerBuilder(table).addPredicate(predicate).build();
+
         Object entity = null;
         while (scanner.hasMoreRows())
         {
@@ -400,8 +400,8 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
      */
     private void populatePartialRow(PartialRow row, EntityMetadata entityMetadata, Object entity)
     {
-        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
-                .getMetamodel(entityMetadata.getPersistenceUnit());
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                entityMetadata.getPersistenceUnit());
         Class entityClazz = entityMetadata.getEntityClazz();
         EntityType entityType = metaModel.entity(entityClazz);
         Set<Attribute> attributes = entityType.getAttributes();
@@ -427,8 +427,8 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
     {
 
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entity.getClass());
-        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
-                .getMetamodel(entityMetadata.getPersistenceUnit());
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                entityMetadata.getPersistenceUnit());
         EntityType entityType = metaModel.entity(entityMetadata.getEntityClazz());
 
         KuduSession session = kuduClient.newSession();
@@ -444,12 +444,12 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
         }
         Delete delete = table.newDelete();
         PartialRow row = delete.getRow();
-        Field field = (Field) entityType
-                .getAttribute(((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName()).getJavaMember();
+        Field field = (Field) entityType.getAttribute(
+                ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName()).getJavaMember();
         Object value = PropertyAccessorHelper.getObject(entity, field);
         Type type = KuduDBValidationClassMapper.getValidTypeForClass(field.getType());
-        KuduDBDataHandler.addToRow(row, ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName(), value,
-                type);
+        KuduDBDataHandler.addToRow(row, ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName(),
+                value, type);
 
         try
         {

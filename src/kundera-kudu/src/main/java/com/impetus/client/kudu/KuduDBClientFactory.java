@@ -18,7 +18,7 @@ package com.impetus.client.kudu;
 import java.util.Map;
 import java.util.Properties;
 
-import org.kududb.client.KuduClient;
+import org.apache.kudu.client.KuduClient;
 
 import com.impetus.client.kudu.query.KuduDBEntityReader;
 import com.impetus.client.kudu.schemamanager.KuduDBSchemaManager;
@@ -81,8 +81,8 @@ public class KuduDBClientFactory extends GenericClientFactory
         reader = new KuduDBEntityReader(kunderaMetadata);
         setExternalProperties(puProperties);
         initializePropertyReader();
-        PersistenceUnitMetadata pum = kunderaMetadata.getApplicationMetadata()
-                .getPersistenceUnitMetadata(getPersistenceUnit());
+        PersistenceUnitMetadata pum = kunderaMetadata.getApplicationMetadata().getPersistenceUnitMetadata(
+                getPersistenceUnit());
 
         Properties pumProps = pum.getProperties();
 
@@ -159,8 +159,8 @@ public class KuduDBClientFactory extends GenericClientFactory
     {
         if (propertyReader == null)
         {
-            propertyReader = new KuduDBPropertyReader(externalProperties,
-                    kunderaMetadata.getApplicationMetadata().getPersistenceUnitMetadata(getPersistenceUnit()));
+            propertyReader = new KuduDBPropertyReader(externalProperties, kunderaMetadata.getApplicationMetadata()
+                    .getPersistenceUnitMetadata(getPersistenceUnit()));
             propertyReader.read(getPersistenceUnit());
         }
     }

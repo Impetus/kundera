@@ -42,7 +42,40 @@ public abstract class Base
     protected Object getMaxValue(Class<?> clazz)
     {
         dataGenerator = factory.getDataGenerator(clazz);
-        return dataGenerator.maxValue();
+        //#KUDU-1766
+        return handleKuduBug(dataGenerator.maxValue());
+        // return dataGenerator.maxValue();
+    }
+
+    /**
+     * Handle kudu bug.
+     * 
+     * @param maxValue
+     *            the max value
+     * @return the object
+     */
+    private Object handleKuduBug(Object maxValue)
+    {
+        if (maxValue instanceof Byte)
+        {
+            return (byte) (((Byte) maxValue) - (byte) 1);
+        }
+        else if (maxValue instanceof Short)
+        {
+            return (short) (((Short) maxValue) - (short) 1);
+        }
+        else if (maxValue instanceof Integer)
+        {
+            return ((Integer) maxValue) - 1;
+        }
+        else if (maxValue instanceof Long)
+        {
+            return ((Long) maxValue) - 1l;
+        }
+        else
+        {
+            return maxValue;
+        }
     }
 
     /**

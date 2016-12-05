@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<artifactId>kundera</artifactId>
@@ -11,19 +12,8 @@
 	<name>kundera-kudu</name>
 	<url>http://maven.apache.org</url>
 
-	<repositories>
-		<repository>
-			<id>cdh.repo</id>
-			<name>Cloudera Repositories</name>
-			<url>https://repository.cloudera.com/artifactory/cloudera-repos</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
-
 	<properties>
-		<kudu.version>0.6.0</kudu.version>
+		<kudu.version>1.1.0</kudu.version>
 	</properties>
 
 	<dependencies>
@@ -59,11 +49,13 @@
 
 
 		<!-- kudu dependencies -->
+
 		<dependency>
-			<groupId>org.kududb</groupId>
+			<groupId>org.apache.kudu</groupId>
 			<artifactId>kudu-client</artifactId>
 			<version>${kudu.version}</version>
 		</dependency>
+
 	</dependencies>
 
 	<!-- Assembly build -->

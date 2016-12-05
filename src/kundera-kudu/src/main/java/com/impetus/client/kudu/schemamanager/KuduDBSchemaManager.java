@@ -21,12 +21,13 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang.StringUtils;
-import org.kududb.ColumnSchema;
-import org.kududb.ColumnSchema.ColumnSchemaBuilder;
-import org.kududb.Schema;
-import org.kududb.client.AlterTableOptions;
-import org.kududb.client.KuduClient;
-import org.kududb.client.KuduTable;
+import org.apache.kudu.ColumnSchema;
+import org.apache.kudu.ColumnSchema.ColumnSchemaBuilder;
+import org.apache.kudu.Schema;
+import org.apache.kudu.client.AlterTableOptions;
+import org.apache.kudu.client.CreateTableOptions;
+import org.apache.kudu.client.KuduClient;
+import org.apache.kudu.client.KuduTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -319,14 +320,22 @@ public class KuduDBSchemaManager extends AbstractSchemaManager implements Schema
         Schema schema = new Schema(columns);
         try
         {
-            client.createTable(tableInfo.getTableName(), schema);
+            CreateTableOptions builder = new CreateTableOptions();
+
+            List<String> rangeKeys = new ArrayList<>();
+            rangeKeys.add(tableInfo.getIdColumnName());
+
+            //TODO: Hard Coded Range Partitioning 
+            builder.setRangePartitionColumns(rangeKeys);
+            client.createTable(tableInfo.getTableName(), schema, builder);
             logger.debug("Table: " + tableInfo.getTableName() + " created successfully");
         }
         catch (Exception e)
         {
             logger.error("Table: " + tableInfo.getTableName() + " cannot be created, Caused by: " + e.getMessage(), e);
             throw new SchemaGenerationException(
-                    "Table: " + tableInfo.getTableName() + " cannot be created, Caused by" + e.getMessage(), e, "Kudu");
+                    "Table: " + tableInfo.getTableName() + " cannot be created, Caused by: " + e.getMessage(), e,
+                    "Kudu");
         }
     }
 

@@ -28,15 +28,15 @@ import org.eclipse.persistence.jpa.jpql.parser.ComparisonExpression;
 import org.eclipse.persistence.jpa.jpql.parser.Expression;
 import org.eclipse.persistence.jpa.jpql.parser.JPQLExpression;
 import org.eclipse.persistence.jpa.jpql.parser.WhereClause;
-import org.kududb.ColumnSchema;
-import org.kududb.Type;
-import org.kududb.client.ColumnRangePredicate;
-import org.kududb.client.KuduClient;
-import org.kududb.client.KuduScanner;
-import org.kududb.client.KuduScanner.KuduScannerBuilder;
-import org.kududb.client.KuduTable;
-import org.kududb.client.RowResult;
-import org.kududb.client.RowResultIterator;
+import org.apache.kudu.ColumnSchema;
+import org.apache.kudu.Type;
+import org.apache.kudu.client.KuduClient;
+import org.apache.kudu.client.KuduPredicate;
+import org.apache.kudu.client.KuduScanner;
+import org.apache.kudu.client.KuduScanner.KuduScannerBuilder;
+import org.apache.kudu.client.KuduTable;
+import org.apache.kudu.client.RowResult;
+import org.apache.kudu.client.RowResultIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -208,24 +208,36 @@ public class KuduDBQuery extends QueryImpl implements Query
     {
         Type type = KuduDBValidationClassMapper.getValidTypeForClass(field.getType());
         ColumnSchema column = new ColumnSchema.ColumnSchemaBuilder(columnName, type).build();
-        ColumnRangePredicate predicate = new ColumnRangePredicate(column);
+
+        KuduPredicate predicate;
+
+        Object valueObject = KuduDBDataHandler.parse(type, value);
+
         switch (identifier)
         {
         case ">=":
-            KuduDBDataHandler.setPredicateLowerBound(predicate, type, KuduDBDataHandler.parse(type, value));
+            predicate = KuduDBDataHandler.getPredicate(column, KuduPredicate.ComparisonOp.GREATER_EQUAL, type,
+                    valueObject);
+            break;
+        case ">":
+            predicate = KuduDBDataHandler.getPredicate(column, KuduPredicate.ComparisonOp.GREATER, type, valueObject);
+            break;
+        case "<":
+            predicate = KuduDBDataHandler.getPredicate(column, KuduPredicate.ComparisonOp.LESS, type, valueObject);
             break;
         case "<=":
-            KuduDBDataHandler.setPredicateUpperBound(predicate, type, KuduDBDataHandler.parse(type, value));
+            predicate = KuduDBDataHandler.getPredicate(column, KuduPredicate.ComparisonOp.LESS_EQUAL, type,
+                    valueObject);
             break;
         case "=":
-            KuduDBDataHandler.setPredicateLowerBound(predicate, type, KuduDBDataHandler.parse(type, value));
-            KuduDBDataHandler.setPredicateUpperBound(predicate, type, KuduDBDataHandler.parse(type, value));
+            predicate = KuduDBDataHandler.getPredicate(column, KuduPredicate.ComparisonOp.EQUAL, type, valueObject);
             break;
         default:
             logger.error("Operation not supported");
             throw new KunderaException("Operation not supported");
         }
-        scannerBuilder.addColumnRangePredicate(predicate);
+
+        scannerBuilder.addPredicate(predicate);
     }
 
     /*

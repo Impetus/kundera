@@ -15,11 +15,12 @@
  ******************************************************************************/
 package com.impetus.client.kudu;
 
-import org.kududb.Schema;
-import org.kududb.Type;
-import org.kududb.client.ColumnRangePredicate;
-import org.kududb.client.PartialRow;
-import org.kududb.client.RowResult;
+import org.apache.kudu.ColumnSchema;
+import org.apache.kudu.Schema;
+import org.apache.kudu.Type;
+import org.apache.kudu.client.KuduPredicate;
+import org.apache.kudu.client.PartialRow;
+import org.apache.kudu.client.RowResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,7 +95,7 @@ public class KuduDBDataHandler
         case STRING:
             row.addString(jpaColumnName, (String) value);
             break;
-        case TIMESTAMP:
+        case UNIXTIME_MICROS:
         default:
             logger.error(type + " type is not supported by Kudu");
             throw new KunderaException(type + " type is not supported by Kudu");
@@ -103,101 +104,63 @@ public class KuduDBDataHandler
     }
 
     /**
-     * Sets the predicate lower bound.
+     * Gets the predicate.
      * 
-     * @param predicate
-     *            the predicate
+     * @param column
+     *            the column
+     * @param operator
+     *            the operator
      * @param type
      *            the type
      * @param key
      *            the key
+     * @return the predicate
      */
-    public static void setPredicateLowerBound(ColumnRangePredicate predicate, Type type, Object key)
+    public static KuduPredicate getPredicate(ColumnSchema column, KuduPredicate.ComparisonOp operator, Type type,
+            Object key)
     {
         switch (type)
         {
         case BINARY:
-            predicate.setLowerBound((byte[]) key);
-            break;
+            return KuduPredicate.newComparisonPredicate(column, operator, (byte[]) key);
         case BOOL:
-            predicate.setLowerBound((Boolean) key);
-            break;
+            return KuduPredicate.newComparisonPredicate(column, operator, (Boolean) key);
         case DOUBLE:
-            predicate.setLowerBound((Double) key);
-            break;
+            return KuduPredicate.newComparisonPredicate(column, operator, (Double) key);
         case FLOAT:
-            predicate.setLowerBound((Float) key);
-            break;
+            return KuduPredicate.newComparisonPredicate(column, operator, (Float) key);
         case INT16:
-            predicate.setLowerBound((Short) key);
-            break;
+            return KuduPredicate.newComparisonPredicate(column, operator, (Short) key);
         case INT32:
-            predicate.setLowerBound((Integer) key);
-            break;
+            return KuduPredicate.newComparisonPredicate(column, operator, (Integer) key);
         case INT64:
-            predicate.setLowerBound((Long) key);
-            break;
+            return KuduPredicate.newComparisonPredicate(column, operator, (Long) key);
         case INT8:
-            predicate.setLowerBound((Byte) key);
-            break;
+            return KuduPredicate.newComparisonPredicate(column, operator, (Byte) key);
         case STRING:
-            predicate.setLowerBound((String) key);
-            break;
-        case TIMESTAMP:
+            return KuduPredicate.newComparisonPredicate(column, operator, (String) key);
+        case UNIXTIME_MICROS:
         default:
             logger.error(type + " type is not supported by Kudu");
             throw new KunderaException(type + " type is not supported by Kudu");
-
         }
     }
 
     /**
-     * Sets the predicate upper bound.
+     * Gets the equal compersion predicate.
      * 
-     * @param predicate
-     *            the predicate
+     * @param column
+     *            the column
      * @param type
      *            the type
      * @param key
      *            the key
+     * @return the equal compersion predicate
      */
-    public static void setPredicateUpperBound(ColumnRangePredicate predicate, Type type, Object key)
+    public static KuduPredicate getEqualCompersionPredicate(ColumnSchema column, Type type, Object key)
     {
-        switch (type)
-        {
-        case BINARY:
-            predicate.setUpperBound((byte[]) key);
-            break;
-        case BOOL:
-            predicate.setUpperBound((Boolean) key);
-            break;
-        case DOUBLE:
-            predicate.setUpperBound((Double) key);
-            break;
-        case FLOAT:
-            predicate.setUpperBound((Float) key);
-            break;
-        case INT16:
-            predicate.setUpperBound((Short) key);
-            break;
-        case INT32:
-            predicate.setUpperBound((Integer) key);
-            break;
-        case INT64:
-            predicate.setUpperBound((Long) key);
-            break;
-        case INT8:
-            predicate.setUpperBound((Byte) key);
-            break;
-        case STRING:
-            predicate.setUpperBound((String) key);
-            break;
-        case TIMESTAMP:
-        default:
-            logger.error(type + " type is not supported by Kudu");
-            throw new KunderaException(type + " type is not supported by Kudu");
+        return getPredicate(column, KuduPredicate.ComparisonOp.EQUAL, type, key);
 
-        }
     }
 
     /**
@@ -231,7 +194,7 @@ public class KuduDBDataHandler
             return result.getByte(jpaColumnName);
         case STRING:
             return result.getString(jpaColumnName);
-        case TIMESTAMP:
+        case UNIXTIME_MICROS:
         default:
             logger.error(jpaColumnName + " type is not supported by Kudu");
             throw new KunderaException(jpaColumnName + " type is not supported by Kudu");
@@ -271,7 +234,7 @@ public class KuduDBDataHandler
             return Byte.parseByte(value);
         case STRING:
             return value;
-        case TIMESTAMP:
+        case UNIXTIME_MICROS:
         default:
             logger.error(type + " type is not supported by Kudu");
             throw new KunderaException(type + " type is not supported by Kudu");

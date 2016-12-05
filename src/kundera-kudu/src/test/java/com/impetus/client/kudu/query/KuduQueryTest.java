@@ -87,6 +87,11 @@ public class KuduQueryTest
         List<Person> results = query.getResultList();
         Assert.assertEquals(4, results.size());
         assertResults(results, F, T, T, T, T);
+        
+        query = em.createQuery("Select p from Person p where p.age > 20");
+        results = query.getResultList();
+        Assert.assertEquals(3, results.size());
+        assertResults(results, F, F, T, T, T);
 
         query = em.createQuery("Select p.personName from Person p");
         results = query.getResultList();
