@@ -234,8 +234,8 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
                 }
                 catch (IOException e)
                 {
-                    log.error("Error while retreiving and storing entity metadata. Details:", e);
-                    throw new MetamodelLoaderException("Error while retreiving and storing entity metadata");
+                    log.error("Error while retrieving and storing entity metadata. Details:", e);
+                    throw new MetamodelLoaderException("Error while retrieving and storing entity metadata");
 
                 }
             }
@@ -262,8 +262,8 @@ public class MetamodelConfiguration extends AbstractSchemaConfiguration implemen
             }
             catch (IOException e)
             {
-                log.error("Error while retreiving and storing entity metadata. Details:", e);
-                throw new MetamodelLoaderException("Error while retreiving and storing entity metadata, Caused by : .",
+                log.error("Error while retrieving and storing entity metadata. Details:", e);
+                throw new MetamodelLoaderException("Error while retrieving and storing entity metadata, Caused by : .",
                         e);
 
             }
