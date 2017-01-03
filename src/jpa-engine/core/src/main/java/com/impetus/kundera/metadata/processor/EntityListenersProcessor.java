@@ -73,6 +73,12 @@ public class EntityListenersProcessor implements MetadataProcessor
 
         // list all external listeners first.
         EntityListeners entityListeners = (EntityListeners) entityClass.getAnnotation(EntityListeners.class);
+
+        if (entityListeners == null && entityClass.getSuperclass() != null)
+        {
+            entityListeners = entityClass.getSuperclass().getAnnotation(EntityListeners.class);
+        }
+        
         if (entityListeners != null)
         {
             Class<?>[] entityListenerClasses = entityListeners.value();
