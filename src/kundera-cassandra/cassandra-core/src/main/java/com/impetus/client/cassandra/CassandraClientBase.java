@@ -905,9 +905,9 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
     public List executeSelectQuery(Class clazz, List<String> relationalField, CassandraDataHandler dataHandler,
             boolean isNative, String cqlQuery)
     {
-        if (log.isInfoEnabled())
+        if (log.isDebugEnabled())
         {
-            log.info("Executing cql query {}.", cqlQuery);
+            log.debug("Executing cql query {}.", cqlQuery);
         }
 
         List entities = new ArrayList<Object>();
@@ -952,9 +952,9 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         List results = new ArrayList();
         try
         {
-            if (log.isInfoEnabled())
+            if (log.isDebugEnabled())
             {
-                log.info("Executing query {}.", cqlQuery);
+                log.debug("Executing query {}.", cqlQuery);
             }
             cqlResult = (CqlResult) executeCQLQuery(cqlQuery, true);
 
@@ -1036,9 +1036,9 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      */
     public int executeUpdateDeleteQuery(String cqlQuery)
     {
-        if (log.isInfoEnabled())
+        if (log.isDebugEnabled())
         {
-            log.info("Executing cql query {}.", cqlQuery);
+            log.debug("Executing cql query {}.", cqlQuery);
         }
         try
         {
@@ -1172,9 +1172,9 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                     .replace(insert_Query, CQLTranslator.COLUMN_VALUES, columnValueBuilder.toString());
             insert_Query = StringUtils.replace(insert_Query, CQLTranslator.COLUMNS, columnNameBuilder.toString());
 
-            if (log.isInfoEnabled())
+            if (log.isDebugEnabled())
             {
-                log.info("Returning cql query {}.", insert_Query);
+                log.debug("Returning cql query {}.", insert_Query);
             }
 
             if (ttlColumns != null && ttlColumns instanceof Integer)
@@ -1309,9 +1309,9 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             queryBuilder.append(CQLTranslator.ADD_SET_CLAUSE);
             queryBuilder.append(builder);
 
-            if (log.isInfoEnabled())
+            if (log.isDebugEnabled())
             {
-                log.info("Returning update query {}.", queryBuilder.toString());
+                log.debug("Returning update query {}.", queryBuilder.toString());
             }
 
             builders.put(tableName, queryBuilder.toString());
@@ -1449,9 +1449,9 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         deleteQueryBuilder
                 .delete(deleteQueryBuilder.lastIndexOf(CQLTranslator.AND_CLAUSE), deleteQueryBuilder.length());
 
-        if (log.isInfoEnabled())
+        if (log.isDebugEnabled())
         {
-            log.info("Returning delete query {}.", deleteQueryBuilder.toString());
+            log.debug("Returning delete query {}.", deleteQueryBuilder.toString());
         }
         return deleteQueryBuilder.toString();
     }
@@ -2056,9 +2056,9 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
                 return execute(cqlQuery, conn);
             }
             KunderaCoreUtils.printQuery(cqlQuery, showQuery);
-            if (log.isInfoEnabled())
+            if (log.isDebugEnabled())
             {
-                log.info("Executing cql query {}.", cqlQuery);
+                log.debug("Executing cql query {}.", cqlQuery);
             }
             return conn.execute_cql_query(ByteBufferUtil.bytes(cqlQuery), org.apache.cassandra.thrift.Compression.NONE);
         }
@@ -2273,9 +2273,9 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             List returnedEntities = new ArrayList();
             try
             {
-                if (log.isInfoEnabled())
+                if (log.isDebugEnabled())
                 {
-                    log.info("Executing query {}.", cqlQuery);
+                    log.debug("Executing query {}.", cqlQuery);
                 }
                 result = (CqlResult) executeCQLQuery(cqlQuery, isCql3Enabled);
 
