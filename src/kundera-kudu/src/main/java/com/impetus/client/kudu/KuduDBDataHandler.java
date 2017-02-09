@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.impetus.client.kudu;
 
+import java.util.List;
+
 import org.apache.kudu.ColumnSchema;
 import org.apache.kudu.Schema;
 import org.apache.kudu.Type;
@@ -147,7 +149,7 @@ public class KuduDBDataHandler
     }
 
     /**
-     * Gets the equal compersion predicate.
+     * Gets the equal comparison predicate.
      * 
      * @param column
      *            the column
@@ -155,9 +157,9 @@ public class KuduDBDataHandler
      *            the type
      * @param key
      *            the key
-     * @return the equal compersion predicate
+     * @return the equal comparison predicate
      */
-    public static KuduPredicate getEqualCompersionPredicate(ColumnSchema column, Type type, Object key)
+    public static KuduPredicate getEqualComparisonPredicate(ColumnSchema column, Type type, Object key)
     {
         return getPredicate(column, KuduPredicate.ComparisonOp.EQUAL, type, key);
 
@@ -262,6 +264,12 @@ public class KuduDBDataHandler
         {
             return false;
         }
+    }
+
+    public static KuduPredicate getInPredicate(ColumnSchema column, List<Object> values)
+    {
+        
+        return KuduPredicate.newInListPredicate(column, values);
     }
 
 }

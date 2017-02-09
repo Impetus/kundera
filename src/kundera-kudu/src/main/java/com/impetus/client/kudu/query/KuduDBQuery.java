@@ -19,6 +19,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
@@ -26,8 +27,10 @@ import javax.persistence.metamodel.EntityType;
 import org.eclipse.persistence.jpa.jpql.parser.AndExpression;
 import org.eclipse.persistence.jpa.jpql.parser.ComparisonExpression;
 import org.eclipse.persistence.jpa.jpql.parser.Expression;
+import org.eclipse.persistence.jpa.jpql.parser.InExpression;
 import org.eclipse.persistence.jpa.jpql.parser.JPQLExpression;
 import org.eclipse.persistence.jpa.jpql.parser.WhereClause;
+import org.eclipse.persistence.jpa.jpql.utility.iterable.ListIterable;
 import org.apache.kudu.ColumnSchema;
 import org.apache.kudu.Type;
 import org.apache.kudu.client.KuduClient;
@@ -95,8 +98,8 @@ public class KuduDBQuery extends QueryImpl implements Query
     protected List populateEntities(EntityMetadata m, Client client)
     {
         List results = new ArrayList();
-        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
-                .getMetamodel(m.getPersistenceUnit());
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                m.getPersistenceUnit());
         EntityType entityType = metaModel.entity(m.getEntityClazz());
 
         KuduClient kuduClient = ((KuduDBClient) client).getKuduClient();
@@ -182,11 +185,45 @@ public class KuduDBQuery extends QueryImpl implements Query
             parseAndBuildFilters(entityType, scannerBuilder, ((AndExpression) whereExp).getLeftExpression());
             parseAndBuildFilters(entityType, scannerBuilder, ((AndExpression) whereExp).getRightExpression());
         }
+        else if (whereExp instanceof InExpression)
+        {
+
+            ListIterator<Expression> inIter = ((InExpression) whereExp).getInItems().children().iterator();
+            Attribute attribute = entityType.getAttribute(((InExpression) whereExp).getExpression().toActualText()
+                    .split("[.]")[1]);
+            addInPredicateToBuilder(scannerBuilder, inIter, attribute);
+        }
+
         else
         {
             logger.error("Operation not supported");
             throw new KunderaException("Operation not supported");
         }
+    }
+
+    /**
+     * Adds the in predicate to builder.
+     * 
+     * @param scannerBuilder
+     *            the scanner builder
+     * @param inIter
+     *            the in iter
+     * @param attribute
+     *            the attribute
+     */
+    private void addInPredicateToBuilder(KuduScannerBuilder scannerBuilder, ListIterator<Expression> inIter,
+            Attribute attribute)
+    {
+        List<Object> finalVals = new ArrayList<>();
+        Type type = KuduDBValidationClassMapper.getValidTypeForClass(((Field) attribute.getJavaMember()).getType());
+        ColumnSchema column = new ColumnSchema.ColumnSchemaBuilder(((AbstractAttribute) attribute).getJPAColumnName(),
+                type).build();
+        while (inIter.hasNext())
+        {
+            String val = inIter.next().toActualText();
+            finalVals.add(KuduDBDataHandler.parse(type, val));
+        }
+        scannerBuilder.addPredicate(KuduDBDataHandler.getInPredicate(column, finalVals));
     }
 
     /**
@@ -226,8 +263,8 @@ public class KuduDBQuery extends QueryImpl implements Query
             predicate = KuduDBDataHandler.getPredicate(column, KuduPredicate.ComparisonOp.LESS, type, valueObject);
             break;
         case "<=":
-            predicate = KuduDBDataHandler.getPredicate(column, KuduPredicate.ComparisonOp.LESS_EQUAL, type,
-                    valueObject);
+            predicate = KuduDBDataHandler
+                    .getPredicate(column, KuduPredicate.ComparisonOp.LESS_EQUAL, type, valueObject);
             break;
         case "=":
             predicate = KuduDBDataHandler.getPredicate(column, KuduPredicate.ComparisonOp.EQUAL, type, valueObject);

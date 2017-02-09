@@ -152,7 +152,7 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
         }
         ColumnSchema column = new ColumnSchema.ColumnSchemaBuilder(idColumnName, idType).build();
 
-        KuduPredicate predicate = KuduDBDataHandler.getEqualCompersionPredicate(column, idType, key);
+        KuduPredicate predicate = KuduDBDataHandler.getEqualComparisonPredicate(column, idType, key);
         KuduScanner scanner = kuduClient.newScannerBuilder(table).addPredicate(predicate).build();
 
         Object entity = null;
