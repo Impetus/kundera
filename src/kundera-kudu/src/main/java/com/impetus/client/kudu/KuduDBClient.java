@@ -21,7 +21,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.Embeddable;
 import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 
 import org.apache.kudu.ColumnSchema;
@@ -406,13 +408,32 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
         EntityType entityType = metaModel.entity(entityClazz);
         Set<Attribute> attributes = entityType.getAttributes();
         Iterator<Attribute> iterator = attributes.iterator();
+        iterateAndPopulateRow(row, entity, metaModel, iterator);
+    }
+
+    private void populatePartialRowForEmbeddedColumn(PartialRow row, EmbeddableType embeddable, Object EmbEntity, MetamodelImpl metaModel)
+    {
+        Set<Attribute> attributes = embeddable.getAttributes();
+        Iterator<Attribute> iterator = attributes.iterator();
+        iterateAndPopulateRow(row, EmbEntity, metaModel, iterator);
+    }
+
+    private void iterateAndPopulateRow(PartialRow row, Object entity, MetamodelImpl metaModel,
+            Iterator<Attribute> iterator)
+    {
         while (iterator.hasNext())
         {
             Attribute attribute = iterator.next();
             Field field = (Field) attribute.getJavaMember();
             Object value = PropertyAccessorHelper.getObject(entity, field);
-            Type type = KuduDBValidationClassMapper.getValidTypeForClass(field.getType());
-            KuduDBDataHandler.addToRow(row, ((AbstractAttribute) attribute).getJPAColumnName(), value, type);
+            if(attribute.getJavaType().isAnnotationPresent(Embeddable.class)){
+                EmbeddableType emb = metaModel.embeddable(attribute.getJavaType());
+                populatePartialRowForEmbeddedColumn(row, emb, value, metaModel);
+            }
+            else{
+                Type type = KuduDBValidationClassMapper.getValidTypeForClass(field.getType());
+                KuduDBDataHandler.addToRow(row, ((AbstractAttribute) attribute).getJPAColumnName(), value, type);
+            }
         }
     }
 

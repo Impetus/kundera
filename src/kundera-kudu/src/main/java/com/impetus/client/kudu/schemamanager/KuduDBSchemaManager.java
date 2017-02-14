@@ -35,10 +35,12 @@ import com.impetus.client.kudu.KuduDBDataHandler;
 import com.impetus.client.kudu.KuduDBValidationClassMapper;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.configure.schema.ColumnInfo;
+import com.impetus.kundera.configure.schema.EmbeddedColumnInfo;
 import com.impetus.kundera.configure.schema.SchemaGenerationException;
 import com.impetus.kundera.configure.schema.TableInfo;
 import com.impetus.kundera.configure.schema.api.AbstractSchemaManager;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 
 /**
@@ -200,6 +202,7 @@ public class KuduDBSchemaManager extends AbstractSchemaManager implements Schema
                     AtomicBoolean updated = new AtomicBoolean(false);
                     Schema schema = table.getSchema();
                     // add modify columns
+                    //TODO: update for embeddables logic
                     for (ColumnInfo columnInfo : tableInfo.getColumnMetadatas())
                     {
                         entityColumns.add(columnInfo.getColumnName());
@@ -306,6 +309,7 @@ public class KuduDBSchemaManager extends AbstractSchemaManager implements Schema
      */
     private void createKuduTable(TableInfo tableInfo)
     {
+        //TODO: handle embedded columns and composite keys
         List<ColumnSchema> columns = new ArrayList<ColumnSchema>();
         // add key
         columns.add(new ColumnSchema.ColumnSchemaBuilder(tableInfo.getIdColumnName(),
@@ -316,6 +320,11 @@ public class KuduDBSchemaManager extends AbstractSchemaManager implements Schema
             ColumnSchemaBuilder columnSchemaBuilder = new ColumnSchema.ColumnSchemaBuilder(columnInfo.getColumnName(),
                     KuduDBValidationClassMapper.getValidTypeForClass(columnInfo.getType()));
             columns.add(columnSchemaBuilder.build());
+        }
+        
+        // add embedded columns
+        for (EmbeddedColumnInfo embColumnInfo : tableInfo.getEmbeddedColumnMetadatas()){
+            buildColumnsFromEmbeddableColumn(embColumnInfo, columns);
         }
         Schema schema = new Schema(columns);
         try
@@ -337,6 +346,16 @@ public class KuduDBSchemaManager extends AbstractSchemaManager implements Schema
                     "Table: " + tableInfo.getTableName() + " cannot be created, Caused by: " + e.getMessage(), e,
                     "Kudu");
         }
+    }
+
+    private void buildColumnsFromEmbeddableColumn(EmbeddedColumnInfo embColumnInfo, List<ColumnSchema> columns)
+    {
+        for (ColumnInfo columnInfo : embColumnInfo.getColumns()){
+            ColumnSchemaBuilder columnSchemaBuilder = new ColumnSchema.ColumnSchemaBuilder(columnInfo.getColumnName(),
+                    KuduDBValidationClassMapper.getValidTypeForClass(columnInfo.getType()));
+            columns.add(columnSchemaBuilder.build());
+        }
+        
     }
 
     /*
