@@ -201,12 +201,21 @@ public class KuduDBSchemaManager extends AbstractSchemaManager implements Schema
                     AtomicBoolean updated = new AtomicBoolean(false);
                     Schema schema = table.getSchema();
                     // add modify columns
-                    //TODO: update for embeddables logic
                     for (ColumnInfo columnInfo : tableInfo.getColumnMetadatas())
                     {
                         entityColumns.add(columnInfo.getColumnName());
                         alterColumn(alterTableOptions, schema, columnInfo, updated);
                     }
+                    //update for embeddables logic
+                    for (EmbeddedColumnInfo embColumnInfo : tableInfo.getEmbeddedColumnMetadatas())
+                    {
+                        for (ColumnInfo columnInfo : embColumnInfo.getColumns())
+                        {
+                            entityColumns.add(columnInfo.getColumnName());
+                            alterColumn(alterTableOptions, schema, columnInfo, updated);
+                        }
+                    }
+                    
                     // delete columns
                     for (ColumnSchema columnSchema : schema.getColumns())
                     {
