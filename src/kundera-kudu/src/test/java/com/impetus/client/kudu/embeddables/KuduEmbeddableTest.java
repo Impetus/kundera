@@ -1,3 +1,18 @@
+/*******************************************************************************
+ *  * Copyright 2017 Impetus Infotech.
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *      http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ ******************************************************************************/
 package com.impetus.client.kudu.embeddables;
 
 import javax.persistence.EntityManager;
@@ -46,7 +61,7 @@ public class KuduEmbeddableTest
     {
         em = emf.createEntityManager();
     }
-    
+
     /**
      * Test CRUD.
      */
@@ -54,8 +69,8 @@ public class KuduEmbeddableTest
     public void testCRUD()
     {
         testInsert();
-//        testMerge();
-//        testDelete();
+        testMerge();
+        testDelete();
     }
 
     /**
@@ -67,14 +82,17 @@ public class KuduEmbeddableTest
         addr.setStreet("4th main");
         addr.setCity("Bangalore");
         addr.setCountry("India");
-        EmbeddablePerson embeddablePerson = new EmbeddablePerson("101", "dev", addr);
+        EmbeddablePerson embeddablePerson = new EmbeddablePerson("101", "karthik", addr);
         em.persist(embeddablePerson);
         em.clear();
         EmbeddablePerson p = em.find(EmbeddablePerson.class, "101");
-//        System.out.println(p.getAddress().getCountry());
         Assert.assertNotNull(p);
         Assert.assertEquals("101", p.getPersonId());
-        Assert.assertEquals("dev", p.getPersonName());
+        Assert.assertEquals("karthik", p.getPersonName());
+        Assert.assertNotNull(p.getAddress());
+        Assert.assertEquals("4th main", p.getAddress().getStreet());
+        Assert.assertEquals("Bangalore", p.getAddress().getCity());
+        Assert.assertEquals("India", p.getAddress().getCountry());
     }
 
     /**
@@ -83,12 +101,22 @@ public class KuduEmbeddableTest
     private void testMerge()
     {
         EmbeddablePerson p = em.find(EmbeddablePerson.class, "101");
-        p.setPersonName("karthik");
+        p.setPersonName("kp");
+        Address addr = new Address();
+        addr.setStreet("Sector-59");
+        addr.setCity("Noida");
+        addr.setCountry("India");
+        p.setAddress(addr);
         em.merge(p);
         em.clear();
         EmbeddablePerson p1 = em.find(EmbeddablePerson.class, "101");
         Assert.assertNotNull(p1);
-        Assert.assertEquals("karthik", p1.getPersonName());
+        Assert.assertEquals("101", p.getPersonId());
+        Assert.assertEquals("kp", p.getPersonName());
+        Assert.assertNotNull(p.getAddress());
+        Assert.assertEquals("Sector-59", p.getAddress().getStreet());
+        Assert.assertEquals("Noida", p.getAddress().getCity());
+        Assert.assertEquals("India", p.getAddress().getCountry());
     }
 
     /**
@@ -102,7 +130,7 @@ public class KuduEmbeddableTest
         EmbeddablePerson p1 = em.find(EmbeddablePerson.class, "101");
         Assert.assertNull(p1);
     }
-    
+
     /**
      * Tear down.
      * 

@@ -24,13 +24,6 @@ import java.util.ListIterator;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 
-import org.eclipse.persistence.jpa.jpql.parser.AndExpression;
-import org.eclipse.persistence.jpa.jpql.parser.ComparisonExpression;
-import org.eclipse.persistence.jpa.jpql.parser.Expression;
-import org.eclipse.persistence.jpa.jpql.parser.InExpression;
-import org.eclipse.persistence.jpa.jpql.parser.JPQLExpression;
-import org.eclipse.persistence.jpa.jpql.parser.WhereClause;
-import org.eclipse.persistence.jpa.jpql.utility.iterable.ListIterable;
 import org.apache.kudu.ColumnSchema;
 import org.apache.kudu.Type;
 import org.apache.kudu.client.KuduClient;
@@ -40,6 +33,12 @@ import org.apache.kudu.client.KuduScanner.KuduScannerBuilder;
 import org.apache.kudu.client.KuduTable;
 import org.apache.kudu.client.RowResult;
 import org.apache.kudu.client.RowResultIterator;
+import org.eclipse.persistence.jpa.jpql.parser.AndExpression;
+import org.eclipse.persistence.jpa.jpql.parser.ComparisonExpression;
+import org.eclipse.persistence.jpa.jpql.parser.Expression;
+import org.eclipse.persistence.jpa.jpql.parser.InExpression;
+import org.eclipse.persistence.jpa.jpql.parser.JPQLExpression;
+import org.eclipse.persistence.jpa.jpql.parser.WhereClause;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,8 +97,8 @@ public class KuduDBQuery extends QueryImpl implements Query
     protected List populateEntities(EntityMetadata m, Client client)
     {
         List results = new ArrayList();
-        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
-                m.getPersistenceUnit());
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
+                .getMetamodel(m.getPersistenceUnit());
         EntityType entityType = metaModel.entity(m.getEntityClazz());
 
         KuduClient kuduClient = ((KuduDBClient) client).getKuduClient();
@@ -131,7 +130,7 @@ public class KuduDBQuery extends QueryImpl implements Query
 
         KuduScanner scanner = scannerBuilder.build();
 
-        Object entity = null;
+        Object entity;
         while (scanner.hasMoreRows())
         {
             RowResultIterator rowResultIter;
@@ -150,7 +149,7 @@ public class KuduDBQuery extends QueryImpl implements Query
                 RowResult result = rowResultIter.next();
                 entity = KunderaCoreUtils.createNewInstance(m.getEntityClazz());
                 // populate RowResult to entity object and return
-                ((KuduDBClient) client).populateEntity(entity, result, entityType);
+                ((KuduDBClient) client).populateEntity(entity, result, entityType, metaModel);
                 results.add(entity);
                 logger.debug(result.rowToString());
             }
@@ -189,8 +188,8 @@ public class KuduDBQuery extends QueryImpl implements Query
         {
 
             ListIterator<Expression> inIter = ((InExpression) whereExp).getInItems().children().iterator();
-            Attribute attribute = entityType.getAttribute(((InExpression) whereExp).getExpression().toActualText()
-                    .split("[.]")[1]);
+            Attribute attribute = entityType
+                    .getAttribute(((InExpression) whereExp).getExpression().toActualText().split("[.]")[1]);
             addInPredicateToBuilder(scannerBuilder, inIter, attribute);
         }
 
@@ -263,8 +262,8 @@ public class KuduDBQuery extends QueryImpl implements Query
             predicate = KuduDBDataHandler.getPredicate(column, KuduPredicate.ComparisonOp.LESS, type, valueObject);
             break;
         case "<=":
-            predicate = KuduDBDataHandler
-                    .getPredicate(column, KuduPredicate.ComparisonOp.LESS_EQUAL, type, valueObject);
+            predicate = KuduDBDataHandler.getPredicate(column, KuduPredicate.ComparisonOp.LESS_EQUAL, type,
+                    valueObject);
             break;
         case "=":
             predicate = KuduDBDataHandler.getPredicate(column, KuduPredicate.ComparisonOp.EQUAL, type, valueObject);

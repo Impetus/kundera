@@ -114,6 +114,14 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
      * populateClientProperties(com.impetus.kundera.client.Client,
      * java.util.Map)
      */
+    /**
+     * Populate client properties.
+     * 
+     * @param client
+     *            the client
+     * @param properties
+     *            the properties
+     */
     @Override
     public void populateClientProperties(Client client, Map<String, Object> properties)
     { // TODO Auto-generated method stub
@@ -125,6 +133,15 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
      * 
      * @see com.impetus.kundera.client.Client#find(java.lang.Class,
      * java.lang.Object)
+     */
+    /**
+     * Find.
+     * 
+     * @param entityClass
+     *            the entity class
+     * @param key
+     *            the key
+     * @return the object
      */
     @Override
     public Object find(Class entityClass, Object key)
@@ -175,7 +192,7 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
             {
                 RowResult result = results.next();
                 entity = KunderaCoreUtils.createNewInstance(entityClass);
-                populateEntity(entity, result, entityType);
+                populateEntity(entity, result, entityType, metaModel);
                 logger.debug(result.rowToString());
             }
         }
@@ -191,20 +208,71 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
      *            the result
      * @param entityType
      *            the entity type
+     * @param metaModel
+     *            the meta model
      */
-    public void populateEntity(Object entity, RowResult result, EntityType entityType)
+    public void populateEntity(Object entity, RowResult result, EntityType entityType, MetamodelImpl metaModel)
     {
-
         Set<Attribute> attributes = entityType.getAttributes();
         Iterator<Attribute> iterator = attributes.iterator();
+        iterateAndPopulateEntity(entity, result, metaModel, iterator);
+    }
+
+    /**
+     * Populate embedded column.
+     * 
+     * @param entity
+     *            the entity
+     * @param result
+     *            the result
+     * @param embeddable
+     *            the embeddable
+     * @param metaModel
+     *            the meta model
+     */
+    private void populateEmbeddedColumn(Object entity, RowResult result, EmbeddableType embeddable,
+            MetamodelImpl metaModel)
+    {
+        Set<Attribute> attributes = embeddable.getAttributes();
+        Iterator<Attribute> iterator = attributes.iterator();
+
+        iterateAndPopulateEntity(entity, result, metaModel, iterator);
+    }
+
+    /**
+     * Iterate and populate entity.
+     * 
+     * @param entity
+     *            the entity
+     * @param result
+     *            the result
+     * @param metaModel
+     *            the meta model
+     * @param iterator
+     *            the iterator
+     */
+    private void iterateAndPopulateEntity(Object entity, RowResult result, MetamodelImpl metaModel,
+            Iterator<Attribute> iterator)
+    {
         while (iterator.hasNext())
         {
             Attribute attribute = iterator.next();
             Field field = (Field) attribute.getJavaMember();
-            if (KuduDBDataHandler.hasColumn(result.getSchema(), ((AbstractAttribute) attribute).getJPAColumnName()))
+            // handle for embeddables
+            if (attribute.getJavaType().isAnnotationPresent(Embeddable.class))
             {
-                PropertyAccessorHelper.set(entity, field,
-                        KuduDBDataHandler.getColumnValue(result, ((AbstractAttribute) attribute).getJPAColumnName()));
+                EmbeddableType emb = metaModel.embeddable(attribute.getJavaType());
+                Object embeddableObj = KunderaCoreUtils.createNewInstance(attribute.getJavaType());
+                populateEmbeddedColumn(embeddableObj, result, emb, metaModel);
+                PropertyAccessorHelper.set(entity, field, embeddableObj);
+            }
+            else
+            {
+                if (KuduDBDataHandler.hasColumn(result.getSchema(), ((AbstractAttribute) attribute).getJPAColumnName()))
+                {
+                    PropertyAccessorHelper.set(entity, field, KuduDBDataHandler.getColumnValue(result,
+                            ((AbstractAttribute) attribute).getJPAColumnName()));
+                }
             }
         }
     }
@@ -214,6 +282,19 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
      * 
      * @see com.impetus.kundera.client.Client#findAll(java.lang.Class,
      * java.lang.String[], java.lang.Object[])
+     */
+    /**
+     * Find all.
+     * 
+     * @param <E>
+     *            the element type
+     * @param entityClass
+     *            the entity class
+     * @param columnsToSelect
+     *            the columns to select
+     * @param keys
+     *            the keys
+     * @return the list
      */
     @Override
     public <E> List<E> findAll(Class<E> entityClass, String[] columnsToSelect, Object... keys)
@@ -227,6 +308,17 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
      * @see com.impetus.kundera.client.Client#find(java.lang.Class,
      * java.util.Map)
      */
+    /**
+     * Find.
+     * 
+     * @param <E>
+     *            the element type
+     * @param entityClass
+     *            the entity class
+     * @param embeddedColumnMap
+     *            the embedded column map
+     * @return the list
+     */
     @Override
     public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap)
     { // TODO Auto-generated method stub
@@ -237,6 +329,9 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
      * (non-Javadoc)
      * 
      * @see com.impetus.kundera.client.Client#close()
+     */
+    /**
+     * Close.
      */
     @Override
     public void close()
@@ -251,6 +346,12 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
      * com.impetus.kundera.client.Client#persistJoinTable(com.impetus.kundera.
      * persistence.context.jointable.JoinTableData )
      */
+    /**
+     * Persist join table.
+     * 
+     * @param joinTableData
+     *            the join table data
+     */
     @Override
     public void persistJoinTable(JoinTableData joinTableData)
     {// TODO Auto-generated method stub
@@ -263,6 +364,25 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
      * @see com.impetus.kundera.client.Client#getColumnsById(java.lang.String,
      * java.lang.String, java.lang.String, java.lang.String, java.lang.Object,
      * java.lang.Class)
+     */
+    /**
+     * Gets the columns by id.
+     * 
+     * @param <E>
+     *            the element type
+     * @param schemaName
+     *            the schema name
+     * @param tableName
+     *            the table name
+     * @param pKeyColumnName
+     *            the key column name
+     * @param columnName
+     *            the column name
+     * @param pKeyColumnValue
+     *            the key column value
+     * @param columnJavaType
+     *            the column java type
+     * @return the columns by id
      */
     @Override
     public <E> List<E> getColumnsById(String schemaName, String tableName, String pKeyColumnName, String columnName,
@@ -278,6 +398,23 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
      * java.lang.String, java.lang.String, java.lang.String, java.lang.Object,
      * java.lang.Class)
      */
+    /**
+     * Find ids by column.
+     * 
+     * @param schemaName
+     *            the schema name
+     * @param tableName
+     *            the table name
+     * @param pKeyName
+     *            the key name
+     * @param columnName
+     *            the column name
+     * @param columnValue
+     *            the column value
+     * @param entityClazz
+     *            the entity clazz
+     * @return the object[]
+     */
     @Override
     public Object[] findIdsByColumn(String schemaName, String tableName, String pKeyName, String columnName,
             Object columnValue, Class entityClazz)
@@ -291,6 +428,18 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
      * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String,
      * java.lang.String, java.lang.String, java.lang.Object)
      */
+    /**
+     * Delete by column.
+     * 
+     * @param schemaName
+     *            the schema name
+     * @param tableName
+     *            the table name
+     * @param columnName
+     *            the column name
+     * @param columnValue
+     *            the column value
+     */
     @Override
     public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
     { // TODO Auto-generated method stub
@@ -303,6 +452,17 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
      * @see com.impetus.kundera.client.Client#findByRelation(java.lang.String,
      * java.lang.Object, java.lang.Class)
      */
+    /**
+     * Find by relation.
+     * 
+     * @param colName
+     *            the col name
+     * @param colValue
+     *            the col value
+     * @param entityClazz
+     *            the entity clazz
+     * @return the list
+     */
     @Override
     public List<Object> findByRelation(String colName, Object colValue, Class entityClazz)
     {// TODO Auto-generated method stub
@@ -313,6 +473,11 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
      * (non-Javadoc)
      * 
      * @see com.impetus.kundera.client.Client#getReader()
+     */
+    /**
+     * Gets the reader.
+     * 
+     * @return the reader
      */
     @Override
     public EntityReader getReader()
@@ -325,6 +490,11 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
      * 
      * @see com.impetus.kundera.client.Client#getQueryImplementor()
      */
+    /**
+     * Gets the query implementor.
+     * 
+     * @return the query implementor
+     */
     @Override
     public Class<KuduDBQuery> getQueryImplementor()
     {
@@ -335,6 +505,11 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
      * (non-Javadoc)
      * 
      * @see com.impetus.kundera.client.Client#getIdGenerator()
+     */
+    /**
+     * Gets the id generator.
+     * 
+     * @return the id generator
      */
     @Override
     public Generator getIdGenerator()
@@ -348,6 +523,18 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
      * @see com.impetus.kundera.client.ClientBase#onPersist(com.impetus.kundera.
      * metadata.model.EntityMetadata, java.lang.Object, java.lang.Object,
      * java.util.List)
+     */
+    /**
+     * On persist.
+     * 
+     * @param entityMetadata
+     *            the entity metadata
+     * @param entity
+     *            the entity
+     * @param id
+     *            the id
+     * @param rlHolders
+     *            the rl holders
      */
     @Override
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
@@ -411,13 +598,38 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
         iterateAndPopulateRow(row, entity, metaModel, iterator);
     }
 
-    private void populatePartialRowForEmbeddedColumn(PartialRow row, EmbeddableType embeddable, Object EmbEntity, MetamodelImpl metaModel)
+    /**
+     * Populate partial row for embedded column.
+     * 
+     * @param row
+     *            the row
+     * @param embeddable
+     *            the embeddable
+     * @param EmbEntity
+     *            the emb entity
+     * @param metaModel
+     *            the meta model
+     */
+    private void populatePartialRowForEmbeddedColumn(PartialRow row, EmbeddableType embeddable, Object EmbEntity,
+            MetamodelImpl metaModel)
     {
         Set<Attribute> attributes = embeddable.getAttributes();
         Iterator<Attribute> iterator = attributes.iterator();
         iterateAndPopulateRow(row, EmbEntity, metaModel, iterator);
     }
 
+    /**
+     * Iterate and populate row.
+     * 
+     * @param row
+     *            the row
+     * @param entity
+     *            the entity
+     * @param metaModel
+     *            the meta model
+     * @param iterator
+     *            the iterator
+     */
     private void iterateAndPopulateRow(PartialRow row, Object entity, MetamodelImpl metaModel,
             Iterator<Attribute> iterator)
     {
@@ -426,11 +638,13 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
             Attribute attribute = iterator.next();
             Field field = (Field) attribute.getJavaMember();
             Object value = PropertyAccessorHelper.getObject(entity, field);
-            if(attribute.getJavaType().isAnnotationPresent(Embeddable.class)){
+            if (attribute.getJavaType().isAnnotationPresent(Embeddable.class))
+            {
                 EmbeddableType emb = metaModel.embeddable(attribute.getJavaType());
                 populatePartialRowForEmbeddedColumn(row, emb, value, metaModel);
             }
-            else{
+            else
+            {
                 Type type = KuduDBValidationClassMapper.getValidTypeForClass(field.getType());
                 KuduDBDataHandler.addToRow(row, ((AbstractAttribute) attribute).getJPAColumnName(), value, type);
             }
@@ -442,6 +656,14 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
      * 
      * @see com.impetus.kundera.client.ClientBase#delete(java.lang.Object,
      * java.lang.Object)
+     */
+    /**
+     * Delete.
+     * 
+     * @param entity
+     *            the entity
+     * @param pKey
+     *            the key
      */
     @Override
     protected void delete(Object entity, Object pKey)
