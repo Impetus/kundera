@@ -35,7 +35,7 @@ import junit.framework.Assert;
  * 
  * @author Devender Yadav
  */
-public class StudentKuduBytePrimitiveTest extends Base
+public class StudentKuduBytePrimitiveTest extends KuduBase
 {
 
     /** The Constant KUDU_PU. */
