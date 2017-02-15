@@ -8,6 +8,7 @@
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<class>com.impetus.client.kudu.entities.Person</class>
 		<class>com.impetus.client.kudu.embeddables.EmbeddablePerson</class>
+		<class>com.impetus.client.kudu.embeddables.Metrics</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<property name="kundera.nodes" value="quickstart.cloudera" />
