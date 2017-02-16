@@ -32,6 +32,7 @@ import org.apache.kudu.client.Delete;
 import org.apache.kudu.client.KuduClient;
 import org.apache.kudu.client.KuduPredicate;
 import org.apache.kudu.client.KuduScanner;
+import org.apache.kudu.client.KuduScanner.KuduScannerBuilder;
 import org.apache.kudu.client.KuduSession;
 import org.apache.kudu.client.KuduTable;
 import org.apache.kudu.client.Operation;
@@ -57,6 +58,7 @@ import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.utils.KunderaCoreUtils;
+import com.impetus.kundera.utils.ReflectUtils;
 
 /**
  * The Class KuduDBClient.
@@ -169,10 +171,28 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
             logger.error("Cannot open table : " + entityMetadata.getTableName(), e);
             throw new KunderaException("Cannot open table : " + entityMetadata.getTableName(), e);
         }
-        ColumnSchema column = new ColumnSchema.ColumnSchemaBuilder(idColumnName, idType).build();
 
-        KuduPredicate predicate = KuduDBDataHandler.getEqualComparisonPredicate(column, idType, key);
-        KuduScanner scanner = kuduClient.newScannerBuilder(table).addPredicate(predicate).build();
+        KuduScannerBuilder scannerBuilder = kuduClient.newScannerBuilder(table);
+        KuduScanner scanner = null;
+
+        if (entityType.getAttribute(idColumnName).getJavaType().isAnnotationPresent(Embeddable.class))
+        {
+            // Composite Id
+            EmbeddableType embeddableIdType = metaModel.embeddable(entityType.getAttribute(idColumnName).getJavaType());
+            Field[] fields = entityType.getAttribute(idColumnName).getJavaType().getDeclaredFields();
+
+            addPredicatesToScannerBuilder(scannerBuilder, embeddableIdType, fields, metaModel, key);
+        }
+        else
+        {
+            // Simple Id
+            ColumnSchema column = new ColumnSchema.ColumnSchemaBuilder(idColumnName, idType).build();
+
+            KuduPredicate predicate = KuduDBDataHandler.getEqualComparisonPredicate(column, idType, key);
+            scannerBuilder.addPredicate(predicate);
+        }
+
+        scanner = scannerBuilder.build();
 
         Object entity = null;
         while (scanner.hasMoreRows())
@@ -197,6 +217,35 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
             }
         }
         return entity;
+    }
+
+    private void addPredicatesToScannerBuilder(KuduScannerBuilder scannerBuilder, EmbeddableType embeddable,
+            Field[] fields, MetamodelImpl metaModel, Object key)
+    {
+        for (Field f : fields)
+        {
+            if (!ReflectUtils.isTransientOrStatic(f))
+            {
+                Object value = PropertyAccessorHelper.getObject(key, f);
+                if (f.getType().isAnnotationPresent(Embeddable.class))
+                {
+                    // nested
+                    addPredicatesToScannerBuilder(scannerBuilder, (EmbeddableType) metaModel.embeddable(f.getType()), f
+                            .getType().getDeclaredFields(), metaModel, value);
+                }
+                else
+                {
+
+                    Attribute attribute = embeddable.getAttribute(f.getName());
+                    Type type = KuduDBValidationClassMapper.getValidTypeForClass(f.getType());
+                    ColumnSchema column = new ColumnSchema.ColumnSchemaBuilder(
+                            ((AbstractAttribute) attribute).getJPAColumnName(), type).build();
+                    KuduPredicate predicate = KuduDBDataHandler.getEqualComparisonPredicate(column, type, value);
+                    scannerBuilder.addPredicate(predicate);
+                }
+            }
+        }
+
     }
 
     /**
@@ -687,12 +736,25 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
         }
         Delete delete = table.newDelete();
         PartialRow row = delete.getRow();
-        Field field = (Field) entityType.getAttribute(
-                ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName()).getJavaMember();
+        String idColumnName = ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName();
+
+        Field field = (Field) entityType.getAttribute(idColumnName).getJavaMember();
         Object value = PropertyAccessorHelper.getObject(entity, field);
-        Type type = KuduDBValidationClassMapper.getValidTypeForClass(field.getType());
-        KuduDBDataHandler.addToRow(row, ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName(),
-                value, type);
+        Type idType = KuduDBValidationClassMapper.getValidTypeForClass(field.getType());
+
+        if (entityType.getAttribute(idColumnName).getJavaType().isAnnotationPresent(Embeddable.class))
+        {
+            // Composite Id
+            EmbeddableType embeddableIdType = metaModel.embeddable(entityType.getAttribute(idColumnName).getJavaType());
+            Field[] fields = entityType.getAttribute(idColumnName).getJavaType().getDeclaredFields();
+            addPrimaryKeyToRow(row, embeddableIdType, fields, metaModel, value);
+        }
+        else
+        {
+            // Simple Id
+            KuduDBDataHandler.addToRow(row, ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName(),
+                    value, idType);
+        }
 
         try
         {
@@ -715,6 +777,32 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
                 throw new KunderaException("Cannot close session", e);
             }
         }
+    }
+
+    private void addPrimaryKeyToRow(PartialRow row, EmbeddableType embeddable, Field[] fields, MetamodelImpl metaModel,
+            Object key)
+    {
+        for (Field f : fields)
+        {
+            if (!ReflectUtils.isTransientOrStatic(f))
+            {
+                Object value = PropertyAccessorHelper.getObject(key, f);
+                if (f.getType().isAnnotationPresent(Embeddable.class))
+                {
+                    // nested
+                    addPrimaryKeyToRow(row, (EmbeddableType) metaModel.embeddable(f.getType()), f.getType()
+                            .getDeclaredFields(), metaModel, value);
+                }
+                else
+                {
+                    Attribute attribute = embeddable.getAttribute(f.getName());
+                    Type type = KuduDBValidationClassMapper.getValidTypeForClass(f.getType());
+                    KuduDBDataHandler.addToRow(row, ((AbstractAttribute) attribute).getJPAColumnName(), value, type);
+                }
+
+            }
+        }
+
     }
 
 }

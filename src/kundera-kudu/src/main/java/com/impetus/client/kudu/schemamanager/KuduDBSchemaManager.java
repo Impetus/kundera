@@ -15,10 +15,16 @@
  ******************************************************************************/
 package com.impetus.client.kudu.schemamanager;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.persistence.Embeddable;
+import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EmbeddableType;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.kudu.ColumnSchema;
@@ -40,7 +46,10 @@ import com.impetus.kundera.configure.schema.SchemaGenerationException;
 import com.impetus.kundera.configure.schema.TableInfo;
 import com.impetus.kundera.configure.schema.api.AbstractSchemaManager;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
+import com.impetus.kundera.utils.ReflectUtils;
 
 /**
  * The Class KuduDBSchemaManager.
@@ -206,7 +215,7 @@ public class KuduDBSchemaManager extends AbstractSchemaManager implements Schema
                         entityColumns.add(columnInfo.getColumnName());
                         alterColumn(alterTableOptions, schema, columnInfo, updated);
                     }
-                    //update for embeddables logic
+                    // update for embeddables logic
                     for (EmbeddedColumnInfo embColumnInfo : tableInfo.getEmbeddedColumnMetadatas())
                     {
                         for (ColumnInfo columnInfo : embColumnInfo.getColumns())
@@ -215,7 +224,7 @@ public class KuduDBSchemaManager extends AbstractSchemaManager implements Schema
                             alterColumn(alterTableOptions, schema, columnInfo, updated);
                         }
                     }
-                    
+
                     // delete columns
                     for (ColumnSchema columnSchema : schema.getColumns())
                     {
@@ -300,10 +309,9 @@ public class KuduDBSchemaManager extends AbstractSchemaManager implements Schema
             }
             catch (Exception e)
             {
-                logger.error(
-                        "Cannot check table existence for table " + tableInfo.getTableName() + ". Caused By: " + e);
-                throw new KunderaException(
-                        "Cannot check table existence for table " + tableInfo.getTableName() + ". Caused By: " + e);
+                logger.error("Cannot check table existence for table " + tableInfo.getTableName() + ". Caused By: " + e);
+                throw new KunderaException("Cannot check table existence for table " + tableInfo.getTableName()
+                        + ". Caused By: " + e);
             }
             createKuduTable(tableInfo);
         }
@@ -317,11 +325,25 @@ public class KuduDBSchemaManager extends AbstractSchemaManager implements Schema
      */
     private void createKuduTable(TableInfo tableInfo)
     {
-        //TODO: handle embedded columns and composite keys
         List<ColumnSchema> columns = new ArrayList<ColumnSchema>();
         // add key
-        columns.add(new ColumnSchema.ColumnSchemaBuilder(tableInfo.getIdColumnName(),
-                KuduDBValidationClassMapper.getValidTypeForClass(tableInfo.getTableIdType())).key(true).build());
+        if (tableInfo.getTableIdType().isAnnotationPresent(Embeddable.class))
+        {
+            // composite keys
+            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                    puMetadata.getPersistenceUnitName());
+            EmbeddableType embeddableIdType = metaModel.embeddable(tableInfo.getTableIdType());
+            Field[] fields = tableInfo.getTableIdType().getDeclaredFields();
+
+            addPrimaryKeyColumnsFromEmbeddable(columns, embeddableIdType, fields, metaModel);
+
+        }
+        else
+        {
+            // simple key
+            columns.add(new ColumnSchema.ColumnSchemaBuilder(tableInfo.getIdColumnName(), KuduDBValidationClassMapper
+                    .getValidTypeForClass(tableInfo.getTableIdType())).key(true).build());
+        }
         // add other columns
         for (ColumnInfo columnInfo : tableInfo.getColumnMetadatas())
         {
@@ -329,9 +351,15 @@ public class KuduDBSchemaManager extends AbstractSchemaManager implements Schema
                     KuduDBValidationClassMapper.getValidTypeForClass(columnInfo.getType()));
             columns.add(columnSchemaBuilder.build());
         }
-        
+
         // add embedded columns
-        for (EmbeddedColumnInfo embColumnInfo : tableInfo.getEmbeddedColumnMetadatas()){
+        for (EmbeddedColumnInfo embColumnInfo : tableInfo.getEmbeddedColumnMetadatas())
+        {
+            if (embColumnInfo.getEmbeddedColumnName().equals(tableInfo.getIdColumnName()))
+            {
+                // skip for embeddable ids
+                continue;
+            }
             buildColumnsFromEmbeddableColumn(embColumnInfo, columns);
         }
         Schema schema = new Schema(columns);
@@ -340,9 +368,26 @@ public class KuduDBSchemaManager extends AbstractSchemaManager implements Schema
             CreateTableOptions builder = new CreateTableOptions();
 
             List<String> rangeKeys = new ArrayList<>();
-            rangeKeys.add(tableInfo.getIdColumnName());
 
-            //TODO: Hard Coded Range Partitioning 
+            // handle for composite Id
+            if (tableInfo.getTableIdType().isAnnotationPresent(Embeddable.class))
+            {
+                Iterator<ColumnSchema> colIter = columns.iterator();
+                while (colIter.hasNext())
+                {
+                    ColumnSchema col = colIter.next();
+                    if (col.isKey())
+                    {
+                        rangeKeys.add(col.getName());
+                    }
+                }
+            }
+            else
+            {
+                rangeKeys.add(tableInfo.getIdColumnName());
+            }
+
+            // TODO: Hard Coded Range Partitioning
             builder.setRangePartitionColumns(rangeKeys);
             client.createTable(tableInfo.getTableName(), schema, builder);
             logger.debug("Table: " + tableInfo.getTableName() + " created successfully");
@@ -350,20 +395,45 @@ public class KuduDBSchemaManager extends AbstractSchemaManager implements Schema
         catch (Exception e)
         {
             logger.error("Table: " + tableInfo.getTableName() + " cannot be created, Caused by: " + e.getMessage(), e);
-            throw new SchemaGenerationException(
-                    "Table: " + tableInfo.getTableName() + " cannot be created, Caused by: " + e.getMessage(), e,
-                    "Kudu");
+            throw new SchemaGenerationException("Table: " + tableInfo.getTableName()
+                    + " cannot be created, Caused by: " + e.getMessage(), e, "Kudu");
         }
+    }
+
+    private void addPrimaryKeyColumnsFromEmbeddable(List<ColumnSchema> columns, EmbeddableType embeddable,
+            Field[] fields, MetamodelImpl metaModel)
+    {
+        for (Field f : fields)
+        {
+            if (!ReflectUtils.isTransientOrStatic(f))
+            {
+                if (f.getType().isAnnotationPresent(Embeddable.class))
+                {
+                    // nested
+                    addPrimaryKeyColumnsFromEmbeddable(columns, (EmbeddableType) metaModel.embeddable(f.getType()), f
+                            .getType().getDeclaredFields(), metaModel);
+                }
+                else
+                {
+                    Attribute attribute = embeddable.getAttribute(f.getName());
+                    columns.add(new ColumnSchema.ColumnSchemaBuilder(
+                            ((AbstractAttribute) attribute).getJPAColumnName(), KuduDBValidationClassMapper
+                                    .getValidTypeForClass(f.getType())).key(true).build());
+                }
+            }
+        }
+
     }
 
     private void buildColumnsFromEmbeddableColumn(EmbeddedColumnInfo embColumnInfo, List<ColumnSchema> columns)
     {
-        for (ColumnInfo columnInfo : embColumnInfo.getColumns()){
+        for (ColumnInfo columnInfo : embColumnInfo.getColumns())
+        {
             ColumnSchemaBuilder columnSchemaBuilder = new ColumnSchema.ColumnSchemaBuilder(columnInfo.getColumnName(),
                     KuduDBValidationClassMapper.getValidTypeForClass(columnInfo.getType()));
             columns.add(columnSchemaBuilder.build());
         }
-        
+
     }
 
     /*
