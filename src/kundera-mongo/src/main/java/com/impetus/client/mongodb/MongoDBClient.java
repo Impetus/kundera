@@ -66,6 +66,8 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBEncoder;
 import com.mongodb.DBObject;
 import com.mongodb.DefaultDBEncoder;
+import com.mongodb.MapReduceCommand;
+import com.mongodb.MapReduceOutput;
 import com.mongodb.MongoException;
 import com.mongodb.WriteConcern;
 import com.mongodb.WriteResult;
@@ -1432,6 +1434,17 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             return entities;
 
         }
+        else if (jsonClause.contains("mapReduce("))
+        {
+            final MapReduceCommand command = parseMapReduceCommand(jsonClause);
+            final MapReduceOutput output = mongoDb.getCollection(command.getInput()).mapReduce(command);
+
+            final BasicDBList list = new BasicDBList();
+            for (final DBObject item : output.results()) {
+                list.add(item);
+            }
+            return list;
+        }
         else
         {
             BasicDBList list = (BasicDBList) executeScript(jsonClause);
@@ -1440,6 +1453,72 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
                 entities.add(obj);
             }
             return entities;
+        }
+    }
+
+    private MapReduceCommand parseMapReduceCommand(String jsonClause) {
+        String collectionName = jsonClause.replaceFirst("(?ms).*\\.\\s*([^.]+?)\\s*\\.\\s*mapReduce\\s*\\(.*", "$1");
+        DBCollection collection = mongoDb.getCollection(collectionName);
+
+        String body = jsonClause.replaceFirst("^(?ms).*?mapReduce\\s*\\(\\s*(.*)\\s*\\)\\s*;?\\s*$", "$1");
+        String mapFunction = findCommaSeparatedArgument(body, 0).trim();
+        String reduceFunction = findCommaSeparatedArgument(body, 1).trim();
+
+        String query = findCommaSeparatedArgument(body, 2).trim();
+        DBObject parameters = (DBObject) JSON.parse(query);
+        DBObject mongoQuery;
+        if (parameters.containsField("query")) {
+            mongoQuery = (DBObject) parameters.get("query");
+        } else {
+            mongoQuery = new BasicDBObject();
+        }
+
+        return new MapReduceCommand(collection,
+              mapFunction, reduceFunction,
+              null, MapReduceCommand.OutputType.INLINE,
+              mongoQuery);
+    }
+
+    private String findCommaSeparatedArgument(String functionBody, int index) {
+        int start = 0;
+        int found = -1;
+        int brackets = 0;
+        int pos = 0;
+        int length = functionBody.length();
+
+        while (found < index && pos < length) {
+            char ch = functionBody.charAt(pos);
+            switch (ch) {
+                case ',':
+                    if (brackets == 0) {
+                        found++;
+
+                        if (found < index) {
+                            start = pos + 1;
+                        }
+                    }
+                    break;
+                case '(':
+                case '[':
+                case '{':
+                    brackets++;
+                    break;
+                case ')':
+                case ']':
+                case '}':
+                    brackets--;
+                    break;
+            }
+
+            pos++;
+        }
+
+        if (found == index) {
+            return functionBody.substring(start, pos - 1);
+        } else if (pos == length) {
+            return functionBody.substring(start);
+        } else {
+            return "";
         }
     }
 

@@ -39,6 +39,7 @@ import com.impetus.client.crud.entities.PersonMongo.Month;
 import com.impetus.client.utils.MongoUtils;
 import com.impetus.kundera.client.Client;
 import com.mongodb.BasicDBList;
+import com.mongodb.BasicDBObject;
 
 public class PersonMongoTest extends BaseTest
 {
@@ -800,5 +801,54 @@ public class PersonMongoTest extends BaseTest
         Assert.assertNotNull(results.get(0).getPersonName());
         Assert.assertNotNull(results.get(0).getAge());
 
+    }
+
+    @Test
+    public void mapReduceTest()
+    {
+        Object p1 = prepareMongoInstance("1", 10);
+        Object p2 = prepareMongoInstance("2", 20);
+        Object p3 = prepareMongoInstance("3", 15);
+        Object p4 = prepareMongoInstance("4", 12);
+        Object p5 = prepareMongoInstance("5", 19);
+        Object p6 = prepareMongoInstance("6", 23);
+        em.persist(p1);
+        em.persist(p2);
+        em.persist(p3);
+        em.persist(p4);
+        em.persist(p5);
+        em.persist(p6);
+
+        String query = "db.PERSON.mapReduce(\n" +
+              "  function () { emit( this.AGE - this.AGE % 10, 1 ); },\n" +
+              "  function (key, values) { return { age: key, count: Array.sum(values) }; },\n" +
+              "  { query: {}, out: { inline: 1 } }\n" +
+              ")";
+
+        Query q = em.createNativeQuery(query);
+        List<BasicDBObject> results = q.getResultList();
+
+        Assert.assertNotNull(results);
+        Assert.assertEquals(2, results.size());
+
+        for (BasicDBObject item : results) {
+            Assert.assertTrue(item.containsField("value"));
+
+            BasicDBObject value = (BasicDBObject) item.get("value");
+
+            Assert.assertTrue(value.containsField("age"));
+            Assert.assertTrue(value.containsField("count"));
+
+            int age = value.getInt("age");
+            int count = value.getInt("count");
+
+            if (age == 10) {
+                Assert.assertEquals(4, count);
+            } else if (age == 20) {
+                Assert.assertEquals(2, count);
+            } else {
+                Assert.fail("Unexpected result");
+            }
+        }
     }
 }
