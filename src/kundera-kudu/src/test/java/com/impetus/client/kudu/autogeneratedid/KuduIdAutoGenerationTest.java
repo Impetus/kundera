@@ -20,15 +20,14 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
-import javax.persistence.Query;
-
-import junit.framework.Assert;
 
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import junit.framework.Assert;
 
 /**
  * The Class KuduIdAutoGenerationTest.
@@ -91,13 +90,17 @@ public class KuduIdAutoGenerationTest
         em.persist(emp2);
         em.clear();
 
-        List employees = em.createQuery("select e from Employee e").getResultList();
+        List<Employee> employees = em.createQuery("select e from Employee e").getResultList();
         Assert.assertEquals(2, employees.size());
         assertEmployees(employees);
 
-        Query q = em.createQuery("delete from Employee e");
-        int count = q.executeUpdate();
-        Assert.assertEquals(2, count);
+        for (Employee emp : employees)
+        {
+            em.remove(emp);
+        }
+
+        employees = em.createQuery("select e from Employee e").getResultList();
+        Assert.assertEquals(0, employees.size());
 
     }
 
