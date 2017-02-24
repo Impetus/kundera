@@ -219,6 +219,15 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
         return entity;
     }
 
+    /**
+     * Adds the predicates to scanner builder.
+     *
+     * @param scannerBuilder the scanner builder
+     * @param embeddable the embeddable
+     * @param fields the fields
+     * @param metaModel the meta model
+     * @param key the key
+     */
     private void addPredicatesToScannerBuilder(KuduScannerBuilder scannerBuilder, EmbeddableType embeddable,
             Field[] fields, MetamodelImpl metaModel, Object key)
     {
@@ -562,8 +571,8 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
      */
     @Override
     public Generator getIdGenerator()
-    { // TODO Auto-generated method stub
-        return null;
+    {
+        return (Generator) KunderaCoreUtils.createNewInstance(KuduDBIdGenerator.class);
     }
 
     /*
@@ -779,6 +788,15 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
         }
     }
 
+    /**
+     * Adds the primary key to row.
+     *
+     * @param row the row
+     * @param embeddable the embeddable
+     * @param fields the fields
+     * @param metaModel the meta model
+     * @param key the key
+     */
     private void addPrimaryKeyToRow(PartialRow row, EmbeddableType embeddable, Field[] fields, MetamodelImpl metaModel,
             Object key)
     {
