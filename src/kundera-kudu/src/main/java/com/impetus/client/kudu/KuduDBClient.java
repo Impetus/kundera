@@ -164,7 +164,7 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
                 .getMetamodel(entityMetadata.getPersistenceUnit());
         EntityType entityType = metaModel.entity(entityMetadata.getEntityClazz());
 
-        String idColumnName = ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName();
+        String idColumnName = ((AbstractAttribute) entityMetadata.getIdAttribute()).getName();
 
         Field field = (Field) entityType.getAttribute(idColumnName).getJavaMember();
 
@@ -195,7 +195,7 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
         else
         {
             // Simple Id
-            ColumnSchema column = new ColumnSchema.ColumnSchemaBuilder(idColumnName, idType).build();
+            ColumnSchema column = new ColumnSchema.ColumnSchemaBuilder(((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName(), idType).build();
 
             KuduPredicate predicate = KuduDBDataHandler.getEqualComparisonPredicate(column, idType, key);
             scannerBuilder.addPredicate(predicate);

@@ -86,7 +86,10 @@ public class KuduDBClientFactory extends GenericClientFactory
 
         Properties pumProps = pum.getProperties();
 
-        pumProps.putAll(puProperties);
+        if (puProperties != null)
+        {
+            pumProps.putAll(puProperties);
+        }
 
         String kuduMasterHost = (String) pumProps.getProperty("kundera.nodes");
 
