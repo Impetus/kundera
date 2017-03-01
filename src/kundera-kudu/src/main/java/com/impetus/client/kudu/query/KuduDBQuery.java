@@ -47,6 +47,8 @@ import com.impetus.client.kudu.KuduDBDataHandler;
 import com.impetus.client.kudu.KuduDBValidationClassMapper;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.ClientBase;
+import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
@@ -97,61 +99,71 @@ public class KuduDBQuery extends QueryImpl implements Query
     protected List populateEntities(EntityMetadata m, Client client)
     {
         List results = new ArrayList();
-        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
-                .getMetamodel(m.getPersistenceUnit());
-        EntityType entityType = metaModel.entity(m.getEntityClazz());
 
-        KuduClient kuduClient = ((KuduDBClient) client).getKuduClient();
-        KuduTable table;
-        try
+        if (!MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
         {
-            table = kuduClient.openTable(m.getTableName());
-        }
-        catch (Exception e)
-        {
-            logger.error("Cannot open table : " + m.getTableName(), e);
-            throw new KunderaException("Cannot open table : " + m.getTableName(), e);
-        }
-        KuduScannerBuilder scannerBuilder = kuduClient.newScannerBuilder(table);
-        JPQLExpression jpqlExp = kunderaQuery.getJpqlExpression();
-        List<String> selectColumns = KunderaQueryUtils.getSelectColumns(jpqlExp);
-        if (!selectColumns.isEmpty())
-        {
-            // select by specific columns, set projection
-            scannerBuilder.setProjectedColumnNames(selectColumns);
-        }
-        if (KunderaQueryUtils.hasWhereClause(jpqlExp))
-        {
-            // add predicate filters
-            WhereClause whereClause = KunderaQueryUtils.getWhereClause(jpqlExp);
-            Expression whereExp = whereClause.getConditionalExpression();
-            parseAndBuildFilters(entityType, scannerBuilder, whereExp);
+            results.addAll(populateUsingLucene(m, client, null, getKunderaQuery().getResult()));
         }
 
-        KuduScanner scanner = scannerBuilder.build();
-
-        Object entity;
-        while (scanner.hasMoreRows())
+        else
         {
-            RowResultIterator rowResultIter;
+            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
+                    .getMetamodel(m.getPersistenceUnit());
+            EntityType entityType = metaModel.entity(m.getEntityClazz());
+
+            KuduClient kuduClient = ((KuduDBClient) client).getKuduClient();
+            KuduTable table;
             try
             {
-                rowResultIter = scanner.nextRows();
+                table = kuduClient.openTable(m.getTableName());
             }
             catch (Exception e)
             {
-                logger.error("Cannot get results from table : " + m.getTableName(), e);
-                throw new KunderaException("Cannot get results from table : " + m.getTableName(), e);
+                logger.error("Cannot open table : " + m.getTableName(), e);
+                throw new KunderaException("Cannot open table : " + m.getTableName(), e);
             }
 
-            while (rowResultIter.hasNext())
+            KuduScannerBuilder scannerBuilder = kuduClient.newScannerBuilder(table);
+            JPQLExpression jpqlExp = kunderaQuery.getJpqlExpression();
+            List<String> selectColumns = KunderaQueryUtils.getSelectColumns(jpqlExp);
+            if (!selectColumns.isEmpty())
             {
-                RowResult result = rowResultIter.next();
-                entity = KunderaCoreUtils.createNewInstance(m.getEntityClazz());
-                // populate RowResult to entity object and return
-                ((KuduDBClient) client).populateEntity(entity, result, entityType, metaModel);
-                results.add(entity);
-                logger.debug(result.rowToString());
+                // select by specific columns, set projection
+                scannerBuilder.setProjectedColumnNames(selectColumns);
+            }
+            if (KunderaQueryUtils.hasWhereClause(jpqlExp))
+            {
+                // add predicate filters
+                WhereClause whereClause = KunderaQueryUtils.getWhereClause(jpqlExp);
+                Expression whereExp = whereClause.getConditionalExpression();
+                parseAndBuildFilters(entityType, scannerBuilder, whereExp);
+            }
+
+            KuduScanner scanner = scannerBuilder.build();
+
+            Object entity;
+            while (scanner.hasMoreRows())
+            {
+                RowResultIterator rowResultIter;
+                try
+                {
+                    rowResultIter = scanner.nextRows();
+                }
+                catch (Exception e)
+                {
+                    logger.error("Cannot get results from table : " + m.getTableName(), e);
+                    throw new KunderaException("Cannot get results from table : " + m.getTableName(), e);
+                }
+
+                while (rowResultIter.hasNext())
+                {
+                    RowResult result = rowResultIter.next();
+                    entity = KunderaCoreUtils.createNewInstance(m.getEntityClazz());
+                    // populate RowResult to entity object and return
+                    ((KuduDBClient) client).populateEntity(entity, result, entityType, metaModel);
+                    results.add(entity);
+                    logger.debug(result.rowToString());
+                }
             }
         }
         return results;
