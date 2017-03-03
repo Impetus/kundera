@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.client.mongodb.query.MongoDBQuery;
+import com.impetus.client.mongodb.query.gfs.KunderaGridFS;
 import com.impetus.client.mongodb.utils.MongoDBUtils;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.PersistenceProperties;
@@ -71,7 +72,6 @@ import com.mongodb.MapReduceOutput;
 import com.mongodb.MongoException;
 import com.mongodb.WriteConcern;
 import com.mongodb.WriteResult;
-import com.mongodb.gridfs.GridFS;
 import com.mongodb.gridfs.GridFSDBFile;
 import com.mongodb.gridfs.GridFSInputFile;
 import com.mongodb.util.JSON;
@@ -409,7 +409,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     {
         String id = ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName();
         DBObject query = new BasicDBObject("metadata." + id, key);
-        GridFS gfs = new GridFS(mongoDb, entityMetadata.getTableName());
+        KunderaGridFS gfs = new KunderaGridFS(mongoDb, entityMetadata.getTableName());
         return gfs.findOne(query);
     }
 
@@ -497,12 +497,13 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         AbstractManagedType managedType = (AbstractManagedType) metaModel.entity(entityMetadata.getEntityClazz());
         boolean hasLob = managedType.hasLobAttribute();
         return (List<E>) (!hasLob ? loadQueryData(entityMetadata, mongoQuery, orderBy, maxResult, firstResult, keys,
-                results) : loadQueryDataGFS(entityMetadata, mongoQuery, orderBy));
+                results) : loadQueryDataGFS(entityMetadata, mongoQuery, orderBy, maxResult, firstResult));
     }
 
-    private <E> List<E> loadQueryDataGFS(EntityMetadata entityMetadata, BasicDBObject mongoQuery, BasicDBObject orderBy)
+    private <E> List<E> loadQueryDataGFS(EntityMetadata entityMetadata, BasicDBObject mongoQuery, BasicDBObject orderBy,
+            int maxResult, int firstResult)
     {
-        List<GridFSDBFile> gfsDBfiles = getGFSDBFiles(mongoQuery, orderBy, entityMetadata.getTableName());
+        List<GridFSDBFile> gfsDBfiles = getGFSDBFiles(mongoQuery, orderBy, entityMetadata.getTableName(), maxResult, firstResult);
         List entities = new ArrayList<E>();
         for (GridFSDBFile file : gfsDBfiles)
         {
@@ -618,10 +619,11 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         return cursor;
     }
 
-    public List<GridFSDBFile> getGFSDBFiles(BasicDBObject mongoQuery, BasicDBObject sort, String collectionName)
+    private List<GridFSDBFile> getGFSDBFiles(BasicDBObject mongoQuery, BasicDBObject sort, String collectionName,
+            int maxResult, int firstResult)
     {
-        GridFS gfs = new GridFS(mongoDb, collectionName);
-        return gfs.find(mongoQuery, sort);
+        KunderaGridFS gfs = new KunderaGridFS(mongoDb, collectionName);
+        return gfs.find(mongoQuery, sort, firstResult, maxResult);
     }
 
     /*
@@ -642,7 +644,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
         if (managedType.hasLobAttribute())
         {
-            GridFS gfs = new GridFS(mongoDb, entityMetadata.getTableName());
+            KunderaGridFS gfs = new KunderaGridFS(mongoDb, entityMetadata.getTableName());
             String id = ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName();
             query.put("metadata." + id, pKey);
             gfs.remove(query);
@@ -888,7 +890,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      */
     private void onPersistGFS(Object entity, Object entityId, EntityMetadata entityMetadata, boolean isUpdate)
     {
-        GridFS gfs = new GridFS(mongoDb, entityMetadata.getTableName());
+        KunderaGridFS gfs = new KunderaGridFS(mongoDb, entityMetadata.getTableName());
         if (!isUpdate)
         {
             GridFSInputFile gfsInputFile = handler.getGFSInputFileFromEntity(gfs, entityMetadata, entity,
