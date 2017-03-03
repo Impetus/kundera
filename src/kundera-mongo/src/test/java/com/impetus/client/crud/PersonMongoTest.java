@@ -41,9 +41,13 @@ import com.impetus.kundera.client.Client;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 
+/**
+ * The Class PersonMongoTest.
+ */
 public class PersonMongoTest extends BaseTest
 {
 
+    /** The Constant _PU. */
     private static final String _PU = "mongoTest";
 
     /** The emf. */
@@ -52,6 +56,7 @@ public class PersonMongoTest extends BaseTest
     /** The em. */
     private static EntityManager em;
 
+    /** The col. */
     private Map<Object, Object> col;
 
     /**
@@ -70,6 +75,9 @@ public class PersonMongoTest extends BaseTest
 
     /**
      * On insert mongo.
+     * 
+     * @throws Exception
+     *             the exception
      */
     @Test
     public void onInsertMongo() throws Exception
@@ -159,6 +167,9 @@ public class PersonMongoTest extends BaseTest
 
     }
 
+    /**
+     * Select id query.
+     */
     private void selectIdQuery()
     {
         String query = "select p.personId from PersonMongo p";
@@ -271,6 +282,9 @@ public class PersonMongoTest extends BaseTest
 
     /**
      * On merge mongo.
+     * 
+     * @throws Exception
+     *             the exception
      */
     @Test
     public void onMergeMongo() throws Exception
@@ -317,6 +331,9 @@ public class PersonMongoTest extends BaseTest
 
     }
 
+    /**
+     * On execute script.
+     */
     private void onExecuteScript()
     {
 
@@ -385,6 +402,9 @@ public class PersonMongoTest extends BaseTest
 
     }
 
+    /**
+     * On execute native query.
+     */
     private void onExecuteNativeQuery()
     {
 
@@ -608,6 +628,9 @@ public class PersonMongoTest extends BaseTest
         Assert.assertEquals("dev", list.get(0).getPersonName());
     }
 
+    /**
+     * Increment function test.
+     */
     @Test
     public void incrementFunctionTest()
     {
@@ -649,6 +672,9 @@ public class PersonMongoTest extends BaseTest
         Assert.assertEquals(new Integer(13), results.get(0).getAge());
     }
 
+    /**
+     * Sub query test.
+     */
     @Test
     public void subQueryTest()
     {
@@ -696,6 +722,9 @@ public class PersonMongoTest extends BaseTest
 
     }
 
+    /**
+     * Inter clause operator test.
+     */
     @Test
     public void interClauseOperatorTest()
     {
@@ -762,6 +791,9 @@ public class PersonMongoTest extends BaseTest
 
     }
 
+    /**
+     * Pagination query test.
+     */
     @Test
     public void paginationQueryTest()
     {
@@ -803,6 +835,9 @@ public class PersonMongoTest extends BaseTest
 
     }
 
+    /**
+     * Map reduce test.
+     */
     @Test
     public void mapReduceTest()
     {
@@ -819,11 +854,9 @@ public class PersonMongoTest extends BaseTest
         em.persist(p5);
         em.persist(p6);
 
-        String query = "db.PERSON.mapReduce(\n" +
-              "  function () { emit( this.AGE - this.AGE % 10, 1 ); },\n" +
-              "  function (key, values) { return { age: key, count: Array.sum(values) }; },\n" +
-              "  { query: {}, out: { inline: 1 } }\n" +
-              ")";
+        String query = "db.PERSON.mapReduce(\n" + "  function () { emit( this.AGE - this.AGE % 10, 1 ); },\n"
+                + "  function (key, values) { return { age: key, count: Array.sum(values) }; },\n"
+                + "  { query: {}, out: { inline: 1 } }\n" + ")";
 
         Query q = em.createNativeQuery(query);
         List<BasicDBObject> results = q.getResultList();
@@ -831,7 +864,8 @@ public class PersonMongoTest extends BaseTest
         Assert.assertNotNull(results);
         Assert.assertEquals(2, results.size());
 
-        for (BasicDBObject item : results) {
+        for (BasicDBObject item : results)
+        {
             Assert.assertTrue(item.containsField("value"));
 
             BasicDBObject value = (BasicDBObject) item.get("value");
@@ -842,11 +876,16 @@ public class PersonMongoTest extends BaseTest
             int age = value.getInt("age");
             int count = value.getInt("count");
 
-            if (age == 10) {
+            if (age == 10)
+            {
                 Assert.assertEquals(4, count);
-            } else if (age == 20) {
+            }
+            else if (age == 20)
+            {
                 Assert.assertEquals(2, count);
-            } else {
+            }
+            else
+            {
                 Assert.fail("Unexpected result");
             }
         }

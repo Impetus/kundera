@@ -119,7 +119,7 @@ public class GridFSTest
      * @throws Exception
      *             the exception
      */
-     @Test
+    @Test
     public void testCRUDGridFS() throws Exception
     {
         testInsert();
@@ -367,7 +367,8 @@ public class GridFSTest
      * @param expectUser4
      *            expect user4 to be found
      */
-    private void assertUsers(List<GFSUser> userList, boolean expectUser1, boolean expectUser2, boolean expectUser3, boolean expectUser4)
+    private void assertUsers(List<GFSUser> userList, boolean expectUser1, boolean expectUser2, boolean expectUser3,
+            boolean expectUser4)
     {
         boolean foundUser1 = false;
         boolean foundUser2 = false;

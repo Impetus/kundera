@@ -103,13 +103,25 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     /** The batch size. */
     private int batchSize;
 
+    /** The ordered bulk operation. */
     private boolean orderedBulkOperation;
 
+    /**
+     * Checks if is ordered bulk operation.
+     * 
+     * @return true, if is ordered bulk operation
+     */
     public boolean isOrderedBulkOperation()
     {
         return orderedBulkOperation;
     }
 
+    /**
+     * Sets the ordered bulk operation.
+     * 
+     * @param orderedBulkOperation
+     *            the new ordered bulk operation
+     */
     public void setOrderedBulkOperation(boolean orderedBulkOperation)
     {
         this.orderedBulkOperation = orderedBulkOperation;
@@ -500,10 +512,28 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
                 results) : loadQueryDataGFS(entityMetadata, mongoQuery, orderBy, maxResult, firstResult));
     }
 
-    private <E> List<E> loadQueryDataGFS(EntityMetadata entityMetadata, BasicDBObject mongoQuery, BasicDBObject orderBy,
-            int maxResult, int firstResult)
+    /**
+     * Load query data gfs.
+     * 
+     * @param <E>
+     *            the element type
+     * @param entityMetadata
+     *            the entity metadata
+     * @param mongoQuery
+     *            the mongo query
+     * @param orderBy
+     *            the order by
+     * @param maxResult
+     *            the max result
+     * @param firstResult
+     *            the first result
+     * @return the list
+     */
+    private <E> List<E> loadQueryDataGFS(EntityMetadata entityMetadata, BasicDBObject mongoQuery,
+            BasicDBObject orderBy, int maxResult, int firstResult)
     {
-        List<GridFSDBFile> gfsDBfiles = getGFSDBFiles(mongoQuery, orderBy, entityMetadata.getTableName(), maxResult, firstResult);
+        List<GridFSDBFile> gfsDBfiles = getGFSDBFiles(mongoQuery, orderBy, entityMetadata.getTableName(), maxResult,
+                firstResult);
         List entities = new ArrayList<E>();
         for (GridFSDBFile file : gfsDBfiles)
         {
@@ -512,6 +542,31 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         return entities;
     }
 
+    /**
+     * Load query data.
+     * 
+     * @param <E>
+     *            the element type
+     * @param entityMetadata
+     *            the entity metadata
+     * @param mongoQuery
+     *            the mongo query
+     * @param orderBy
+     *            the order by
+     * @param maxResult
+     *            the max result
+     * @param firstResult
+     *            the first result
+     * @param keys
+     *            the keys
+     * @param results
+     *            the results
+     * @return the list
+     * @throws InstantiationException
+     *             the instantiation exception
+     * @throws IllegalAccessException
+     *             the illegal access exception
+     */
     private <E> List<E> loadQueryData(EntityMetadata entityMetadata, BasicDBObject mongoQuery, BasicDBObject orderBy,
             int maxResult, int firstResult, BasicDBObject keys, String... results) throws InstantiationException,
             IllegalAccessException
@@ -579,6 +634,16 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         return entities;
     }
 
+    /**
+     * Populate gfs entity.
+     * 
+     * @param entityMetadata
+     *            the entity metadata
+     * @param entities
+     *            the entities
+     * @param gfsDBFile
+     *            the gfs db file
+     */
     private void populateGFSEntity(EntityMetadata entityMetadata, List entities, GridFSDBFile gfsDBFile)
     {
         Object entity = instantiateEntity(entityMetadata.getEntityClazz(), null);
@@ -619,6 +684,21 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         return cursor;
     }
 
+    /**
+     * Gets the GFSDB files.
+     * 
+     * @param mongoQuery
+     *            the mongo query
+     * @param sort
+     *            the sort
+     * @param collectionName
+     *            the collection name
+     * @param maxResult
+     *            the max result
+     * @param firstResult
+     *            the first result
+     * @return the GFSDB files
+     */
     private List<GridFSDBFile> getGFSDBFiles(BasicDBObject mongoQuery, BasicDBObject sort, String collectionName,
             int maxResult, int firstResult)
     {
@@ -844,6 +924,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      * 
      * @param gfsInputFile
      *            the gfs input file
+     * @param m
+     *            the m
      */
     private void saveGridFSFile(GridFSInputFile gfsInputFile, EntityMetadata m)
     {
@@ -1147,7 +1229,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
                 DBCollection dbCollection = mongoDb.getCollection(documentName);
                 KunderaCoreUtils.printQuery("Persist collection:" + documentName, showQuery);
 
-                dbCollection.save(documents.get(documentName),getWriteConcern());
+                dbCollection.save(documents.get(documentName), getWriteConcern());
             }
         }
         else
@@ -1442,7 +1524,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             final MapReduceOutput output = mongoDb.getCollection(command.getInput()).mapReduce(command);
 
             final BasicDBList list = new BasicDBList();
-            for (final DBObject item : output.results()) {
+            for (final DBObject item : output.results())
+            {
                 list.add(item);
             }
             return list;
@@ -1458,7 +1541,15 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         }
     }
 
-    private MapReduceCommand parseMapReduceCommand(String jsonClause) {
+    /**
+     * Parses the map reduce command.
+     * 
+     * @param jsonClause
+     *            the json clause
+     * @return the map reduce command
+     */
+    private MapReduceCommand parseMapReduceCommand(String jsonClause)
+    {
         String collectionName = jsonClause.replaceFirst("(?ms).*\\.\\s*([^.]+?)\\s*\\.\\s*mapReduce\\s*\\(.*", "$1");
         DBCollection collection = mongoDb.getCollection(collectionName);
 
@@ -1469,57 +1560,77 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         String query = findCommaSeparatedArgument(body, 2).trim();
         DBObject parameters = (DBObject) JSON.parse(query);
         DBObject mongoQuery;
-        if (parameters.containsField("query")) {
+        if (parameters.containsField("query"))
+        {
             mongoQuery = (DBObject) parameters.get("query");
-        } else {
+        }
+        else
+        {
             mongoQuery = new BasicDBObject();
         }
 
-        return new MapReduceCommand(collection,
-              mapFunction, reduceFunction,
-              null, MapReduceCommand.OutputType.INLINE,
-              mongoQuery);
+        return new MapReduceCommand(collection, mapFunction, reduceFunction, null, MapReduceCommand.OutputType.INLINE,
+                mongoQuery);
     }
 
-    private String findCommaSeparatedArgument(String functionBody, int index) {
+    /**
+     * Find comma separated argument.
+     * 
+     * @param functionBody
+     *            the function body
+     * @param index
+     *            the index
+     * @return the string
+     */
+    private String findCommaSeparatedArgument(String functionBody, int index)
+    {
         int start = 0;
         int found = -1;
         int brackets = 0;
         int pos = 0;
         int length = functionBody.length();
 
-        while (found < index && pos < length) {
+        while (found < index && pos < length)
+        {
             char ch = functionBody.charAt(pos);
-            switch (ch) {
-                case ',':
-                    if (brackets == 0) {
-                        found++;
+            switch (ch)
+            {
+            case ',':
+                if (brackets == 0)
+                {
+                    found++;
 
-                        if (found < index) {
-                            start = pos + 1;
-                        }
+                    if (found < index)
+                    {
+                        start = pos + 1;
                     }
-                    break;
-                case '(':
-                case '[':
-                case '{':
-                    brackets++;
-                    break;
-                case ')':
-                case ']':
-                case '}':
-                    brackets--;
-                    break;
+                }
+                break;
+            case '(':
+            case '[':
+            case '{':
+                brackets++;
+                break;
+            case ')':
+            case ']':
+            case '}':
+                brackets--;
+                break;
             }
 
             pos++;
         }
 
-        if (found == index) {
+        if (found == index)
+        {
             return functionBody.substring(start, pos - 1);
-        } else if (pos == length) {
+        }
+        else if (pos == length)
+        {
             return functionBody.substring(start);
-        } else {
+        }
+        else
+        {
             return "";
         }
     }
@@ -1639,6 +1750,14 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         return result.getN();
     }
 
+    /**
+     * Creates the unique index gfs.
+     * 
+     * @param coll
+     *            the coll
+     * @param id
+     *            the id
+     */
     private void createUniqueIndexGFS(DBCollection coll, String id)
     {
         try
