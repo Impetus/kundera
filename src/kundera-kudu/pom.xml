@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>kundera</artifactId>
 		<groupId>com.impetus</groupId>
-		<version>3.8-SNAPSHOT</version>
+		<version>3.9-SNAPSHOT</version>
 	</parent>
 	<groupId>com.impetus.kundera.client</groupId>
 	<artifactId>kundera-kudu</artifactId>
@@ -40,12 +40,18 @@
 		</dependency>
 
 		<dependency>
+			<groupId>com.impetus.kundera.client</groupId>
+			<artifactId>kundera-elastic-search</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.8.2</version>
 			<scope>test</scope>
 		</dependency>
-
 
 		<!-- kudu dependencies -->
 

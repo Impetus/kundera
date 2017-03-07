@@ -61,6 +61,9 @@ public class GridFSTest
     /** The profile pic3. */
     private byte[] profilePic3;
 
+    /** The profile pic4. */
+    private byte[] profilePic4;
+
     /**
      * Sets the up before class.
      * 
@@ -116,7 +119,7 @@ public class GridFSTest
      * @throws Exception
      *             the exception
      */
-     @Test
+    @Test
     public void testCRUDGridFS() throws Exception
     {
         testInsert();
@@ -143,17 +146,21 @@ public class GridFSTest
         profilePic3 = createBinaryData("src/test/resources/pic.jpg", 20);
         GFSUser user3 = prepareUserObject(3, "Amit", profilePic3);
 
+        profilePic4 = createBinaryData("src/test/resources/pic.jpg", 25);
+        GFSUser user4 = prepareUserObject(4, "Viktor", profilePic4);
+
         em.persist(user1);
         em.persist(user2);
         em.persist(user3);
+        em.persist(user4);
 
         em.clear();
 
         String query = "SELECT u FROM GFSUser u";
         Query qry = em.createQuery(query);
         List<GFSUser> userList = qry.getResultList();
-        Assert.assertEquals(3, userList.size());
-        assertUsers(userList, true, true, true);
+        Assert.assertEquals(4, userList.size());
+        assertUsers(userList, true, true, true, true);
 
         query = "SELECT u FROM GFSUser u WHERE u.name = 'Dev'";
         qry = em.createQuery(query);
@@ -177,8 +184,8 @@ public class GridFSTest
         query = "SELECT u FROM GFSUser u WHERE u.userId > 1";
         qry = em.createQuery(query);
         userList = qry.getResultList();
-        Assert.assertEquals(2, userList.size());
-        assertUsers(userList, false, true, true);
+        Assert.assertEquals(3, userList.size());
+        assertUsers(userList, false, true, true, true);
 
         query = "SELECT u FROM GFSUser u WHERE u.userId = 2 and u.name = 'PG'";
         qry = em.createQuery(query);
@@ -192,16 +199,41 @@ public class GridFSTest
         qry = em.createQuery(query);
         userList = qry.getResultList();
         Assert.assertEquals(2, userList.size());
-        assertUsers(userList, true, true, false);
+        assertUsers(userList, true, true, false, false);
+
+        query = "SELECT u FROM GFSUser u order by u.name DESC";
+        qry = em.createQuery(query);
+        qry.setFirstResult(1);
+        qry.setMaxResults(1);
+        userList = qry.getResultList();
+        Assert.assertEquals(1, userList.size());
+        assertUsers(userList, false, true, false, false);
+
+        query = "SELECT u FROM GFSUser u order by u.name DESC";
+        qry = em.createQuery(query);
+        qry.setFirstResult(2);
+        qry.setMaxResults(1);
+        userList = qry.getResultList();
+        Assert.assertEquals(1, userList.size());
+        assertUsers(userList, true, false, false, false);
+
+        query = "SELECT u FROM GFSUser u order by u.name DESC";
+        qry = em.createQuery(query);
+        qry.setMaxResults(2);
+        userList = qry.getResultList();
+        Assert.assertEquals(2, userList.size());
+        assertUsers(userList, false, true, false, true);
 
         // remove all users
         GFSUser u1 = em.find(GFSUser.class, 1);
         GFSUser u2 = em.find(GFSUser.class, 2);
         GFSUser u3 = em.find(GFSUser.class, 3);
+        GFSUser u4 = em.find(GFSUser.class, 4);
         em.clear();
         em.remove(u1);
         em.remove(u2);
         em.remove(u3);
+        em.remove(u4);
     }
 
     /**
@@ -326,33 +358,51 @@ public class GridFSTest
      * 
      * @param userList
      *            the user list
-     * @param foundUser1
-     *            the found user1
-     * @param foundUser2
-     *            the found user2
-     * @param foundUser3
-     *            the found user3
+     * @param expectUser1
+     *            expect user1 to be found
+     * @param expectUser2
+     *            expect user2 to be found
+     * @param expectUser3
+     *            expect user3 to be found
+     * @param expectUser4
+     *            expect user4 to be found
      */
-    private void assertUsers(List<GFSUser> userList, boolean foundUser1, boolean foundUser2, boolean foundUser3)
+    private void assertUsers(List<GFSUser> userList, boolean expectUser1, boolean expectUser2, boolean expectUser3,
+            boolean expectUser4)
     {
+        boolean foundUser1 = false;
+        boolean foundUser2 = false;
+        boolean foundUser3 = false;
+        boolean foundUser4 = false;
+
         for (GFSUser user : userList)
         {
             if (user.getUserId() == 1)
             {
+                foundUser1 = true;
                 Assert.assertEquals("Dev", user.getName());
                 Assert.assertEquals(profilePic1.length, user.getProfilePic().length);
             }
 
             else if (user.getUserId() == 2)
             {
+                foundUser2 = true;
                 Assert.assertEquals("PG", user.getName());
                 Assert.assertEquals(profilePic2.length, user.getProfilePic().length);
             }
 
             else if (user.getUserId() == 3)
             {
+                foundUser3 = true;
                 Assert.assertEquals("Amit", user.getName());
                 Assert.assertEquals(profilePic3.length, user.getProfilePic().length);
+            }
+
+            else if (user.getUserId() == 4)
+            {
+                foundUser4 = true;
+                Assert.assertEquals("Viktor", user.getName());
+                Assert.assertEquals(profilePic4.length, user.getProfilePic().length);
             }
 
             else
@@ -360,6 +410,11 @@ public class GridFSTest
                 Assert.fail();
             }
         }
+
+        Assert.assertEquals(expectUser1, foundUser1);
+        Assert.assertEquals(expectUser2, foundUser2);
+        Assert.assertEquals(expectUser3, foundUser3);
+        Assert.assertEquals(expectUser4, foundUser4);
     }
 
 }

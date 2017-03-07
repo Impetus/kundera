@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.client.mongodb.query.MongoDBQuery;
+import com.impetus.client.mongodb.query.gfs.KunderaGridFS;
 import com.impetus.client.mongodb.utils.MongoDBUtils;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.PersistenceProperties;
@@ -71,7 +72,6 @@ import com.mongodb.MapReduceOutput;
 import com.mongodb.MongoException;
 import com.mongodb.WriteConcern;
 import com.mongodb.WriteResult;
-import com.mongodb.gridfs.GridFS;
 import com.mongodb.gridfs.GridFSDBFile;
 import com.mongodb.gridfs.GridFSInputFile;
 import com.mongodb.util.JSON;
@@ -103,13 +103,25 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     /** The batch size. */
     private int batchSize;
 
+    /** The ordered bulk operation. */
     private boolean orderedBulkOperation;
 
+    /**
+     * Checks if is ordered bulk operation.
+     *
+     * @return true, if is ordered bulk operation
+     */
     public boolean isOrderedBulkOperation()
     {
         return orderedBulkOperation;
     }
 
+    /**
+     * Sets the ordered bulk operation.
+     *
+     * @param orderedBulkOperation
+     *            the new ordered bulk operation
+     */
     public void setOrderedBulkOperation(boolean orderedBulkOperation)
     {
         this.orderedBulkOperation = orderedBulkOperation;
@@ -409,7 +421,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     {
         String id = ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName();
         DBObject query = new BasicDBObject("metadata." + id, key);
-        GridFS gfs = new GridFS(mongoDb, entityMetadata.getTableName());
+        KunderaGridFS gfs = new KunderaGridFS(mongoDb, entityMetadata.getTableName());
         return gfs.findOne(query);
     }
 
@@ -497,12 +509,31 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         AbstractManagedType managedType = (AbstractManagedType) metaModel.entity(entityMetadata.getEntityClazz());
         boolean hasLob = managedType.hasLobAttribute();
         return (List<E>) (!hasLob ? loadQueryData(entityMetadata, mongoQuery, orderBy, maxResult, firstResult, keys,
-                results) : loadQueryDataGFS(entityMetadata, mongoQuery, orderBy));
+                results) : loadQueryDataGFS(entityMetadata, mongoQuery, orderBy, maxResult, firstResult));
     }
 
-    private <E> List<E> loadQueryDataGFS(EntityMetadata entityMetadata, BasicDBObject mongoQuery, BasicDBObject orderBy)
+    /**
+     * Load query data gfs.
+     *
+     * @param <E>
+     *            the element type
+     * @param entityMetadata
+     *            the entity metadata
+     * @param mongoQuery
+     *            the mongo query
+     * @param orderBy
+     *            the order by
+     * @param maxResult
+     *            the max result
+     * @param firstResult
+     *            the first result
+     * @return the list
+     */
+    private <E> List<E> loadQueryDataGFS(EntityMetadata entityMetadata, BasicDBObject mongoQuery,
+            BasicDBObject orderBy, int maxResult, int firstResult)
     {
-        List<GridFSDBFile> gfsDBfiles = getGFSDBFiles(mongoQuery, orderBy, entityMetadata.getTableName());
+        List<GridFSDBFile> gfsDBfiles = getGFSDBFiles(mongoQuery, orderBy, entityMetadata.getTableName(), maxResult,
+                firstResult);
         List entities = new ArrayList<E>();
         for (GridFSDBFile file : gfsDBfiles)
         {
@@ -511,6 +542,31 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         return entities;
     }
 
+    /**
+     * Load query data.
+     *
+     * @param <E>
+     *            the element type
+     * @param entityMetadata
+     *            the entity metadata
+     * @param mongoQuery
+     *            the mongo query
+     * @param orderBy
+     *            the order by
+     * @param maxResult
+     *            the max result
+     * @param firstResult
+     *            the first result
+     * @param keys
+     *            the keys
+     * @param results
+     *            the results
+     * @return the list
+     * @throws InstantiationException
+     *             the instantiation exception
+     * @throws IllegalAccessException
+     *             the illegal access exception
+     */
     private <E> List<E> loadQueryData(EntityMetadata entityMetadata, BasicDBObject mongoQuery, BasicDBObject orderBy,
             int maxResult, int firstResult, BasicDBObject keys, String... results) throws InstantiationException,
             IllegalAccessException
@@ -578,6 +634,16 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         return entities;
     }
 
+    /**
+     * Populate gfs entity.
+     *
+     * @param entityMetadata
+     *            the entity metadata
+     * @param entities
+     *            the entities
+     * @param gfsDBFile
+     *            the gfs db file
+     */
     private void populateGFSEntity(EntityMetadata entityMetadata, List entities, GridFSDBFile gfsDBFile)
     {
         Object entity = instantiateEntity(entityMetadata.getEntityClazz(), null);
@@ -618,10 +684,26 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         return cursor;
     }
 
-    public List<GridFSDBFile> getGFSDBFiles(BasicDBObject mongoQuery, BasicDBObject sort, String collectionName)
+    /**
+     * Gets the GFSDB files.
+     *
+     * @param mongoQuery
+     *            the mongo query
+     * @param sort
+     *            the sort
+     * @param collectionName
+     *            the collection name
+     * @param maxResult
+     *            the max result
+     * @param firstResult
+     *            the first result
+     * @return the GFSDB files
+     */
+    private List<GridFSDBFile> getGFSDBFiles(BasicDBObject mongoQuery, BasicDBObject sort, String collectionName,
+            int maxResult, int firstResult)
     {
-        GridFS gfs = new GridFS(mongoDb, collectionName);
-        return gfs.find(mongoQuery, sort);
+        KunderaGridFS gfs = new KunderaGridFS(mongoDb, collectionName);
+        return gfs.find(mongoQuery, sort, firstResult, maxResult);
     }
 
     /*
@@ -642,7 +724,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
         if (managedType.hasLobAttribute())
         {
-            GridFS gfs = new GridFS(mongoDb, entityMetadata.getTableName());
+            KunderaGridFS gfs = new KunderaGridFS(mongoDb, entityMetadata.getTableName());
             String id = ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName();
             query.put("metadata." + id, pKey);
             gfs.remove(query);
@@ -842,6 +924,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      * 
      * @param gfsInputFile
      *            the gfs input file
+     * @param m
+     *            the m
      */
     private void saveGridFSFile(GridFSInputFile gfsInputFile, EntityMetadata m)
     {
@@ -888,7 +972,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      */
     private void onPersistGFS(Object entity, Object entityId, EntityMetadata entityMetadata, boolean isUpdate)
     {
-        GridFS gfs = new GridFS(mongoDb, entityMetadata.getTableName());
+        KunderaGridFS gfs = new KunderaGridFS(mongoDb, entityMetadata.getTableName());
         if (!isUpdate)
         {
             GridFSInputFile gfsInputFile = handler.getGFSInputFileFromEntity(gfs, entityMetadata, entity,
@@ -1145,7 +1229,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
                 DBCollection dbCollection = mongoDb.getCollection(documentName);
                 KunderaCoreUtils.printQuery("Persist collection:" + documentName, showQuery);
 
-                dbCollection.save(documents.get(documentName),getWriteConcern());
+                dbCollection.save(documents.get(documentName), getWriteConcern());
             }
         }
         else
@@ -1370,7 +1454,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         {
             entities = executeNativeQuery(jsonClause, entityMetadata);
             List result = new ArrayList();
-            if (!entities.isEmpty() && (entities.get(0) instanceof EnhanceEntity))
+            if (entities.get(0) instanceof EnhanceEntity)
             {
                 for (Object obj : entities)
                 {
@@ -1440,7 +1524,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             final MapReduceOutput output = mongoDb.getCollection(command.getInput()).mapReduce(command);
 
             final BasicDBList list = new BasicDBList();
-            for (final DBObject item : output.results()) {
+            for (final DBObject item : output.results())
+            {
                 list.add(item);
             }
             return list;
@@ -1456,7 +1541,15 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         }
     }
 
-    private MapReduceCommand parseMapReduceCommand(String jsonClause) {
+    /**
+     * Parses the map reduce command.
+     *
+     * @param jsonClause
+     *            the json clause
+     * @return the map reduce command
+     */
+    private MapReduceCommand parseMapReduceCommand(String jsonClause)
+    {
         String collectionName = jsonClause.replaceFirst("(?ms).*?\\.\\s*(.+?)\\s*\\.\\s*mapReduce\\s*\\(.*", "$1");
         if (collectionName.contains("getCollection")) {
             collectionName = collectionName.replaceFirst(".*getCollection\\s*\\(\\s*['\"](.*)['\"]\\s*\\).*", "$1");
@@ -1471,57 +1564,77 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         String query = findCommaSeparatedArgument(body, 2).trim();
         DBObject parameters = (DBObject) JSON.parse(query);
         DBObject mongoQuery;
-        if (parameters.containsField("query")) {
+        if (parameters.containsField("query"))
+        {
             mongoQuery = (DBObject) parameters.get("query");
-        } else {
+        }
+        else
+        {
             mongoQuery = new BasicDBObject();
         }
 
-        return new MapReduceCommand(collection,
-              mapFunction, reduceFunction,
-              null, MapReduceCommand.OutputType.INLINE,
-              mongoQuery);
+        return new MapReduceCommand(collection, mapFunction, reduceFunction, null, MapReduceCommand.OutputType.INLINE,
+                mongoQuery);
     }
 
-    private String findCommaSeparatedArgument(String functionBody, int index) {
+    /**
+     * Find comma separated argument.
+     *
+     * @param functionBody
+     *            the function body
+     * @param index
+     *            the index
+     * @return the string
+     */
+    private String findCommaSeparatedArgument(String functionBody, int index)
+    {
         int start = 0;
         int found = -1;
         int brackets = 0;
         int pos = 0;
         int length = functionBody.length();
 
-        while (found < index && pos < length) {
+        while (found < index && pos < length)
+        {
             char ch = functionBody.charAt(pos);
-            switch (ch) {
-                case ',':
-                    if (brackets == 0) {
-                        found++;
+            switch (ch)
+            {
+            case ',':
+                if (brackets == 0)
+                {
+                    found++;
 
-                        if (found < index) {
-                            start = pos + 1;
-                        }
+                    if (found < index)
+                    {
+                        start = pos + 1;
                     }
-                    break;
-                case '(':
-                case '[':
-                case '{':
-                    brackets++;
-                    break;
-                case ')':
-                case ']':
-                case '}':
-                    brackets--;
-                    break;
+                }
+                break;
+            case '(':
+            case '[':
+            case '{':
+                brackets++;
+                break;
+            case ')':
+            case ']':
+            case '}':
+                brackets--;
+                break;
             }
 
             pos++;
         }
 
-        if (found == index) {
+        if (found == index)
+        {
             return functionBody.substring(start, pos - 1);
-        } else if (pos == length) {
+        }
+        else if (pos == length)
+        {
             return functionBody.substring(start);
-        } else {
+        }
+        else
+        {
             return "";
         }
     }
@@ -1641,6 +1754,14 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         return result.getN();
     }
 
+    /**
+     * Creates the unique index gfs.
+     *
+     * @param coll
+     *            the coll
+     * @param id
+     *            the id
+     */
     private void createUniqueIndexGFS(DBCollection coll, String id)
     {
         try

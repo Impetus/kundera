@@ -49,7 +49,9 @@ import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.ClientPropertiesSetter;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.generator.Generator;
+import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
@@ -79,9 +81,11 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
 
     /**
      * Instantiates a new kudu db client.
-     * 
+     *
      * @param kunderaMetadata
      *            the kundera metadata
+     * @param indexManager
+     *            the index manager
      * @param reader
      *            the reader
      * @param properties
@@ -90,13 +94,18 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
      *            the persistence unit
      * @param kuduClient
      *            the kudu client
+     * @param clientMetadata
+     *            the client metadata
      */
-    protected KuduDBClient(KunderaMetadata kunderaMetadata, EntityReader reader, Map<String, Object> properties,
-            String persistenceUnit, KuduClient kuduClient)
+    protected KuduDBClient(KunderaMetadata kunderaMetadata, IndexManager indexManager, EntityReader reader,
+            Map<String, Object> properties, String persistenceUnit, KuduClient kuduClient,
+            ClientMetadata clientMetadata)
     {
         super(kunderaMetadata, properties, persistenceUnit);
         this.reader = reader;
         this.kuduClient = kuduClient;
+        this.indexManager = indexManager;
+        this.clientMetadata = clientMetadata;
     }
 
     /**
@@ -151,11 +160,11 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
 
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClass);
 
-        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
-                entityMetadata.getPersistenceUnit());
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
+                .getMetamodel(entityMetadata.getPersistenceUnit());
         EntityType entityType = metaModel.entity(entityMetadata.getEntityClazz());
 
-        String idColumnName = ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName();
+        String idColumnName = ((AbstractAttribute) entityMetadata.getIdAttribute()).getName();
 
         Field field = (Field) entityType.getAttribute(idColumnName).getJavaMember();
 
@@ -186,7 +195,7 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
         else
         {
             // Simple Id
-            ColumnSchema column = new ColumnSchema.ColumnSchemaBuilder(idColumnName, idType).build();
+            ColumnSchema column = new ColumnSchema.ColumnSchemaBuilder(((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName(), idType).build();
 
             KuduPredicate predicate = KuduDBDataHandler.getEqualComparisonPredicate(column, idType, key);
             scannerBuilder.addPredicate(predicate);
@@ -219,6 +228,20 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
         return entity;
     }
 
+    /**
+     * Adds the predicates to scanner builder.
+     *
+     * @param scannerBuilder
+     *            the scanner builder
+     * @param embeddable
+     *            the embeddable
+     * @param fields
+     *            the fields
+     * @param metaModel
+     *            the meta model
+     * @param key
+     *            the key
+     */
     private void addPredicatesToScannerBuilder(KuduScannerBuilder scannerBuilder, EmbeddableType embeddable,
             Field[] fields, MetamodelImpl metaModel, Object key)
     {
@@ -230,8 +253,8 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
                 if (f.getType().isAnnotationPresent(Embeddable.class))
                 {
                     // nested
-                    addPredicatesToScannerBuilder(scannerBuilder, (EmbeddableType) metaModel.embeddable(f.getType()), f
-                            .getType().getDeclaredFields(), metaModel, value);
+                    addPredicatesToScannerBuilder(scannerBuilder, (EmbeddableType) metaModel.embeddable(f.getType()),
+                            f.getType().getDeclaredFields(), metaModel, value);
                 }
                 else
                 {
@@ -562,8 +585,8 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
      */
     @Override
     public Generator getIdGenerator()
-    { // TODO Auto-generated method stub
-        return null;
+    {
+        return (Generator) KunderaCoreUtils.createNewInstance(KuduDBIdGenerator.class);
     }
 
     /*
@@ -638,8 +661,8 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
      */
     private void populatePartialRow(PartialRow row, EntityMetadata entityMetadata, Object entity)
     {
-        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
-                entityMetadata.getPersistenceUnit());
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
+                .getMetamodel(entityMetadata.getPersistenceUnit());
         Class entityClazz = entityMetadata.getEntityClazz();
         EntityType entityType = metaModel.entity(entityClazz);
         Set<Attribute> attributes = entityType.getAttributes();
@@ -695,7 +718,10 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
             else
             {
                 Type type = KuduDBValidationClassMapper.getValidTypeForClass(field.getType());
-                KuduDBDataHandler.addToRow(row, ((AbstractAttribute) attribute).getJPAColumnName(), value, type);
+                if (type != null)
+                {
+                    KuduDBDataHandler.addToRow(row, ((AbstractAttribute) attribute).getJPAColumnName(), value, type);
+                }
             }
         }
     }
@@ -719,8 +745,8 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
     {
 
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entity.getClass());
-        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
-                entityMetadata.getPersistenceUnit());
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
+                .getMetamodel(entityMetadata.getPersistenceUnit());
         EntityType entityType = metaModel.entity(entityMetadata.getEntityClazz());
 
         KuduSession session = kuduClient.newSession();
@@ -736,7 +762,7 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
         }
         Delete delete = table.newDelete();
         PartialRow row = delete.getRow();
-        String idColumnName = ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName();
+        String idColumnName = ((AbstractAttribute) entityMetadata.getIdAttribute()).getName();
 
         Field field = (Field) entityType.getAttribute(idColumnName).getJavaMember();
         Object value = PropertyAccessorHelper.getObject(entity, field);
@@ -779,6 +805,20 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
         }
     }
 
+    /**
+     * Adds the primary key to row.
+     *
+     * @param row
+     *            the row
+     * @param embeddable
+     *            the embeddable
+     * @param fields
+     *            the fields
+     * @param metaModel
+     *            the meta model
+     * @param key
+     *            the key
+     */
     private void addPrimaryKeyToRow(PartialRow row, EmbeddableType embeddable, Field[] fields, MetamodelImpl metaModel,
             Object key)
     {
@@ -790,8 +830,8 @@ public class KuduDBClient extends ClientBase implements Client<KuduDBQuery>, Cli
                 if (f.getType().isAnnotationPresent(Embeddable.class))
                 {
                     // nested
-                    addPrimaryKeyToRow(row, (EmbeddableType) metaModel.embeddable(f.getType()), f.getType()
-                            .getDeclaredFields(), metaModel, value);
+                    addPrimaryKeyToRow(row, (EmbeddableType) metaModel.embeddable(f.getType()),
+                            f.getType().getDeclaredFields(), metaModel, value);
                 }
                 else
                 {

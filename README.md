@@ -34,7 +34,7 @@ You can find the list of data stores(specific versions) supported by Kundera [he
 
 Getting Started
 ===============
-The latest stable release of Kundera is <b>3.7</b>.
+The latest stable release of Kundera is <b>3.8</b>.
 It is a maven based project . You can either download it directly from github and build using following command :
 
 <b>mvn clean install -Dfile src/pom.xml </b>
@@ -98,10 +98,11 @@ Troubleshooting
 
 Sample Projects
 ===============
-
+* [kundera-mongodb-kudu-example.zip (MongoDB - Kudu polyglot)](https://github.com/impetus-opensource/Kundera/blob/trunk/examples/basic-examples/downloadables/kundera-mongodb-kudu-example.zip?raw=true)
 * [kundera-cassandra-example.zip](https://github.com/impetus-opensource/Kundera/blob/trunk/examples/basic-examples/downloadables/kundera-cassandra-example.zip?raw=true)
 * [kundera-mongodb-example.zip](https://github.com/impetus-opensource/Kundera/blob/trunk/examples/basic-examples/downloadables/kundera-mongodb-example.zip?raw=true)
 * [kundera-hbase-example.zip](https://github.com/impetus-opensource/Kundera/blob/trunk/examples/basic-examples/downloadables/kundera-hbase-example.zip?raw=true)
+
 
 Contribution
 ============

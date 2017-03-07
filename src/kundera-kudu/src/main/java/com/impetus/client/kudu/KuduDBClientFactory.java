@@ -81,12 +81,15 @@ public class KuduDBClientFactory extends GenericClientFactory
         reader = new KuduDBEntityReader(kunderaMetadata);
         setExternalProperties(puProperties);
         initializePropertyReader();
-        PersistenceUnitMetadata pum = kunderaMetadata.getApplicationMetadata().getPersistenceUnitMetadata(
-                getPersistenceUnit());
+        PersistenceUnitMetadata pum = kunderaMetadata.getApplicationMetadata()
+                .getPersistenceUnitMetadata(getPersistenceUnit());
 
         Properties pumProps = pum.getProperties();
 
-        pumProps.putAll(puProperties);
+        if (puProperties != null)
+        {
+            pumProps.putAll(puProperties);
+        }
 
         String kuduMasterHost = (String) pumProps.getProperty("kundera.nodes");
 
@@ -123,7 +126,8 @@ public class KuduDBClientFactory extends GenericClientFactory
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
-        return new KuduDBClient(kunderaMetadata, reader, externalProperties, persistenceUnit, this.kuduClient);
+        return new KuduDBClient(kunderaMetadata, indexManager, reader, externalProperties, persistenceUnit,
+                this.kuduClient, this.clientMetadata);
     }
 
     /*
@@ -159,8 +163,8 @@ public class KuduDBClientFactory extends GenericClientFactory
     {
         if (propertyReader == null)
         {
-            propertyReader = new KuduDBPropertyReader(externalProperties, kunderaMetadata.getApplicationMetadata()
-                    .getPersistenceUnitMetadata(getPersistenceUnit()));
+            propertyReader = new KuduDBPropertyReader(externalProperties,
+                    kunderaMetadata.getApplicationMetadata().getPersistenceUnitMetadata(getPersistenceUnit()));
             propertyReader.read(getPersistenceUnit());
         }
     }

@@ -187,7 +187,7 @@ public class PersonRdbmsTest extends BaseTest
         catch (Exception e)
         {
             Assert.assertEquals(
-                    "org.hibernate.hql.internal.ast.QuerySyntaxException: unexpected end of subtree [Select p from com.impetus.client.crud.entities.PersonRDBMS p where p.personName IN ()]",
+                    "javax.persistence.PersistenceException: org.hibernate.exception.SQLGrammarException: could not prepare statement",
                     e.getMessage());
         }
         findQuery = em.createQuery("Select p from PersonRDBMS p where p.personName IN ('vivek', 'kk')");

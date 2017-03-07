@@ -26,9 +26,9 @@ import javax.persistence.PersistenceException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.StatelessSession;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
-import org.hibernate.service.ServiceRegistryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -112,7 +112,7 @@ public class RDBMSClientFactory extends GenericClientFactory
             }
         }
 
-        serviceRegistry = new ServiceRegistryBuilder().applySettings(conf.getProperties()).buildServiceRegistry();
+        serviceRegistry = new StandardServiceRegistryBuilder().applySettings(conf.getProperties()).build();
 
         Iterator<Collection<Class<?>>> iter = classes.values().iterator();
 

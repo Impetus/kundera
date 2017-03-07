@@ -176,9 +176,9 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     private Transaction onBegin()
     {
         Transaction tx;
-        if (((StatelessSessionImpl) s).getTransactionCoordinator().isTransactionInProgress())
+        if (((StatelessSessionImpl) s).getTransactionCoordinator().isTransactionActive())
         {
-            tx = ((StatelessSessionImpl) s).getTransactionCoordinator().getTransaction();
+            tx = ((StatelessSessionImpl) s).getTransaction();
         }
         else
         {
