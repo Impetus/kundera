@@ -1370,7 +1370,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         {
             entities = executeNativeQuery(jsonClause, entityMetadata);
             List result = new ArrayList();
-            if (entities.get(0) instanceof EnhanceEntity)
+            if (!entities.isEmpty() && (entities.get(0) instanceof EnhanceEntity))
             {
                 for (Object obj : entities)
                 {
@@ -1457,7 +1457,11 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     }
 
     private MapReduceCommand parseMapReduceCommand(String jsonClause) {
-        String collectionName = jsonClause.replaceFirst("(?ms).*\\.\\s*([^.]+?)\\s*\\.\\s*mapReduce\\s*\\(.*", "$1");
+        String collectionName = jsonClause.replaceFirst("(?ms).*?\\.\\s*(.+?)\\s*\\.\\s*mapReduce\\s*\\(.*", "$1");
+        if (collectionName.contains("getCollection")) {
+            collectionName = collectionName.replaceFirst(".*getCollection\\s*\\(\\s*['\"](.*)['\"]\\s*\\).*", "$1");
+        }
+
         DBCollection collection = mongoDb.getCollection(collectionName);
 
         String body = jsonClause.replaceFirst("^(?ms).*?mapReduce\\s*\\(\\s*(.*)\\s*\\)\\s*;?\\s*$", "$1");
