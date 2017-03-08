@@ -890,4 +890,32 @@ public class PersonMongoTest extends BaseTest
             }
         }
     }
+
+    @Test
+    public void countTest()
+    {
+        Object p1 = prepareMongoInstance("1", 10);
+        Object p2 = prepareMongoInstance("2", 20);
+        Object p3 = prepareMongoInstance("3", 15);
+        em.persist(p1);
+        em.persist(p2);
+        em.persist(p3);
+
+        Query query = em.createQuery("select count(p) from PersonMongo p");
+        List<?> results = query.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(results.size(), 1);
+        Assert.assertEquals(results.get(0), 3L);
+
+        query = em.createQuery("select count(p) from PersonMongo p where p.age < 18");
+        results = query.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(results.size(), 1);
+        Assert.assertEquals(results.get(0), 2L);
+
+        query = em.createQuery("select count(p) from PersonMongo p");
+        Object singleResult = query.getSingleResult();
+        Assert.assertEquals(singleResult, 3L);
+    }
+
 }
