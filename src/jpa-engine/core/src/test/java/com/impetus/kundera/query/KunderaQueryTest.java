@@ -93,6 +93,25 @@ public class KunderaQueryTest
         Assert.assertNotNull(kunderaQuery.getResult());
         Assert.assertEquals(PU, kunderaQuery.getPersistenceUnit());
         Assert.assertNull(kunderaQuery.getOrdering());
+
+        query = "Select p from Person as p";
+        kunderaQuery = new KunderaQuery(query, kunderaMetadata);
+        queryParser = new KunderaQueryParser(kunderaQuery);
+        queryParser.parse();
+        kunderaQuery.postParsingInit();
+        Assert.assertNotNull(kunderaQuery.getEntityClass());
+        Assert.assertEquals(Person.class, kunderaQuery.getEntityClass());
+        Assert.assertNotNull(kunderaQuery.getEntityMetadata());
+        Assert.assertTrue(KunderaMetadataManager.getEntityMetadata(kunderaMetadata, Person.class).equals(
+              kunderaQuery.getEntityMetadata()));
+        Assert.assertNull(kunderaQuery.getFilter());
+        Assert.assertTrue(kunderaQuery.getFilterClauseQueue().isEmpty());
+        Assert.assertNotNull(kunderaQuery.getFrom());
+        Assert.assertTrue(kunderaQuery.getUpdateClauseQueue().isEmpty());
+        Assert.assertNotNull(kunderaQuery.getResult());
+        Assert.assertEquals(PU, kunderaQuery.getPersistenceUnit());
+        Assert.assertNull(kunderaQuery.getOrdering());
+
         try
         {
             query = "Select p from p";

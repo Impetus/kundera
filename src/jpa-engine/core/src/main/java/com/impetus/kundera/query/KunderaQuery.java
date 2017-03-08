@@ -568,6 +568,11 @@ public class KunderaQuery
 
         if (!this.isDeleteUpdate)
         {
+            if (fromArray.length == 3 && fromArray[1].equalsIgnoreCase("as"))
+            {
+                fromArray = new String[] { fromArray[0], fromArray[2] };
+            }
+
             if (fromArray.length != 2)
             {
                 throw new JPQLParseException("Bad query format: " + from
