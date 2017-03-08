@@ -479,7 +479,10 @@ public class MongoDBQuery extends QueryImpl
 
                     if (isCompositeColumn)
                     {
-                        property = new StringBuffer("_id.").append(property).toString();
+                        EmbeddableType embeddableType = metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
+                        AbstractAttribute attribute = (AbstractAttribute) embeddableType.getAttribute(property);
+
+                        property = new StringBuffer("_id.").append(attribute.getJPAColumnName()).toString();
                     }
                     if (condition.equals("="))
                     {
