@@ -1552,7 +1552,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     {
         String collectionName = jsonClause.replaceFirst("(?ms).*?\\.\\s*(.+?)\\s*\\.\\s*mapReduce\\s*\\(.*", "$1");
         if (collectionName.contains("getCollection")) {
-            collectionName = collectionName.replaceFirst(".*getCollection\\s*\\(\\s*['\"](.*)['\"]\\s*\\).*", "$1");
+            collectionName = collectionName.replaceFirst(".*getCollection\\s*\\(\\s*(['\"])([^'\"]+)\\1\\s*\\).*", "$2");
         }
 
         DBCollection collection = mongoDb.getCollection(collectionName);

@@ -861,6 +861,14 @@ public class PersonMongoTest extends BaseTest
               ")";
 
         executeMapReduceTest(query);
+
+        query = "db.getCollection(\"PERSON\").mapReduce(\n" +
+              "  function () { emit( this.AGE - this.AGE % 10, 1 ); },\n" +
+              "  function (key, values) { return { age: key, count: Array.sum(values) }; },\n" +
+              "  { query: {}, out: { inline: 1 } }\n" +
+              ")";
+
+        executeMapReduceTest(query);
     }
 
     private void executeMapReduceTest(String query)
