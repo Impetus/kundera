@@ -1190,7 +1190,7 @@ public class KunderaQuery
                 {
                     try
                     {
-                        orderType = SortOrder.valueOf(nextOrder);
+                        orderType = SortOrder.valueOf(nextOrder.toUpperCase());
                     }
                     catch (IllegalArgumentException e)
                     {

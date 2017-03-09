@@ -548,6 +548,54 @@ public class KunderaQueryTest
 
     }
 
+    @Test
+    public void testOrderBy()
+    {
+        // with uppercase sort order
+        String query = "Select p from Person p order by p.age ASC";
+        KunderaQuery kunderaQuery = new KunderaQuery(query, kunderaMetadata);
+        KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery);
+        queryParser.parse();
+        kunderaQuery.postParsingInit();
+        Assert.assertNotNull(kunderaQuery.getEntityClass());
+        Assert.assertEquals(Person.class, kunderaQuery.getEntityClass());
+        Assert.assertNotNull(kunderaQuery.getEntityMetadata());
+        Assert.assertTrue(KunderaMetadataManager.getEntityMetadata(kunderaMetadata, Person.class).equals(
+              kunderaQuery.getEntityMetadata()));
+        Assert.assertNull(kunderaQuery.getFilter());
+        Assert.assertTrue(kunderaQuery.getFilterClauseQueue().isEmpty());
+        Assert.assertNotNull(kunderaQuery.getFrom());
+        Assert.assertTrue(kunderaQuery.getUpdateClauseQueue().isEmpty());
+        Assert.assertNotNull(kunderaQuery.getResult());
+        Assert.assertEquals(PU, kunderaQuery.getPersistenceUnit());
+        Assert.assertNotNull(kunderaQuery.getOrdering());
+        Assert.assertEquals(1, kunderaQuery.getOrdering().size());
+        Assert.assertEquals("p.age", kunderaQuery.getOrdering().get(0).getColumnName());
+        Assert.assertEquals(KunderaQuery.SortOrder.ASC, kunderaQuery.getOrdering().get(0).getOrder());
+
+        // with lowercase sort order
+        query = "Select p from Person p order by p.salary desc";
+        kunderaQuery = new KunderaQuery(query, kunderaMetadata);
+        queryParser = new KunderaQueryParser(kunderaQuery);
+        queryParser.parse();
+        kunderaQuery.postParsingInit();
+        Assert.assertNotNull(kunderaQuery.getEntityClass());
+        Assert.assertEquals(Person.class, kunderaQuery.getEntityClass());
+        Assert.assertNotNull(kunderaQuery.getEntityMetadata());
+        Assert.assertTrue(KunderaMetadataManager.getEntityMetadata(kunderaMetadata, Person.class).equals(
+              kunderaQuery.getEntityMetadata()));
+        Assert.assertNull(kunderaQuery.getFilter());
+        Assert.assertTrue(kunderaQuery.getFilterClauseQueue().isEmpty());
+        Assert.assertNotNull(kunderaQuery.getFrom());
+        Assert.assertTrue(kunderaQuery.getUpdateClauseQueue().isEmpty());
+        Assert.assertNotNull(kunderaQuery.getResult());
+        Assert.assertEquals(PU, kunderaQuery.getPersistenceUnit());
+        Assert.assertNotNull(kunderaQuery.getOrdering());
+        Assert.assertEquals(1, kunderaQuery.getOrdering().size());
+        Assert.assertEquals("p.salary", kunderaQuery.getOrdering().get(0).getColumnName());
+        Assert.assertEquals(KunderaQuery.SortOrder.DESC, kunderaQuery.getOrdering().get(0).getOrder());
+    }
+
     private void assertMixSubQuery(KunderaQuery kunderaQuery, int paramSize)
     {
         Assert.assertEquals(paramSize, kunderaQuery.getParameters().size());
