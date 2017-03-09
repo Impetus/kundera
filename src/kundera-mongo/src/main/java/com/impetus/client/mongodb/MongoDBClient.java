@@ -108,7 +108,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
     /**
      * Checks if is ordered bulk operation.
-     * 
+     *
      * @return true, if is ordered bulk operation
      */
     public boolean isOrderedBulkOperation()
@@ -118,7 +118,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
     /**
      * Sets the ordered bulk operation.
-     * 
+     *
      * @param orderedBulkOperation
      *            the new ordered bulk operation
      */
@@ -514,7 +514,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
     /**
      * Load query data gfs.
-     * 
+     *
      * @param <E>
      *            the element type
      * @param entityMetadata
@@ -544,7 +544,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
     /**
      * Load query data.
-     * 
+     *
      * @param <E>
      *            the element type
      * @param entityMetadata
@@ -636,7 +636,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
     /**
      * Populate gfs entity.
-     * 
+     *
      * @param entityMetadata
      *            the entity metadata
      * @param entities
@@ -686,7 +686,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
     /**
      * Gets the GFSDB files.
-     * 
+     *
      * @param mongoQuery
      *            the mongo query
      * @param sort
@@ -1543,14 +1543,18 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
     /**
      * Parses the map reduce command.
-     * 
+     *
      * @param jsonClause
      *            the json clause
      * @return the map reduce command
      */
     private MapReduceCommand parseMapReduceCommand(String jsonClause)
     {
-        String collectionName = jsonClause.replaceFirst("(?ms).*\\.\\s*([^.]+?)\\s*\\.\\s*mapReduce\\s*\\(.*", "$1");
+        String collectionName = jsonClause.replaceFirst("(?ms).*?\\.\\s*(.+?)\\s*\\.\\s*mapReduce\\s*\\(.*", "$1");
+        if (collectionName.contains("getCollection")) {
+            collectionName = collectionName.replaceFirst(".*getCollection\\s*\\(\\s*(['\"])([^'\"]+)\\1\\s*\\).*", "$2");
+        }
+
         DBCollection collection = mongoDb.getCollection(collectionName);
 
         String body = jsonClause.replaceFirst("^(?ms).*?mapReduce\\s*\\(\\s*(.*)\\s*\\)\\s*;?\\s*$", "$1");
@@ -1575,7 +1579,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
     /**
      * Find comma separated argument.
-     * 
+     *
      * @param functionBody
      *            the function body
      * @param index
@@ -1752,7 +1756,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
     /**
      * Creates the unique index gfs.
-     * 
+     *
      * @param coll
      *            the coll
      * @param id
