@@ -869,6 +869,111 @@ public class PersonMongoTest extends BaseTest
         executeMapReduceTest(query);
     }
 
+    @Test
+    public void testUpperAndLower()
+    {
+        Object p1 = prepareMongoInstance("alexander", 10);
+        Object p2 = prepareMongoInstance("sandra", 20);
+        Object p3 = prepareMongoInstance("CASSANDRA", 15);
+        em.persist(p1);
+        em.persist(p2);
+        em.persist(p3);
+
+        String query = "Select p from PersonMongo p where UPPER(p.personId) = 'SANDRA'";
+        Query q = em.createQuery(query);
+        List<PersonMongo> results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(1, results.size());
+
+        query = "Select p from PersonMongo p where LOWER(p.personId) = 'cassandra'";
+        q = em.createQuery(query);
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(1, results.size());
+
+        query = "Select p from PersonMongo p where LOWER(p.personId) IN ('sandra', 'cassandra')";
+        q = em.createQuery(query);
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(2, results.size());
+
+        query = "Select p from PersonMongo p where LOWER(p.personId) NOT IN ('sandra', 'cassandra')";
+        q = em.createQuery(query);
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(1, results.size());
+
+        query = "Select p from PersonMongo p where UPPER(p.personId) <> 'ALEXANDER'";
+        q = em.createQuery(query);
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(2, results.size());
+    }
+
+    @Test
+    public void testLikeAndUpperLower()
+    {
+        Object p1 = prepareMongoInstance("alexander", 10);
+        Object p2 = prepareMongoInstance("sandra", 20);
+        Object p3 = prepareMongoInstance("CASSANDRA", 15);
+        em.persist(p1);
+        em.persist(p2);
+        em.persist(p3);
+
+        String query = "Select p from PersonMongo p where p.personId LIKE '%and%'";
+        Query q = em.createQuery(query);
+        List<PersonMongo> results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(3, results.size());
+
+        query = "Select p from PersonMongo p where UPPER(p.personId) LIKE '%and%'";
+        q = em.createQuery(query);
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(3, results.size());
+
+        query = "Select p from PersonMongo p where LOWER(p.personId) LIKE '%and%'";
+        q = em.createQuery(query);
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(3, results.size());
+    }
+
+    @Test
+    public void testNotLike()
+    {
+        Object p1 = prepareMongoInstance("alexander", 10);
+        Object p2 = prepareMongoInstance("sandra", 20);
+        Object p3 = prepareMongoInstance("CASSANDRA", 15);
+        em.persist(p1);
+        em.persist(p2);
+        em.persist(p3);
+
+        String query = "Select p from PersonMongo p where p.personId NOT LIKE '%andr%'";
+        Query q = em.createQuery(query);
+        List<PersonMongo> results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(1, results.size());
+
+        query = "Select p from PersonMongo p where p.personId NOT LIKE '%andr%' AND p.personId = 'alexander'";
+        q = em.createQuery(query);
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(1, results.size());
+
+        query = "Select p from PersonMongo p where p.personId = 'alexander' AND p.personId NOT LIKE '%andr%'";
+        q = em.createQuery(query);
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(1, results.size());
+
+        query = "Select p from PersonMongo p where p.personId LIKE '%lex%' AND p.personId NOT LIKE 'cass%'";
+        q = em.createQuery(query);
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(1, results.size());
+    }
+
     /**
      * Execute map reduce test.
      * 

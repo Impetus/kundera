@@ -9,8 +9,10 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -18,6 +20,9 @@ import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.xml.bind.DatatypeConverter;
 
+import org.eclipse.persistence.jpa.jpql.parser.CollectionExpression;
+import org.eclipse.persistence.jpa.jpql.parser.Expression;
+import org.eclipse.persistence.jpa.jpql.parser.StringLiteral;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -125,6 +130,22 @@ public class MongoDBUtils
         else if ((valObj instanceof Calendar) || (valObj instanceof GregorianCalendar))
         {
             return ((Calendar) valObj).getTime();
+        }
+        else if (CollectionExpression.class.isAssignableFrom(clazz))
+        {
+            CollectionExpression collExpr = (CollectionExpression) valObj;
+            List<String> texts = new ArrayList<String>(collExpr.childrenSize());
+
+            for (Expression childExpr : collExpr.orderedChildren())
+            {
+                if (childExpr instanceof StringLiteral)
+                {
+                    StringLiteral stringLiteral = (StringLiteral) childExpr;
+                    texts.add(stringLiteral.getUnquotedText());
+                }
+            }
+
+            return texts;
         }
         return valObj;
     }

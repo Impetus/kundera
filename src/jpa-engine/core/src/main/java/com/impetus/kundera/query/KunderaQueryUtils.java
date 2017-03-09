@@ -25,6 +25,8 @@ import java.util.Map;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 
+import org.eclipse.persistence.jpa.jpql.parser.AbstractPathExpression;
+import org.eclipse.persistence.jpa.jpql.parser.AbstractSingleEncapsulatedExpression;
 import org.eclipse.persistence.jpa.jpql.parser.AggregateFunction;
 import org.eclipse.persistence.jpa.jpql.parser.BetweenExpression;
 import org.eclipse.persistence.jpa.jpql.parser.CollectionExpression;
@@ -38,6 +40,7 @@ import org.eclipse.persistence.jpa.jpql.parser.JPQLExpression;
 import org.eclipse.persistence.jpa.jpql.parser.KeywordExpression;
 import org.eclipse.persistence.jpa.jpql.parser.LikeExpression;
 import org.eclipse.persistence.jpa.jpql.parser.LogicalExpression;
+import org.eclipse.persistence.jpa.jpql.parser.LowerExpression;
 import org.eclipse.persistence.jpa.jpql.parser.NumericLiteral;
 import org.eclipse.persistence.jpa.jpql.parser.OrderByClause;
 import org.eclipse.persistence.jpa.jpql.parser.OrderByItem;
@@ -48,6 +51,7 @@ import org.eclipse.persistence.jpa.jpql.parser.StateFieldPathExpression;
 import org.eclipse.persistence.jpa.jpql.parser.StringLiteral;
 import org.eclipse.persistence.jpa.jpql.parser.SubExpression;
 import org.eclipse.persistence.jpa.jpql.parser.UpdateStatement;
+import org.eclipse.persistence.jpa.jpql.parser.UpperExpression;
 import org.eclipse.persistence.jpa.jpql.parser.WhereClause;
 import org.eclipse.persistence.jpa.jpql.utility.iterable.ListIterable;
 import org.slf4j.Logger;
@@ -356,7 +360,7 @@ public final class KunderaQueryUtils
         List<Map<String, Object>> columnsToOutput = new ArrayList<Map<String, Object>>();
         if (StateFieldPathExpression.class.isAssignableFrom(selectExpression.getClass()))
         {
-            StateFieldPathExpression sfpExp = (StateFieldPathExpression) selectExpression;
+            Expression sfpExp = selectExpression;
 
             addToOutputColumns(selectExpression, m, columnsToOutput, kunderaMetadata);
         }
@@ -388,7 +392,18 @@ public final class KunderaQueryUtils
     public static Map<String, Object> setFieldClazzAndColumnFamily(Expression expression, EntityMetadata m,
             final KunderaMetadata kunderaMetadata)
     {
-        StateFieldPathExpression sfpExp = (StateFieldPathExpression) expression;
+        AbstractPathExpression pathExp = null;
+
+        if (expression instanceof AbstractPathExpression) {
+            pathExp = (AbstractPathExpression) expression;
+
+        } else {
+            if (expression instanceof AbstractSingleEncapsulatedExpression) {
+                pathExp = (AbstractPathExpression) ((AbstractSingleEncapsulatedExpression) expression).getExpression();
+            }
+
+        }
+
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
 
@@ -401,17 +416,17 @@ public final class KunderaQueryUtils
 
         boolean isEmbeddable = false;
         int count = 1;
-        String fieldName = sfpExp.getPath(count++);
+        String fieldName = pathExp.getPath(count++);
 
         AbstractAttribute attrib = (AbstractAttribute) entity.getAttribute(fieldName);
         String dbColName = attrib.getJPAColumnName();
         isEmbeddable = metaModel.isEmbeddable(attrib.getBindableJavaType());
-        while (sfpExp.pathSize() > count)
+        while (pathExp.pathSize() > count)
         {
             if (isEmbeddable)
             {
                 EmbeddableType embeddableType = metaModel.embeddable(attrib.getBindableJavaType());
-                String attName = sfpExp.getPath(count++);
+                String attName = pathExp.getPath(count++);
                 fieldName = fieldName + "." + attName;
                 attrib = (AbstractAttribute) embeddableType.getAttribute(attName);
                 isEmbeddable = metaModel.isEmbeddable(attrib.getBindableJavaType());
@@ -420,7 +435,7 @@ public final class KunderaQueryUtils
             colName = fieldName;
         }
 
-        if (!sfpExp.getPath(count - 1).equals(discriminatorColumn))
+        if (!pathExp.getPath(count - 1).equals(discriminatorColumn))
         {
             fieldClazz = attrib.getBindableJavaType();
             colFamily = attrib.getTableName() != null ? attrib.getTableName() : m.getTableName();
@@ -428,12 +443,16 @@ public final class KunderaQueryUtils
 
         }
 
+        boolean ignoreCase =
+              (expression instanceof UpperExpression) || (expression instanceof LowerExpression);
+
         map.put(Constants.FIELD_CLAZZ, fieldClazz);
         map.put(Constants.COL_FAMILY, colFamily);
         map.put(Constants.COL_NAME, colName);
         map.put(Constants.FIELD_NAME, fieldName);
         map.put(Constants.IS_EMBEDDABLE, isEmbeddable);
         map.put(Constants.DB_COL_NAME, dbColName);
+        map.put(Constants.IGNORE_CASE, ignoreCase);
         return map;
     }
 
@@ -509,16 +528,18 @@ public final class KunderaQueryUtils
             KunderaMetadata kunderaMetadata, KunderaQuery kunderaQuery)
     {
         BetweenExpression betweenExp = (BetweenExpression) expression;
-        StateFieldPathExpression sfpExp = (StateFieldPathExpression) betweenExp.getExpression();
+        Expression sfpExp = betweenExp.getExpression();
 
         Map<String, Object> map = KunderaQueryUtils.setFieldClazzAndColumnFamily(sfpExp, m, kunderaMetadata);
         String columnName = (String) map.get(Constants.COL_NAME);
         String fieldName = (String) map.get(Constants.FIELD_NAME);
-        kunderaQuery.addFilterClause(columnName, Expression.GREATER_THAN_OR_EQUAL, betweenExp.getLowerBoundExpression()
-                .toActualText(), fieldName);
+        kunderaQuery.addFilterClause(
+              columnName, Expression.GREATER_THAN_OR_EQUAL, betweenExp.getLowerBoundExpression().toActualText(),
+              fieldName, (Boolean) map.get(Constants.IGNORE_CASE));
         kunderaQuery.addFilterClause("AND");
-        kunderaQuery.addFilterClause(columnName, Expression.LOWER_THAN_OR_EQUAL, betweenExp.getUpperBoundExpression()
-                .toActualText(), fieldName);
+        kunderaQuery.addFilterClause(
+              columnName, Expression.LOWER_THAN_OR_EQUAL, betweenExp.getUpperBoundExpression().toActualText(),
+              fieldName, (Boolean) map.get(Constants.IGNORE_CASE));
 
         return map;
 
@@ -535,10 +556,11 @@ public final class KunderaQueryUtils
             KunderaMetadata kunderaMetadata, KunderaQuery kunderaQuery)
     {
         LikeExpression likeExp = (LikeExpression) expression;
-        StateFieldPathExpression sfpExp = (StateFieldPathExpression) likeExp.getStringExpression();
+        Expression sfpExp = likeExp.getStringExpression();
         Map<String, Object> map = KunderaQueryUtils.setFieldClazzAndColumnFamily(sfpExp, m, kunderaMetadata);
-        kunderaQuery.addFilterClause((String) map.get(Constants.COL_NAME), likeExp.getIdentifier(), likeExp
-                .getPatternValue().toActualText(), (String) map.get(Constants.FIELD_NAME));
+        kunderaQuery.addFilterClause(
+              (String) map.get(Constants.COL_NAME), likeExp.getIdentifier(), likeExp.getPatternValue().toActualText(),
+              (String) map.get(Constants.FIELD_NAME), (Boolean) map.get(Constants.IGNORE_CASE));
         return map;
 
     }
@@ -560,10 +582,12 @@ public final class KunderaQueryUtils
             KunderaMetadata kunderaMetadata, KunderaQuery kunderaQuery)
     {
         RegexpExpression regExp = (RegexpExpression) expression;
-        StateFieldPathExpression sfpExp = (StateFieldPathExpression) regExp.getStringExpression();
+        Expression sfpExp = regExp.getStringExpression();
         Map<String, Object> map = KunderaQueryUtils.setFieldClazzAndColumnFamily(sfpExp, m, kunderaMetadata);
-        kunderaQuery.addFilterClause((String) map.get(Constants.COL_NAME), regExp.getActualRegexpIdentifier()
-                .toUpperCase(), regExp.getPatternValue().toActualText(), (String) map.get(Constants.FIELD_NAME));
+        kunderaQuery.addFilterClause(
+              (String) map.get(Constants.COL_NAME), regExp.getActualRegexpIdentifier().toUpperCase(),
+              regExp.getPatternValue().toActualText(), (String) map.get(Constants.FIELD_NAME),
+              (Boolean) map.get(Constants.IGNORE_CASE));
         return map;
     }
 
@@ -604,10 +628,11 @@ public final class KunderaQueryUtils
             KunderaMetadata kunderaMetadata, KunderaQuery kunderaQuery)
     {
         InExpression inExp = (InExpression) expression;
-        StateFieldPathExpression sfpExp = (StateFieldPathExpression) inExp.getExpression();
+        Expression sfpExp = inExp.getExpression();
         Map<String, Object> map = KunderaQueryUtils.setFieldClazzAndColumnFamily(sfpExp, m, kunderaMetadata);
-        kunderaQuery.addFilterClause((String) map.get(Constants.COL_NAME), inExp.getIdentifier(), inExp.getInItems(),
-                (String) map.get(Constants.FIELD_NAME));
+        kunderaQuery.addFilterClause(
+              (String) map.get(Constants.COL_NAME), inExp.getIdentifier(), inExp.getInItems(),
+              (String) map.get(Constants.FIELD_NAME), (Boolean) map.get(Constants.IGNORE_CASE));
         return map;
     }
 
@@ -631,12 +656,13 @@ public final class KunderaQueryUtils
         ComparisonExpression compExp = (ComparisonExpression) expression;
 
         String condition = compExp.getIdentifier();
-        StateFieldPathExpression sfpExp = (StateFieldPathExpression) compExp.getLeftExpression();
+        Expression sfpExp = compExp.getLeftExpression();
         Map<String, Object> map = KunderaQueryUtils.setFieldClazzAndColumnFamily(sfpExp, m, kunderaMetadata);
         Object value = KunderaQueryUtils.getValue(compExp.getRightExpression(), (Class) map.get(Constants.FIELD_CLAZZ),
                 kunderaQuery);
-        kunderaQuery.addFilterClause((String) map.get(Constants.COL_NAME), condition, value,
-                (String) map.get(Constants.FIELD_NAME));
+        kunderaQuery.addFilterClause(
+              (String) map.get(Constants.COL_NAME), condition, value,
+              (String) map.get(Constants.FIELD_NAME), (Boolean) map.get(Constants.IGNORE_CASE));
         return map;
 
     }

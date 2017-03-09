@@ -17,11 +17,13 @@ package com.impetus.client.mongodb.query;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.StringTokenizer;
+import java.util.regex.Pattern;
 
 import javax.persistence.Query;
 import javax.persistence.metamodel.Attribute;
@@ -443,7 +445,17 @@ public class MongoDBQuery extends QueryImpl
                 FilterClause filter = (FilterClause) object;
                 String property = filter.getProperty();
                 String condition = filter.getCondition();
-                Object value = filter.getValue().get(0);
+                boolean ignoreCase = filter.isIgnoreCase();
+
+                Object value;
+                if (filter.getValue().size() == 1)
+                {
+                    value = filter.getValue().get(0);
+                }
+                else
+                {
+                    value = filter.getValue();
+                }
 
                 // value is string but field.getType is different, then get
                 // value using
@@ -555,23 +567,60 @@ public class MongoDBQuery extends QueryImpl
 
                         property = new StringBuffer("_id.").append(attribute.getJPAColumnName()).toString();
                     }
+
+                    if (ignoreCase)
+                    {
+                        // let 'like' and 'not like' take care of this on its own
+                        if (!condition.equalsIgnoreCase("like") && !condition.equalsIgnoreCase("not like")) {
+
+                            if (value instanceof String)
+                            {
+                                value = Pattern.compile(createLikeRegex((String) value));
+
+                            }
+                            else if (value instanceof Collection)
+                            {
+                                Collection<?> original = (Collection<?>) value;
+                                List<Pattern> values = new ArrayList<Pattern>(original.size());
+
+                                for (Object item : original)
+                                {
+                                    values.add(Pattern.compile(createLikeRegex((String) item)));
+                                }
+
+                                value = values;
+
+                            }
+                        }
+                    }
+
                     if (condition.equals("="))
                     {
                         query.append(property, value);
 
                     }
-                    else if (condition.equalsIgnoreCase("like"))
+                    else if (condition.toLowerCase().contains("like"))
                     {
+
+                        Pattern regEx = Pattern.compile(createLikeRegex((String) value));
+                        boolean negative = condition.toLowerCase().contains("not");
 
                         if (query.containsField(property))
                         {
-                            query.get(property);
-                            query.put(property, ((BasicDBObject) query.get(property)).append("$regex",
-                                    createLikeRegex((String) value)));
+                            Object existing = query.get(property);
+
+                            if (!(existing instanceof BasicDBObject))
+                            {
+                                query.put(property, new BasicDBObject("$eq", existing));
+                            }
+
+                            query.put(property,
+                                  ((BasicDBObject) query.get(property))
+                                        .append(negative ? "$not" : "$regex", regEx));
                         }
                         else
                         {
-                            query.append(property, new BasicDBObject("$regex", createLikeRegex((String) value)));
+                            query.append(property, new BasicDBObject(negative ? "$not" : "$regex", regEx));
                         }
 
                     }
@@ -637,11 +686,11 @@ public class MongoDBQuery extends QueryImpl
                         if (query.containsField(property))
                         {
                             query.get(property);
-                            query.put(property, ((BasicDBObject) query.get(property)).append("$in", filter.getValue()));
+                            query.put(property, ((BasicDBObject) query.get(property)).append("$in", value));
                         }
                         else
                         {
-                            query.append(property, new BasicDBObject("$in", filter.getValue()));
+                            query.append(property, new BasicDBObject("$in", value));
                         }
 
                     }
@@ -651,25 +700,27 @@ public class MongoDBQuery extends QueryImpl
                         if (query.containsField(property))
                         {
                             query.get(property);
-                            query.put(property, ((BasicDBObject) query.get(property)).append("$nin", filter.getValue()));
+                            query.put(property, ((BasicDBObject) query.get(property)).append("$nin", value));
                         }
                         else
                         {
-                            query.append(property, new BasicDBObject("$nin", filter.getValue()));
+                            query.append(property, new BasicDBObject("$nin", value));
                         }
 
                     }
                     else if (condition.equalsIgnoreCase("<>"))
                     {
 
+                        String operator = value instanceof Pattern ? "$not" : "$ne";
+
                         if (query.containsField(property))
                         {
                             query.get(property);
-                            query.put(property, ((BasicDBObject) query.get(property)).append("$ne", value));
+                            query.put(property, ((BasicDBObject) query.get(property)).append(operator, value));
                         }
                         else
                         {
-                            query.append(property, new BasicDBObject("$ne", value));
+                            query.append(property, new BasicDBObject(operator, value));
                         }
 
                     }

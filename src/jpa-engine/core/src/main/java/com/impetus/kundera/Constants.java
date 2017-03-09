@@ -147,6 +147,9 @@ public interface Constants
     /** The Constant COL_NAME. */
     public static final String COL_NAME = "colName";
 
+    /** The Constant IGNORE_CASE. */
+    public static final String IGNORE_CASE = "ignoreCase";
+
     /** The Constant COMPOSITE. */
     public final static String COMPOSITE = "composite";
 

@@ -1058,6 +1058,9 @@ public class KunderaQuery
         /** The value. */
         private List<Object> value = new ArrayList<Object>();
 
+        /** Whether to ignore case while evaluating the condition */
+        private boolean ignoreCase;
+
         /**
          * The Constructor.
          * 
@@ -1141,6 +1144,26 @@ public class KunderaQuery
             }
 
             this.value = valObjects;
+        }
+
+        /**
+         * Returns whether to ignore the case when evaluating the filter clause.
+         *
+         * @return whether to ignore the case when evaluating the filter clause
+         */
+        public boolean isIgnoreCase()
+        {
+            return ignoreCase;
+        }
+
+        /**
+         * Sets whether to ignore the case when evaluating the filter clause.
+         *
+         * @param ignoreCase true to ignore the case when evaluating the filter clause
+         */
+        public void setIgnoreCase(final boolean ignoreCase)
+        {
+            this.ignoreCase = ignoreCase;
         }
 
         /* @see java.lang.Object#toString() */
@@ -1438,13 +1461,16 @@ public class KunderaQuery
      *            the value
      * @param fieldName
      *            the field name
+     * @param ignoreCase
+     *            to ignore case in the filter
      */
     public void addFilterClause(final String property, final String condition, final Object value,
-            final String fieldName)
+            final String fieldName, final boolean ignoreCase)
     {
         if (property != null && condition != null)
         {
             FilterClause filterClause = new FilterClause(property.trim(), condition.trim(), value, fieldName);
+            filterClause.setIgnoreCase(ignoreCase);
             filtersQueue.add(filterClause);
         }
         else
