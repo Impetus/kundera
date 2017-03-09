@@ -37,22 +37,30 @@ import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.KunderaQuery.UpdateClause;
 
 /**
- * @author vivek.mishra Junit for Kundera query test.
+ * The Class KunderaQueryTest.
  * 
+ * @author vivek.mishra Junit for Kundera query test.
  */
 public class KunderaQueryTest
 {
 
+    /** The Constant PU. */
     private static final String PU = "patest";
 
+    /** The emf. */
     private EntityManagerFactory emf;
 
+    /** The em. */
     private EntityManager em;
 
+    /** The kundera metadata. */
     private KunderaMetadata kunderaMetadata;
 
     /**
-     * @throws java.lang.Exception
+     * Sets the up.
+     * 
+     * @throws Exception
+     *             the exception
      */
     @Before
     public void setUp() throws Exception
@@ -64,7 +72,10 @@ public class KunderaQueryTest
     }
 
     /**
-     * @throws java.lang.Exception
+     * Tear down.
+     * 
+     * @throws Exception
+     *             the exception
      */
     @After
     public void tearDown() throws Exception
@@ -73,6 +84,9 @@ public class KunderaQueryTest
         emf.close();
     }
 
+    /**
+     * Test.
+     */
     @Test
     public void test()
     {
@@ -103,7 +117,7 @@ public class KunderaQueryTest
         Assert.assertEquals(Person.class, kunderaQuery.getEntityClass());
         Assert.assertNotNull(kunderaQuery.getEntityMetadata());
         Assert.assertTrue(KunderaMetadataManager.getEntityMetadata(kunderaMetadata, Person.class).equals(
-              kunderaQuery.getEntityMetadata()));
+                kunderaQuery.getEntityMetadata()));
         Assert.assertNull(kunderaQuery.getFilter());
         Assert.assertTrue(kunderaQuery.getFilterClauseQueue().isEmpty());
         Assert.assertNotNull(kunderaQuery.getFrom());
@@ -191,7 +205,7 @@ public class KunderaQueryTest
             queryParser = new KunderaQueryParser(kunderaQuery);
             queryParser.parse();
             kunderaQuery.postParsingInit();
-           // Assert.fail();
+            // Assert.fail();
         }
         catch (PersistenceException e)
         {
@@ -239,6 +253,9 @@ public class KunderaQueryTest
 
     }
 
+    /**
+     * Test on index parameter.
+     */
     @Test
     public void testOnIndexParameter()
     {
@@ -320,6 +337,9 @@ public class KunderaQueryTest
 
     }
 
+    /**
+     * Test on name parameter.
+     */
     @Test
     public void testOnNameParameter()
     {
@@ -355,6 +375,9 @@ public class KunderaQueryTest
 
     }
 
+    /**
+     * Test invalid index parameter.
+     */
     @Test
     public void testInvalidIndexParameter()
     {
@@ -377,6 +400,9 @@ public class KunderaQueryTest
         }
     }
 
+    /**
+     * Test invalid name parameter.
+     */
     @Test
     public void testInvalidNameParameter()
     {
@@ -399,6 +425,9 @@ public class KunderaQueryTest
         }
     }
 
+    /**
+     * Test update clause.
+     */
     @Test
     public void testUpdateClause()
     {
@@ -459,6 +488,9 @@ public class KunderaQueryTest
 
     }
 
+    /**
+     * Test with in clause.
+     */
     @Test
     public void testWithInClause()
     {
@@ -469,6 +501,9 @@ public class KunderaQueryTest
         kunderaQuery.postParsingInit();
     }
 
+    /**
+     * Test in not in not equals.
+     */
     @Test
     public void testInNotInNotEquals()
     {
@@ -499,6 +534,9 @@ public class KunderaQueryTest
 
     }
 
+    /**
+     * Test with sub query in mid.
+     */
     @Test
     public void testWithSubQueryInMid()
     {
@@ -529,6 +567,9 @@ public class KunderaQueryTest
 
     }
 
+    /**
+     * Test with sub query in mid without set param.
+     */
     @Test
     public void testWithSubQueryInMidWithoutSetParam()
     {
@@ -567,6 +608,9 @@ public class KunderaQueryTest
 
     }
 
+    /**
+     * Test order by.
+     */
     @Test
     public void testOrderBy()
     {
@@ -580,7 +624,7 @@ public class KunderaQueryTest
         Assert.assertEquals(Person.class, kunderaQuery.getEntityClass());
         Assert.assertNotNull(kunderaQuery.getEntityMetadata());
         Assert.assertTrue(KunderaMetadataManager.getEntityMetadata(kunderaMetadata, Person.class).equals(
-              kunderaQuery.getEntityMetadata()));
+                kunderaQuery.getEntityMetadata()));
         Assert.assertNull(kunderaQuery.getFilter());
         Assert.assertTrue(kunderaQuery.getFilterClauseQueue().isEmpty());
         Assert.assertNotNull(kunderaQuery.getFrom());
@@ -602,7 +646,7 @@ public class KunderaQueryTest
         Assert.assertEquals(Person.class, kunderaQuery.getEntityClass());
         Assert.assertNotNull(kunderaQuery.getEntityMetadata());
         Assert.assertTrue(KunderaMetadataManager.getEntityMetadata(kunderaMetadata, Person.class).equals(
-              kunderaQuery.getEntityMetadata()));
+                kunderaQuery.getEntityMetadata()));
         Assert.assertNull(kunderaQuery.getFilter());
         Assert.assertTrue(kunderaQuery.getFilterClauseQueue().isEmpty());
         Assert.assertNotNull(kunderaQuery.getFrom());
@@ -615,6 +659,14 @@ public class KunderaQueryTest
         Assert.assertEquals(KunderaQuery.SortOrder.DESC, kunderaQuery.getOrdering().get(0).getOrder());
     }
 
+    /**
+     * Assert mix sub query.
+     * 
+     * @param kunderaQuery
+     *            the kundera query
+     * @param paramSize
+     *            the param size
+     */
     private void assertMixSubQuery(KunderaQuery kunderaQuery, int paramSize)
     {
         Assert.assertEquals(paramSize, kunderaQuery.getParameters().size());
@@ -654,6 +706,12 @@ public class KunderaQueryTest
         Assert.assertEquals(paramSize, kunderaQuery.getParameters().size());
     }
 
+    /**
+     * Assert sub query.
+     * 
+     * @param kunderaQuery
+     *            the kundera query
+     */
     private void assertSubQuery(KunderaQuery kunderaQuery)
     {
         Assert.assertEquals(4, kunderaQuery.getParameters().size());
@@ -699,21 +757,39 @@ public class KunderaQueryTest
         Assert.assertEquals(4, kunderaQuery.getParameters().size());
     }
 
+    /**
+     * The Class JPAParameter.
+     */
     private class JPAParameter implements Parameter<String>
     {
 
+        /*
+         * (non-Javadoc)
+         * 
+         * @see javax.persistence.Parameter#getName()
+         */
         @Override
         public String getName()
         {
             return "jpa";
         }
 
+        /*
+         * (non-Javadoc)
+         * 
+         * @see javax.persistence.Parameter#getPosition()
+         */
         @Override
         public Integer getPosition()
         {
             return 0;
         }
 
+        /*
+         * (non-Javadoc)
+         * 
+         * @see javax.persistence.Parameter#getParameterType()
+         */
         @Override
         public Class<String> getParameterType()
         {

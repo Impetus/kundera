@@ -16,7 +16,6 @@
 package com.impetus.kundera.query;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,12 +25,9 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.el.ExpressionFactory;
 import javax.persistence.Parameter;
-import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.Metamodel;
@@ -76,6 +72,7 @@ public class KunderaQuery
     /** The result. */
     private String[] result;
 
+    /** The aggregation result. */
     private String[] aggregationResult;
 
     /** The from. */
@@ -99,6 +96,7 @@ public class KunderaQuery
     /** The sort orders. */
     private List<SortOrdering> sortOrders;
 
+    /** The is aggregate. */
     private boolean isAggregate;
 
     /** Persistence Unit(s). */
@@ -109,31 +107,45 @@ public class KunderaQuery
     /** The filters queue. */
     private Queue filtersQueue = new LinkedList();
 
+    /** The is delete update. */
     private boolean isDeleteUpdate;
 
+    /** The update clause queue. */
     private Queue<UpdateClause> updateClauseQueue = new LinkedList<UpdateClause>();
 
+    /** The typed parameter. */
     private TypedParameter typedParameter;
 
+    /** The parameters map. */
     private Map<String, Object> parametersMap = new HashMap<String, Object>();
 
+    /** The is native query. */
     boolean isNativeQuery;
 
+    /** The jpa query. */
     private String jpaQuery;
 
+    /** The kundera metadata. */
     private final KunderaMetadata kunderaMetadata;
 
+    /** The jpql expression. */
     private JPQLExpression jpqlExpression;
 
+    /** The expression factory. */
     private ExpressionFactory expressionFactory;
 
+    /** The select statement. */
     private SelectStatement selectStatement;
 
+    /** The update statement. */
     private UpdateStatement updateStatement;
 
+    /** The delete statement. */
     private DeleteStatement deleteStatement;
 
     /**
+     * Sets the expression factory.
+     * 
      * @param expressionFactory
      *            the expressionFactory to set
      */
@@ -143,6 +155,8 @@ public class KunderaQuery
     }
 
     /**
+     * Gets the jpql expression.
+     * 
      * @return the jpqlExpression
      */
     public JPQLExpression getJpqlExpression()
@@ -153,8 +167,10 @@ public class KunderaQuery
     /**
      * Instantiates a new kundera query.
      * 
-     * @param persistenceUnits
-     *            the persistence units
+     * @param jpaQuery
+     *            the jpa query
+     * @param kunderaMetadata
+     *            the kundera metadata
      */
     public KunderaQuery(final String jpaQuery, final KunderaMetadata kunderaMetadata)
     {
@@ -163,6 +179,12 @@ public class KunderaQuery
         initiateJPQLObject(jpaQuery);
     }
 
+    /**
+     * Initiate jpql object.
+     * 
+     * @param jpaQuery
+     *            the jpa query
+     */
     private void initiateJPQLObject(final String jpaQuery)
     {
         JPQLGrammar jpqlGrammar = EclipseLinkJPQLGrammar2_4.instance();
@@ -170,6 +192,9 @@ public class KunderaQuery
         setKunderaQueryTypeObject();
     }
 
+    /**
+     * Sets the kundera query type object.
+     */
     private void setKunderaQueryTypeObject()
     {
 
@@ -201,6 +226,8 @@ public class KunderaQuery
     }
 
     /**
+     * Gets the select statement.
+     * 
      * @return the selectStatement
      */
     public SelectStatement getSelectStatement()
@@ -209,6 +236,8 @@ public class KunderaQuery
     }
 
     /**
+     * Sets the select statement.
+     * 
      * @param selectStatement
      *            the selectStatement to set
      */
@@ -218,6 +247,8 @@ public class KunderaQuery
     }
 
     /**
+     * Sets the update statement.
+     * 
      * @param updateStatement
      *            the updateStatement to set
      */
@@ -227,6 +258,8 @@ public class KunderaQuery
     }
 
     /**
+     * Gets the update statement.
+     * 
      * @return the updateStatement
      */
     public UpdateStatement getUpdateStatement()
@@ -235,6 +268,8 @@ public class KunderaQuery
     }
 
     /**
+     * Gets the delete statement.
+     * 
      * @return the deleteStatement
      */
     public DeleteStatement getDeleteStatement()
@@ -243,6 +278,8 @@ public class KunderaQuery
     }
 
     /**
+     * Sets the delete statement.
+     * 
      * @param deleteStatement
      *            the deleteStatement to set
      */
@@ -251,23 +288,40 @@ public class KunderaQuery
         this.deleteStatement = deleteStatement;
     }
 
+    /**
+     * Checks if is select statement.
+     * 
+     * @return true, if is select statement
+     */
     public boolean isSelectStatement()
     {
         return this.getJpqlExpression().getQueryStatement().getClass().isAssignableFrom(SelectStatement.class);
 
     }
 
+    /**
+     * Checks if is delete statement.
+     * 
+     * @return true, if is delete statement
+     */
     public boolean isDeleteStatement()
     {
         return this.getJpqlExpression().getQueryStatement().getClass().isAssignableFrom(DeleteStatement.class);
     }
 
+    /**
+     * Checks if is update statement.
+     * 
+     * @return true, if is update statement
+     */
     public boolean isUpdateStatement()
     {
         return this.getJpqlExpression().getQueryStatement().getClass().isAssignableFrom(UpdateStatement.class);
     }
 
     /**
+     * Gets the expression factory.
+     * 
      * @return the expressionFactory
      */
     public ExpressionFactory getExpressionFactory()
@@ -308,6 +362,8 @@ public class KunderaQuery
     }
 
     /**
+     * Gets the agg result.
+     * 
      * @return Aggregation result set
      */
     public final String[] getAggResult()
@@ -316,6 +372,8 @@ public class KunderaQuery
     }
 
     /**
+     * Checks if is aggregated.
+     * 
      * @return Query contains aggregation or not
      */
     public boolean isAggregated()
@@ -324,7 +382,10 @@ public class KunderaQuery
     }
 
     /**
+     * Sets the aggregated.
+     * 
      * @param isAggregated
+     *            the new aggregated
      */
     public void setAggregated(boolean isAggregated)
     {
@@ -406,6 +467,8 @@ public class KunderaQuery
     }
 
     /**
+     * Gets the parameters map.
+     * 
      * @return Map of query parameters.
      */
     public Map<String, Object> getParametersMap()
@@ -437,10 +500,11 @@ public class KunderaQuery
     }
 
     /**
-     * Parameter is bound if it holds any value, else will return false
+     * Parameter is bound if it holds any value, else will return false.
      * 
      * @param param
-     * @return
+     *            the param
+     * @return true, if is bound
      */
     public boolean isBound(Parameter param)
     {
@@ -451,7 +515,8 @@ public class KunderaQuery
      * Returns clause value for supplied parameter.
      * 
      * @param paramString
-     * @return
+     *            the param string
+     * @return the clause value
      */
     public List<Object> getClauseValue(String paramString)
     {
@@ -543,7 +608,7 @@ public class KunderaQuery
     }
 
     /**
-     * 
+     * Inits the update clause.
      */
     private void initUpdateClause()
     {
@@ -654,6 +719,14 @@ public class KunderaQuery
         addDiscriminatorClause(null, entityType);
     }
 
+    /**
+     * Adds the discriminator clause.
+     * 
+     * @param clauses
+     *            the clauses
+     * @param entityType
+     *            the entity type
+     */
     private void addDiscriminatorClause(List<String> clauses, EntityType entityType)
     {
         if (((AbstractManagedType) entityType).isInherited())
@@ -678,10 +751,12 @@ public class KunderaQuery
      * Depending upon filter value, if it starts with ":" then it is NAMED
      * parameter, else if starts with "?", it will be INDEXED parameter.
      * 
-     * @param tokens
-     *            tokens
-     * @param filterClause
-     *            filter clauses.
+     * @param value
+     *            the value
+     * @param updateClause
+     *            the update clause
+     * @param fieldName
+     *            the field name
      */
     private void onTypedParameter(Object value, UpdateClause updateClause, String fieldName)
     {
@@ -702,8 +777,6 @@ public class KunderaQuery
      * Depending upon filter value, if it starts with ":" then it is NAMED
      * parameter, else if starts with "?", it will be INDEXED parameter.
      * 
-     * @param tokens
-     *            tokens
      * @param filterClause
      *            filter clauses.
      */
@@ -725,7 +798,7 @@ public class KunderaQuery
     }
 
     /**
-     * Adds typed parameter to {@link TypedParameter}
+     * Adds typed parameter to {@link TypedParameter}.
      * 
      * @param type
      *            type of parameter(e.g. NAMED/INDEXED)
@@ -752,7 +825,7 @@ public class KunderaQuery
     }
 
     /**
-     * Adds typed parameter to {@link TypedParameter}
+     * Adds typed parameter to {@link TypedParameter}.
      * 
      * @param type
      *            type of parameter(e.g. NAMED/INDEXED)
@@ -782,9 +855,14 @@ public class KunderaQuery
     }
 
     /**
+     * Filter jpa parameter info.
+     * 
      * @param type
+     *            the type
      * @param name
+     *            the name
      * @param fieldName
+     *            the field name
      */
     private void filterJPAParameterInfo(Type type, String name, String fieldName)
     {
@@ -804,8 +882,11 @@ public class KunderaQuery
     }
 
     /**
+     * Gets the attribute name.
+     * 
      * @param fieldName
-     * @return
+     *            the field name
+     * @return the attribute name
      */
     private String getAttributeName(String fieldName)
     {
@@ -831,6 +912,14 @@ public class KunderaQuery
         parametersMap.put(":" + name, value);
     }
 
+    /**
+     * Sets the parameter.
+     * 
+     * @param position
+     *            the position
+     * @param value
+     *            the value
+     */
     public final void setParameter(int position, Object value)
     {
         setParameterValue("?" + position, value);
@@ -838,7 +927,7 @@ public class KunderaQuery
     }
 
     /**
-     * Sets parameter value into filterClause, depending upon {@link Type}
+     * Sets parameter value into filterClause, depending upon {@link Type}.
      * 
      * @param name
      *            parameter name.
@@ -888,11 +977,21 @@ public class KunderaQuery
         return entityClass;
     }
 
+    /**
+     * Gets the entity alias.
+     * 
+     * @return the entity alias
+     */
     public final String getEntityAlias()
     {
         return this.entityAlias;
     }
 
+    /**
+     * Checks if is native.
+     * 
+     * @return true, if is native
+     */
     public boolean isNative()
     {
         return isNativeQuery;
@@ -947,6 +1046,8 @@ public class KunderaQuery
         private String fieldName;
 
         /**
+         * Gets the field name.
+         * 
          * @return the fieldName
          */
         public String getFieldName()
@@ -966,6 +1067,8 @@ public class KunderaQuery
          *            the condition
          * @param value
          *            the value
+         * @param fieldName
+         *            the field name
          */
         public FilterClause(String property, String condition, Object value, String fieldName)
         {
@@ -1063,12 +1166,26 @@ public class KunderaQuery
         }
     }
 
+    /**
+     * The Class UpdateClause.
+     */
     public final class UpdateClause
     {
+
+        /** The property. */
         private String property;
 
+        /** The value. */
         private Object value;
 
+        /**
+         * Instantiates a new update clause.
+         * 
+         * @param property
+         *            the property
+         * @param value
+         *            the value
+         */
         public UpdateClause(final String property, final Object value)
         {
             this.property = property;
@@ -1076,6 +1193,8 @@ public class KunderaQuery
         }
 
         /**
+         * Gets the property.
+         * 
          * @return the property
          */
         public String getProperty()
@@ -1084,6 +1203,8 @@ public class KunderaQuery
         }
 
         /**
+         * Gets the value.
+         * 
          * @return the value
          */
         public Object getValue()
@@ -1092,6 +1213,8 @@ public class KunderaQuery
         }
 
         /**
+         * Sets the value.
+         * 
          * @param value
          *            the value to set
          */
@@ -1137,6 +1260,8 @@ public class KunderaQuery
     /**
      * Gets the metamodel.
      * 
+     * @param pu
+     *            the pu
      * @return the metamodel
      */
     private MetamodelImpl getMetamodel(String pu)
@@ -1267,6 +1392,8 @@ public class KunderaQuery
     }
 
     /**
+     * Gets the update clause queue.
+     * 
      * @return the updateClauseQueue
      */
     public Queue<UpdateClause> getUpdateClauseQueue()
@@ -1274,14 +1401,23 @@ public class KunderaQuery
         return updateClauseQueue;
     }
 
+    /**
+     * Checks if is update clause.
+     * 
+     * @return true, if is update clause
+     */
     public boolean isUpdateClause()
     {
         return !updateClauseQueue.isEmpty();
     }
 
     /**
+     * Adds the update clause.
+     * 
      * @param property
+     *            the property
      * @param value
+     *            the value
      */
     public void addUpdateClause(final String property, final String value)
     {
@@ -1292,10 +1428,16 @@ public class KunderaQuery
     }
 
     /**
+     * Adds the filter clause.
+     * 
      * @param property
+     *            the property
      * @param condition
+     *            the condition
      * @param value
+     *            the value
      * @param fieldName
+     *            the field name
      */
     public void addFilterClause(final String property, final String condition, final Object value,
             final String fieldName)
@@ -1312,7 +1454,10 @@ public class KunderaQuery
     }
 
     /**
+     * Adds the filter clause.
+     * 
      * @param filterClause
+     *            the filter clause
      */
     public void addFilterClause(Object filterClause)
     {
@@ -1322,35 +1467,59 @@ public class KunderaQuery
     }
 
     /**
+     * Sets the checks if is delete update.
+     * 
      * @param b
+     *            the new checks if is delete update
      */
     public void setIsDeleteUpdate(boolean b)
     {
         this.isDeleteUpdate = b;
     }
 
+    /**
+     * Checks if is delete update.
+     * 
+     * @return true, if is delete update
+     */
     public boolean isDeleteUpdate()
     {
         return isDeleteUpdate;
     }
 
+    /**
+     * Gets the JPA query.
+     * 
+     * @return the JPA query
+     */
     public String getJPAQuery()
     {
         return this.jpaQuery;
     }
 
+    /**
+     * The Class TypedParameter.
+     */
     private class TypedParameter
     {
+
+        /** The type. */
         private Type type;
 
+        /** The jpa parameters. */
         private Set<Parameter<?>> jpaParameters = new HashSet<Parameter<?>>();
 
+        /** The parameters. */
         private Map<String, List<FilterClause>> parameters;
 
+        /** The update parameters. */
         private Map<String, UpdateClause> updateParameters;
 
         /**
+         * Instantiates a new typed parameter.
          * 
+         * @param type
+         *            the type
          */
         public TypedParameter(Type type)
         {
@@ -1358,6 +1527,8 @@ public class KunderaQuery
         }
 
         /**
+         * Gets the type.
+         * 
          * @return the type
          */
         private Type getType()
@@ -1366,6 +1537,8 @@ public class KunderaQuery
         }
 
         /**
+         * Gets the parameters.
+         * 
          * @return the parameters
          */
         Map<String, List<FilterClause>> getParameters()
@@ -1374,6 +1547,8 @@ public class KunderaQuery
         }
 
         /**
+         * Gets the update parameters.
+         * 
          * @return the parameters
          */
         Map<String, UpdateClause> getUpdateParameters()
@@ -1381,6 +1556,14 @@ public class KunderaQuery
             return updateParameters;
         }
 
+        /**
+         * Adds the parameters.
+         * 
+         * @param key
+         *            the key
+         * @param clause
+         *            the clause
+         */
         void addParameters(String key, FilterClause clause)
         {
             if (parameters == null)
@@ -1394,6 +1577,14 @@ public class KunderaQuery
             parameters.get(key).add(clause);
         }
 
+        /**
+         * Adds the parameters.
+         * 
+         * @param key
+         *            the key
+         * @param clause
+         *            the clause
+         */
         void addParameters(String key, UpdateClause clause)
         {
             if (updateParameters == null)
@@ -1404,30 +1595,60 @@ public class KunderaQuery
             updateParameters.put(key, clause);
         }
 
+        /**
+         * Adds the jpa parameter.
+         * 
+         * @param param
+         *            the param
+         */
         void addJPAParameter(Parameter param)
         {
             jpaParameters.add(param);
         }
     }
 
+    /**
+     * The Enum Type.
+     */
     private enum Type
     {
-        INDEXED, NAMED
+
+        /** The indexed. */
+        INDEXED,
+        /** The named. */
+        NAMED
     }
 
     /*
      * JPA Parameter type
      */
+    /**
+     * The Class JPAParameter.
+     * 
+     * @param <T>
+     *            the generic type
+     */
     private class JPAParameter<T> implements Parameter<T>
     {
+
+        /** The name. */
         private String name;
 
+        /** The position. */
         private Integer position;
 
+        /** The type. */
         private Class<T> type;
 
         /**
+         * Instantiates a new JPA parameter.
          * 
+         * @param name
+         *            the name
+         * @param position
+         *            the position
+         * @param type
+         *            the type
          */
         JPAParameter(String name, Integer position, Class<T> type)
         {
@@ -1469,12 +1690,22 @@ public class KunderaQuery
             return type;
         }
 
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.lang.Object#hashCode()
+         */
         @Override
         public int hashCode()
         {
             return HashCodeBuilder.reflectionHashCode(this);
         }
 
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.lang.Object#equals(java.lang.Object)
+         */
         @Override
         public boolean equals(Object obj)
         {
@@ -1505,6 +1736,11 @@ public class KunderaQuery
             return false;
         }
 
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.lang.Object#toString()
+         */
         @Override
         public String toString()
         {

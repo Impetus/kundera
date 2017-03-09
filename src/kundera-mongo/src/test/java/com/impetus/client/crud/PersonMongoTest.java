@@ -75,7 +75,7 @@ public class PersonMongoTest extends BaseTest
 
     /**
      * On insert mongo.
-     *
+     * 
      * @throws Exception
      *             the exception
      */
@@ -282,7 +282,7 @@ public class PersonMongoTest extends BaseTest
 
     /**
      * On merge mongo.
-     *
+     * 
      * @throws Exception
      *             the exception
      */
@@ -839,12 +839,11 @@ public class PersonMongoTest extends BaseTest
      * Map reduce test (simple).
      */
     @Test
-    public void mapReduceTest() {
-        String query = "db.PERSON.mapReduce(\n" +
-              "  function () { emit( this.AGE - this.AGE % 10, 1 ); },\n" +
-              "  function (key, values) { return { age: key, count: Array.sum(values) }; },\n" +
-              "  { query: {}, out: { inline: 1 } }\n" +
-              ")";
+    public void mapReduceTest()
+    {
+        String query = "db.PERSON.mapReduce(\n" + "  function () { emit( this.AGE - this.AGE % 10, 1 ); },\n"
+                + "  function (key, values) { return { age: key, count: Array.sum(values) }; },\n"
+                + "  { query: {}, out: { inline: 1 } }\n" + ")";
 
         executeMapReduceTest(query);
     }
@@ -853,24 +852,29 @@ public class PersonMongoTest extends BaseTest
      * Map reduce test (with db.getCollection(..)).
      */
     @Test
-    public void mapReduceTestWithGetCollection() {
-        String query = "db.getCollection('PERSON').mapReduce(\n" +
-              "  function () { emit( this.AGE - this.AGE % 10, 1 ); },\n" +
-              "  function (key, values) { return { age: key, count: Array.sum(values) }; },\n" +
-              "  { query: {}, out: { inline: 1 } }\n" +
-              ")";
+    public void mapReduceTestWithGetCollection()
+    {
+        String query = "db.getCollection('PERSON').mapReduce(\n"
+                + "  function () { emit( this.AGE - this.AGE % 10, 1 ); },\n"
+                + "  function (key, values) { return { age: key, count: Array.sum(values) }; },\n"
+                + "  { query: {}, out: { inline: 1 } }\n" + ")";
 
         executeMapReduceTest(query);
 
-        query = "db.getCollection(\"PERSON\").mapReduce(\n" +
-              "  function () { emit( this.AGE - this.AGE % 10, 1 ); },\n" +
-              "  function (key, values) { return { age: key, count: Array.sum(values) }; },\n" +
-              "  { query: {}, out: { inline: 1 } }\n" +
-              ")";
+        query = "db.getCollection(\"PERSON\").mapReduce(\n"
+                + "  function () { emit( this.AGE - this.AGE % 10, 1 ); },\n"
+                + "  function (key, values) { return { age: key, count: Array.sum(values) }; },\n"
+                + "  { query: {}, out: { inline: 1 } }\n" + ")";
 
         executeMapReduceTest(query);
     }
 
+    /**
+     * Execute map reduce test.
+     * 
+     * @param query
+     *            the query
+     */
     private void executeMapReduceTest(String query)
     {
         Object p1 = prepareMongoInstance("1", 10);
@@ -919,6 +923,9 @@ public class PersonMongoTest extends BaseTest
         }
     }
 
+    /**
+     * Count test.
+     */
     @Test
     public void countTest()
     {

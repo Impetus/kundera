@@ -109,7 +109,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
     /**
      * Checks if is ordered bulk operation.
-     *
+     * 
      * @return true, if is ordered bulk operation
      */
     public boolean isOrderedBulkOperation()
@@ -119,7 +119,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
     /**
      * Sets the ordered bulk operation.
-     *
+     * 
      * @param orderedBulkOperation
      *            the new ordered bulk operation
      */
@@ -493,6 +493,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      *            the max result
      * @param firstResult
      *            the first result
+     * @param isCountQuery
+     *            the is count query
      * @param keys
      *            the keys
      * @param results
@@ -502,21 +504,21 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      *             the exception
      */
     public <E> List<E> loadData(EntityMetadata entityMetadata, BasicDBObject mongoQuery, List<String> relationNames,
-            BasicDBObject orderBy, int maxResult, int firstResult, boolean isCountQuery, BasicDBObject keys, String... results)
-            throws Exception
+            BasicDBObject orderBy, int maxResult, int firstResult, boolean isCountQuery, BasicDBObject keys,
+            String... results) throws Exception
     {
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 entityMetadata.getPersistenceUnit());
         AbstractManagedType managedType = (AbstractManagedType) metaModel.entity(entityMetadata.getEntityClazz());
         boolean hasLob = managedType.hasLobAttribute();
-        return (List<E>) (!hasLob ?
-              loadQueryData(entityMetadata, mongoQuery, orderBy, maxResult, firstResult, isCountQuery, keys, results) :
-              loadQueryDataGFS(entityMetadata, mongoQuery, orderBy, maxResult, firstResult, isCountQuery));
+        return (List<E>) (!hasLob ? loadQueryData(entityMetadata, mongoQuery, orderBy, maxResult, firstResult,
+                isCountQuery, keys, results) : loadQueryDataGFS(entityMetadata, mongoQuery, orderBy, maxResult,
+                firstResult, isCountQuery));
     }
 
     /**
      * Load query data gfs.
-     *
+     * 
      * @param <E>
      *            the element type
      * @param entityMetadata
@@ -529,6 +531,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      *            the max result
      * @param firstResult
      *            the first result
+     * @param isCountQuery
+     *            the is count query
      * @return the list
      */
     private <E> List<E> loadQueryDataGFS(EntityMetadata entityMetadata, BasicDBObject mongoQuery,
@@ -537,7 +541,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         List<GridFSDBFile> gfsDBfiles = getGFSDBFiles(mongoQuery, orderBy, entityMetadata.getTableName(), maxResult,
                 firstResult);
 
-        if (isCountQuery) {
+        if (isCountQuery)
+        {
             return (List<E>) Collections.singletonList(gfsDBfiles.size());
         }
 
@@ -551,7 +556,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
     /**
      * Load query data.
-     *
+     * 
      * @param <E>
      *            the element type
      * @param entityMetadata
@@ -564,6 +569,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      *            the max result
      * @param firstResult
      *            the first result
+     * @param isCountQuery
+     *            the is count query
      * @param keys
      *            the keys
      * @param results
@@ -575,8 +582,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      *             the illegal access exception
      */
     private <E> List<E> loadQueryData(EntityMetadata entityMetadata, BasicDBObject mongoQuery, BasicDBObject orderBy,
-            int maxResult, int firstResult, boolean isCountQuery, BasicDBObject keys, String... results) throws InstantiationException,
-            IllegalAccessException
+            int maxResult, int firstResult, boolean isCountQuery, BasicDBObject keys, String... results)
+            throws InstantiationException, IllegalAccessException
     {
         String documentName = entityMetadata.getTableName();
 
@@ -633,7 +640,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
     /**
      * Populate gfs entity.
-     *
+     * 
      * @param entityMetadata
      *            the entity metadata
      * @param entities
@@ -683,7 +690,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
     /**
      * Gets the GFSDB files.
-     *
+     * 
      * @param mongoQuery
      *            the mongo query
      * @param sort
@@ -1540,7 +1547,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
     /**
      * Parses the map reduce command.
-     *
+     * 
      * @param jsonClause
      *            the json clause
      * @return the map reduce command
@@ -1548,8 +1555,10 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     private MapReduceCommand parseMapReduceCommand(String jsonClause)
     {
         String collectionName = jsonClause.replaceFirst("(?ms).*?\\.\\s*(.+?)\\s*\\.\\s*mapReduce\\s*\\(.*", "$1");
-        if (collectionName.contains("getCollection")) {
-            collectionName = collectionName.replaceFirst(".*getCollection\\s*\\(\\s*(['\"])([^'\"]+)\\1\\s*\\).*", "$2");
+        if (collectionName.contains("getCollection"))
+        {
+            collectionName = collectionName
+                    .replaceFirst(".*getCollection\\s*\\(\\s*(['\"])([^'\"]+)\\1\\s*\\).*", "$2");
         }
 
         DBCollection collection = mongoDb.getCollection(collectionName);
@@ -1576,7 +1585,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
     /**
      * Find comma separated argument.
-     *
+     * 
      * @param functionBody
      *            the function body
      * @param index
@@ -1753,7 +1762,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
     /**
      * Creates the unique index gfs.
-     *
+     * 
      * @param coll
      *            the coll
      * @param id
