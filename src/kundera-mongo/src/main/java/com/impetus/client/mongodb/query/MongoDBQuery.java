@@ -30,6 +30,9 @@ import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.Metamodel;
 
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.persistence.jpa.jpql.parser.CountFunction;
+import org.eclipse.persistence.jpa.jpql.parser.Expression;
+import org.eclipse.persistence.jpa.jpql.parser.SelectClause;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -156,8 +159,8 @@ public class MongoDBQuery extends QueryImpl
                 BasicDBObject orderByClause = getOrderByClause(m);
                 return ((MongoDBClient) client).loadData(m,
                         createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()), null, orderByClause,
-                        isSingleResult ? 1 : maxResult, firstResult, getKeys(m, getKunderaQuery().getResult()),
-                        getKunderaQuery().getResult());
+                        isSingleResult ? 1 : maxResult, firstResult, isCountQuery(),
+                        getKeys(m, getKunderaQuery().getResult()), getKunderaQuery().getResult());
             }
             else
             {
@@ -181,7 +184,7 @@ public class MongoDBQuery extends QueryImpl
             BasicDBObject orderByClause = getOrderByClause(m);
             // find on id, so no need to add skip() [firstResult hardcoded 0]
             return ((MongoDBClient) client).loadData(m, createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()),
-                    null, orderByClause, isSingleResult ? 1 : maxResult, 0,
+                    null, orderByClause, isSingleResult ? 1 : maxResult, 0, isCountQuery(),
                     getKeys(m, getKunderaQuery().getResult()), getKunderaQuery().getResult());
         }
         catch (Exception e)
@@ -215,7 +218,7 @@ public class MongoDBQuery extends QueryImpl
                 BasicDBObject orderByClause = getOrderByClause(m);
                 ls = ((MongoDBClient) client).loadData(m,
                         createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()), m.getRelationNames(),
-                        orderByClause, isSingleResult ? 1 : maxResult, firstResult,
+                        orderByClause, isSingleResult ? 1 : maxResult, firstResult, isCountQuery(),
                         getKeys(m, getKunderaQuery().getResult()), getKunderaQuery().getResult());
             }
             else
@@ -230,6 +233,21 @@ public class MongoDBQuery extends QueryImpl
         }
 
         return setRelationEntities(ls, client, m);
+    }
+
+    private boolean isCountQuery()
+    {
+        if (getKunderaQuery().getSelectStatement() != null) {
+            final Expression selectClause = getKunderaQuery().getSelectStatement().getSelectClause();
+
+            if (selectClause instanceof SelectClause) {
+                final Expression expression = ((SelectClause) selectClause).getSelectExpression();
+
+                return expression instanceof CountFunction;
+            }
+        }
+
+        return false;
     }
 
     /*
@@ -479,7 +497,10 @@ public class MongoDBQuery extends QueryImpl
 
                     if (isCompositeColumn)
                     {
-                        property = new StringBuffer("_id.").append(property).toString();
+                        EmbeddableType embeddableType = metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
+                        AbstractAttribute attribute = (AbstractAttribute) embeddableType.getAttribute(property);
+
+                        property = new StringBuffer("_id.").append(attribute.getJPAColumnName()).toString();
                     }
                     if (condition.equals("="))
                     {
