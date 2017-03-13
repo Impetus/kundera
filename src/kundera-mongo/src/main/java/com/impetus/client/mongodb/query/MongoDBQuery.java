@@ -872,9 +872,24 @@ public class MongoDBQuery extends QueryImpl
     {
         EntityMetadata m = getEntityMetadata();
         Client client = persistenceDelegeator.getClient(m);
+
+        int fetchSize;
+        if (getFetchSize() != null)
+        {
+            fetchSize = getFetchSize();
+        }
+        else if (this.maxResult != 0)
+        {
+            fetchSize = this.maxResult;
+        }
+        else
+        {
+            fetchSize = Integer.MAX_VALUE;
+        }
+
         return new ResultIterator((MongoDBClient) client, m, createMongoQuery(m, getKunderaQuery()
                 .getFilterClauseQueue()), getOrderByClause(m), getKeys(m, getKunderaQuery().getResult()),
-                persistenceDelegeator, getFetchSize() != null ? getFetchSize() : this.maxResult);
+                persistenceDelegeator, fetchSize);
     }
 
     /**

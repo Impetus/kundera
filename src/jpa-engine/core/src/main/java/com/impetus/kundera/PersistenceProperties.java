@@ -48,6 +48,9 @@ public interface PersistenceProperties
     /** The Constant KUNDERA_FETCH_MAX_DEPTH. */
     public static final String KUNDERA_FETCH_MAX_DEPTH = "kundera.fetch.max.depth";
 
+    /** The Constant KUNDERA_QUERY_DEFAULT_MAX_RESULTS. */
+    public static final String KUNDERA_QUERY_DEFAULT_MAX_RESULTS = "kundera.query.default.max.results";
+
     /** Connection Pooling related constants. */
 
     // Cap on the number of object instances managed by the pool per node.
