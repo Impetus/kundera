@@ -924,7 +924,7 @@ public class PersonMongoTest extends BaseTest
         Query q = em.createQuery(query);
         List<PersonMongo> results = q.getResultList();
         Assert.assertNotNull(results);
-        Assert.assertEquals(3, results.size());
+        Assert.assertEquals(2, results.size());
 
         query = "Select p from PersonMongo p where UPPER(p.personId) LIKE '%and%'";
         q = em.createQuery(query);
@@ -953,7 +953,7 @@ public class PersonMongoTest extends BaseTest
         Query q = em.createQuery(query);
         List<PersonMongo> results = q.getResultList();
         Assert.assertNotNull(results);
-        Assert.assertEquals(1, results.size());
+        Assert.assertEquals(2, results.size());
 
         query = "Select p from PersonMongo p where p.personId NOT LIKE '%andr%' AND p.personId = 'alexander'";
         q = em.createQuery(query);

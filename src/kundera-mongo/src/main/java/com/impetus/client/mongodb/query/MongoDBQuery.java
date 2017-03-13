@@ -575,7 +575,7 @@ public class MongoDBQuery extends QueryImpl
 
                             if (value instanceof String)
                             {
-                                value = Pattern.compile(createLikeRegex((String) value));
+                                value = Pattern.compile(createLikeRegex((String) value, ignoreCase));
 
                             }
                             else if (value instanceof Collection)
@@ -585,7 +585,7 @@ public class MongoDBQuery extends QueryImpl
 
                                 for (Object item : original)
                                 {
-                                    values.add(Pattern.compile(createLikeRegex((String) item)));
+                                    values.add(Pattern.compile(createLikeRegex((String) item, ignoreCase)));
                                 }
 
                                 value = values;
@@ -602,7 +602,7 @@ public class MongoDBQuery extends QueryImpl
                     else if (condition.toLowerCase().contains("like"))
                     {
 
-                        Pattern regEx = Pattern.compile(createLikeRegex((String) value));
+                        Pattern regEx = Pattern.compile(createLikeRegex((String) value, ignoreCase));
                         boolean negative = condition.toLowerCase().contains("not");
 
                         if (query.containsField(property))
@@ -980,11 +980,13 @@ public class MongoDBQuery extends QueryImpl
      * 
      * @param expr
      *            the expr
+     * @param ignoreCase
+     *            whether to ignore the case
      * @return the string
      */
-    public static String createLikeRegex(String expr)
+    public static String createLikeRegex(String expr, boolean ignoreCase)
     {
-        String regex = createRegex(expr);
+        String regex = createRegex(expr, ignoreCase);
         regex = regex.replace("_", ".").replace("%", ".*?");
 
         return regex;
@@ -995,9 +997,11 @@ public class MongoDBQuery extends QueryImpl
      * 
      * @param value
      *            the value
+     * @param ignoreCase
+     *            whether to ignore the case
      * @return the string
      */
-    public static String createRegex(String value)
+    public static String createRegex(String value, boolean ignoreCase)
     {
         if (value == null)
         {
@@ -1011,7 +1015,13 @@ public class MongoDBQuery extends QueryImpl
         }
 
         StringBuilder sb = new StringBuilder(len * 2);
-        sb.append("(?i)^");
+
+        if (ignoreCase) {
+            sb.append("(?i)");
+        }
+
+        sb.append("^");
+
         for (int i = 0; i < len; i++)
         {
             char c = value.charAt(i);
