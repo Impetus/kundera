@@ -328,7 +328,9 @@ public class MongoDBQuery extends QueryImpl
         if (sq.clauses.size() > 0 || hasChildren)
         {
             if (sq.clauses.size() > 0)
+            {
                 sq.actualQuery = createSubMongoQuery(m, sq.clauses);
+            }
             if (hasChildren)
             {
                 List<BasicDBObject> childQs = new ArrayList<BasicDBObject>();
@@ -338,7 +340,11 @@ public class MongoDBQuery extends QueryImpl
                 {
                     childQs.add(subQ.actualQuery);
                 }
-                if (sq.isAnd)
+                if (childQs.size() == 1)
+                {
+                    sq.actualQuery = childQs.get(0);
+                }
+                else if (sq.isAnd)
                 {
                     BasicDBObject dbo = new BasicDBObject("$and", childQs);
                     sq.actualQuery = dbo;
@@ -350,7 +356,6 @@ public class MongoDBQuery extends QueryImpl
                 }
             }
         }
-        return;
     }
 
     /**
@@ -533,13 +538,17 @@ public class MongoDBQuery extends QueryImpl
                             f = (Field) entity.getAttribute(fieldName).getJavaMember();
                         }
                     }
-                    if (value.getClass().isAssignableFrom(String.class) && f != null
-                            && !f.getType().equals(value.getClass()))
+
+                    if (value != null)
                     {
-                        value = PropertyAccessorFactory.getPropertyAccessor(f).fromString(f.getType().getClass(),
-                                value.toString());
+                        if (value.getClass().isAssignableFrom(String.class) && f != null
+                                && !f.getType().equals(value.getClass()))
+                        {
+                            value = PropertyAccessorFactory.getPropertyAccessor(f).fromString(f.getType().getClass(),
+                                    value.toString());
+                        }
+                        value = MongoDBUtils.populateValue(value, value.getClass());
                     }
-                    value = MongoDBUtils.populateValue(value, value.getClass());
 
                 }
 
@@ -596,8 +605,27 @@ public class MongoDBQuery extends QueryImpl
 
                     if (condition.equals("="))
                     {
-                        query.append(property, value);
 
+                        if (query.containsField(property))
+                        {
+                            appendToQuery(query, property, "$eq", value);
+                        }
+                        else
+                        {
+                            query.append(property, value);
+                        }
+
+                    }
+                    else if (condition.equalsIgnoreCase("is null"))
+                    {
+                        if (query.containsField(property))
+                        {
+                            appendToQuery(query, property, "$eq", null);
+                        }
+                        else
+                        {
+                            query.append(property, null);
+                        }
                     }
                     else if (condition.toLowerCase().contains("like"))
                     {
@@ -605,107 +633,43 @@ public class MongoDBQuery extends QueryImpl
                         Pattern regEx = Pattern.compile(createLikeRegex((String) value, ignoreCase));
                         boolean negative = condition.toLowerCase().contains("not");
 
-                        if (query.containsField(property))
-                        {
-                            Object existing = query.get(property);
-
-                            if (!(existing instanceof BasicDBObject))
-                            {
-                                query.put(property, new BasicDBObject("$eq", existing));
-                            }
-
-                            query.put(property,
-                                  ((BasicDBObject) query.get(property))
-                                        .append(negative ? "$not" : "$regex", regEx));
-                        }
-                        else
-                        {
-                            query.append(property, new BasicDBObject(negative ? "$not" : "$regex", regEx));
-                        }
+                        appendToQuery(query, property, negative ? "$not" : "$regex", regEx);
 
                     }
                     else if (condition.equalsIgnoreCase(">"))
                     {
 
-                        if (query.containsField(property))
-                        {
-                            query.get(property);
-                            query.put(property, ((BasicDBObject) query.get(property)).append("$gt", value));
-                        }
-                        else
-                        {
-                            query.append(property, new BasicDBObject("$gt", value));
-                        }
+                        appendToQuery(query, property, "$gt", value);
+
                     }
                     else if (condition.equalsIgnoreCase(">="))
                     {
 
-                        if (query.containsField(property))
-
-                        {
-                            query.get(property);
-                            query.put(property, ((BasicDBObject) query.get(property)).append("$gte", value));
-                        }
-                        else
-                        {
-                            query.append(property, new BasicDBObject("$gte", value));
-                        }
+                        appendToQuery(query, property, "$gte", value);
 
                     }
                     else if (condition.equalsIgnoreCase("<"))
                     {
 
-                        if (query.containsField(property))
-                        {
-                            query.get(property);
-                            query.put(property, ((BasicDBObject) query.get(property)).append("$lt", value));
-                        }
-                        else
-                        {
-                            query.append(property, new BasicDBObject("$lt", value));
-                        }
+                        appendToQuery(query, property, "$lt", value);
 
                     }
                     else if (condition.equalsIgnoreCase("<="))
                     {
 
-                        if (query.containsField(property))
-                        {
-                            query.get(property);
-                            query.put(property, ((BasicDBObject) query.get(property)).append("$lte", value));
-                        }
-                        else
-                        {
-                            query.append(property, new BasicDBObject("$lte", value));
-                        }
+                        appendToQuery(query, property, "$lte", value);
 
                     }
                     else if (condition.equalsIgnoreCase("in"))
                     {
 
-                        if (query.containsField(property))
-                        {
-                            query.get(property);
-                            query.put(property, ((BasicDBObject) query.get(property)).append("$in", value));
-                        }
-                        else
-                        {
-                            query.append(property, new BasicDBObject("$in", value));
-                        }
+                        appendToQuery(query, property, "$in", value);
 
                     }
                     else if (condition.equalsIgnoreCase("not in"))
                     {
 
-                        if (query.containsField(property))
-                        {
-                            query.get(property);
-                            query.put(property, ((BasicDBObject) query.get(property)).append("$nin", value));
-                        }
-                        else
-                        {
-                            query.append(property, new BasicDBObject("$nin", value));
-                        }
+                        appendToQuery(query, property, "$nin", value);
 
                     }
                     else if (condition.equalsIgnoreCase("<>"))
@@ -713,15 +677,13 @@ public class MongoDBQuery extends QueryImpl
 
                         String operator = value instanceof Pattern ? "$not" : "$ne";
 
-                        if (query.containsField(property))
-                        {
-                            query.get(property);
-                            query.put(property, ((BasicDBObject) query.get(property)).append(operator, value));
-                        }
-                        else
-                        {
-                            query.append(property, new BasicDBObject(operator, value));
-                        }
+                        appendToQuery(query, property, operator, value);
+
+                    }
+                    else if (condition.equalsIgnoreCase("is not null"))
+                    {
+
+                        appendToQuery(query, property, "$not", null);
 
                     }
                 }
@@ -736,6 +698,24 @@ public class MongoDBQuery extends QueryImpl
         }
 
         return query;
+    }
+
+    private void appendToQuery(BasicDBObject query, String property, String operator, Object value) {
+        if (query.containsField(property))
+        {
+            Object existing = query.get(property);
+
+            if (!(existing instanceof BasicDBObject))
+            {
+                query.put(property, new BasicDBObject("$eq", existing));
+            }
+
+            query.put(property, ((BasicDBObject) query.get(property)).append(operator, value));
+        }
+        else
+        {
+            query.append(property, new BasicDBObject(operator, value));
+        }
     }
 
     /**

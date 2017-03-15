@@ -41,7 +41,9 @@ import org.eclipse.persistence.jpa.jpql.parser.KeywordExpression;
 import org.eclipse.persistence.jpa.jpql.parser.LikeExpression;
 import org.eclipse.persistence.jpa.jpql.parser.LogicalExpression;
 import org.eclipse.persistence.jpa.jpql.parser.LowerExpression;
+import org.eclipse.persistence.jpa.jpql.parser.NullComparisonExpression;
 import org.eclipse.persistence.jpa.jpql.parser.NumericLiteral;
+import org.eclipse.persistence.jpa.jpql.parser.OrExpression;
 import org.eclipse.persistence.jpa.jpql.parser.OrderByClause;
 import org.eclipse.persistence.jpa.jpql.parser.OrderByItem;
 import org.eclipse.persistence.jpa.jpql.parser.RegexpExpression;
@@ -475,6 +477,10 @@ public final class KunderaQueryUtils
         {
             onComparisonExpression(expression, m, kunderaMetadata, kunderaQuery);
         }
+        else if (NullComparisonExpression.class.isAssignableFrom(expression.getClass()))
+        {
+            onNullComparisonExpression(expression, m, kunderaMetadata, kunderaQuery);
+        }
         else if (LogicalExpression.class.isAssignableFrom(expression.getClass()))
         {
             onLogicalExpression(expression, m, kunderaMetadata, kunderaQuery);
@@ -605,9 +611,31 @@ public final class KunderaQueryUtils
     public static void onLogicalExpression(Expression expression, EntityMetadata m, KunderaMetadata kunderaMetadata,
             KunderaQuery kunderaQuery)
     {
+        if (expression instanceof OrExpression)
+        {
+            kunderaQuery.addFilterClause("(");
+        }
+
         traverse(((LogicalExpression) expression).getLeftExpression(), m, kunderaMetadata, kunderaQuery, false);
+
+        if (expression instanceof OrExpression)
+        {
+            kunderaQuery.addFilterClause(")");
+        }
+
         kunderaQuery.addFilterClause(((LogicalExpression) expression).getIdentifier());
+
+        if (expression instanceof OrExpression)
+        {
+            kunderaQuery.addFilterClause("(");
+        }
+
         traverse(((LogicalExpression) expression).getRightExpression(), m, kunderaMetadata, kunderaQuery, false);
+
+        if (expression instanceof OrExpression)
+        {
+            kunderaQuery.addFilterClause(")");
+        }
     }
 
     /**
@@ -662,6 +690,35 @@ public final class KunderaQueryUtils
                 kunderaQuery);
         kunderaQuery.addFilterClause(
               (String) map.get(Constants.COL_NAME), condition, value,
+              (String) map.get(Constants.FIELD_NAME), (Boolean) map.get(Constants.IGNORE_CASE));
+        return map;
+
+    }
+
+    /**
+     * On null-comparison expression.
+     *
+     * @param expression
+     *            the expression
+     * @param m
+     *            the m
+     * @param idColumn
+     *            the id column
+     * @param isIdColumn
+     *            the is id column
+     * @return
+     * @return the filter
+     */
+    public static Map<String, Object> onNullComparisonExpression(Expression expression, EntityMetadata m,
+                                                                 KunderaMetadata kunderaMetadata, KunderaQuery kunderaQuery)
+    {
+        NullComparisonExpression compExp = (NullComparisonExpression) expression;
+
+        String condition = compExp.getIdentifier();
+        Expression sfpExp = compExp.getExpression();
+        Map<String, Object> map = KunderaQueryUtils.setFieldClazzAndColumnFamily(sfpExp, m, kunderaMetadata);
+        kunderaQuery.addFilterClause(
+              (String) map.get(Constants.COL_NAME), condition, null,
               (String) map.get(Constants.FIELD_NAME), (Boolean) map.get(Constants.IGNORE_CASE));
         return map;
 

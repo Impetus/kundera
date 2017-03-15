@@ -783,6 +783,11 @@ public class KunderaQuery
     private void onTypedParameter(FilterClause filterClause)
     {
 
+        if (filterClause.value != null && filterClause.value.get(0) == null)
+        {
+            return;
+        }
+
         if (filterClause.value != null && filterClause.value.get(0).toString().startsWith(":"))
         {
             addTypedParameter(Type.NAMED, filterClause.value.get(0).toString(), filterClause);

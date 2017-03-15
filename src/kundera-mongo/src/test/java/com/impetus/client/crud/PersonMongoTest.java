@@ -749,7 +749,8 @@ public class PersonMongoTest extends BaseTest
         q.setParameter("personId", "1");
         List<PersonMongo> results = q.getResultList();
         Assert.assertNotNull(results);
-        Assert.assertEquals(0, results.size());
+        Assert.assertEquals(1, results.size());
+        Assert.assertEquals("1", results.get(0).getPersonId());
 
         query = "Select p from PersonMongo p where (p.personName = :name AND p.age NOT IN :ageList)"
                 + " OR (p.personId = :personId)";

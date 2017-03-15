@@ -229,16 +229,14 @@ public class StudentMongoBooleanPrimitiveTest extends MongoBase
             q = em.createQuery(query);
             students = q.getResultList();
             Assert.assertNotNull(students);
-            Assert.assertEquals(1, students.size());
+            Assert.assertEquals(2, students.size());
             count = 0;
             for (StudentMongoBooleanPrimitive student : students)
             {
-                Assert.assertEquals(getMaxValue(boolean.class), student.getId());
-                Assert.assertEquals(getMaxValue(short.class), student.getAge());
                 Assert.assertEquals("Kuldeep", student.getName());
                 count++;
             }
-            Assert.assertEquals(1, count);
+            Assert.assertEquals(2, count);
             em.close();
         }
         catch (QueryHandlerException qhe)

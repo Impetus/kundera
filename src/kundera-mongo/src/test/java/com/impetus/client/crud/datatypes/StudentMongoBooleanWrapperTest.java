@@ -40,9 +40,15 @@ public class StudentMongoBooleanWrapperTest extends MongoBase
     @After
     public void tearDown() throws Exception
     {
-        // EntityManager em = emf.createEntityManager();
-        // em.remove(em.find(StudentMongoBooleanWrapper.class,
-        // getMinValue(Boolean.class)));
+        EntityManager em = emf.createEntityManager();
+        List<StudentMongoBooleanWrapper> existingItems =
+              em.createQuery("select s from StudentMongoBooleanWrapper s").getResultList();
+
+        for (StudentMongoBooleanWrapper item : existingItems)
+        {
+            em.remove(item);
+        }
+
         emf.close();
         if (AUTO_MANAGE_SCHEMA)
         {
@@ -230,16 +236,14 @@ public class StudentMongoBooleanWrapperTest extends MongoBase
             q = em.createQuery(query);
             students = q.getResultList();
             Assert.assertNotNull(students);
-            Assert.assertEquals(1, students.size());
+            Assert.assertEquals(2, students.size());
             count = 0;
             for (StudentMongoBooleanWrapper student : students)
             {
-                Assert.assertEquals(getMaxValue(Boolean.class), student.getId());
-                Assert.assertEquals(getMaxValue(short.class), student.getAge());
                 Assert.assertEquals("Kuldeep", student.getName());
                 count++;
             }
-            Assert.assertEquals(1, count);
+            Assert.assertEquals(2, count);
             em.close();
         }
         catch (QueryHandlerException qhe)
