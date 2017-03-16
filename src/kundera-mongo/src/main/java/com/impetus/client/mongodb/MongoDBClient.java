@@ -493,7 +493,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         {
             pipeline.add(new BasicDBObject("$group", aggregation));
         }
-        if (orderBy != null)
+        if (orderBy != null && aggregation != null)
         {
             BasicDBObject actual = new BasicDBObject();
             for (String key : orderBy.keySet())
@@ -502,12 +502,27 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
                 {
                     actual.put(key, orderBy.get(key));
                 }
-                else if (aggregation.containsField("_id") && ((BasicDBObject) aggregation.get("_id")).containsField(key))
+                else if (aggregation.containsField("_id"))
                 {
-                    actual.put("_id", orderBy.get(key));
+                    if (((BasicDBObject) aggregation.get("_id")).containsField(key))
+                    {
+                        actual.put("_id", orderBy.get(key));
+                    }
+                    else if (hasLob && key.startsWith("metadata."))
+                    {
+                        // check the key without the "metadata." prefix for GridFS
+                        if (((BasicDBObject) aggregation.get("_id")).containsField(key.substring(9)))
+                        {
+                            actual.put("_id", orderBy.get(key));
+                        }
+                    }
                 }
             }
-            pipeline.add(new BasicDBObject("$sort", actual));
+
+            if (actual.size() > 0)
+            {
+                pipeline.add(new BasicDBObject("$sort", actual));
+            }
         }
         if (maxResult > 0)
         {

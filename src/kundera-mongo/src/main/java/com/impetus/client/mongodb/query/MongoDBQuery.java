@@ -489,13 +489,16 @@ public class MongoDBQuery extends QueryImpl
 
                     f = (Field) entity.getAttribute(fieldName).getJavaMember();
 
-                    if (value.getClass().isAssignableFrom(String.class) && f != null
-                            && !f.getType().equals(value.getClass()))
+                    if (value != null)
                     {
-                        value = PropertyAccessorFactory.getPropertyAccessor(f).fromString(f.getType().getClass(),
-                                value.toString());
+                        if (value.getClass().isAssignableFrom(String.class) && f != null
+                              && !f.getType().equals(value.getClass()))
+                        {
+                            value = PropertyAccessorFactory.getPropertyAccessor(f).fromString(f.getType().getClass(),
+                                  value.toString());
+                        }
+                        value = MongoDBUtils.populateValue(value, value.getClass());
                     }
-                    value = MongoDBUtils.populateValue(value, value.getClass());
 
                     property = "metadata." + property;
                 }
@@ -503,15 +506,18 @@ public class MongoDBQuery extends QueryImpl
                 {
                     if (((AbstractAttribute) m.getIdAttribute()).getJPAColumnName().equalsIgnoreCase(property))
                     {
-                        property = "_id";
-                        f = (Field) m.getIdAttribute().getJavaMember();
-                        if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType())
-                                && value.getClass().isAssignableFrom(f.getType()))
+                        if (value != null)
                         {
-                            EmbeddableType compoundKey = metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
-                            compositeColumns = MongoDBUtils.getCompoundKeyColumns(m, value, compoundKey);
-                            isCompositeColumn = true;
-                            continue;
+                            property = "_id";
+                            f = (Field) m.getIdAttribute().getJavaMember();
+                            if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType())
+                                  && value.getClass().isAssignableFrom(f.getType()))
+                            {
+                                EmbeddableType compoundKey = metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
+                                compositeColumns = MongoDBUtils.getCompoundKeyColumns(m, value, compoundKey);
+                                isCompositeColumn = true;
+                                continue;
+                            }
                         }
                     }
                     else if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType())
@@ -775,13 +781,15 @@ public class MongoDBQuery extends QueryImpl
         {
             Metamodel metaModel = kunderaMetadata.getApplicationMetadata().getMetamodel(metadata.getPersistenceUnit());
             EntityType entityType = metaModel.entity(metadata.getEntityClazz());
+            AbstractManagedType managedType = (AbstractManagedType) metaModel.entity(metadata.getEntityClazz());
+            boolean hasLob = managedType.hasLobAttribute();
 
             BasicDBObject aggregation = new BasicDBObject();
 
             SelectClause selectClause = (SelectClause) kunderaQuery.getSelectStatement().getSelectClause();
             Expression expression = selectClause.getSelectExpression();
 
-            buildAggregation(aggregation, expression, metadata, entityType);
+            buildAggregation(aggregation, expression, metadata, entityType, hasLob);
 
             if (!aggregation.containsField("_id"))
             {
@@ -803,7 +811,7 @@ public class MongoDBQuery extends QueryImpl
      * @param entityType
      */
     private void buildAggregation(DBObject group, Expression expression,
-                                  EntityMetadata metadata, EntityType entityType)
+                                  EntityMetadata metadata, EntityType entityType, boolean hasLob)
     {
         if (expression instanceof AggregateFunction)
         {
@@ -816,8 +824,13 @@ public class MongoDBQuery extends QueryImpl
             {
                 StateFieldPathExpression sfpExp = (StateFieldPathExpression) child;
                 String columnName = getColumnName(metadata, entityType, sfpExp.toActualText());
+                String actualColumnName = columnName;
+                if (hasLob)
+                {
+                    actualColumnName = "metadata." + columnName;
+                }
 
-                BasicDBObject item = new BasicDBObject("$" + identifier, "$" + columnName);
+                BasicDBObject item = new BasicDBObject("$" + identifier, "$" + actualColumnName);
                 group.put(identifier + "_" + columnName, item);
             }
             else if (expression instanceof CountFunction)
@@ -829,7 +842,7 @@ public class MongoDBQuery extends QueryImpl
         {
             for (Expression child : expression.children())
             {
-                buildAggregation(group, child, metadata, entityType);
+                buildAggregation(group, child, metadata, entityType, hasLob);
             }
         }
         else if (expression instanceof StateFieldPathExpression)
@@ -849,8 +862,13 @@ public class MongoDBQuery extends QueryImpl
             }
 
             String columnName = getColumnName(metadata, entityType, sfpExp.toActualText());
+            String actualColumnName = columnName;
+            if (hasLob)
+            {
+                actualColumnName = "metadata." + columnName;
+            }
 
-            idObject.put(columnName, "$" + columnName);
+            idObject.put(columnName, "$" + actualColumnName);
         }
     }
 
@@ -907,32 +925,30 @@ public class MongoDBQuery extends QueryImpl
         if (orders != null)
         {
             orderByClause = new BasicDBObject();
-            if (!managedType.hasLobAttribute())
-            {
-                for (SortOrdering order : orders)
-                {
-                    if (order.getColumnName().contains("("))
-                    {
-                        String function = order.getColumnName().replaceFirst("\\s*(.*?)\\s*\\(.*", "$1");
-                        String property = order.getColumnName().replaceFirst(".*?\\(\\s*(.*)\\s*\\).*", "$1");
-                        String columnName = getColumnName(metadata, entityType, property);
 
-                        orderByClause.append(function.toLowerCase() + "_" + columnName,
-                              order.getOrder().equals(SortOrder.ASC) ? 1 : -1);
-                    }
-                    else
+            for (SortOrdering order : orders)
+            {
+                if (order.getColumnName().contains("("))
+                {
+                    String function = order.getColumnName().replaceFirst("\\s*(.*?)\\s*\\(.*", "$1");
+                    String property = order.getColumnName().replaceFirst(".*?\\(\\s*(.*)\\s*\\).*", "$1");
+                    String columnName = getColumnName(metadata, entityType, property);
+
+                    orderByClause.append(function.toLowerCase() + "_" + columnName,
+                          order.getOrder().equals(SortOrder.ASC) ? 1 : -1);
+                }
+                else
+                {
+                    if (!managedType.hasLobAttribute())
                     {
                         orderByClause.append(getColumnName(metadata, entityType, order.getColumnName()),
                               order.getOrder().equals(SortOrder.ASC) ? 1 : -1);
                     }
-                }
-            }
-            else
-            {
-                for (SortOrdering order : orders)
-                {
-                    orderByClause.append("metadata." + getColumnName(metadata, entityType, order.getColumnName()),
-                          order.getOrder().equals(SortOrder.ASC) ? 1 : -1);
+                    else
+                    {
+                        orderByClause.append("metadata." + getColumnName(metadata, entityType, order.getColumnName()),
+                              order.getOrder().equals(SortOrder.ASC) ? 1 : -1);
+                    }
                 }
             }
         }
