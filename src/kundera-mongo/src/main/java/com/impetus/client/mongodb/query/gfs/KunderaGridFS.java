@@ -16,6 +16,7 @@
 
 package com.impetus.client.mongodb.query.gfs;
 
+import com.mongodb.AggregationOutput;
 import com.mongodb.DB;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
@@ -100,6 +101,17 @@ public class KunderaGridFS extends GridFS
             }
         }
         return files;
+    }
+
+    /**
+     * MongoDB aggregation.
+     *
+     * @param pipeline
+     * @return
+     */
+    public AggregationOutput aggregate(List<DBObject> pipeline)
+    {
+        return _filesCollection.aggregate(pipeline);
     }
 
 }

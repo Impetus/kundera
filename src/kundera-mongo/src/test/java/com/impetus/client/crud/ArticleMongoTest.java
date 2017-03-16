@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.client.crud;
 
+import com.impetus.client.crud.entities.ArticleExtension;
 import com.impetus.client.crud.entities.ArticleMongo;
 import com.impetus.client.utils.MongoUtils;
 import junit.framework.Assert;
@@ -28,6 +29,7 @@ import javax.persistence.Persistence;
 import javax.persistence.Query;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -74,7 +76,8 @@ public class ArticleMongoTest
     }
 
     @Test
-    public void testComplexQueries() {
+    public void testComplexQueries()
+    {
         prepareArticle("article1", date("2017-01-05 10:00"), date("2017-01-05 10:00"), "First article", "important", 0, true);
         prepareArticle("article2", date("2017-01-15 10:00"), date("2017-01-15 10:00"), "Second article", null, 0, true);
         prepareArticle("article3", date("2017-01-25 10:00"), date("2017-01-25 10:00"), "Third article", "important", 0, true);
@@ -160,6 +163,151 @@ public class ArticleMongoTest
         Assert.assertEquals("Fourth article", results.get(2).getTitle());
     }
 
+    @Test
+    public void testJoins()
+    {
+        prepareArticle("article1", date("2017-01-05 10:00"), null, "First article", "A", 1, true);
+        prepareArticle("article2", date("2017-01-15 10:00"), null, "Second article", "B", 3, true);
+        prepareArticle("article3", date("2017-01-25 10:00"), null, "Third article", "A", 6, true);
+        prepareArticleExtension("ext1", "article1", 30);
+        prepareArticleExtension("ext2", "article1", 20);
+        prepareArticleExtension("ext3", "article3", 50);
+        prepareArticleExtension("ext4", "article2", 10);
+
+        Query query = em.createQuery("select e from ArticleExtension e");
+        List<?> results = query.getResultList();
+
+        Assert.assertNotNull(results);
+        Assert.assertEquals(4, results.size());
+    }
+
+    @Test
+    public void testAggregation()
+    {
+        prepareArticle("article1", date("2017-01-05 10:00"), null, "First article", "A", 1, true);
+        prepareArticle("article2", date("2017-01-15 10:00"), null, "Second article", "B", 3, true);
+        prepareArticle("article3", date("2017-01-25 10:00"), null, "Third article", "A", 6, true);
+
+        Query query = em.createQuery("select max(a.priority) from ArticleMongo a");
+        List<?> results = query.getResultList();
+
+        Assert.assertNotNull(results);
+        Assert.assertEquals(1, results.size());
+        Assert.assertEquals(6, results.get(0));
+
+        query = em.createQuery("select max(a.priority), min(a.priority) from ArticleMongo a");
+        results = query.getResultList();
+
+        Assert.assertNotNull(results);
+        Assert.assertEquals(1, results.size());
+
+        Object[] resultArray = (Object[]) results.get(0);
+        Assert.assertEquals("Results: " + Arrays.toString(resultArray), 2, resultArray.length);
+        Assert.assertEquals(6, resultArray[0]);
+        Assert.assertEquals(1, resultArray[1]);
+
+        query = em.createQuery("select avg(a.priority), sum(a.priority), max(a.priority), min(a.priority) from ArticleMongo a");
+        results = query.getResultList();
+
+        Assert.assertNotNull(results);
+        Assert.assertEquals(1, results.size());
+
+        resultArray = (Object[]) results.get(0);
+        Assert.assertEquals("Results: " + Arrays.toString(resultArray), 4, resultArray.length);
+        assertAlmostEqual(3.3333, resultArray[0]);
+        Assert.assertEquals(10, resultArray[1]);
+        Assert.assertEquals(6, resultArray[2]);
+        Assert.assertEquals(1, resultArray[3]);
+
+        query = em.createQuery("select sum(a.priority), a.category from ArticleMongo a group by a.category order by a.category");
+        results = query.getResultList();
+
+        Assert.assertNotNull(results);
+        Assert.assertEquals(2, results.size());
+        Assert.assertEquals("A", ((Object[]) results.get(0))[1]);
+        Assert.assertEquals("B", ((Object[]) results.get(1))[1]);
+
+        for (Object item : results)
+        {
+            resultArray = (Object[]) item;
+            Assert.assertEquals("Result Item: " + Arrays.toString(resultArray), 2, resultArray.length);
+            Assert.assertTrue(Arrays.asList("A", "B").contains(resultArray[1]));
+
+            if (resultArray[1].equals("A"))
+            {
+                Assert.assertEquals(7, resultArray[0]);
+            }
+            else if (resultArray[1].equals("B"))
+            {
+                Assert.assertEquals(3, resultArray[0]);
+            }
+        }
+
+        query = em.createQuery("select sum(a.priority), a.category, avg(a.priority), min(a.priority) from ArticleMongo a group by a.category");
+        results = query.getResultList();
+
+        Assert.assertNotNull(results);
+        Assert.assertEquals(2, results.size());
+        assertSumsMatch(results, 4);
+
+        query = em.createQuery("select sum(a.priority), a.category from ArticleMongo a group by a.category order by sum(a.priority) desc");
+        results = query.getResultList();
+
+        Assert.assertNotNull(results);
+        Assert.assertEquals(2, results.size());
+        Assert.assertEquals("A", ((Object[]) results.get(0))[1]);
+        Assert.assertEquals("B", ((Object[]) results.get(1))[1]);
+        assertSumsMatch(results, 2);
+    }
+
+    @Test
+    public void testCountAggregation()
+    {
+        prepareArticle("article1", date("2017-01-05 10:00"), null, "First article", "A", 1, true);
+        prepareArticle("article2", date("2017-01-15 10:00"), null, "Second article", "B", 3, true);
+        prepareArticle("article3", date("2017-01-25 10:00"), null, "Third article", "A", 6, true);
+
+        Query query = em.createQuery("select sum(a.priority), count(a), a.category from ArticleMongo a group by a.category order by a.category");
+        List results = query.getResultList();
+
+        Assert.assertNotNull(results);
+        Assert.assertEquals(2, results.size());
+        Assert.assertEquals(2L, ((Object[]) results.get(0))[1]);
+        Assert.assertEquals(1L, ((Object[]) results.get(1))[1]);
+
+        query = em.createQuery("select count(a) from ArticleMongo a");
+        Object result = query.getSingleResult();
+
+        Assert.assertNotNull(result);
+        Assert.assertEquals(3L, result);
+    }
+
+    private void assertAlmostEqual(double expected, Object actual)
+    {
+        double value = (double) actual;
+        Assert.assertTrue(String.format("%.4f != %.4f\nExpected: %.4f\nActual  : %.4f", expected, value, expected, value),
+              Math.abs(value - expected) < 0.0001);
+    }
+
+    private void assertSumsMatch(List results, int expectedNumberOfItems)
+    {
+        for (Object item : results)
+        {
+            Object[] resultArray = (Object[]) item;
+            Assert.assertEquals("Result Item: " + Arrays.toString(resultArray), expectedNumberOfItems, resultArray.length);
+            Assert.assertTrue(Arrays.asList("A", "B").contains(resultArray[1]));
+
+            if (resultArray[1].equals("A"))
+            {
+                Assert.assertEquals(7, resultArray[0]);
+            }
+            else if (resultArray[1].equals("B"))
+            {
+                Assert.assertEquals(3, resultArray[0]);
+            }
+        }
+    }
+
     private void prepareArticle(String id, Date createDate, Date displayDate,
                                 String title, String category, int priority, boolean show)
     {
@@ -172,6 +320,17 @@ public class ArticleMongoTest
         item.setPriority(priority);
         item.setShow(show);
         em.persist(item);
+    }
+
+    private void prepareArticleExtension(String id, String articleId, long value)
+    {
+        ArticleMongo article = em.find(ArticleMongo.class, articleId);
+
+        ArticleExtension extension = new ArticleExtension();
+        extension.setId(id);
+        extension.setArticle(article);
+        extension.setValue(value);
+        em.persist(extension);
     }
 
     private static Date date(String value)

@@ -32,9 +32,12 @@ import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.Metamodel;
 
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.persistence.jpa.jpql.parser.AggregateFunction;
+import org.eclipse.persistence.jpa.jpql.parser.CollectionExpression;
 import org.eclipse.persistence.jpa.jpql.parser.CountFunction;
 import org.eclipse.persistence.jpa.jpql.parser.Expression;
 import org.eclipse.persistence.jpa.jpql.parser.SelectClause;
+import org.eclipse.persistence.jpa.jpql.parser.StateFieldPathExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,6 +68,7 @@ import com.impetus.kundera.query.KunderaQuery.SortOrdering;
 import com.impetus.kundera.query.KunderaQuery.UpdateClause;
 import com.impetus.kundera.query.QueryHandlerException;
 import com.impetus.kundera.query.QueryImpl;
+import com.mongodb.DBObject;
 import com.mongodb.BasicDBObject;
 
 /**
@@ -155,7 +159,15 @@ public class MongoDBQuery extends QueryImpl
                 return ((MongoDBClient) client).executeQuery(query == null ? getJPAQuery() : query, m);
             }
 
-            if (MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
+            if (kunderaQuery.isAggregated())
+            {
+                return ((MongoDBClient) client).aggregate(m,
+                      createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()),
+                      createAggregation(m),
+                      getAggregationOrderByClause(m),
+                      isSingleResult ? 1 : maxResult);
+            }
+            else if (MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
             {
                 BasicDBObject orderByClause = getOrderByClause(m);
                 return ((MongoDBClient) client).loadData(m,
@@ -752,6 +764,97 @@ public class MongoDBQuery extends QueryImpl
     }
 
     /**
+     * Get the aggregation object.
+     *
+     * @param metadata
+     * @return
+     */
+    private BasicDBObject createAggregation(EntityMetadata metadata)
+    {
+        if (kunderaQuery.getSelectStatement() != null)
+        {
+            Metamodel metaModel = kunderaMetadata.getApplicationMetadata().getMetamodel(metadata.getPersistenceUnit());
+            EntityType entityType = metaModel.entity(metadata.getEntityClazz());
+
+            BasicDBObject aggregation = new BasicDBObject();
+
+            SelectClause selectClause = (SelectClause) kunderaQuery.getSelectStatement().getSelectClause();
+            Expression expression = selectClause.getSelectExpression();
+
+            buildAggregation(aggregation, expression, metadata, entityType);
+
+            if (!aggregation.containsField("_id"))
+            {
+                aggregation.put("_id", null);
+            }
+
+            return aggregation;
+        }
+
+        return null;
+    }
+
+    /**
+     * Build the aggregation parameters.
+     *
+     * @param group
+     * @param expression
+     * @param metadata
+     * @param entityType
+     */
+    private void buildAggregation(DBObject group, Expression expression,
+                                  EntityMetadata metadata, EntityType entityType)
+    {
+        if (expression instanceof AggregateFunction)
+        {
+            AggregateFunction aggregateFunction = (AggregateFunction) expression;
+            String identifier = aggregateFunction.getIdentifier().toLowerCase();
+
+            Expression child = aggregateFunction.getExpression();
+
+            if (child instanceof StateFieldPathExpression)
+            {
+                StateFieldPathExpression sfpExp = (StateFieldPathExpression) child;
+                String columnName = getColumnName(metadata, entityType, sfpExp.toActualText());
+
+                BasicDBObject item = new BasicDBObject("$" + identifier, "$" + columnName);
+                group.put(identifier + "_" + columnName, item);
+            }
+            else if (expression instanceof CountFunction)
+            {
+                group.put("count", new BasicDBObject("$sum", 1));
+            }
+        }
+        else if (expression instanceof CollectionExpression)
+        {
+            for (Expression child : expression.children())
+            {
+                buildAggregation(group, child, metadata, entityType);
+            }
+        }
+        else if (expression instanceof StateFieldPathExpression)
+        {
+            StateFieldPathExpression sfpExp = (StateFieldPathExpression) expression;
+
+            BasicDBObject idObject;
+            Object existing = group.get("_id");
+            if (existing != null)
+            {
+                idObject = (BasicDBObject) existing;
+            }
+            else
+            {
+                idObject = new BasicDBObject();
+                group.put("_id", idObject);
+            }
+
+            String columnName = getColumnName(metadata, entityType, sfpExp.toActualText());
+
+            idObject.put(columnName, "$" + columnName);
+        }
+    }
+
+    /**
      * Prepare order by clause.
      * 
      * @param metadata
@@ -785,6 +888,51 @@ public class MongoDBQuery extends QueryImpl
                 {
                     orderByClause.append("metadata." + getColumnName(metadata, entityType, order.getColumnName()),
                             order.getOrder().equals(SortOrder.ASC) ? 1 : -1);
+                }
+            }
+        }
+
+        return orderByClause;
+    }
+
+    private BasicDBObject getAggregationOrderByClause(final EntityMetadata metadata)
+    {
+        BasicDBObject orderByClause = null;
+        Metamodel metaModel = kunderaMetadata.getApplicationMetadata().getMetamodel(metadata.getPersistenceUnit());
+        EntityType entityType = metaModel.entity(metadata.getEntityClazz());
+
+        AbstractManagedType managedType = (AbstractManagedType) metaModel.entity(metadata.getEntityClazz());
+
+        List<SortOrdering> orders = kunderaQuery.getOrdering();
+        if (orders != null)
+        {
+            orderByClause = new BasicDBObject();
+            if (!managedType.hasLobAttribute())
+            {
+                for (SortOrdering order : orders)
+                {
+                    if (order.getColumnName().contains("("))
+                    {
+                        String function = order.getColumnName().replaceFirst("\\s*(.*?)\\s*\\(.*", "$1");
+                        String property = order.getColumnName().replaceFirst(".*?\\(\\s*(.*)\\s*\\).*", "$1");
+                        String columnName = getColumnName(metadata, entityType, property);
+
+                        orderByClause.append(function.toLowerCase() + "_" + columnName,
+                              order.getOrder().equals(SortOrder.ASC) ? 1 : -1);
+                    }
+                    else
+                    {
+                        orderByClause.append(getColumnName(metadata, entityType, order.getColumnName()),
+                              order.getOrder().equals(SortOrder.ASC) ? 1 : -1);
+                    }
+                }
+            }
+            else
+            {
+                for (SortOrdering order : orders)
+                {
+                    orderByClause.append("metadata." + getColumnName(metadata, entityType, order.getColumnName()),
+                          order.getOrder().equals(SortOrder.ASC) ? 1 : -1);
                 }
             }
         }

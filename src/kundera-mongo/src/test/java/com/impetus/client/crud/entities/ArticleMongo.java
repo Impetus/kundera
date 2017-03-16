@@ -29,7 +29,6 @@ import java.util.Date;
 public class ArticleMongo
 {
 
-    /** The person id. */
     @Id
     @Column(name = "article_id")
     private String articleId;
