@@ -18,16 +18,22 @@ package com.impetus.kundera.query;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Map;
 
 import javax.persistence.Query;
 
+import com.impetus.kundera.client.ClientBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.Constants;
+import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.DefaultMaxResultsProvider;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 
@@ -164,12 +170,18 @@ public class QueryResolver
     {
         Query query;
 
-        Class clazz = persistenceDelegator.getClient(m).getQueryImplementor();
+        Client client = persistenceDelegator.getClient(m);
+        Class clazz = client.getQueryImplementor();
 
         @SuppressWarnings("rawtypes")
         Constructor constructor = clazz.getConstructor(KunderaQuery.class, PersistenceDelegator.class,
                 KunderaMetadata.class);
         query = (Query) constructor.newInstance(kunderaQuery, persistenceDelegator, kunderaMetadata);
+
+        PersistenceUnitMetadata puMetadata =
+                KunderaMetadataManager.getPersistenceUnitMetadata(kunderaMetadata, m.getPersistenceUnit());
+
+        applyDefaultMaxResults(query, client, puMetadata);
 
         return query;
     }
@@ -216,6 +228,12 @@ public class QueryResolver
                     KunderaMetadata.class);
             query = (Query) constructor.newInstance(kunderaQuery, persistenceDelegator,
                     persistenceDelegator.getKunderaMetadata());
+
+            Client client = persistenceDelegator.getClient(metadata);
+            PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(
+                  persistenceDelegator.getKunderaMetadata(), metadata.getPersistenceUnit());
+
+            applyDefaultMaxResults(query, client, puMetadata);
         }
         catch (Exception e)
         {
@@ -224,5 +242,58 @@ public class QueryResolver
         }
         return query;
 
+    }
+
+    private void applyDefaultMaxResults(Query query, Client client, PersistenceUnitMetadata metadata)
+    {
+        Map<String, Object> externalProperties = null;
+
+        try
+        {
+            Field field = ClientBase.class.getDeclaredField("externalProperties");
+            if (field != null && !field.isAccessible())
+            {
+                field.setAccessible(true);
+            }
+
+            externalProperties = (Map<String, Object>) field.get(client);
+        }
+        catch (NoSuchFieldException ex)
+        {
+            log.debug("Client has no external properties: " + client.getClass().getName());
+        }
+        catch (IllegalAccessException ex)
+        {
+            log.debug("Failed to access the external properties of the client: " + client.getClass().getName());
+        }
+
+        String maxResults = null;
+
+        if (externalProperties != null)
+        {
+            maxResults = (String) externalProperties.get(PersistenceProperties.KUNDERA_QUERY_DEFAULT_MAX_RESULTS);
+        }
+
+        if (maxResults == null)
+        {
+            maxResults = metadata.getProperty(PersistenceProperties.KUNDERA_QUERY_DEFAULT_MAX_RESULTS);
+        }
+
+        if (maxResults != null)
+        {
+            try
+            {
+                query.setMaxResults(Integer.parseInt(maxResults));
+            }
+            catch (NumberFormatException ex)
+            {
+                throw new IllegalArgumentException("Illegal value for " +
+                      PersistenceProperties.KUNDERA_QUERY_DEFAULT_MAX_RESULTS, ex);
+            }
+        }
+        else if (client instanceof DefaultMaxResultsProvider)
+        {
+            query.setMaxResults(((DefaultMaxResultsProvider) client).getDefaultMaxResults());
+        }
     }
 }

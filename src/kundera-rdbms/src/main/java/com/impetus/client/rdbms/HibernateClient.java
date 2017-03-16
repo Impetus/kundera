@@ -52,6 +52,7 @@ import com.impetus.client.rdbms.query.RDBMSQuery;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
+import com.impetus.kundera.client.DefaultMaxResultsProvider;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.generator.Generator;
@@ -80,7 +81,7 @@ import com.impetus.kundera.utils.KunderaCoreUtils;
  * 
  * @author vivek.mishra
  */
-public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
+public class HibernateClient extends ClientBase implements Client<RDBMSQuery>, DefaultMaxResultsProvider
 {
 
     /** The client factory. */
@@ -752,6 +753,12 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     public Class<RDBMSQuery> getQueryImplementor()
     {
         return RDBMSQuery.class;
+    }
+
+    @Override
+    public int getDefaultMaxResults()
+    {
+        return 0; // allow returning unlimited number of results unless otherwise specified
     }
 
     /**

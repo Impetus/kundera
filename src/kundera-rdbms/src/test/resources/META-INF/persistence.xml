@@ -117,4 +117,15 @@
 		</properties>
 	</persistence-unit>
 
+	<persistence-unit name="RdbmsDefaultsTest">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<class>com.impetus.client.crud.entities.PersonRDBMS</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<properties>
+			<property name="kundera.client.lookup.class" value="com.impetus.client.rdbms.RDBMSClientFactory" />
+			<property name="kundera.client.property" value="hibernate.properties" />
+			<property name="kundera.query.default.max.results" value="47" />
+		</properties>
+	</persistence-unit>
+
 </persistence>

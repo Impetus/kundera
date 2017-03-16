@@ -198,11 +198,24 @@ public class RDBMSQuery extends QueryImpl
             throw new UnsupportedOperationException("Iteration not supported over native queries");
         }
 
+        int fetchSize;
+        if (getFetchSize() != null)
+        {
+            fetchSize = getFetchSize();
+        }
+        else if (this.maxResult != 0)
+        {
+            fetchSize = this.maxResult;
+        }
+        else
+        {
+            fetchSize = Integer.MAX_VALUE;
+        }
+
         initializeReader();
         EntityMetadata m = getEntityMetadata();
         Client client = persistenceDelegeator.getClient(m);
-        return new ResultIterator((HibernateClient) client, m, persistenceDelegeator,
-                getFetchSize() != null ? getFetchSize() : this.maxResult,
+        return new ResultIterator((HibernateClient) client, m, persistenceDelegeator, fetchSize,
                 ((RDBMSEntityReader) getReader()).getSqlQueryFromJPA(m, m.getRelationNames(), null));
     }
 

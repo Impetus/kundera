@@ -38,6 +38,7 @@ import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.ClientPropertiesSetter;
+import com.impetus.kundera.client.DefaultMaxResultsProvider;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.generator.Generator;
@@ -83,7 +84,7 @@ import com.mongodb.util.JSONParseException;
  * 
  * @author devender.yadav
  */
-public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, Batcher, ClientPropertiesSetter
+public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, Batcher, ClientPropertiesSetter, DefaultMaxResultsProvider
 
 {
     /** The mongo db. */
@@ -1282,6 +1283,12 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     public void populateClientProperties(Client client, Map<String, Object> properties)
     {
         new MongoDBClientProperties().populateClientProperties(client, properties);
+    }
+
+    @Override
+    public int getDefaultMaxResults()
+    {
+        return 0; // allow returning unlimited number of results unless otherwise specified
     }
 
     /**
