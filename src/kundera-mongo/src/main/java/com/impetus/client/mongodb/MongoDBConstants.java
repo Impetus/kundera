@@ -23,9 +23,6 @@ package com.impetus.client.mongodb;
 public interface MongoDBConstants
 {
 
-    /** Prefix to use with the property names below if the setting comes from external properties. */
-    public static final String EXTERNAL_CONFIGURATION_PREFIX = "kundera.mongodb.";
-
     /** The Constant CONNECTIONS. */
     public static final String CONNECTIONS = "mongodb.servers";
 

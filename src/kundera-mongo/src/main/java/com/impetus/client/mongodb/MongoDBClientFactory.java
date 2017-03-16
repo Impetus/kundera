@@ -28,6 +28,7 @@ import java.util.Properties;
 import javax.net.SocketFactory;
 
 import com.impetus.kundera.utils.KunderaCoreUtils;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +37,8 @@ import com.impetus.client.mongodb.config.MongoDBPropertyReader;
 import com.impetus.client.mongodb.config.MongoDBPropertyReader.MongoDBSchemaMetadata;
 import com.impetus.client.mongodb.schemamanager.MongoDBSchemaManager;
 import com.impetus.client.mongodb.utils.MongoDBUtils;
+import com.impetus.kundera.Constants;
+import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.configure.ClientProperties;
@@ -157,7 +160,7 @@ public class MongoDBClientFactory extends GenericClientFactory
         {
             mongo = onSetMongoServerProperties(contactNode, defaultPort, poolSize, addrs);
 
-            logger.info("Connected to mongodb at " + contactNode + " on default port " + defaultPort);
+            logger.info("Connected to mongodb at " + contactNode + " on port " + defaultPort);
         }
         catch (NumberFormatException e)
         {
@@ -186,25 +189,34 @@ public class MongoDBClientFactory extends GenericClientFactory
             logger.error(e.getMessage());
             throw e;
         }
-        logger.info("Connected to mongodb at " + contactNode + " on default port " + defaultPort);
+        logger.info("Connected to mongodb at " + contactNode + " on port " + defaultPort);
         return mongoDB;
 
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.loader.GenericClientFactory#onValidation(java.lang
+     * .String, java.lang.String)
+     */
     @Override
-    protected void onValidation(final String contactNode, final String defaultPort) {
+    protected void onValidation(final String contactNode, final String defaultPort)
+    {
         if (contactNode != null)
         {
-            // allow configuration as comma-separated list of host:port addresses without the default port
+            // allow configuration as comma-separated list of host:port
+            // addresses without the default port
             boolean allAddressesHaveHostAndPort = true;
 
-            for (String node : contactNode.split(","))
+            for (String node : contactNode.split(Constants.COMMA))
             {
-                if (StringUtils.countMatches(node, ":") == 1)
+                if (StringUtils.countMatches(node, Constants.COLON) == 1)
                 {
                     // node is given with hostname and port
                     // count == 1 is to exclude IPv6 addresses
-                    if (StringUtils.isNumeric(node.split(":")[1]))
+                    if (StringUtils.isNumeric(node.split(Constants.COLON)[1]))
                     {
                         continue;
                     }
@@ -220,7 +232,8 @@ public class MongoDBClientFactory extends GenericClientFactory
             }
         }
 
-        // fall back to the generic validation which requires the default port to be set
+        // fall back to the generic validation which requires the default port
+        // to be set
         super.onValidation(contactNode, defaultPort);
     }
 
@@ -260,19 +273,19 @@ public class MongoDBClientFactory extends GenericClientFactory
                 }
             }
 
-            propsFromCp = dataStore != null && dataStore.getConnection() != null ?
-                  dataStore.getConnection().getProperties() : null;
+            propsFromCp = dataStore != null && dataStore.getConnection() != null ? dataStore.getConnection()
+                    .getProperties() : null;
         }
         else
         {
-            for (String node : contactNode.split(","))
+            for (String node : contactNode.split(Constants.COMMA))
             {
-                if (StringUtils.countMatches(node, ":") == 1)
+                if (StringUtils.countMatches(node, Constants.COLON) == 1)
                 {
                     // node is given with hostname and port
                     // count == 1 is to exclude IPv6 addresses
                     String host = node.split(":")[0];
-                    int port = Integer.parseInt(node.split(":")[1]);
+                    int port = Integer.parseInt(node.split(Constants.COLON)[1]);
 
                     addrs.add(new ServerAddress(host.trim(), port));
                 }
@@ -372,15 +385,21 @@ public class MongoDBClientFactory extends GenericClientFactory
     public static class PopulateMongoOptions
     {
 
+        /** The Constant INSTANCE_CREATION_EXCEPTION. */
+        private static final String INSTANCE_CREATION_EXCEPTION = "Cannot create instace from property";
+
         /** The logger. */
         private static Logger logger = LoggerFactory.getLogger(PopulateMongoOptions.class);
 
+        /** The client properties. */
         private final Properties clientProperties;
+
+        /** The external properties. */
         private final Map<String, ?> externalProperties;
 
         /**
          * Constructor.
-         *
+         * 
          * @param clientProperties
          *            the properties from the 'kundera.client.property' file
          * @param externalProperties
@@ -394,6 +413,8 @@ public class MongoDBClientFactory extends GenericClientFactory
 
         /**
          * Prepare a mongo options builder.
+         * 
+         * @return the mongo client options. builder
          */
         public MongoClientOptions.Builder prepareBuilder()
         {
@@ -401,14 +422,14 @@ public class MongoDBClientFactory extends GenericClientFactory
 
             try
             {
-                    /*
-                     * if value of SAFE is provided in client properties. Then
-                     * it is given preference over other parameters values like
-                     * W, W_TIME_OUT, FSYNC, J
-                     *
-                     * So, whether choose simply write concern SAFE or not. Or
-                     * you can put values like W, W_TIME_OUT
-                     */
+                /*
+                 * if value of SAFE is provided in client properties. Then it is
+                 * given preference over other parameters values like W,
+                 * W_TIME_OUT, FSYNC, J
+                 * 
+                 * So, whether choose simply write concern SAFE or not. Or you
+                 * can put values like W, W_TIME_OUT
+                 */
                 int w = getProperty(MongoDBConstants.W, 1, int.class);
                 int wTimeOut = getProperty(MongoDBConstants.W_TIME_OUT, 0, int.class);
 
@@ -434,48 +455,39 @@ public class MongoDBClientFactory extends GenericClientFactory
 
                 if (hasProperty(MongoDBConstants.DB_DECODER_FACTORY))
                 {
-                    builder.dbDecoderFactory(
-                          getProperty(MongoDBConstants.DB_DECODER_FACTORY, DBDecoderFactory.class));
+                    builder.dbDecoderFactory(getProperty(MongoDBConstants.DB_DECODER_FACTORY, DBDecoderFactory.class));
                 }
                 if (hasProperty(MongoDBConstants.DB_ENCODER_FACTORY))
                 {
-                    builder.dbEncoderFactory(
-                          getProperty(MongoDBConstants.DB_ENCODER_FACTORY, DBEncoderFactory.class));
+                    builder.dbEncoderFactory(getProperty(MongoDBConstants.DB_ENCODER_FACTORY, DBEncoderFactory.class));
                 }
                 if (hasProperty(MongoDBConstants.SOCKET_FACTORY))
                 {
-                    builder.socketFactory(
-                          getProperty(MongoDBConstants.SOCKET_FACTORY, SocketFactory.class));
+                    builder.socketFactory(getProperty(MongoDBConstants.SOCKET_FACTORY, SocketFactory.class));
                 }
                 if (hasProperty(MongoDBConstants.AUTO_CONNECT_RETRY))
                 {
-                    builder.autoConnectRetry(
-                          getProperty(MongoDBConstants.AUTO_CONNECT_RETRY, boolean.class));
+                    builder.autoConnectRetry(getProperty(MongoDBConstants.AUTO_CONNECT_RETRY, boolean.class));
                 }
                 if (hasProperty(MongoDBConstants.MAX_AUTO_CONNECT_RETRY))
                 {
-                    builder.maxAutoConnectRetryTime(
-                          getProperty(MongoDBConstants.MAX_AUTO_CONNECT_RETRY, long.class));
+                    builder.maxAutoConnectRetryTime(getProperty(MongoDBConstants.MAX_AUTO_CONNECT_RETRY, long.class));
                 }
                 if (hasProperty(MongoDBConstants.CONNECTION_PER_HOST))
                 {
-                    builder.connectionsPerHost(
-                          getProperty(MongoDBConstants.CONNECTION_PER_HOST, int.class));
+                    builder.connectionsPerHost(getProperty(MongoDBConstants.CONNECTION_PER_HOST, int.class));
                 }
                 if (hasProperty(MongoDBConstants.CONNECT_TIME_OUT))
                 {
-                    builder.connectTimeout(
-                          getProperty(MongoDBConstants.CONNECT_TIME_OUT, int.class));
+                    builder.connectTimeout(getProperty(MongoDBConstants.CONNECT_TIME_OUT, int.class));
                 }
                 if (hasProperty(MongoDBConstants.MAX_WAIT_TIME))
                 {
-                    builder.maxWaitTime(
-                          getProperty(MongoDBConstants.MAX_WAIT_TIME, int.class));
+                    builder.maxWaitTime(getProperty(MongoDBConstants.MAX_WAIT_TIME, int.class));
                 }
                 if (hasProperty(MongoDBConstants.TABCM))
                 {
-                    builder.threadsAllowedToBlockForConnectionMultiplier(
-                          getProperty(MongoDBConstants.TABCM, int.class));
+                    builder.threadsAllowedToBlockForConnectionMultiplier(getProperty(MongoDBConstants.TABCM, int.class));
                 }
             }
             catch (NumberFormatException nfe)
@@ -487,13 +499,20 @@ public class MongoDBClientFactory extends GenericClientFactory
             return builder;
         }
 
+        /**
+         * Checks for property.
+         * 
+         * @param key
+         *            the key
+         * @return true, if successful
+         */
         private boolean hasProperty(String key)
         {
             boolean result = false;
 
             if (externalProperties != null)
             {
-                result = externalProperties.containsKey(MongoDBConstants.EXTERNAL_CONFIGURATION_PREFIX + key);
+                result = externalProperties.containsKey(key);
             }
 
             if (!result && clientProperties != null)
@@ -504,18 +523,42 @@ public class MongoDBClientFactory extends GenericClientFactory
             return result;
         }
 
+        /**
+         * Gets the property.
+         * 
+         * @param <T>
+         *            the generic type
+         * @param key
+         *            the key
+         * @param targetClass
+         *            the target class
+         * @return the property
+         */
         private <T> T getProperty(String key, Class<T> targetClass)
         {
             return getProperty(key, null, targetClass);
         }
 
+        /**
+         * Gets the property.
+         * 
+         * @param <T>
+         *            the generic type
+         * @param key
+         *            the key
+         * @param defaultValue
+         *            the default value
+         * @param targetClass
+         *            the target class
+         * @return the property
+         */
         private <T> T getProperty(String key, T defaultValue, Class<T> targetClass)
         {
             T value = null;
 
             if (externalProperties != null)
             {
-                value = instanceFromProperty(externalProperties.get(MongoDBConstants.EXTERNAL_CONFIGURATION_PREFIX + key), targetClass);
+                value = instanceFromProperty(externalProperties.get(key), targetClass);
             }
 
             if (value == null && clientProperties != null)
@@ -533,6 +576,17 @@ public class MongoDBClientFactory extends GenericClientFactory
             }
         }
 
+        /**
+         * Instance from property.
+         * 
+         * @param <T>
+         *            the generic type
+         * @param property
+         *            the property
+         * @param targetClass
+         *            the target class
+         * @return the t
+         */
         private <T> T instanceFromProperty(Object property, Class<T> targetClass)
         {
             if (property == null)
@@ -585,9 +639,10 @@ public class MongoDBClientFactory extends GenericClientFactory
                     {
                         Class<?> clazz = Class.forName(className);
 
-                        if (memberName.contains("("))
+                        if (memberName.contains(Constants.OPEN_ROUND_BRACKET))
                         {
-                            // static method without arguments - e.g. javax.net.ssl.SSLSocketFactory.getDefault()
+                            // static method without arguments - e.g.
+                            // javax.net.ssl.SSLSocketFactory.getDefault()
                             String methodName = memberName.substring(0, memberName.indexOf('('));
 
                             Method method = clazz.getMethod(methodName);
@@ -595,30 +650,36 @@ public class MongoDBClientFactory extends GenericClientFactory
                         }
                         else
                         {
-                            // static field - e.g. com.mongodb.LazyDBDecoder.FACTORY
+                            // static field - e.g.
+                            // com.mongodb.LazyDBDecoder.FACTORY
                             Field field = clazz.getField(memberName);
                             return (T) field.get(null);
                         }
                     }
                     catch (ClassNotFoundException ex)
                     {
-                        // parent class not found
+                        logger.error("Parent class not found", ex);
+                        throw new KunderaException(INSTANCE_CREATION_EXCEPTION, ex);
                     }
                     catch (NoSuchMethodException ex)
                     {
-                        // static method not found
+                        logger.error("Static method not found", ex);
+                        throw new KunderaException(INSTANCE_CREATION_EXCEPTION, ex);
                     }
                     catch (NoSuchFieldException ex)
                     {
-                        // static field not found
+                        logger.error("Static field not found", ex);
+                        throw new KunderaException(INSTANCE_CREATION_EXCEPTION, ex);
                     }
-                    catch (IllegalAccessException exx)
+                    catch (IllegalAccessException ex)
                     {
-                        // the static method or field was not accessible (e.g. not public)
+                        logger.error("Static method or field was not accessible", ex);
+                        throw new KunderaException(INSTANCE_CREATION_EXCEPTION, ex);
                     }
                     catch (InvocationTargetException ex)
                     {
-                        // the static method invocation failed
+                        logger.error("Static method invocation failed", ex);
+                        throw new KunderaException(INSTANCE_CREATION_EXCEPTION, ex);
                     }
                 }
             }
