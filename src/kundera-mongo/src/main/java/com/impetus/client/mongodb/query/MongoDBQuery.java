@@ -92,7 +92,6 @@ public class MongoDBQuery extends QueryImpl
             final KunderaMetadata kunderaMetadata)
     {
         super(kunderaQuery, persistenceDelegator, kunderaMetadata);
-        setMaxResults(0);
     }
 
     /*
@@ -873,24 +872,9 @@ public class MongoDBQuery extends QueryImpl
     {
         EntityMetadata m = getEntityMetadata();
         Client client = persistenceDelegeator.getClient(m);
-
-        int fetchSize;
-        if (getFetchSize() != null)
-        {
-            fetchSize = getFetchSize();
-        }
-        else if (this.maxResult != 0)
-        {
-            fetchSize = this.maxResult;
-        }
-        else
-        {
-            fetchSize = Integer.MAX_VALUE;
-        }
-
         return new ResultIterator((MongoDBClient) client, m, createMongoQuery(m, getKunderaQuery()
                 .getFilterClauseQueue()), getOrderByClause(m), getKeys(m, getKunderaQuery().getResult()),
-                persistenceDelegeator, fetchSize);
+                persistenceDelegeator, getFetchSize() != null ? getFetchSize() : this.maxResult);
     }
 
     /**

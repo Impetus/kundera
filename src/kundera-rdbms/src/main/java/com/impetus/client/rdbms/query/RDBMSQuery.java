@@ -75,7 +75,6 @@ public class RDBMSQuery extends QueryImpl
             final KunderaMetadata kunderaMetadata)
     {
         super(kunderaQuery, persistenceDelegator, kunderaMetadata);
-        setMaxResults(0);
     }
 
     @Override
@@ -202,22 +201,8 @@ public class RDBMSQuery extends QueryImpl
         initializeReader();
         EntityMetadata m = getEntityMetadata();
         Client client = persistenceDelegeator.getClient(m);
-
-        int fetchSize;
-        if (getFetchSize() != null)
-        {
-            fetchSize = getFetchSize();
-        }
-        else if (this.maxResult != 0)
-        {
-            fetchSize = this.maxResult;
-        }
-        else
-        {
-            fetchSize = Integer.MAX_VALUE;
-        }
-
-        return new ResultIterator((HibernateClient) client, m, persistenceDelegeator, fetchSize,
+        return new ResultIterator((HibernateClient) client, m, persistenceDelegeator,
+                getFetchSize() != null ? getFetchSize() : this.maxResult,
                 ((RDBMSEntityReader) getReader()).getSqlQueryFromJPA(m, m.getRelationNames(), null));
     }
 
