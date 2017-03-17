@@ -31,6 +31,7 @@ import javax.persistence.Query;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -155,6 +156,18 @@ public class ArticleMongoTest
         query.setParameter("show", true);
         query.setParameter("date", date("2017-03-30 00:00"));
         query.setParameter("category", "important");
+        results = query.getResultList();
+
+        Assert.assertNotNull(results);
+        Assert.assertEquals(3, results.size());
+        Assert.assertEquals("First article", results.get(0).getTitle());
+        Assert.assertEquals("Third article", results.get(1).getTitle());
+        Assert.assertEquals("Fourth article", results.get(2).getTitle());
+
+        query = em.createQuery(
+              "select a from ArticleMongo a where a.category IN :category " +
+                    "order by a.createDate asc");
+        query.setParameter("category", Collections.singletonList("important"));
         results = query.getResultList();
 
         Assert.assertNotNull(results);

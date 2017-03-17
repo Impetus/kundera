@@ -19,6 +19,7 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -704,11 +705,27 @@ public class MongoDBQuery extends QueryImpl
                     else if (condition.equalsIgnoreCase("in"))
                     {
 
+                        if (value != null)
+                        {
+                            if (!value.getClass().isArray() && !(value instanceof Collection))
+                            {
+                                value = Collections.singletonList(value);
+                            }
+                        }
+
                         appendToQuery(query, property, "$in", value);
 
                     }
                     else if (condition.equalsIgnoreCase("not in"))
                     {
+
+                        if (value != null)
+                        {
+                            if (!value.getClass().isArray() && !(value instanceof Collection))
+                            {
+                                value = Collections.singletonList(value);
+                            }
+                        }
 
                         appendToQuery(query, property, "$nin", value);
 
