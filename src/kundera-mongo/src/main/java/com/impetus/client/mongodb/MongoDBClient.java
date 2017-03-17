@@ -16,9 +16,11 @@
 package com.impetus.client.mongodb;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +52,7 @@ import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.annotation.DefaultEntityAnnotationProcessor;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
@@ -477,8 +480,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         return entities;
     }
 
-    public <E> List<E> aggregate(EntityMetadata entityMetadata, BasicDBObject mongoQuery, BasicDBObject aggregation,
-                                 BasicDBObject orderBy, int maxResult) throws Exception
+    public <E> List<E> aggregate(EntityMetadata entityMetadata, BasicDBObject mongoQuery, BasicDBList lookup,
+                                 BasicDBObject aggregation, BasicDBObject orderBy, int maxResult) throws Exception
     {
         String collectionName = entityMetadata.getTableName();
 
@@ -488,6 +491,10 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         boolean hasLob = managedType.hasLobAttribute();
 
         List<DBObject> pipeline = new LinkedList<DBObject>();
+        for (Object lookupItem : lookup)
+        {
+            pipeline.add((DBObject) lookupItem);
+        }
         pipeline.add(new BasicDBObject("$match", mongoQuery));
         if (aggregation != null)
         {
@@ -529,23 +536,82 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             pipeline.add(new BasicDBObject("$limit", maxResult));
         }
 
-        List results;
+        Iterable<DBObject> aggregationResults;
 
         if (hasLob)
         {
             KunderaGridFS gridFS = new KunderaGridFS(mongoDb, collectionName);
             AggregationOutput output = gridFS.aggregate(pipeline);
-
-            results = extractAggregationValues(output.results(), aggregation);
+            aggregationResults = output.results();
         }
         else
         {
             AggregationOutput output = mongoDb.getCollection(collectionName).aggregate(pipeline);
-
-            results = extractAggregationValues(output.results(), aggregation);
+            aggregationResults = output.results();
         }
 
-        return (List<E>) results;
+        if (lookup != null)
+        {
+            List<EnhanceEntity> entities = new ArrayList<EnhanceEntity>(((Collection) aggregationResults).size());
+            for (DBObject document : aggregationResults)
+            {
+                populateEntity(entityMetadata, entities, document);
+            }
+
+            List<E> results = new ArrayList<E>(entities.size());
+
+            Iterator<EnhanceEntity> entityIterator = entities.iterator();
+            Iterator<DBObject> documentIterator = aggregationResults.iterator();
+
+            while (entityIterator.hasNext() && documentIterator.hasNext())
+            {
+                DBObject document = documentIterator.next();
+                EnhanceEntity enhanceEntity = entityIterator.next();
+                Object entity = enhanceEntity.getEntity();
+
+                for (String relationKey : enhanceEntity.getRelations().keySet())
+                {
+                    BasicDBObject lookupItem = null;
+                    for (Object item : lookup)
+                    {
+                        BasicDBObject dbItem = (BasicDBObject) item;
+                        if (dbItem.containsField("$lookup"))
+                        {
+                            dbItem = (BasicDBObject) dbItem.get("$lookup");
+                        }
+                        if (dbItem.getString("localField", "").equalsIgnoreCase(relationKey))
+                        {
+                            lookupItem = dbItem;
+                            break;
+                        }
+                    }
+
+                    if (lookupItem != null)
+                    {
+                        String fieldName = lookupItem.getString("as");
+                        Object target = document.get(fieldName);
+
+                        if (target instanceof DBObject)
+                        {
+                            Relation relation = entityMetadata.getRelation(fieldName);
+                            Class associatedClass = relation.getTargetEntity();
+                            Object associated = instantiateEntity(associatedClass, null);
+                            EntityMetadata associatedMetadata = metaModel.getEntityMetadata(associatedClass);
+                            handler.getEntityFromDocument(associatedClass, associated, associatedMetadata,
+                                  (DBObject) target, null, null, kunderaMetadata);
+
+                            PropertyAccessorHelper.set(entity, relation.getProperty(), associated);
+                        }
+                    }
+                }
+
+                results.add((E) entity);
+            }
+
+            return results;
+        }
+
+        return (List<E>) extractAggregationValues(aggregationResults, aggregation);
     }
 
     private List extractAggregationValues(Iterable<DBObject> documents, BasicDBObject aggregation)
@@ -573,7 +639,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         return results;
     }
 
-    private void extractAggregationValues(DBObject document, List results, BasicDBObject keyMap)
+    private void extractAggregationValues(DBObject document, List results, DBObject keyMap)
     {
         if (document.keySet().size() == 1)
         {
@@ -603,7 +669,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
                 if (value instanceof DBObject)
                 {
-                    extractAggregationValues((DBObject) value, values, (BasicDBObject) keyMap.get(key));
+                    extractAggregationValues((DBObject) value, values, (DBObject) keyMap.get(key));
                 }
                 else
                 {

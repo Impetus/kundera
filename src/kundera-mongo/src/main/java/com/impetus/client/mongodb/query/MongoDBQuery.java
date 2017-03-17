@@ -16,6 +16,7 @@
 package com.impetus.client.mongodb.query;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -30,6 +31,7 @@ import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.Metamodel;
+import javax.persistence.metamodel.SingularAttribute;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.persistence.jpa.jpql.parser.AggregateFunction;
@@ -54,6 +56,7 @@ import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
@@ -69,6 +72,7 @@ import com.impetus.kundera.query.KunderaQuery.UpdateClause;
 import com.impetus.kundera.query.QueryHandlerException;
 import com.impetus.kundera.query.QueryImpl;
 import com.mongodb.DBObject;
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 
 /**
@@ -163,6 +167,7 @@ public class MongoDBQuery extends QueryImpl
             {
                 return ((MongoDBClient) client).aggregate(m,
                       createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()),
+                      createAggregationLookup(m),
                       createAggregation(m),
                       getAggregationOrderByClause(m),
                       isSingleResult ? 1 : maxResult);
@@ -240,6 +245,15 @@ public class MongoDBQuery extends QueryImpl
             {
                 return ((MongoDBClient) client).executeQuery(query == null ? getJPAQuery() : query, m);
 
+            }
+            if (!m.getRelations().isEmpty())
+            {
+                return ((MongoDBClient) client).aggregate(m,
+                      createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()),
+                      createAggregationLookup(m),
+                      createAggregation(m),
+                      getAggregationOrderByClause(m),
+                      isSingleResult ? 1 : maxResult);
             }
             if (MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
             {
@@ -537,13 +551,22 @@ public class MongoDBQuery extends QueryImpl
                         String embeddedAttributeAsStr = tokenizer.nextToken();
                         String embeddableAttributeAsStr = tokenizer.nextToken();
                         Attribute embeddedAttribute = entity.getAttribute(embeddedAttributeAsStr);
-                        EmbeddableType embeddableEntity = metaModel.embeddable(((AbstractAttribute) embeddedAttribute)
-                                .getBindableJavaType());
-                        f = (Field) embeddableEntity.getAttribute(embeddableAttributeAsStr).getJavaMember();
-                        property = ((AbstractAttribute) embeddedAttribute).getJPAColumnName()
-                                + "."
-                                + ((AbstractAttribute) embeddableEntity.getAttribute(embeddableAttributeAsStr))
-                                        .getJPAColumnName();
+
+                        if (embeddedAttribute.isAssociation())
+                        {
+                            Relation relation = m.getRelation(embeddedAttributeAsStr);
+                            f = relation.getProperty();
+                        }
+                        else
+                        {
+                            EmbeddableType embeddableEntity = metaModel.embeddable(((AbstractAttribute) embeddedAttribute)
+                                  .getBindableJavaType());
+                            f = (Field) embeddableEntity.getAttribute(embeddableAttributeAsStr).getJavaMember();
+                            property = ((AbstractAttribute) embeddedAttribute).getJPAColumnName()
+                                  + "."
+                                  + ((AbstractAttribute) embeddableEntity.getAttribute(embeddableAttributeAsStr))
+                                  .getJPAColumnName();
+                        }
                     }
                     else
                     {
@@ -769,6 +792,44 @@ public class MongoDBQuery extends QueryImpl
         return keys;
     }
 
+    private BasicDBList createAggregationLookup(EntityMetadata metadata)
+    {
+        BasicDBList lookup = new BasicDBList();
+
+        MetamodelImpl metaModel = (MetamodelImpl)
+              kunderaMetadata.getApplicationMetadata().getMetamodel(metadata.getPersistenceUnit());
+
+        for (Relation relation : metadata.getRelations())
+        {
+            EntityMetadata associatedMetadata = metaModel.getEntityMetadata(relation.getTargetEntity());
+            EntityType entityType = metaModel.entity(metadata.getEntityClazz());
+
+            AbstractAttribute attribute = (AbstractAttribute) entityType.getAttribute(relation.getProperty().getName());
+            boolean optional = false;
+            if (attribute instanceof SingularAttribute)
+            {
+                optional = ((SingularAttribute) attribute).isOptional();
+            }
+
+            BasicDBObject item = new BasicDBObject();
+            item.put("from", associatedMetadata.getTableName());
+            item.put("foreignField", "_id");
+            item.put("localField", relation.getJoinColumnName(kunderaMetadata));
+            item.put("as", attribute.getName());
+            lookup.add(new BasicDBObject("$lookup", item));
+
+            if (Arrays.asList(Relation.ForeignKey.ONE_TO_ONE,Relation.ForeignKey.MANY_TO_ONE).contains(relation.getType()))
+            {
+                BasicDBObject unwind = new BasicDBObject();
+                unwind.append("path", "$" + attribute.getName());
+                unwind.append("preserveNullAndEmptyArrays", optional);
+                lookup.add(new BasicDBObject("$unwind", unwind));
+            }
+        }
+
+        return lookup;
+    }
+
     /**
      * Get the aggregation object.
      *
@@ -790,6 +851,11 @@ public class MongoDBQuery extends QueryImpl
             Expression expression = selectClause.getSelectExpression();
 
             buildAggregation(aggregation, expression, metadata, entityType, hasLob);
+
+            if (aggregation.size() == 0)
+            {
+                return null;
+            }
 
             if (!aggregation.containsField("_id"))
             {

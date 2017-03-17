@@ -417,12 +417,14 @@ public final class KunderaQueryUtils
         Map<String, Object> map = new HashMap<String, Object>();
 
         boolean isEmbeddable = false;
+        boolean isAssociation = false;
         int count = 1;
         String fieldName = pathExp.getPath(count++);
 
         AbstractAttribute attrib = (AbstractAttribute) entity.getAttribute(fieldName);
         String dbColName = attrib.getJPAColumnName();
         isEmbeddable = metaModel.isEmbeddable(attrib.getBindableJavaType());
+        isAssociation = attrib.isAssociation();
         while (pathExp.pathSize() > count)
         {
             if (isEmbeddable)
@@ -432,6 +434,17 @@ public final class KunderaQueryUtils
                 fieldName = fieldName + "." + attName;
                 attrib = (AbstractAttribute) embeddableType.getAttribute(attName);
                 isEmbeddable = metaModel.isEmbeddable(attrib.getBindableJavaType());
+                isAssociation = attrib.isAssociation();
+                dbColName += ("." + attrib.getJPAColumnName());
+            }
+            else if (isAssociation)
+            {
+                String attName = pathExp.getPath(count++);
+                fieldName = fieldName + "." + attName;
+                EntityType associatedType = metaModel.entity(attrib.getBindableJavaType());
+                attrib = (AbstractAttribute) associatedType.getAttribute(attName);
+                isEmbeddable = metaModel.isEmbeddable(attrib.getBindableJavaType());
+                isAssociation = attrib.isAssociation();
                 dbColName += ("." + attrib.getJPAColumnName());
             }
             colName = fieldName;

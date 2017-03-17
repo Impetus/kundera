@@ -15,7 +15,8 @@
  ******************************************************************************/
 package com.impetus.client.crud;
 
-import com.impetus.client.crud.entities.ArticleExtension;
+import com.impetus.client.crud.entities.ArticleDetails;
+import com.impetus.client.crud.entities.ArticleMTO;
 import com.impetus.client.crud.entities.ArticleMongo;
 import com.impetus.client.utils.MongoUtils;
 import junit.framework.Assert;
@@ -169,16 +170,39 @@ public class ArticleMongoTest
         prepareArticle("article1", date("2017-01-05 10:00"), null, "First article", "A", 1, true);
         prepareArticle("article2", date("2017-01-15 10:00"), null, "Second article", "B", 3, true);
         prepareArticle("article3", date("2017-01-25 10:00"), null, "Third article", "A", 6, true);
-        prepareArticleExtension("ext1", "article1", 30);
-        prepareArticleExtension("ext2", "article1", 20);
-        prepareArticleExtension("ext3", "article3", 50);
-        prepareArticleExtension("ext4", "article2", 10);
+        prepareArticleDetails("det1", "First author", "Intro #1", "Contents #1");
+        prepareArticleDetails("det2", "Second author", "Intro #2", "Contents #2");
+        prepareArticleDetails("det3", "Third author", "Intro #3", "Contents #3");
+        prepareArticleExtension("ext1", "article1", "det1", 30);
+        prepareArticleExtension("ext2", "article1", "det2", 20);
+        prepareArticleExtension("ext3", "article3", "det3", 50);
+        prepareArticleExtension("ext4", "article2", null, 10);
 
-        Query query = em.createQuery("select e from ArticleExtension e");
-        List<?> results = query.getResultList();
+        Query query = em.createQuery("select e from ArticleMTO e order by e.id");
+        List<ArticleMTO> results = query.getResultList();
 
         Assert.assertNotNull(results);
         Assert.assertEquals(4, results.size());
+        Assert.assertEquals("ext1", results.get(0).getId());
+        Assert.assertEquals("article1", results.get(0).getArticle().getArticleId());
+        Assert.assertEquals("det1", results.get(0).getDetails().getId());
+        Assert.assertEquals("ext2", results.get(1).getId());
+        Assert.assertEquals("article1", results.get(1).getArticle().getArticleId());
+        Assert.assertEquals("det2", results.get(1).getDetails().getId());
+        Assert.assertEquals("ext3", results.get(2).getId());
+        Assert.assertEquals("article3", results.get(2).getArticle().getArticleId());
+        Assert.assertEquals("det3", results.get(2).getDetails().getId());
+        Assert.assertEquals("ext4", results.get(3).getId());
+        Assert.assertEquals("article2", results.get(3).getArticle().getArticleId());
+        Assert.assertNull(results.get(3).getDetails());
+
+        query = em.createQuery("select e from ArticleMTO e where e.article.priority > 2");
+        results = query.getResultList();
+
+        Assert.assertNotNull(results);
+        Assert.assertEquals(2, results.size());
+        Assert.assertTrue(Arrays.asList("ext3", "ext4").contains(results.get(0).getId()));
+        Assert.assertTrue(Arrays.asList("ext3", "ext4").contains(results.get(1).getId()));
     }
 
     @Test
@@ -322,13 +346,25 @@ public class ArticleMongoTest
         em.persist(item);
     }
 
-    private void prepareArticleExtension(String id, String articleId, long value)
+    private void prepareArticleDetails(String id, String author, String intro, String body)
     {
-        ArticleMongo article = em.find(ArticleMongo.class, articleId);
+        ArticleDetails details = new ArticleDetails();
+        details.setId(id);
+        details.setAuthor(author);
+        details.setIntro(intro);
+        details.setBody(body);
+        em.persist(details);
+    }
 
-        ArticleExtension extension = new ArticleExtension();
+    private void prepareArticleExtension(String id, String articleId, String detailsId, long value)
+    {
+        ArticleMongo article = articleId != null ? em.find(ArticleMongo.class, articleId) : null;
+        ArticleDetails details = detailsId != null ? em.find(ArticleDetails.class, detailsId) : null;
+
+        ArticleMTO extension = new ArticleMTO();
         extension.setId(id);
         extension.setArticle(article);
+        extension.setDetails(details);
         extension.setValue(value);
         em.persist(extension);
     }

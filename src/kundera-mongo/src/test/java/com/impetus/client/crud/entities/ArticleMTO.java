@@ -3,8 +3,8 @@ package com.impetus.client.crud.entities;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "ArticleExtension", schema = "KunderaExamples@mongoTest")
-public class ArticleExtension
+@Table(name = "ArticleMTO", schema = "KunderaExamples@mongoTest")
+public class ArticleMTO
 {
 
    @Id
@@ -15,7 +15,11 @@ public class ArticleExtension
    @JoinColumn(name = "article_id")
    private ArticleMongo article;
 
-   @Column(name = "artile_value")
+   @OneToOne
+   @JoinColumn(name = "details_id")
+   private ArticleDetails details;
+
+   @Column(name = "article_value")
    private long value;
 
    public String getId()
@@ -36,6 +40,16 @@ public class ArticleExtension
    public void setArticle(final ArticleMongo article)
    {
       this.article = article;
+   }
+
+   public ArticleDetails getDetails()
+   {
+      return details;
+   }
+
+   public void setDetails(final ArticleDetails details)
+   {
+      this.details = details;
    }
 
    public long getValue()
