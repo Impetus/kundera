@@ -280,7 +280,7 @@ public class ESIndexer implements Indexer
         {
             builder.setQuery(queryBuilder);
             builder.setFrom(firstResult);
-            builder.setSize(maxResults == 0 ? -1 : maxResults);
+            builder.setSize(maxResults);
             addSortOrder(builder, kunderaQuery, m, kunderaMetadata);
         }
         else
