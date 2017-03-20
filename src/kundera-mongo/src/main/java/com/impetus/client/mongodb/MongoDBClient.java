@@ -16,7 +16,6 @@
 package com.impetus.client.mongodb;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 
 import org.apache.commons.lang.NotImplementedException;
@@ -550,67 +550,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             aggregationResults = output.results();
         }
 
-        if (lookup != null)
-        {
-            List<EnhanceEntity> entities = new ArrayList<EnhanceEntity>(((Collection) aggregationResults).size());
-            for (DBObject document : aggregationResults)
-            {
-                populateEntity(entityMetadata, entities, document);
-            }
-
-            List<E> results = new ArrayList<E>(entities.size());
-
-            Iterator<EnhanceEntity> entityIterator = entities.iterator();
-            Iterator<DBObject> documentIterator = aggregationResults.iterator();
-
-            while (entityIterator.hasNext() && documentIterator.hasNext())
-            {
-                DBObject document = documentIterator.next();
-                EnhanceEntity enhanceEntity = entityIterator.next();
-                Object entity = enhanceEntity.getEntity();
-
-                for (String relationKey : enhanceEntity.getRelations().keySet())
-                {
-                    BasicDBObject lookupItem = null;
-                    for (Object item : lookup)
-                    {
-                        BasicDBObject dbItem = (BasicDBObject) item;
-                        if (dbItem.containsField("$lookup"))
-                        {
-                            dbItem = (BasicDBObject) dbItem.get("$lookup");
-                        }
-                        if (dbItem.getString("localField", "").equalsIgnoreCase(relationKey))
-                        {
-                            lookupItem = dbItem;
-                            break;
-                        }
-                    }
-
-                    if (lookupItem != null)
-                    {
-                        String fieldName = lookupItem.getString("as");
-                        Object target = document.get(fieldName);
-
-                        if (target instanceof DBObject)
-                        {
-                            Relation relation = entityMetadata.getRelation(fieldName);
-                            Class associatedClass = relation.getTargetEntity();
-                            Object associated = instantiateEntity(associatedClass, null);
-                            EntityMetadata associatedMetadata = metaModel.getEntityMetadata(associatedClass);
-                            handler.getEntityFromDocument(associatedClass, associated, associatedMetadata,
-                                  (DBObject) target, null, null, kunderaMetadata);
-
-                            PropertyAccessorHelper.set(entity, relation.getProperty(), associated);
-                        }
-                    }
-                }
-
-                results.add((E) entity);
-            }
-
-            return results;
-        }
-
         return (List<E>) extractAggregationValues(aggregationResults, aggregation);
     }
 
@@ -652,7 +591,14 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
                 value = Long.parseLong(value.toString());
             }
 
-            results.add(value);
+            if (value instanceof DBObject)
+            {
+                extractAggregationValues((DBObject) value, results, (DBObject) keyMap.get(key));
+            }
+            else
+            {
+                results.add(value);
+            }
         }
         else if (document.keySet().size() > 1)
         {

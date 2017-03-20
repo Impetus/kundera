@@ -15,11 +15,15 @@
  ******************************************************************************/
 package com.impetus.client.crud.entities;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Lob;
+import javax.persistence.Table;
 import java.util.Date;
 
 /**
- * The Class Article.
+ * The Class ArticleGFS.
  */
 @Entity
 @Table(name = "ArticleGFS", schema = "KunderaExamples@mongoTest")

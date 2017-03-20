@@ -209,13 +209,16 @@ public class ArticleMongoTest
         Assert.assertEquals("article2", results.get(3).getArticle().getArticleId());
         Assert.assertNull(results.get(3).getDetails());
 
-        query = em.createQuery("select e from ArticleMTO e where e.article.priority > 2");
+        query = em.createQuery("select e from ArticleMTO e where e.article.articleId in :ids order by e.id");
+        query.setParameter("ids", Arrays.asList("article2", "article3"));
         results = query.getResultList();
 
         Assert.assertNotNull(results);
         Assert.assertEquals(2, results.size());
-        Assert.assertTrue(Arrays.asList("ext3", "ext4").contains(results.get(0).getId()));
-        Assert.assertTrue(Arrays.asList("ext3", "ext4").contains(results.get(1).getId()));
+        Assert.assertEquals("ext3", results.get(0).getId());
+        Assert.assertEquals("article3", results.get(0).getArticle().getArticleId());
+        Assert.assertEquals("ext4", results.get(1).getId());
+        Assert.assertEquals("article2", results.get(1).getArticle().getArticleId());
     }
 
     @Test

@@ -22,7 +22,7 @@ import javax.persistence.Table;
 import java.util.Date;
 
 /**
- * The Class Article.
+ * The Class ArticleDetails.
  */
 @Entity
 @Table(name = "ArticleDetails", schema = "KunderaExamples@mongoTest")
