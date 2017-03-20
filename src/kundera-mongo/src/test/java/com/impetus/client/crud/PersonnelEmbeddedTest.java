@@ -16,6 +16,7 @@
 package com.impetus.client.crud;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -25,6 +26,7 @@ import java.util.Set;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.Query;
 
 import junit.framework.Assert;
 
@@ -174,4 +176,65 @@ public class PersonnelEmbeddedTest
        
 
     }
+
+    @Test
+    public void testAggregation()
+    {
+        PersonalDetailEmbedded embedded1 = new PersonalDetailEmbedded();
+        embedded1.setAddress("Address 1");
+        embedded1.setEmailId("email1@company.com");
+        embedded1.setPhoneNo(90001);
+        embedded1.setPhone(new PhoneDirectory("dir1",
+              Collections.singletonList("contact1"), Collections.singletonMap("contact1", "90091"),
+              Collections.singleton("90091")));
+
+        PersonnelEmbedded personnel1 = new PersonnelEmbedded();
+        personnel1.setId(1);
+        personnel1.setAge(25);
+        personnel1.setName("Person 1");
+        personnel1.setPersonalDetail(embedded1);
+
+        em.persist(personnel1);
+
+        PersonalDetailEmbedded embedded2 = new PersonalDetailEmbedded();
+        embedded2.setAddress("Address 2");
+        embedded2.setEmailId("email2@company.com");
+        embedded2.setPhoneNo(90002);
+        embedded2.setPhone(new PhoneDirectory("dir2",
+              Collections.singletonList("contact2"), Collections.singletonMap("contact2", "90092"),
+              Collections.singleton("90092")));
+
+        PersonnelEmbedded personnel2 = new PersonnelEmbedded();
+        personnel2.setId(2);
+        personnel2.setAge(32);
+        personnel2.setName("Person 2");
+        personnel2.setPersonalDetail(embedded2);
+
+        em.persist(personnel2);
+
+        Query query = em.createQuery("select max(p.id) from PersonnelEmbedded p");
+        Object result = query.getSingleResult();
+
+        Assert.assertNotNull(result);
+        Assert.assertEquals(2, result);
+
+        query = em.createQuery("select min(p.id) from PersonnelEmbedded p");
+        result = query.getSingleResult();
+
+        Assert.assertNotNull(result);
+        Assert.assertEquals(1, result);
+
+        query = em.createQuery("select avg(p.id) from PersonnelEmbedded p");
+        result = query.getSingleResult();
+
+        Assert.assertNotNull(result);
+        Assert.assertEquals(1.5, result);
+
+        query = em.createQuery("select sum(p.id) from PersonnelEmbedded p");
+        result = query.getSingleResult();
+
+        Assert.assertNotNull(result);
+        Assert.assertEquals(3, result);
+    }
+
 }

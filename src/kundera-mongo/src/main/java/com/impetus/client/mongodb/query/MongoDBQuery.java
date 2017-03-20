@@ -976,6 +976,10 @@ public class MongoDBQuery extends QueryImpl
                 {
                     actualColumnName = "metadata." + columnName;
                 }
+                else if (metadata.getIdAttribute().equals(entityType.getAttribute(columnName)))
+                {
+                    actualColumnName = "_id";
+                }
 
                 BasicDBObject item = new BasicDBObject("$" + identifier, "$" + actualColumnName);
                 group.put(identifier + "_" + columnName, item);
