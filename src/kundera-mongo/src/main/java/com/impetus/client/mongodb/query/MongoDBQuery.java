@@ -565,9 +565,19 @@ public class MongoDBQuery extends QueryImpl
                         {
                             Relation relation = m.getRelation(embeddedAttributeAsStr);
                             f = relation.getProperty();
-                            if (!kunderaQuery.isAggregated())
+
+                            AbstractAttribute targetAttribute = (AbstractAttribute) metaModel
+                                  .entity(relation.getTargetEntity()).getAttribute(embeddableAttributeAsStr);
+                            String targetColumnName = targetAttribute.getJPAColumnName();
+
+                            if (targetAttribute instanceof DefaultSingularAttribute &&
+                                  ((DefaultSingularAttribute) targetAttribute).isId())
                             {
                                 property = relation.getJoinColumnName(kunderaMetadata);
+                            }
+                            else
+                            {
+                                property = embeddedAttributeAsStr + "." + targetColumnName;
                             }
                         }
                         else

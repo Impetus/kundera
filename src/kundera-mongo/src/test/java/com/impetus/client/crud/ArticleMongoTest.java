@@ -219,6 +219,13 @@ public class ArticleMongoTest
         Assert.assertEquals("article3", results.get(0).getArticle().getArticleId());
         Assert.assertEquals("ext4", results.get(1).getId());
         Assert.assertEquals("article2", results.get(1).getArticle().getArticleId());
+
+        query = em.createQuery("select max(e.value) from ArticleMTO e where e.article.priority < :priority");
+        query.setParameter("priority", 5);
+        Object singleResult = query.getSingleResult();
+
+        Assert.assertNotNull(singleResult);
+        Assert.assertEquals(30L, singleResult);
     }
 
     @Test

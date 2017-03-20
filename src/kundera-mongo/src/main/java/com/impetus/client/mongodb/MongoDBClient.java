@@ -491,45 +491,14 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         boolean hasLob = managedType.hasLobAttribute();
 
         List<DBObject> pipeline = new LinkedList<DBObject>();
-        for (Object lookupItem : lookup)
-        {
-            pipeline.add((DBObject) lookupItem);
-        }
-        pipeline.add(new BasicDBObject("$match", mongoQuery));
+        addLookupAndMatchToPipeline(lookup, mongoQuery, pipeline);
         if (aggregation != null)
         {
             pipeline.add(new BasicDBObject("$group", aggregation));
         }
         if (orderBy != null && aggregation != null)
         {
-            BasicDBObject actual = new BasicDBObject();
-            for (String key : orderBy.keySet())
-            {
-                if (aggregation.containsField(key))
-                {
-                    actual.put(key, orderBy.get(key));
-                }
-                else if (aggregation.containsField("_id"))
-                {
-                    if (((BasicDBObject) aggregation.get("_id")).containsField(key))
-                    {
-                        actual.put("_id", orderBy.get(key));
-                    }
-                    else if (hasLob && key.startsWith("metadata."))
-                    {
-                        // check the key without the "metadata." prefix for GridFS
-                        if (((BasicDBObject) aggregation.get("_id")).containsField(key.substring(9)))
-                        {
-                            actual.put("_id", orderBy.get(key));
-                        }
-                    }
-                }
-            }
-
-            if (actual.size() > 0)
-            {
-                pipeline.add(new BasicDBObject("$sort", actual));
-            }
+            addSortToPipeline(orderBy, aggregation, hasLob, pipeline);
         }
         if (maxResult > 0)
         {
@@ -551,6 +520,69 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         }
 
         return (List<E>) extractAggregationValues(aggregationResults, aggregation);
+    }
+
+    private void addLookupAndMatchToPipeline(BasicDBList lookup, BasicDBObject mongoQuery, List<DBObject> pipeline)
+    {
+        BasicDBObject matchBeforeLookup = new BasicDBObject();
+        BasicDBObject matchAfterLookup = new BasicDBObject();
+
+        for (String key : mongoQuery.keySet())
+        {
+            if (key.contains("."))
+            {
+                matchAfterLookup.append(key, mongoQuery.get(key));
+            }
+            else
+            {
+                matchBeforeLookup.append(key, mongoQuery.get(key));
+            }
+        }
+
+        if (matchBeforeLookup.size() > 0)
+        {
+            pipeline.add(new BasicDBObject("$match", matchBeforeLookup));
+        }
+        for (Object lookupItem : lookup)
+        {
+            pipeline.add((DBObject) lookupItem);
+        }
+        if (matchAfterLookup.size() > 0)
+        {
+            pipeline.add(new BasicDBObject("$match", matchAfterLookup));
+        }
+    }
+
+    private void addSortToPipeline(BasicDBObject orderBy, BasicDBObject aggregation, boolean hasLob, List<DBObject> pipeline)
+    {
+        BasicDBObject actual = new BasicDBObject();
+        for (String key : orderBy.keySet())
+        {
+            if (aggregation.containsField(key))
+            {
+                actual.put(key, orderBy.get(key));
+            }
+            else if (aggregation.containsField("_id"))
+            {
+                if (((BasicDBObject) aggregation.get("_id")).containsField(key))
+                {
+                    actual.put("_id", orderBy.get(key));
+                }
+                else if (hasLob && key.startsWith("metadata."))
+                {
+                    // check the key without the "metadata." prefix for GridFS
+                    if (((BasicDBObject) aggregation.get("_id")).containsField(key.substring(9)))
+                    {
+                        actual.put("_id", orderBy.get(key));
+                    }
+                }
+            }
+        }
+
+        if (actual.size() > 0)
+        {
+            pipeline.add(new BasicDBObject("$sort", actual));
+        }
     }
 
     private List extractAggregationValues(Iterable<DBObject> documents, BasicDBObject aggregation)
