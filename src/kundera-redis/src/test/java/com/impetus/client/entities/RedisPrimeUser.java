@@ -22,6 +22,9 @@ import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
+
 /**
  * @author vivek.mishra
  * 
@@ -29,6 +32,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "User", schema = "RedisK@redis_pu")
+@IndexCollection(columns={@Index(name="tweetBody")})
 public class RedisPrimeUser
 {
 

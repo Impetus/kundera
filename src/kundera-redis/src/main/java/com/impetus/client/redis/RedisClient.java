@@ -253,7 +253,12 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
         String rowKey = null;
         if (metaModel.isEmbeddable(entityMetadata.getIdAttribute().getBindableJavaType()))
         {
+            if(key instanceof String && ((String) key).indexOf(COMPOSITE_KEY_SEPERATOR)>0){
+                rowKey = (String) key;
+            }
+            else{
             rowKey = KunderaCoreUtils.prepareCompositeKey(entityMetadata, key);
+            }
         }
         else
         {
@@ -1573,7 +1578,7 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
             {
                 key = PropertyAccessorFactory.getPropertyAccessor(javaType).fromString(javaType, key.toString());
             }
-            PropertyAccessorHelper.set(entity, (Field) entityMetadata.getIdAttribute().getJavaMember(), key);
+//            PropertyAccessorHelper.set(entity, (Field) entityMetadata.getIdAttribute().getJavaMember(), key);
         }
         if (!relations.isEmpty())
         {
