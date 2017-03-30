@@ -836,10 +836,46 @@ public class PersonMongoTest extends BaseTest
     }
 
     /**
-     * Map reduce test.
+     * Map reduce test (simple).
      */
     @Test
     public void mapReduceTest()
+    {
+        String query = "db.PERSON.mapReduce(\n" + "  function () { emit( this.AGE - this.AGE % 10, 1 ); },\n"
+                + "  function (key, values) { return { age: key, count: Array.sum(values) }; },\n"
+                + "  { query: {}, out: { inline: 1 } }\n" + ")";
+
+        executeMapReduceTest(query);
+    }
+
+    /**
+     * Map reduce test (with db.getCollection(..)).
+     */
+    @Test
+    public void mapReduceTestWithGetCollection()
+    {
+        String query = "db.getCollection('PERSON').mapReduce(\n"
+                + "  function () { emit( this.AGE - this.AGE % 10, 1 ); },\n"
+                + "  function (key, values) { return { age: key, count: Array.sum(values) }; },\n"
+                + "  { query: {}, out: { inline: 1 } }\n" + ")";
+
+        executeMapReduceTest(query);
+
+        query = "db.getCollection(\"PERSON\").mapReduce(\n"
+                + "  function () { emit( this.AGE - this.AGE % 10, 1 ); },\n"
+                + "  function (key, values) { return { age: key, count: Array.sum(values) }; },\n"
+                + "  { query: {}, out: { inline: 1 } }\n" + ")";
+
+        executeMapReduceTest(query);
+    }
+
+    /**
+     * Execute map reduce test.
+     * 
+     * @param query
+     *            the query
+     */
+    private void executeMapReduceTest(String query)
     {
         Object p1 = prepareMongoInstance("1", 10);
         Object p2 = prepareMongoInstance("2", 20);
@@ -853,10 +889,6 @@ public class PersonMongoTest extends BaseTest
         em.persist(p4);
         em.persist(p5);
         em.persist(p6);
-
-        String query = "db.PERSON.mapReduce(\n" + "  function () { emit( this.AGE - this.AGE % 10, 1 ); },\n"
-                + "  function (key, values) { return { age: key, count: Array.sum(values) }; },\n"
-                + "  { query: {}, out: { inline: 1 } }\n" + ")";
 
         Query q = em.createNativeQuery(query);
         List<BasicDBObject> results = q.getResultList();
@@ -890,4 +922,35 @@ public class PersonMongoTest extends BaseTest
             }
         }
     }
+
+    /**
+     * Count test.
+     */
+    @Test
+    public void countTest()
+    {
+        Object p1 = prepareMongoInstance("1", 10);
+        Object p2 = prepareMongoInstance("2", 20);
+        Object p3 = prepareMongoInstance("3", 15);
+        em.persist(p1);
+        em.persist(p2);
+        em.persist(p3);
+
+        Query query = em.createQuery("select count(p) from PersonMongo p");
+        List<?> results = query.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(results.size(), 1);
+        Assert.assertEquals(results.get(0), 3L);
+
+        query = em.createQuery("select count(p) from PersonMongo p where p.age < 18");
+        results = query.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(results.size(), 1);
+        Assert.assertEquals(results.get(0), 2L);
+
+        query = em.createQuery("select count(p) from PersonMongo p");
+        Object singleResult = query.getSingleResult();
+        Assert.assertEquals(singleResult, 3L);
+    }
+
 }

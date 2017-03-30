@@ -16,6 +16,7 @@
 package com.impetus.client.mongodb;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -492,6 +493,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      *            the max result
      * @param firstResult
      *            the first result
+     * @param isCountQuery
+     *            the is count query
      * @param keys
      *            the keys
      * @param results
@@ -501,15 +504,16 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      *             the exception
      */
     public <E> List<E> loadData(EntityMetadata entityMetadata, BasicDBObject mongoQuery, List<String> relationNames,
-            BasicDBObject orderBy, int maxResult, int firstResult, BasicDBObject keys, String... results)
-            throws Exception
+            BasicDBObject orderBy, int maxResult, int firstResult, boolean isCountQuery, BasicDBObject keys,
+            String... results) throws Exception
     {
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
                 entityMetadata.getPersistenceUnit());
         AbstractManagedType managedType = (AbstractManagedType) metaModel.entity(entityMetadata.getEntityClazz());
         boolean hasLob = managedType.hasLobAttribute();
-        return (List<E>) (!hasLob ? loadQueryData(entityMetadata, mongoQuery, orderBy, maxResult, firstResult, keys,
-                results) : loadQueryDataGFS(entityMetadata, mongoQuery, orderBy, maxResult, firstResult));
+        return (List<E>) (!hasLob ? loadQueryData(entityMetadata, mongoQuery, orderBy, maxResult, firstResult,
+                isCountQuery, keys, results) : loadQueryDataGFS(entityMetadata, mongoQuery, orderBy, maxResult,
+                firstResult, isCountQuery));
     }
 
     /**
@@ -527,13 +531,21 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      *            the max result
      * @param firstResult
      *            the first result
+     * @param isCountQuery
+     *            the is count query
      * @return the list
      */
     private <E> List<E> loadQueryDataGFS(EntityMetadata entityMetadata, BasicDBObject mongoQuery,
-            BasicDBObject orderBy, int maxResult, int firstResult)
+            BasicDBObject orderBy, int maxResult, int firstResult, boolean isCountQuery)
     {
         List<GridFSDBFile> gfsDBfiles = getGFSDBFiles(mongoQuery, orderBy, entityMetadata.getTableName(), maxResult,
                 firstResult);
+
+        if (isCountQuery)
+        {
+            return (List<E>) Collections.singletonList(gfsDBfiles.size());
+        }
+
         List entities = new ArrayList<E>();
         for (GridFSDBFile file : gfsDBfiles)
         {
@@ -557,6 +569,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      *            the max result
      * @param firstResult
      *            the first result
+     * @param isCountQuery
+     *            the is count query
      * @param keys
      *            the keys
      * @param results
@@ -568,22 +582,12 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      *             the illegal access exception
      */
     private <E> List<E> loadQueryData(EntityMetadata entityMetadata, BasicDBObject mongoQuery, BasicDBObject orderBy,
-            int maxResult, int firstResult, BasicDBObject keys, String... results) throws InstantiationException,
-            IllegalAccessException
+            int maxResult, int firstResult, boolean isCountQuery, BasicDBObject keys, String... results)
+            throws InstantiationException, IllegalAccessException
     {
         String documentName = entityMetadata.getTableName();
-        Class clazz = entityMetadata.getEntityClazz();
 
         List entities = new ArrayList<E>();
-
-        boolean isCountQuery = false;
-        if (results != null && results.length > 1)
-        {
-            if (results[0].toLowerCase().indexOf("count(") == 0)
-            {
-                isCountQuery = true;
-            }
-        }
 
         Object object = getDBCursorInstance(mongoQuery, orderBy, maxResult, firstResult, keys, documentName,
                 isCountQuery);
@@ -1550,7 +1554,13 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      */
     private MapReduceCommand parseMapReduceCommand(String jsonClause)
     {
-        String collectionName = jsonClause.replaceFirst("(?ms).*\\.\\s*([^.]+?)\\s*\\.\\s*mapReduce\\s*\\(.*", "$1");
+        String collectionName = jsonClause.replaceFirst("(?ms).*?\\.\\s*(.+?)\\s*\\.\\s*mapReduce\\s*\\(.*", "$1");
+        if (collectionName.contains("getCollection"))
+        {
+            collectionName = collectionName
+                    .replaceFirst(".*getCollection\\s*\\(\\s*(['\"])([^'\"]+)\\1\\s*\\).*", "$2");
+        }
+
         DBCollection collection = mongoDb.getCollection(collectionName);
 
         String body = jsonClause.replaceFirst("^(?ms).*?mapReduce\\s*\\(\\s*(.*)\\s*\\)\\s*;?\\s*$", "$1");

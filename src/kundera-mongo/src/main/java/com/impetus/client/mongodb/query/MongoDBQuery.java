@@ -30,6 +30,9 @@ import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.Metamodel;
 
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.persistence.jpa.jpql.parser.CountFunction;
+import org.eclipse.persistence.jpa.jpql.parser.Expression;
+import org.eclipse.persistence.jpa.jpql.parser.SelectClause;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,19 +75,18 @@ public class MongoDBQuery extends QueryImpl
     /** The log used by this class. */
     private static Logger log = LoggerFactory.getLogger(MongoDBQuery.class);
 
+    /** The is single result. */
     private boolean isSingleResult;
 
     /**
      * Instantiates a new mongo db query.
      * 
-     * @param jpaQuery
-     *            the jpa query
      * @param kunderaQuery
      *            the kundera query
      * @param persistenceDelegator
      *            the persistence delegator
-     * @param persistenceUnits
-     *            the persistence units
+     * @param kunderaMetadata
+     *            the kundera metadata
      */
     public MongoDBQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator,
             final KunderaMetadata kunderaMetadata)
@@ -156,8 +158,8 @@ public class MongoDBQuery extends QueryImpl
                 BasicDBObject orderByClause = getOrderByClause(m);
                 return ((MongoDBClient) client).loadData(m,
                         createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()), null, orderByClause,
-                        isSingleResult ? 1 : maxResult, firstResult, getKeys(m, getKunderaQuery().getResult()),
-                        getKunderaQuery().getResult());
+                        isSingleResult ? 1 : maxResult, firstResult, isCountQuery(),
+                        getKeys(m, getKunderaQuery().getResult()), getKunderaQuery().getResult());
             }
             else
             {
@@ -173,6 +175,13 @@ public class MongoDBQuery extends QueryImpl
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.query.QueryImpl#findUsingLucene(com.impetus.kundera
+     * .metadata.model.EntityMetadata, com.impetus.kundera.client.Client)
+     */
     @Override
     protected List findUsingLucene(EntityMetadata m, Client client)
     {
@@ -181,7 +190,7 @@ public class MongoDBQuery extends QueryImpl
             BasicDBObject orderByClause = getOrderByClause(m);
             // find on id, so no need to add skip() [firstResult hardcoded 0]
             return ((MongoDBClient) client).loadData(m, createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()),
-                    null, orderByClause, isSingleResult ? 1 : maxResult, 0,
+                    null, orderByClause, isSingleResult ? 1 : maxResult, 0, isCountQuery(),
                     getKeys(m, getKunderaQuery().getResult()), getKunderaQuery().getResult());
         }
         catch (Exception e)
@@ -192,6 +201,14 @@ public class MongoDBQuery extends QueryImpl
 
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.query.QueryImpl#recursivelyPopulateEntities(com.impetus
+     * .kundera.metadata.model.EntityMetadata,
+     * com.impetus.kundera.client.Client)
+     */
     @Override
     protected List<Object> recursivelyPopulateEntities(EntityMetadata m, Client client)
     {
@@ -215,7 +232,7 @@ public class MongoDBQuery extends QueryImpl
                 BasicDBObject orderByClause = getOrderByClause(m);
                 ls = ((MongoDBClient) client).loadData(m,
                         createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()), m.getRelationNames(),
-                        orderByClause, isSingleResult ? 1 : maxResult, firstResult,
+                        orderByClause, isSingleResult ? 1 : maxResult, firstResult, isCountQuery(),
                         getKeys(m, getKunderaQuery().getResult()), getKunderaQuery().getResult());
             }
             else
@@ -232,6 +249,28 @@ public class MongoDBQuery extends QueryImpl
         return setRelationEntities(ls, client, m);
     }
 
+    /**
+     * Checks if is count query.
+     * 
+     * @return true, if is count query
+     */
+    private boolean isCountQuery()
+    {
+        if (getKunderaQuery().getSelectStatement() != null)
+        {
+            final Expression selectClause = getKunderaQuery().getSelectStatement().getSelectClause();
+
+            if (selectClause instanceof SelectClause)
+            {
+                final Expression expression = ((SelectClause) selectClause).getSelectExpression();
+
+                return expression instanceof CountFunction;
+            }
+        }
+
+        return false;
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -243,19 +282,36 @@ public class MongoDBQuery extends QueryImpl
         return new MongoEntityReader(kunderaQuery, kunderaMetadata);
     }
 
+    /**
+     * The Class QueryComponent.
+     */
     static class QueryComponent
     {
+
+        /** The is and. */
         boolean isAnd;
 
+        /** The clauses. */
         Queue clauses = new LinkedList();
 
+        /** The children. */
         List<QueryComponent> children = new ArrayList<MongoDBQuery.QueryComponent>();
 
+        /** The parent. */
         QueryComponent parent;
 
+        /** The actual query. */
         BasicDBObject actualQuery;
     }
 
+    /**
+     * Populate query components.
+     * 
+     * @param m
+     *            the m
+     * @param sq
+     *            the sq
+     */
     private void populateQueryComponents(EntityMetadata m, QueryComponent sq)
     {
         boolean hasChildren = false;
@@ -295,6 +351,13 @@ public class MongoDBQuery extends QueryImpl
         return;
     }
 
+    /**
+     * Gets the query component.
+     * 
+     * @param filterClauseQueue
+     *            the filter clause queue
+     * @return the query component
+     */
     private static QueryComponent getQueryComponent(Queue filterClauseQueue)
     {
         QueryComponent subQuery = new QueryComponent();
@@ -334,6 +397,15 @@ public class MongoDBQuery extends QueryImpl
         return subQuery;
     }
 
+    /**
+     * Creates the mongo query.
+     * 
+     * @param m
+     *            the m
+     * @param filterClauseQueue
+     *            the filter clause queue
+     * @return the basic db object
+     */
     public BasicDBObject createMongoQuery(EntityMetadata m, Queue filterClauseQueue)
     {
         QueryComponent sq = getQueryComponent(filterClauseQueue);
@@ -348,7 +420,6 @@ public class MongoDBQuery extends QueryImpl
      *            the m
      * @param filterClauseQueue
      *            the filter clause queue
-     * @param columns
      * @return the basic db object
      */
     public BasicDBObject createSubMongoQuery(EntityMetadata m, Queue filterClauseQueue)
@@ -479,7 +550,10 @@ public class MongoDBQuery extends QueryImpl
 
                     if (isCompositeColumn)
                     {
-                        property = new StringBuffer("_id.").append(property).toString();
+                        EmbeddableType embeddableType = metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
+                        AbstractAttribute attribute = (AbstractAttribute) embeddableType.getAttribute(property);
+
+                        property = new StringBuffer("_id.").append(attribute.getJPAColumnName()).toString();
                     }
                     if (condition.equals("="))
                     {
@@ -613,6 +687,15 @@ public class MongoDBQuery extends QueryImpl
         return query;
     }
 
+    /**
+     * Gets the keys.
+     * 
+     * @param m
+     *            the m
+     * @param columns
+     *            the columns
+     * @return the keys
+     */
     private BasicDBObject getKeys(EntityMetadata m, String[] columns)
     {
         BasicDBObject keys = new BasicDBObject();
@@ -640,6 +723,8 @@ public class MongoDBQuery extends QueryImpl
     /**
      * Prepare order by clause.
      * 
+     * @param metadata
+     *            the metadata
      * @return order by clause.
      */
     private BasicDBObject getOrderByClause(final EntityMetadata metadata)
@@ -695,6 +780,11 @@ public class MongoDBQuery extends QueryImpl
     /** The Constant SINGLE_STRING_KEYWORDS. */
     public static final String[] FUNCTION_KEYWORDS = { "INCREMENT\\(\\d+\\)", "DECREMENT\\(\\d+\\)" };
 
+    /**
+     * Handle special functions.
+     * 
+     * @return the int
+     */
     private int handleSpecialFunctions()
     {
 
@@ -762,11 +852,21 @@ public class MongoDBQuery extends QueryImpl
         return ((MongoDBClient) client).handleUpdateFunctions(query, update, m.getTableName());
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.query.QueryImpl#close()
+     */
     @Override
     public void close()
     {
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.query.QueryImpl#iterate()
+     */
     @Override
     public Iterator iterate()
     {
@@ -777,6 +877,17 @@ public class MongoDBQuery extends QueryImpl
                 persistenceDelegeator, getFetchSize() != null ? getFetchSize() : this.maxResult);
     }
 
+    /**
+     * Gets the column name.
+     * 
+     * @param metadata
+     *            the metadata
+     * @param entityType
+     *            the entity type
+     * @param property
+     *            the property
+     * @return the column name
+     */
     private String getColumnName(EntityMetadata metadata, EntityType entityType, String property)
     {
         String columnName = null;
@@ -814,10 +925,11 @@ public class MongoDBQuery extends QueryImpl
 
     /**
      * Create regular expression equivalent to any like operator string match
-     * function
+     * function.
      * 
      * @param expr
-     * @return
+     *            the expr
+     * @return the string
      */
     public static String createLikeRegex(String expr)
     {
@@ -828,10 +940,11 @@ public class MongoDBQuery extends QueryImpl
     }
 
     /**
-     * Generates the regular expression for matching string for like operator
+     * Generates the regular expression for matching string for like operator.
      * 
      * @param value
-     * @return
+     *            the value
+     * @return the string
      */
     public static String createRegex(String value)
     {
