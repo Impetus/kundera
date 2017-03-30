@@ -60,7 +60,7 @@ public final class CassandraValidationClassMapper
 
     /** The Constant validationClassMapper. */
     private final static HashMap<Class<?>, Class<?>> validationClassMapper = new HashMap<Class<?>, Class<?>>();
-    
+
     /** The Constant validationSerializerClassMapper. */
     private final static HashMap<Class<?>, TypeSerializer<?>> validationSerializerClassMapper = new HashMap<Class<?>, TypeSerializer<?>>();
 
@@ -128,9 +128,8 @@ public final class CassandraValidationClassMapper
         validationClassMapper.put(List.class, ListType.class);
         validationClassMapper.put(Set.class, SetType.class);
         validationClassMapper.put(Map.class, MapType.class);
-        
-        
-        //validation serializer class mappers
+
+        // validation serializer class mappers
         validationSerializerClassMapper.put(java.lang.String.class, UTF8Serializer.instance);
         validationSerializerClassMapper.put(Character.class, UTF8Serializer.instance);
         validationSerializerClassMapper.put(char.class, UTF8Serializer.instance);
@@ -165,14 +164,15 @@ public final class CassandraValidationClassMapper
 
         validationSerializerClassMapper.put(Calendar.class, TimestampSerializer.instance);
 
-        
     }
 
     /**
      * Gets the validation class.
-     *
-     * @param dataType            the data type
-     * @param isCql3Enabled the is cql3 enabled
+     * 
+     * @param dataType
+     *            the data type
+     * @param isCql3Enabled
+     *            the is cql3 enabled
      * @return the validation class
      */
     public static String getValidationClass(Class<?> dataType, boolean isCql3Enabled)
@@ -182,9 +182,11 @@ public final class CassandraValidationClassMapper
 
     /**
      * Gets the validation class instance.
-     *
-     * @param dataType the data type
-     * @param isCql3Enabled the is cql3 enabled
+     * 
+     * @param dataType
+     *            the data type
+     * @param isCql3Enabled
+     *            the is cql3 enabled
      * @return the validation class instance
      */
     public static Class<?> getValidationClassInstance(Class<?> dataType, boolean isCql3Enabled)
@@ -192,19 +194,28 @@ public final class CassandraValidationClassMapper
         resetMapperForCQL3(isCql3Enabled);
         Class<?> validation_class;
         validation_class = validationClassMapper.get(dataType);
-        if (!(validation_class != null))
+        if (validation_class == null)
         {
-            validation_class = BytesType.class;
+            if (dataType.isEnum())
+            {
+                validation_class = UTF8Type.class;
+            }
+            else
+            {
+                validation_class = BytesType.class;
+            }
         }
         resetMapperForThrift(isCql3Enabled);
         return validation_class;
     }
-    
+
     /**
      * Gets the validation serializer class instance.
-     *
-     * @param dataType the data type
-     * @param isCql3Enabled the is cql3 enabled
+     * 
+     * @param dataType
+     *            the data type
+     * @param isCql3Enabled
+     *            the is cql3 enabled
      * @return the validation serializer class instance
      */
     public static TypeSerializer<?> getValidationSerializerClassInstance(Class<?> dataType, boolean isCql3Enabled)
@@ -222,20 +233,30 @@ public final class CassandraValidationClassMapper
 
     /**
      * Gets the value type name.
-     *
-     * @param dataType the data type
-     * @param genericClasses the generic classes
-     * @param isCql3Enabled the is cql3 enabled
+     * 
+     * @param dataType
+     *            the data type
+     * @param genericClasses
+     *            the generic classes
+     * @param isCql3Enabled
+     *            the is cql3 enabled
      * @return the value type name
-     * @throws SyntaxException the syntax exception
-     * @throws ConfigurationException the configuration exception
-     * @throws IllegalArgumentException the illegal argument exception
-     * @throws IllegalAccessException the illegal access exception
-     * @throws NoSuchFieldException the no such field exception
-     * @throws SecurityException the security exception
+     * @throws SyntaxException
+     *             the syntax exception
+     * @throws ConfigurationException
+     *             the configuration exception
+     * @throws IllegalArgumentException
+     *             the illegal argument exception
+     * @throws IllegalAccessException
+     *             the illegal access exception
+     * @throws NoSuchFieldException
+     *             the no such field exception
+     * @throws SecurityException
+     *             the security exception
      */
     public static String getValueTypeName(Class<?> dataType, List<Class<?>> genericClasses, boolean isCql3Enabled)
-            throws SyntaxException, ConfigurationException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException
+            throws SyntaxException, ConfigurationException, IllegalArgumentException, IllegalAccessException,
+            NoSuchFieldException, SecurityException
     {
         String valueType;
 
@@ -255,24 +276,28 @@ public final class CassandraValidationClassMapper
         else if (validation_class.equals(MapType.class))
         {
             Class keyClass = CassandraValidationClassMapper.getValidationClassInstance(genericClasses.get(0), true);
-            Class valueClass = CassandraValidationClassMapper
-                    .getValidationClassInstance(genericClasses.get(1), true);
+            Class valueClass = CassandraValidationClassMapper.getValidationClassInstance(genericClasses.get(1), true);
 
             Object keyClassInstance = keyClass.getDeclaredField("instance").get(null);
             Object valueClassInstance = valueClass.getDeclaredField("instance").get(null);
 
-           valueType = MapType.getInstance((AbstractType) keyClassInstance,
-                    (AbstractType) valueClassInstance, true).toString();
-//            TypeParser keyParser = new TypeParser(getValidationClass(genericClasses.get(0), isCql3Enabled));
-//            TypeParser valueParser = new TypeParser(getValidationClass(genericClasses.get(1), isCql3Enabled));
-//            valueType = MapType.getInstance(keyParser, valueParser).toString();
+            valueType = MapType.getInstance((AbstractType) keyClassInstance, (AbstractType) valueClassInstance, true)
+                    .toString();
+            // TypeParser keyParser = new
+            // TypeParser(getValidationClass(genericClasses.get(0),
+            // isCql3Enabled));
+            // TypeParser valueParser = new
+            // TypeParser(getValidationClass(genericClasses.get(1),
+            // isCql3Enabled));
+            // valueType = MapType.getInstance(keyParser,
+            // valueParser).toString();
         }
         return valueType;
     }
 
     /**
      * Gets the replication strategies.
-     *
+     * 
      * @return the replication strategies
      */
     public static List<String> getReplicationStrategies()
@@ -282,7 +307,7 @@ public final class CassandraValidationClassMapper
 
     /**
      * Gets the validators and comparators.
-     *
+     * 
      * @return the validatorsAndComparators
      */
     public static List<String> getValidatorsAndComparators()
@@ -292,8 +317,9 @@ public final class CassandraValidationClassMapper
 
     /**
      * Reset mapper for cq l3.
-     *
-     * @param isCql3Enabled the is cql3 enabled
+     * 
+     * @param isCql3Enabled
+     *            the is cql3 enabled
      */
     private static void resetMapperForCQL3(boolean isCql3Enabled)
     {
@@ -313,8 +339,9 @@ public final class CassandraValidationClassMapper
 
     /**
      * Reset mapper for thrift.
-     *
-     * @param isCql3Enabled the is cql3 enabled
+     * 
+     * @param isCql3Enabled
+     *            the is cql3 enabled
      */
     private static void resetMapperForThrift(boolean isCql3Enabled)
     {
