@@ -489,6 +489,10 @@ public class MongoDBClientFactory extends GenericClientFactory
                 {
                     builder.threadsAllowedToBlockForConnectionMultiplier(getProperty(MongoDBConstants.TABCM, int.class));
                 }
+                if (hasProperty(MongoDBConstants.REPLICA_SET_NAME))
+                {
+                    builder.requiredReplicaSetName(getProperty(MongoDBConstants.REPLICA_SET_NAME, String.class));
+                }
             }
             catch (NumberFormatException nfe)
             {

@@ -95,4 +95,7 @@ public interface MongoDBConstants
 
     /** The Constant ORDERED_BULK_OPERATION. */
     public final static String ORDERED_BULK_OPERATION = "ordered.bulk.operation";
+
+    /** The Constant REPLICA_SET_NAME. */
+    public final static String REPLICA_SET_NAME = "replica.set.name";
 }
