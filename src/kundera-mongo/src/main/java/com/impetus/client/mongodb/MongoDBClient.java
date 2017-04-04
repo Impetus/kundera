@@ -1641,7 +1641,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         {
             entities = executeNativeQuery(jsonClause, entityMetadata);
             List result = new ArrayList();
-            if (entities.get(0) instanceof EnhanceEntity)
+            if (entities.size() > 0 && (entities.get(0) instanceof EnhanceEntity))
             {
                 for (Object obj : entities)
                 {
