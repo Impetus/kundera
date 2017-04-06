@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -1428,6 +1429,11 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
     private void addToWrapper(EntityMetadata entityMetadata, AttributeWrapper wrapper, Object embeddedObject,
             Attribute attrib, Attribute embeddedAttrib)
     {
+        if (embeddedObject == null)
+        {
+            return;
+        }
+        
         byte[] value = PropertyAccessorHelper.get(embeddedObject, (Field) attrib.getJavaMember());
         byte[] name;
         if (value != null)
@@ -1542,8 +1548,17 @@ public class RedisClient extends ClientBase implements Client<RedisQuery>, Batch
                                     .getEntityClazz());
 
                             EmbeddableType embeddableAttribute = embeddables.get(embeddedFieldName);
-
-                            Attribute attrib = embeddableAttribute.getAttribute(embeddedColumnName);
+                            
+                            AbstractAttribute attrib = null;
+                            Iterator itr = embeddableAttribute.getAttributes().iterator();
+                            while (itr.hasNext())
+                            {
+                                attrib = (AbstractAttribute) itr.next();
+                                if (attrib.getJPAColumnName().equals(embeddedColumnName))
+                                {
+                                    break;
+                                }
+                            }
 
                             Object embeddedObject = PropertyAccessorHelper.getObject(entity, (Field) entityType
                                     .getAttribute(embeddedFieldName).getJavaMember());
