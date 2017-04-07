@@ -1421,7 +1421,12 @@ public abstract class CassandraDataHandlerBase
                     serializer.validate(field);
 
                     Object finalValue = serializer.deserialize(field);
-                    PropertyAccessorHelper.set(entity, fieldToSet, finalValue);
+                    if (type.getClass().getSimpleName().equals("UTF8Type")){
+                        PropertyAccessorHelper.set(entity, fieldToSet, ((String) finalValue).getBytes());
+                    }
+                    else{
+                        PropertyAccessorHelper.set(entity, fieldToSet, finalValue);
+                    }
                 }
 
             }

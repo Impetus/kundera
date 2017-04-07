@@ -250,7 +250,9 @@ public final class CassandraDataTranslator
      */
     public static CassandraType getCassandraDataTypeClass(Class clazz)
     {
-
+        if(clazz.isEnum()){
+            return CassandraType.STRING;
+        }
         return typeToClazz.get(clazz);
     }
 
