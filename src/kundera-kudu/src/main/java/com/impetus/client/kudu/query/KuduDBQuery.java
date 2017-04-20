@@ -69,6 +69,15 @@ import com.impetus.kundera.utils.KunderaCoreUtils;
 public class KuduDBQuery extends QueryImpl implements Query
 {
 
+    /** The Constant DOT_REGEX. */
+    private static final String DOT_REGEX = "[.]";
+
+    /** The Constant PARAMETERIZED_PREFIX. */
+    private static final String PARAMETERIZED_PREFIX = ":";
+
+    /** The Constant POSITIONAL_PREFIX. */
+    private static final String POSITIONAL_PREFIX = "?";
+
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(KuduDBQuery.class);
 
@@ -107,8 +116,8 @@ public class KuduDBQuery extends QueryImpl implements Query
 
         else
         {
-            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
-                    .getMetamodel(m.getPersistenceUnit());
+            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                    m.getPersistenceUnit());
             EntityType entityType = metaModel.entity(m.getEntityClazz());
 
             KuduClient kuduClient = ((KuduDBClient) client).getKuduClient();
@@ -186,7 +195,11 @@ public class KuduDBQuery extends QueryImpl implements Query
             String left = ((ComparisonExpression) whereExp).getLeftExpression().toActualText();
 
             String right = ((ComparisonExpression) whereExp).getRightExpression().toActualText();
-            Attribute attribute = entityType.getAttribute(left.split("[.]")[1]);
+            if (right.startsWith(POSITIONAL_PREFIX) || right.startsWith(PARAMETERIZED_PREFIX))
+            {
+                right = kunderaQuery.getParametersMap().get(right) + "";
+            }
+            Attribute attribute = entityType.getAttribute(left.split(DOT_REGEX)[1]);
             addColumnRangePredicateToBuilder((Field) attribute.getJavaMember(), scannerBuilder,
                     ((AbstractAttribute) attribute).getJPAColumnName(), right,
                     ((ComparisonExpression) whereExp).getActualIdentifier());
@@ -200,8 +213,8 @@ public class KuduDBQuery extends QueryImpl implements Query
         {
 
             ListIterator<Expression> inIter = ((InExpression) whereExp).getInItems().children().iterator();
-            Attribute attribute = entityType
-                    .getAttribute(((InExpression) whereExp).getExpression().toActualText().split("[.]")[1]);
+            Attribute attribute = entityType.getAttribute(((InExpression) whereExp).getExpression().toActualText()
+                    .split(DOT_REGEX)[1]);
             addInPredicateToBuilder(scannerBuilder, inIter, attribute);
         }
 
@@ -274,8 +287,8 @@ public class KuduDBQuery extends QueryImpl implements Query
             predicate = KuduDBDataHandler.getPredicate(column, KuduPredicate.ComparisonOp.LESS, type, valueObject);
             break;
         case "<=":
-            predicate = KuduDBDataHandler.getPredicate(column, KuduPredicate.ComparisonOp.LESS_EQUAL, type,
-                    valueObject);
+            predicate = KuduDBDataHandler
+                    .getPredicate(column, KuduPredicate.ComparisonOp.LESS_EQUAL, type, valueObject);
             break;
         case "=":
             predicate = KuduDBDataHandler.getPredicate(column, KuduPredicate.ComparisonOp.EQUAL, type, valueObject);

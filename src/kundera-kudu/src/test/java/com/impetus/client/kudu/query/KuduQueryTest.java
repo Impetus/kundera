@@ -107,6 +107,18 @@ public class KuduQueryTest
         results = query.getResultList();
         Assert.assertEquals(3, results.size());
         
+        query = em.createQuery("Select p.age, p.salary from Person p where p.age >= ?1 and p.age <= ?2");
+        query.setParameter(1, 20);
+        query.setParameter(2, 40);
+        results = query.getResultList();
+        Assert.assertEquals(3, results.size());
+        
+        query = em.createQuery("Select p.age, p.salary from Person p where p.age >= :age1 and p.age <= :age2");
+        query.setParameter("age1", 20);
+        query.setParameter("age2", 40);
+        results = query.getResultList();
+        Assert.assertEquals(3, results.size());
+        
         query = em.createQuery("Select p from Person p where p.personId in (101, 104)");
         results = query.getResultList();
         Assert.assertEquals(2, results.size());
