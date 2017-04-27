@@ -84,15 +84,17 @@ public final class NumericUtils
                 break;
 
             case BIGDECIMAL:
-                returnValue = new BigDecimal(value) == (BigDecimal.ZERO);
+                // Note: cannot use 'equals' here - it would require both BigDecimals to have
+                // the same scale.
+                returnValue = (new BigDecimal(value)).compareTo(BigDecimal.ZERO) == 0;
                 break;
 
             case BIGINTEGER:
-                returnValue = new BigInteger(value) == (BigInteger.ZERO);
+                returnValue = (new BigInteger(value)).equals(BigInteger.ZERO);
                 break;
             
             case SHORT:
-                returnValue = new Short(value) == (NumberUtils.SHORT_ZERO);
+                returnValue = (new Short(value)).shortValue() == NumberUtils.SHORT_ZERO.shortValue();
                 break;
             }
         }
