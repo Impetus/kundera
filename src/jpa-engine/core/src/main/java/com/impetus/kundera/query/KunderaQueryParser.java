@@ -375,7 +375,7 @@ public class KunderaQueryParser
             }
 
             // content cannot be empty
-            if (groupByClause == null && groupByClause.toActualText().length() == 0)
+            if (groupByClause == null || groupByClause.toActualText().length() == 0)
             {
                 throw new JPQLParseException("keyword without value: GROUP BY");
             }
@@ -396,7 +396,7 @@ public class KunderaQueryParser
             }
 
             // content cannot be empty
-            if (havingClause == null && havingClause.toActualText().length() == 0)
+            if (havingClause == null || havingClause.toActualText().length() == 0)
             {
                 throw new JPQLParseException("keyword without value: HAVING");
             }
