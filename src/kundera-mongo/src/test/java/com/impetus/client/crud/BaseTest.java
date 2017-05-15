@@ -298,7 +298,7 @@ public abstract class BaseTest
         results = q.getResultList();
         Assert.assertEquals(0, results.size());
         
-        q = em.createQuery("Select p from " + clazz + " p where p." + fieldName + " like :name");
+        q = em.createQuery("Select p from " + clazz + " p where UPPER(p." + fieldName + ") like :name");
         q.setParameter("name", "MC.JOHN DOE");
         results = q.getResultList();
         Assert.assertEquals(1, results.size());
@@ -334,7 +334,7 @@ public abstract class BaseTest
         results = q.getResultList();
         Assert.assertEquals(0, results.size());
         
-        q = em.createQuery("Select p from " + clazz + " p where p." + fieldName + " like :name");
+        q = em.createQuery("Select p from " + clazz + " p where UPPER(p." + fieldName + ") like :name");
         q.setParameter("name", "MC_%");
         results = q.getResultList();
         Assert.assertEquals(1, results.size());

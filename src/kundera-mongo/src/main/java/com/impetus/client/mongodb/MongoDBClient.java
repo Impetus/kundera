@@ -19,10 +19,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 
 import org.apache.commons.lang.NotImplementedException;
@@ -49,6 +52,7 @@ import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.annotation.DefaultEntityAnnotationProcessor;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
@@ -58,6 +62,7 @@ import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.utils.KunderaCoreUtils;
+import com.mongodb.AggregationOutput;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.BulkWriteException;
@@ -298,7 +303,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
     /**
      * Find.
-     * 
+     *
      * @param entityClass
      *            the entity class
      * @param key
@@ -393,7 +398,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
     /**
      * Find GFS entity.
-     * 
+     *
      * @param entityMetadata
      *            the entity metadata
      * @param entityClass
@@ -411,7 +416,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
     /**
      * Find GRIDFSDBFile.
-     * 
+     *
      * @param entityMetadata
      *            the entity metadata
      * @param key
@@ -428,7 +433,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
     /**
      * Instantiate entity.
-     * 
+     *
      * @param entityClass
      *            the entity class
      * @param entity
@@ -473,6 +478,184 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             populateEntity(entityMetadata, entities, fetchedDocument);
         }
         return entities;
+    }
+
+    public <E> List<E> aggregate(EntityMetadata entityMetadata, BasicDBObject mongoQuery, BasicDBList lookup,
+                                 BasicDBObject aggregation, BasicDBObject orderBy, int maxResult) throws Exception
+    {
+        String collectionName = entityMetadata.getTableName();
+
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+              entityMetadata.getPersistenceUnit());
+        AbstractManagedType managedType = (AbstractManagedType) metaModel.entity(entityMetadata.getEntityClazz());
+        boolean hasLob = managedType.hasLobAttribute();
+
+        List<DBObject> pipeline = new LinkedList<DBObject>();
+        addLookupAndMatchToPipeline(lookup, mongoQuery, pipeline);
+        if (aggregation != null)
+        {
+            pipeline.add(new BasicDBObject("$group", aggregation));
+        }
+        if (orderBy != null && aggregation != null)
+        {
+            addSortToPipeline(orderBy, aggregation, hasLob, pipeline);
+        }
+        if (maxResult > 0)
+        {
+            pipeline.add(new BasicDBObject("$limit", maxResult));
+        }
+
+        Iterable<DBObject> aggregationResults;
+
+        if (hasLob)
+        {
+            KunderaGridFS gridFS = new KunderaGridFS(mongoDb, collectionName);
+            AggregationOutput output = gridFS.aggregate(pipeline);
+            aggregationResults = output.results();
+        }
+        else
+        {
+            AggregationOutput output = mongoDb.getCollection(collectionName).aggregate(pipeline);
+            aggregationResults = output.results();
+        }
+
+        return (List<E>) extractAggregationValues(aggregationResults, aggregation);
+    }
+
+    private void addLookupAndMatchToPipeline(BasicDBList lookup, BasicDBObject mongoQuery, List<DBObject> pipeline)
+    {
+        BasicDBObject matchBeforeLookup = new BasicDBObject();
+        BasicDBObject matchAfterLookup = new BasicDBObject();
+
+        for (String key : mongoQuery.keySet())
+        {
+            if (key.contains("."))
+            {
+                matchAfterLookup.append(key, mongoQuery.get(key));
+            }
+            else
+            {
+                matchBeforeLookup.append(key, mongoQuery.get(key));
+            }
+        }
+
+        if (matchBeforeLookup.size() > 0)
+        {
+            pipeline.add(new BasicDBObject("$match", matchBeforeLookup));
+        }
+        for (Object lookupItem : lookup)
+        {
+            pipeline.add((DBObject) lookupItem);
+        }
+        if (matchAfterLookup.size() > 0)
+        {
+            pipeline.add(new BasicDBObject("$match", matchAfterLookup));
+        }
+    }
+
+    private void addSortToPipeline(BasicDBObject orderBy, BasicDBObject aggregation, boolean hasLob, List<DBObject> pipeline)
+    {
+        BasicDBObject actual = new BasicDBObject();
+        for (String key : orderBy.keySet())
+        {
+            if (aggregation.containsField(key))
+            {
+                actual.put(key, orderBy.get(key));
+            }
+            else if (aggregation.containsField("_id"))
+            {
+                if (((BasicDBObject) aggregation.get("_id")).containsField(key))
+                {
+                    actual.put("_id", orderBy.get(key));
+                }
+                else if (hasLob && key.startsWith("metadata."))
+                {
+                    // check the key without the "metadata." prefix for GridFS
+                    if (((BasicDBObject) aggregation.get("_id")).containsField(key.substring(9)))
+                    {
+                        actual.put("_id", orderBy.get(key));
+                    }
+                }
+            }
+        }
+
+        if (actual.size() > 0)
+        {
+            pipeline.add(new BasicDBObject("$sort", actual));
+        }
+    }
+
+    private List extractAggregationValues(Iterable<DBObject> documents, BasicDBObject aggregation)
+    {
+        List results = new LinkedList();
+
+        if (aggregation != null)
+        {
+            if (aggregation.containsField("_id") && aggregation.get("_id") == null)
+            {
+                aggregation.removeField("_id");
+            }
+        }
+
+        for (DBObject document : documents)
+        {
+            if (document.containsField("_id") && document.get("_id") == null)
+            {
+                document.removeField("_id");
+            }
+
+            extractAggregationValues(document, results, aggregation != null ? aggregation : (BasicDBObject) document);
+        }
+
+        return results;
+    }
+
+    private void extractAggregationValues(DBObject document, List results, DBObject keyMap)
+    {
+        if (document.keySet().size() == 1)
+        {
+            String key = document.keySet().iterator().next();
+            Object value = document.get(key);
+
+            // special case for count
+            if (key.equals("count"))
+            {
+                value = Long.parseLong(value.toString());
+            }
+
+            if (value instanceof DBObject)
+            {
+                extractAggregationValues((DBObject) value, results, (DBObject) keyMap.get(key));
+            }
+            else
+            {
+                results.add(value);
+            }
+        }
+        else if (document.keySet().size() > 1)
+        {
+            List<Object> values = new ArrayList<Object>(document.keySet().size());
+            for (String key : keyMap.keySet())
+            {
+                Object value = document.get(key);
+
+                // special case for count
+                if (key.equals("count"))
+                {
+                    value = Long.parseLong(value.toString());
+                }
+
+                if (value instanceof DBObject)
+                {
+                    extractAggregationValues((DBObject) value, values, (DBObject) keyMap.get(key));
+                }
+                else
+                {
+                    values.add(value);
+                }
+            }
+            results.add(values.toArray());
+        }
     }
 
     /**
@@ -1458,7 +1641,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         {
             entities = executeNativeQuery(jsonClause, entityMetadata);
             List result = new ArrayList();
-            if (entities.get(0) instanceof EnhanceEntity)
+            if (entities.size() > 0 && (entities.get(0) instanceof EnhanceEntity))
             {
                 for (Object obj : entities)
                 {

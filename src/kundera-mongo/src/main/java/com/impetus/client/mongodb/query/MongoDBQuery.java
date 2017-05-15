@@ -16,23 +16,31 @@
 package com.impetus.client.mongodb.query;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.StringTokenizer;
+import java.util.regex.Pattern;
 
 import javax.persistence.Query;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.Metamodel;
+import javax.persistence.metamodel.SingularAttribute;
 
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.persistence.jpa.jpql.parser.AggregateFunction;
+import org.eclipse.persistence.jpa.jpql.parser.CollectionExpression;
 import org.eclipse.persistence.jpa.jpql.parser.CountFunction;
 import org.eclipse.persistence.jpa.jpql.parser.Expression;
 import org.eclipse.persistence.jpa.jpql.parser.SelectClause;
+import org.eclipse.persistence.jpa.jpql.parser.StateFieldPathExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +57,9 @@ import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+import com.impetus.kundera.metadata.model.attributes.DefaultSingularAttribute;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
@@ -63,6 +73,8 @@ import com.impetus.kundera.query.KunderaQuery.SortOrdering;
 import com.impetus.kundera.query.KunderaQuery.UpdateClause;
 import com.impetus.kundera.query.QueryHandlerException;
 import com.impetus.kundera.query.QueryImpl;
+import com.mongodb.DBObject;
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 
 /**
@@ -140,8 +152,6 @@ public class MongoDBQuery extends QueryImpl
     {
         ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
 
-        List<Object> result = new ArrayList<Object>();
-
         try
         {
             String query = appMetadata.getQuery(getJPAQuery());
@@ -155,11 +165,24 @@ public class MongoDBQuery extends QueryImpl
 
             if (MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
             {
-                BasicDBObject orderByClause = getOrderByClause(m);
-                return ((MongoDBClient) client).loadData(m,
-                        createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()), null, orderByClause,
-                        isSingleResult ? 1 : maxResult, firstResult, isCountQuery(),
-                        getKeys(m, getKunderaQuery().getResult()), getKunderaQuery().getResult());
+                if (kunderaQuery.isAggregated())
+                {
+                    return ((MongoDBClient) client).aggregate(m,
+                          createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()),
+                          createAggregationLookup(m),
+                          createAggregation(m),
+                          getAggregationOrderByClause(m),
+                          isSingleResult ? 1 : maxResult
+                    );
+                }
+                else
+                {
+                    BasicDBObject orderByClause = getOrderByClause(m);
+                    return ((MongoDBClient) client).loadData(m,
+                          createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()), null, orderByClause,
+                          isSingleResult ? 1 : maxResult, firstResult, isCountQuery(),
+                          getKeys(m, getKunderaQuery().getResult()), getKunderaQuery().getResult());
+                }
             }
             else
             {
@@ -227,13 +250,27 @@ public class MongoDBQuery extends QueryImpl
                 return ((MongoDBClient) client).executeQuery(query == null ? getJPAQuery() : query, m);
 
             }
+
             if (MetadataUtils.useSecondryIndex(((ClientBase) client).getClientMetadata()))
             {
-                BasicDBObject orderByClause = getOrderByClause(m);
-                ls = ((MongoDBClient) client).loadData(m,
-                        createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()), m.getRelationNames(),
-                        orderByClause, isSingleResult ? 1 : maxResult, firstResult, isCountQuery(),
-                        getKeys(m, getKunderaQuery().getResult()), getKunderaQuery().getResult());
+                if (kunderaQuery.isAggregated())
+                {
+                    return ((MongoDBClient) client).aggregate(m,
+                          createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()),
+                          createAggregationLookup(m),
+                          createAggregation(m),
+                          getAggregationOrderByClause(m),
+                          isSingleResult ? 1 : maxResult
+                    );
+                }
+                else
+                {
+                    BasicDBObject orderByClause = getOrderByClause(m);
+                    ls = ((MongoDBClient) client).loadData(m,
+                          createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()), m.getRelationNames(),
+                          orderByClause, isSingleResult ? 1 : maxResult, firstResult, isCountQuery(),
+                          getKeys(m, getKunderaQuery().getResult()), getKunderaQuery().getResult());
+                }
             }
             else
             {
@@ -326,7 +363,9 @@ public class MongoDBQuery extends QueryImpl
         if (sq.clauses.size() > 0 || hasChildren)
         {
             if (sq.clauses.size() > 0)
+            {
                 sq.actualQuery = createSubMongoQuery(m, sq.clauses);
+            }
             if (hasChildren)
             {
                 List<BasicDBObject> childQs = new ArrayList<BasicDBObject>();
@@ -336,7 +375,11 @@ public class MongoDBQuery extends QueryImpl
                 {
                     childQs.add(subQ.actualQuery);
                 }
-                if (sq.isAnd)
+                if (childQs.size() == 1)
+                {
+                    sq.actualQuery = childQs.get(0);
+                }
+                else if (sq.isAnd)
                 {
                     BasicDBObject dbo = new BasicDBObject("$and", childQs);
                     sq.actualQuery = dbo;
@@ -348,7 +391,6 @@ public class MongoDBQuery extends QueryImpl
                 }
             }
         }
-        return;
     }
 
     /**
@@ -443,7 +485,17 @@ public class MongoDBQuery extends QueryImpl
                 FilterClause filter = (FilterClause) object;
                 String property = filter.getProperty();
                 String condition = filter.getCondition();
-                Object value = filter.getValue().get(0);
+                boolean ignoreCase = filter.isIgnoreCase();
+
+                Object value;
+                if (filter.getValue().size() == 1)
+                {
+                    value = filter.getValue().get(0);
+                }
+                else
+                {
+                    value = filter.getValue();
+                }
 
                 // value is string but field.getType is different, then get
                 // value using
@@ -460,13 +512,16 @@ public class MongoDBQuery extends QueryImpl
 
                     f = (Field) entity.getAttribute(fieldName).getJavaMember();
 
-                    if (value.getClass().isAssignableFrom(String.class) && f != null
-                            && !f.getType().equals(value.getClass()))
+                    if (value != null)
                     {
-                        value = PropertyAccessorFactory.getPropertyAccessor(f).fromString(f.getType().getClass(),
-                                value.toString());
+                        if (value.getClass().isAssignableFrom(String.class) && f != null
+                              && !f.getType().equals(value.getClass()))
+                        {
+                            value = PropertyAccessorFactory.getPropertyAccessor(f).fromString(f.getType().getClass(),
+                                  value.toString());
+                        }
+                        value = MongoDBUtils.populateValue(value, value.getClass());
                     }
-                    value = MongoDBUtils.populateValue(value, value.getClass());
 
                     property = "metadata." + property;
                 }
@@ -474,15 +529,18 @@ public class MongoDBQuery extends QueryImpl
                 {
                     if (((AbstractAttribute) m.getIdAttribute()).getJPAColumnName().equalsIgnoreCase(property))
                     {
-                        property = "_id";
-                        f = (Field) m.getIdAttribute().getJavaMember();
-                        if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType())
-                                && value.getClass().isAssignableFrom(f.getType()))
+                        if (value != null)
                         {
-                            EmbeddableType compoundKey = metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
-                            compositeColumns = MongoDBUtils.getCompoundKeyColumns(m, value, compoundKey);
-                            isCompositeColumn = true;
-                            continue;
+                            property = "_id";
+                            f = (Field) m.getIdAttribute().getJavaMember();
+                            if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType())
+                                  && value.getClass().isAssignableFrom(f.getType()))
+                            {
+                                EmbeddableType compoundKey = metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
+                                compositeColumns = MongoDBUtils.getCompoundKeyColumns(m, value, compoundKey);
+                                isCompositeColumn = true;
+                                continue;
+                            }
                         }
                     }
                     else if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType())
@@ -502,13 +560,36 @@ public class MongoDBQuery extends QueryImpl
                         String embeddedAttributeAsStr = tokenizer.nextToken();
                         String embeddableAttributeAsStr = tokenizer.nextToken();
                         Attribute embeddedAttribute = entity.getAttribute(embeddedAttributeAsStr);
-                        EmbeddableType embeddableEntity = metaModel.embeddable(((AbstractAttribute) embeddedAttribute)
-                                .getBindableJavaType());
-                        f = (Field) embeddableEntity.getAttribute(embeddableAttributeAsStr).getJavaMember();
-                        property = ((AbstractAttribute) embeddedAttribute).getJPAColumnName()
-                                + "."
-                                + ((AbstractAttribute) embeddableEntity.getAttribute(embeddableAttributeAsStr))
-                                        .getJPAColumnName();
+
+                        if (embeddedAttribute.isAssociation())
+                        {
+                            Relation relation = m.getRelation(embeddedAttributeAsStr);
+                            f = relation.getProperty();
+
+                            AbstractAttribute targetAttribute = (AbstractAttribute) metaModel
+                                  .entity(relation.getTargetEntity()).getAttribute(embeddableAttributeAsStr);
+                            String targetColumnName = targetAttribute.getJPAColumnName();
+
+                            if (targetAttribute instanceof DefaultSingularAttribute &&
+                                  ((DefaultSingularAttribute) targetAttribute).isId())
+                            {
+                                property = relation.getJoinColumnName(kunderaMetadata);
+                            }
+                            else
+                            {
+                                property = embeddedAttributeAsStr + "." + targetColumnName;
+                            }
+                        }
+                        else
+                        {
+                            EmbeddableType embeddableEntity = metaModel.embeddable(((AbstractAttribute) embeddedAttribute)
+                                  .getBindableJavaType());
+                            f = (Field) embeddableEntity.getAttribute(embeddableAttributeAsStr).getJavaMember();
+                            property = ((AbstractAttribute) embeddedAttribute).getJPAColumnName()
+                                  + "."
+                                  + ((AbstractAttribute) embeddableEntity.getAttribute(embeddableAttributeAsStr))
+                                  .getJPAColumnName();
+                        }
                     }
                     else
                     {
@@ -521,13 +602,17 @@ public class MongoDBQuery extends QueryImpl
                             f = (Field) entity.getAttribute(fieldName).getJavaMember();
                         }
                     }
-                    if (value.getClass().isAssignableFrom(String.class) && f != null
-                            && !f.getType().equals(value.getClass()))
+
+                    if (value != null)
                     {
-                        value = PropertyAccessorFactory.getPropertyAccessor(f).fromString(f.getType().getClass(),
-                                value.toString());
+                        if (value.getClass().isAssignableFrom(String.class) && f != null
+                                && !f.getType().equals(value.getClass()))
+                        {
+                            value = PropertyAccessorFactory.getPropertyAccessor(f).fromString(f.getType().getClass(),
+                                    value.toString());
+                        }
+                        value = MongoDBUtils.populateValue(value, value.getClass());
                     }
-                    value = MongoDBUtils.populateValue(value, value.getClass());
 
                 }
 
@@ -555,122 +640,130 @@ public class MongoDBQuery extends QueryImpl
 
                         property = new StringBuffer("_id.").append(attribute.getJPAColumnName()).toString();
                     }
-                    if (condition.equals("="))
-                    {
-                        query.append(property, value);
 
+                    if (ignoreCase)
+                    {
+                        // let 'like' and 'not like' take care of this on its own
+                        if (!condition.equalsIgnoreCase("like") && !condition.equalsIgnoreCase("not like")) {
+
+                            if (value instanceof String)
+                            {
+                                value = Pattern.compile(createLikeRegex((String) value, ignoreCase));
+
+                            }
+                            else if (value instanceof Collection)
+                            {
+                                Collection<?> original = (Collection<?>) value;
+                                List<Pattern> values = new ArrayList<Pattern>(original.size());
+
+                                for (Object item : original)
+                                {
+                                    values.add(Pattern.compile(createLikeRegex((String) item, ignoreCase)));
+                                }
+
+                                value = values;
+
+                            }
+                        }
                     }
-                    else if (condition.equalsIgnoreCase("like"))
+
+                    if (condition.equals("="))
                     {
 
                         if (query.containsField(property))
                         {
-                            query.get(property);
-                            query.put(property, ((BasicDBObject) query.get(property)).append("$regex",
-                                    createLikeRegex((String) value)));
+                            appendToQuery(query, property, "$eq", value);
                         }
                         else
                         {
-                            query.append(property, new BasicDBObject("$regex", createLikeRegex((String) value)));
+                            query.append(property, value);
                         }
+
+                    }
+                    else if (condition.equalsIgnoreCase("is null"))
+                    {
+                        if (query.containsField(property))
+                        {
+                            appendToQuery(query, property, "$eq", null);
+                        }
+                        else
+                        {
+                            query.append(property, null);
+                        }
+                    }
+                    else if (condition.toLowerCase().contains("like"))
+                    {
+
+                        Pattern regEx = Pattern.compile(createLikeRegex((String) value, ignoreCase));
+                        boolean negative = condition.toLowerCase().contains("not");
+
+                        appendToQuery(query, property, negative ? "$not" : "$regex", regEx);
 
                     }
                     else if (condition.equalsIgnoreCase(">"))
                     {
 
-                        if (query.containsField(property))
-                        {
-                            query.get(property);
-                            query.put(property, ((BasicDBObject) query.get(property)).append("$gt", value));
-                        }
-                        else
-                        {
-                            query.append(property, new BasicDBObject("$gt", value));
-                        }
+                        appendToQuery(query, property, "$gt", value);
+
                     }
                     else if (condition.equalsIgnoreCase(">="))
                     {
 
-                        if (query.containsField(property))
-
-                        {
-                            query.get(property);
-                            query.put(property, ((BasicDBObject) query.get(property)).append("$gte", value));
-                        }
-                        else
-                        {
-                            query.append(property, new BasicDBObject("$gte", value));
-                        }
+                        appendToQuery(query, property, "$gte", value);
 
                     }
                     else if (condition.equalsIgnoreCase("<"))
                     {
 
-                        if (query.containsField(property))
-                        {
-                            query.get(property);
-                            query.put(property, ((BasicDBObject) query.get(property)).append("$lt", value));
-                        }
-                        else
-                        {
-                            query.append(property, new BasicDBObject("$lt", value));
-                        }
+                        appendToQuery(query, property, "$lt", value);
 
                     }
                     else if (condition.equalsIgnoreCase("<="))
                     {
 
-                        if (query.containsField(property))
-                        {
-                            query.get(property);
-                            query.put(property, ((BasicDBObject) query.get(property)).append("$lte", value));
-                        }
-                        else
-                        {
-                            query.append(property, new BasicDBObject("$lte", value));
-                        }
+                        appendToQuery(query, property, "$lte", value);
 
                     }
                     else if (condition.equalsIgnoreCase("in"))
                     {
 
-                        if (query.containsField(property))
+                        if (value != null)
                         {
-                            query.get(property);
-                            query.put(property, ((BasicDBObject) query.get(property)).append("$in", filter.getValue()));
+                            if (!value.getClass().isArray() && !(value instanceof Collection))
+                            {
+                                value = Collections.singletonList(value);
+                            }
                         }
-                        else
-                        {
-                            query.append(property, new BasicDBObject("$in", filter.getValue()));
-                        }
+
+                        appendToQuery(query, property, "$in", value);
 
                     }
                     else if (condition.equalsIgnoreCase("not in"))
                     {
 
-                        if (query.containsField(property))
+                        if (value != null)
                         {
-                            query.get(property);
-                            query.put(property, ((BasicDBObject) query.get(property)).append("$nin", filter.getValue()));
+                            if (!value.getClass().isArray() && !(value instanceof Collection))
+                            {
+                                value = Collections.singletonList(value);
+                            }
                         }
-                        else
-                        {
-                            query.append(property, new BasicDBObject("$nin", filter.getValue()));
-                        }
+
+                        appendToQuery(query, property, "$nin", value);
 
                     }
                     else if (condition.equalsIgnoreCase("<>"))
                     {
 
-                        if (query.containsField(property))
-                        {
-                            query.get(property);
-                            query.put(property, ((BasicDBObject) query.get(property)).append("$ne", value));
-                        }
-                        else
-                        {
-                            query.append(property, new BasicDBObject("$ne", value));
-                        }
+                        String operator = value instanceof Pattern ? "$not" : "$ne";
+
+                        appendToQuery(query, property, operator, value);
+
+                    }
+                    else if (condition.equalsIgnoreCase("is not null"))
+                    {
+
+                        appendToQuery(query, property, "$not", null);
 
                     }
                 }
@@ -685,6 +778,24 @@ public class MongoDBQuery extends QueryImpl
         }
 
         return query;
+    }
+
+    private void appendToQuery(BasicDBObject query, String property, String operator, Object value) {
+        if (query.containsField(property))
+        {
+            Object existing = query.get(property);
+
+            if (!(existing instanceof BasicDBObject))
+            {
+                query.put(property, new BasicDBObject("$eq", existing));
+            }
+
+            query.put(property, ((BasicDBObject) query.get(property)).append(operator, value));
+        }
+        else
+        {
+            query.append(property, new BasicDBObject(operator, value));
+        }
     }
 
     /**
@@ -718,6 +829,198 @@ public class MongoDBQuery extends QueryImpl
             }
         }
         return keys;
+    }
+
+    private BasicDBList createAggregationLookup(EntityMetadata metadata)
+    {
+        BasicDBList lookup = new BasicDBList();
+
+        MetamodelImpl metaModel = (MetamodelImpl)
+              kunderaMetadata.getApplicationMetadata().getMetamodel(metadata.getPersistenceUnit());
+
+        for (Relation relation : metadata.getRelations())
+        {
+            EntityType entityType = metaModel.entity(metadata.getEntityClazz());
+
+            AbstractAttribute attribute = (AbstractAttribute) entityType.getAttribute(relation.getProperty().getName());
+            boolean optional = false;
+            if (attribute instanceof SingularAttribute)
+            {
+                optional = ((SingularAttribute) attribute).isOptional();
+            }
+
+            EntityMetadata associatedMetadata = metaModel.getEntityMetadata(relation.getTargetEntity());
+            EntityType associatedEntityType = metaModel.entity(associatedMetadata.getEntityClazz());
+
+            String joinColumn = relation.getJoinColumnName(kunderaMetadata);
+            String localField = metadata.getFieldName(joinColumn);
+            String foreignField = associatedMetadata.getFieldName(joinColumn);
+            Attribute localAttribute = entityType.getAttribute(localField);
+
+            if (foreignField != null)
+            {
+                Attribute foreignAttribute = associatedEntityType.getAttribute(foreignField);
+                foreignField = getActualColumnName(foreignAttribute);
+            }
+            else
+            {
+                foreignField = "_id";
+            }
+
+            BasicDBObject item = new BasicDBObject();
+            item.put("from", associatedMetadata.getTableName());
+            item.put("localField", getActualColumnName(localAttribute));
+            item.put("foreignField", foreignField);
+            item.put("as", attribute.getName());
+            lookup.add(new BasicDBObject("$lookup", item));
+
+            if (Arrays.asList(Relation.ForeignKey.ONE_TO_ONE, Relation.ForeignKey.MANY_TO_ONE).contains(relation.getType()))
+            {
+                BasicDBObject unwind = new BasicDBObject();
+                unwind.append("path", "$" + attribute.getName());
+                unwind.append("preserveNullAndEmptyArrays", optional);
+                lookup.add(new BasicDBObject("$unwind", unwind));
+            }
+        }
+
+        return lookup;
+    }
+
+    private String getActualColumnName(Attribute attribute)
+    {
+        if (attribute instanceof DefaultSingularAttribute)
+        {
+            DefaultSingularAttribute dsAttribute = (DefaultSingularAttribute) attribute;
+
+            if (dsAttribute.isId())
+            {
+                return "_id";
+            }
+            else
+            {
+                return dsAttribute.getJPAColumnName();
+            }
+        }
+        else if (attribute instanceof AbstractAttribute)
+        {
+            return ((AbstractAttribute) attribute).getJPAColumnName();
+        }
+        else
+        {
+            return attribute.getName();
+        }
+    }
+
+    /**
+     * Get the aggregation object.
+     *
+     * @param metadata
+     * @return
+     */
+    private BasicDBObject createAggregation(EntityMetadata metadata)
+    {
+        if (kunderaQuery.getSelectStatement() != null)
+        {
+            Metamodel metaModel = kunderaMetadata.getApplicationMetadata().getMetamodel(metadata.getPersistenceUnit());
+            EntityType entityType = metaModel.entity(metadata.getEntityClazz());
+            AbstractManagedType managedType = (AbstractManagedType) metaModel.entity(metadata.getEntityClazz());
+            boolean hasLob = managedType.hasLobAttribute();
+
+            BasicDBObject aggregation = new BasicDBObject();
+
+            SelectClause selectClause = (SelectClause) kunderaQuery.getSelectStatement().getSelectClause();
+            Expression expression = selectClause.getSelectExpression();
+
+            buildAggregation(aggregation, expression, metadata, entityType, hasLob);
+
+            if (aggregation.size() == 0)
+            {
+                return null;
+            }
+
+            if (!aggregation.containsField("_id"))
+            {
+                aggregation.put("_id", null);
+            }
+
+            return aggregation;
+        }
+
+        return null;
+    }
+
+    /**
+     * Build the aggregation parameters.
+     *
+     * @param group
+     * @param expression
+     * @param metadata
+     * @param entityType
+     */
+    private void buildAggregation(DBObject group, Expression expression,
+                                  EntityMetadata metadata, EntityType entityType, boolean hasLob)
+    {
+        if (expression instanceof AggregateFunction)
+        {
+            AggregateFunction aggregateFunction = (AggregateFunction) expression;
+            String identifier = aggregateFunction.getIdentifier().toLowerCase();
+
+            Expression child = aggregateFunction.getExpression();
+
+            if (child instanceof StateFieldPathExpression)
+            {
+                StateFieldPathExpression sfpExp = (StateFieldPathExpression) child;
+                String columnName = getColumnName(metadata, entityType, sfpExp.toActualText());
+                String actualColumnName = columnName;
+                if (hasLob)
+                {
+                    actualColumnName = "metadata." + columnName;
+                }
+                else if (metadata.getIdAttribute().equals(entityType.getAttribute(columnName)))
+                {
+                    actualColumnName = "_id";
+                }
+
+                BasicDBObject item = new BasicDBObject("$" + identifier, "$" + actualColumnName);
+                group.put(identifier + "_" + columnName, item);
+            }
+            else if (expression instanceof CountFunction)
+            {
+                group.put("count", new BasicDBObject("$sum", 1));
+            }
+        }
+        else if (expression instanceof CollectionExpression)
+        {
+            for (Expression child : expression.children())
+            {
+                buildAggregation(group, child, metadata, entityType, hasLob);
+            }
+        }
+        else if (expression instanceof StateFieldPathExpression)
+        {
+            StateFieldPathExpression sfpExp = (StateFieldPathExpression) expression;
+
+            BasicDBObject idObject;
+            Object existing = group.get("_id");
+            if (existing != null)
+            {
+                idObject = (BasicDBObject) existing;
+            }
+            else
+            {
+                idObject = new BasicDBObject();
+                group.put("_id", idObject);
+            }
+
+            String columnName = getColumnName(metadata, entityType, sfpExp.toActualText());
+            String actualColumnName = columnName;
+            if (hasLob)
+            {
+                actualColumnName = "metadata." + columnName;
+            }
+
+            idObject.put(columnName, "$" + actualColumnName);
+        }
     }
 
     /**
@@ -754,6 +1057,49 @@ public class MongoDBQuery extends QueryImpl
                 {
                     orderByClause.append("metadata." + getColumnName(metadata, entityType, order.getColumnName()),
                             order.getOrder().equals(SortOrder.ASC) ? 1 : -1);
+                }
+            }
+        }
+
+        return orderByClause;
+    }
+
+    private BasicDBObject getAggregationOrderByClause(final EntityMetadata metadata)
+    {
+        BasicDBObject orderByClause = null;
+        Metamodel metaModel = kunderaMetadata.getApplicationMetadata().getMetamodel(metadata.getPersistenceUnit());
+        EntityType entityType = metaModel.entity(metadata.getEntityClazz());
+
+        AbstractManagedType managedType = (AbstractManagedType) metaModel.entity(metadata.getEntityClazz());
+
+        List<SortOrdering> orders = kunderaQuery.getOrdering();
+        if (orders != null)
+        {
+            orderByClause = new BasicDBObject();
+
+            for (SortOrdering order : orders)
+            {
+                if (order.getColumnName().contains("("))
+                {
+                    String function = order.getColumnName().replaceFirst("\\s*(.*?)\\s*\\(.*", "$1");
+                    String property = order.getColumnName().replaceFirst(".*?\\(\\s*(.*)\\s*\\).*", "$1");
+                    String columnName = getColumnName(metadata, entityType, property);
+
+                    orderByClause.append(function.toLowerCase() + "_" + columnName,
+                          order.getOrder().equals(SortOrder.ASC) ? 1 : -1);
+                }
+                else
+                {
+                    if (!managedType.hasLobAttribute())
+                    {
+                        orderByClause.append(getColumnName(metadata, entityType, order.getColumnName()),
+                              order.getOrder().equals(SortOrder.ASC) ? 1 : -1);
+                    }
+                    else
+                    {
+                        orderByClause.append("metadata." + getColumnName(metadata, entityType, order.getColumnName()),
+                              order.getOrder().equals(SortOrder.ASC) ? 1 : -1);
+                    }
                 }
             }
         }
@@ -929,11 +1275,13 @@ public class MongoDBQuery extends QueryImpl
      * 
      * @param expr
      *            the expr
+     * @param ignoreCase
+     *            whether to ignore the case
      * @return the string
      */
-    public static String createLikeRegex(String expr)
+    public static String createLikeRegex(String expr, boolean ignoreCase)
     {
-        String regex = createRegex(expr);
+        String regex = createRegex(expr, ignoreCase);
         regex = regex.replace("_", ".").replace("%", ".*?");
 
         return regex;
@@ -944,9 +1292,11 @@ public class MongoDBQuery extends QueryImpl
      * 
      * @param value
      *            the value
+     * @param ignoreCase
+     *            whether to ignore the case
      * @return the string
      */
-    public static String createRegex(String value)
+    public static String createRegex(String value, boolean ignoreCase)
     {
         if (value == null)
         {
@@ -960,7 +1310,13 @@ public class MongoDBQuery extends QueryImpl
         }
 
         StringBuilder sb = new StringBuilder(len * 2);
-        sb.append("(?i)^");
+
+        if (ignoreCase) {
+            sb.append("(?i)");
+        }
+
+        sb.append("^");
+
         for (int i = 0; i < len; i++)
         {
             char c = value.charAt(i);

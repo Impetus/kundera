@@ -16,6 +16,7 @@
 package com.impetus.kundera.query;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -657,6 +658,52 @@ public class KunderaQueryTest
         Assert.assertEquals(1, kunderaQuery.getOrdering().size());
         Assert.assertEquals("p.salary", kunderaQuery.getOrdering().get(0).getColumnName());
         Assert.assertEquals(KunderaQuery.SortOrder.DESC, kunderaQuery.getOrdering().get(0).getOrder());
+    }
+
+    @Test
+    public void testComplexQuery()
+    {
+        String query =
+              "SELECT p FROM Person p " +
+                    "WHERE (p.age > :maxAge OR p.age < :minAge) " +
+                    "AND UPPER(p.personName) LIKE '%TEST%' " +
+                    "ORDER BY p.personId ASC";
+
+        KunderaQuery kunderaQuery = new KunderaQuery(query, kunderaMetadata);
+        KunderaQueryParser queryParser = new KunderaQueryParser(kunderaQuery);
+        queryParser.parse();
+        kunderaQuery.postParsingInit();
+        Assert.assertNotNull(kunderaQuery.getEntityClass());
+        Assert.assertEquals(Person.class, kunderaQuery.getEntityClass());
+        Assert.assertNotNull(kunderaQuery.getEntityMetadata());
+        Assert.assertTrue(KunderaMetadataManager.getEntityMetadata(kunderaMetadata, Person.class).equals(
+              kunderaQuery.getEntityMetadata()));
+        Assert.assertNotNull(kunderaQuery.getFilter());
+        Assert.assertFalse(kunderaQuery.getFilterClauseQueue().isEmpty());
+        Assert.assertNotNull(kunderaQuery.getFrom());
+        Assert.assertTrue(kunderaQuery.getUpdateClauseQueue().isEmpty());
+        Assert.assertNotNull(kunderaQuery.getResult());
+        Assert.assertEquals(PU, kunderaQuery.getPersistenceUnit());
+        Assert.assertNotNull(kunderaQuery.getOrdering());
+        Assert.assertEquals(1, kunderaQuery.getOrdering().size());
+        Assert.assertEquals("p.personId", kunderaQuery.getOrdering().get(0).getColumnName());
+        Assert.assertEquals(KunderaQuery.SortOrder.ASC, kunderaQuery.getOrdering().get(0).getOrder());
+
+        List<String> expectedConditions = Arrays.asList(">", "<", "LIKE");
+        List<Boolean> expectedIgnoreCaseSettings = Arrays.asList(false, false, true);
+
+        int index = 0;
+
+        for (Object filterObject : kunderaQuery.getFilterClauseQueue()) {
+            if (filterObject instanceof FilterClause) {
+                FilterClause clause = (FilterClause) filterObject;
+
+                Assert.assertEquals(expectedConditions.get(index), clause.getCondition());
+                Assert.assertEquals(expectedIgnoreCaseSettings.get(index), clause.isIgnoreCase());
+
+                index++;
+            }
+        }
     }
 
     /**
