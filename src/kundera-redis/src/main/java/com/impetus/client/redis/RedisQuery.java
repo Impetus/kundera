@@ -161,6 +161,13 @@ public class RedisQuery extends QueryImpl
          */
         for (Object clause : clauseQueue)
         {
+            
+            if (clause.toString().trim().equalsIgnoreCase("(") || clause.toString().trim().equalsIgnoreCase(")"))
+            {
+                // nested/multiple AND/OR not supported in Redis
+                continue;
+            }
+            
             if (clause.getClass().isAssignableFrom(FilterClause.class))
             {
                 Object value = ((FilterClause) clause).getValue().get(0);
