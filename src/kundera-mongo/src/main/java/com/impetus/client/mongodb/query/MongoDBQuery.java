@@ -976,7 +976,7 @@ public class MongoDBQuery extends QueryImpl
                 {
                     actualColumnName = "metadata." + columnName;
                 }
-                else if (metadata.getIdAttribute().equals(entityType.getAttribute(columnName)))
+                else if (metadata.getIdAttribute().equals(entityType.getAttribute(metadata.getFieldName(columnName))))
                 {
                     actualColumnName = "_id";
                 }
