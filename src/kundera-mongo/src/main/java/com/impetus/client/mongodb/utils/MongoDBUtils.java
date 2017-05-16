@@ -15,7 +15,9 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
+import javax.persistence.Embedded;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.xml.bind.DatatypeConverter;
@@ -75,7 +77,7 @@ public class MongoDBUtils
         // Iterator<Attribute> iter = compoundKey.getAttributes().iterator();
         BasicDBObject compoundKeyObj = new BasicDBObject();
 
-        compoundKeyObj = getCompoundKeyColumns(m, id, compoundKey);
+        compoundKeyObj = getCompoundKeyColumns(m, id, compoundKey, metaModel);
 
         dbObj.put("_id", compoundKeyObj);
     }
@@ -89,24 +91,38 @@ public class MongoDBUtils
      *            the id
      * @param compoundKey
      *            the compound key
+     * @param metaModel
      * @return the compound key columns
      */
-    public static BasicDBObject getCompoundKeyColumns(EntityMetadata m, Object id, EmbeddableType compoundKey)
+    public static BasicDBObject getCompoundKeyColumns(EntityMetadata m, Object id, EmbeddableType compoundKey,
+            MetamodelImpl metaModel)
     {
         BasicDBObject compoundKeyObj = new BasicDBObject();
+
+        Set<Attribute> attribs = compoundKey.getDeclaredAttributes();
+
         Field[] fields = m.getIdAttribute().getBindableJavaType().getDeclaredFields();
 
         // To ensure order.
-        for (Field f : fields)
+        for (Attribute attr : attribs)
         {
+            Field f = (Field) attr.getJavaMember();
             if (!ReflectUtils.isTransientOrStatic(f))
             {
-                Attribute compositeColumn = compoundKey.getAttribute(f.getName());
+                if (f.getAnnotation(Embedded.class) != null)
+                {
+                    EmbeddableType emb = metaModel.embeddable(f.getType());
+                    Object val = PropertyAccessorHelper.getObject(id, f);
+                    BasicDBObject dbVal = getCompoundKeyColumns(m, val, emb, metaModel);
+                    compoundKeyObj.put(((AbstractAttribute) attr).getJPAColumnName(), dbVal);
+                }
+                else
+                {
+                    compoundKeyObj.put(((AbstractAttribute) attr).getJPAColumnName(),
+                            populateValue(PropertyAccessorHelper.getObject(id, (Field) attr.getJavaMember()),
+                                    ((AbstractAttribute) attr).getBindableJavaType()));
 
-                compoundKeyObj.put(
-                        ((AbstractAttribute) compositeColumn).getJPAColumnName(),
-                        populateValue(PropertyAccessorHelper.getObject(id, (Field) compositeColumn.getJavaMember()),
-                                ((AbstractAttribute) compositeColumn).getBindableJavaType()));
+                }
             }
         }
         return compoundKeyObj;

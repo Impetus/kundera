@@ -94,23 +94,14 @@ public final class DefaultMongoDBDataHandler implements MongoDBDataHandler
             Object rowKey = document.get("_id");
             Class<?> rowKeyValueClass = rowKey.getClass();
             Class<?> idClass = null;
-            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
-                    m.getPersistenceUnit());
+            MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
+                    .getMetamodel(m.getPersistenceUnit());
             idClass = m.getIdAttribute().getJavaType();
             rowKey = MongoDBUtils.populateValue(rowKey, idClass);
-
-            if (metaModel.isEmbeddable(m.getIdAttribute().getBindableJavaType()))
+            AbstractAttribute idAttrib = (AbstractAttribute) m.getIdAttribute();
+            if (metaModel.isEmbeddable(idAttrib.getBindableJavaType()))
             {
-                EmbeddableType embeddable = metaModel.embeddable(m.getIdAttribute().getBindableJavaType());
-                Iterator<Attribute> iter = embeddable.getAttributes().iterator();
-                Object compoundKey = m.getIdAttribute().getBindableJavaType().newInstance();
-                while (iter.hasNext())
-                {
-                    AbstractAttribute compositeAttrib = (AbstractAttribute) iter.next();
-                    Object value = ((BasicDBObject) rowKey).get(compositeAttrib.getJPAColumnName());
-                    PropertyAccessorHelper.set(compoundKey, (Field) compositeAttrib.getJavaMember(), value);
-                }
-                PropertyAccessorHelper.setId(entity, m, compoundKey);
+                populateEntityFromDocument(entity, rowKey, metaModel, idAttrib);
             }
             else
             {
@@ -142,7 +133,7 @@ public final class DefaultMongoDBDataHandler implements MongoDBDataHandler
                     {
                         if (relationValue == null)
                         {
-                            relationValue = new HashMap<String, Object>();
+                            relationValue = new HashMap<>();
                         }
 
                         if (relations.contains(jpaColumnName)
@@ -185,6 +176,30 @@ public final class DefaultMongoDBDataHandler implements MongoDBDataHandler
         }
     }
 
+    private void populateEntityFromDocument(Object entity, Object rowKey, MetamodelImpl metaModel,
+            AbstractAttribute attrib) throws InstantiationException, IllegalAccessException
+    {
+        EmbeddableType embeddable = metaModel.embeddable(attrib.getBindableJavaType());
+        Iterator<Attribute> iter = embeddable.getAttributes().iterator();
+        Object compoundKey = attrib.getBindableJavaType().newInstance();
+        while (iter.hasNext())
+        {
+            AbstractAttribute compositeAttrib = (AbstractAttribute) iter.next();
+            Object value = ((BasicDBObject) rowKey).get(compositeAttrib.getJPAColumnName());
+
+            if (metaModel.isEmbeddable(compositeAttrib.getBindableJavaType()))
+            {
+                populateEntityFromDocument(compoundKey, value, metaModel, compositeAttrib);
+
+            }
+            else
+            {
+                PropertyAccessorHelper.set(compoundKey, (Field) compositeAttrib.getJavaMember(), value);
+            }
+        }
+        PropertyAccessorHelper.set(entity, (Field) attrib.getJavaMember(), compoundKey);
+    }
+
     /**
      * Gets the entity from GFSDBFile.
      * 
@@ -200,11 +215,11 @@ public final class DefaultMongoDBDataHandler implements MongoDBDataHandler
      *            the kundera metadata
      * @return the entity from GFSDBFile
      */
-    public Object getEntityFromGFSDBFile(Class<?> entityClazz, Object entity, EntityMetadata m,
-            GridFSDBFile outputFile, KunderaMetadata kunderaMetadata)
+    public Object getEntityFromGFSDBFile(Class<?> entityClazz, Object entity, EntityMetadata m, GridFSDBFile outputFile,
+            KunderaMetadata kunderaMetadata)
     {
-        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
-                m.getPersistenceUnit());
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
+                .getMetamodel(m.getPersistenceUnit());
         String id = ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName();
         Object rowKey = ((DBObject) outputFile.get(MongoDBUtils.METADATA)).get(id);
         Class<?> rowKeyValueClass = rowKey.getClass();
@@ -259,8 +274,8 @@ public final class DefaultMongoDBDataHandler implements MongoDBDataHandler
     {
         Map<String, DBObject> dbObjects = new HashMap<String, DBObject>();
 
-        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
-                m.getPersistenceUnit());
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
+                .getMetamodel(m.getPersistenceUnit());
         EntityType entityType = metaModel.entity(m.getEntityClazz());
 
         // Populate Row Key
@@ -274,9 +289,11 @@ public final class DefaultMongoDBDataHandler implements MongoDBDataHandler
         Set<Attribute> columns = entityType.getAttributes();
         for (Attribute column : columns)
         {
-            String tableName = ((AbstractAttribute) column).getTableName() != null ? ((AbstractAttribute) column)
-                    .getTableName() : m.getTableName();
-            dbObj = MongoDBUtils.getDBObject(m, tableName, dbObjects, metaModel, id);
+            // String tableName = ((AbstractAttribute) column).getTableName() !=
+            // null ? ((AbstractAttribute) column)
+            // .getTableName() : m.getTableName();
+            // dbObj = MongoDBUtils.getDBObject(m, tableName, dbObjects,
+            // metaModel, id);
 
             if (!column.equals(m.getIdAttribute()))
             {
@@ -355,8 +372,8 @@ public final class DefaultMongoDBDataHandler implements MongoDBDataHandler
     public GridFSInputFile getGFSInputFileFromEntity(GridFS gfs, EntityMetadata m, Object entity,
             KunderaMetadata kunderaMetadata, boolean isUpdate)
     {
-        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
-                m.getPersistenceUnit());
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
+                .getMetamodel(m.getPersistenceUnit());
         EntityType entityType = metaModel.entity(m.getEntityClazz());
         GridFSInputFile gridFSInputFile = null;
 
@@ -449,8 +466,8 @@ public final class DefaultMongoDBDataHandler implements MongoDBDataHandler
      */
     public List getEmbeddedObjectList(DBCollection dbCollection, EntityMetadata m, String documentName,
             BasicDBObject mongoQuery, String result, BasicDBObject orderBy, int maxResult, int firstResult,
-            BasicDBObject keys, final KunderaMetadata kunderaMetadata) throws PropertyAccessException,
-            InstantiationException, IllegalAccessException
+            BasicDBObject keys, final KunderaMetadata kunderaMetadata)
+                    throws PropertyAccessException, InstantiationException, IllegalAccessException
     {
         List list = new ArrayList();// List of embedded object to be returned
 
@@ -463,8 +480,8 @@ public final class DefaultMongoDBDataHandler implements MongoDBDataHandler
 
         String enclosingDocumentName = null;
 
-        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
-                m.getPersistenceUnit());
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
+                .getMetamodel(m.getPersistenceUnit());
         EntityType entityType = metaModel.entity(m.getEntityClazz());
         EmbeddableType superColumn = null;
         Set<Attribute> columns = null;
@@ -497,8 +514,8 @@ public final class DefaultMongoDBDataHandler implements MongoDBDataHandler
         }
 
         // Query for fetching entities based on user specified criteria
-        DBCursor cursor = orderBy != null ? dbCollection.find(mongoQuery, keys).sort(orderBy) : dbCollection
-                .find(mongoQuery, keys).limit(maxResult).skip(firstResult);
+        DBCursor cursor = orderBy != null ? dbCollection.find(mongoQuery, keys).sort(orderBy)
+                : dbCollection.find(mongoQuery, keys).limit(maxResult).skip(firstResult);
 
         if (superColumn != null)
         {
@@ -559,9 +576,9 @@ public final class DefaultMongoDBDataHandler implements MongoDBDataHandler
                 Collection embeddedCollection = (Collection) embeddedObject;
                 // means it is case of element collection
 
-                dbObj.put(((AbstractAttribute) column).getJPAColumnName(), DocumentObjectMapper
-                        .getDocumentListFromCollection(metaModel, embeddedCollection, embeddableType.getAttributes(),
-                                tableName));
+                dbObj.put(((AbstractAttribute) column).getJPAColumnName(),
+                        DocumentObjectMapper.getDocumentListFromCollection(metaModel, embeddedCollection,
+                                embeddableType.getAttributes(), tableName));
             }
             else
             {
@@ -632,8 +649,8 @@ public final class DefaultMongoDBDataHandler implements MongoDBDataHandler
      */
     public Object getLobFromGFSEntity(GridFS gfs, EntityMetadata m, Object entity, KunderaMetadata kunderaMetadata)
     {
-        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
-                m.getPersistenceUnit());
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
+                .getMetamodel(m.getPersistenceUnit());
         EntityType entityType = metaModel.entity(m.getEntityClazz());
         Set<Attribute> columns = entityType.getAttributes();
         for (Attribute column : columns)
@@ -663,8 +680,8 @@ public final class DefaultMongoDBDataHandler implements MongoDBDataHandler
     public DBObject getMetadataFromGFSEntity(GridFS gfs, EntityMetadata m, Object entity,
             KunderaMetadata kunderaMetadata)
     {
-        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
-                m.getPersistenceUnit());
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
+                .getMetamodel(m.getPersistenceUnit());
 
         EntityType entityType = metaModel.entity(m.getEntityClazz());
 
