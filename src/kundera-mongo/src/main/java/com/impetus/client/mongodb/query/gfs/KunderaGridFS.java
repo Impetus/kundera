@@ -75,14 +75,15 @@ public class KunderaGridFS extends GridFS
      *            number of files to return
      * @return list of gridfs files
      */
-    public List<GridFSDBFile> find(final DBObject query, final DBObject sort, final int firstResult, final int maxResult)
+    public List<GridFSDBFile> find(final DBObject query, final DBObject sort, final int firstResult,
+            final int maxResult)
     {
         List<GridFSDBFile> files = new ArrayList<GridFSDBFile>();
 
         DBCursor c = null;
         try
         {
-            c = _filesCollection.find(query);
+            c = getFilesCollection().find(query);
             if (sort != null)
             {
                 c.sort(sort);
@@ -90,7 +91,7 @@ public class KunderaGridFS extends GridFS
             c.skip(firstResult).limit(maxResult);
             while (c.hasNext())
             {
-                files.add(_fix(c.next()));
+                files.add(findOne(c.next()));
             }
         }
         finally
@@ -111,7 +112,7 @@ public class KunderaGridFS extends GridFS
      */
     public AggregationOutput aggregate(List<DBObject> pipeline)
     {
-        return _filesCollection.aggregate(pipeline);
+        return getFilesCollection().aggregate(pipeline);
     }
 
 }

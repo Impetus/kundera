@@ -115,22 +115,22 @@ public class MongoDBSchemaManagerTest
             }
             else if (dbObject.get("name").equals("PERSON_NAME_1"))
             {
-                Assert.assertEquals(new Integer(Integer.MIN_VALUE), dbObject.get("min"));
-                Assert.assertEquals(new Integer(Integer.MAX_VALUE), dbObject.get("max"));
+                Assert.assertEquals(new Double(Integer.MIN_VALUE), dbObject.get("min"));
+                Assert.assertEquals(new Double(Integer.MAX_VALUE), dbObject.get("max"));
                 Assert.assertTrue(dbObject.get("key").equals(new BasicDBObject("PERSON_NAME", 1)));
                 count++;
             }
             else if (dbObject.get("name").equals("AGE_-1"))
             {
-                Assert.assertEquals(new Integer(100), dbObject.get("min"));
-                Assert.assertEquals(new Integer(500), dbObject.get("max"));
+                Assert.assertEquals(new Double(100.0), dbObject.get("min"));
+                Assert.assertEquals(new Double(500.0), dbObject.get("max"));
                 Assert.assertTrue(dbObject.get("key").equals(new BasicDBObject("AGE", -1)));
                 count++;
             }
             else
             {
-                Assert.assertEquals(new Integer(-100), dbObject.get("min"));
-                Assert.assertEquals(new Integer(500), dbObject.get("max"));
+                Assert.assertEquals(new Double(-100), dbObject.get("min"));
+                Assert.assertEquals(new Double(500), dbObject.get("max"));
                 Assert.assertTrue(dbObject.get("key").equals(new BasicDBObject("CURRENT_LOCATION", "2d")));
                 count++;
             }
@@ -173,22 +173,22 @@ public class MongoDBSchemaManagerTest
             }
             else if (dbObject.get("name").equals("PERSON_NAME_1"))
             {
-                Assert.assertEquals(new Integer(Integer.MIN_VALUE), dbObject.get("min"));
-                Assert.assertEquals(new Integer(Integer.MAX_VALUE), dbObject.get("max"));
+                Assert.assertEquals(new Double(Integer.MIN_VALUE), dbObject.get("min"));
+                Assert.assertEquals(new Double(Integer.MAX_VALUE), dbObject.get("max"));
                 Assert.assertTrue(dbObject.get("key").equals(new BasicDBObject("PERSON_NAME", 1)));
                 count++;
             }
             else if (dbObject.get("name").equals("AGE_-1"))
             {
-                Assert.assertEquals(new Integer(100), dbObject.get("min"));
-                Assert.assertEquals(new Integer(500), dbObject.get("max"));
+                Assert.assertEquals(new Double(100), dbObject.get("min"));
+                Assert.assertEquals(new Double(500), dbObject.get("max"));
                 Assert.assertTrue(dbObject.get("key").equals(new BasicDBObject("AGE", -1)));
                 count++;
             }
             else
             {
-                Assert.assertEquals(new Integer(-100), dbObject.get("min"));
-                Assert.assertEquals(new Integer(500), dbObject.get("max"));
+                Assert.assertEquals(new Double(-100), dbObject.get("min"));
+                Assert.assertEquals(new Double(500), dbObject.get("max"));
                 Assert.assertTrue(dbObject.get("key").equals(new BasicDBObject("CURRENT_LOCATION", "2d")));
                 count++;
             }
@@ -226,29 +226,29 @@ public class MongoDBSchemaManagerTest
             }
             else if (dbObject.get("name").equals("PERSON_NAME_1"))
             {
-                Assert.assertEquals(new Integer(Integer.MIN_VALUE), dbObject.get("min"));
-                Assert.assertEquals(new Integer(Integer.MAX_VALUE), dbObject.get("max"));
+                Assert.assertEquals(new Double(Integer.MIN_VALUE), dbObject.get("min"));
+                Assert.assertEquals(new Double(Integer.MAX_VALUE), dbObject.get("max"));
                 Assert.assertTrue(dbObject.get("key").equals(new BasicDBObject("PERSON_NAME", 1)));
                 count++;
             }
             else if (dbObject.get("name").equals("AGE_-1"))
             {
-                Assert.assertEquals(new Integer(100), dbObject.get("min"));
-                Assert.assertEquals(new Integer(500), dbObject.get("max"));
+                Assert.assertEquals(new Double(100), dbObject.get("min"));
+                Assert.assertEquals(new Double(500), dbObject.get("max"));
                 Assert.assertTrue(dbObject.get("key").equals(new BasicDBObject("AGE", -1)));
                 count++;
             }
             else if (dbObject.get("name").equals("location.CURRENT_LOCATION_2d"))
             {
-                Assert.assertEquals(new Integer(-100), dbObject.get("min"));
-                Assert.assertEquals(new Integer(500), dbObject.get("max"));
+                Assert.assertEquals(new Double(-100), dbObject.get("min"));
+                Assert.assertEquals(new Double(500), dbObject.get("max"));
                 Assert.assertTrue(dbObject.get("key").equals(new BasicDBObject("location.CURRENT_LOCATION", "2d")));
                 count++;
             }
             else
             {
-                Assert.assertEquals(new Integer(100), dbObject.get("min"));
-                Assert.assertEquals(new Integer(400), dbObject.get("max"));
+                Assert.assertEquals(new Double(100), dbObject.get("min"));
+                Assert.assertEquals(new Double(400), dbObject.get("max"));
                 Assert.assertTrue(dbObject.get("key").equals(new BasicDBObject("location.PREVIOUS_LOCATION", "2d")));
                 count++;
             }

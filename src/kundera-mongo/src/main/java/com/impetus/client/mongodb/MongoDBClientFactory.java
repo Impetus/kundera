@@ -18,7 +18,6 @@ package com.impetus.client.mongodb;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,8 +25,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.net.SocketFactory;
-
-import com.impetus.kundera.utils.KunderaCoreUtils;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -48,11 +45,13 @@ import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.loader.ClientLoaderException;
 import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.utils.KunderaCoreUtils;
 import com.mongodb.DB;
 import com.mongodb.DBDecoderFactory;
 import com.mongodb.DBEncoderFactory;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
+import com.mongodb.MongoCredential;
 import com.mongodb.MongoException;
 import com.mongodb.ServerAddress;
 import com.mongodb.WriteConcern;
@@ -153,12 +152,13 @@ public class MongoDBClientFactory extends GenericClientFactory
 
         onValidation(contactNode, defaultPort);
 
-        List<ServerAddress> addrs = new ArrayList<ServerAddress>();
+        List<ServerAddress> addrs = new ArrayList<>();
 
         MongoClient mongo = null;
         try
         {
-            mongo = onSetMongoServerProperties(contactNode, defaultPort, poolSize, addrs);
+            mongo = onSetMongoServerProperties(contactNode, defaultPort, poolSize, addrs,
+                    MongoDBUtils.fetchCredentials(props, externalProperties));
 
             logger.info("Connected to mongodb at " + contactNode + " on port " + defaultPort);
         }
@@ -167,31 +167,12 @@ public class MongoDBClientFactory extends GenericClientFactory
             logger.error("Invalid format for MONGODB port, Unale to connect!" + "; Caused by:" + e.getMessage());
             throw new ClientLoaderException(e);
         }
-        catch (UnknownHostException e)
-        {
-            logger.error("Unable to connect to MONGODB at host " + contactNode + "; Caused by:" + e.getMessage());
-            throw new ClientLoaderException(e);
-        }
         catch (MongoException e)
         {
             logger.error("Unable to connect to MONGODB; Caused by:" + e.getMessage());
             throw new ClientLoaderException(e);
         }
-
-        DB mongoDB = mongo.getDB(keyspace);
-
-        try
-        {
-            MongoDBUtils.authenticate(props, externalProperties, mongoDB);
-        }
-        catch (ClientLoaderException e)
-        {
-            logger.error(e.getMessage());
-            throw e;
-        }
-        logger.info("Connected to mongodb at " + contactNode + " on port " + defaultPort);
-        return mongoDB;
-
+        return mongo.getDB(keyspace);
     }
 
     /*
@@ -253,10 +234,9 @@ public class MongoDBClientFactory extends GenericClientFactory
      *             the unknown host exception
      */
     private MongoClient onSetMongoServerProperties(String contactNode, String defaultPort, String poolSize,
-            List<ServerAddress> addrs) throws UnknownHostException
+            List<ServerAddress> addrs, List<MongoCredential> credentials)
     {
-        MongoClient mongo = null;
-        MongoClientOptions mo = null;
+        MongoClientOptions mo;
         MongoDBSchemaMetadata metadata = MongoDBPropertyReader.msmd;
         ClientProperties cp = metadata != null ? metadata.getClientProperties() : null;
         Properties propsFromCp = null;
@@ -304,9 +284,7 @@ public class MongoDBClientFactory extends GenericClientFactory
             mo = b.connectionsPerHost(Integer.parseInt(poolSize)).build();
         }
 
-        mongo = new MongoClient(addrs, mo);
-
-        return mongo;
+        return new MongoClient(addrs, credentials, mo);
     }
 
     /*
@@ -464,14 +442,6 @@ public class MongoDBClientFactory extends GenericClientFactory
                 if (hasProperty(MongoDBConstants.SOCKET_FACTORY))
                 {
                     builder.socketFactory(getProperty(MongoDBConstants.SOCKET_FACTORY, SocketFactory.class));
-                }
-                if (hasProperty(MongoDBConstants.AUTO_CONNECT_RETRY))
-                {
-                    builder.autoConnectRetry(getProperty(MongoDBConstants.AUTO_CONNECT_RETRY, boolean.class));
-                }
-                if (hasProperty(MongoDBConstants.MAX_AUTO_CONNECT_RETRY))
-                {
-                    builder.maxAutoConnectRetryTime(getProperty(MongoDBConstants.MAX_AUTO_CONNECT_RETRY, long.class));
                 }
                 if (hasProperty(MongoDBConstants.CONNECTION_PER_HOST))
                 {

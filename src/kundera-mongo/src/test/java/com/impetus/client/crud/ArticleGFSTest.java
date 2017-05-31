@@ -15,22 +15,28 @@
  ******************************************************************************/
 package com.impetus.client.crud;
 
-import com.impetus.client.crud.entities.ArticleGFS;
-import com.impetus.client.utils.MongoUtils;
-import junit.framework.Assert;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.persistence.Query;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.persistence.Query;
+
+import junit.framework.Assert;
+
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import com.impetus.client.crud.entities.ArticleGFS;
+import com.impetus.client.utils.MongoUtils;
+import com.impetus.kundera.KunderaException;
 
 /**
  * The Class ArticleGFSTest.
@@ -48,6 +54,15 @@ public class ArticleGFSTest
     private static EntityManager em;
 
     /**
+     * @throws Exception
+     */
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception
+    {
+        emf = Persistence.createEntityManagerFactory(_PU);
+    }
+
+    /**
      * Sets the up.
      * 
      * @throws Exception
@@ -56,37 +71,23 @@ public class ArticleGFSTest
     @Before
     public void setUp() throws Exception
     {
-        emf = Persistence.createEntityManagerFactory(_PU);
         em = emf.createEntityManager();
-    }
-
-    /**
-     * Tear down.
-     * 
-     * @throws Exception
-     *             the exception
-     */
-    @After
-    public void tearDown() throws Exception
-    {
-        em.close();
-        MongoUtils.dropDatabase(emf, _PU);
-        emf.close();
     }
 
     @Test
     public void testComplexQueries()
     {
-        prepareArticle("article1", date("2017-01-05 10:00"), date("2017-01-05 10:00"), "First article", "important", 0, true);
+        prepareArticle("article1", date("2017-01-05 10:00"), date("2017-01-05 10:00"), "First article", "important", 0,
+                true);
         prepareArticle("article2", date("2017-01-15 10:00"), date("2017-01-15 10:00"), "Second article", null, 0, true);
-        prepareArticle("article3", date("2017-01-25 10:00"), date("2017-01-25 10:00"), "Third article", "important", 0, true);
+        prepareArticle("article3", date("2017-01-25 10:00"), date("2017-01-25 10:00"), "Third article", "important", 0,
+                true);
         prepareArticle("article4", date("2017-01-30 10:00"), null, "Fourth article", "important", 0, true);
         prepareArticle("article5", date("2017-02-05 10:00"), date("2017-02-55 10:00"), "Fifth article", null, 0, true);
 
-        Query query = em.createQuery(
-              "select a from ArticleGFS a where a.show = :show and " +
-                    "(a.displayDate is null or a.displayDate < :date1 or a.displayDate > :date2) " +
-                    "order by a.createDate asc");
+        Query query = em.createQuery("select a from ArticleGFS a where a.show = :show and "
+                + "(a.displayDate is null or a.displayDate < :date1 or a.displayDate > :date2) "
+                + "order by a.createDate asc");
         query.setParameter("show", true);
         query.setParameter("date1", date("2017-01-20 00:00"));
         query.setParameter("date2", date("2017-02-01 00:00"));
@@ -99,10 +100,9 @@ public class ArticleGFSTest
         Assert.assertEquals("Fourth article", results.get(2).getTitle());
         Assert.assertEquals("Fifth article", results.get(3).getTitle());
 
-        query = em.createQuery(
-              "select a from ArticleGFS a where a.show = :show and " +
-                    "(a.displayDate is null or a.displayDate < :date1 or a.displayDate > :date2 and a.category is null) " +
-                    "order by a.createDate asc");
+        query = em.createQuery("select a from ArticleGFS a where a.show = :show and "
+                + "(a.displayDate is null or a.displayDate < :date1 or a.displayDate > :date2 and a.category is null) "
+                + "order by a.createDate asc");
         query.setParameter("show", true);
         query.setParameter("date1", date("2017-01-20 00:00"));
         query.setParameter("date2", date("2017-02-01 00:00"));
@@ -115,10 +115,9 @@ public class ArticleGFSTest
         Assert.assertEquals("Fourth article", results.get(2).getTitle());
         Assert.assertEquals("Fifth article", results.get(3).getTitle());
 
-        query = em.createQuery(
-              "select a from ArticleGFS a where a.show = :show and " +
-                    "(a.displayDate > :date2 and a.category is null or a.displayDate is null or a.displayDate < :date1) " +
-                    "order by a.createDate asc");
+        query = em.createQuery("select a from ArticleGFS a where a.show = :show and "
+                + "(a.displayDate > :date2 and a.category is null or a.displayDate is null or a.displayDate < :date1) "
+                + "order by a.createDate asc");
         query.setParameter("show", true);
         query.setParameter("date1", date("2017-01-20 00:00"));
         query.setParameter("date2", date("2017-02-01 00:00"));
@@ -131,10 +130,10 @@ public class ArticleGFSTest
         Assert.assertEquals("Fourth article", results.get(2).getTitle());
         Assert.assertEquals("Fifth article", results.get(3).getTitle());
 
-        query = em.createQuery(
-              "select a from ArticleGFS a where a.show = :show and " +
-                    "(a.category is null and (a.displayDate > :date2 or a.displayDate is null or a.displayDate < :date1)) " +
-                    "order by a.createDate asc");
+        query = em
+                .createQuery("select a from ArticleGFS a where a.show = :show and "
+                        + "(a.category is null and (a.displayDate > :date2 or a.displayDate is null or a.displayDate < :date1)) "
+                        + "order by a.createDate asc");
         query.setParameter("show", true);
         query.setParameter("date1", date("2017-01-20 00:00"));
         query.setParameter("date2", date("2017-02-01 00:00"));
@@ -145,11 +144,9 @@ public class ArticleGFSTest
         Assert.assertEquals("Second article", results.get(0).getTitle());
         Assert.assertEquals("Fifth article", results.get(1).getTitle());
 
-        query = em.createQuery(
-              "select a from ArticleGFS a where a.show = :show and " +
-                    "(a.createDate < :date and (a.displayDate is null or a.displayDate < :date)) " +
-                    "and a.category = :category " +
-                    "order by a.createDate asc");
+        query = em.createQuery("select a from ArticleGFS a where a.show = :show and "
+                + "(a.createDate < :date and (a.displayDate is null or a.displayDate < :date)) "
+                + "and a.category = :category " + "order by a.createDate asc");
         query.setParameter("show", true);
         query.setParameter("date", date("2017-03-30 00:00"));
         query.setParameter("category", "important");
@@ -162,7 +159,7 @@ public class ArticleGFSTest
         Assert.assertEquals("Fourth article", results.get(2).getTitle());
     }
 
-    @Test
+    @Test(expected = Exception.class)
     public void testAggregation()
     {
         prepareArticle("article1", date("2017-01-05 10:00"), null, "First article", "A", 1, true);
@@ -187,7 +184,8 @@ public class ArticleGFSTest
         Assert.assertEquals(6, resultArray[0]);
         Assert.assertEquals(1, resultArray[1]);
 
-        query = em.createQuery("select avg(a.priority), sum(a.priority), max(a.priority), min(a.priority) from ArticleGFS a");
+        query = em
+                .createQuery("select avg(a.priority), sum(a.priority), max(a.priority), min(a.priority) from ArticleGFS a");
         results = query.getResultList();
 
         Assert.assertNotNull(results);
@@ -200,7 +198,8 @@ public class ArticleGFSTest
         Assert.assertEquals(6, resultArray[2]);
         Assert.assertEquals(1, resultArray[3]);
 
-        query = em.createQuery("select sum(a.priority), a.category from ArticleGFS a group by a.category order by a.category");
+        query = em
+                .createQuery("select sum(a.priority), a.category from ArticleGFS a group by a.category order by a.category");
         results = query.getResultList();
 
         Assert.assertNotNull(results);
@@ -224,14 +223,16 @@ public class ArticleGFSTest
             }
         }
 
-        query = em.createQuery("select sum(a.priority), a.category, avg(a.priority), min(a.priority) from ArticleGFS a group by a.category");
+        query = em
+                .createQuery("select sum(a.priority), a.category, avg(a.priority), min(a.priority) from ArticleGFS a group by a.category");
         results = query.getResultList();
 
         Assert.assertNotNull(results);
         Assert.assertEquals(2, results.size());
         assertSumsMatch(results, 4);
 
-        query = em.createQuery("select sum(a.priority), a.category from ArticleGFS a group by a.category order by sum(a.priority) desc");
+        query = em
+                .createQuery("select sum(a.priority), a.category from ArticleGFS a group by a.category order by sum(a.priority) desc");
         results = query.getResultList();
 
         Assert.assertNotNull(results);
@@ -241,14 +242,15 @@ public class ArticleGFSTest
         assertSumsMatch(results, 2);
     }
 
-    @Test
+    @Test(expected = Exception.class)
     public void testCountAggregation()
     {
         prepareArticle("article1", date("2017-01-05 10:00"), null, "First article", "A", 1, true);
         prepareArticle("article2", date("2017-01-15 10:00"), null, "Second article", "B", 3, true);
         prepareArticle("article3", date("2017-01-25 10:00"), null, "Third article", "A", 6, true);
 
-        Query query = em.createQuery("select sum(a.priority), count(a), a.category from ArticleGFS a group by a.category order by a.category");
+        Query query = em
+                .createQuery("select sum(a.priority), count(a), a.category from ArticleGFS a group by a.category order by a.category");
         List results = query.getResultList();
 
         Assert.assertNotNull(results);
@@ -263,11 +265,34 @@ public class ArticleGFSTest
         Assert.assertEquals(3L, result);
     }
 
+    /**
+     * Tear down.
+     * 
+     * @throws Exception
+     *             the exception
+     */
+    @After
+    public void tearDown() throws Exception
+    {
+        em.close();
+    }
+
+    /**
+     * @throws Exception
+     */
+    @AfterClass
+    public static void tearDownAfterClass() throws Exception
+    {
+        MongoUtils.dropDatabase(emf, _PU);
+        emf.close();
+    }
+
     private void assertAlmostEqual(double expected, Object actual)
     {
         double value = (double) actual;
-        Assert.assertTrue(String.format("%.4f != %.4f\nExpected: %.4f\nActual  : %.4f", expected, value, expected, value),
-              Math.abs(value - expected) < 0.0001);
+        Assert.assertTrue(
+                String.format("%.4f != %.4f\nExpected: %.4f\nActual  : %.4f", expected, value, expected, value),
+                Math.abs(value - expected) < 0.0001);
     }
 
     private void assertSumsMatch(List results, int expectedNumberOfItems)
@@ -275,7 +300,8 @@ public class ArticleGFSTest
         for (Object item : results)
         {
             Object[] resultArray = (Object[]) item;
-            Assert.assertEquals("Result Item: " + Arrays.toString(resultArray), expectedNumberOfItems, resultArray.length);
+            Assert.assertEquals("Result Item: " + Arrays.toString(resultArray), expectedNumberOfItems,
+                    resultArray.length);
             Assert.assertTrue(Arrays.asList("A", "B").contains(resultArray[1]));
 
             if (resultArray[1].equals("A"))
@@ -289,8 +315,8 @@ public class ArticleGFSTest
         }
     }
 
-    private void prepareArticle(String id, Date createDate, Date displayDate,
-                                String title, String category, int priority, boolean show)
+    private void prepareArticle(String id, Date createDate, Date displayDate, String title, String category,
+            int priority, boolean show)
     {
         ArticleGFS item = new ArticleGFS();
         item.setArticleId(id);

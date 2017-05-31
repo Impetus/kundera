@@ -68,7 +68,7 @@ public class MongoAuthenticationTest
      * 
      * 
      */
-    @Test
+    // @Test
     public void authenticateWithValidCredentials()
     {
         try
@@ -105,7 +105,7 @@ public class MongoAuthenticationTest
      * Here user is in "admin" database assigned a role readWriteAnyDatabase. So
      * it can access "KunderaAuthTests" database too.
      */
-    @Test
+    // @Test
     public void authenticateWithValidCredentialsMultipleDbs()
     {
         try
@@ -142,7 +142,7 @@ public class MongoAuthenticationTest
      * Authenticate with invalid credentials.
      * 
      */
-    @Test
+    // @Test
     public void authenticateWithInValidCredentials()
     {
         Set<String> collectionList = new HashSet<String>();
@@ -178,7 +178,7 @@ public class MongoAuthenticationTest
     /**
      * Authenticate with invalid credentials in Persistence Unit.
      */
-    @Test
+    // @Test
     public void authenticateWithInValidCredentialsPu()
     {
         EntityManager em = null;
@@ -201,7 +201,7 @@ public class MongoAuthenticationTest
      * No authentication test.
      * 
      */
-    @Test
+    // @Test
     public void noAuthenticationTest()
     {
         try

@@ -340,15 +340,11 @@ public class PersonMongoTest extends BaseTest
         Map<String, Client<Query>> clients = (Map<String, Client<Query>>) em.getDelegate();
         Client client = clients.get(_PU);
 
-        String script = "db.system.js.save({ _id: \"echoFunction\",value : function(x) { return x; }})";
-        Object result = (client).executeScript(script);
-        Assert.assertNull(result);
-
         /*
          * To find a single document from DB
          */
-        script = "db.PERSON.findOne()";
-        result = (client).executeScript(script);
+        String script = "db.PERSON.findOne()";
+        Object result = (client).executeScript(script);
         Assert.assertNotNull(result);
 
         /*

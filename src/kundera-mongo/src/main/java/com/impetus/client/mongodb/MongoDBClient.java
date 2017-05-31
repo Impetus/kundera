@@ -481,12 +481,12 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     }
 
     public <E> List<E> aggregate(EntityMetadata entityMetadata, BasicDBObject mongoQuery, BasicDBList lookup,
-                                 BasicDBObject aggregation, BasicDBObject orderBy, int maxResult) throws Exception
+            BasicDBObject aggregation, BasicDBObject orderBy, int maxResult) throws Exception
     {
         String collectionName = entityMetadata.getTableName();
 
         MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
-              entityMetadata.getPersistenceUnit());
+                entityMetadata.getPersistenceUnit());
         AbstractManagedType managedType = (AbstractManagedType) metaModel.entity(entityMetadata.getEntityClazz());
         boolean hasLob = managedType.hasLobAttribute();
 
@@ -509,9 +509,12 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
         if (hasLob)
         {
-            KunderaGridFS gridFS = new KunderaGridFS(mongoDb, collectionName);
-            AggregationOutput output = gridFS.aggregate(pipeline);
-            aggregationResults = output.results();
+            // KunderaGridFS gridFS = new KunderaGridFS(mongoDb,
+            // collectionName);
+            // AggregationOutput output = gridFS.aggregate(pipeline);
+            // aggregationResults = output.results();
+            throw new KunderaException("Aggregation not supported for MongoDB with GridFS.");
+
         }
         else
         {
@@ -553,7 +556,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         }
     }
 
-    private void addSortToPipeline(BasicDBObject orderBy, BasicDBObject aggregation, boolean hasLob, List<DBObject> pipeline)
+    private void addSortToPipeline(BasicDBObject orderBy, BasicDBObject aggregation, boolean hasLob,
+            List<DBObject> pipeline)
     {
         BasicDBObject actual = new BasicDBObject();
         for (String key : orderBy.keySet())
