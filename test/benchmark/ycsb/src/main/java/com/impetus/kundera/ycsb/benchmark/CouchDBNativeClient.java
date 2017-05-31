@@ -125,7 +125,7 @@ public class CouchDBNativeClient extends DB
         {
             System.out.println("Reading ....");
             URI uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-                    CouchDBConstants.URL_SAPRATOR + database.toLowerCase() + CouchDBConstants.URL_SAPRATOR + table
+                    CouchDBConstants.URL_SEPARATOR + database.toLowerCase() + CouchDBConstants.URL_SEPARATOR + table
                             + key, null, null);
             HttpGet get = new HttpGet(uri);
             get.addHeader("Accept", "application/json");
@@ -165,7 +165,7 @@ public class CouchDBNativeClient extends DB
                 object.addProperty(entry.getKey(), entry.getValue().toString());
             }
             URI uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-                    CouchDBConstants.URL_SAPRATOR + database.toLowerCase() + CouchDBConstants.URL_SAPRATOR + table
+                    CouchDBConstants.URL_SEPARATOR + database.toLowerCase() + CouchDBConstants.URL_SEPARATOR + table
                             + key, null, null);
 
             HttpPut put = new HttpPut(uri);
@@ -206,7 +206,7 @@ public class CouchDBNativeClient extends DB
             HttpGet get;
             Reader reader;
             uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-                    CouchDBConstants.URL_SAPRATOR + database.toLowerCase() + CouchDBConstants.URL_SAPRATOR + table
+                    CouchDBConstants.URL_SEPARATOR + database.toLowerCase() + CouchDBConstants.URL_SEPARATOR + table
                             + key, null, null);
             get = new HttpGet(uri);
             get.addHeader("Accept", "application/json");

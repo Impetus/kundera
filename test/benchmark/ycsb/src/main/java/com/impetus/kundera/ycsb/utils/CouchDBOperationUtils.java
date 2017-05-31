@@ -58,7 +58,7 @@ public class CouchDBOperationUtils
     {
         initiateClient(host, port);
         URI uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-                CouchDBConstants.URL_SAPRATOR + keyspace.toLowerCase(), null, null);
+                CouchDBConstants.URL_SEPARATOR + keyspace.toLowerCase(), null, null);
 
         HttpPut put = new HttpPut(uri);
         HttpResponse putRes = null;
@@ -79,7 +79,7 @@ public class CouchDBOperationUtils
     {
         initiateClient(host, port);
         URI uri = new URI(CouchDBConstants.PROTOCOL, null, httpHost.getHostName(), httpHost.getPort(),
-                CouchDBConstants.URL_SAPRATOR + keyspace.toLowerCase(), null, null);
+                CouchDBConstants.URL_SEPARATOR + keyspace.toLowerCase(), null, null);
 
         HttpDelete delete = new HttpDelete(uri);
         HttpResponse delReq = null;

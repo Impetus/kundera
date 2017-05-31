@@ -93,7 +93,7 @@ public abstract class YCSBRunner
 
     public void run(final String workLoad, final int threadCount) throws IOException
     {
-        int runCounter = crudUtils.getMaxRunSequence(new Date(), runType) ;
+        int runCounter = crudUtils.getMaxRunSequence(new Date(), runType);
         runCounter = runCounter + 1;
         noOfThreads = threadCount;
         // id column of performanceNoInfo table
@@ -115,17 +115,27 @@ public abstract class YCSBRunner
                 long noOfOperations = 0;
 
                 Process process = runtime.exec(runCommand);
-                process.getErrorStream();
+
+                InputStream er = process.getErrorStream();
+                InputStreamReader esr = new InputStreamReader(er);
+                BufferedReader ebr = new BufferedReader(esr);
+                String line;
+                while ((line = ebr.readLine()) != null)
+                {
+                    logger.debug(line);
+                }
+
                 InputStream is = process.getInputStream();
                 InputStreamReader isr = new InputStreamReader(is);
                 BufferedReader br = new BufferedReader(isr);
-                String line = null;
                 BigDecimal avgLatency = null;
                 BigDecimal throughput = null;
 
                 boolean processed = false;
                 while ((line = br.readLine()) != null)
                 {
+                    logger.debug(line);
+
                     processed = true;
                     if (line.contains("RunTime"))
                     {
@@ -159,7 +169,7 @@ public abstract class YCSBRunner
                      */
                     // if(!(line.contains("CLEANUP") || line.contains("UPDATE")
                     // || line.contains("INSERT") )){
-//                     logger.info(line);
+                    // logger.info(line);
                     // }
                 }
 
@@ -195,7 +205,7 @@ public abstract class YCSBRunner
             }
         }
 
-       sendMail();
+        sendMail();
     }
 
     protected String getCommandString(String clazz, String workLoad)
