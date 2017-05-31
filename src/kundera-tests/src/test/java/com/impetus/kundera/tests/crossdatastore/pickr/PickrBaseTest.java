@@ -180,10 +180,6 @@ public abstract class PickrBaseTest
         {
             log.error(e.getMessage());
         }
-        catch (UnknownHostException e)
-        {
-            log.error(e.getMessage());
-        }
         catch (MongoException e)
         {
             log.error(e.getMessage());
