@@ -599,7 +599,7 @@ public class MongoDBQuery extends QueryImpl
                         if (value.getClass().isAssignableFrom(String.class) && f != null
                                 && !f.getType().equals(value.getClass()))
                         {
-                            value = PropertyAccessorFactory.getPropertyAccessor(f).fromString(f.getType().getClass(),
+                            value = PropertyAccessorFactory.getPropertyAccessor(f).fromString(f.getType(),
                                     value.toString());
                         }
                         value = MongoDBUtils.populateValue(value, value.getClass());
