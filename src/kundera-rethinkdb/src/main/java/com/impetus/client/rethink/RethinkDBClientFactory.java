@@ -33,7 +33,8 @@ import com.rethinkdb.net.Connection;
  * 
  * @author karthikp.manchala
  */
-public class RethinkDBClientFactory extends GenericClientFactory {
+public class RethinkDBClientFactory extends GenericClientFactory
+{
 
     /** The Constant r. */
     private static final RethinkDB r = RethinkDB.r;
@@ -44,15 +45,18 @@ public class RethinkDBClientFactory extends GenericClientFactory {
     /*
      * (non-Javadoc)
      * 
-     * @see com.impetus.kundera.loader.ClientFactory#getSchemaManager(java.util.Map)
+     * @see
+     * com.impetus.kundera.loader.ClientFactory#getSchemaManager(java.util.Map)
      */
     @Override
-    public SchemaManager getSchemaManager(Map<String, Object> puProperties) {
-        if (schemaManager == null) {
+    public SchemaManager getSchemaManager(Map<String, Object> puProperties)
+    {
+        if (schemaManager == null)
+        {
             initializePropertyReader();
             setExternalProperties(puProperties);
-            schemaManager =
-                new RethinkDBSchemaManager(RethinkDBClientFactory.class.getName(), puProperties, kunderaMetadata);
+            schemaManager = new RethinkDBSchemaManager(RethinkDBClientFactory.class.getName(), puProperties,
+                    kunderaMetadata);
         }
         return schemaManager;
     }
@@ -60,11 +64,12 @@ public class RethinkDBClientFactory extends GenericClientFactory {
     /**
      * Initialize property reader.
      */
-    private void initializePropertyReader() {
-        if (propertyReader == null) {
-            propertyReader =
-                new RethinkDBPropertyReader(externalProperties, kunderaMetadata.getApplicationMetadata()
-                    .getPersistenceUnitMetadata(getPersistenceUnit()));
+    private void initializePropertyReader()
+    {
+        if (propertyReader == null)
+        {
+            propertyReader = new RethinkDBPropertyReader(externalProperties,
+                    kunderaMetadata.getApplicationMetadata().getPersistenceUnitMetadata(getPersistenceUnit()));
             propertyReader.read(getPersistenceUnit());
         }
     }
@@ -75,7 +80,8 @@ public class RethinkDBClientFactory extends GenericClientFactory {
      * @see com.impetus.kundera.loader.ClientLifeCycleManager#destroy()
      */
     @Override
-    public void destroy() {
+    public void destroy()
+    {
         // TODO Auto-generated method stub
 
     }
@@ -83,41 +89,46 @@ public class RethinkDBClientFactory extends GenericClientFactory {
     /*
      * (non-Javadoc)
      * 
-     * @see com.impetus.kundera.loader.GenericClientFactory#initialize(java.util.Map)
+     * @see
+     * com.impetus.kundera.loader.GenericClientFactory#initialize(java.util.Map)
      */
     @Override
-    public void initialize(Map<String, Object> puProperties) {
+    public void initialize(Map<String, Object> puProperties)
+    {
         reader = new RethinkDBEntityReader(kunderaMetadata);
         setExternalProperties(puProperties);
         initializePropertyReader();
-        PersistenceUnitMetadata pum =
-            kunderaMetadata.getApplicationMetadata().getPersistenceUnitMetadata(getPersistenceUnit());
+        PersistenceUnitMetadata pum = kunderaMetadata.getApplicationMetadata()
+                .getPersistenceUnitMetadata(getPersistenceUnit());
 
         Properties pumProps = pum.getProperties();
 
-        if (puProperties != null) {
+        if (puProperties != null)
+        {
             pumProps.putAll(puProperties);
         }
 
-        String host = (String) pumProps.getProperty("kundera.nodes");
+        String host = pumProps.getProperty("kundera.nodes");
+        String port = pumProps.getProperty("kundera.port");
 
-        String port = (String) pumProps.getProperty("kundera.port");
-
-        if (host == null || port == null) {
+        if (host == null || port == null)
+        {
             throw new KunderaException("Hostname/IP or Port is null.");
         }
 
-        connection = r.connection().hostname(host).port(28015).connect();
+        connection = r.connection().hostname(host).port(Integer.parseInt(port)).connect();
 
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.impetus.kundera.loader.GenericClientFactory#createPoolOrConnection()
+     * @see
+     * com.impetus.kundera.loader.GenericClientFactory#createPoolOrConnection()
      */
     @Override
-    protected Object createPoolOrConnection() {
+    protected Object createPoolOrConnection()
+    {
         // TODO Auto-generated method stub
         return null;
     }
@@ -125,12 +136,15 @@ public class RethinkDBClientFactory extends GenericClientFactory {
     /*
      * (non-Javadoc)
      * 
-     * @see com.impetus.kundera.loader.GenericClientFactory#instantiateClient(java.lang.String)
+     * @see
+     * com.impetus.kundera.loader.GenericClientFactory#instantiateClient(java.
+     * lang.String)
      */
     @Override
-    protected Client instantiateClient(String persistenceUnit) {
+    protected Client instantiateClient(String persistenceUnit)
+    {
         return new RethinkDBClient(kunderaMetadata, indexManager, reader, externalProperties, persistenceUnit,
-            this.connection, this.clientMetadata);
+                this.connection, this.clientMetadata);
     }
 
     /*
@@ -139,7 +153,8 @@ public class RethinkDBClientFactory extends GenericClientFactory {
      * @see com.impetus.kundera.loader.GenericClientFactory#isThreadSafe()
      */
     @Override
-    public boolean isThreadSafe() {
+    public boolean isThreadSafe()
+    {
         // TODO Auto-generated method stub
         return false;
     }
@@ -147,10 +162,13 @@ public class RethinkDBClientFactory extends GenericClientFactory {
     /*
      * (non-Javadoc)
      * 
-     * @see com.impetus.kundera.loader.GenericClientFactory#initializeLoadBalancer(java.lang.String)
+     * @see
+     * com.impetus.kundera.loader.GenericClientFactory#initializeLoadBalancer(
+     * java.lang.String)
      */
     @Override
-    protected void initializeLoadBalancer(String loadBalancingPolicyName) {
+    protected void initializeLoadBalancer(String loadBalancingPolicyName)
+    {
         // TODO Auto-generated method stub
 
     }

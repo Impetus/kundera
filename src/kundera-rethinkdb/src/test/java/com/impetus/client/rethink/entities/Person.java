@@ -26,7 +26,8 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "PERSON_RETHINK", schema = "rethink@rethink_pu")
-public class Person {
+public class Person
+{
 
     /** The person id. */
     @Id
@@ -44,7 +45,8 @@ public class Person {
     /**
      * Instantiates a new person.
      */
-    public Person() {
+    public Person()
+    {
     }
 
     /**
@@ -59,7 +61,8 @@ public class Person {
      * @param salary
      *            the salary
      */
-    public Person(String personId, String personName, long age, Double salary) {
+    public Person(String personId, String personName, long age, Double salary)
+    {
         super();
         this.personId = personId;
         this.personName = personName;
@@ -72,7 +75,8 @@ public class Person {
      * 
      * @return the person id
      */
-    public String getPersonId() {
+    public String getPersonId()
+    {
         return personId;
     }
 
@@ -82,7 +86,8 @@ public class Person {
      * @param personId
      *            the new person id
      */
-    public void setPersonId(String personId) {
+    public void setPersonId(String personId)
+    {
         this.personId = personId;
     }
 
@@ -91,7 +96,8 @@ public class Person {
      * 
      * @return the person name
      */
-    public String getPersonName() {
+    public String getPersonName()
+    {
         return personName;
     }
 
@@ -101,7 +107,8 @@ public class Person {
      * @param personName
      *            the new person name
      */
-    public void setPersonName(String personName) {
+    public void setPersonName(String personName)
+    {
         this.personName = personName;
     }
 
@@ -110,7 +117,8 @@ public class Person {
      * 
      * @return the age
      */
-    public Long getAge() {
+    public Long getAge()
+    {
         return age;
     }
 
@@ -120,7 +128,8 @@ public class Person {
      * @param age
      *            the new age
      */
-    public void setAge(Long age) {
+    public void setAge(Long age)
+    {
         this.age = age;
     }
 
@@ -129,7 +138,8 @@ public class Person {
      * 
      * @return the salary
      */
-    public Double getSalary() {
+    public Double getSalary()
+    {
         return salary;
     }
 
@@ -139,7 +149,8 @@ public class Person {
      * @param salary
      *            the new salary
      */
-    public void setSalary(Double salary) {
+    public void setSalary(Double salary)
+    {
         this.salary = salary;
     }
 

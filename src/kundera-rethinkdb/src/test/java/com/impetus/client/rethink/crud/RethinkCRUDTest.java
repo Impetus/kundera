@@ -34,7 +34,8 @@ import com.impetus.client.rethink.entities.Person;
  * 
  * @author: karthikp.manchala
  */
-public class RethinkCRUDTest {
+public class RethinkCRUDTest
+{
 
     /** The Constant RETHINK_PU. */
     private static final String RETHINK_PU = "rethink_pu";
@@ -52,7 +53,8 @@ public class RethinkCRUDTest {
      *             the exception
      */
     @BeforeClass
-    public static void SetUpBeforeClass() throws Exception {
+    public static void SetUpBeforeClass() throws Exception
+    {
         emf = Persistence.createEntityManagerFactory(RETHINK_PU);
     }
 
@@ -63,7 +65,8 @@ public class RethinkCRUDTest {
      *             the exception
      */
     @Before
-    public void setUp() throws Exception {
+    public void setUp() throws Exception
+    {
         em = emf.createEntityManager();
     }
 
@@ -71,7 +74,8 @@ public class RethinkCRUDTest {
      * Test CRUD.
      */
     @Test
-    public void testCRUD() {
+    public void testCRUD()
+    {
         testInsert();
         testMerge();
         testDelete();
@@ -80,7 +84,8 @@ public class RethinkCRUDTest {
     /**
      * Test insert.
      */
-    private void testInsert() {
+    private void testInsert()
+    {
         Person person = new Person("101", "dev", 22, 30000.5);
         em.persist(person);
         em.clear();
@@ -95,7 +100,8 @@ public class RethinkCRUDTest {
     /**
      * Test merge.
      */
-    private void testMerge() {
+    private void testMerge()
+    {
         Person p = em.find(Person.class, "101");
         p.setPersonName("karthik");
         em.merge(p);
@@ -108,7 +114,8 @@ public class RethinkCRUDTest {
     /**
      * Test delete.
      */
-    private void testDelete() {
+    private void testDelete()
+    {
         Person p = em.find(Person.class, "101");
         em.remove(p);
         em.clear();
@@ -123,7 +130,8 @@ public class RethinkCRUDTest {
      *             the exception
      */
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() throws Exception
+    {
         em.close();
     }
 
@@ -134,8 +142,10 @@ public class RethinkCRUDTest {
      *             the exception
      */
     @AfterClass
-    public static void tearDownAfterClass() throws Exception {
-        if (emf != null) {
+    public static void tearDownAfterClass() throws Exception
+    {
+        if (emf != null)
+        {
             emf.close();
         }
     }

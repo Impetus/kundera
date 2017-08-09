@@ -29,7 +29,8 @@ import com.impetus.kundera.persistence.EntityReader;
  * 
  * @author karthikp.manchala
  */
-public class RethinkDBEntityReader extends AbstractEntityReader implements EntityReader {
+public class RethinkDBEntityReader extends AbstractEntityReader implements EntityReader
+{
 
     /**
      * Instantiates a new rethink db entity reader.
@@ -37,18 +38,22 @@ public class RethinkDBEntityReader extends AbstractEntityReader implements Entit
      * @param kunderaMetadata
      *            the kundera metadata
      */
-    public RethinkDBEntityReader(KunderaMetadata kunderaMetadata) {
+    public RethinkDBEntityReader(KunderaMetadata kunderaMetadata)
+    {
         super(kunderaMetadata);
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.impetus.kundera.persistence.AbstractEntityReader#findById(java.lang. Object,
-     * com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.client.Client)
+     * @see
+     * com.impetus.kundera.persistence.AbstractEntityReader#findById(java.lang.
+     * Object, com.impetus.kundera.metadata.model.EntityMetadata,
+     * com.impetus.kundera.client.Client)
      */
     @Override
-    public EnhanceEntity findById(Object primaryKey, EntityMetadata m, Client client) {
+    public EnhanceEntity findById(Object primaryKey, EntityMetadata m, Client client)
+    {
         return super.findById(primaryKey, m, client);
     }
 
@@ -56,11 +61,13 @@ public class RethinkDBEntityReader extends AbstractEntityReader implements Entit
      * (non-Javadoc)
      * 
      * @see
-     * com.impetus.kundera.persistence.EntityReader#populateRelation(com.impetus.kundera.metadata.model.EntityMetadata,
+     * com.impetus.kundera.persistence.EntityReader#populateRelation(com.impetus
+     * .kundera.metadata.model.EntityMetadata,
      * com.impetus.kundera.client.Client, int)
      */
     @Override
-    public List<EnhanceEntity> populateRelation(EntityMetadata m, Client client, int maxResults) {
+    public List<EnhanceEntity> populateRelation(EntityMetadata m, Client client, int maxResults)
+    {
         // TODO Auto-generated method stub
         return null;
     }

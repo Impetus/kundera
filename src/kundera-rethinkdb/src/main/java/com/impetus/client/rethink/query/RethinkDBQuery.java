@@ -32,7 +32,8 @@ import com.impetus.kundera.query.QueryImpl;
  * 
  * @author karthikp.manchala
  */
-public class RethinkDBQuery extends QueryImpl implements Query {
+public class RethinkDBQuery extends QueryImpl implements Query
+{
 
     /**
      * Instantiates a new rethink db query.
@@ -45,7 +46,8 @@ public class RethinkDBQuery extends QueryImpl implements Query {
      *            the kundera metadata
      */
     public RethinkDBQuery(KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator,
-        KunderaMetadata kunderaMetadata) {
+            KunderaMetadata kunderaMetadata)
+    {
         super(kunderaQuery, persistenceDelegator, kunderaMetadata);
         // TODO Auto-generated constructor stub
     }
@@ -53,23 +55,13 @@ public class RethinkDBQuery extends QueryImpl implements Query {
     /*
      * (non-Javadoc)
      * 
-     * @see com.impetus.kundera.query.QueryImpl#populateEntities(com.impetus.kundera.metadata.model.EntityMetadata,
-     * com.impetus.kundera.client.Client)
+     * @see
+     * com.impetus.kundera.query.QueryImpl#populateEntities(com.impetus.kundera.
+     * metadata.model.EntityMetadata, com.impetus.kundera.client.Client)
      */
     @Override
-    protected List populateEntities(EntityMetadata m, Client client) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.query.QueryImpl#findUsingLucene(com.impetus.kundera.metadata.model.EntityMetadata,
-     * com.impetus.kundera.client.Client)
-     */
-    @Override
-    protected List findUsingLucene(EntityMetadata m, Client client) {
+    protected List populateEntities(EntityMetadata m, Client client)
+    {
         // TODO Auto-generated method stub
         return null;
     }
@@ -78,11 +70,26 @@ public class RethinkDBQuery extends QueryImpl implements Query {
      * (non-Javadoc)
      * 
      * @see
-     * com.impetus.kundera.query.QueryImpl#recursivelyPopulateEntities(com.impetus.kundera.metadata.model.EntityMetadata
-     * , com.impetus.kundera.client.Client)
+     * com.impetus.kundera.query.QueryImpl#findUsingLucene(com.impetus.kundera.
+     * metadata.model.EntityMetadata, com.impetus.kundera.client.Client)
      */
     @Override
-    protected List recursivelyPopulateEntities(EntityMetadata m, Client client) {
+    protected List findUsingLucene(EntityMetadata m, Client client)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.query.QueryImpl#recursivelyPopulateEntities(com.
+     * impetus.kundera.metadata.model.EntityMetadata ,
+     * com.impetus.kundera.client.Client)
+     */
+    @Override
+    protected List recursivelyPopulateEntities(EntityMetadata m, Client client)
+    {
         // TODO Auto-generated method stub
         return null;
     }
@@ -93,7 +100,8 @@ public class RethinkDBQuery extends QueryImpl implements Query {
      * @see com.impetus.kundera.query.QueryImpl#getReader()
      */
     @Override
-    protected EntityReader getReader() {
+    protected EntityReader getReader()
+    {
         // TODO Auto-generated method stub
         return null;
     }
@@ -104,7 +112,8 @@ public class RethinkDBQuery extends QueryImpl implements Query {
      * @see com.impetus.kundera.query.QueryImpl#onExecuteUpdate()
      */
     @Override
-    protected int onExecuteUpdate() {
+    protected int onExecuteUpdate()
+    {
         // TODO Auto-generated method stub
         return 0;
     }
@@ -115,7 +124,8 @@ public class RethinkDBQuery extends QueryImpl implements Query {
      * @see com.impetus.kundera.query.QueryImpl#close()
      */
     @Override
-    public void close() {
+    public void close()
+    {
         // TODO Auto-generated method stub
 
     }
@@ -126,7 +136,8 @@ public class RethinkDBQuery extends QueryImpl implements Query {
      * @see com.impetus.kundera.query.QueryImpl#iterate()
      */
     @Override
-    public Iterator iterate() {
+    public Iterator iterate()
+    {
         // TODO Auto-generated method stub
         return null;
     }

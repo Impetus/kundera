@@ -9,7 +9,7 @@
 		<class>com.impetus.client.rethink.entities.Person</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
-			<property name="kundera.nodes" value="192.168.145.151" />
+			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="28015" />
 			<property name="kundera.keyspace" value="rethink" />
 			<property name="kundera.client" value="rethink" />

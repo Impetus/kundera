@@ -50,7 +50,8 @@ import com.rethinkdb.net.Connection;
  * 
  * @author karthikp.manchala
  */
-public class RethinkDBClient extends ClientBase implements Client<RethinkDBQuery>, ClientPropertiesSetter {
+public class RethinkDBClient extends ClientBase implements Client<RethinkDBQuery>, ClientPropertiesSetter
+{
 
     /** The Constant ID. */
     private static final String ID = "id";
@@ -83,7 +84,9 @@ public class RethinkDBClient extends ClientBase implements Client<RethinkDBQuery
      *            the client metadata
      */
     protected RethinkDBClient(KunderaMetadata kunderaMetadata, IndexManager indexManager, EntityReader reader,
-        Map<String, Object> properties, String persistenceUnit, Connection connection, ClientMetadata clientMetadata) {
+            Map<String, Object> properties, String persistenceUnit, Connection connection,
+            ClientMetadata clientMetadata)
+    {
         super(kunderaMetadata, properties, persistenceUnit);
         this.reader = reader;
         this.connection = connection;
@@ -94,12 +97,13 @@ public class RethinkDBClient extends ClientBase implements Client<RethinkDBQuery
     /*
      * (non-Javadoc)
      * 
-     * @see
-     * com.impetus.kundera.client.ClientPropertiesSetter#populateClientProperties(com.impetus.kundera.client.Client,
+     * @see com.impetus.kundera.client.ClientPropertiesSetter#
+     * populateClientProperties(com.impetus.kundera.client.Client,
      * java.util.Map)
      */
     @Override
-    public void populateClientProperties(Client client, Map<String, Object> properties) {
+    public void populateClientProperties(Client client, Map<String, Object> properties)
+    {
         // TODO Auto-generated method stub
 
     }
@@ -107,15 +111,17 @@ public class RethinkDBClient extends ClientBase implements Client<RethinkDBQuery
     /*
      * (non-Javadoc)
      * 
-     * @see com.impetus.kundera.client.Client#find(java.lang.Class, java.lang.Object)
+     * @see com.impetus.kundera.client.Client#find(java.lang.Class,
+     * java.lang.Object)
      */
     @Override
-    public Object find(Class entityClass, Object key) {
+    public Object find(Class entityClass, Object key)
+    {
 
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClass);
 
-        Object e =
-            r.db(entityMetadata.getSchema()).table(entityMetadata.getTableName()).get(key).run(connection, entityClass);
+        Object e = r.db(entityMetadata.getSchema()).table(entityMetadata.getTableName()).get(key).run(connection,
+                entityClass);
 
         PropertyAccessorHelper.setId(e, entityMetadata, key);
 
@@ -125,10 +131,12 @@ public class RethinkDBClient extends ClientBase implements Client<RethinkDBQuery
     /*
      * (non-Javadoc)
      * 
-     * @see com.impetus.kundera.client.Client#findAll(java.lang.Class, java.lang.String[], java.lang.Object[])
+     * @see com.impetus.kundera.client.Client#findAll(java.lang.Class,
+     * java.lang.String[], java.lang.Object[])
      */
     @Override
-    public <E> List<E> findAll(Class<E> entityClass, String[] columnsToSelect, Object... keys) {
+    public <E> List<E> findAll(Class<E> entityClass, String[] columnsToSelect, Object... keys)
+    {
         // TODO Auto-generated method stub
         return null;
     }
@@ -136,10 +144,12 @@ public class RethinkDBClient extends ClientBase implements Client<RethinkDBQuery
     /*
      * (non-Javadoc)
      * 
-     * @see com.impetus.kundera.client.Client#find(java.lang.Class, java.util.Map)
+     * @see com.impetus.kundera.client.Client#find(java.lang.Class,
+     * java.util.Map)
      */
     @Override
-    public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap) {
+    public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap)
+    {
         // TODO Auto-generated method stub
         return null;
     }
@@ -150,7 +160,8 @@ public class RethinkDBClient extends ClientBase implements Client<RethinkDBQuery
      * @see com.impetus.kundera.client.Client#close()
      */
     @Override
-    public void close() {
+    public void close()
+    {
         // TODO Auto-generated method stub
 
     }
@@ -159,11 +170,12 @@ public class RethinkDBClient extends ClientBase implements Client<RethinkDBQuery
      * (non-Javadoc)
      * 
      * @see
-     * com.impetus.kundera.client.Client#persistJoinTable(com.impetus.kundera.persistence.context.jointable.JoinTableData
-     * )
+     * com.impetus.kundera.client.Client#persistJoinTable(com.impetus.kundera.
+     * persistence.context.jointable.JoinTableData )
      */
     @Override
-    public void persistJoinTable(JoinTableData joinTableData) {
+    public void persistJoinTable(JoinTableData joinTableData)
+    {
         // TODO Auto-generated method stub
 
     }
@@ -171,12 +183,14 @@ public class RethinkDBClient extends ClientBase implements Client<RethinkDBQuery
     /*
      * (non-Javadoc)
      * 
-     * @see com.impetus.kundera.client.Client#getColumnsById(java.lang.String, java.lang.String, java.lang.String,
-     * java.lang.String, java.lang.Object, java.lang.Class)
+     * @see com.impetus.kundera.client.Client#getColumnsById(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.String, java.lang.Object,
+     * java.lang.Class)
      */
     @Override
     public <E> List<E> getColumnsById(String schemaName, String tableName, String pKeyColumnName, String columnName,
-        Object pKeyColumnValue, Class columnJavaType) {
+            Object pKeyColumnValue, Class columnJavaType)
+    {
         // TODO Auto-generated method stub
         return null;
     }
@@ -184,12 +198,14 @@ public class RethinkDBClient extends ClientBase implements Client<RethinkDBQuery
     /*
      * (non-Javadoc)
      * 
-     * @see com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String, java.lang.String, java.lang.String,
-     * java.lang.String, java.lang.Object, java.lang.Class)
+     * @see com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.String, java.lang.Object,
+     * java.lang.Class)
      */
     @Override
     public Object[] findIdsByColumn(String schemaName, String tableName, String pKeyName, String columnName,
-        Object columnValue, Class entityClazz) {
+            Object columnValue, Class entityClazz)
+    {
         // TODO Auto-generated method stub
         return null;
     }
@@ -197,11 +213,12 @@ public class RethinkDBClient extends ClientBase implements Client<RethinkDBQuery
     /*
      * (non-Javadoc)
      * 
-     * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String, java.lang.String, java.lang.String,
-     * java.lang.Object)
+     * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.Object)
      */
     @Override
-    public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue) {
+    public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
+    {
         // TODO Auto-generated method stub
 
     }
@@ -209,10 +226,12 @@ public class RethinkDBClient extends ClientBase implements Client<RethinkDBQuery
     /*
      * (non-Javadoc)
      * 
-     * @see com.impetus.kundera.client.Client#findByRelation(java.lang.String, java.lang.Object, java.lang.Class)
+     * @see com.impetus.kundera.client.Client#findByRelation(java.lang.String,
+     * java.lang.Object, java.lang.Class)
      */
     @Override
-    public List<Object> findByRelation(String colName, Object colValue, Class entityClazz) {
+    public List<Object> findByRelation(String colName, Object colValue, Class entityClazz)
+    {
         // TODO Auto-generated method stub
         return null;
     }
@@ -223,7 +242,8 @@ public class RethinkDBClient extends ClientBase implements Client<RethinkDBQuery
      * @see com.impetus.kundera.client.Client#getReader()
      */
     @Override
-    public EntityReader getReader() {
+    public EntityReader getReader()
+    {
         return reader;
     }
 
@@ -233,7 +253,8 @@ public class RethinkDBClient extends ClientBase implements Client<RethinkDBQuery
      * @see com.impetus.kundera.client.Client#getQueryImplementor()
      */
     @Override
-    public Class<RethinkDBQuery> getQueryImplementor() {
+    public Class<RethinkDBQuery> getQueryImplementor()
+    {
         // TODO Auto-generated method stub
         return null;
     }
@@ -244,7 +265,8 @@ public class RethinkDBClient extends ClientBase implements Client<RethinkDBQuery
      * @see com.impetus.kundera.client.Client#getIdGenerator()
      */
     @Override
-    public Generator getIdGenerator() {
+    public Generator getIdGenerator()
+    {
         // TODO Auto-generated method stub
         return null;
     }
@@ -252,17 +274,22 @@ public class RethinkDBClient extends ClientBase implements Client<RethinkDBQuery
     /*
      * (non-Javadoc)
      * 
-     * @see com.impetus.kundera.client.ClientBase#onPersist(com.impetus.kundera.metadata.model.EntityMetadata,
-     * java.lang.Object, java.lang.Object, java.util.List)
+     * @see com.impetus.kundera.client.ClientBase#onPersist(com.impetus.kundera.
+     * metadata.model.EntityMetadata, java.lang.Object, java.lang.Object,
+     * java.util.List)
      */
     @Override
-    protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders) {
-        if (!isUpdate) {
+    protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
+    {
+        if (!isUpdate)
+        {
             r.db(entityMetadata.getSchema()).table(entityMetadata.getTableName())
-                .insert(populateRmap(entityMetadata, entity)).run(connection);
-        } else {
+                    .insert(populateRmap(entityMetadata, entity)).run(connection);
+        }
+        else
+        {
             r.db(entityMetadata.getSchema()).table(entityMetadata.getTableName())
-                .update(populateRmap(entityMetadata, entity)).run(connection);
+                    .update(populateRmap(entityMetadata, entity)).run(connection);
         }
     }
 
@@ -275,9 +302,10 @@ public class RethinkDBClient extends ClientBase implements Client<RethinkDBQuery
      *            the entity
      * @return the map object
      */
-    private MapObject populateRmap(EntityMetadata entityMetadata, Object entity) {
-        MetamodelImpl metaModel =
-            (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(entityMetadata.getPersistenceUnit());
+    private MapObject populateRmap(EntityMetadata entityMetadata, Object entity)
+    {
+        MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
+                .getMetamodel(entityMetadata.getPersistenceUnit());
         Class entityClazz = entityMetadata.getEntityClazz();
         EntityType entityType = metaModel.entity(entityClazz);
         Set<Attribute> attributes = entityType.getAttributes();
@@ -296,15 +324,20 @@ public class RethinkDBClient extends ClientBase implements Client<RethinkDBQuery
      *            the iterator
      * @return the map object
      */
-    private MapObject iterateAndPopulateRmap(Object entity, MetamodelImpl metaModel, Iterator<Attribute> iterator) {
+    private MapObject iterateAndPopulateRmap(Object entity, MetamodelImpl metaModel, Iterator<Attribute> iterator)
+    {
         MapObject map = r.hashMap();
-        while (iterator.hasNext()) {
+        while (iterator.hasNext())
+        {
             Attribute attribute = iterator.next();
             Field field = (Field) attribute.getJavaMember();
             Object value = PropertyAccessorHelper.getObject(entity, field);
-            if (field.isAnnotationPresent(Id.class)) {
+            if (field.isAnnotationPresent(Id.class))
+            {
                 map.with(ID, value);
-            } else {
+            }
+            else
+            {
                 map.with(((AbstractAttribute) attribute).getJPAColumnName(), value);
             }
         }
@@ -314,10 +347,12 @@ public class RethinkDBClient extends ClientBase implements Client<RethinkDBQuery
     /*
      * (non-Javadoc)
      * 
-     * @see com.impetus.kundera.client.ClientBase#delete(java.lang.Object, java.lang.Object)
+     * @see com.impetus.kundera.client.ClientBase#delete(java.lang.Object,
+     * java.lang.Object)
      */
     @Override
-    protected void delete(Object entity, Object pKey) {
+    protected void delete(Object entity, Object pKey)
+    {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entity.getClass());
         r.db(entityMetadata.getSchema()).table(entityMetadata.getTableName()).get(pKey).delete().run(connection);
     }

@@ -28,7 +28,8 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
  * 
  * @author karthikp.manchala
  */
-public class RethinkDBPropertyReader extends AbstractPropertyReader implements PropertyReader {
+public class RethinkDBPropertyReader extends AbstractPropertyReader implements PropertyReader
+{
 
     /** The resmd. */
     public static RethinkDBSchemaMetadata resmd;
@@ -41,7 +42,8 @@ public class RethinkDBPropertyReader extends AbstractPropertyReader implements P
      * @param puMetadata
      *            the pu metadata
      */
-    public RethinkDBPropertyReader(Map externalProperties, final PersistenceUnitMetadata puMetadata) {
+    public RethinkDBPropertyReader(Map externalProperties, final PersistenceUnitMetadata puMetadata)
+    {
         super(externalProperties, puMetadata);
         resmd = new RethinkDBSchemaMetadata();
     }
@@ -49,10 +51,15 @@ public class RethinkDBPropertyReader extends AbstractPropertyReader implements P
     /*
      * (non-Javadoc)
      * 
-     * @see com.impetus.kundera.configure.AbstractPropertyReader#onXml(com.impetus. kundera.configure.ClientProperties)
+     * @see
+     * com.impetus.kundera.configure.AbstractPropertyReader#onXml(com.impetus.
+     * kundera.configure.ClientProperties)
      */
-    public void onXml(ClientProperties cp) {
-        if (cp != null) {
+    @Override
+    public void onXml(ClientProperties cp)
+    {
+        if (cp != null)
+        {
             resmd.setClientProperties(cp);
         }
     }
@@ -60,7 +67,8 @@ public class RethinkDBPropertyReader extends AbstractPropertyReader implements P
     /**
      * The Class RethinkDBSchemaMetadata.
      */
-    public class RethinkDBSchemaMetadata {
+    public class RethinkDBSchemaMetadata
+    {
 
         /** The client properties. */
         private ClientProperties clientProperties;
@@ -68,7 +76,8 @@ public class RethinkDBPropertyReader extends AbstractPropertyReader implements P
         /**
          * Instantiates a new rethink db schema metadata.
          */
-        public RethinkDBSchemaMetadata() {
+        public RethinkDBSchemaMetadata()
+        {
 
         }
 
@@ -77,7 +86,8 @@ public class RethinkDBPropertyReader extends AbstractPropertyReader implements P
          * 
          * @return the client properties
          */
-        public ClientProperties getClientProperties() {
+        public ClientProperties getClientProperties()
+        {
             return clientProperties;
         }
 
@@ -87,7 +97,8 @@ public class RethinkDBPropertyReader extends AbstractPropertyReader implements P
          * @param clientProperties
          *            the new client properties
          */
-        private void setClientProperties(ClientProperties clientProperties) {
+        private void setClientProperties(ClientProperties clientProperties)
+        {
             this.clientProperties = clientProperties;
         }
 
@@ -98,10 +109,14 @@ public class RethinkDBPropertyReader extends AbstractPropertyReader implements P
          *            the datastore
          * @return the data store
          */
-        public DataStore getDataStore(String datastore) {
-            if (getClientProperties() != null && getClientProperties().getDatastores() != null) {
-                for (DataStore dataStore : getClientProperties().getDatastores()) {
-                    if (dataStore.getName() != null && dataStore.getName().trim().equalsIgnoreCase(datastore)) {
+        public DataStore getDataStore(String datastore)
+        {
+            if (getClientProperties() != null && getClientProperties().getDatastores() != null)
+            {
+                for (DataStore dataStore : getClientProperties().getDatastores())
+                {
+                    if (dataStore.getName() != null && dataStore.getName().trim().equalsIgnoreCase(datastore))
+                    {
                         return dataStore;
                     }
                 }
