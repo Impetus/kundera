@@ -1421,10 +1421,12 @@ public abstract class CassandraDataHandlerBase
                     serializer.validate(field);
 
                     Object finalValue = serializer.deserialize(field);
-                    if (type.getClass().getSimpleName().equals("UTF8Type")){
+                    if (type.getClass().getSimpleName().equals("UTF8Type"))
+                    {
                         PropertyAccessorHelper.set(entity, fieldToSet, ((String) finalValue).getBytes());
                     }
-                    else{
+                    else
+                    {
                         PropertyAccessorHelper.set(entity, fieldToSet, finalValue);
                     }
                 }
@@ -1548,9 +1550,10 @@ public abstract class CassandraDataHandlerBase
         {
 
             String key = UTF8Serializer.instance.deserialize((schemaType.getKey()));
-            if (key.equals(((AbstractAttribute) attribute).getJavaMember().getName()))
+            if (key.equals(((AbstractAttribute) attribute).getJPAColumnName()))
             {
                 cqlColumnMetadata = schemaType.getValue();
+                break;
             }
         }
 

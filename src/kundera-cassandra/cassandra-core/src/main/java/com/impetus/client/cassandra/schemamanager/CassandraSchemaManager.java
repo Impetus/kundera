@@ -505,7 +505,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     {
         return !tableInfo.getEmbeddedColumnMetadatas().isEmpty();
     }
-    
+
     /**
      * Contains element collection columns.
      * 
@@ -760,11 +760,34 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             // are not allowed with compound/composite key.
             List<EmbeddedColumnInfo> compositeColumns = tableInfo.getEmbeddedColumnMetadatas();
             EmbeddableType compoEmbeddableType = null;
+
             if (!compositeColumns.isEmpty() && tableInfo.getTableIdType().isAnnotationPresent(Embeddable.class))
             {
-                compoEmbeddableType = compositeColumns.get(0).getEmbeddable();
-                onCompositeColumns(translator, compositeColumns.get(0).getColumns(), queryBuilder, columns,
-                        isCounterColumnType);
+                EmbeddedColumnInfo compositeId = null;
+                for (EmbeddedColumnInfo compositeCol : compositeColumns)
+                {
+                    if (compositeCol.getEmbeddedColumnName().equals(tableInfo.getIdColumnName()))
+                    {
+                        compositeId = compositeCol;
+                        break;
+                    }
+                }
+                MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                        puMetadata.getPersistenceUnitName());
+                // get list of names of all embeddables in compositeid
+                List compositeEmbeddables = new ArrayList<String>();
+                getCompositeIdEmbeddables(compositeId.getEmbeddable(), compositeEmbeddables, metaModel);
+
+                if (compositeColumns.size() > 1 || !tableInfo.getElementCollectionMetadatas().isEmpty())
+                {
+                    createTypeforEmbeddables(compositeEmbeddables);
+                    onEmbeddedColumns(translator, tableInfo, queryBuilder, compositeEmbeddables);
+                    onElementCollectionColumns(translator, tableInfo.getElementCollectionMetadatas(), queryBuilder);
+
+                }
+
+                compoEmbeddableType = compositeId.getEmbeddable();
+                onCompositeColumns(translator, compositeId.getColumns(), queryBuilder, columns, isCounterColumnType);
             }
             else
             {
@@ -773,8 +796,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                     // embedded create udts
                     // check for multiple embedded and collections in embedded
                     // entity
-                    createTypeforEmbeddables();
-                    onEmbeddedColumns(translator, tableInfo, queryBuilder);
+                    createTypeforEmbeddables(new ArrayList<String>());
+                    onEmbeddedColumns(translator, tableInfo, queryBuilder, new ArrayList<String>());
                     onElementCollectionColumns(translator, tableInfo.getElementCollectionMetadatas(), queryBuilder);
 
                 }
@@ -832,6 +855,35 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             updateExistingColumnFamily(tableInfo, ksDef, irex);
         }
 
+    }
+
+    /**
+     * Gets the composite id embeddables.
+     * 
+     * @param embeddable
+     *            the embeddable
+     * @param compositeEmbeddables
+     *            the composite embeddables
+     * @param metaModel
+     *            the meta model
+     * @return the composite id embeddables
+     */
+    private void getCompositeIdEmbeddables(EmbeddableType embeddable, List compositeEmbeddables, MetamodelImpl metaModel)
+    {
+        compositeEmbeddables.add(embeddable.getJavaType().getSimpleName());
+
+        for (Object column : embeddable.getAttributes())
+        {
+
+            Attribute columnAttribute = (Attribute) column;
+            Field f = (Field) columnAttribute.getJavaMember();
+
+            if (columnAttribute.getJavaType().isAnnotationPresent(Embeddable.class))
+            {
+                getCompositeIdEmbeddables(metaModel.embeddable(columnAttribute.getJavaType()), compositeEmbeddables,
+                        metaModel);
+            }
+        }
     }
 
     /**
@@ -940,24 +992,32 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      *            the table info
      * @param queryBuilder
      *            the query builder
+     * @param compositeEmbeddables
+     *            the composite embeddables
      */
-    private void onEmbeddedColumns(CQLTranslator translator, TableInfo tableInfo, StringBuilder queryBuilder)
+    private void onEmbeddedColumns(CQLTranslator translator, TableInfo tableInfo, StringBuilder queryBuilder,
+            List compositeEmbeddables)
     {
         List<EmbeddedColumnInfo> embeddedColumns = tableInfo.getEmbeddedColumnMetadatas();
         for (EmbeddedColumnInfo embColInfo : embeddedColumns)
         {
-            String cqlType = CQLTranslator.FROZEN + Constants.STR_LT + Constants.ESCAPE_QUOTE
-                    + embColInfo.getEmbeddable().getJavaType().getSimpleName() + Constants.ESCAPE_QUOTE
-                    + Constants.STR_GT + translator.COMMA_STR;
-            translator.appendColumnName(queryBuilder, embColInfo.getEmbeddedColumnName(), cqlType);
+            if (!compositeEmbeddables.contains(embColInfo.getEmbeddable().getJavaType().getSimpleName()))
+            {
+                String cqlType = CQLTranslator.FROZEN + Constants.STR_LT + Constants.ESCAPE_QUOTE
+                        + embColInfo.getEmbeddable().getJavaType().getSimpleName() + Constants.ESCAPE_QUOTE
+                        + Constants.STR_GT + translator.COMMA_STR;
+                translator.appendColumnName(queryBuilder, embColInfo.getEmbeddedColumnName(), cqlType);
+            }
         }
     }
 
     /**
      * Creates the typefor embeddables.
      * 
+     * @param compositeEmbeddables
+     *            the composite embeddables
      */
-    private void createTypeforEmbeddables()
+    private void createTypeforEmbeddables(List compositeEmbeddables)
     {
         if (!createdPuEmbeddables.contains(puMetadata.getPersistenceUnitName()))
         {
@@ -976,7 +1036,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
 
                 String typeQuery = CQLTranslator.CREATE_TYPE;
                 EmbeddableType embeddedColumn = (EmbeddableType) iter.next();
-                if (!embeddedColumn.getPersistenceType().equals(PersistenceType.EMBEDDABLE))
+                if (!embeddedColumn.getPersistenceType().equals(PersistenceType.EMBEDDABLE)
+                        || compositeEmbeddables.contains(embeddedColumn.getJavaType().getSimpleName()))
                 {
                     continue;
                 }
@@ -2257,7 +2318,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
 
             onSetSubComparator(cfDef, cfProperties, builder);
 
-//            onSetReplicateOnWrite(cfDef, cfProperties, builder);
+            // onSetReplicateOnWrite(cfDef, cfProperties, builder);
 
             onSetCompactionThreshold(cfDef, cfProperties, builder);
 
@@ -2281,8 +2342,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 builder.delete(builder.lastIndexOf(CQLTranslator.AND_CLAUSE), builder.length());
                 // builder.deleteCharAt(builder.length() - 2);
             }
-            
-         // Strip last WITH clause.
+
+            // Strip last WITH clause.
             if (builder != null && StringUtils.contains(builder.toString(), CQLTranslator.WITH_CLAUSE))
             {
                 builder.delete(builder.lastIndexOf(CQLTranslator.WITH_CLAUSE), builder.length());
@@ -2740,8 +2801,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         boolean isCounterColumnType = isCounterColumnType(tableInfo, defaultValidationClass);
         return containsCompositeKey(tableInfo)
                 || containsCollectionColumns(tableInfo)
-                || ((cql_version != null && cql_version.equals(CassandraConstants.CQL_VERSION_3_0)) &&
-                		(containsEmbeddedColumns(tableInfo) || containsElementCollectionColumns(tableInfo)))
+                || ((cql_version != null && cql_version.equals(CassandraConstants.CQL_VERSION_3_0)) && (containsEmbeddedColumns(tableInfo) || containsElementCollectionColumns(tableInfo)))
                 && !isCounterColumnType
                 || ((cql_version != null && cql_version.equals(CassandraConstants.CQL_VERSION_3_0)) && !tableInfo
                         .getType().equals(Type.SUPER_COLUMN_FAMILY.name()));
