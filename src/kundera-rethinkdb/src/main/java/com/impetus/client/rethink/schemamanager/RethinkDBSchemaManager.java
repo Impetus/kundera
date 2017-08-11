@@ -116,7 +116,7 @@ public class RethinkDBSchemaManager extends AbstractSchemaManager implements Sch
             }
             try
             {
-                connection = r.connection().hostname(host).port(28015).connect();
+                connection = r.connection().hostname(host).port(Integer.parseInt(port)).connect();
             }
             catch (Exception e)
             {
