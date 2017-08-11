@@ -62,6 +62,26 @@ public class RethinkDBClient extends ClientBase implements Client<RethinkDBQuery
     /** The Constant r. */
     private static final RethinkDB r = RethinkDB.r;
 
+    /**
+     * Gets the connection.
+     * 
+     * @return the connection
+     */
+    public Connection getConnection()
+    {
+        return connection;
+    }
+
+    /**
+     * Gets the r.
+     * 
+     * @return the r
+     */
+    public static RethinkDB getR()
+    {
+        return r;
+    }
+
     /** The reader. */
     private EntityReader reader;
 
@@ -256,7 +276,7 @@ public class RethinkDBClient extends ClientBase implements Client<RethinkDBQuery
     public Class<RethinkDBQuery> getQueryImplementor()
     {
         // TODO Auto-generated method stub
-        return null;
+        return RethinkDBQuery.class;
     }
 
     /*
