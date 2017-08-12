@@ -91,6 +91,16 @@ public class RethinkQueryTest
         Assert.assertEquals(5, results.size());
         assertResults(results, T, T, T, T, T);
 
+        query = em.createQuery("Select p.personName,p.age from Person p where p.personId = '103'");
+        results = query.getResultList();
+        Assert.assertEquals(1, results.size());
+        Person p = results.get(0);
+        Assert.assertNotNull(p);
+        Assert.assertEquals("pg", p.getPersonName());
+        Assert.assertEquals(new Long(30), p.getAge());
+        Assert.assertNull(p.getPersonId());
+        Assert.assertNull(p.getSalary());
+
         query = em.createQuery("Select p from Person p where p.personId = '103'");
         results = query.getResultList();
         Assert.assertEquals(1, results.size());
