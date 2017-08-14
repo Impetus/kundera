@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.impetus</groupId>
 		<artifactId>kundera</artifactId>
-		<version>4.0-SNAPSHOT</version>
+		<version>3.10</version>
 	</parent>
 	<groupId>com.impetus.kundera.client</groupId>
 	<artifactId>kundera-oracle-nosql</artifactId>
