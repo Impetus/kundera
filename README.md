@@ -10,7 +10,8 @@ Kundera is a "Polyglot Object Mapper" with a JPA interface. The idea behind Kund
 
 Latest 
 ======
-* Kundera now supports **Apache Kudu**. Check [Kundera with Kudu](https://github.com/impetus-opensource/Kundera/wiki/Kundera-with-Kudu) for more details.
+* Kundera now supports **RethinkDB**. Check [Kundera with RethinkDB](https://github.com/impetus-opensource/Kundera/wiki/Kundera-with-RethinkDB) for more details.
+* Kundera supports **Apache Kudu**. Check [Kundera with Kudu](https://github.com/impetus-opensource/Kundera/wiki/Kundera-with-Kudu) for more details.
 * Want to step out of JPA world and still take advantage of Kundera? Check [Kundera Data as Object](https://github.com/impetus-opensource/Kundera/wiki/Kundera-Data-As-Object).
 * Want to save your large files in MongoDB GridFS in the same JPA way. Check [GridFS support in Kundera](https://github.com/impetus-opensource/Kundera/wiki/GridFS-support-with-Kundera-MongoDB).
 * Perform SQL queries over big data using Kundera with **Apache Spark** as the query engine. Check [Kundera with Spark](https://github.com/impetus-opensource/Kundera/wiki/Kundera-with-Spark) for more details. 
@@ -35,7 +36,7 @@ You can find the list of data stores(specific versions) supported by Kundera [he
 
 Getting Started
 ===============
-The latest stable release of Kundera is <b>3.9</b>.
+The latest stable release of Kundera is <b>3.10</b>.
 It is a maven based project . You can either download it directly from github and build using following command :
 
 <b>mvn clean install -Dfile src/pom.xml </b>
