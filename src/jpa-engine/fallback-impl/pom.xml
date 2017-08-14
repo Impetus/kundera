@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.impetus.kundera.core</groupId>
 		<artifactId>core-parent</artifactId>
-		<version>3.10</version>
+		<version>3.11-SNAPSHOT</version>
 	</parent>
 
 	<groupId>com.impetus.kundera.core</groupId>
