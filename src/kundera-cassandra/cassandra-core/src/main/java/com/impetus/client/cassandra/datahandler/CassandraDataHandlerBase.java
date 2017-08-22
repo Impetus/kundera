@@ -90,6 +90,15 @@ import com.impetus.kundera.utils.TimestampGenerator;
 public abstract class CassandraDataHandlerBase
 {
 
+    /** The Constant MAX. */
+    private static final String MAX = "max";
+
+    /** The Constant MIN. */
+    private static final String MIN = "min";
+
+    /** The Constant COUNT. */
+    private static final String COUNT = "count";
+
     /** The log. */
     private static Logger log = LoggerFactory.getLogger(CassandraDataHandlerBase.class);
 
@@ -1169,7 +1178,8 @@ public abstract class CassandraDataHandlerBase
                         }
                     }
                 }
-                else if (metaModel.isEmbeddable(((AbstractAttribute) m.getIdAttribute()).getBindableJavaType()))
+                else if (metaModel.isEmbeddable(((AbstractAttribute) m.getIdAttribute()).getBindableJavaType())
+                        && !isAggregate(thriftColumnName))
                 {
                     entity = populateCompositeId(m, entity, thriftColumnName, thriftColumnValue, metaModel,
                             m.getIdAttribute(), m.getEntityClazz());
@@ -1220,6 +1230,23 @@ public abstract class CassandraDataHandlerBase
 
         }
         return entity;
+    }
+
+    /**
+     * Checks if is aggregate.
+     * 
+     * @param thriftColumnName
+     *            the thrift column name
+     * @return true, if is aggregate
+     */
+    private boolean isAggregate(String thriftColumnName)
+    {
+        if (thriftColumnName.equalsIgnoreCase(COUNT) || thriftColumnName.equalsIgnoreCase(MIN)
+                || thriftColumnName.equalsIgnoreCase(MAX))
+        {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -1628,8 +1655,10 @@ public abstract class CassandraDataHandlerBase
      *            the field
      * @param metaModel
      *            the meta model
-     * @param embeddedObject
-     *            the embedded object
+     * @param embeddedClass
+     *            the embedded class
+     * @param useNativeProtocol2
+     *            the use native protocol2
      * @return the object
      */
     private Object setElementCollectionMap(MapType mapType, ByteBuffer thriftColumnValue, Object entity, Field field,
@@ -1674,8 +1703,10 @@ public abstract class CassandraDataHandlerBase
      *            the field
      * @param metaModel
      *            the meta model
-     * @param embeddedObject
-     *            the embedded object
+     * @param embeddedClass
+     *            the embedded class
+     * @param useNativeProtocol2
+     *            the use native protocol2
      * @return the object
      */
     private Object setElementCollectionSet(SetType setType, ByteBuffer thriftColumnValue, Object entity, Field field,
@@ -1720,8 +1751,10 @@ public abstract class CassandraDataHandlerBase
      *            the field
      * @param metaModel
      *            the meta model
-     * @param embeddedObject
-     *            the embedded object
+     * @param embeddedClass
+     *            the embedded class
+     * @param useNativeProtocol2
+     *            the use native protocol2
      * @return the object
      */
     private Object setElementCollectionList(ListType listType, ByteBuffer thriftColumnValue, Object entity,
