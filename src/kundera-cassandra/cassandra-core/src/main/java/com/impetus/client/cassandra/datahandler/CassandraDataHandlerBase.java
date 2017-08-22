@@ -90,6 +90,27 @@ import com.impetus.kundera.utils.TimestampGenerator;
 public abstract class CassandraDataHandlerBase
 {
 
+    /** The Constant SYS_SUM. */
+    private static final String SYS_SUM = "system.sum";
+
+    /** The Constant SYS_AVG. */
+    private static final String SYS_AVG = "system.avg";
+
+    /** The Constant SYS_MAX. */
+    private static final String SYS_MAX = "system.max";
+
+    /** The Constant SYS_MIN. */
+    private static final String SYS_MIN = "system.min";
+
+    /** The Constant SYS_COUNT. */
+    private static final String SYS_COUNT = "system.count";
+
+    /** The Constant SUM. */
+    private static final String SUM = "sum";
+
+    /** The Constant AVG. */
+    private static final String AVG = "avg";
+
     /** The Constant MAX. */
     private static final String MAX = "max";
 
@@ -1241,8 +1262,15 @@ public abstract class CassandraDataHandlerBase
      */
     private boolean isAggregate(String thriftColumnName)
     {
-        if (thriftColumnName.equalsIgnoreCase(COUNT) || thriftColumnName.equalsIgnoreCase(MIN)
-                || thriftColumnName.equalsIgnoreCase(MAX))
+        if (thriftColumnName.startsWith(SYS_COUNT) || thriftColumnName.startsWith(SYS_MIN)
+                || thriftColumnName.startsWith(SYS_MAX) || thriftColumnName.startsWith(SYS_AVG)
+                || thriftColumnName.startsWith(SYS_SUM))
+        {
+            return true;
+        }
+        else if (thriftColumnName.startsWith(COUNT) || thriftColumnName.startsWith(MIN)
+                || thriftColumnName.startsWith(MAX) || thriftColumnName.startsWith(AVG)
+                || thriftColumnName.startsWith(SUM))
         {
             return true;
         }
