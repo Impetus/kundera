@@ -28,6 +28,7 @@ import java.util.Set;
 
 import javassist.Modifier;
 
+import javax.persistence.Embeddable;
 import javax.persistence.Transient;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
@@ -419,11 +420,7 @@ public class CassQuery extends QueryImpl
                             Field[] fields = m.getIdAttribute().getBindableJavaType().getDeclaredFields();
                             for (Field field : fields)
                             {
-                                if (!ReflectUtils.isTransientOrStatic(field))
-                                {
-                                    Attribute compositeColumn = compoundKey.getAttribute(field.getName());
-                                    columns.add(((AbstractAttribute) compositeColumn).getJPAColumnName());
-                                }
+                                addCompositeIdToColumns(metamodel, compoundKey, columns, field);
                             }
                         }
                         else if (m.getIdAttribute().equals(attribute) && compoundKey == null)
@@ -445,6 +442,45 @@ public class CassQuery extends QueryImpl
             log.info("No record found, returning null.");
         }
         return null;
+    }
+
+    /**
+     * Adds the composite id to columns.
+     * 
+     * @param metamodel
+     *            the metamodel
+     * @param compoundKey
+     *            the compound key
+     * @param columns
+     *            the columns
+     * @param field
+     *            the field
+     */
+    private void addCompositeIdToColumns(MetamodelImpl metamodel, EmbeddableType compoundKey, List<String> columns,
+            Field field)
+    {
+        if (!ReflectUtils.isTransientOrStatic(field))
+        {
+            Attribute compositeColumn = compoundKey.getAttribute(field.getName());
+            if (compositeColumn.getJavaType().isAnnotationPresent(Embeddable.class))
+            {
+                // partition key
+                EmbeddableType partitionCol = metamodel.embeddable(compositeColumn.getJavaType());
+                Set<Attribute> cols = partitionCol.getAttributes();
+                for (Attribute col : cols)
+                {
+                    Field f = (Field) col.getJavaMember();
+                    if (!ReflectUtils.isTransientOrStatic(f))
+                    {
+                        columns.add(((AbstractAttribute) col).getJPAColumnName());
+                    }
+                }
+            }
+            else
+            {
+                columns.add(((AbstractAttribute) compositeColumn).getJPAColumnName());
+            }
+        }
     }
 
     /**
@@ -853,7 +889,8 @@ public class CassQuery extends QueryImpl
                     isPresent = buildWhereClause(builder, isPresent, translator, condition, value, useInClause,
                             ((AbstractAttribute) m.getIdAttribute()), CassandraUtilities.getIdColumnName(
                                     kunderaMetadata, m, externalProperties,
-                                    ((CassandraClientBase) persistenceDelegeator.getClient(m)).isCql3Enabled(m)), useToken);
+                                    ((CassandraClientBase) persistenceDelegeator.getClient(m)).isCql3Enabled(m)),
+                            useToken);
                 }
                 else
                 {
