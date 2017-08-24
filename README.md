@@ -28,6 +28,7 @@ Kundera currently supports following data stores :
 *  OracleNoSQL
 *  Neo4j
 *  Couchdb
+*  RethinkDB
 *  Kudu
 *  Relational databases
 *  Apache Spark
