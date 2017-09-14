@@ -97,7 +97,7 @@ public class KuduQueryTest
         Assert.assertEquals("karthik", person.getPersonName());
         Assert.assertNull(person.getPersonId());
         Assert.assertNull(person.getSalary());
-        Assert.assertNull(person.getAge());
+        Assert.assertEquals(0, person.getAge());
 
         query = em.createQuery("Select p from Person p where p.age >= 20");
         results = query.getResultList();
