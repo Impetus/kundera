@@ -86,10 +86,20 @@ public class RethinkQueryTest
     @Test
     public void testSelect()
     {
-        Query query = em.createQuery("Select p.personName from Person p");
+        Query query = em.createQuery("Select p from Person p");
         List<Person> results = query.getResultList();
         Assert.assertEquals(5, results.size());
         assertResults(results, T, T, T, T, T);
+        
+        query = em.createQuery("Select p.personName from Person p where p.age = 20");
+        results = query.getResultList();
+        Assert.assertEquals(1, results.size());
+        Person person = results.get(0);
+        Assert.assertNotNull(person);
+        Assert.assertEquals("karthik", person.getPersonName());
+        Assert.assertNull(person.getPersonId());
+        Assert.assertNull(person.getSalary());
+        Assert.assertNull(person.getAge());
 
         query = em.createQuery("Select p.personName,p.age from Person p where p.personId = '103'");
         results = query.getResultList();

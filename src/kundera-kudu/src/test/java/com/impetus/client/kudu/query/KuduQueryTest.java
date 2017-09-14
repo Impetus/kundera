@@ -83,20 +83,31 @@ public class KuduQueryTest
     @Test
     public void testSelect()
     {
-        Query query = em.createQuery("Select p from Person p where p.age >= 20");
+
+        Query query = em.createQuery("Select p from Person p");
         List<Person> results = query.getResultList();
+        Assert.assertEquals(5, results.size());
+        assertResults(results, T, T, T, T, T);
+
+        query = em.createQuery("Select p.personName from Person p where p.age = 20");
+        results = query.getResultList();
+        Assert.assertEquals(1, results.size());
+        Person person = results.get(0);
+        Assert.assertNotNull(person);
+        Assert.assertEquals("karthik", person.getPersonName());
+        Assert.assertNull(person.getPersonId());
+        Assert.assertNull(person.getSalary());
+        Assert.assertNull(person.getAge());
+
+        query = em.createQuery("Select p from Person p where p.age >= 20");
+        results = query.getResultList();
         Assert.assertEquals(4, results.size());
         assertResults(results, F, T, T, T, T);
-        
+
         query = em.createQuery("Select p from Person p where p.age > 20");
         results = query.getResultList();
         Assert.assertEquals(3, results.size());
         assertResults(results, F, F, T, T, T);
-
-        query = em.createQuery("Select p.personName from Person p");
-        results = query.getResultList();
-        Assert.assertEquals(5, results.size());
-        assertResults(results, T, T, T, T, T);
 
         query = em.createQuery("Select p from Person p where p.personId = '101'");
         results = query.getResultList();
@@ -106,19 +117,19 @@ public class KuduQueryTest
         query = em.createQuery("Select p.age, p.salary from Person p where p.age >= 20 and p.age <= 40");
         results = query.getResultList();
         Assert.assertEquals(3, results.size());
-        
+
         query = em.createQuery("Select p.age, p.salary from Person p where p.age >= ?1 and p.age <= ?2");
         query.setParameter(1, 20);
         query.setParameter(2, 40);
         results = query.getResultList();
         Assert.assertEquals(3, results.size());
-        
+
         query = em.createQuery("Select p.age, p.salary from Person p where p.age >= :age1 and p.age <= :age2");
         query.setParameter("age1", 20);
         query.setParameter("age2", 40);
         results = query.getResultList();
         Assert.assertEquals(3, results.size());
-        
+
         query = em.createQuery("Select p from Person p where p.personId in (101, 104)");
         results = query.getResultList();
         Assert.assertEquals(2, results.size());

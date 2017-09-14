@@ -110,12 +110,22 @@ public final class KunderaQueryUtils
 
     public static List<String> getSelectColumns(JPQLExpression jpqlExpression)
     {
-        List<String> columns = null;
+        List<String> columns;
         if (isSelectStatement(jpqlExpression))
         {
-            columns = new ArrayList<String>();
-            SelectClause k = ((SelectClause) ((SelectStatement) jpqlExpression.getQueryStatement()).getSelectClause());
-            if (k.getSelectExpression() instanceof CollectionExpression)
+            columns = new ArrayList<>();
+            SelectClause k = (SelectClause) ((SelectStatement) jpqlExpression.getQueryStatement()).getSelectClause();
+
+            Expression selExp = k.getSelectExpression();
+
+            if (selExp instanceof StateFieldPathExpression)
+            {
+                if (selExp.toActualText().indexOf(".") > 0)
+                {
+                    columns.add(selExp.toActualText().split("[.]")[1]);
+                }
+            }
+            else if (selExp instanceof CollectionExpression)
             {
                 CollectionExpression l = ((CollectionExpression) k.getSelectExpression());
                 ListIterable<Expression> list = l.children();
