@@ -121,7 +121,7 @@ public class CouchbaseClient extends ClientBase implements Client<CouchbaseQuery
         }
         finally
         {
-            CouchbaseBucketUtils.closeBucket(cluster, bucket);
+            CouchbaseBucketUtils.closeBucket(bucket);
         }
 
         if (doc == null)
@@ -299,7 +299,7 @@ public class CouchbaseClient extends ClientBase implements Client<CouchbaseQuery
         }
         finally
         {
-            CouchbaseBucketUtils.closeBucket(cluster, bucket);
+            CouchbaseBucketUtils.closeBucket(bucket);
         }
     }
 
@@ -322,7 +322,7 @@ public class CouchbaseClient extends ClientBase implements Client<CouchbaseQuery
         }
         finally
         {
-            CouchbaseBucketUtils.closeBucket(cluster, bucket);
+            CouchbaseBucketUtils.closeBucket(bucket);
         }
     }
 
@@ -339,16 +339,16 @@ public class CouchbaseClient extends ClientBase implements Client<CouchbaseQuery
     {
         Bucket bucket = null;
         N1qlQueryResult list;
-        N1qlQuery query = N1qlQuery.simple(stmt, N1qlParams.build().consistency(ScanConsistency.REQUEST_PLUS));
         try
         {
             bucket = CouchbaseBucketUtils.openBucket(cluster, em.getTableName());
+            N1qlQuery query = N1qlQuery.simple(stmt, N1qlParams.build().consistency(ScanConsistency.REQUEST_PLUS));
             list = bucket.query(query);
             LOGGER.debug("Executed query : " + query.toString() + " on the " + bucket.name() + " Bucket");
         }
         finally
         {
-            CouchbaseBucketUtils.closeBucket(cluster, bucket);
+            CouchbaseBucketUtils.closeBucket(bucket);
         }
         validateQueryResults(stmt.toString(), list);
         List records = new ArrayList<>();
@@ -391,7 +391,7 @@ public class CouchbaseClient extends ClientBase implements Client<CouchbaseQuery
         }
         finally
         {
-            CouchbaseBucketUtils.closeBucket(cluster, bucket);
+            CouchbaseBucketUtils.closeBucket(bucket);
         }
         validateQueryResults(n1qlQuery, result);
         return result.allRows();

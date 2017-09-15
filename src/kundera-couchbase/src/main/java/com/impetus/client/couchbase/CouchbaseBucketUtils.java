@@ -1,5 +1,7 @@
 package com.impetus.client.couchbase;
 
+import java.util.concurrent.TimeUnit;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,10 +40,14 @@ public class CouchbaseBucketUtils
      */
     public static Bucket openBucket(CouchbaseCluster cluster, String name)
     {
-        clusterNullCheck(cluster);
+        if (cluster == null)
+        {
+            throw new KunderaException("CouchbaseCluster object can't be null");
+        }
+
         try
         {
-            Bucket bucket = cluster.openBucket(name);
+            Bucket bucket = cluster.openBucket(name, 1, TimeUnit.MINUTES);
             LOGGER.debug("Bucket [" + name + "] is opened!");
             return bucket;
         }
@@ -61,11 +67,10 @@ public class CouchbaseBucketUtils
      * @param bucket
      *            the bucket
      */
-    public static void closeBucket(CouchbaseCluster cluster, Bucket bucket)
+    public static void closeBucket(Bucket bucket)
     {
         if (bucket != null)
         {
-            clusterNullCheck(cluster);
             if (!bucket.close())
             {
                 LOGGER.error("Not able to close bucket [" + bucket.name() + "].");
@@ -75,21 +80,6 @@ public class CouchbaseBucketUtils
             {
                 LOGGER.debug("Bucket [" + bucket.name() + "] is closed!");
             }
-        }
-    }
-
-    /**
-     * Cluster null check.
-     *
-     * @param cluster
-     *            the cluster
-     */
-    private static void clusterNullCheck(CouchbaseCluster cluster)
-    {
-        if (cluster == null)
-        {
-            LOGGER.error("CouchbaseCluster object can't be null");
-            throw new IllegalArgumentException("CouchbaseCluster object can't be null");
         }
     }
 

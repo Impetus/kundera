@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import com.couchbase.client.java.CouchbaseCluster;
 import com.impetus.client.couchbase.query.CouchbaseEntityReader;
 import com.impetus.client.couchbase.schemamanager.CouchbaseSchemaManager;
+import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
@@ -194,7 +195,7 @@ public class CouchbaseClientFactory extends GenericClientFactory
      */
     private String[] splitHostNames(String hostNames)
     {
-        String[] hostArray = hostNames.split(",");
+        String[] hostArray = hostNames.split(Constants.COMMA);
         String[] hosts = new String[hostArray.length];
         for (int i = 0; i < hostArray.length; i++)
         {

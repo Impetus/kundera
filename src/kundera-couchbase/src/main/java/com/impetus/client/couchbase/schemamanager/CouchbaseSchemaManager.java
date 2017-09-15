@@ -225,7 +225,14 @@ public class CouchbaseSchemaManager extends AbstractSchemaManager implements Sch
             /*
              * Ignoring if indexes pre-exist
              */
-            bucket.bucketManager().createN1qlPrimaryIndex(buildIndexName(bucketName), true, false);
+            boolean indexCreated = bucket.bucketManager().createN1qlPrimaryIndex(buildIndexName(bucketName), true,
+                    false);
+
+            if (!indexCreated)
+            {
+                LOGGER.error("Not able to create Niql primary index for bucket [" + bucketName + "].");
+                throw new KunderaException("Not able to create Niql primary index for bucket [" + bucketName + "].");
+            }
 
             LOGGER.debug("Niql primary Index are created for bucket [" + bucketName + "].");
         }
@@ -236,7 +243,7 @@ public class CouchbaseSchemaManager extends AbstractSchemaManager implements Sch
         }
         finally
         {
-            CouchbaseBucketUtils.closeBucket(cluster, bucket);
+            CouchbaseBucketUtils.closeBucket(bucket);
         }
 
     }
