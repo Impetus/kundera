@@ -1,7 +1,5 @@
 package com.impetus.client.couchbase;
 
-import java.util.concurrent.TimeUnit;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +45,7 @@ public class CouchbaseBucketUtils
 
         try
         {
-            Bucket bucket = cluster.openBucket(name, 1, TimeUnit.MINUTES);
+            Bucket bucket = cluster.openBucket(name);
             LOGGER.debug("Bucket [" + name + "] is opened!");
             return bucket;
         }
