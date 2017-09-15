@@ -98,6 +98,7 @@
 				<module>kundera-redis</module>
 				<module>kundera-oracle-nosql</module>
 				<module>kundera-couchdb</module>
+				<module>kundera-couchbase</module>
 				<module>kundera-tests</module>
 			</modules>
 		</profile>
@@ -152,6 +153,16 @@
 			<modules>
 				<module>jpa-engine</module>
 				<module>kundera-couchdb</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>couchbase</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<modules>
+				<module>jpa-engine</module>
+				<module>kundera-couchbase</module>
 			</modules>
 		</profile>
 		<profile>
