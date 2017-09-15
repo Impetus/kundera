@@ -88,19 +88,6 @@ public class CouchbaseCRUDTest
     {
         Person person = new Person("101", "dev", 22, 30000.5);
         em.persist(person);
-        
-         person = new Person("102", "dev", 22, 30000.5);
-        em.persist(person);
-        
-         person = new Person("103", "dev", 22, 30000.5);
-        em.persist(person);
-        
-         person = new Person("104", "dev", 22, 30000.5);
-        em.persist(person);
-        
-         person = new Person("105", "dev", 22, 30000.5);
-        em.persist(person);
-        
         em.clear();
         Person p = em.find(Person.class, "101");
         Assert.assertNotNull(p);
@@ -130,14 +117,6 @@ public class CouchbaseCRUDTest
     private void testDelete()
     {
         Person p = em.find(Person.class, "101");
-        em.remove(p);
-        p.setPersonId("102");
-        em.remove(p);
-        p.setPersonId("103");
-        em.remove(p);
-        p.setPersonId("104");
-        em.remove(p);
-        p.setPersonId("105");
         em.remove(p);
         em.clear();
         Person p1 = em.find(Person.class, "101");
