@@ -25,7 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.couchbase.client.java.Bucket;
-import com.couchbase.client.java.CouchbaseCluster;
 import com.couchbase.client.java.document.JsonDocument;
 import com.couchbase.client.java.document.json.JsonObject;
 import com.couchbase.client.java.query.N1qlParams;
@@ -60,8 +59,8 @@ public class CouchbaseClient extends ClientBase implements Client<CouchbaseQuery
     /** The Constant LOGGER. */
     private static final Logger LOGGER = LoggerFactory.getLogger(CouchbaseClient.class);
 
-    /** The cluster. */
-    private CouchbaseCluster cluster;
+    /** The bucket. */
+    private Bucket bucket;
 
     /** The reader. */
     private EntityReader reader;
@@ -82,18 +81,17 @@ public class CouchbaseClient extends ClientBase implements Client<CouchbaseQuery
      *            the properties
      * @param persistenceUnit
      *            the persistence unit
-     * @param cluster
-     *            the cluster
+     * @param bucket
+     *            the bucket
      * @param clientMetadata
      *            the client metadata
      */
     protected CouchbaseClient(KunderaMetadata kunderaMetadata, IndexManager indexManager, EntityReader reader,
-            Map<String, Object> properties, String persistenceUnit, CouchbaseCluster cluster,
-            ClientMetadata clientMetadata)
+            Map<String, Object> properties, String persistenceUnit, Bucket bucket, ClientMetadata clientMetadata)
     {
         super(kunderaMetadata, properties, persistenceUnit);
         this.reader = reader;
-        this.cluster = cluster;
+        this.bucket = bucket;
         this.indexManager = indexManager;
         this.clientMetadata = clientMetadata;
         handler = new DefaultCouchbaseDataHandler();
@@ -110,19 +108,10 @@ public class CouchbaseClient extends ClientBase implements Client<CouchbaseQuery
     {
 
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClass);
-        Bucket bucket = null;
         JsonDocument doc;
-        try
-        {
-            bucket = CouchbaseBucketUtils.openBucket(cluster, entityMetadata.getTableName());
-            doc = bucket.get(key.toString());
-            LOGGER.debug("Found result for ID : " + key.toString() + " in the " + bucket.name() + " Bucket");
-
-        }
-        finally
-        {
-            CouchbaseBucketUtils.closeBucket(bucket);
-        }
+        String id = generateJsonDocId(entityMetadata.getTableName(), key.toString());
+        doc = bucket.get(id);
+        LOGGER.debug("Found result for ID : " + key.toString() + " in the " + bucket.name() + " Bucket");
 
         if (doc == null)
         {
@@ -280,26 +269,17 @@ public class CouchbaseClient extends ClientBase implements Client<CouchbaseQuery
     @Override
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
     {
-        Bucket bucket = null;
-        try
-        {
-            bucket = CouchbaseBucketUtils.openBucket(cluster, entityMetadata.getTableName());
-            JsonDocument doc = handler.getDocumentFromEntity(entityMetadata, entity, kunderaMetadata);
+        JsonDocument doc = handler.getDocumentFromEntity(entityMetadata, entity, kunderaMetadata);
 
-            if (!isUpdate)
-            {
-                bucket.insert(doc);
-                LOGGER.debug("Inserted document with ID : " + doc.id() + " in the " + bucket.name() + " Bucket");
-            }
-            else
-            {
-                bucket.upsert(doc);
-                LOGGER.debug("Updated document with ID : " + doc.id() + " in the " + bucket.name() + " Bucket");
-            }
-        }
-        finally
+        if (!isUpdate)
         {
-            CouchbaseBucketUtils.closeBucket(bucket);
+            bucket.insert(doc);
+            LOGGER.debug("Inserted document with ID : " + doc.id() + " in the " + bucket.name() + " Bucket");
+        }
+        else
+        {
+            bucket.upsert(doc);
+            LOGGER.debug("Updated document with ID : " + doc.id() + " in the " + bucket.name() + " Bucket");
         }
     }
 
@@ -313,17 +293,23 @@ public class CouchbaseClient extends ClientBase implements Client<CouchbaseQuery
     protected void delete(Object entity, Object pKey)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entity.getClass());
-        Bucket bucket = null;
-        try
-        {
-            bucket = CouchbaseBucketUtils.openBucket(cluster, entityMetadata.getTableName());
-            bucket.remove(pKey.toString());
-            LOGGER.debug("Deleted document with ID : " + pKey.toString() + " from the " + bucket.name() + " Bucket");
-        }
-        finally
-        {
-            CouchbaseBucketUtils.closeBucket(bucket);
-        }
+        String id = generateJsonDocId(entityMetadata.getTableName(), pKey.toString());
+        bucket.remove(id);
+        LOGGER.debug("Deleted document with ID : " + id + " from the " + bucket.name() + " Bucket");
+    }
+
+    /**
+     * Generate json doc id.
+     *
+     * @param tableName
+     *            the table name
+     * @param pKey
+     *            the key
+     * @return the string
+     */
+    private String generateJsonDocId(String tableName, String pKey)
+    {
+        return tableName + "_" + pKey;
     }
 
     /**
@@ -337,29 +323,19 @@ public class CouchbaseClient extends ClientBase implements Client<CouchbaseQuery
      */
     public List executeQuery(Statement stmt, EntityMetadata em)
     {
-        Bucket bucket = null;
-        N1qlQueryResult list;
-        try
-        {
-            bucket = CouchbaseBucketUtils.openBucket(cluster, em.getTableName());
-            N1qlQuery query = N1qlQuery.simple(stmt, N1qlParams.build().consistency(ScanConsistency.REQUEST_PLUS));
-            list = bucket.query(query);
-            LOGGER.debug("Executed query : " + query.toString() + " on the " + bucket.name() + " Bucket");
-        }
-        finally
-        {
-            CouchbaseBucketUtils.closeBucket(bucket);
-        }
+        N1qlQuery query = N1qlQuery.simple(stmt, N1qlParams.build().consistency(ScanConsistency.REQUEST_PLUS));
+        N1qlQueryResult list = bucket.query(query);
+        LOGGER.debug("Executed query : " + query.toString() + " on the " + bucket.name() + " Bucket");
         validateQueryResults(stmt.toString(), list);
-        List records = new ArrayList<>();
 
+        List records = new ArrayList<>();
         for (N1qlQueryRow row : list)
         {
             MetamodelImpl metaModel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
                     .getMetamodel(em.getPersistenceUnit());
             EntityType entityType = metaModel.entity(em.getEntityClazz());
 
-            JsonObject jsonObj = row.value().containsKey(em.getTableName()) ? row.value().getObject(em.getTableName())
+            JsonObject jsonObj = row.value().containsKey(em.getSchema()) ? row.value().getObject(em.getSchema())
                     : row.value();
 
             records.add(handler.getEntityFromDocument(em.getEntityClazz(), jsonObj, entityType));
@@ -380,21 +356,13 @@ public class CouchbaseClient extends ClientBase implements Client<CouchbaseQuery
      */
     public List executeNativeQuery(String n1qlQuery, EntityMetadata em)
     {
-        Bucket bucket = null;
-        N1qlQueryResult result;
-        try
-        {
-            bucket = CouchbaseBucketUtils.openBucket(cluster, em.getTableName());
-            result = bucket
-                    .query(N1qlQuery.simple(n1qlQuery, N1qlParams.build().consistency(ScanConsistency.REQUEST_PLUS)));
-            LOGGER.debug("Executed query : " + n1qlQuery + " on the " + bucket.name() + " Bucket");
-        }
-        finally
-        {
-            CouchbaseBucketUtils.closeBucket(bucket);
-        }
+        N1qlQueryResult result = bucket
+                .query(N1qlQuery.simple(n1qlQuery, N1qlParams.build().consistency(ScanConsistency.REQUEST_PLUS)));
+        LOGGER.debug("Executed query : " + n1qlQuery + " on the " + bucket.name() + " Bucket");
+
         validateQueryResults(n1qlQuery, result);
         return result.allRows();
+
     }
 
     /**

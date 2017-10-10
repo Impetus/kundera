@@ -117,6 +117,7 @@ public class CouchbaseCRUDTest
     private void testDelete()
     {
         Person p = em.find(Person.class, "101");
+        Assert.assertNotNull(p);
         em.remove(p);
         em.clear();
         Person p1 = em.find(Person.class, "101");

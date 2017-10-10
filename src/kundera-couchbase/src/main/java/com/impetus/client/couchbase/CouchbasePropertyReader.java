@@ -15,11 +15,14 @@
  ******************************************************************************/
 package com.impetus.client.couchbase;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import com.impetus.kundera.configure.AbstractPropertyReader;
 import com.impetus.kundera.configure.ClientProperties;
 import com.impetus.kundera.configure.ClientProperties.DataStore;
+import com.impetus.kundera.configure.ClientProperties.DataStore.Schema;
 import com.impetus.kundera.configure.PropertyReader;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
@@ -112,6 +115,26 @@ public class CouchbasePropertyReader extends AbstractPropertyReader implements P
                         return dataStore;
                     }
                 }
+            }
+            return null;
+        }
+
+        /**
+         * Gets the bucket property.
+         *
+         * @param property
+         *            the property
+         * @return the bucket property
+         */
+        public String getBucketProperty(String property)
+        {
+            List<Schema> list = csmd.getDataStore(CouchbaseConstants.COUCHBASE).getSchemas();
+
+            if (!list.isEmpty())
+            {
+                Schema schema = list.get(0);
+                Properties prop = schema.getSchemaProperties();
+                return (String) prop.get(property);
             }
             return null;
         }
