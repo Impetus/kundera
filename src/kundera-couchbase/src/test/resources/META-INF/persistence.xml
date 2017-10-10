@@ -11,13 +11,14 @@
 		<properties>
 			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.client" value="couchbase" />
-			<property name="kundera.keyspace" value="couchbase" />
+			<property name="kundera.keyspace" value="couchbase_db" />
 			<property name="kundera.username" value="root" />
 			<property name="kundera.password" value="root" />
 			<property name="kundera.ddl.auto.prepare" value="update" />
 			<property name="kundera.client.lookup.class"
 				value="com.impetus.client.couchbase.CouchbaseClientFactory" />
+			<property name="kundera.client.property" value="kunderaCouchbaseTest.xml" />
 		</properties>
 	</persistence-unit>
-	
-</persistence>
+
+</persistence>	
