@@ -63,9 +63,10 @@ public class DefaultCouchbaseDataHandler implements CouchbaseDataHandler
         EntityType entityType = metaModel.entity(entityClazz);
         Set<Attribute> attributes = entityType.getAttributes();
         Iterator<Attribute> iterator = attributes.iterator();
-        JsonObject obj = iterateAndPopulateJsonObject(entity, iterator);
+        JsonObject obj = iterateAndPopulateJsonObject(entity, iterator, entityMetadata.getTableName());
         Object id = PropertyAccessorHelper.getId(entity, entityMetadata);
-        return JsonDocument.create(id.toString(), obj);
+        return JsonDocument.create(entityMetadata.getTableName() + CouchbaseConstants.ID_SEPARATOR + id.toString(),
+                obj);
     }
 
     /**
@@ -86,7 +87,7 @@ public class DefaultCouchbaseDataHandler implements CouchbaseDataHandler
             Field field = (Field) attribute.getJavaMember();
             String colName = ((AbstractAttribute) attribute).getJPAColumnName();
 
-            if (obj.get(colName) != null)
+            if (!colName.equalsIgnoreCase(CouchbaseConstants.KUNDERA_ENTITY) && obj.get(colName) != null)
             {
                 Object value = ConvertUtils.convert(obj.get(colName), field.getType());
                 PropertyAccessorHelper.set(entity, field, value);
@@ -104,7 +105,7 @@ public class DefaultCouchbaseDataHandler implements CouchbaseDataHandler
      *            the iterator
      * @return the json object
      */
-    private JsonObject iterateAndPopulateJsonObject(Object entity, Iterator<Attribute> iterator)
+    private JsonObject iterateAndPopulateJsonObject(Object entity, Iterator<Attribute> iterator, String tableName)
     {
         JsonObject obj = JsonObject.create();
         while (iterator.hasNext())
@@ -115,6 +116,7 @@ public class DefaultCouchbaseDataHandler implements CouchbaseDataHandler
 
             obj.put(((AbstractAttribute) attribute).getJPAColumnName(), value);
         }
+        obj.put(CouchbaseConstants.KUNDERA_ENTITY, tableName);
         return obj;
     }
 

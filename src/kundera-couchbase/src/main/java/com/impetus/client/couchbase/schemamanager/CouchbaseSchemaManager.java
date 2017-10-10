@@ -29,6 +29,9 @@ import com.couchbase.client.java.cluster.BucketSettings;
 import com.couchbase.client.java.cluster.ClusterManager;
 import com.couchbase.client.java.cluster.DefaultBucketSettings;
 import com.impetus.client.couchbase.CouchbaseBucketUtils;
+import com.impetus.client.couchbase.CouchbaseConstants;
+import com.impetus.client.couchbase.CouchbasePropertyReader;
+import com.impetus.client.couchbase.CouchbasePropertyReader.CouchbaseSchemaMetadata;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.configure.schema.SchemaGenerationException;
 import com.impetus.kundera.configure.schema.TableInfo;
@@ -50,15 +53,15 @@ public class CouchbaseSchemaManager extends AbstractSchemaManager implements Sch
     /**
      * The Constant DEFAULT_RAM_SIZE_IN_MB.
      * 
-     * Using 100 MB (minimum RAM) be default
+     * Using 100 MB (minimum RAM Quota) be default
      */
     private static final int DEFAULT_RAM_SIZE_IN_MB = 100;
 
-    /** The Constant INDEX_SUFFIX. */
-    private static final String INDEX_SUFFIX = "_primary";
-
     /** The cluster. */
     private CouchbaseCluster cluster;
+
+    /** The csmd. */
+    private CouchbaseSchemaMetadata csmd = CouchbasePropertyReader.csmd;
 
     /** The cluster manager. */
     private ClusterManager clusterManager;
@@ -94,6 +97,8 @@ public class CouchbaseSchemaManager extends AbstractSchemaManager implements Sch
                 removeBucket(tableInfo.getTableName());
             }
         }
+        cluster.disconnect();
+        cluster = null;
     }
 
     /*
@@ -126,7 +131,6 @@ public class CouchbaseSchemaManager extends AbstractSchemaManager implements Sch
                 throw new IllegalArgumentException("Host Name should not be null.");
             }
         }
-
         cluster = CouchbaseCluster.create(hosts);
 
         if (userName != null && password != null)
@@ -151,13 +155,9 @@ public class CouchbaseSchemaManager extends AbstractSchemaManager implements Sch
     protected void validate(List<TableInfo> tableInfos)
     {
 
-        for (TableInfo tableInfo : tableInfos)
+        if (!clusterManager.hasBucket(databaseName))
         {
-            String name = tableInfo.getTableName();
-            if (!clusterManager.hasBucket(name))
-            {
-                throw new SchemaGenerationException("Bucket [" + tableInfo.getTableName() + "] does not exist.");
-            }
+            throw new SchemaGenerationException("Bucket [" + databaseName + "] does not exist.");
         }
     }
 
@@ -171,14 +171,10 @@ public class CouchbaseSchemaManager extends AbstractSchemaManager implements Sch
     @Override
     protected void update(List<TableInfo> tableInfos)
     {
-        for (TableInfo tableInfo : tableInfos)
+        if (!clusterManager.hasBucket(databaseName))
         {
-            String name = tableInfo.getTableName();
-            if (!clusterManager.hasBucket(name))
-            {
-                addBucket(name);
-                createIdIndex(name);
-            }
+            addBucket(databaseName);
+            createIdIndex(databaseName);
         }
     }
 
@@ -193,21 +189,16 @@ public class CouchbaseSchemaManager extends AbstractSchemaManager implements Sch
     protected void create(List<TableInfo> tableInfos)
     {
 
-        for (TableInfo tableInfo : tableInfos)
+        if (clusterManager.hasBucket(databaseName))
         {
-            String name = tableInfo.getTableName();
-            if (clusterManager.hasBucket(name))
-            {
-                /*
-                 * Removing bucket will drop indexes too
-                 * 
-                 */
-                removeBucket(name);
-            }
-            addBucket(name);
-            createIdIndex(name);
+            /*
+             * Removing bucket will drop indexes too
+             * 
+             */
+            removeBucket(databaseName);
         }
-
+        addBucket(databaseName);
+        createIdIndex(databaseName);
     }
 
     /**
@@ -221,18 +212,13 @@ public class CouchbaseSchemaManager extends AbstractSchemaManager implements Sch
         Bucket bucket = null;
         try
         {
-            bucket = CouchbaseBucketUtils.openBucket(cluster, bucketName);
+            bucket = CouchbaseBucketUtils.openBucket(cluster, bucketName, csmd.getBucketProperty("bucket.password"));
+
             /*
              * Ignoring if indexes pre-exist
              */
-            boolean indexCreated = bucket.bucketManager().createN1qlPrimaryIndex(buildIndexName(bucketName), true,
-                    false);
 
-            if (!indexCreated)
-            {
-                LOGGER.error("Not able to create Niql primary index for bucket [" + bucketName + "].");
-                throw new KunderaException("Not able to create Niql primary index for bucket [" + bucketName + "].");
-            }
+            bucket.bucketManager().createN1qlPrimaryIndex(buildIndexName(bucketName), true, false);
 
             LOGGER.debug("Niql primary Index are created for bucket [" + bucketName + "].");
         }
@@ -241,6 +227,7 @@ public class CouchbaseSchemaManager extends AbstractSchemaManager implements Sch
             LOGGER.error("Not able to create Niql primary index for bucket [" + bucketName + "].", cex);
             throw new KunderaException("Not able to create Niql primary index for bucket [" + bucketName + "].", cex);
         }
+
         finally
         {
             CouchbaseBucketUtils.closeBucket(bucket);
@@ -307,8 +294,10 @@ public class CouchbaseSchemaManager extends AbstractSchemaManager implements Sch
      */
     private void addBucket(String name)
     {
+        String qouta = csmd.getBucketProperty("bucket.quota");
+        int bucketQuota = qouta != null ? Integer.parseInt(qouta) : DEFAULT_RAM_SIZE_IN_MB;
         BucketSettings bucketSettings = new DefaultBucketSettings.Builder().type(BucketType.COUCHBASE).name(name)
-                .quota(DEFAULT_RAM_SIZE_IN_MB).build();
+                .quota(bucketQuota).build();
 
         try
         {
@@ -335,7 +324,7 @@ public class CouchbaseSchemaManager extends AbstractSchemaManager implements Sch
         {
             throw new KunderaException("Bucket Name can't be null!");
         }
-        return (bucketName + INDEX_SUFFIX).toLowerCase();
+        return (bucketName + CouchbaseConstants.INDEX_SUFFIX).toLowerCase();
     }
 
 }

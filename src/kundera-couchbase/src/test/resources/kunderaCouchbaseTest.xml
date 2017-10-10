@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<clientProperties>
+	<datastores>
+		<dataStore>
+			<name>couchbase</name>
+			<schemas>
+				<schema>
+					<name>couchbase_db</name>
+					<properties>
+						<property name="bucket.password" value=""></property>
+						<property name="bucket.quota" value="120"></property>
+					</properties>
+				</schema>
+			</schemas>
+		</dataStore>
+	</datastores>
+</clientProperties>
+

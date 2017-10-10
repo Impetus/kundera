@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import com.couchbase.client.java.query.Statement;
 import com.couchbase.client.java.query.dsl.path.AsPath;
 import com.impetus.client.couchbase.CouchbaseClient;
+import com.impetus.client.couchbase.CouchbaseConstants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -58,18 +59,6 @@ public class CouchbaseQuery extends QueryImpl implements Query
 
     /** The LOGGER. */
     private static final Logger LOGGER = LoggerFactory.getLogger(CouchbaseQuery.class);
-
-    /** The Constant DOT_REGEX. */
-    private static final String DOT_REGEX = "[.]";
-
-    /** The Constant PARAMETERIZED_PREFIX. */
-    private static final String PARAMETERIZED_PREFIX = ":";
-
-    /** The Constant POSITIONAL_PREFIX. */
-    private static final String POSITIONAL_PREFIX = "?";
-
-    /** The Constant STAR. */
-    private static final String STAR = "*";
 
     /**
      * Instantiates a new couchbase query.
@@ -111,11 +100,11 @@ public class CouchbaseQuery extends QueryImpl implements Query
             AsPath asPath;
             if (selectColumns.isEmpty())
             {
-                asPath = select(STAR).from(i(m.getTableName()));
+                asPath = select(CouchbaseConstants.STAR).from(i(m.getSchema()));
             }
             else
             {
-                asPath = select(selectColumns.toArray(new String[selectColumns.size()])).from(i(m.getTableName()));
+                asPath = select(selectColumns.toArray(new String[selectColumns.size()])).from(i(m.getSchema()));
             }
             Statement statement;
 
@@ -128,17 +117,23 @@ public class CouchbaseQuery extends QueryImpl implements Query
                 {
                     String left = ((ComparisonExpression) whereExp).getLeftExpression().toActualText();
                     String right = ((ComparisonExpression) whereExp).getRightExpression().toActualText();
-                    if (right.startsWith(POSITIONAL_PREFIX) || right.startsWith(PARAMETERIZED_PREFIX))
+                    if (right.startsWith(CouchbaseConstants.POSITIONAL_PREFIX)
+                            || right.startsWith(CouchbaseConstants.PARAMETERIZED_PREFIX))
                     {
                         right = kunderaQuery.getParametersMap().get(right) + "";
                     }
-                    Attribute attribute = entityType.getAttribute(left.split(DOT_REGEX)[1]);
+                    Attribute attribute = entityType.getAttribute(left.split(CouchbaseConstants.DOT_REGEX)[1]);
 
                     statement = addWhereCondition(asPath, ((ComparisonExpression) whereExp).getActualIdentifier(),
-                            ((AbstractAttribute) attribute).getJPAColumnName(), right);
+                            ((AbstractAttribute) attribute).getJPAColumnName(), right, m.getTableName());
                 }
 
             }
+            else
+            {
+                asPath.where(x(CouchbaseConstants.KUNDERA_ENTITY).eq(x("'" + m.getTableName() + "'")));
+            }
+
             statement = asPath;
             return ((CouchbaseClient) client).executeQuery(statement, m);
         }
@@ -155,31 +150,37 @@ public class CouchbaseQuery extends QueryImpl implements Query
      *            the col name
      * @param val
      *            the val
-     * @return the val
+     * @param tableName
+     *            the table name
+     * @return the statement
      */
-    public Statement addWhereCondition(AsPath asPath, String identifier, String colName, String val)
+    public Statement addWhereCondition(AsPath asPath, String identifier, String colName, String val, String tableName)
     {
+        com.couchbase.client.java.query.dsl.Expression exp;
         switch (identifier)
         {
 
         case "<":
-            return asPath.where(x(colName).lt(x(val)));
-
+            exp = x(colName).lt(x(val));
+            break;
         case "<=":
-            return asPath.where(x(colName).lte(x(val)));
-
+            exp = x(colName).lte(x(val));
+            break;
         case ">":
-            return asPath.where(x(colName).gt(x(val)));
+            exp = x(colName).gt(x(val));
+            break;
         case ">=":
-            return asPath.where(x(colName).gte(x(val)));
-
+            exp = x(colName).gte(x(val));
+            break;
         case "=":
-            return asPath.where(x(colName).eq(x(val)));
-
+            exp = x(colName).eq(x(val));
+            break;
         default:
             LOGGER.error("Operator " + identifier + "  is not supported in the JPA query for Couchbase.");
             throw new KunderaException("Operator " + identifier + "  is not supported in the JPA query for Couchbase.");
         }
+
+        return asPath.where(exp.and(x(CouchbaseConstants.KUNDERA_ENTITY).eq(x("'" + tableName) + "'")));
     }
 
     /*
