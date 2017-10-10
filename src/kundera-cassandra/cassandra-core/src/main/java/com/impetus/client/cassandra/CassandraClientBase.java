@@ -66,6 +66,7 @@ import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
+import org.apache.cassandra.transport.ProtocolVersion;
 import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.thrift.TException;
@@ -1022,7 +1023,7 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
             throw new KunderaException("Error while deserializing column value " + ex);
         }
         if(type.isCollection()){
-            return ((CollectionSerializer) type.getSerializer()).deserializeForNativeProtocol(ByteBuffer.wrap(thriftColumnValue), 2);
+            return ((CollectionSerializer) type.getSerializer()).deserializeForNativeProtocol(ByteBuffer.wrap(thriftColumnValue), ProtocolVersion.V2);
         }
         return type.compose(ByteBuffer.wrap(thriftColumnValue));
     }

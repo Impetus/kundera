@@ -435,15 +435,22 @@ public class EntityWithMultiplePartitionKeyTest
                     .createQuery(
                             "select e from EntityWithMultiplePartitionKey e where e.id.partitionKey.partitionKey1=partitionKey1")
                     .getResultList();
+            EntityWithMultiplePartitionKey foundEntity = foundEntitys.get(0);
+			Assert.assertNotNull(foundEntity );
+            Assert.assertNotNull(foundEntity.getId());
+            Assert.assertNotNull(foundEntity.getId().getPartitionKey());
+            Assert.assertEquals("Persisting", foundEntity.getAction());
+            Assert.assertEquals("Entity to test composite key with multiple partition key.",
+                    foundEntity.getEntityDiscription());
+            Assert.assertEquals("clusterkey1", foundEntity.getId().getClusterkey1());
+            Assert.assertEquals(11, foundEntity.getId().getClusterkey2());
+            Assert.assertEquals("partitionKey1", foundEntity.getId().getPartitionKey().getPartitionKey1());
+            Assert.assertEquals(1, foundEntity.getId().getPartitionKey().getPartitionKey2());
 
-            Assert.fail();
         }
         catch (Exception e)
         {
-            Assert.assertEquals(
-                    "All part of partition key must be in where clause, but provided only first part. ",
-                    "javax.persistence.PersistenceException: com.impetus.kundera.KunderaException: InvalidRequestException(why:Partition key parts: partitionKey2 must be restricted as other parts are)",
-                    e.getMessage());
+        	Assert.fail();
         }
 
         //test iteration of result.
@@ -463,10 +470,6 @@ public class EntityWithMultiplePartitionKeyTest
             Assert.assertEquals("Persisting", entity.getAction());
             Assert.assertEquals("Entity to test composite key with multiple partition key.",
                     entity.getEntityDiscription());
-            Assert.assertEquals("clusterkey1", entity.getId().getClusterkey1());
-            Assert.assertEquals(11, entity.getId().getClusterkey2());
-            Assert.assertEquals("partitionKey1", entity.getId().getPartitionKey().getPartitionKey1());
-            Assert.assertEquals(1, entity.getId().getPartitionKey().getPartitionKey2());
             count++;
         }
         Assert.assertEquals(1, count);
