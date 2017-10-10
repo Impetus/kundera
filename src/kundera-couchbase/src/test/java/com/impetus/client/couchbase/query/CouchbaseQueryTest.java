@@ -73,10 +73,11 @@ public class CouchbaseQueryTest
     @Test
     public void testNativeSelect()
     {
-        List list = em.createNativeQuery("select * from PERSON").getResultList();
+        List list = em.createNativeQuery("select * from couchbase_db where kundera_enity = 'PERSON'").getResultList();
         Assert.assertEquals(5, list.size());
 
-        list = em.createNativeQuery("select * from PERSON where age > 20").getResultList();
+        list = em.createNativeQuery("select * from couchbase_db where kundera_enity = 'PERSON' AND age > 20")
+                .getResultList();
         Assert.assertEquals(3, list.size());
     }
 
@@ -138,8 +139,12 @@ public class CouchbaseQueryTest
     @AfterClass
     public static void tearDownAfterClass() throws Exception
     {
-        deletePersons();
-        em.close();
+        if (em != null)
+        {
+            deletePersons();
+            em.close();
+        }
+
         if (emf != null)
         {
             emf.close();

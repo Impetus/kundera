@@ -21,6 +21,7 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.CouchbaseCluster;
 import com.impetus.client.couchbase.query.CouchbaseEntityReader;
 import com.impetus.client.couchbase.schemamanager.CouchbaseSchemaManager;
@@ -44,6 +45,9 @@ public class CouchbaseClientFactory extends GenericClientFactory
 
     /** The cluster. */
     private CouchbaseCluster cluster;
+
+    /** The bucket. */
+    private Bucket bucket;
 
     /*
      * (non-Javadoc)
@@ -90,6 +94,12 @@ public class CouchbaseClientFactory extends GenericClientFactory
         {
             schemaManager.dropSchema();
         }
+        if (bucket != null)
+        {
+            LOGGER.info("Closing bucket " + bucket.name() + ".");
+            CouchbaseBucketUtils.closeBucket(bucket);
+            LOGGER.info("Closed bucket " + bucket.name() + ".");
+        }
         if (cluster != null)
         {
             LOGGER.info("Closing connection to couchbase.");
@@ -127,12 +137,20 @@ public class CouchbaseClientFactory extends GenericClientFactory
         }
 
         String host = pumProps.getProperty("kundera.nodes");
+        String keyspace = pumProps.getProperty("kundera.keyspace");
 
         if (host == null)
         {
             throw new KunderaException("Hostname/IP is null.");
         }
+
+        if (keyspace == null)
+        {
+            throw new KunderaException("kundera.keyspace is null.");
+        }
         cluster = CouchbaseCluster.create(splitHostNames(host));
+        String password = ((CouchbasePropertyReader) propertyReader).csmd.getBucketProperty("bucket.password");
+        bucket = CouchbaseBucketUtils.openBucket(cluster, keyspace, password);
 
     }
 
@@ -159,7 +177,7 @@ public class CouchbaseClientFactory extends GenericClientFactory
     protected Client instantiateClient(String persistenceUnit)
     {
         return new CouchbaseClient(kunderaMetadata, indexManager, reader, externalProperties, persistenceUnit,
-                this.cluster, this.clientMetadata);
+                this.bucket, this.clientMetadata);
     }
 
     /*
