@@ -62,7 +62,7 @@ public class CassandraNativeFunctionsTest
         CassandraCli.dropKeySpace("KunderaExamples");
         HashMap propertyMap = new HashMap();
         propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create");
-        propertyMap.put(CassandraConstants.CQL_VERSION,	CassandraConstants.CQL_VERSION_3_0);
+        propertyMap.put(CassandraConstants.CQL_VERSION, CassandraConstants.CQL_VERSION_3_0);
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("genericCassandraTest", propertyMap);
         EntityManager em = emf.createEntityManager();
 
@@ -306,10 +306,11 @@ public class CassandraNativeFunctionsTest
         }
         catch (Exception e)
         {
-            Assert.assertEquals(
-                    "javax.persistence.PersistenceException: com.impetus.kundera.KunderaException: "
-                            + "InvalidRequestException(why:Partition key parts: k_part_two must be restricted as other parts are)",
-                    e.getMessage());
+            Assert.assertEquals("javax.persistence.PersistenceException: com.impetus.kundera.KunderaException: "
+                    + "InvalidRequestException(why:Cannot execute this query as it might "
+                    + "involve data filtering and thus may have unpredictable performance. "
+                    + "If you want to execute this query despite the performance "
+                    + "unpredictability, use ALLOW FILTERING)", e.getMessage());
         }
     }
 
