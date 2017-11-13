@@ -99,7 +99,18 @@
 				<module>kundera-oracle-nosql</module>
 				<module>kundera-couchdb</module>
 				<module>kundera-couchbase</module>
+				<module>kundera-ethereum</module>
 				<module>kundera-tests</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>ethereum</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<modules>
+				<module>jpa-engine</module>
+				<module>kundera-ethereum</module>
 			</modules>
 		</profile>
 		<profile>
