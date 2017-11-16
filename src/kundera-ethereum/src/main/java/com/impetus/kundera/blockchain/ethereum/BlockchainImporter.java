@@ -31,6 +31,7 @@ public class BlockchainImporter
     /** The client. */
     private static KunderaWeb3jClient client;
 
+
     /**
      * Instantiates a new blockchain importer.
      */
@@ -38,6 +39,16 @@ public class BlockchainImporter
     {
     }
 
+    /**
+     * Gets the kundera web3j client.
+     *
+     * @return the kundera web3j client
+     */
+    public static KunderaWeb3jClient getKunderaWeb3jClient()
+    {
+        return client;
+    }
+    
     /**
      * Import all blocks from EARLIEST to LATEST and keep importing upcoming new
      * blocks
@@ -112,7 +123,7 @@ public class BlockchainImporter
      */
     public Block getFirstBlock()
     {
-        return EtherObjectConverterUtil.convertEtherBlockToKunderaBlock(client.getFirstBlock(false),false);
+        return EtherObjectConverterUtil.convertEtherBlockToKunderaBlock(client.getFirstBlock(false), false);
     }
 
     /**
@@ -142,7 +153,7 @@ public class BlockchainImporter
      */
     public Block getLatestBlock()
     {
-        return EtherObjectConverterUtil.convertEtherBlockToKunderaBlock(client.getLatestBlock(false),false);
+        return EtherObjectConverterUtil.convertEtherBlockToKunderaBlock(client.getLatestBlock(false), false);
     }
 
     /**
@@ -174,7 +185,7 @@ public class BlockchainImporter
      */
     public Block getBlock(BigInteger blockNumber)
     {
-        return EtherObjectConverterUtil.convertEtherBlockToKunderaBlock(client.getBlock(blockNumber, false),false);
+        return EtherObjectConverterUtil.convertEtherBlockToKunderaBlock(client.getBlock(blockNumber, false), false);
     }
 
     /**
@@ -203,7 +214,7 @@ public class BlockchainImporter
     /**
      * Destroy.
      */
-    public static void destroy()
+    public void destroy()
     {
         client.destroy();
     }

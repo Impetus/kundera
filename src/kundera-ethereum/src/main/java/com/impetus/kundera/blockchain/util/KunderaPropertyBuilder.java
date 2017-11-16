@@ -31,7 +31,13 @@ import com.impetus.kundera.blockchain.ethereum.Datasource;
 public class KunderaPropertyBuilder
 {
 
-    /** The Constant LOGGER. */
+    private static final String _3_0_0 = "3.0.0";
+
+	private static final String CQL_VERSION = "cql.version";
+
+	private static final String CASSANDRA = "cassandra";
+
+	/** The Constant LOGGER. */
     private static final Logger LOGGER = LoggerFactory.getLogger(PropertyReader.class);
 
     /** The client name to factory map. */
@@ -39,14 +45,14 @@ public class KunderaPropertyBuilder
 
     static
     {
-        clientNameToFactoryMap.put(Datasource.MONGODB, Constants.KUNDERA_MONGODB_CLIENT_FACTORY);
-        clientNameToFactoryMap.put(Datasource.RETHINKDB, Constants.KUNDERA_RETHINKDB_CLIENT_FACTORY);
-        clientNameToFactoryMap.put(Datasource.CASSANDRA, Constants.KUNDERA_CASSANDRA_CLIENT_FACTORY);
-        clientNameToFactoryMap.put(Datasource.HBASE, Constants.KUNDERA_HBASE_CLIENT_FACTORY);
-        clientNameToFactoryMap.put(Datasource.KUDU, Constants.KUNDERA_KUDU_CLIENT_FACTORY);
-        clientNameToFactoryMap.put(Datasource.REDIS, Constants.KUNDERA_REDIS_CLIENT_FACTORY);
-        clientNameToFactoryMap.put(Datasource.COUCHDB, Constants.KUNDERA_COUCHDB_CLIENT_FACTORY);
-        clientNameToFactoryMap.put(Datasource.KVSTORE, Constants.KUNDERA_ONS_CLIENT_FACTORY);
+        clientNameToFactoryMap.put(Datasource.MONGODB, EthConstants.KUNDERA_MONGODB_CLIENT_FACTORY);
+        clientNameToFactoryMap.put(Datasource.RETHINKDB, EthConstants.KUNDERA_RETHINKDB_CLIENT_FACTORY);
+        clientNameToFactoryMap.put(Datasource.CASSANDRA, EthConstants.KUNDERA_CASSANDRA_CLIENT_FACTORY);
+        clientNameToFactoryMap.put(Datasource.HBASE, EthConstants.KUNDERA_HBASE_CLIENT_FACTORY);
+        clientNameToFactoryMap.put(Datasource.KUDU, EthConstants.KUNDERA_KUDU_CLIENT_FACTORY);
+        clientNameToFactoryMap.put(Datasource.REDIS, EthConstants.KUNDERA_REDIS_CLIENT_FACTORY);
+        clientNameToFactoryMap.put(Datasource.COUCHDB, EthConstants.KUNDERA_COUCHDB_CLIENT_FACTORY);
+        clientNameToFactoryMap.put(Datasource.KVSTORE, EthConstants.KUNDERA_ONS_CLIENT_FACTORY);
     }
 
     /**
@@ -66,33 +72,37 @@ public class KunderaPropertyBuilder
     public static Map<String, String> populatePersistenceUnitProperties(PropertyReader reader)
     {
 
-        String dbType = reader.getProperty(Constants.DATABASE_TYPE);
-        String host = reader.getProperty(Constants.DATABASE_HOST);
-        String port = reader.getProperty(Constants.DATABASE_PORT);
-        String dbName = reader.getProperty(Constants.DATABASE_NAME);
+        String dbType = reader.getProperty(EthConstants.DATABASE_TYPE);
+        String host = reader.getProperty(EthConstants.DATABASE_HOST);
+        String port = reader.getProperty(EthConstants.DATABASE_PORT);
+        String dbName = reader.getProperty(EthConstants.DATABASE_NAME);
 
         propertyNullCheck(dbType, host, port, dbName);
 
         Map<String, String> props = new HashMap<>();
 
-        props.put(Constants.KUNDERA_CLIENT_LOOKUP_CLASS, getKunderaClientToLookupClass(dbType));
-        props.put(Constants.KUNDERA_NODES, host);
-        props.put(Constants.KUNDERA_PORT, port);
-        props.put(Constants.KUNDERA_KEYSPACE, dbName);
-        props.put(Constants.KUNDERA_DIALECT, dbType);
+        props.put(EthConstants.KUNDERA_CLIENT_LOOKUP_CLASS, getKunderaClientToLookupClass(dbType));
+        props.put(EthConstants.KUNDERA_NODES, host);
+        props.put(EthConstants.KUNDERA_PORT, port);
+        props.put(EthConstants.KUNDERA_KEYSPACE, dbName);
+        props.put(EthConstants.KUNDERA_DIALECT, dbType);
+        
+        if(dbType.equalsIgnoreCase(CASSANDRA)){
+        	props.put(CQL_VERSION, _3_0_0);
+        }
 
-        boolean schemaAutoGen = Boolean.parseBoolean(reader.getProperty(Constants.SCHEMA_AUTO_GENERATE));
-        boolean schemaDropExisting = Boolean.parseBoolean(reader.getProperty(Constants.SCHEMA_DROP_EXISTING));
+        boolean schemaAutoGen = Boolean.parseBoolean(reader.getProperty(EthConstants.SCHEMA_AUTO_GENERATE));
+        boolean schemaDropExisting = Boolean.parseBoolean(reader.getProperty(EthConstants.SCHEMA_DROP_EXISTING));
 
         if (schemaAutoGen)
         {
             if (schemaDropExisting)
             {
-                props.put(Constants.KUNDERA_DDL_AUTO_PREPARE, "create");
+                props.put(EthConstants.KUNDERA_DDL_AUTO_PREPARE, "create");
             }
             else
             {
-                props.put(Constants.KUNDERA_DDL_AUTO_PREPARE, "update");
+                props.put(EthConstants.KUNDERA_DDL_AUTO_PREPARE, "update");
             }
         }
         LOGGER.info("Kundera properties : " + props);
@@ -116,26 +126,26 @@ public class KunderaPropertyBuilder
 
         if (dbType == null || dbType.isEmpty())
         {
-            LOGGER.error("Property '" + Constants.DATABASE_TYPE + "' can't be null or empty");
-            throw new KunderaException("Property '" + Constants.DATABASE_TYPE + "' can't be null or empty");
+            LOGGER.error("Property '" + EthConstants.DATABASE_TYPE + "' can't be null or empty");
+            throw new KunderaException("Property '" + EthConstants.DATABASE_TYPE + "' can't be null or empty");
         }
 
         if (host == null || host.isEmpty())
         {
-            LOGGER.error("Property '" + Constants.DATABASE_HOST + "' can't be null or empty");
-            throw new KunderaException("Property '" + Constants.DATABASE_HOST + "' can't be null or empty");
+            LOGGER.error("Property '" + EthConstants.DATABASE_HOST + "' can't be null or empty");
+            throw new KunderaException("Property '" + EthConstants.DATABASE_HOST + "' can't be null or empty");
         }
 
         if (port == null || port.isEmpty())
         {
-            LOGGER.error("Property '" + Constants.DATABASE_PORT + "' can't be null or empty");
-            throw new KunderaException("Property '" + Constants.DATABASE_PORT + "' can't be null or empty");
+            LOGGER.error("Property '" + EthConstants.DATABASE_PORT + "' can't be null or empty");
+            throw new KunderaException("Property '" + EthConstants.DATABASE_PORT + "' can't be null or empty");
         }
 
         if (dbName == null || dbName.isEmpty())
         {
-            LOGGER.error("Property'" + Constants.DATABASE_NAME + "' can't be null or empty");
-            throw new KunderaException("Property '" + Constants.DATABASE_NAME + "' can't be null or empty");
+            LOGGER.error("Property'" + EthConstants.DATABASE_NAME + "' can't be null or empty");
+            throw new KunderaException("Property '" + EthConstants.DATABASE_NAME + "' can't be null or empty");
         }
 
     }

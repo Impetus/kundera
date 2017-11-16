@@ -38,7 +38,7 @@ import org.web3j.utils.Numeric;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.blockchain.entities.Block;
 import com.impetus.kundera.blockchain.entities.Transaction;
-import com.impetus.kundera.blockchain.util.Constants;
+import com.impetus.kundera.blockchain.util.EthConstants;
 import com.impetus.kundera.blockchain.util.KunderaPropertyBuilder;
 import com.impetus.kundera.blockchain.util.PropertyReader;
 import com.impetus.kundera.client.ClientResolverException;
@@ -96,8 +96,8 @@ public class KunderaWeb3jClient
         }
         else
         {
-            web3j.catchUpToLatestBlockObservable(DefaultBlockParameter.valueOf(startBlockNum), true)
-                    .subscribe(block -> {
+            web3j.catchUpToLatestBlockObservable(DefaultBlockParameter.valueOf(startBlockNum), true).subscribe(
+                    block -> {
                         persistBlocksAndTransactions(block);
                     });
         }
@@ -120,13 +120,14 @@ public class KunderaWeb3jClient
         catch (Exception ex)
         {
             LOGGER.error("Block number " + getBlockNumberWithRawData(blk.getNumber()) + " is not stored. ", ex);
-            throw new KunderaException(
-                    "Block number " + getBlockNumberWithRawData(blk.getNumber()) + " is not stored. ", ex);
+            throw new KunderaException("Block number " + getBlockNumberWithRawData(blk.getNumber())
+                    + " is not stored. ", ex);
         }
         for (TransactionResult tx : block.getResult().getTransactions())
         {
             persistTransactions(EtherObjectConverterUtil.convertEtherTxToKunderaTx(tx), blk.getNumber());
         }
+        em.clear();
     }
 
     /**
@@ -297,19 +298,19 @@ public class KunderaWeb3jClient
     private void initializeWeb3j(PropertyReader reader)
     {
 
-        String endPoint = reader.getProperty(Constants.ETHEREUM_NODE_ENDPOINT);
+        String endPoint = reader.getProperty(EthConstants.ETHEREUM_NODE_ENDPOINT);
 
         if (endPoint == null || endPoint.isEmpty())
         {
-            LOGGER.error(
-                    "Specify - " + Constants.ETHEREUM_NODE_ENDPOINT + " in " + Constants.KUNDERA_ETHEREUM_PROPERTIES);
-            throw new KunderaException(
-                    "Specify - " + Constants.ETHEREUM_NODE_ENDPOINT + " in " + Constants.KUNDERA_ETHEREUM_PROPERTIES);
+            LOGGER.error("Specify - " + EthConstants.ETHEREUM_NODE_ENDPOINT + " in "
+                    + EthConstants.KUNDERA_ETHEREUM_PROPERTIES);
+            throw new KunderaException("Specify - " + EthConstants.ETHEREUM_NODE_ENDPOINT + " in "
+                    + EthConstants.KUNDERA_ETHEREUM_PROPERTIES);
         }
 
         else if (endPoint.contains(".ipc"))
         {
-            String os = reader.getProperty(Constants.ETHEREUM_NODE_OS);
+            String os = reader.getProperty(EthConstants.ETHEREUM_NODE_OS);
             LOGGER.info("Connecting using IPC socket. IPC Socket File location - " + endPoint);
             if (os != null && "windows".equalsIgnoreCase(os))
             {
@@ -339,14 +340,14 @@ public class KunderaWeb3jClient
         Map<String, String> props = KunderaPropertyBuilder.populatePersistenceUnitProperties(reader);
         try
         {
-            emf = Persistence.createEntityManagerFactory(Constants.PU, props);
+            emf = Persistence.createEntityManagerFactory(EthConstants.PU, props);
         }
         catch (ClientResolverException ex)
         {
-            LOGGER.error("Not able to find dependency for Kundera " + props.get(Constants.KUNDERA_DIALECT) + " client.",
-                    ex);
-            throw new KunderaException(
-                    "Not able to find dependency for Kundera " + props.get(Constants.KUNDERA_DIALECT) + " client.", ex);
+            LOGGER.error("Not able to find dependency for Kundera " + props.get(EthConstants.KUNDERA_DIALECT)
+                    + " client.", ex);
+            throw new KunderaException("Not able to find dependency for Kundera "
+                    + props.get(EthConstants.KUNDERA_DIALECT) + " client.", ex);
         }
         LOGGER.info("Kundera EMF created...");
         em = emf.createEntityManager();
@@ -360,7 +361,7 @@ public class KunderaWeb3jClient
      */
     private PropertyReader initializeProperties()
     {
-        return new PropertyReader(Constants.KUNDERA_ETHEREUM_PROPERTIES);
+        return new PropertyReader(EthConstants.KUNDERA_ETHEREUM_PROPERTIES);
     }
 
     /**
@@ -368,15 +369,28 @@ public class KunderaWeb3jClient
      * 
      * It is used for logging purpose
      *
-     * @param blockNumerRaw
-     *            the block numer raw
+     * @param blockNumberRaw
+     *            the block number raw
      * @return the block number with raw data
      */
-    private String getBlockNumberWithRawData(String blockNumerRaw)
+    private String getBlockNumberWithRawData(String blockNumberRaw)
     {
-        return Numeric.decodeQuantity(blockNumerRaw) + "(" + blockNumerRaw + ")";
+        return Numeric.decodeQuantity(blockNumberRaw) + "(" + blockNumberRaw + ")";
     }
 
+    /**
+     * Gets the EntityManager.
+     *
+     * @return the EntityManager
+     */
+    public EntityManager getEntityManager()
+    {
+        return emf.createEntityManager();
+    }
+
+    /**
+     * Destroy.
+     */
     public void destroy()
     {
         if (em != null)

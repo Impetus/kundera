@@ -176,7 +176,7 @@ public class KunderaEthereumImporterTest
     @AfterClass
     public static void tearDownAfterClass() throws Exception
     {
-        BlockchainImporter.destroy();
+    	importer.destroy();
     }
 
 }
