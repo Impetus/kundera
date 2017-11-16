@@ -74,7 +74,10 @@ public class RethinkDBSchemaManager extends AbstractSchemaManager implements Sch
     {
         try
         {
-            r.dbDrop(databaseName);
+            if (operation != null && ("create-drop").equalsIgnoreCase(operation))
+            {
+                r.dbDrop(databaseName);
+            }
         }
         catch (Exception e)
         {
@@ -120,8 +123,8 @@ public class RethinkDBSchemaManager extends AbstractSchemaManager implements Sch
             }
             catch (Exception e)
             {
-                logger.error("Database host cannot be resolved, Caused by: " + e.getMessage());
-                throw new SchemaGenerationException("Database host cannot be resolved, Caused by: " + e.getMessage());
+                logger.error("Database host/port cannot be resolved, Caused by: " + e.getMessage());
+                throw new SchemaGenerationException("Database host/port cannot be resolved, Caused by: " + e.getMessage());
             }
         }
         return true;
@@ -197,6 +200,12 @@ public class RethinkDBSchemaManager extends AbstractSchemaManager implements Sch
     @Override
     protected void create(List<TableInfo> tableInfos)
     {
+        List dbList = r.dbList().run(connection);
+        
+        if(!dbList.contains(databaseName)){
+            r.dbCreate(databaseName).run(connection);
+        }
+        
         List listTables = r.db(databaseName).tableList().run(connection);
 
         for (TableInfo tableInfo : tableInfos)
