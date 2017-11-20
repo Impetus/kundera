@@ -33,11 +33,11 @@ public class KunderaPropertyBuilder
 
     private static final String _3_0_0 = "3.0.0";
 
-	private static final String CQL_VERSION = "cql.version";
+    private static final String CQL_VERSION = "cql.version";
 
-	private static final String CASSANDRA = "cassandra";
+    private static final String CASSANDRA = "cassandra";
 
-	/** The Constant LOGGER. */
+    /** The Constant LOGGER. */
     private static final Logger LOGGER = LoggerFactory.getLogger(PropertyReader.class);
 
     /** The client name to factory map. */
@@ -79,6 +79,9 @@ public class KunderaPropertyBuilder
 
         propertyNullCheck(dbType, host, port, dbName);
 
+        String username = reader.getProperty(EthConstants.DATABASE_USERNAME);
+        String pswd = reader.getProperty(EthConstants.DATABASE_PASSWORD);
+
         Map<String, String> props = new HashMap<>();
 
         props.put(EthConstants.KUNDERA_CLIENT_LOOKUP_CLASS, getKunderaClientToLookupClass(dbType));
@@ -86,9 +89,16 @@ public class KunderaPropertyBuilder
         props.put(EthConstants.KUNDERA_PORT, port);
         props.put(EthConstants.KUNDERA_KEYSPACE, dbName);
         props.put(EthConstants.KUNDERA_DIALECT, dbType);
-        
-        if(dbType.equalsIgnoreCase(CASSANDRA)){
-        	props.put(CQL_VERSION, _3_0_0);
+
+        if (username != null && !username.isEmpty() && pswd != null)
+        {
+            props.put(EthConstants.KUNDERA_USERNAME, username);
+            props.put(EthConstants.KUNDERA_PASSWORD, pswd);
+        }
+
+        if (dbType.equalsIgnoreCase(CASSANDRA))
+        {
+            props.put(CQL_VERSION, _3_0_0);
         }
 
         boolean schemaAutoGen = Boolean.parseBoolean(reader.getProperty(EthConstants.SCHEMA_AUTO_GENERATE));

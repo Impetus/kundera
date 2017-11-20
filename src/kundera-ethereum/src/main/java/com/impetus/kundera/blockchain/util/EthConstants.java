@@ -41,6 +41,12 @@ public class EthConstants
     /** The Constant DATABASE_NAME. */
     public static final String DATABASE_NAME = "database.name";
 
+    /** The Constant DATABASE_USERNAME. */
+    public static final String DATABASE_USERNAME = "database.username";
+
+    /** The Constant DATABASE_PASSWORD. */
+    public static final String DATABASE_PASSWORD = "database.password";
+
     /** The Constant SCHEMA_AUTO_GENERATE. */
     public static final String SCHEMA_AUTO_GENERATE = "schema.auto.generate";
 
@@ -70,6 +76,12 @@ public class EthConstants
 
     /** The Constant KUNDERA_CLIENT. */
     public static final String KUNDERA_CLIENT = "kundera.client";
+
+    /** The Constant KUNDERA_USERNAME. */
+    public static final String KUNDERA_USERNAME = "kundera.username";
+
+    /** The Constant KUNDERA_PASSWORD. */
+    public static final String KUNDERA_PASSWORD = "kundera.password";
 
     /** The Constant KUNDERA_DDL_AUTO_PREPARE. */
     public static final String KUNDERA_DDL_AUTO_PREPARE = "kundera.ddl.auto.prepare";
