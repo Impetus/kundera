@@ -223,9 +223,16 @@ public final class CassandraValidationClassMapper
         resetMapperForCQL3(isCql3Enabled);
         TypeSerializer<?> validation_class;
         validation_class = validationSerializerClassMapper.get(dataType);
-        if (!(validation_class != null))
+        if (validation_class == null)
         {
-            validation_class = BytesSerializer.instance;
+            if (dataType.isEnum())
+            {
+                validation_class = UTF8Serializer.instance;
+            }
+            else
+            {
+                validation_class = BytesSerializer.instance;
+            }
         }
         resetMapperForThrift(isCql3Enabled);
         return validation_class;
