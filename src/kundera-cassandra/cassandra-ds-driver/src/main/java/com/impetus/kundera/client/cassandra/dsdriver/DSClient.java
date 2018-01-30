@@ -49,6 +49,8 @@ import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.SimpleStatement;
 import com.datastax.driver.core.Statement;
+import com.datastax.driver.core.BoundStatement;
+import com.datastax.driver.core.PreparedStatement;
 import com.impetus.client.cassandra.CassandraClientBase;
 import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
@@ -74,6 +76,7 @@ import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.utils.KunderaCoreUtils;
 import com.impetus.kundera.utils.TimestampGenerator;
+import com.impetus.kundera.query.KunderaQuery;
 
 /**
  * Kundera powered datastax java driver based client.
@@ -530,12 +533,100 @@ public class DSClient extends CassandraClientBase implements Client<DSCassQuery>
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, clazz);
         return iterateAndReturn(rSet, metadata);
     }
+
+
+    // XXX
+    @Override
+    public List executeQuery(
+	final Class clazz,
+	final List<String> relationalField,
+	final boolean isNative,
+	final String cqlQuery,
+	final List<KunderaQuery.BindParameter> parameters
+    )
+    {
+        ResultSet rSet = (ResultSet) this.execute(cqlQuery, null, parameters);
+
+        if (clazz == null)
+        {
+		if (isNative)
+			return iterateAndReturnNative(rSet);
+            return iterateAndReturn(rSet);
+        }
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, clazz);
+        return iterateAndReturn(rSet, metadata);
+    }
+ 
+
+
     
     public ResultSet executeStatement(Statement st){
         
         Session session = factory.getConnection();
         return session.execute(st);
     }
+
+
+    /**
+     * XXX
+     *
+     * Iterate and return for native queries.
+     * Returns a List&lt;Object&gt; or a List&lt;Object[]&gt;
+     * 
+     * @param rSet
+     *            the r set
+     * @return the list
+     */
+    private List iterateAndReturnNative(final ResultSet rSet)
+    {
+        final Iterator<Row> rowIter = rSet.iterator();
+        final List results = new ArrayList();
+	final List item = new ArrayList<>();
+
+	final boolean isSingle = (rSet.getColumnDefinitions().size() == 1);
+
+        while (rowIter.hasNext())
+        {
+            final Row row = rowIter.next();
+
+            final ColumnDefinitions columnDefs = row.getColumnDefinitions();
+
+            final Iterator<Definition> columnDefIter = columnDefs.iterator();
+
+	    item.clear();
+
+            while (columnDefIter.hasNext())
+            {
+                final Definition columnDef = columnDefIter.next();
+
+		item.add(
+			DSClientUtilities.assign(
+				row,
+				null,
+				null,
+				columnDef.getType().getName(),
+				null,
+                                columnDef.getName(),
+				null,
+				null
+			)
+		);
+            }
+
+	    if (isSingle) {
+		if (!item.isEmpty())
+			results.add(item.get(0));
+		else
+			results.add(null);
+	    } else
+	   	 results.add(item.toArray(new Object[item.size()]));
+        }
+
+        return results;
+    }
+
+ 
+
 
     /**
      * Iterate and return.
@@ -733,6 +824,117 @@ public class DSClient extends CassandraClientBase implements Client<DSCassQuery>
             // factory.releaseConnection(session);
         }
     }
+
+
+    @Override
+    public <T> T execute(final String query, Object connection, final List<KunderaQuery.BindParameter> parameters)
+    {
+
+        Session session = factory.getConnection();
+
+        try
+        {
+		final PreparedStatement preparedStatement = session.prepare(query);
+		final BoundStatement boundStatement = preparedStatement.bind();
+
+		for (KunderaQuery.BindParameter value: parameters) {
+
+			log.info(
+				"binding [" + value.getIndex() + ":" + value.getName() +
+				"] to [" + value.getValue() + "]"
+			);
+
+			if (value.getValue() != null) {
+
+				if (value.getValue() instanceof String) {
+					if (value.isNamed())
+						boundStatement.setString(
+							value.getName(),
+							(String) value.getValue()
+						);
+					else
+						boundStatement.setString(
+							value.getIndex(),
+							(String) value.getValue()
+						);
+				} else if (value.getValue() instanceof Integer) {
+					if (value.isNamed())
+						boundStatement.setInt(
+							value.getName(),
+							(Integer) value.getValue()
+						);
+					else
+						boundStatement.setInt(
+							value.getIndex(),
+							(Integer) value.getValue()
+						);
+				} else if (value.getValue() instanceof Long) {
+					if (value.isNamed())
+						boundStatement.setLong(
+							value.getName(),
+							(Long) value.getValue()
+						);
+					else
+						boundStatement.setLong(
+							value.getIndex(),
+							(Long) value.getValue()
+						);
+				} else if (value.getValue() instanceof java.util.UUID) {
+					if (value.isNamed())
+						boundStatement.setUUID(
+							value.getName(),
+							(java.util.UUID) value.getValue()
+						);
+					else
+						boundStatement.setUUID(
+							value.getIndex(),
+							(java.util.UUID) value.getValue()
+						);
+				} else if (value.getValue() instanceof List) {
+					if (value.isNamed())
+						boundStatement.setList(
+							value.getName(),
+							(List) value.getValue()
+						);
+					else
+						boundStatement.setList(
+							value.getIndex(),
+							(List) value.getValue()
+						);
+				} else {
+					throw new IllegalArgumentException(
+						"bind parameter type [" +
+						value.getValue().getClass() +
+						"] is not supported, " + value.getIndex() + ":" + value.getName()
+					);
+				}
+			} else {
+				throw new IllegalArgumentException(
+					"setting null bind parameters is not supported"
+				);
+			}
+		}
+
+		KunderaCoreUtils.printQuery(query, showQuery);
+
+		boundStatement.setConsistencyLevel(
+			ConsistencyLevel.valueOf(this.consistencyLevel.name())
+		);
+
+		return (T) session.execute(boundStatement);
+        }
+        catch (Exception e)
+        {
+            log.error("Error while executing query {}.", query);
+            throw new KunderaException(e);
+        }
+        finally
+        {
+            // factory.releaseConnection(session);
+        }
+    }
+
+
 
     /*
      * (non-Javadoc)

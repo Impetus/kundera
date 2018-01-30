@@ -151,8 +151,24 @@ public class CassQuery extends QueryImpl
         {
             if (isNative)
             {
-                result = ((CassandraClientBase) client).executeQuery(m != null ? m.getEntityClazz() : null, null,
-                        isNative, query != null ? query : getJPAQuery());
+		    // XXX
+		if (
+		    !kunderaQuery.getBindParameters().isEmpty()
+		) {
+	                result = ((CassandraClientBase) client).executeQuery(
+				null,
+				null,
+				isNative, query != null ? query : getJPAQuery(),
+				kunderaQuery.getBindParameters()
+			);
+		} else {
+	                result = ((CassandraClientBase) client).executeQuery(
+				m != null ? m.getEntityClazz() : null,
+				null,
+				isNative,
+				query != null ? query : getJPAQuery()
+			);
+		}
             }
             else
             {

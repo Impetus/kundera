@@ -112,6 +112,8 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.property.accessor.StringAccessor;
 import com.impetus.kundera.utils.KunderaCoreUtils;
 import com.impetus.kundera.utils.TimestampGenerator;
+import com.impetus.kundera.query.KunderaQuery;
+
 
 /**
  * Base Class for all Cassandra Clients Contains methods that are applicable to
@@ -1559,6 +1561,17 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
      */
     public abstract List executeQuery(Class clazz, List<String> relationalField, boolean isNative, String cqlQuery);
 
+    // XXX
+    public List executeQuery(
+	Class clazz,
+	List<String> relationalField,
+	boolean isNative,
+	String cqlQuery,
+	final List<KunderaQuery.BindParameter> parameters
+    ) {
+            throw new KunderaException("not implemented");
+    }
+
     /**
      * Find.
      * 
@@ -2579,6 +2592,30 @@ public abstract class CassandraClientBase extends ClientBase implements ClientPr
         }
         return entities;
     }
+
+
+    // XXX
+    /**
+     * Execute with bind parameters
+     * 
+     * @param <T>
+     *            the generic type
+     * @param query
+     *            the query
+     * @param connection
+     *            the connection
+     * @return the t
+     */
+    public <T> T execute(
+	final String query,
+	final Object connection,
+	final List<KunderaQuery.BindParameter> parameters
+    ) {
+	throw new KunderaException("not implemented");
+    }
+
+ 
+
 
     /**
      * Execute.

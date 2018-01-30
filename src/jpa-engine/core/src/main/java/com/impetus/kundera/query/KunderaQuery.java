@@ -119,6 +119,9 @@ public class KunderaQuery
     /** The parameters map. */
     private Map<String, Object> parametersMap = new HashMap<String, Object>();
 
+    /** Bind parameters */
+    private final List<BindParameter> bindParameters = new ArrayList<>();
+
     /** The is native query. */
     boolean isNativeQuery;
 
@@ -475,6 +478,18 @@ public class KunderaQuery
     {
         return parametersMap;
     }
+
+
+   /**
+     * Gets the bind parameters map.
+     * 
+     * @return Map of query parameters.
+     */
+    public List<BindParameter> getBindParameters()
+    {
+        return bindParameters;
+    }
+
 
     /**
      * Method to check if required result is to get complete entity or a select
@@ -911,9 +926,15 @@ public class KunderaQuery
      * @param value
      *            the value
      */
+
     public final void setParameter(String name, Object value)
     {
-        setParameterValue(":" + name, value);
+        if (isNative()) {
+            bindParameters.add(new BindParameter(name, value));
+	} else {
+            setParameterValue(":" + name, value);
+	}
+
         parametersMap.put(":" + name, value);
     }
 
@@ -927,7 +948,12 @@ public class KunderaQuery
      */
     public final void setParameter(int position, Object value)
     {
-        setParameterValue("?" + position, value);
+	if (isNative()) {
+	    bindParameters.add(new BindParameter(position, value));
+	} else {
+            setParameterValue("?" + position, value);
+	}
+
         parametersMap.put("?" + position, value);
     }
 
@@ -1803,5 +1829,53 @@ public class KunderaQuery
 
         return value;
     }
+
+
+
+    /*
+     * XXX
+     * Indexed or named bind parameter for queries
+     */
+
+    public static class BindParameter implements java.io.Serializable {
+
+	    public BindParameter(final String name, final Object value) {
+		    this.name = name;
+		    this.index = -1;
+		    this.value = value;
+	    }
+
+	    public BindParameter(final int index, final Object value) {
+		    this.name = null;
+		    this.index = index;
+		    this.value = value;
+	    }
+
+
+	    private final String name;
+
+	    public String getName() {
+		    return name;
+	    }
+
+	    public boolean isNamed() {
+		    return (getName() != null);
+	    }
+
+
+	    private final int index;
+
+	    public int getIndex() {
+		    return index;
+	    }
+
+
+	    private final Object value;
+
+	    public Object getValue() {
+		    return value;
+	    }
+    }
+
 
 }
