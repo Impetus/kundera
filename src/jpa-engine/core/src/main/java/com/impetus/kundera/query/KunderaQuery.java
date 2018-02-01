@@ -1839,6 +1839,11 @@ public class KunderaQuery
 
     public static class BindParameter implements java.io.Serializable {
 
+	    private final String name;
+	    private final int index;
+	    private final Object value;
+
+
 	    public BindParameter(final String name, final Object value) {
 		    this.name = name;
 		    this.index = -1;
@@ -1852,8 +1857,6 @@ public class KunderaQuery
 	    }
 
 
-	    private final String name;
-
 	    public String getName() {
 		    return name;
 	    }
@@ -1862,15 +1865,9 @@ public class KunderaQuery
 		    return (getName() != null);
 	    }
 
-
-	    private final int index;
-
 	    public int getIndex() {
 		    return index;
 	    }
-
-
-	    private final Object value;
 
 	    public Object getValue() {
 		    return value;
