@@ -1,3 +1,4 @@
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/909a6d0a3c344f378d98adb26cc5854c)](https://www.codacy.com/app/devender-yadav/Kundera?utm_source=github.com&utm_medium=referral&utm_content=Impetus/Kundera&utm_campaign=badger)
 [![Join the chat at https://gitter.im/impetus-opensource/Kundera](https://badges.gitter.im/impetus-opensource/Kundera.svg)](https://gitter.im/impetus-opensource/Kundera) [![Follow us on Twitter](http://i.imgur.com/wWzX9uB.png)](https://twitter.com/kundera_impetus)
 
 Overview
