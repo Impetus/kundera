@@ -854,7 +854,7 @@ public class DSClient extends CassandraClientBase implements Client<DSCassQuery>
 						);
 					else
 						boundStatement.setString(
-							value.getIndex(),
+							value.getIndex() - 1,
 							(String) value.getValue()
 						);
 				} else if (value.getValue() instanceof Integer) {
@@ -865,7 +865,7 @@ public class DSClient extends CassandraClientBase implements Client<DSCassQuery>
 						);
 					else
 						boundStatement.setInt(
-							value.getIndex(),
+							value.getIndex() - 1,
 							(Integer) value.getValue()
 						);
 				} else if (value.getValue() instanceof Long) {
@@ -876,7 +876,7 @@ public class DSClient extends CassandraClientBase implements Client<DSCassQuery>
 						);
 					else
 						boundStatement.setLong(
-							value.getIndex(),
+							value.getIndex() - 1,
 							(Long) value.getValue()
 						);
 				} else if (value.getValue() instanceof java.util.UUID) {
@@ -887,7 +887,7 @@ public class DSClient extends CassandraClientBase implements Client<DSCassQuery>
 						);
 					else
 						boundStatement.setUUID(
-							value.getIndex(),
+							value.getIndex() - 1,
 							(java.util.UUID) value.getValue()
 						);
 				} else if (value.getValue() instanceof List) {
@@ -898,7 +898,7 @@ public class DSClient extends CassandraClientBase implements Client<DSCassQuery>
 						);
 					else
 						boundStatement.setList(
-							value.getIndex(),
+							value.getIndex() - 1,
 							(List) value.getValue()
 						);
 				} else {
