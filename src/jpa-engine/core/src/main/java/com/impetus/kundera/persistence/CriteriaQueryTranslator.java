@@ -139,18 +139,11 @@ final class CriteriaQueryTranslator
 
         List<Order> orderings = criteriaQuery.getOrderList();
 
-        if (orderings != null)
+        if (orderings != null && !orderings.isEmpty())
         {
-            if (!orderings.isEmpty())
-            {
-                builder.appendOrderClause(where == null);
-            }
-
-            for (Order order : orderings)
-            {
-                builder.appendAlias(from.getAlias() != null ? from.getAlias() : select.getAlias());
-                builder.appendOrdering(order);
-            }
+            builder.appendOrderClause(where == null);
+            String alias = from.getAlias() != null ? from.getAlias() : select.getAlias();
+            builder.appendMultiOrdering(orderings, alias);
         }
         return builder.getQuery();
 
@@ -206,6 +199,20 @@ final class CriteriaQueryTranslator
             this.builder.append(Constants.SPACE);
             return this;
 
+        }
+        
+        QueryBuilder appendMultiOrdering(List<Order> orderings, String alias)
+        {
+            for (Order order : orderings)
+            {
+                this.appendAlias(alias);
+                this.appendOrdering(order);
+                this.builder.append(Constants.COMMA);
+            }
+
+            // remove last comma
+            this.builder.deleteCharAt(this.builder.length() - 1);
+            return this;
         }
 
         QueryBuilder appendOrdering(Order orderAttribute)
