@@ -15,14 +15,10 @@
  ******************************************************************************/
 package com.impetus.kundera.client.cassandra.crud;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -32,28 +28,17 @@ import javax.persistence.TypedQuery;
 
 import junit.framework.Assert;
 
-import org.apache.cassandra.thrift.Compression;
-import org.apache.cassandra.thrift.ConsistencyLevel;
-import org.apache.cassandra.thrift.InvalidRequestException;
-import org.apache.cassandra.thrift.SchemaDisagreementException;
-import org.apache.cassandra.thrift.TimedOutException;
-import org.apache.cassandra.thrift.UnavailableException;
-import org.apache.thrift.TException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.cassandra.common.CassandraConstants;
-import com.impetus.client.cassandra.thrift.CQLTranslator;
 import com.impetus.client.crud.BaseTest;
-import com.impetus.client.crud.Group;
 import com.impetus.client.crud.Month;
 import com.impetus.client.crud.PersonCassandra;
 import com.impetus.client.crud.PersonCassandra.Day;
 import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.client.Client;
-import com.impetus.kundera.client.cassandra.dsdriver.DSClient;
 import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
+
 
 /**
  * Test case to perform native queries with bind parameters
