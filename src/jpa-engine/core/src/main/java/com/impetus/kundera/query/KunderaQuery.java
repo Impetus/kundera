@@ -54,11 +54,10 @@ import com.impetus.kundera.persistence.EntityManagerFactoryImpl.KunderaMetadata;
 /**
  * The Class KunderaQuery.
  */
-public class KunderaQuery
-{
+public class KunderaQuery {
     /** The Constant SINGLE_STRING_KEYWORDS. */
-    public static final String[] SINGLE_STRING_KEYWORDS = { "SELECT", "UPDATE", "SET", "DELETE", "UNIQUE", "FROM",
-            "WHERE", "GROUP BY", "HAVING", "ORDER BY" };
+    public static final String[] SINGLE_STRING_KEYWORDS =
+        { "SELECT", "UPDATE", "SET", "DELETE", "UNIQUE", "FROM", "WHERE", "GROUP BY", "HAVING", "ORDER BY" };
 
     /** The Constant INTER_CLAUSE_OPERATORS. */
     public static final String[] INTER_CLAUSE_OPERATORS = { "AND", "OR", "BETWEEN", "(", ")" };
@@ -152,8 +151,7 @@ public class KunderaQuery
      * @param expressionFactory
      *            the expressionFactory to set
      */
-    public void setExpressionFactory(ExpressionFactory expressionFactory)
-    {
+    public void setExpressionFactory(ExpressionFactory expressionFactory) {
         this.expressionFactory = expressionFactory;
     }
 
@@ -162,8 +160,7 @@ public class KunderaQuery
      * 
      * @return the jpqlExpression
      */
-    public JPQLExpression getJpqlExpression()
-    {
+    public JPQLExpression getJpqlExpression() {
         return jpqlExpression;
     }
 
@@ -175,8 +172,7 @@ public class KunderaQuery
      * @param kunderaMetadata
      *            the kundera metadata
      */
-    public KunderaQuery(final String jpaQuery, final KunderaMetadata kunderaMetadata)
-    {
+    public KunderaQuery(final String jpaQuery, final KunderaMetadata kunderaMetadata) {
         this.jpaQuery = jpaQuery;
         this.kunderaMetadata = kunderaMetadata;
         initiateJPQLObject(jpaQuery);
@@ -188,8 +184,7 @@ public class KunderaQuery
      * @param jpaQuery
      *            the jpa query
      */
-    private void initiateJPQLObject(final String jpaQuery)
-    {
+    private void initiateJPQLObject(final String jpaQuery) {
         JPQLGrammar jpqlGrammar = EclipseLinkJPQLGrammar2_4.instance();
         this.jpqlExpression = new JPQLExpression(jpaQuery, jpqlGrammar, "ql_statement", true);
         setKunderaQueryTypeObject();
@@ -198,31 +193,22 @@ public class KunderaQuery
     /**
      * Sets the kundera query type object.
      */
-    private void setKunderaQueryTypeObject()
-    {
+    private void setKunderaQueryTypeObject() {
 
-        try
-        {
-            if (isSelectStatement())
-            {
+        try {
+            if (isSelectStatement()) {
 
                 this.setSelectStatement((SelectStatement) (this.getJpqlExpression().getQueryStatement()));
 
-            }
-            else if (isUpdateStatement())
-            {
+            } else if (isUpdateStatement()) {
 
                 this.setUpdateStatement((UpdateStatement) (this.getJpqlExpression().getQueryStatement()));
 
-            }
-            else if (isDeleteStatement())
-            {
+            } else if (isDeleteStatement()) {
                 this.setDeleteStatement((DeleteStatement) (this.getJpqlExpression().getQueryStatement()));
 
             }
-        }
-        catch (ClassCastException cce)
-        {
+        } catch (ClassCastException cce) {
             throw new JPQLParseException("Bad query format : " + cce.getMessage());
         }
 
@@ -233,8 +219,7 @@ public class KunderaQuery
      * 
      * @return the selectStatement
      */
-    public SelectStatement getSelectStatement()
-    {
+    public SelectStatement getSelectStatement() {
         return selectStatement;
     }
 
@@ -244,8 +229,7 @@ public class KunderaQuery
      * @param selectStatement
      *            the selectStatement to set
      */
-    public void setSelectStatement(SelectStatement selectStatement)
-    {
+    public void setSelectStatement(SelectStatement selectStatement) {
         this.selectStatement = selectStatement;
     }
 
@@ -255,8 +239,7 @@ public class KunderaQuery
      * @param updateStatement
      *            the updateStatement to set
      */
-    public void setUpdateStatement(UpdateStatement updateStatement)
-    {
+    public void setUpdateStatement(UpdateStatement updateStatement) {
         this.updateStatement = updateStatement;
     }
 
@@ -265,8 +248,7 @@ public class KunderaQuery
      * 
      * @return the updateStatement
      */
-    public UpdateStatement getUpdateStatement()
-    {
+    public UpdateStatement getUpdateStatement() {
         return updateStatement;
     }
 
@@ -275,8 +257,7 @@ public class KunderaQuery
      * 
      * @return the deleteStatement
      */
-    public DeleteStatement getDeleteStatement()
-    {
+    public DeleteStatement getDeleteStatement() {
         return deleteStatement;
     }
 
@@ -286,8 +267,7 @@ public class KunderaQuery
      * @param deleteStatement
      *            the deleteStatement to set
      */
-    public void setDeleteStatement(DeleteStatement deleteStatement)
-    {
+    public void setDeleteStatement(DeleteStatement deleteStatement) {
         this.deleteStatement = deleteStatement;
     }
 
@@ -296,8 +276,7 @@ public class KunderaQuery
      * 
      * @return true, if is select statement
      */
-    public boolean isSelectStatement()
-    {
+    public boolean isSelectStatement() {
         return this.getJpqlExpression().getQueryStatement().getClass().isAssignableFrom(SelectStatement.class);
 
     }
@@ -307,8 +286,7 @@ public class KunderaQuery
      * 
      * @return true, if is delete statement
      */
-    public boolean isDeleteStatement()
-    {
+    public boolean isDeleteStatement() {
         return this.getJpqlExpression().getQueryStatement().getClass().isAssignableFrom(DeleteStatement.class);
     }
 
@@ -317,8 +295,7 @@ public class KunderaQuery
      * 
      * @return true, if is update statement
      */
-    public boolean isUpdateStatement()
-    {
+    public boolean isUpdateStatement() {
         return this.getJpqlExpression().getQueryStatement().getClass().isAssignableFrom(UpdateStatement.class);
     }
 
@@ -327,8 +304,7 @@ public class KunderaQuery
      * 
      * @return the expressionFactory
      */
-    public ExpressionFactory getExpressionFactory()
-    {
+    public ExpressionFactory getExpressionFactory() {
         return expressionFactory;
     }
 
@@ -338,8 +314,7 @@ public class KunderaQuery
      * @param groupingClause
      *            the new grouping
      */
-    public void setGrouping(String groupingClause)
-    {
+    public void setGrouping(String groupingClause) {
     }
 
     /**
@@ -348,8 +323,7 @@ public class KunderaQuery
      * @param result
      *            the new result
      */
-    public final void setResult(String[] result)
-    {
+    public final void setResult(String[] result) {
         this.result = result;
     }
 
@@ -359,8 +333,7 @@ public class KunderaQuery
      * @param aggResult
      *            the new result
      */
-    public final void setAggregationResult(String[] aggResult)
-    {
+    public final void setAggregationResult(String[] aggResult) {
         this.aggregationResult = aggResult;
     }
 
@@ -369,8 +342,7 @@ public class KunderaQuery
      * 
      * @return Aggregation result set
      */
-    public final String[] getAggResult()
-    {
+    public final String[] getAggResult() {
         return aggregationResult;
     }
 
@@ -379,8 +351,7 @@ public class KunderaQuery
      * 
      * @return Query contains aggregation or not
      */
-    public boolean isAggregated()
-    {
+    public boolean isAggregated() {
         return isAggregate;
     }
 
@@ -390,8 +361,7 @@ public class KunderaQuery
      * @param isAggregated
      *            the new aggregated
      */
-    public void setAggregated(boolean isAggregated)
-    {
+    public void setAggregated(boolean isAggregated) {
         this.isAggregate = isAggregated;
     }
 
@@ -401,8 +371,7 @@ public class KunderaQuery
      * @param from
      *            the new from
      */
-    public final void setFrom(String from)
-    {
+    public final void setFrom(String from) {
         this.from = from;
     }
 
@@ -412,8 +381,7 @@ public class KunderaQuery
      * @param filter
      *            the new filter
      */
-    public final void setFilter(String filter)
-    {
+    public final void setFilter(String filter) {
         this.filter = filter;
     }
 
@@ -423,8 +391,7 @@ public class KunderaQuery
      * @param ordering
      *            the new ordering
      */
-    public final void setOrdering(String ordering)
-    {
+    public final void setOrdering(String ordering) {
         this.ordering = ordering;
         parseOrdering(this.ordering);
     }
@@ -434,8 +401,7 @@ public class KunderaQuery
      * 
      * @return the filter
      */
-    public final String getFilter()
-    {
+    public final String getFilter() {
         return filter;
     }
 
@@ -444,8 +410,7 @@ public class KunderaQuery
      * 
      * @return the from
      */
-    public final String getFrom()
-    {
+    public final String getFrom() {
         return from;
     }
 
@@ -454,8 +419,7 @@ public class KunderaQuery
      * 
      * @return the ordering
      */
-    public final List<SortOrdering> getOrdering()
-    {
+    public final List<SortOrdering> getOrdering() {
         return sortOrders;
     }
 
@@ -464,8 +428,7 @@ public class KunderaQuery
      * 
      * @return the result
      */
-    public final String[] getResult()
-    {
+    public final String[] getResult() {
         return result;
     }
 
@@ -474,32 +437,26 @@ public class KunderaQuery
      * 
      * @return Map of query parameters.
      */
-    public Map<String, Object> getParametersMap()
-    {
+    public Map<String, Object> getParametersMap() {
         return parametersMap;
     }
 
-
-   /**
+    /**
      * Gets the bind parameters map.
      * 
      * @return Map of query parameters.
      */
-    public List<BindParameter> getBindParameters()
-    {
+    public List<BindParameter> getBindParameters() {
         return bindParameters;
     }
 
-
     /**
-     * Method to check if required result is to get complete entity or a select
-     * scalar value.
+     * Method to check if required result is to get complete entity or a select scalar value.
      * 
      * @return true, if it result is for complete alias.
      * 
      */
-    public final boolean isAliasOnly()
-    {
+    public final boolean isAliasOnly() {
         // TODO
         return result != null && (result[0].indexOf(".") == -1);
     }
@@ -509,8 +466,7 @@ public class KunderaQuery
      * 
      * @return jpaParameters
      */
-    public Set<Parameter<?>> getParameters()
-    {
+    public Set<Parameter<?>> getParameters() {
         return typedParameter != null ? typedParameter.jpaParameters : null;
     }
 
@@ -521,8 +477,7 @@ public class KunderaQuery
      *            the param
      * @return true, if is bound
      */
-    public boolean isBound(Parameter param)
-    {
+    public boolean isBound(Parameter param) {
         return getClauseValue(param) != null;
     }
 
@@ -533,17 +488,12 @@ public class KunderaQuery
      *            the param string
      * @return the clause value
      */
-    public List<Object> getClauseValue(String paramString)
-    {
-        if (typedParameter != null && typedParameter.getParameters() != null)
-        {
+    public List<Object> getClauseValue(String paramString) {
+        if (typedParameter != null && typedParameter.getParameters() != null) {
             List<FilterClause> clauses = typedParameter.getParameters().get(paramString);
-            if (clauses != null)
-            {
+            if (clauses != null) {
                 return clauses.get(0).getValue();
-            }
-            else
-            {
+            } else {
                 throw new IllegalArgumentException("parameter is not a parameter of the query");
             }
         }
@@ -560,36 +510,24 @@ public class KunderaQuery
      * 
      * @return clause value.
      */
-    public List<Object> getClauseValue(Parameter param)
-    {
+    public List<Object> getClauseValue(Parameter param) {
         Parameter match = null;
-        if (typedParameter != null && typedParameter.jpaParameters != null)
-        {
-            for (Parameter p : typedParameter.jpaParameters)
-            {
-                if (p.equals(param))
-                {
+        if (typedParameter != null && typedParameter.jpaParameters != null) {
+            for (Parameter p : typedParameter.jpaParameters) {
+                if (p.equals(param)) {
                     match = p;
-                    if (typedParameter.getType().equals(Type.NAMED))
-                    {
+                    if (typedParameter.getType().equals(Type.NAMED)) {
                         List<FilterClause> clauses = typedParameter.getParameters().get(":" + p.getName());
-                        if (clauses != null)
-                        {
+                        if (clauses != null) {
                             return clauses.get(0).getValue();
                         }
-                    }
-                    else
-                    {
+                    } else {
                         List<FilterClause> clauses = typedParameter.getParameters().get("?" + p.getPosition());
-                        if (clauses != null)
-                        {
+                        if (clauses != null) {
                             return clauses.get(0).getValue();
-                        }
-                        else
-                        {
+                        } else {
                             UpdateClause updateClause = typedParameter.getUpdateParameters().get("?" + p.getPosition());
-                            if (updateClause != null)
-                            {
+                            if (updateClause != null) {
                                 List<Object> value = new ArrayList<Object>();
                                 value.add(updateClause.getValue());
                                 return value;
@@ -600,8 +538,7 @@ public class KunderaQuery
                     break;
                 }
             }
-            if (match == null)
-            {
+            if (match == null) {
                 throw new IllegalArgumentException("parameter is not a parameter of the query");
             }
         }
@@ -615,8 +552,7 @@ public class KunderaQuery
     /**
      * Post parsing init.
      */
-    protected void postParsingInit()
-    {
+    protected void postParsingInit() {
         initEntityClass();
         initFilter();
         initUpdateClause();
@@ -625,10 +561,8 @@ public class KunderaQuery
     /**
      * Inits the update clause.
      */
-    private void initUpdateClause()
-    {
-        for (UpdateClause updateClause : updateClauseQueue)
-        {
+    private void initUpdateClause() {
+        for (UpdateClause updateClause : updateClauseQueue) {
 
             onTypedParameter(updateClause.getValue(), updateClause, updateClause.getProperty().trim());
         }
@@ -638,34 +572,27 @@ public class KunderaQuery
     /**
      * Inits the entity class.
      */
-    private void initEntityClass()
-    {
-        if (from == null)
-        {
+    private void initEntityClass() {
+        if (from == null) {
             throw new JPQLParseException("Bad query format FROM clause is mandatory for SELECT queries");
         }
         String fromArray[] = from.split(" ");
 
-        if (!this.isDeleteUpdate)
-        {
-            if (fromArray.length == 3 && fromArray[1].equalsIgnoreCase("as"))
-            {
+        if (!this.isDeleteUpdate) {
+            if (fromArray.length == 3 && fromArray[1].equalsIgnoreCase("as")) {
                 fromArray = new String[] { fromArray[0], fromArray[2] };
             }
 
-            if (fromArray.length != 2)
-            {
+            if (fromArray.length != 2) {
                 throw new JPQLParseException("Bad query format: " + from
-                        + ". Identification variable is mandatory in FROM clause for SELECT queries");
+                    + ". Identification variable is mandatory in FROM clause for SELECT queries");
             }
 
             // TODO
             StringTokenizer tokenizer = new StringTokenizer(result[0], ",");
-            while (tokenizer.hasMoreTokens())
-            {
+            while (tokenizer.hasMoreTokens()) {
                 String token = tokenizer.nextToken();
-                if (!StringUtils.containsAny(fromArray[1] + ".", token))
-                {
+                if (!StringUtils.containsAny(fromArray[1] + ".", token)) {
                     throw new QueryHandlerException("bad query format with invalid alias:" + token);
                 }
             }
@@ -680,39 +607,34 @@ public class KunderaQuery
         // Get specific metamodel.
         MetamodelImpl model = getMetamodel(persistenceUnit);
 
-        if (model != null)
-        {
+        if (model != null) {
             entityClass = model.getEntityClass(entityName);
         }
 
-        if (null == entityClass)
-        {
+        if (null == entityClass) {
             logger.error(
-                    "No entity {} found, please verify it is properly annotated with @Entity and not a mapped Super class",
-                    entityName);
+                "No entity {} found, please verify it is properly annotated with @Entity and not a mapped Super class",
+                entityName);
             throw new QueryHandlerException("No entity found by the name: " + entityName);
         }
 
         EntityMetadata metadata = model.getEntityMetadata(entityClass);
 
-        if (metadata != null && !metadata.isIndexable())
-        {
+        if (metadata != null && !metadata.isIndexable()) {
             throw new QueryHandlerException(entityClass + " is not indexed. Not possible to run a query on it."
-                    + " Check whether it was properly annotated for indexing.");
+                + " Check whether it was properly annotated for indexing.");
         }
     }
 
     /**
      * Inits the filter.
      */
-    private void initFilter()
-    {
+    private void initFilter() {
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClass);
         Metamodel metaModel = kunderaMetadata.getApplicationMetadata().getMetamodel(getPersistenceUnit());
         EntityType entityType = metaModel.entity(entityClass);
 
-        if (null == filter)
-        {
+        if (null == filter) {
             List<String> clauses = new ArrayList<String>();
             addDiscriminatorClause(clauses, entityType);
             return;
@@ -721,11 +643,9 @@ public class KunderaQuery
 
         KunderaQueryUtils.traverse(whereClause.getConditionalExpression(), metadata, kunderaMetadata, this, false);
 
-        for (Object filterClause : filtersQueue)
-        {
+        for (Object filterClause : filtersQueue) {
 
-            if (!(filterClause instanceof String))
-            {
+            if (!(filterClause instanceof String)) {
                 onTypedParameter(((FilterClause) filterClause));
             }
 
@@ -742,17 +662,13 @@ public class KunderaQuery
      * @param entityType
      *            the entity type
      */
-    private void addDiscriminatorClause(List<String> clauses, EntityType entityType)
-    {
-        if (((AbstractManagedType) entityType).isInherited())
-        {
+    private void addDiscriminatorClause(List<String> clauses, EntityType entityType) {
+        if (((AbstractManagedType) entityType).isInherited()) {
             String discrColumn = ((AbstractManagedType) entityType).getDiscriminatorColumn();
             String discrValue = ((AbstractManagedType) entityType).getDiscriminatorValue();
 
-            if (discrColumn != null && discrValue != null)
-            {
-                if (clauses != null && !clauses.isEmpty())
-                {
+            if (discrColumn != null && discrValue != null) {
+                if (clauses != null && !clauses.isEmpty()) {
                     filtersQueue.add("AND");
                 }
 
@@ -763,8 +679,8 @@ public class KunderaQuery
     }
 
     /**
-     * Depending upon filter value, if it starts with ":" then it is NAMED
-     * parameter, else if starts with "?", it will be INDEXED parameter.
+     * Depending upon filter value, if it starts with ":" then it is NAMED parameter, else if starts with "?", it will
+     * be INDEXED parameter.
      * 
      * @param value
      *            the value
@@ -773,47 +689,38 @@ public class KunderaQuery
      * @param fieldName
      *            the field name
      */
-    private void onTypedParameter(Object value, UpdateClause updateClause, String fieldName)
-    {
+    private void onTypedParameter(Object value, UpdateClause updateClause, String fieldName) {
         String token = value.toString();
-        if (token != null && token.startsWith(":"))
-        {
+        if (token != null && token.startsWith(":")) {
             addTypedParameter(Type.NAMED, token, updateClause);
             filterJPAParameterInfo(Type.NAMED, token.substring(1), fieldName);
-        }
-        else if (token != null && token.startsWith("?"))
-        {
+        } else if (token != null && token.startsWith("?")) {
             addTypedParameter(Type.INDEXED, token, updateClause);
             filterJPAParameterInfo(Type.INDEXED, token.substring(1), fieldName);
         }
     }
 
     /**
-     * Depending upon filter value, if it starts with ":" then it is NAMED
-     * parameter, else if starts with "?", it will be INDEXED parameter.
+     * Depending upon filter value, if it starts with ":" then it is NAMED parameter, else if starts with "?", it will
+     * be INDEXED parameter.
      * 
      * @param filterClause
      *            filter clauses.
      */
-    private void onTypedParameter(FilterClause filterClause)
-    {
+    private void onTypedParameter(FilterClause filterClause) {
 
-        if (filterClause.value != null && filterClause.value.get(0) == null)
-        {
+        if (filterClause.value != null && filterClause.value.get(0) == null) {
             return;
         }
 
-        if (filterClause.value != null && filterClause.value.get(0).toString().startsWith(":"))
-        {
+        if (filterClause.value != null && filterClause.value.get(0).toString().startsWith(":")) {
             addTypedParameter(Type.NAMED, filterClause.value.get(0).toString(), filterClause);
             filterJPAParameterInfo(Type.NAMED, filterClause.value.get(0).toString().substring(1),
-                    filterClause.fieldName);
-        }
-        else if (filterClause.value.toString() != null && filterClause.value.get(0).toString().startsWith("?"))
-        {
+                filterClause.fieldName);
+        } else if (filterClause.value.toString() != null && filterClause.value.get(0).toString().startsWith("?")) {
             addTypedParameter(Type.INDEXED, filterClause.value.get(0).toString(), filterClause);
             filterJPAParameterInfo(Type.INDEXED, filterClause.value.get(0).toString().substring(1),
-                    filterClause.fieldName);
+                filterClause.fieldName);
         }
     }
 
@@ -827,19 +734,14 @@ public class KunderaQuery
      * @param clause
      *            filter clause.
      */
-    private void addTypedParameter(Type type, String parameter, FilterClause clause)
-    {
-        if (typedParameter == null)
-        {
+    private void addTypedParameter(Type type, String parameter, FilterClause clause) {
+        if (typedParameter == null) {
             typedParameter = new TypedParameter(type);
         }
 
-        if (typedParameter.getType().equals(type))
-        {
+        if (typedParameter.getType().equals(type)) {
             typedParameter.addParameters(parameter, clause);
-        }
-        else
-        {
+        } else {
             logger.warn("Invalid type provided, it can either be name or indexes!");
         }
     }
@@ -854,21 +756,15 @@ public class KunderaQuery
      * @param clause
      *            filter clause.
      */
-    private void addTypedParameter(Type type, String parameter, UpdateClause clause)
-    {
-        if (type != null)
-        {
-            if (typedParameter == null)
-            {
+    private void addTypedParameter(Type type, String parameter, UpdateClause clause) {
+        if (type != null) {
+            if (typedParameter == null) {
                 typedParameter = new TypedParameter(type);
             }
 
-            if (typedParameter.getType().equals(type))
-            {
+            if (typedParameter.getType().equals(type)) {
                 typedParameter.addParameters(parameter, clause);
-            }
-            else
-            {
+            } else {
                 logger.warn("Invalid type provided, it can either be name or indexes!");
             }
         }
@@ -884,19 +780,16 @@ public class KunderaQuery
      * @param fieldName
      *            the field name
      */
-    private void filterJPAParameterInfo(Type type, String name, String fieldName)
-    {
+    private void filterJPAParameterInfo(Type type, String name, String fieldName) {
         String attributeName = getAttributeName(fieldName);
-        Attribute entityAttribute = ((MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
-                persistenceUnit)).getEntityAttribute(entityClass, attributeName);
+        Attribute entityAttribute =
+            ((MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(persistenceUnit))
+                .getEntityAttribute(entityClass, attributeName);
         Class fieldType = entityAttribute.getJavaType();
 
-        if (type.equals(Type.INDEXED))
-        {
+        if (type.equals(Type.INDEXED)) {
             typedParameter.addJPAParameter(new JPAParameter(null, Integer.valueOf(name), fieldType));
-        }
-        else
-        {
+        } else {
             typedParameter.addJPAParameter(new JPAParameter(name, null, fieldType));
         }
     }
@@ -908,11 +801,9 @@ public class KunderaQuery
      *            the field name
      * @return the attribute name
      */
-    private String getAttributeName(String fieldName)
-    {
+    private String getAttributeName(String fieldName) {
         String attributeName = fieldName;
-        if (fieldName.indexOf(".") != -1)
-        {
+        if (fieldName.indexOf(".") != -1) {
             attributeName = fieldName.substring(0, fieldName.indexOf("."));
         }
         return attributeName;
@@ -927,13 +818,12 @@ public class KunderaQuery
      *            the value
      */
 
-    public final void setParameter(String name, Object value)
-    {
+    public final void setParameter(String name, Object value) {
         if (isNative()) {
             bindParameters.add(new BindParameter(name, value));
-	} else {
+        } else {
             setParameterValue(":" + name, value);
-	}
+        }
 
         parametersMap.put(":" + name, value);
     }
@@ -946,13 +836,12 @@ public class KunderaQuery
      * @param value
      *            the value
      */
-    public final void setParameter(int position, Object value)
-    {
-	if (isNative()) {
-	    bindParameters.add(new BindParameter(position, value));
-	} else {
+    public final void setParameter(int position, Object value) {
+        if (isNative()) {
+            bindParameters.add(new BindParameter(position, value));
+        } else {
             setParameterValue("?" + position, value);
-	}
+        }
 
         parametersMap.put("?" + position, value);
     }
@@ -965,35 +854,24 @@ public class KunderaQuery
      * @param value
      *            parameter value.
      */
-    private void setParameterValue(String name, Object value)
-    {
-        if (typedParameter != null)
-        {
-            List<FilterClause> clauses = typedParameter.getParameters() != null ? typedParameter.getParameters().get(
-                    name) : null;
-            if (clauses != null)
-            {
-                for (FilterClause clause : clauses)
-                {
+    private void setParameterValue(String name, Object value) {
+        if (typedParameter != null) {
+            List<FilterClause> clauses =
+                typedParameter.getParameters() != null ? typedParameter.getParameters().get(name) : null;
+            if (clauses != null) {
+                for (FilterClause clause : clauses) {
                     clause.setValue(value);
                 }
-            }
-            else
-            {
-                if (typedParameter.getUpdateParameters() != null)
-                {
+            } else {
+                if (typedParameter.getUpdateParameters() != null) {
                     UpdateClause updateClause = typedParameter.getUpdateParameters().get(name);
                     updateClause.setValue(value);
-                }
-                else
-                {
+                } else {
                     logger.error("Error while setting parameter.");
                     throw new QueryHandlerException("named parameter : " + name + " not found!");
                 }
             }
-        }
-        else
-        {
+        } else {
             throw new QueryHandlerException("No named parameter present for query");
         }
     }
@@ -1003,8 +881,7 @@ public class KunderaQuery
      * 
      * @return the entityClass
      */
-    public final Class getEntityClass()
-    {
+    public final Class getEntityClass() {
         return entityClass;
     }
 
@@ -1013,8 +890,7 @@ public class KunderaQuery
      * 
      * @return the entity alias
      */
-    public final String getEntityAlias()
-    {
+    public final String getEntityAlias() {
         return this.entityAlias;
     }
 
@@ -1023,8 +899,7 @@ public class KunderaQuery
      * 
      * @return true, if is native
      */
-    public boolean isNative()
-    {
+    public boolean isNative() {
         return isNativeQuery;
     }
 
@@ -1033,19 +908,14 @@ public class KunderaQuery
      * 
      * @return the entity metadata
      */
-    public final EntityMetadata getEntityMetadata()
-    {
+    public final EntityMetadata getEntityMetadata() {
         EntityMetadata metadata = null;
-        try
-        {
+        try {
             metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, entityClass);
-        }
-        catch (KunderaException e)
-        {
+        } catch (KunderaException e) {
             logger.info("No Entity class provided, Proceeding as Scalar Query");
         }
-        if (!this.isNativeQuery && metadata == null)
-        {
+        if (!this.isNativeQuery && metadata == null) {
             throw new KunderaException("Unable to load entity metadata for : " + entityClass);
         }
         return metadata;
@@ -1056,16 +926,14 @@ public class KunderaQuery
      * 
      * @return the filters
      */
-    public final Queue getFilterClauseQueue()
-    {
+    public final Queue getFilterClauseQueue() {
         return filtersQueue;
     }
 
     /**
      * The FilterClause class to hold a where clause predicate.
      */
-    public final class FilterClause
-    {
+    public final class FilterClause {
 
         /** The property. */
         private String property;
@@ -1081,8 +949,7 @@ public class KunderaQuery
          * 
          * @return the fieldName
          */
-        public String getFieldName()
-        {
+        public String getFieldName() {
             return fieldName;
         }
 
@@ -1104,21 +971,16 @@ public class KunderaQuery
          * @param fieldName
          *            the field name
          */
-        public FilterClause(String property, String condition, Object value, String fieldName)
-        {
+        public FilterClause(String property, String condition, Object value, String fieldName) {
             super();
             this.property = property;
             this.condition = condition.trim();
             this.fieldName = fieldName;
-            if (value instanceof Collection)
-            {
-                for (Object valueObject : (Collection) value)
-                {
+            if (value instanceof Collection) {
+                for (Object valueObject : (Collection) value) {
                     this.value.add(KunderaQuery.getValue(valueObject));
                 }
-            }
-            else
-            {
+            } else {
                 this.value.add(KunderaQuery.getValue(value));
             }
         }
@@ -1128,8 +990,7 @@ public class KunderaQuery
          * 
          * @return the property
          */
-        public final String getProperty()
-        {
+        public final String getProperty() {
             return property;
         }
 
@@ -1138,8 +999,7 @@ public class KunderaQuery
          * 
          * @return the condition
          */
-        public final String getCondition()
-        {
+        public final String getCondition() {
             return condition;
         }
 
@@ -1148,8 +1008,7 @@ public class KunderaQuery
          * 
          * @return the value
          */
-        public final List<Object> getValue()
-        {
+        public final List<Object> getValue() {
             return value;
         }
 
@@ -1159,18 +1018,13 @@ public class KunderaQuery
          * @param value
          *            the value to set
          */
-        protected void setValue(Object value)
-        {
+        protected void setValue(Object value) {
             List<Object> valObjects = new ArrayList<Object>();
-            if (value instanceof Collection)
-            {
-                for (Object valueObject : (Collection) value)
-                {
+            if (value instanceof Collection) {
+                for (Object valueObject : (Collection) value) {
                     valObjects.add(KunderaQuery.getValue(valueObject));
                 }
-            }
-            else
-            {
+            } else {
                 valObjects.add(KunderaQuery.getValue(value));
             }
 
@@ -1182,18 +1036,17 @@ public class KunderaQuery
          *
          * @return whether to ignore the case when evaluating the filter clause
          */
-        public boolean isIgnoreCase()
-        {
+        public boolean isIgnoreCase() {
             return ignoreCase;
         }
 
         /**
          * Sets whether to ignore the case when evaluating the filter clause.
          *
-         * @param ignoreCase true to ignore the case when evaluating the filter clause
+         * @param ignoreCase
+         *            true to ignore the case when evaluating the filter clause
          */
-        public void setIgnoreCase(final boolean ignoreCase)
-        {
+        public void setIgnoreCase(final boolean ignoreCase) {
             this.ignoreCase = ignoreCase;
         }
 
@@ -1204,8 +1057,7 @@ public class KunderaQuery
          * @see java.lang.Object#toString()
          */
         @Override
-        public String toString()
-        {
+        public String toString() {
             StringBuilder builder = new StringBuilder();
             builder.append("FilterClause [property=");
             builder.append(property);
@@ -1223,8 +1075,7 @@ public class KunderaQuery
     /**
      * The Class UpdateClause.
      */
-    public final class UpdateClause
-    {
+    public final class UpdateClause {
 
         /** The property. */
         private String property;
@@ -1240,8 +1091,7 @@ public class KunderaQuery
          * @param value
          *            the value
          */
-        public UpdateClause(final String property, final Object value)
-        {
+        public UpdateClause(final String property, final Object value) {
             this.property = property;
             this.value = KunderaQuery.getValue(value);
         }
@@ -1251,8 +1101,7 @@ public class KunderaQuery
          * 
          * @return the property
          */
-        public String getProperty()
-        {
+        public String getProperty() {
             return property;
         }
 
@@ -1261,8 +1110,7 @@ public class KunderaQuery
          * 
          * @return the value
          */
-        public Object getValue()
-        {
+        public Object getValue() {
             return value;
         }
 
@@ -1272,8 +1120,7 @@ public class KunderaQuery
          * @param value
          *            the value to set
          */
-        public void setValue(Object value)
-        {
+        public void setValue(Object value) {
             this.value = KunderaQuery.getValue(value);
         }
 
@@ -1286,8 +1133,7 @@ public class KunderaQuery
      * @see java.lang.Object#clone()
      */
     @Override
-    public final Object clone() throws CloneNotSupportedException
-    {
+    public final Object clone() throws CloneNotSupportedException {
         return super.clone();
     }
 
@@ -1298,8 +1144,7 @@ public class KunderaQuery
      * @see java.lang.Object#toString()
      */
     @Override
-    public final String toString()
-    {
+    public final String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("KunderaQuery [entityName=");
         builder.append(entityName);
@@ -1318,8 +1163,7 @@ public class KunderaQuery
      *            the pu
      * @return the metamodel
      */
-    private MetamodelImpl getMetamodel(String pu)
-    {
+    private MetamodelImpl getMetamodel(String pu) {
         return KunderaMetadataManager.getMetamodel(kunderaMetadata, pu);
     }
 
@@ -1328,8 +1172,7 @@ public class KunderaQuery
      * 
      * @return the persistenceUnits
      */
-    public String getPersistenceUnit()
-    {
+    public String getPersistenceUnit() {
         return persistenceUnit;
     }
 
@@ -1339,8 +1182,7 @@ public class KunderaQuery
      * @param persistenceUnit
      *            the new persistence unit
      */
-    public void setPersistenceUnit(String persistenceUnit)
-    {
+    public void setPersistenceUnit(String persistenceUnit) {
         this.persistenceUnit = persistenceUnit;
     }
 
@@ -1350,34 +1192,27 @@ public class KunderaQuery
      * @param ordering
      *            the ordering
      */
-    private void parseOrdering(String ordering)
-    {
+    private void parseOrdering(String ordering) {
         final String comma = ",";
         final String space = " ";
 
         StringTokenizer tokenizer = new StringTokenizer(ordering, comma);
 
         sortOrders = new ArrayList<KunderaQuery.SortOrdering>();
-        while (tokenizer.hasMoreTokens())
-        {
+        while (tokenizer.hasMoreTokens()) {
             String order = (String) tokenizer.nextElement();
             StringTokenizer token = new StringTokenizer(order, space);
             SortOrder orderType = SortOrder.ASC;
 
             String colName = (String) token.nextElement();
-            while (token.hasMoreElements())
-            {
+            while (token.hasMoreElements()) {
                 String nextOrder = (String) token.nextElement();
 
                 // more spaces given.
-                if (StringUtils.isNotBlank(nextOrder))
-                {
-                    try
-                    {
+                if (StringUtils.isNotBlank(nextOrder)) {
+                    try {
                         orderType = SortOrder.valueOf(nextOrder.toUpperCase());
-                    }
-                    catch (IllegalArgumentException e)
-                    {
+                    } catch (IllegalArgumentException e) {
                         logger.error("Error while parsing order by clause:");
                         throw new JPQLParseException("Invalid sort order provided:" + nextOrder);
                     }
@@ -1390,8 +1225,7 @@ public class KunderaQuery
     /**
      * Containing SortOrder.
      */
-    public class SortOrdering
-    {
+    public class SortOrdering {
 
         /** The column name. */
         String columnName;
@@ -1407,8 +1241,7 @@ public class KunderaQuery
          * @param order
          *            the order
          */
-        public SortOrdering(String columnName, SortOrder order)
-        {
+        public SortOrdering(String columnName, SortOrder order) {
             this.columnName = columnName;
             this.order = order;
         }
@@ -1418,8 +1251,7 @@ public class KunderaQuery
          * 
          * @return the column name
          */
-        public String getColumnName()
-        {
+        public String getColumnName() {
             return columnName;
         }
 
@@ -1428,8 +1260,7 @@ public class KunderaQuery
          * 
          * @return the order
          */
-        public SortOrder getOrder()
-        {
+        public SortOrder getOrder() {
             return order;
         }
     }
@@ -1437,12 +1268,11 @@ public class KunderaQuery
     /**
      * The Enum SortOrder.
      */
-    public enum SortOrder
-    {
-        /** The ASC. */
-        ASC,
-        /** The DESC. */
-        DESC;
+    public enum SortOrder {
+                           /** The ASC. */
+                           ASC,
+                           /** The DESC. */
+                           DESC;
     }
 
     /**
@@ -1450,8 +1280,7 @@ public class KunderaQuery
      * 
      * @return the updateClauseQueue
      */
-    public Queue<UpdateClause> getUpdateClauseQueue()
-    {
+    public Queue<UpdateClause> getUpdateClauseQueue() {
         return updateClauseQueue;
     }
 
@@ -1460,8 +1289,7 @@ public class KunderaQuery
      * 
      * @return true, if is update clause
      */
-    public boolean isUpdateClause()
-    {
+    public boolean isUpdateClause() {
         return !updateClauseQueue.isEmpty();
     }
 
@@ -1473,12 +1301,12 @@ public class KunderaQuery
      * @param value
      *            the value
      */
-    public void addUpdateClause(final String property, final String value)
-    {
+    public void addUpdateClause(final String property, final String value) {
         UpdateClause updateClause = new UpdateClause(property.trim(), value.trim());
         updateClauseQueue.add(updateClause);
-        addTypedParameter(value.trim().startsWith("?") ? Type.INDEXED : value.trim().startsWith(":") ? Type.NAMED
-                : null, property, updateClause);
+        addTypedParameter(
+            value.trim().startsWith("?") ? Type.INDEXED : value.trim().startsWith(":") ? Type.NAMED : null, property,
+            updateClause);
     }
 
     /**
@@ -1496,16 +1324,12 @@ public class KunderaQuery
      *            to ignore case in the filter
      */
     public void addFilterClause(final String property, final String condition, final Object value,
-            final String fieldName, final boolean ignoreCase)
-    {
-        if (property != null && condition != null)
-        {
+        final String fieldName, final boolean ignoreCase) {
+        if (property != null && condition != null) {
             FilterClause filterClause = new FilterClause(property.trim(), condition.trim(), value, fieldName);
             filterClause.setIgnoreCase(ignoreCase);
             filtersQueue.add(filterClause);
-        }
-        else
-        {
+        } else {
             filtersQueue.add(property);
         }
     }
@@ -1516,8 +1340,7 @@ public class KunderaQuery
      * @param filterClause
      *            the filter clause
      */
-    public void addFilterClause(Object filterClause)
-    {
+    public void addFilterClause(Object filterClause) {
 
         filtersQueue.add(filterClause);
 
@@ -1529,8 +1352,7 @@ public class KunderaQuery
      * @param b
      *            the new checks if is delete update
      */
-    public void setIsDeleteUpdate(boolean b)
-    {
+    public void setIsDeleteUpdate(boolean b) {
         this.isDeleteUpdate = b;
     }
 
@@ -1539,8 +1361,7 @@ public class KunderaQuery
      * 
      * @return true, if is delete update
      */
-    public boolean isDeleteUpdate()
-    {
+    public boolean isDeleteUpdate() {
         return isDeleteUpdate;
     }
 
@@ -1549,16 +1370,14 @@ public class KunderaQuery
      * 
      * @return the JPA query
      */
-    public String getJPAQuery()
-    {
+    public String getJPAQuery() {
         return this.jpaQuery;
     }
 
     /**
      * The Class TypedParameter.
      */
-    private class TypedParameter
-    {
+    private class TypedParameter {
 
         /** The type. */
         private Type type;
@@ -1578,8 +1397,7 @@ public class KunderaQuery
          * @param type
          *            the type
          */
-        public TypedParameter(Type type)
-        {
+        public TypedParameter(Type type) {
             this.type = type;
         }
 
@@ -1588,8 +1406,7 @@ public class KunderaQuery
          * 
          * @return the type
          */
-        private Type getType()
-        {
+        private Type getType() {
             return type;
         }
 
@@ -1598,8 +1415,7 @@ public class KunderaQuery
          * 
          * @return the parameters
          */
-        Map<String, List<FilterClause>> getParameters()
-        {
+        Map<String, List<FilterClause>> getParameters() {
             return parameters;
         }
 
@@ -1608,8 +1424,7 @@ public class KunderaQuery
          * 
          * @return the parameters
          */
-        Map<String, UpdateClause> getUpdateParameters()
-        {
+        Map<String, UpdateClause> getUpdateParameters() {
             return updateParameters;
         }
 
@@ -1621,14 +1436,11 @@ public class KunderaQuery
          * @param clause
          *            the clause
          */
-        void addParameters(String key, FilterClause clause)
-        {
-            if (parameters == null)
-            {
+        void addParameters(String key, FilterClause clause) {
+            if (parameters == null) {
                 parameters = new HashMap<String, List<FilterClause>>();
             }
-            if (!parameters.containsKey(key))
-            {
+            if (!parameters.containsKey(key)) {
                 parameters.put(key, new ArrayList<KunderaQuery.FilterClause>());
             }
             parameters.get(key).add(clause);
@@ -1642,10 +1454,8 @@ public class KunderaQuery
          * @param clause
          *            the clause
          */
-        void addParameters(String key, UpdateClause clause)
-        {
-            if (updateParameters == null)
-            {
+        void addParameters(String key, UpdateClause clause) {
+            if (updateParameters == null) {
                 updateParameters = new HashMap<String, UpdateClause>();
             }
 
@@ -1658,8 +1468,7 @@ public class KunderaQuery
          * @param param
          *            the param
          */
-        void addJPAParameter(Parameter param)
-        {
+        void addJPAParameter(Parameter param) {
             jpaParameters.add(param);
         }
     }
@@ -1667,13 +1476,12 @@ public class KunderaQuery
     /**
      * The Enum Type.
      */
-    private enum Type
-    {
+    private enum Type {
 
-        /** The indexed. */
-        INDEXED,
-        /** The named. */
-        NAMED
+                       /** The indexed. */
+                       INDEXED,
+                       /** The named. */
+                       NAMED
     }
 
     /*
@@ -1685,8 +1493,7 @@ public class KunderaQuery
      * @param <T>
      *            the generic type
      */
-    private class JPAParameter<T> implements Parameter<T>
-    {
+    private class JPAParameter<T> implements Parameter<T> {
 
         /** The name. */
         private String name;
@@ -1707,8 +1514,7 @@ public class KunderaQuery
          * @param type
          *            the type
          */
-        JPAParameter(String name, Integer position, Class<T> type)
-        {
+        JPAParameter(String name, Integer position, Class<T> type) {
             this.name = name;
             this.position = position;
             this.type = type;
@@ -1720,8 +1526,7 @@ public class KunderaQuery
          * @see javax.persistence.Parameter#getName()
          */
         @Override
-        public String getName()
-        {
+        public String getName() {
             return name;
         }
 
@@ -1731,8 +1536,7 @@ public class KunderaQuery
          * @see javax.persistence.Parameter#getPosition()
          */
         @Override
-        public Integer getPosition()
-        {
+        public Integer getPosition() {
             return position;
         }
 
@@ -1742,8 +1546,7 @@ public class KunderaQuery
          * @see javax.persistence.Parameter#getParameterType()
          */
         @Override
-        public Class<T> getParameterType()
-        {
+        public Class<T> getParameterType() {
             return type;
         }
 
@@ -1753,8 +1556,7 @@ public class KunderaQuery
          * @see java.lang.Object#hashCode()
          */
         @Override
-        public int hashCode()
-        {
+        public int hashCode() {
             return HashCodeBuilder.reflectionHashCode(this);
         }
 
@@ -1764,27 +1566,20 @@ public class KunderaQuery
          * @see java.lang.Object#equals(java.lang.Object)
          */
         @Override
-        public boolean equals(Object obj)
-        {
-            if (obj == null)
-            {
+        public boolean equals(Object obj) {
+            if (obj == null) {
                 return false;
             }
-            if (!obj.getClass().equals(this.getClass()))
-            {
+            if (!obj.getClass().equals(this.getClass())) {
                 return false;
             }
 
             Parameter<?> typed = (Parameter<?>) obj;
 
-            if (typed.getParameterType().equals(this.getParameterType()))
-            {
-                if (this.getName() == null && typed.getName() == null)
-                {
+            if (typed.getParameterType().equals(this.getParameterType())) {
+                if (this.getName() == null && typed.getName() == null) {
                     return this.getPosition() != null && this.getPosition().equals(typed.getPosition());
-                }
-                else
-                {
+                } else {
                     return this.getName() != null && this.getName().equals(typed.getName());
                 }
 
@@ -1799,8 +1594,7 @@ public class KunderaQuery
          * @see java.lang.Object#toString()
          */
         @Override
-        public String toString()
-        {
+        public String toString() {
             StringBuilder strBuilder = new StringBuilder();
             strBuilder.append("[ name = " + this.getName() + "]");
             strBuilder.append("[ position = " + this.getPosition() + "]");
@@ -1810,69 +1604,59 @@ public class KunderaQuery
     }
 
     /**
-     * Method to skip string literal as per JPA specification. if literal starts
-     * is enclose within "''" then skip "'" and include "'" in case of "''"
-     * replace it with "'".
+     * Method to skip string literal as per JPA specification. if literal starts is enclose within "''" then skip "'"
+     * and include "'" in case of "''" replace it with "'".
      * 
      * @param value
      *            value.
      * 
-     * @return replaced string in case of string, else will return original
-     *         value.
+     * @return replaced string in case of string, else will return original value.
      */
-    private static Object getValue(Object value)
-    {
-        if (value != null && value.getClass().isAssignableFrom(String.class))
-        {
+    private static Object getValue(Object value) {
+        if (value != null && value.getClass().isAssignableFrom(String.class)) {
             return ((String) value).replaceAll("^'", "").replaceAll("'$", "").replaceAll("''", "'");
         }
 
         return value;
     }
 
-
-
     /*
-     * XXX
-     * Indexed or named bind parameter for queries
+     * XXX Indexed or named bind parameter for queries
      */
 
     public static class BindParameter implements java.io.Serializable {
 
-	    private final String name;
-	    private final int index;
-	    private final Object value;
+        private final String name;
+        private final int index;
+        private final Object value;
 
+        public BindParameter(final String name, final Object value) {
+            this.name = name;
+            this.index = -1;
+            this.value = value;
+        }
 
-	    public BindParameter(final String name, final Object value) {
-		    this.name = name;
-		    this.index = -1;
-		    this.value = value;
-	    }
+        public BindParameter(final int index, final Object value) {
+            this.name = null;
+            this.index = index;
+            this.value = value;
+        }
 
-	    public BindParameter(final int index, final Object value) {
-		    this.name = null;
-		    this.index = index;
-		    this.value = value;
-	    }
+        public String getName() {
+            return name;
+        }
 
+        public boolean isNamed() {
+            return (getName() != null);
+        }
 
-	    public String getName() {
-		    return name;
-	    }
+        public int getIndex() {
+            return index;
+        }
 
-	    public boolean isNamed() {
-		    return (getName() != null);
-	    }
-
-	    public int getIndex() {
-		    return index;
-	    }
-
-	    public Object getValue() {
-		    return value;
-	    }
+        public Object getValue() {
+            return value;
+        }
     }
-
 
 }

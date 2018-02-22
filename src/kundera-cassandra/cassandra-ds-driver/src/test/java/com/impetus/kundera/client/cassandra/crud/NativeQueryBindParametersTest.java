@@ -23,8 +23,6 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
 
 import junit.framework.Assert;
 
@@ -39,14 +37,12 @@ import com.impetus.client.crud.PersonCassandra.Day;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.cassandra.persistence.CassandraCli;
 
-
 /**
  * Test case to perform native queries with bind parameters
  * 
  * @author dev@antonyudin.com
  */
-public class NativeQueryBindParametersTest extends BaseTest
-{
+public class NativeQueryBindParametersTest extends BaseTest {
     private static final String _PU = "cassandra_ds_pu";
 
     /** The emf. */
@@ -57,7 +53,6 @@ public class NativeQueryBindParametersTest extends BaseTest
 
     protected Map propertyMap = null;
 
-
     /**
      * Sets the up.
      * 
@@ -65,14 +60,12 @@ public class NativeQueryBindParametersTest extends BaseTest
      *             the exception
      */
     @Before
-    public void setUp() throws Exception
-    {
-        
+    public void setUp() throws Exception {
+
         CassandraCli.cassandraSetUp();
         System.setProperty("cassandra.start_native_transport", "true");
 
-        if (propertyMap == null)
-        {
+        if (propertyMap == null) {
             propertyMap = new HashMap();
             propertyMap.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create");
         }
@@ -80,27 +73,26 @@ public class NativeQueryBindParametersTest extends BaseTest
         emf = Persistence.createEntityManagerFactory(_PU, propertyMap);
         entityManager = emf.createEntityManager();
 
-	    final List<PersonCassandra> entities = new ArrayList<>();
+        final List<PersonCassandra> entities = new ArrayList<>();
 
-	    for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 10; i++) {
 
-		final PersonCassandra entity = new PersonCassandra();
-		entity.setPersonId(Integer.toString(i));
-		entity.setPersonName("name" + i);
-		entity.setAge(10 + i);
-		entity.setDay(Day.thursday);
-		entity.setMonth(Month.APRIL);
+            final PersonCassandra entity = new PersonCassandra();
+            entity.setPersonId(Integer.toString(i));
+            entity.setPersonName("name" + i);
+            entity.setAge(10 + i);
+            entity.setDay(Day.thursday);
+            entity.setMonth(Month.APRIL);
 
-		entities.add(entity);
-	    }
+            entities.add(entity);
+        }
 
+        for (PersonCassandra entity : entities) {
+            entityManager.persist(entity);
+        }
 
-	    for (PersonCassandra entity: entities) {
-		    entityManager.persist(entity);
-	    }
-
-	    entityManager.flush();
-            entityManager.clear();
+        entityManager.flush();
+        entityManager.clear();
 
     }
 
@@ -111,28 +103,21 @@ public class NativeQueryBindParametersTest extends BaseTest
      *             the exception
      */
     @Test
-    public void onTestNativeQueriesNamedParametersInteger() throws Exception
-    {
+    public void onTestNativeQueriesNamedParametersInteger() throws Exception {
 
-	    final List<Object[]> result = entityManager.createNativeQuery(
-		"SELECT " +
-		     "\"personId\", \"PERSON_NAME\", \"AGE\" " +
-		"FROM " +
-		     "\"PERSON\" " +
-	        "WHERE " +
-		     "\"AGE\" = :age " +
-		"ALLOW FILTERING"
-            ).setParameter("age", 10 + 3).getResultList();
+        final List<Object[]> result = entityManager
+            .createNativeQuery("SELECT " + "\"personId\", \"PERSON_NAME\", \"AGE\" " + "FROM " + "\"PERSON\" "
+                + "WHERE " + "\"AGE\" = :age " + "ALLOW FILTERING")
+            .setParameter("age", 10 + 3).getResultList();
 
-            Assert.assertNotNull(result);
-            Assert.assertEquals(result.size(), 1);
-            Assert.assertEquals(result.get(0)[0], "3");
-            Assert.assertEquals(result.get(0)[1], "name" + 3);
-            Assert.assertEquals(result.get(0)[2], 10 + 3);
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.size(), 1);
+        Assert.assertEquals(result.get(0)[0], "3");
+        Assert.assertEquals(result.get(0)[1], "name" + 3);
+        Assert.assertEquals(result.get(0)[2], 10 + 3);
 
-            entityManager.clear();
+        entityManager.clear();
     }
-
 
     /**
      * test native queries with named bind parameters
@@ -141,53 +126,41 @@ public class NativeQueryBindParametersTest extends BaseTest
      *             the exception
      */
     @Test
-    public void onTestNativeQueriesNamedParametersString() throws Exception
-    {
+    public void onTestNativeQueriesNamedParametersString() throws Exception {
 
-	    final List<Object[]> result = entityManager.createNativeQuery(
-		"SELECT " +
-		     "\"personId\", \"PERSON_NAME\" " +
-		"FROM " +
-		     "\"PERSON\" " +
-	        "WHERE " +
-		     "\"personId\" = :personId"
-            ).setParameter("personId", "3").getResultList();
+        final List<Object[]> result =
+            entityManager.createNativeQuery("SELECT " + "\"personId\", \"PERSON_NAME\" " + "FROM " + "\"PERSON\" "
+                + "WHERE " + "\"personId\" = :personId").setParameter("personId", "3").getResultList();
 
-            Assert.assertNotNull(result);
-            Assert.assertEquals(result.size(), 1);
-            Assert.assertEquals(result.get(0)[0], "3");
-            Assert.assertEquals(result.get(0)[1], "name" + 3);
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.size(), 1);
+        Assert.assertEquals(result.get(0)[0], "3");
+        Assert.assertEquals(result.get(0)[1], "name" + 3);
 
-            entityManager.clear();
+        entityManager.clear();
     }
 
-   /**
+    /**
      * test native queries with indexed bind parameters
      * 
      * @throws Exception
      *             the exception
      */
     @Test
-    public void onTestNativeQueriesIndexedParametersString() throws Exception
-    {
+    public void onTestNativeQueriesIndexedParametersString() throws Exception {
 
-	    final List<Object[]> result = entityManager.createNativeQuery(
-		"SELECT " +
-		     "\"personId\", \"PERSON_NAME\" " +
-		"FROM " +
-		     "\"PERSON\" " +
-	        "WHERE " +
-		     "\"personId\" = ?"
-            ).setParameter(1, "2").getResultList();
+        final List<Object[]> result = entityManager
+            .createNativeQuery(
+                "SELECT " + "\"personId\", \"PERSON_NAME\" " + "FROM " + "\"PERSON\" " + "WHERE " + "\"personId\" = ?")
+            .setParameter(1, "2").getResultList();
 
-            Assert.assertNotNull(result);
-            Assert.assertEquals(result.size(), 1);
-            Assert.assertEquals(result.get(0)[0], "2");
-            Assert.assertEquals(result.get(0)[1], "name" + 2);
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.size(), 1);
+        Assert.assertEquals(result.get(0)[0], "2");
+        Assert.assertEquals(result.get(0)[1], "name" + 2);
 
-            entityManager.clear();
+        entityManager.clear();
     }
-
 
     /**
      * Tear down.
@@ -196,8 +169,7 @@ public class NativeQueryBindParametersTest extends BaseTest
      *             the exception
      */
     @After
-    public void tearDown() throws Exception
-    {
+    public void tearDown() throws Exception {
         entityManager.close();
         emf.close();
         CassandraCli.dropKeySpace("KunderaExamples");
