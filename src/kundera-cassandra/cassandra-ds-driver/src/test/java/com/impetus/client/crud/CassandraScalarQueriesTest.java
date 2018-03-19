@@ -78,34 +78,41 @@ public class CassandraScalarQueriesTest
         String qry = "Select \"personId\", \"PERSON_NAME\" from \"PERSON\" where \"personId\" = '1'";
 
         Query q = entityManager.createNativeQuery(qry);
-        List persons = q.getResultList();
+        List<Object[]> persons = q.getResultList();
         Assert.assertNotNull(persons);
         Assert.assertFalse(persons.isEmpty());
         Assert.assertEquals(1, persons.size());
-        Assert.assertEquals("1", ((Map) persons.get(0)).get("personId"));
-        Assert.assertEquals("karthik", ((Map) persons.get(0)).get("PERSON_NAME"));
 
-        qry = "Select * from \"PERSON\" where \"personId\" = '1'";
+        Assert.assertEquals("1", persons.get(0)[0]);
+        Assert.assertEquals("karthik", persons.get(0)[1]);
+
+        qry = "Select \"personId\", \"PERSON_NAME\", \"MONTH_ENUM\", \"AGE\" from \"PERSON\" where \"personId\" = '1'";
         q = entityManager.createNativeQuery(qry);
+
         persons = q.getResultList();
+
         Assert.assertNotNull(persons);
         Assert.assertFalse(persons.isEmpty());
         Assert.assertEquals(1, persons.size());
-        Assert.assertEquals("1", ((Map) persons.get(0)).get("personId"));
-        Assert.assertEquals("karthik", ((Map) persons.get(0)).get("PERSON_NAME"));
-        Assert.assertEquals("MAY", ((Map) persons.get(0)).get("MONTH_ENUM"));
-        Assert.assertEquals(10, ((Map) persons.get(0)).get("AGE"));
 
-        qry = "Select * from \"PERSON\"";
+        Assert.assertEquals("1", persons.get(0)[0]);
+        Assert.assertEquals("karthik", persons.get(0)[1]);
+        Assert.assertEquals("MAY", persons.get(0)[2]);
+        Assert.assertEquals(10, persons.get(0)[3]);
+
+        qry = "Select \"personId\", \"PERSON_NAME\", \"MONTH_ENUM\", \"AGE\" from \"PERSON\"";
         q = entityManager.createNativeQuery(qry);
+
         persons = q.getResultList();
+
         Assert.assertNotNull(persons);
         Assert.assertFalse(persons.isEmpty());
         Assert.assertEquals(3, persons.size());
-        Assert.assertEquals("1", ((Map) persons.get(0)).get("personId"));
-        Assert.assertEquals("karthik", ((Map) persons.get(0)).get("PERSON_NAME"));
-        Assert.assertEquals("MAY", ((Map) persons.get(0)).get("MONTH_ENUM"));
-        Assert.assertEquals(10, ((Map) persons.get(0)).get("AGE"));
+
+        Assert.assertEquals("1", persons.get(0)[0]);
+        Assert.assertEquals("karthik", persons.get(0)[1]);
+        Assert.assertEquals("MAY", persons.get(0)[2]);
+        Assert.assertEquals(10, persons.get(0)[3]);
 
         entityManager.close();
         emf.close();
@@ -143,12 +150,15 @@ public class CassandraScalarQueriesTest
         // select key and state
         String selectSql = "SELECT key, state FROM users";
         q = entityManager.createNativeQuery(selectSql);
-        List results = q.getResultList();
+
+        List<Object[]> results = q.getResultList();
+
         Assert.assertNotNull(results);
         Assert.assertEquals(1, results.size());
-        Assert.assertEquals("bsanderson", ((Map) results.get(0)).get("key"));
-        Assert.assertEquals("UT", ((Map) results.get(0)).get("state"));
-        Assert.assertEquals(null, ((Map) results.get(0)).get("full_name"));
+
+        Assert.assertEquals("bsanderson", results.get(0)[0]);
+        Assert.assertEquals("UT", results.get(0)[1]);
+      //  Assert.assertEquals(null, ((Map) results.get(0)).get("full_name"));
 
         // insert users.
         insertSql = "INSERT INTO users (key, full_name, birth_date, state) VALUES ('prothfuss', 'Patrick Rothfuss', 1973, 'WI')";
@@ -165,10 +175,11 @@ public class CassandraScalarQueriesTest
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(1, results.size());
-        Assert.assertEquals("bsanderson", ((Map) results.get(0)).get("key"));
-        Assert.assertEquals("UT", ((Map) results.get(0)).get("state"));
-        Assert.assertEquals("Brandon Sanderson", ((Map) results.get(0)).get("full_name"));
-        Assert.assertEquals(new Integer(1975), ((Map) results.get(0)).get("birth_date"));
+
+        Assert.assertEquals("bsanderson", results.get(0)[0]);
+        Assert.assertEquals("UT", results.get(0)[1]);
+        Assert.assertEquals("Brandon Sanderson", results.get(0)[2]);
+        Assert.assertEquals(new Integer(1975), results.get(0)[3]);
 
         String updateSql = "UPDATE users SET full_name = 'update' WHERE key = 'bsanderson'";
         q = entityManager.createNativeQuery(updateSql);
@@ -179,10 +190,11 @@ public class CassandraScalarQueriesTest
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(1, results.size());
-        Assert.assertEquals("bsanderson", ((Map) results.get(0)).get("key"));
-        Assert.assertEquals("UT", ((Map) results.get(0)).get("state"));
-        Assert.assertEquals("update", ((Map) results.get(0)).get("full_name"));
-        Assert.assertEquals(new Integer(1975), ((Map) results.get(0)).get("birth_date"));
+
+        Assert.assertEquals("bsanderson", results.get(0)[0]);
+        Assert.assertEquals("UT", results.get(0)[1]);
+        Assert.assertEquals("update", results.get(0)[2]);
+        Assert.assertEquals(new Integer(1975), results.get(0)[3]);
 
         entityManager.close();
         emf.close();
@@ -196,32 +208,35 @@ public class CassandraScalarQueriesTest
         String useNativeSql = "SELECT keyspace_name,table_name,column_name,kind,type FROM system_schema.columns"
                 + " WHERE keyspace_name = 'KunderaExamples' AND table_name = 'PERSON'";
         Query q = entityManager.createNativeQuery(useNativeSql);
-        List results = q.getResultList();
+        List<Object[]> results = q.getResultList();
 
         Assert.assertNotNull(results);
         Assert.assertEquals(6, results.size());
-        Assert.assertEquals("KunderaExamples", ((Map) results.get(0)).get("keyspace_name"));
-        Assert.assertEquals("PERSON", ((Map) results.get(0)).get("table_name"));
-        Assert.assertEquals("AGE", ((Map) results.get(0)).get("column_name"));
-        Assert.assertEquals("regular", ((Map) results.get(0)).get("kind"));
-        Assert.assertEquals("int", ((Map) results.get(0)).get("type"));
 
-        useNativeSql = "SELECT * FROM system_schema.keyspaces WHERE keyspace_name = 'KunderaExamples'";
+        Assert.assertEquals("KunderaExamples", results.get(0)[0]);
+        Assert.assertEquals("PERSON", results.get(0)[1]);
+        Assert.assertEquals("AGE", results.get(0)[2]);
+        Assert.assertEquals("regular", results.get(0)[3]);
+        Assert.assertEquals("int", results.get(0)[4]);
+
+        useNativeSql = "SELECT keyspace_name, durable_writes FROM system_schema.keyspaces WHERE keyspace_name = 'KunderaExamples'";
         q = entityManager.createNativeQuery(useNativeSql);
         results = q.getResultList();
 
         Assert.assertNotNull(results);
         Assert.assertEquals(1, results.size());
-        Assert.assertEquals("KunderaExamples", ((Map) results.get(0)).get("keyspace_name"));
-        Assert.assertEquals(true, ((Map) results.get(0)).get("durable_writes"));
+
+        Assert.assertEquals("KunderaExamples", results.get(0)[0]);
+        Assert.assertEquals(true, results.get(0)[1]);
 
         useNativeSql = "SELECT COUNT(*) FROM system_schema.columns WHERE keyspace_name = 'KunderaExamples'AND table_name = 'PERSON'";
         q = entityManager.createNativeQuery(useNativeSql);
-        results = q.getResultList();
+
+        final List<Object> resultsSingle = q.getResultList();
 
         Assert.assertNotNull(results);
-        Assert.assertEquals(1, results.size());
-        Assert.assertEquals(6l, ((Map) results.get(0)).get("count"));
+        Assert.assertEquals(1, resultsSingle.size());
+        Assert.assertEquals(6l, resultsSingle.get(0));
 
         entityManager.close();
         emf.close();

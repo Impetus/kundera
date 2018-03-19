@@ -478,6 +478,9 @@ public class DSClient extends CassandraClientBase implements Client<DSCassQuery>
     public List executeQuery(Class clazz, List<String> relationalField, boolean isNative, String cqlQuery) {
         ResultSet rSet = (ResultSet) this.execute(cqlQuery, null);
         if (clazz == null) {
+		// XXX
+            if (isNative)
+                return iterateAndReturnNative(rSet);
             return iterateAndReturn(rSet);
         }
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(kunderaMetadata, clazz);
