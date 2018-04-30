@@ -68,40 +68,46 @@ public class KuduDBDataHandler
      */
     public static void addToRow(PartialRow row, String jpaColumnName, Object value, Type type)
     {
-        switch (type)
+        if (value == null)
         {
-        case BINARY:
-            row.addBinary(jpaColumnName, (byte[]) value);
-            break;
-        case BOOL:
-            row.addBoolean(jpaColumnName, (Boolean) value);
-            break;
-        case DOUBLE:
-            row.addDouble(jpaColumnName, (Double) value);
-            break;
-        case FLOAT:
-            row.addFloat(jpaColumnName, (Float) value);
-            break;
-        case INT16:
-            row.addShort(jpaColumnName, (Short) value);
-            break;
-        case INT32:
-            row.addInt(jpaColumnName, (Integer) value);
-            break;
-        case INT64:
-            row.addLong(jpaColumnName, (Long) value);
-            break;
-        case INT8:
-            row.addByte(jpaColumnName, (Byte) value);
-            break;
-        case STRING:
-            row.addString(jpaColumnName, (String) value);
-            break;
-        case UNIXTIME_MICROS:
-        default:
-            logger.error(type + " type is not supported by Kudu");
-            throw new KunderaException(type + " type is not supported by Kudu");
-
+            row.setNull(jpaColumnName);
+        }
+        else
+        {
+            switch (type)
+            {
+            case BINARY:
+                row.addBinary(jpaColumnName, (byte[]) value);
+                break;
+            case BOOL:
+                row.addBoolean(jpaColumnName, (Boolean) value);
+                break;
+            case DOUBLE:
+                row.addDouble(jpaColumnName, (Double) value);
+                break;
+            case FLOAT:
+                row.addFloat(jpaColumnName, (Float) value);
+                break;
+            case INT16:
+                row.addShort(jpaColumnName, (Short) value);
+                break;
+            case INT32:
+                row.addInt(jpaColumnName, (Integer) value);
+                break;
+            case INT64:
+                row.addLong(jpaColumnName, (Long) value);
+                break;
+            case INT8:
+                row.addByte(jpaColumnName, (Byte) value);
+                break;
+            case STRING:
+                row.addString(jpaColumnName, (String) value);
+                break;
+            case UNIXTIME_MICROS:
+            default:
+                logger.error(type + " type is not supported by Kudu");
+                throw new KunderaException(type + " type is not supported by Kudu");
+            }
         }
     }
 
@@ -176,6 +182,12 @@ public class KuduDBDataHandler
      */
     public static Object getColumnValue(RowResult result, String jpaColumnName)
     {
+
+        if (result.isNull(jpaColumnName))
+        {
+            return null;
+        }
+
         switch (result.getColumnType(jpaColumnName))
         {
         case BINARY:
@@ -268,7 +280,7 @@ public class KuduDBDataHandler
 
     public static KuduPredicate getInPredicate(ColumnSchema column, List<Object> values)
     {
-        
+
         return KuduPredicate.newInListPredicate(column, values);
     }
 
