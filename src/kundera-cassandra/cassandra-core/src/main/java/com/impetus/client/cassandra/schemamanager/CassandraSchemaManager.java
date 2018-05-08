@@ -402,7 +402,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         {
             createKeyspace = createKeyspace.replace("$CLASS", placement_strategy);
             replication_conf = replication_conf.replace("$REPLICATION_FACTOR",
-                    CassandraConstants.DEFAULT_REPLICATION_FACTOR);
+                    (CharSequence) externalProperties.getOrDefault(CassandraConstants.REPLICATION_FACTOR,
+                    		CassandraConstants.DEFAULT_REPLICATION_FACTOR));
             createKeyspace = createKeyspace.replace("$REPLICATION", replication_conf);
             createKeyspace = createKeyspace.replace("$DURABLE_WRITES", "true");
         }
