@@ -217,7 +217,7 @@ public final class CassandraDataTranslator
 
         typeToClazz.put(Calendar.class, CassandraType.CALENDAR);
         typeToClazz.put(java.sql.Date.class, CassandraType.SQL_DATE);
-        typeToClazz.put(java.util.Date.class, CassandraType.DATE);
+        typeToClazz.put(java.util.Date.class, CassandraType.TIMESTAMP);
         typeToClazz.put(java.sql.Time.class, CassandraType.SQL_TIME);
         typeToClazz.put(java.sql.Timestamp.class, CassandraType.SQL_TIMESTAMP);
 

@@ -528,7 +528,7 @@ public final class DSClientUtilities
             break;
 
         case TIMESTAMP:
-            retVal = row.getDate(columnName);
+            retVal = row.getTimestamp(columnName);
             if (retVal != null && member != null)
                 retVal = CassandraDataTranslator.decompose(member.getType(),
                         ByteBufferUtil.bytes(((Date) retVal).getTime()).array(), true);
