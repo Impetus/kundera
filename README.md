@@ -102,6 +102,8 @@ Troubleshooting
 
 Sample Projects
 ===============
+Please use latest version of Kundera in these sample projects.
+
 * [kundera-mongodb-kudu-example.zip (MongoDB - Kudu polyglot)](https://github.com/impetus-opensource/Kundera/blob/trunk/examples/basic-examples/downloadables/kundera-mongodb-kudu-example.zip?raw=true)
 * [kundera-cassandra-example.zip](https://github.com/impetus-opensource/Kundera/blob/trunk/examples/basic-examples/downloadables/kundera-cassandra-example.zip?raw=true)
 * [kundera-mongodb-example.zip](https://github.com/impetus-opensource/Kundera/blob/trunk/examples/basic-examples/downloadables/kundera-mongodb-example.zip?raw=true)
