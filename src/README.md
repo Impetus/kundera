@@ -7,7 +7,9 @@ The idea behind Kundera is to make working with NoSQL Databases drop-dead simple
 *	To help developers, forget the complexity of NoSQL stores and focus on Domain Model.
 *	To make switching across data-stores as easy as changing a configuration.
 
-[Downloads](https://github.com/impetus-opensource/Kundera/wiki/Stable-Release "Downloads")
+[Downloads](https://github.com/impetus-opensource/Kundera/wiki/Stable-Release)
+
+[Supported Databases](https://github.com/Impetus/Kundera/wiki/Datastores-Supported)
 
 Note
 ====
@@ -39,21 +41,6 @@ If you have worked upon Hibernate or any JPA Compliant ORM Solution, then the wh
 + Write persistence.xml file
 + Write Entity class
 + Moment of Truth!
-
-
-Currently Supported Datasources
-================================
-*  Cassandra
-*  MongoDB
-*  HBase
-*  Redis
-*  OracleNoSQL
-*  Neo4j
-*  Elastic-search
-*  Couchdb
-*  Relational databases
-*  Spark enabled support for Hive, Teradata, HDFS,CSV
-
 
 Recent Releases
 ================================
