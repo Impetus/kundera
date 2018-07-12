@@ -1,4 +1,4 @@
-[![Join the chat at https://gitter.im/impetus-opensource/Kundera](https://badges.gitter.im/impetus-opensource/Kundera.svg)](https://gitter.im/impetus-opensource/Kundera) [![Follow us on Twitter](http://i.imgur.com/wWzX9uB.png)](https://twitter.com/kundera_impetus)
+[![Join the chat at https://gitter.im/Impetus/Kundera](https://badges.gitter.im/Impetus/Kundera.svg)](https://gitter.im/Impetus/Kundera) [![Follow us on Twitter](http://i.imgur.com/wWzX9uB.png)](https://twitter.com/kundera_impetus)
 
 Overview
 =========
