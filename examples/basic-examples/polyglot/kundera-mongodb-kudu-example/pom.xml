@@ -9,7 +9,7 @@
 	<url>http://maven.apache.org</url>
 
 	<properties>
-		<kundera.version>3.7</kundera.version>
+		<kundera.version>3.13</kundera.version>
 	</properties>
 
 	<dependencies>

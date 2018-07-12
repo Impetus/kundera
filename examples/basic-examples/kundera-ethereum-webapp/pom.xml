@@ -52,7 +52,7 @@
 		<dependency>
 			<groupId>com.impetus.kundera.client</groupId>
 			<artifactId>kundera-ethereum</artifactId>
-			<version>3.12-SNAPSHOT</version>
+			<version>3.13</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.springframework/spring-orm -->
