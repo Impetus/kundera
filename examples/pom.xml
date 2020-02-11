@@ -62,7 +62,7 @@
 		<repository>
 			<id>clover</id>
 			<name>Clover maven repo</name>
-			<url>http://mirrors.ibiblio.org/pub/mirrors/maven</url>
+			<url>https://mirrors.ibiblio.org/pub/mirrors/maven</url>
 			<releases>
 				<enabled>true</enabled>
 			</releases>
@@ -73,7 +73,7 @@
 		<repository>
 			<id>kundera-missing</id>
 			<name>Kundera Public Missing Resources Repository</name>
-			<url>http://kundera.googlecode.com/svn/maven2/maven-missing-resources</url>
+			<url>https://kundera.googlecode.com/svn/maven2/maven-missing-resources</url>
 			<releases>
 				<enabled>true</enabled>
 			</releases>
@@ -84,7 +84,7 @@
 		<repository>
 			<id>riptano</id>
 			<name>riptano</name>
-			<url>http://mvn.riptano.com/content/repositories/public</url>
+			<url>https://mvn.riptano.com/content/repositories/public</url>
 		</repository>
 		<repository>
 			<id>maven.scale7.org</id>
