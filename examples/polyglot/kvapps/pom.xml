@@ -30,7 +30,7 @@
 		<repository>
 			<id>kundera-missing</id>
 			<name>Kundera Public Missing Resources Repository</name>
-			<url>http://kundera.googlecode.com/svn/maven2/maven-missing-resources</url>
+			<url>https://kundera.googlecode.com/svn/maven2/maven-missing-resources</url>
 			<releases>
 				<enabled>true</enabled>
 			</releases>
